@@ -1,0 +1,17 @@
+{
+  "name": "svelte-drag",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "svelte-kit dev",
+    "build": "svelte-kit build",
+    "preview": "svelte-kit preview"
+  },
+  "devDependencies": {
+    "@sveltejs/kit": "^1.0.0-next.131",
+    "svelte": "^3.38.3",
+    "svelte-preprocess": "^4.7.4",
+    "svelte2tsx": "^0.4.2",
+    "typescript": "^4.3.5"
+  }
+}
