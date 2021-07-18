@@ -1,17 +1,34 @@
 {
-  "name": "svelte-drag",
-  "version": "0.0.1",
+  "name": "@puruvj/svelte-draggable",
+  "version": "0.0.2",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/types.d.ts",
   "type": "module",
+  "files": [
+    "./dist/"
+  ],
   "scripts": {
-    "dev": "svelte-kit dev",
-    "build": "svelte-kit build",
-    "preview": "svelte-kit preview"
+    "watch": "tsup --watch",
+    "prepublishOnly": "tsup",
+    "pub": "npm publish --access public"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PuruVJ/svelte-drag.git"
+  },
+  "keywords": [
+    "draggable",
+    "svelte"
+  ],
+  "author": "Puru Vijay",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PuruVJ/svelte-drag/issues"
+  },
+  "homepage": "https://github.com/PuruVJ/svelte-drag#readme",
   "devDependencies": {
-    "@sveltejs/kit": "^1.0.0-next.131",
-    "svelte": "^3.38.3",
-    "svelte-preprocess": "^4.7.4",
-    "svelte2tsx": "^0.4.2",
+    "tsup": "^4.12.5",
     "typescript": "^4.3.5"
   }
 }
