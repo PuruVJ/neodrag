@@ -27,9 +27,8 @@ export type Options = {
   defaultPosition?: { x: number; y: number };
 };
 
-export const draggable = (
-  node: HTMLElement,
-  {
+export const draggable = (node: HTMLElement, options: Options = {}) => {
+  const {
     bounds,
     axis = 'both',
     gpuAcceleration = true,
@@ -46,8 +45,8 @@ export const draggable = (
     defaultClassDragged = 'svelte-draggable-dragged',
 
     defaultPosition = { x: 0, y: 0 },
-  }: Options = {}
-) => {
+  } = options;
+
   let active = false;
 
   let [translateX, translateY] = [0, 0];
