@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { draggable } from '../../../dist';
-  import type { Options } from '../../../dist';
-  // import { draggable } from 'svelte-drag';
+  // import { draggable } from '../../../dist';
+  // import type { Options } from '../../../dist';
+
+  import { draggable } from 'svelte-drag';
+  import type { Options } from 'svelte-drag';
 
   const options: Required<Options> = {
     applyUserSelectHack: true,
