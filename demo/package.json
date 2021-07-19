@@ -16,6 +16,6 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "svelte-drag": "0.0.7"
+    "svelte-drag": "0.0.10"
   }
 }

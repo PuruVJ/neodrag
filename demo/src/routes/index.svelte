@@ -1,16 +1,126 @@
-<script>
-  // import { draggable } from '../../../dist/index';
-  import { draggable } from 'svelte-drag';
+<script lang="ts">
+  import { draggable } from '../../../dist';
+  import type { Options } from '../../../dist';
+  // import { draggable } from 'svelte-drag';
+
+  const options: Required<Options> = {
+    applyUserSelectHack: true,
+    axis: 'both',
+    cancel: '.cancel',
+    handle: '.handle',
+    defaultClass: 'svelte-drag',
+    defaultClassDragged: 'svelte-dragged',
+    defaultClassDragging: 'svelte-dragging',
+    defaultPosition: { x: 0, y: 0 },
+    disabled: false,
+    gpuAcceleration: true,
+    grid: null,
+  };
+
+  // $: console.log(options);
 </script>
 
 <h1>Welcome to SvelteKit</h1>
 <p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
 
-<div use:draggable={{}} class="box">
+<label>
+  Apply user select hack
+  <input type="checkbox" bind:checked={options.applyUserSelectHack} />
+</label>
+
+<br /> <br />
+
+<div>
+  Axis:
+
+  <label>
+    <input type="radio" bind:group={options.axis} value="both" />
+    Both
+  </label>
+
+  <label>
+    <input type="radio" bind:group={options.axis} value="x" />
+    x
+  </label>
+
+  <label>
+    <input type="radio" bind:group={options.axis} value="y" />
+    y
+  </label>
+
+  <label>
+    <input type="radio" bind:group={options.axis} value="none" />
+    none
+  </label>
+</div>
+
+<br />
+
+<div>
+  Cancel:
+
+  <label>
+    <input type="radio" bind:group={options.cancel} value=".cancel" />
+    .cancel
+  </label>
+
+  <label>
+    <input type="radio" bind:group={options.cancel} value=".cancel-2" />
+    .cancel-2
+  </label>
+
+  <label>
+    <input type="radio" bind:group={options.cancel} value={undefined} />
+    undefined
+  </label>
+</div>
+
+<br />
+
+<div>
+  handle:
+
+  <label>
+    <input type="radio" bind:group={options.handle} value=".handle" />
+    .handle
+  </label>
+
+  <label>
+    <input type="radio" bind:group={options.handle} value=".handle-2" />
+    .handle-2
+  </label>
+
+  <label>
+    <input type="radio" bind:group={options.handle} value={undefined} />
+    undefined
+  </label>
+</div>
+
+<br />
+
+<div>
+  Default class: <input bind:value={options.defaultClass} />
+</div>
+
+<br />
+
+<div>
+  <label>
+    Disabled
+    <input type="checkbox" bind:checked={options.disabled} />
+  </label>
+</div>
+
+<br />
+
+<div use:draggable={options} class="box">
   hello
 
   <div class="handle">Le handel</div>
   <div class="cancel">Cancel</div>
+
+  <div class="handle-2">Le handel 2</div>
+  <div class="cancel-2">Cancel 2</div>
 </div>
 
 <style>
@@ -22,8 +132,8 @@
   }
 
   .box {
-    width: 100px;
-    height: 100px;
+    width: 200px;
+    height: 200px;
 
     background-color: aquamarine;
     color: black;

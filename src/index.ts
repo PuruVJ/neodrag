@@ -6,7 +6,7 @@ type Coords = {
 };
 
 export type Options = {
-  bounds?: string | Coords;
+  // bounds?: string | Coords;
 
   axis?: 'both' | 'x' | 'y' | 'none';
   gpuAcceleration?: boolean;
@@ -27,9 +27,15 @@ export type Options = {
   defaultPosition?: { x: number; y: number };
 };
 
+const DEFAULT_CLASS = {
+  MAIN: 'svelte-draggable',
+  DRAGGING: 'svelte-draggable-dragging',
+  DRAGGED: 'svelte-draggable-dragged',
+};
+
 export const draggable = (node: HTMLElement, options: Options = {}) => {
-  const {
-    bounds,
+  let {
+    // bounds,
     axis = 'both',
     gpuAcceleration = true,
     applyUserSelectHack = true,
@@ -40,9 +46,9 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
     cancel,
     handle,
 
-    defaultClass = 'svelte-draggable',
-    defaultClassDragging = 'svelte-draggable-dragging',
-    defaultClassDragged = 'svelte-draggable-dragged',
+    defaultClass = DEFAULT_CLASS.MAIN,
+    defaultClassDragging = DEFAULT_CLASS.DRAGGING,
+    defaultClassDragged = DEFAULT_CLASS.DRAGGED,
 
     defaultPosition = { x: 0, y: 0 },
   } = options;
@@ -57,29 +63,34 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
 
   setTranslate(xOffset, yOffset, node, gpuAcceleration);
 
-  let canMoveInX = ['both', 'x'].includes(axis);
-  let canMoveInY = ['both', 'y'].includes(axis);
+  let canMoveInX: boolean;
+  let canMoveInY: boolean;
 
   let bodyOriginalUserSelectVal = '';
 
   let computedBounds: Coords;
   let nodeRect: DOMRect;
 
+  let dragEl: HTMLElement | undefined;
+  let cancelEl: HTMLElement | undefined;
+
   setupListeners(dragStart, dragEnd, drag);
 
-  let dragEl = getDragEl(handle, node);
-  let cancelEl = getCancelElement(cancel, node);
-
   // Apply defaultClass on node
-  node.classList.add(defaultClass);
 
   function dragStart(e: TouchEvent | MouseEvent) {
+    node.classList.add(defaultClass);
+
     if (disabled) return;
 
     dragEl = getDragEl(handle, node);
+    cancelEl = getCancelElement(cancel, node);
+
+    canMoveInX = ['both', 'x'].includes(axis);
+    canMoveInY = ['both', 'y'].includes(axis);
 
     // Compute bounds
-    if (typeof bounds !== 'undefined') computedBounds = computeBoundRect(bounds);
+    // if (typeof bounds !== 'undefined') computedBounds = computeBoundRect(bounds);
 
     // Compute current node's bounding client Rectangle
     nodeRect = node.getBoundingClientRect();
@@ -192,6 +203,29 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
       unlisten('mousedown', dragStart, false);
       unlisten('mouseup', dragEnd, false);
       unlisten('mousemove', drag, false);
+    },
+    update: (options: Options) => {
+      // Update all the values that need to be changed
+      axis = options.axis || 'both';
+      disabled = options.disabled ?? false;
+      handle = options.handle;
+      // bounds = options.bounds;
+      cancel = options.cancel;
+      applyUserSelectHack = options.applyUserSelectHack ?? true;
+      grid = options.grid;
+      gpuAcceleration = options.gpuAcceleration ?? true;
+
+      const dragged = node.classList.contains(defaultClassDragged);
+
+      node.classList.remove(defaultClass, defaultClassDragged);
+
+      defaultClass = options.defaultClass ?? DEFAULT_CLASS.MAIN;
+      defaultClassDragging = options.defaultClassDragging ?? DEFAULT_CLASS.DRAGGING;
+      defaultClassDragged = options.defaultClassDragged ?? DEFAULT_CLASS.DRAGGED;
+
+      node.classList.add(defaultClass);
+
+      if (dragged) node.classList.add(defaultClassDragged);
     },
   };
 };
