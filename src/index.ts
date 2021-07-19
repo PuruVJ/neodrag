@@ -7,10 +7,17 @@ type Coords = {
 
 export type Options = {
   bounds?: string | Coords;
+
   axis?: 'both' | 'x' | 'y' | 'none';
   gpuAcceleration?: boolean;
+
   applyUserSelectHack?: boolean;
+
   disabled?: boolean;
+
+  grid?: [number, number];
+
+  cancel?: string;
   handle?: string;
 
   defaultClass?: string;
@@ -28,6 +35,10 @@ export const draggable = (
     gpuAcceleration = true,
     applyUserSelectHack = true,
     disabled = false,
+
+    grid,
+
+    cancel,
     handle,
 
     defaultClass = 'svelte-draggable',
@@ -39,14 +50,11 @@ export const draggable = (
 ) => {
   let active = false;
 
-  let translateX = 0;
-  let translateY = 0;
+  let [translateX, translateY] = [0, 0];
+  let [initialX, initialY] = [0, 0];
+  let [previousX, previousY] = [0, 0];
 
-  let initialX = 0;
-  let initialY = 0;
-
-  let xOffset = defaultPosition.x;
-  let yOffset = defaultPosition.y;
+  let [xOffset, yOffset] = [defaultPosition.x, defaultPosition.y];
 
   setTranslate(xOffset, yOffset, node, gpuAcceleration);
 
@@ -55,14 +63,13 @@ export const draggable = (
 
   let bodyOriginalUserSelectVal = '';
 
-  let dragEl: HTMLElement;
-
   let computedBounds: Coords;
   let nodeRect: DOMRect;
 
   setupListeners(dragStart, dragEnd, drag);
 
-  dragEl = getDragEl(handle, node);
+  let dragEl = getDragEl(handle, node);
+  let cancelEl = getCancelElement(cancel, node);
 
   // Apply defaultClass on node
   node.classList.add(defaultClass);
@@ -78,16 +85,25 @@ export const draggable = (
     // Compute current node's bounding client Rectangle
     nodeRect = node.getBoundingClientRect();
 
+    if (handle === cancel) throw new Error("`handle` selector can't be same as `cancel` selector");
+
+    if (cancelEl?.contains(dragEl))
+      throw new Error(
+        "Element being dragged can't be a child of the element on which action is applied"
+      );
+
+    if (dragEl.contains(e.target as HTMLElement) && !cancelEl?.contains(e.target as HTMLElement))
+      active = true;
+
+    if (!active) return;
+
     if (applyUserSelectHack) {
       // Apply user-select: none on body to prevent misbehavior
       bodyOriginalUserSelectVal = document.body.style.userSelect;
       document.body.style.userSelect = 'none';
     }
-
-    if (e.target === dragEl) active = true;
-
     // Dispatch custom event
-    node.dispatchEvent(new CustomEvent('svelte-drag:start'));
+    fireSvelteDragStartEvent(node);
 
     const { clientX, clientY } = e instanceof TouchEvent ? e.touches[0] : e;
 
@@ -104,7 +120,7 @@ export const draggable = (
 
     if (applyUserSelectHack) document.body.style.userSelect = bodyOriginalUserSelectVal;
 
-    node.dispatchEvent(new CustomEvent('svelte-drag:end'));
+    fireSvelteDragStopEvent(node);
 
     if (canMoveInX) initialX = translateX;
     if (canMoveInX) initialY = translateY;
@@ -120,20 +136,45 @@ export const draggable = (
     // Apply class defaultClassDragging
     node.classList.add(defaultClassDragging);
 
-    node.dispatchEvent(
-      new CustomEvent('svelte-drag', { detail: { x: translateX, y: translateY } })
-    );
+    fireSvelteDragEvent(node, translateX, translateY);
 
     e.preventDefault();
 
     nodeRect = node.getBoundingClientRect();
 
-    const dimensions = e instanceof TouchEvent ? e.touches[0] : e;
+    const { clientX, clientY } = e instanceof TouchEvent ? e.touches[0] : e;
 
-    const { clientX, clientY } = dimensions;
+    // Get final values for clamping
+    let [finalX, finalY] = [clientX, clientY];
 
-    if (canMoveInX) translateX = clientX - initialX;
-    if (canMoveInY) translateY = clientY - initialY;
+    // TODO: Get bounds done
+    // if (computedBounds) {
+    //   finalX = Math.min(clientX, computedBounds.right);
+    //   finalY = Math.min(clientY, computedBounds.bottom);
+
+    //   finalX = Math.max(clientX, computedBounds.left);
+    //   finalY = Math.max(clientY, computedBounds.top);
+    // }
+
+    if (Array.isArray(grid)) {
+      let [xSnap, ySnap] = grid;
+
+      if (isNaN(+xSnap) || xSnap < 0)
+        throw new Error('1st argument of `grid` must be a valid positive number');
+
+      if (isNaN(+ySnap) || ySnap < 0)
+        throw new Error('2nd argument of `grid` must be a valid positive number');
+
+      let [deltaX, deltaY] = [finalX - previousX, finalY - previousY];
+      [deltaX, deltaY] = snapToGrid([xSnap, ySnap], deltaX, deltaY);
+
+      if (!deltaX && !deltaY) return;
+
+      [finalX, finalY] = [previousX + deltaX, previousY + deltaY];
+    }
+
+    if (canMoveInX) translateX = finalX - initialX;
+    if (canMoveInY) translateY = finalY - initialY;
 
     [xOffset, yOffset] = [translateX, translateY];
 
@@ -155,6 +196,27 @@ export const draggable = (
   };
 };
 
+export function snapToGrid(
+  [xSnap, ySnap]: [number, number],
+  pendingX: number,
+  pendingY: number
+): [number, number] {
+  const x = Math.round(pendingX / xSnap) * xSnap;
+  const y = Math.round(pendingY / ySnap) * ySnap;
+  return [x, y];
+}
+function fireSvelteDragStopEvent(node: HTMLElement) {
+  node.dispatchEvent(new CustomEvent('svelte-drag:end'));
+}
+
+function fireSvelteDragStartEvent(node: HTMLElement) {
+  node.dispatchEvent(new CustomEvent('svelte-drag:start'));
+}
+
+function fireSvelteDragEvent(node: HTMLElement, translateX: number, translateY: number) {
+  node.dispatchEvent(new CustomEvent('svelte-drag', { detail: { x: translateX, y: translateY } }));
+}
+
 function setupListeners(
   dragStart: (e: TouchEvent | MouseEvent) => void,
   dragEnd: () => void,
@@ -172,17 +234,29 @@ function setupListeners(
 }
 
 function getDragEl(handle: string | undefined, node: HTMLElement) {
-  if (typeof handle === 'string') {
-    // Valid!! Let's check if this selector exists or not
-    const handleEl = node.querySelector<HTMLElement>(handle);
-    if (typeof handleEl === 'undefined')
-      throw new Error(
-        'Selector passed for `handle` option should be child of the element on which the action is applied'
-      );
+  if (!handle) return node;
 
-    return handleEl!;
-  }
-  return node;
+  // Valid!! Let's check if this selector exists or not
+  const handleEl = node.querySelector<HTMLElement>(handle);
+  if (handleEl === null)
+    throw new Error(
+      'Selector passed for `handle` option should be child of the element on which the action is applied'
+    );
+
+  return handleEl!;
+}
+
+function getCancelElement(cancel: string | undefined, node: HTMLElement) {
+  if (!cancel) return;
+
+  const cancelEl = node.querySelector<HTMLElement>(cancel);
+
+  if (cancelEl === null)
+    throw new Error(
+      'Selector passed for `cancel` option should be child of the element on which the action is applied'
+    );
+
+  return cancelEl;
 }
 
 function computeBoundRect(bounds: string | Coords) {
@@ -200,7 +274,7 @@ function computeBoundRect(bounds: string | Coords) {
   // It's a string
   const node = document.querySelector(bounds);
 
-  if (typeof node === 'undefined')
+  if (node === null)
     throw new Error("The selector provided for bound doesn't exists in the document.");
 
   computedBounds = node!.getBoundingClientRect();

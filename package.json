@@ -1,6 +1,6 @@
 {
   "name": "svelte-drag",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Svelte port of react-draggable",
   "main": "dist/index.js",
   "types": "dist/types.d.ts",
@@ -11,7 +11,7 @@
   "scripts": {
     "watch": "tsup --watch",
     "prepublishOnly": "tsup",
-    "pub": "npm publish --access public"
+    "pub": "npm publish"
   },
   "repository": {
     "type": "git",
