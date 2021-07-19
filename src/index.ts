@@ -128,8 +128,10 @@ export const draggable = (
     const { clientX, clientY } = dimensions;
 
     // Now check directions
-    const isMovingUp = clientY > previousYCoord;
-    const isMovingRight = clientX > previousXCoord;
+    const isMovingUp = clientY <= previousYCoord;
+    const isMovingRight = clientX >= previousXCoord;
+
+    console.log(isMovingRight);
 
     if ((canMoveRight && isMovingRight) || (canMoveLeft && !isMovingRight))
       translateX = clientX - initialX;
