@@ -142,13 +142,15 @@ export const draggable = (
 
   return {
     destroy: () => {
-      removeEventListener('touchstart', dragStart, false);
-      removeEventListener('touchend', dragEnd, false);
-      removeEventListener('touchmove', drag, false);
+      const unlisten = removeEventListener;
 
-      removeEventListener('mousedown', dragStart, false);
-      removeEventListener('mouseup', dragEnd, false);
-      removeEventListener('mousemove', drag, false);
+      unlisten('touchstart', dragStart, false);
+      unlisten('touchend', dragEnd, false);
+      unlisten('touchmove', drag, false);
+
+      unlisten('mousedown', dragStart, false);
+      unlisten('mouseup', dragEnd, false);
+      unlisten('mousemove', drag, false);
     },
   };
 };
@@ -158,18 +160,18 @@ function setupListeners(
   dragEnd: () => void,
   drag: (e: TouchEvent | MouseEvent) => void
 ) {
-  addEventListener('touchstart', dragStart, false);
-  addEventListener('touchend', dragEnd, false);
-  addEventListener('touchmove', drag, false);
+  const listen = addEventListener;
 
-  addEventListener('mousedown', dragStart, false);
-  addEventListener('mouseup', dragEnd, false);
-  addEventListener('mousemove', drag, false);
+  listen('touchstart', dragStart, false);
+  listen('touchend', dragEnd, false);
+  listen('touchmove', drag, false);
+
+  listen('mousedown', dragStart, false);
+  listen('mouseup', dragEnd, false);
+  listen('mousemove', drag, false);
 }
 
 function getDragEl(handle: string | undefined, node: HTMLElement) {
-  let dragEl: HTMLElement;
-
   if (typeof handle === 'string') {
     // Valid!! Let's check if this selector exists or not
     const handleEl = node.querySelector<HTMLElement>(handle);
@@ -178,11 +180,9 @@ function getDragEl(handle: string | undefined, node: HTMLElement) {
         'Selector passed for `handle` option should be child of the element on which the action is applied'
       );
 
-    dragEl = handleEl!;
-  } else {
-    dragEl = node;
+    return handleEl!;
   }
-  return dragEl;
+  return node;
 }
 
 function computeBoundRect(bounds: string | Coords) {
@@ -190,23 +190,20 @@ function computeBoundRect(bounds: string | Coords) {
 
   if (typeof bounds === 'object') {
     // we have the left right etc
-    const {
-      top = 0,
-      right = document.body.getBoundingClientRect().right,
-      bottom = document.body.getBoundingClientRect().bottom,
-      left = 0,
-    } = bounds;
+    const { right: bodyRight, bottom: bodyBottom } = document.body.getBoundingClientRect();
 
-    computedBounds = { top, right, bottom, left };
-  } else {
-    // It's a string
-    const node = document.querySelector(bounds);
+    const { top = 0, left = 0, right = bodyRight, bottom = bodyBottom } = bounds;
 
-    if (typeof node === 'undefined')
-      throw new Error("The selector provided for bound doesn't exists in the document.");
-
-    computedBounds = node!.getBoundingClientRect();
+    return { top, right, bottom, left };
   }
+
+  // It's a string
+  const node = document.querySelector(bounds);
+
+  if (typeof node === 'undefined')
+    throw new Error("The selector provided for bound doesn't exists in the document.");
+
+  computedBounds = node!.getBoundingClientRect();
 
   return computedBounds;
 }
