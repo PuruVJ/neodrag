@@ -1,5 +1,5 @@
 {
-  "name": "svelte-drag",
+  "name": "svelte-drag-demo",
   "version": "0.0.1",
   "type": "module",
   "scripts": {
@@ -14,5 +14,8 @@
     "svelte-preprocess": "^4.7.4",
     "svelte2tsx": "^0.4.2",
     "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "svelte-drag": "0.0.4"
   }
 }
