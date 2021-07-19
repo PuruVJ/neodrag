@@ -84,7 +84,8 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
     // Compute current node's bounding client Rectangle
     nodeRect = node.getBoundingClientRect();
 
-    if (handle === cancel) throw new Error("`handle` selector can't be same as `cancel` selector");
+    if (isString(handle) && isString(cancel) && handle === cancel)
+      throw new Error("`handle` selector can't be same as `cancel` selector");
 
     if (cancelEl?.contains(dragEl))
       throw new Error(
@@ -195,7 +196,11 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
   };
 };
 
-export function snapToGrid(
+function isString(val: unknown): val is string {
+  return typeof val === 'string';
+}
+
+function snapToGrid(
   [xSnap, ySnap]: [number, number],
   pendingX: number,
   pendingY: number
@@ -204,6 +209,7 @@ export function snapToGrid(
   const y = Math.round(pendingY / ySnap) * ySnap;
   return [x, y];
 }
+
 function fireSvelteDragStopEvent(node: HTMLElement) {
   node.dispatchEvent(new CustomEvent('svelte-drag:end'));
 }

@@ -6,7 +6,7 @@ export default defineConfig({
   dts: true,
   format: ['esm'],
   entryPoints: ['src/index.ts'],
-  minify: true,
+  minify: false,
 
   target: 'es2018',
 });
