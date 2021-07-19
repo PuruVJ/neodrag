@@ -12,17 +12,29 @@ export type Options = {
   applyUserSelectHack?: boolean;
   disabled?: boolean;
   handle?: string;
+
+  defaultClass?: string;
+  defaultClassDragging?: string;
+  defaultClassDragged?: string;
+
+  defaultPosition?: { x: number; y: number };
 };
 
 export const draggable = (
   node: HTMLElement,
   {
-    bounds = 'body',
+    bounds,
     axis = 'both',
     gpuAcceleration = true,
     applyUserSelectHack = true,
     disabled = false,
     handle,
+
+    defaultClass = 'svelte-draggable',
+    defaultClassDragging = 'svelte-draggable-dragging',
+    defaultClassDragged = 'svelte-draggable-dragged',
+
+    defaultPosition = { x: 0, y: 0 },
   }: Options = {}
 ) => {
   let active = false;
@@ -33,10 +45,11 @@ export const draggable = (
   let initialX = 0;
   let initialY = 0;
 
-  let xOffset = 0;
-  let yOffset = 0;
+  let xOffset = defaultPosition.x;
+  let yOffset = defaultPosition.y;
 
-  // Compute direction
+  setTranslate(xOffset, yOffset, node, gpuAcceleration);
+
   let canMoveInX = ['both', 'x'].includes(axis);
   let canMoveInY = ['both', 'y'].includes(axis);
 
@@ -47,18 +60,12 @@ export const draggable = (
   let computedBounds: Coords;
   let nodeRect: DOMRect;
 
-  let previousXCoord = 0;
-  let previousYCoord = 0;
-
   setupListeners(dragStart, dragEnd, drag);
 
   dragEl = getDragEl(handle, node);
 
-  // Compute bounds
-  computedBounds = computeBoundRect(bounds);
-
-  // Compute current node's bounding client Rectangle
-  nodeRect = node.getBoundingClientRect();
+  // Apply defaultClass on node
+  node.classList.add(defaultClass);
 
   function dragStart(e: TouchEvent | MouseEvent) {
     if (disabled) return;
@@ -66,7 +73,7 @@ export const draggable = (
     dragEl = getDragEl(handle, node);
 
     // Compute bounds
-    computedBounds = computeBoundRect(bounds);
+    if (typeof bounds !== 'undefined') computedBounds = computeBoundRect(bounds);
 
     // Compute current node's bounding client Rectangle
     nodeRect = node.getBoundingClientRect();
@@ -82,17 +89,18 @@ export const draggable = (
     // Dispatch custom event
     node.dispatchEvent(new CustomEvent('svelte-drag:start'));
 
-    if (e.type === 'touchstart') {
-      if (canMoveInX) initialX = (e as TouchEvent).touches[0].clientX - xOffset;
-      if (canMoveInY) initialY = (e as TouchEvent).touches[0].clientY - yOffset;
-    }
+    const { clientX, clientY } = e instanceof TouchEvent ? e.touches[0] : e;
 
-    if (canMoveInX) initialX = (e as MouseEvent).clientX - xOffset;
-    if (canMoveInY) initialY = (e as MouseEvent).clientY - yOffset;
+    if (canMoveInX) initialX = clientX - xOffset;
+    if (canMoveInY) initialY = clientY - yOffset;
   }
 
   function dragEnd() {
     if (disabled) return;
+
+    // Apply class defaultClassDragged
+    node.classList.remove(defaultClassDragging);
+    node.classList.add(defaultClassDragged);
 
     if (applyUserSelectHack) document.body.style.userSelect = bodyOriginalUserSelectVal;
 
@@ -109,6 +117,9 @@ export const draggable = (
 
     if (!active) return;
 
+    // Apply class defaultClassDragging
+    node.classList.add(defaultClassDragging);
+
     node.dispatchEvent(
       new CustomEvent('svelte-drag', { detail: { x: translateX, y: translateY } })
     );
@@ -117,28 +128,12 @@ export const draggable = (
 
     nodeRect = node.getBoundingClientRect();
 
-    const canMoveLeft = canMoveInX && nodeRect.left > computedBounds.left;
-    const canMoveRight = canMoveInX && nodeRect.right < computedBounds.right;
-
-    const canMoveUp = canMoveInY && nodeRect.top >= computedBounds.top;
-    const canMoveDown = canMoveInY && nodeRect.bottom <= nodeRect.bottom;
-
     const dimensions = e instanceof TouchEvent ? e.touches[0] : e;
 
     const { clientX, clientY } = dimensions;
 
-    // Now check directions
-    const isMovingUp = clientY <= previousYCoord;
-    const isMovingRight = clientX >= previousXCoord;
-
-    console.log(isMovingRight);
-
-    if ((canMoveRight && isMovingRight) || (canMoveLeft && !isMovingRight))
-      translateX = clientX - initialX;
-
-    if ((canMoveUp && isMovingUp) || (canMoveDown && !isMovingUp)) translateY = clientY - initialY;
-
-    [previousXCoord, previousYCoord] = [clientX, clientY];
+    if (canMoveInX) translateX = clientX - initialX;
+    if (canMoveInY) translateY = clientY - initialY;
 
     [xOffset, yOffset] = [translateX, translateY];
 
@@ -195,7 +190,12 @@ function computeBoundRect(bounds: string | Coords) {
 
   if (typeof bounds === 'object') {
     // we have the left right etc
-    const { top = 0, right = 0, bottom = 0, left = 0 } = bounds;
+    const {
+      top = 0,
+      right = document.body.getBoundingClientRect().right,
+      bottom = document.body.getBoundingClientRect().bottom,
+      left = 0,
+    } = bounds;
 
     computedBounds = { top, right, bottom, left };
   } else {
