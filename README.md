@@ -42,6 +42,8 @@ With options
 <div use:draggable={{ axis: 'x', grid: [10, 10] }}>Hello</div>
 ```
 
+[REPL](https://svelte.dev/repl/fc972f90450c4945b6f2481d13eafa00?version=3.38.3)
+
 ## Options
 
 There's tons of options available for this package. All of them are already documented within the code itself, so you'd never have to leave the code editor.
