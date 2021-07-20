@@ -21,7 +21,8 @@
     gpuAcceleration: true,
     grid: null,
     // bounds: boundToBody ? 'body' : undefined,
-    bounds: { top: 100, left: 100, right: 100, bottom: 40 },
+    // bounds: { top: 100, left: 100, right: 100, bottom: 40 },
+    bounds: 'parent',
   };
 
   // $: console.log(options);

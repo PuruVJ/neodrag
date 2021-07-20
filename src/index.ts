@@ -280,7 +280,7 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
     canMoveInY = ['both', 'y'].includes(axis);
 
     // Compute bounds
-    if (typeof bounds !== 'undefined') computedBounds = computeBoundRect(bounds);
+    if (typeof bounds !== 'undefined') computedBounds = computeBoundRect(bounds, node);
 
     // Compute current node's bounding client Rectangle
     nodeRect = node.getBoundingClientRect();
@@ -501,9 +501,7 @@ function getCancelElement(cancel: string | undefined, node: HTMLElement) {
   return cancelEl;
 }
 
-function computeBoundRect(bounds: string | Partial<Coords>) {
-  let computedBounds: Coords;
-
+function computeBoundRect(bounds: string | Partial<Coords>, rootNode: HTMLElement) {
   if (typeof bounds === 'object') {
     // we have the left right etc
     const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
@@ -517,12 +515,14 @@ function computeBoundRect(bounds: string | Partial<Coords>) {
   }
 
   // It's a string
-  const node = document.querySelector(bounds);
+  if (bounds === 'parent') return (rootNode.parentNode as HTMLElement).getBoundingClientRect();
+
+  const node = document.querySelector<HTMLElement>(bounds);
 
   if (node === null)
     throw new Error("The selector provided for bound doesn't exists in the document.");
 
-  computedBounds = node!.getBoundingClientRect();
+  const computedBounds = node!.getBoundingClientRect();
 
   return computedBounds;
 }
