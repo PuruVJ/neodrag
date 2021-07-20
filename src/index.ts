@@ -217,12 +217,13 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
 
   setupListeners(dragStart, dragEnd, drag);
 
-  // Apply defaultClass on node
+  // On mobile, touch can become extremely janky without it
+  node.style.touchAction = 'none';
 
   function dragStart(e: TouchEvent | MouseEvent) {
-    node.classList.add(defaultClass);
-
     if (disabled) return;
+
+    node.classList.add(defaultClass);
 
     dragEl = getDragEl(handle, node);
     cancelEl = getCancelElement(cancel, node);
