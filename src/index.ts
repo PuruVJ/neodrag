@@ -24,7 +24,7 @@ export type Options = {
    * You yourself will have to make sure of that, or it may lead to strange behavior
    *
    * Or, finally, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
-   * These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right from right of window.
+   * These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right` from right of window.
    * If any of these properties are unspecified, they are assumed to be `0`.
    *
    * @example
