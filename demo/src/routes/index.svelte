@@ -5,7 +5,10 @@
   // import { draggable } from 'svelte-drag';
   // import type { Options } from 'svelte-drag';
 
-  const options: Required<Options> = {
+  let boundToBody = false;
+
+  let options: Required<Options>;
+  $: options = {
     applyUserSelectHack: true,
     axis: 'both',
     cancel: '.cancel',
@@ -17,6 +20,7 @@
     disabled: false,
     gpuAcceleration: true,
     grid: null,
+    bounds: boundToBody ? 'body' : undefined,
   };
 
   // $: console.log(options);
@@ -28,6 +32,13 @@
 <label>
   Apply user select hack
   <input type="checkbox" bind:checked={options.applyUserSelectHack} />
+</label>
+
+<br /> <br />
+
+<label>
+  Bound to body
+  <input type="checkbox" bind:checked={boundToBody} />
 </label>
 
 <br /> <br />
@@ -131,6 +142,7 @@
     color: white;
 
     font-family: monospace;
+    margin: 30px;
   }
 
   .box {

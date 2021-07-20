@@ -6,7 +6,7 @@ type Coords = {
 };
 
 export type Options = {
-  // bounds?: string | Coords;
+  bounds?: string | Coords;
 
   /**
    * Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
@@ -176,7 +176,7 @@ const DEFAULT_CLASS = {
 
 export const draggable = (node: HTMLElement, options: Options = {}) => {
   let {
-    // bounds,
+    bounds,
     axis = 'both',
     gpuAcceleration = true,
     applyUserSelectHack = true,
@@ -199,6 +199,9 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
   let [translateX, translateY] = [0, 0];
   let [initialX, initialY] = [0, 0];
   let [previousX, previousY] = [0, 0];
+
+  // The offset of the client position relative to the node's top-left corner
+  let [clientToNodeOffsetX, clientToNodeOffsetY] = [0, 0];
 
   let [xOffset, yOffset] = [defaultPosition.x, defaultPosition.y];
 
@@ -232,7 +235,7 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
     canMoveInY = ['both', 'y'].includes(axis);
 
     // Compute bounds
-    // if (typeof bounds !== 'undefined') computedBounds = computeBoundRect(bounds);
+    if (typeof bounds !== 'undefined') computedBounds = computeBoundRect(bounds);
 
     // Compute current node's bounding client Rectangle
     nodeRect = node.getBoundingClientRect();
@@ -263,6 +266,13 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
 
     if (canMoveInX) initialX = clientX - xOffset;
     if (canMoveInY) initialY = clientY - yOffset;
+
+    // Only the bounds uses these properties at the moment,
+    // may open up in the future if others need it
+    if (computedBounds) {
+      clientToNodeOffsetX = clientX - nodeRect.left;
+      clientToNodeOffsetY = clientY - nodeRect.top;
+    }
   }
 
   function dragEnd() {
@@ -302,14 +312,18 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
     // Get final values for clamping
     let [finalX, finalY] = [clientX, clientY];
 
-    // TODO: Get bounds done
-    // if (computedBounds) {
-    //   finalX = Math.min(clientX, computedBounds.right);
-    //   finalY = Math.min(clientY, computedBounds.bottom);
+    if (computedBounds) {
+      // Client position is limited to this virtual boundary to prevent node going out of bounds
+      const virtualClientBounds: Coords = {
+        left: computedBounds.left + clientToNodeOffsetX,
+        top: computedBounds.top + clientToNodeOffsetY,
+        right: computedBounds.right + clientToNodeOffsetX - nodeRect.width,
+        bottom: computedBounds.bottom + clientToNodeOffsetY - nodeRect.height,
+      };
 
-    //   finalX = Math.max(clientX, computedBounds.left);
-    //   finalY = Math.max(clientY, computedBounds.top);
-    // }
+      finalX = Math.min(Math.max(finalX, virtualClientBounds.left), virtualClientBounds.right);
+      finalY = Math.min(Math.max(finalY, virtualClientBounds.top), virtualClientBounds.bottom);
+    }
 
     if (Array.isArray(grid)) {
       let [xSnap, ySnap] = grid;
@@ -353,7 +367,7 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
       axis = options.axis || 'both';
       disabled = options.disabled ?? false;
       handle = options.handle;
-      // bounds = options.bounds;
+      bounds = options.bounds;
       cancel = options.cancel;
       applyUserSelectHack = options.applyUserSelectHack ?? true;
       grid = options.grid;
