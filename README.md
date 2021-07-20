@@ -6,7 +6,7 @@ Inspired from the amazing [react-draggable](https://github.com/react-grid-layout
 
 ## Features
 
-- 🤏 Tiny - Only [1.4KB](https://bundlephobia.com/package/svelte-drag@latest) min+gzip
+- 🤏 Tiny - Only [1.7KB](https://bundlephobia.com/package/svelte-drag@latest) min+gzip
 - 🐇 Simple - Available as Svelte Action for very simple usage
 - 🗃️ Highly customisable - Offers tons of options that you can modify to get different behavior
 - ⚛️ Reactive - Change options passed to it on the fly, it will **just work 🙂**
