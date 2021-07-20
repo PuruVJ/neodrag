@@ -1,12 +1,57 @@
 type Coords = {
+  /** Number of pixels from left of the document */
   left: number;
+
+  /** Number of pixels from top of the document */
   top: number;
+
+  /** Number of pixels from the right side of document */
   right: number;
+
+  /** Number of pixels from the bottom of the document */
   bottom: number;
 };
 
 export type Options = {
-  bounds?: string | Coords;
+  /**
+   * Optionally limit the drag area
+   *
+   * Accepts `parent` as prefixed value, and limits it to its parent.
+   *
+   * Or, you can specify any selector and it will be bound to that.
+   *
+   * **Note**: We don't check whether the selector is bigger than the node element.
+   * You yourself will have to make sure of that, or it may lead to strange behavior
+   *
+   * Or, finally, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
+   * These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right from right of window.
+   * If any of these properties are unspecified, they are assumed to be `0`.
+   *
+   * @example
+   * ```svelte
+   * <!-- Bound to parent element -->
+   * <div use:draggable={{ bounds: 'parent' }}>
+   *   Hello
+   * </div>
+   * ```
+   *
+   * @example
+   * ```svelte
+   * <!-- Bound to body -->
+   * <div use:draggable={{ bounds: 'body' }}>
+   *   Hello
+   * </div>
+   * ```
+   *
+   * @example
+   * ```svelte
+   * <!-- Bound to arbitrary coordinates -->
+   * <div use:draggable={{ bounds: { top: 100, right: 100, bottom: 100, left: 100 } }}>
+   *   Hello
+   * </div>
+   * ```
+   */
+  bounds?: 'parent' | string | Partial<Coords>;
 
   /**
    * Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
@@ -456,16 +501,19 @@ function getCancelElement(cancel: string | undefined, node: HTMLElement) {
   return cancelEl;
 }
 
-function computeBoundRect(bounds: string | Coords) {
+function computeBoundRect(bounds: string | Partial<Coords>) {
   let computedBounds: Coords;
 
   if (typeof bounds === 'object') {
     // we have the left right etc
-    const { right: bodyRight, bottom: bodyBottom } = document.body.getBoundingClientRect();
+    const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
 
-    const { top = 0, left = 0, right = bodyRight, bottom = bodyBottom } = bounds;
+    const { top = 0, left = 0, right = 0, bottom = 0 } = bounds;
 
-    return { top, right, bottom, left };
+    const computedRight = windowWidth - right;
+    const computedBottom = windowHeight - bottom;
+
+    return { top, right: computedRight, bottom: computedBottom, left };
   }
 
   // It's a string
