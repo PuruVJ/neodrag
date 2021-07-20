@@ -1,6 +1,6 @@
 {
   "name": "svelte-drag",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Svelte port of react-draggable",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -29,7 +29,7 @@
     "svelte"
   ],
   "author": "Puru Vijay",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/PuruVJ/svelte-drag/issues"
   },
