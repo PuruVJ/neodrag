@@ -257,7 +257,8 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
     // Dispatch custom event
     fireSvelteDragStartEvent(node);
 
-    const { clientX, clientY } = e instanceof TouchEvent ? e.touches[0] : e;
+    const { clientX, clientY } =
+      e.type === 'touchstart' ? (e as TouchEvent).touches[0] : (e as MouseEvent);
 
     if (canMoveInX) initialX = clientX - xOffset;
     if (canMoveInY) initialY = clientY - yOffset;
@@ -294,7 +295,8 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
 
     nodeRect = node.getBoundingClientRect();
 
-    const { clientX, clientY } = e instanceof TouchEvent ? e.touches[0] : e;
+    const { clientX, clientY } =
+      e.type === 'touchmove' ? (e as TouchEvent).touches[0] : (e as MouseEvent);
 
     // Get final values for clamping
     let [finalX, finalY] = [clientX, clientY];
