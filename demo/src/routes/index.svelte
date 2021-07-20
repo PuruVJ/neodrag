@@ -20,7 +20,8 @@
     disabled: false,
     gpuAcceleration: true,
     grid: null,
-    bounds: boundToBody ? 'body' : undefined,
+    // bounds: boundToBody ? 'body' : undefined,
+    bounds: { top: 100, left: 100, right: 100, bottom: 40 },
   };
 
   // $: console.log(options);
