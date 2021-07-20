@@ -137,14 +137,6 @@ On the other hand, as an action, this gives ultimate control to both the user an
 
 This is extremely simple and expressive. By applying the action, you are specifying which element you want keep draggable, without any extra overhead. It just works. And Actions aren't run in SSR, so your app will Server render without errors caused from this library, and will spare me the gruelling task of adding browser checks everywhere!! It's a win win for everyone!! 🙂
 
-# Help needed
-
-This project still needs more work. It supports 90% of `react-draggable`'s API. Just one hiccup: it doesn't support `bounds` option. `bounds` allow you to set an element or `coordinates` as the boundary to which the element can be dragged!!
-
-This requires some mathematical calculations and positioning which I am having trouble implementing. So I'd appreciate if you could take some time and discuss about it, the math required etc, or even better, make a Pull Request 😊
-
-Issue link: [#1](https://github.com/PuruVJ/svelte-drag/issues/1)
-
 # Contributing
 
 Feel free to open an issue with a bug or feature request.
