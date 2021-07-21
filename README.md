@@ -94,19 +94,19 @@ let axis;
 <div>
   Axis:
   <label>
-    <input type="radio" bind:group={options.axis} value="both" />
+    <input type="radio" bind:group={axis} value="both" />
     Both
   </label>
   <label>
-    <input type="radio" bind:group={options.axis} value="x" />
+    <input type="radio" bind:group={axis} value="x" />
     x
   </label>
   <label>
-    <input type="radio" bind:group={options.axis} value="y" />
+    <input type="radio" bind:group={axis} value="y" />
     y
   </label>
   <label>
-    <input type="radio" bind:group={options.axis} value="none" />
+    <input type="radio" bind:group={axis} value="none" />
     none
   </label>
 </div>
