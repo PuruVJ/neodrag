@@ -320,7 +320,12 @@ Due to a bug in our pipeline, these types can't be included automatically. We'll
 This package exports 2 types you can use:
 
 ```ts
-import type { SvelteDragOptions, SvelteDragBoundsCoords } from 'svelte-drag';
+import type {
+  SvelteDragAxis,
+  SvelteDragBounds,
+  SvelteDragBoundsCoords,
+  SvelteDragOptions,
+} from 'svelte-drag';
 ```
 
 `SvelteDragOptions` is the documented list of all options provided by the component.
