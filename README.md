@@ -4,7 +4,7 @@ A lightweight Svelte Action to make your elements draggable.
 
 Inspired from the amazing [react-draggable](https://github.com/react-grid-layout/react-draggable), and implements same APIs.
 
-## Features
+# Features
 
 - 🤏 Tiny - Only [1.7KB](https://bundlephobia.com/package/svelte-drag) min+gzip
 - 🐇 Simple - Available as Svelte Action for very simple usage
@@ -13,7 +13,7 @@ Inspired from the amazing [react-draggable](https://github.com/react-grid-layout
 
 [Try it in Svelte REPL](https://svelte.dev/repl/fc972f90450c4945b6f2481d13eafa00?version=3.38.3)
 
-## Installing
+# Installing
 
 ```bash
 npm install svelte-drag
@@ -22,7 +22,7 @@ npm install svelte-drag
 yarn add svelte-drag
 ```
 
-## Usage
+# Usage
 
 Basic usage
 
@@ -60,11 +60,11 @@ Defining options elsewhere with typescript
 <div use:draggable={options}>Hello</div>
 ```
 
-## Options
+# Options
 
 There's tons of options available for this package. All of them are already documented within the code itself, so you'd never have to leave the code editor.
 
-### axis
+## axis
 
 **type**: `'both' | 'x' | 'y' | 'none'`
 
@@ -115,7 +115,7 @@ let axis;
 <div use:draggable={{ axis }}>Text</div>
 ```
 
-### bounds
+## bounds
 
 **type**: `'parent' | string | { top?: number; right?: number; bottom?: number; left?: number }`
 
@@ -168,7 +168,7 @@ Bound only to top and bottom, and unbounded horizontally in practice by setting 
 <div use:draggable={{ bounds: { top: 0, bottom: 0, left: -1000, right: -1000 } }}>Hello</div>
 ```
 
-### gpuAcceleration
+## gpuAcceleration
 
 **type**: `boolean`
 
@@ -184,7 +184,7 @@ Example 👇
 <div use:draggable={{ gpuAcceleration: false }}>Hello</div>
 ```
 
-### applyUserSelectHack
+## applyUserSelectHack
 
 **type**: `boolean`
 
@@ -192,7 +192,7 @@ Example 👇
 
 Applies `user-select: none` on `<body />` element when dragging, to prevent the irritating effect where dragging doesn't happen and the text is selected. Applied when dragging starts and removed when it stops.
 
-### disabled
+## disabled
 
 **type**: `boolean`
 
@@ -200,7 +200,7 @@ Applies `user-select: none` on `<body />` element when dragging, to prevent the 
 
 Disables dragging.
 
-### grid
+## grid
 
 **type**: `[number, number]`
 
@@ -210,7 +210,7 @@ Applies a grid on the page to which the element snaps to when dragging, rather t
 
 `Note`: If you're programmatically creating the grid, do not set it to [0, 0] ever, that will stop drag at all. Set it to `undefined` to make it continuous once again.
 
-### cancel
+## cancel
 
 **type**: `string`
 
@@ -225,7 +225,7 @@ CSS Selector of an element inside the parent node(on which `use:draggable` is ap
 </div>
 ```
 
-### handle
+## handle
 
 **type**: `string`
 
@@ -240,7 +240,7 @@ CSS Selector of an element inside the parent node(on which `use:draggable` is ap
 </div>
 ```
 
-### defaultClass
+## defaultClass
 
 **type**: `string`
 
@@ -248,7 +248,7 @@ CSS Selector of an element inside the parent node(on which `use:draggable` is ap
 
 Class to apply on the element on which `use:draggable` is applied. <br/><br/> Note that if `handle` is provided, it will still apply class on the parent element, **NOT** the handle
 
-### defaultClassDragging
+## defaultClassDragging
 
 **type**: `string`
 
@@ -256,7 +256,7 @@ Class to apply on the element on which `use:draggable` is applied. <br/><br/> No
 
 Class to apply on the parent element when it is dragging
 
-### defaultClassDragged
+## defaultClassDragged
 
 **type**: `string`
 
@@ -264,7 +264,7 @@ Class to apply on the parent element when it is dragging
 
 Class to apply on the parent element if it has been dragged at least once.
 
-### defaultPosition
+## defaultPosition
 
 **type**: `{ x: number; y: number }`
 
@@ -272,7 +272,7 @@ Class to apply on the parent element if it has been dragged at least once.
 
 Offsets your element to the position you specify in the very beginning. `x` and `y` should be in pixels
 
-## Events
+# Events
 
 `svelte-drag` emits 3 events, `on:svelte-drag`, `on:svelte-drag:start` & `on:svelte-drag:end`. These are all custom events, and can be listened on the node the `use:draggable` is applied to
 
