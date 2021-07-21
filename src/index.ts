@@ -1,4 +1,4 @@
-type Coords = {
+export type SvelteDragBoundsCoords = {
   /** Number of pixels from left of the document */
   left: number;
 
@@ -12,7 +12,11 @@ type Coords = {
   bottom: number;
 };
 
-export type Options = {
+export type SvelteDragAxis = 'both' | 'x' | 'y' | 'none';
+
+export type SvelteDragBounds = 'parent' | string | Partial<SvelteDragBoundsCoords>;
+
+export type SvelteDragOptions = {
   /**
    * Optionally limit the drag area
    *
@@ -51,7 +55,7 @@ export type Options = {
    * </div>
    * ```
    */
-  bounds?: 'parent' | string | Partial<Coords>;
+  bounds?: SvelteDragBounds;
 
   /**
    * Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
@@ -71,7 +75,7 @@ export type Options = {
    * </div>
    * ```
    */
-  axis?: 'both' | 'x' | 'y' | 'none';
+  axis?: SvelteDragAxis;
 
   /**
    * If true, uses `translate3d` instead of `translate` to move the element around, and the hardware acceleration kicks in.
@@ -219,7 +223,7 @@ const DEFAULT_CLASS = {
   DRAGGED: 'svelte-draggable-dragged',
 };
 
-export const draggable = (node: HTMLElement, options: Options = {}) => {
+export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) => {
   let {
     bounds,
     axis = 'both',
@@ -257,7 +261,7 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
 
   let bodyOriginalUserSelectVal = '';
 
-  let computedBounds: Coords;
+  let computedBounds: SvelteDragBoundsCoords;
   let nodeRect: DOMRect;
 
   let dragEl: HTMLElement | undefined;
@@ -359,7 +363,7 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
 
     if (computedBounds) {
       // Client position is limited to this virtual boundary to prevent node going out of bounds
-      const virtualClientBounds: Coords = {
+      const virtualClientBounds: SvelteDragBoundsCoords = {
         left: computedBounds.left + clientToNodeOffsetX,
         top: computedBounds.top + clientToNodeOffsetY,
         right: computedBounds.right + clientToNodeOffsetX - nodeRect.width,
@@ -407,7 +411,7 @@ export const draggable = (node: HTMLElement, options: Options = {}) => {
       unlisten('mouseup', dragEnd, false);
       unlisten('mousemove', drag, false);
     },
-    update: (options: Options) => {
+    update: (options: SvelteDragOptions) => {
       // Update all the values that need to be changed
       axis = options.axis || 'both';
       disabled = options.disabled ?? false;
@@ -501,7 +505,7 @@ function getCancelElement(cancel: string | undefined, node: HTMLElement) {
   return cancelEl;
 }
 
-function computeBoundRect(bounds: string | Partial<Coords>, rootNode: HTMLElement) {
+function computeBoundRect(bounds: string | Partial<SvelteDragBoundsCoords>, rootNode: HTMLElement) {
   if (typeof bounds === 'object') {
     // we have the left right etc
     const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
