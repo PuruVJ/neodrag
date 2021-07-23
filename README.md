@@ -2,13 +2,14 @@
 
 A lightweight Svelte Action to make your elements draggable.
 
-Inspired from the amazing [react-draggable](https://github.com/react-grid-layout/react-draggable), and implements same APIs.
+Inspired from the amazing [react-draggable](https://github.com/react-grid-layout/react-draggable) library, and implements the same API.
 
 # Features
 
-- 🤏 Tiny - Only [1.7KB](https://bundlephobia.com/package/svelte-drag) min+gzip
-- 🐇 Simple - Available as Svelte Action for very simple usage
-- 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior
+- 🤏 Tiny - Only [1.7KB](https://bundlephobia.com/package/svelte-drag) min+gzip.
+- 🐇 Simple - Quite simple to use, and effectively no-config required!
+- 🧙‍♀️ Elegant - Svelte Action, to keep the usage simple, elegant and expressive.
+- 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
 - ⚛️ Reactive - Change options passed to it on the fly, it will **just work 🙂**
 
 [Try it in Svelte REPL](https://svelte.dev/repl/fc972f90450c4945b6f2481d13eafa00?version=3.38.3)
@@ -62,7 +63,7 @@ Defining options elsewhere with typescript
 
 # Options
 
-There's tons of options available for this package. All of them are already documented within the code itself, so you'd never have to leave the code editor.
+There's tons of options available for this package. All of them are already documented within the code itself, so you'll never have to leave the code editor.
 
 ## axis
 
@@ -127,8 +128,8 @@ Accepts `parent` as prefixed value, and limits it to its parent.
 
 Or, you can specify any selector and it will be bound to that.
 
-**Note**: We don't check whether the selector is bigger than the node element.
-You yourself will have to make sure of that, or it may lead to strange behavior
+**Note**: This library doesn't check whether the selector is bigger than the node element.
+You yourself will have to make sure of that, or it may lead to unexpected behavior.
 
 Or, finally, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
 These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right` from right of window.
@@ -234,7 +235,7 @@ CSS Selector of an element inside the parent node(on which `use:draggable` is ap
 CSS Selector of an element inside the parent node(on which `use:draggable` is applied). If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
 
 ```svelte
-<div use:draggable={{ cancel: '.cancel' }}>
+<div use:draggable={{ handle: '.handle' }}>
   You shall not drag!!🧙‍♂️
   <div class="handle">This will drag 😁</div>
 </div>
@@ -293,7 +294,7 @@ Event signatures:
 
 `on:svelte-drag:start`: `(event: CustomEvent<null>) => void`. No internal state provided to `event.detail`
 
-`on:svelte-drag:`: `(event: CustomEvent<{x: number; y: number }>) => void`. Provides how far the element has been dragged from it's original position in `x` and `y` coordinates on the `event.detail` object
+`on:svelte-drag:`: `(event: CustomEvent<{offsetX: number; offsetY: number }>) => void`. Provides how far the element has been dragged from it's original position in `x` and `y` coordinates on the `event.detail` object
 
 `on:svelte-drag:end`: `(event: CustomEvent<null>) => void`. No internal state provided to `event.detail`.
 
@@ -301,23 +302,21 @@ If you're a TypeScript user, read on below 👇
 
 # TypeScript
 
-The events above are custom events, and hence, not recognized by the TypeScript compiler, so your editor will basically yell at you and says these events do not exist. For that, you need to create a `types.d.ts` file in the `source` folder of your project and the code below to it 👇
+The events above are custom events, and hence, not recognized by the TypeScript compiler, so your editor will basically yell at you and say these events do not exist. For that, you need to create a `types.d.ts` file in the `source` folder of your project and the code below to it 👇
 
 ```ts
-declare namespace svelte.JSX {
-  interface HTMLAttributes {
+export declare namespace svelte.JSX {
+  interface HTMLAttributes<T> {
     'onsvelte-drag:start'?: (e: CustomEvent<null>) => void;
     'onsvelte-drag:end'?: (e: CustomEvent<null>) => void;
-    'ondrag-drag'?: (e: CustomEvent<{ x: number; y: number }>) => void;
+    'onsvelte-drag'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
   }
 }
 ```
 
-Due to a bug in our pipeline, these types can't be included automatically. We'll soon be able to remove this step for you 😊
-
 ## Types Exported from package
 
-This package exports 2 types you can use:
+This package exports these types you can use:
 
 ```ts
 import type {
@@ -338,25 +337,51 @@ import type {
 
 ```ts
 export type SvelteDragBoundsCoords = {
-  /** Number of pixels from left of the document */
+  /** Number of pixels from left of the window */
   left: number;
 
-  /** Number of pixels from top of the document */
+  /** Number of pixels from top of the window */
   top: number;
 
-  /** Number of pixels from the right side of document */
+  /** Number of pixels from the right side of window */
   right: number;
 
-  /** Number of pixels from the bottom of the document */
+  /** Number of pixels from the bottom of the window */
   bottom: number;
 };
 ```
 
 # Why an action and not a component?
 
-In case you're wondering why this library is an action, and not a component, the answer is simple: Actions usage is much much simpler than component.
+In case you're wondering why this library is an action, and not a component, the answer is simple: Actions usage is much much more simple and elegant than component for this case could ever be.
 
-If it were a component, it's syntax would be like this 👇
+If it were a component, its syntax would be like this 👇
+
+```svelte
+<Draggable axis="x" grid={[50, 50]}>
+  <div>
+    Hello
+  </div>
+</Draggable>
+```
+
+This is ok, but what if there are more than 2 elements at the top.
+
+```svelte
+<Draggable axis="x" grid={[50, 50]}>
+  <div>
+    Hello
+  </div>
+
+  <div>
+    You shall not pass ~ Gandalf the wizard
+  </div>
+</Draggable>
+```
+
+This poses a problem: How would I decide which of these to make a draggable? OfC, I could wrap the `<slot />` in a `<div>`, apply event listeners on it, set it to `display: contents`, but it would add an extra DOM element, and sometimes, that alone can make a huge difference!!
+
+So to not add a wrapper myself, I would need to write here in docs to pass only one root element, and give an error when I detect multiple. or I'd need to enforce passing the ref of the element into the component using `bind:this`, like this 👇
 
 ```svelte
 <script>
@@ -370,25 +395,37 @@ let ref;
 </Draggable>
 ```
 
-You'd have to bind the element ref which you wanna make draggable and pass it to the component. This would be necessary, for it would be near impossible for the component to determine which element is the draggable, in-case multiple root elements were provided. This is simple enough, but adds more complexity for user as well as me, the library author.
+You'd have to bind the element ref which you wanna make draggable and pass it to the component.
 
-Not to mention, it would require much more work to make it SSR compliant, which makes no sense, cuz the server isn't dragging elements around, so why need to SSR it in the first place. I'd have to add `browser` checks everywhere to make it work, which is less than ideal.
+This is doable, but it adds an unnecessary amount of API layer, and the code isn't idiomatic and elegant, not to mention how much extra code I would have to add as the library author.
+
+Not to mention, it would require much more work to make it SSR compliant, which makes no sense, cuz the server isn't dragging elements around, so why need to SSR it in the first place ¯\\\_(ツ)\_/¯. I would have to add `browser` checks everywhere to make it work, which is less than ideal.
 
 On the other hand, as an action, this gives ultimate control to both the user and me.
 
 ```svelte
-<div use:draggable>
+<div use:draggable={{ axis: 'x', grid: [50, 50] }}>
   Hello
 </div>
 ```
 
-This is extremely simple and expressive. By applying the action, you are specifying which element you want keep draggable, without any extra overhead. It just works. And Actions aren't run in SSR, so your app will Server render without errors caused from this library, and will spare me the gruelling task of adding browser checks everywhere!! It's a win win for everyone!! 🙂
+This is extremely simple, elegant and expressive. By applying the action, you are specifying which element you want to be draggable, without any extra overhead. It just works!! And Actions aren't run in SSR, so your app will server render without errors caused from this library, and will spare me the gruelling task of adding browser checks everywhere!! It's a win win for everyone!! 🙂
 
 # Contributing
 
 Feel free to open an issue with a bug or feature request.
 
 If you wish to make a PR fixing something, please open an issue about it first!
+
+## Help needed 🛑
+
+This library lacks something very important: **Automated Tests!**
+
+I'll be straight about this: I don't know how to write tests. I've tried, but not been able to.
+
+So I need your help. If you wish to contribute and can add tests here, it would be great for everyone using this! 🙂
+
+Specifications here: [#7](https://github.com/PuruVJ/svelte-drag/issues/7)
 
 # License
 

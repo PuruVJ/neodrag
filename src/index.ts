@@ -1,3 +1,5 @@
+import memoize from './memoize';
+
 export type SvelteDragBoundsCoords = {
   /** Number of pixels from left of the document */
   left: number;
@@ -14,7 +16,7 @@ export type SvelteDragBoundsCoords = {
 
 export type SvelteDragAxis = 'both' | 'x' | 'y' | 'none';
 
-export type SvelteDragBounds = 'parent' | string | Partial<SvelteDragBoundsCoords>;
+export type SvelteDragBounds = 'parent' | Partial<SvelteDragBoundsCoords> | string;
 
 export type SvelteDragOptions = {
   /**
@@ -310,8 +312,7 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
     // Dispatch custom event
     fireSvelteDragStartEvent(node);
 
-    const { clientX, clientY } =
-      e.type === 'touchstart' ? (e as TouchEvent).touches[0] : (e as MouseEvent);
+    const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
 
     if (canMoveInX) initialX = clientX - xOffset;
     if (canMoveInY) initialY = clientY - yOffset;
@@ -349,14 +350,11 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
     // Apply class defaultClassDragging
     node.classList.add(defaultClassDragging);
 
-    fireSvelteDragEvent(node, translateX, translateY);
-
     e.preventDefault();
 
     nodeRect = node.getBoundingClientRect();
 
-    const { clientX, clientY } =
-      e.type === 'touchmove' ? (e as TouchEvent).touches[0] : (e as MouseEvent);
+    const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
 
     // Get final values for clamping
     let [finalX, finalY] = [clientX, clientY];
@@ -395,6 +393,8 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
     if (canMoveInY) translateY = finalY - initialY;
 
     [xOffset, yOffset] = [translateX, translateY];
+
+    fireSvelteDragEvent(node, translateX, translateY);
 
     Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
   }
@@ -437,19 +437,21 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
   };
 };
 
+function isTouchEvent(event: MouseEvent | TouchEvent): event is TouchEvent {
+  return Boolean((event as TouchEvent).touches && (event as TouchEvent).touches.length);
+}
+
 function isString(val: unknown): val is string {
   return typeof val === 'string';
 }
 
-function snapToGrid(
-  [xSnap, ySnap]: [number, number],
-  pendingX: number,
-  pendingY: number
-): [number, number] {
-  const x = Math.round(pendingX / xSnap) * xSnap;
-  const y = Math.round(pendingY / ySnap) * ySnap;
-  return [x, y];
-}
+const snapToGrid = memoize(
+  ([xSnap, ySnap]: [number, number], pendingX: number, pendingY: number): [number, number] => {
+    const x = Math.round(pendingX / xSnap) * xSnap;
+    const y = Math.round(pendingY / ySnap) * ySnap;
+    return [x, y];
+  }
+);
 
 function fireSvelteDragStopEvent(node: HTMLElement) {
   node.dispatchEvent(new CustomEvent('svelte-drag:end'));
@@ -460,7 +462,9 @@ function fireSvelteDragStartEvent(node: HTMLElement) {
 }
 
 function fireSvelteDragEvent(node: HTMLElement, translateX: number, translateY: number) {
-  node.dispatchEvent(new CustomEvent('svelte-drag', { detail: { x: translateX, y: translateY } }));
+  node.dispatchEvent(
+    new CustomEvent('svelte-drag', { detail: { offsetX: translateX, offsetY: translateY } })
+  );
 }
 
 function setupListeners(
@@ -505,31 +509,33 @@ function getCancelElement(cancel: string | undefined, node: HTMLElement) {
   return cancelEl;
 }
 
-function computeBoundRect(bounds: string | Partial<SvelteDragBoundsCoords>, rootNode: HTMLElement) {
-  if (typeof bounds === 'object') {
-    // we have the left right etc
-    const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
+const computeBoundRect = memoize(
+  (bounds: string | Partial<SvelteDragBoundsCoords>, rootNode: HTMLElement) => {
+    if (typeof bounds === 'object') {
+      // we have the left right etc
+      const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
 
-    const { top = 0, left = 0, right = 0, bottom = 0 } = bounds;
+      const { top = 0, left = 0, right = 0, bottom = 0 } = bounds;
 
-    const computedRight = windowWidth - right;
-    const computedBottom = windowHeight - bottom;
+      const computedRight = windowWidth - right;
+      const computedBottom = windowHeight - bottom;
 
-    return { top, right: computedRight, bottom: computedBottom, left };
+      return { top, right: computedRight, bottom: computedBottom, left };
+    }
+
+    // It's a string
+    if (bounds === 'parent') return (rootNode.parentNode as HTMLElement).getBoundingClientRect();
+
+    const node = document.querySelector<HTMLElement>(bounds);
+
+    if (node === null)
+      throw new Error("The selector provided for bound doesn't exists in the document.");
+
+    const computedBounds = node!.getBoundingClientRect();
+
+    return computedBounds;
   }
-
-  // It's a string
-  if (bounds === 'parent') return (rootNode.parentNode as HTMLElement).getBoundingClientRect();
-
-  const node = document.querySelector<HTMLElement>(bounds);
-
-  if (node === null)
-    throw new Error("The selector provided for bound doesn't exists in the document.");
-
-  const computedBounds = node!.getBoundingClientRect();
-
-  return computedBounds;
-}
+);
 
 function setTranslate(xPos: number, yPos: number, el: HTMLElement, gpuAcceleration: boolean) {
   el.style.transform = gpuAcceleration

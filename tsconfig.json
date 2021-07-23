@@ -3,7 +3,8 @@
     "module": "ES2020",
     "target": "ES2019",
     "declaration": true,
-    "declarationDir": "dist/types/",
+    "emitDeclarationOnly": true,
+    "declarationDir": "dist/",
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "Node"

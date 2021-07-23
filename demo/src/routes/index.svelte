@@ -1,13 +1,13 @@
 <script lang="ts">
-  // import { draggable } from '../../../dist';
-  // import type { Options } from '../../../dist';
+  import { draggable } from '../../../dist';
+  import type { SvelteDragOptions } from '../../../dist';
 
-  import { draggable } from 'svelte-drag';
-  import type { Options } from 'svelte-drag';
+  // import { draggable } from 'svelte-drag';
+  // import type { Options } from 'svelte-drag';
 
   let boundToBody = false;
 
-  let options: Options;
+  let options: SvelteDragOptions;
   $: options = {
     applyUserSelectHack: true,
     axis: 'both',
@@ -19,11 +19,11 @@
     defaultPosition: { x: 0, y: 0 },
     disabled: false,
     gpuAcceleration: true,
-    grid: null,
+    grid: [100, 100],
     // bounds: boundToBody ? 'body' : undefined,
     // bounds: { top: 100, left: 100, right: 100, bottom: 40 },
-    bounds: 'parent',
-  } as Options;
+    // bounds: 'parent',
+  } as SvelteDragOptions;
 
   // $: console.log(options);
 </script>
@@ -128,7 +128,7 @@
 
 <br />
 
-<div use:draggable={options} class="box">
+<div use:draggable={options} on:svelte-drag={(e) => console.log(e)} class="box">
   hello
 
   <div class="handle">Le handel</div>
