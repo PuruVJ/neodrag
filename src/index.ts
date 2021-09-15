@@ -207,7 +207,6 @@ export type SvelteDragOptions = {
    * Offsets your element to the position you specify in the very beginning.
    * `x` and `y` should be in pixels
    *
-
    *
    * @example
    * <!-- Place the element at (300, 200) at the very beginning -->
@@ -408,15 +407,15 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
       [finalX, finalY] = [previousX + deltaX, previousY + deltaY];
     }
 
-    if (canMoveInX) translateX = finalX - initialX
+    if (canMoveInX) translateX = finalX - initialX;
     if (canMoveInY) translateY = finalY - initialY;
 
     [xOffset, yOffset] = [translateX, translateY];
 
-    fireSvelteDragEvent(node, translateX, translateY)
+    fireSvelteDragEvent(node, translateX, translateY);
 
     if (!disableTransform)
-      Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration))
+      Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
 
   }
 
@@ -455,8 +454,8 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
 
       if (dragged) node.classList.add(defaultClassDragged);
     },
-  }
-}
+  };
+};
 
 function isTouchEvent(event: MouseEvent | TouchEvent): event is TouchEvent {
   return Boolean((event as TouchEvent).touches && (event as TouchEvent).touches.length);
@@ -468,14 +467,14 @@ function isString(val: unknown): val is string {
 
 const snapToGrid = memoize(
   ([xSnap, ySnap]: [number, number], pendingX: number, pendingY: number): [number, number] => {
-    const x = Math.round(pendingX / xSnap) * xSnap
-    const y = Math.round(pendingY / ySnap) * ySnap
-    return [x, y]
+    const x = Math.round(pendingX / xSnap) * xSnap;
+    const y = Math.round(pendingY / ySnap) * ySnap;
+    return [x, y];
   }
 );
 
 function fireSvelteDragStopEvent(node: HTMLElement) {
-  node.dispatchEvent(new CustomEvent('svelte-drag:end'))
+  node.dispatchEvent(new CustomEvent('svelte-drag:end'));
 }
 
 function fireSvelteDragStartEvent(node: HTMLElement) {
@@ -556,7 +555,7 @@ const computeBoundRect = memoize(
 
     return computedBounds;
   }
-)
+);
 
 function setTranslate(xPos: number, yPos: number, el: HTMLElement, gpuAcceleration: boolean) {
   el.style.transform = gpuAcceleration
