@@ -12,7 +12,7 @@ export type SvelteDragBoundsCoords = {
 
   /** Number of pixels from the bottom of the document */
   bottom: number;
-}
+};
 
 export type SvelteDragAxis = 'both' | 'x' | 'y' | 'none';
 
@@ -233,13 +233,13 @@ export type SvelteDragOptions = {
   disableTransform?: false;
 
 
-}
+};
 
 const DEFAULT_CLASS = {
   MAIN: 'svelte-draggable',
   DRAGGING: 'svelte-draggable-dragging',
   DRAGGED: 'svelte-draggable-dragged',
-}
+};
 
 export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) => {
   let {
@@ -385,7 +385,7 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
         top: computedBounds.top + clientToNodeOffsetY,
         right: computedBounds.right + clientToNodeOffsetX - nodeRect.width,
         bottom: computedBounds.bottom + clientToNodeOffsetY - nodeRect.height,
-      }
+      };
 
       finalX = Math.min(Math.max(finalX, virtualClientBounds.left), virtualClientBounds.right);
       finalY = Math.min(Math.max(finalY, virtualClientBounds.top), virtualClientBounds.bottom);
@@ -405,13 +405,13 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
 
       if (!deltaX && !deltaY) return;
 
-      [finalX, finalY] = [previousX + deltaX, previousY + deltaY]
+      [finalX, finalY] = [previousX + deltaX, previousY + deltaY];
     }
 
     if (canMoveInX) translateX = finalX - initialX
     if (canMoveInY) translateY = finalY - initialY;
 
-    [xOffset, yOffset] = [translateX, translateY]
+    [xOffset, yOffset] = [translateX, translateY];
 
     fireSvelteDragEvent(node, translateX, translateY)
 
@@ -422,48 +422,48 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
 
   return {
     destroy: () => {
-      const unlisten = removeEventListener
+      const unlisten = removeEventListener;
 
-      unlisten('touchstart', dragStart, false)
-      unlisten('touchend', dragEnd, false)
-      unlisten('touchmove', drag, false)
+      unlisten('touchstart', dragStart, false);
+      unlisten('touchend', dragEnd, false);
+      unlisten('touchmove', drag, false);
 
-      unlisten('mousedown', dragStart, false)
-      unlisten('mouseup', dragEnd, false)
-      unlisten('mousemove', drag, false)
+      unlisten('mousedown', dragStart, false);
+      unlisten('mouseup', dragEnd, false);
+      unlisten('mousemove', drag, false);
     },
     update: (options: SvelteDragOptions) => {
       // Update all the values that need to be changed
-      axis = options.axis || 'both'
-      disabled = options.disabled ?? false
-      handle = options.handle
-      bounds = options.bounds
-      cancel = options.cancel
-      applyUserSelectHack = options.applyUserSelectHack ?? true
-      grid = options.grid
-      gpuAcceleration = options.gpuAcceleration ?? true
+      axis = options.axis || 'both';
+      disabled = options.disabled ?? false;
+      handle = options.handle;
+      bounds = options.bounds;
+      cancel = options.cancel;
+      applyUserSelectHack = options.applyUserSelectHack ?? true;
+      grid = options.grid;
+      gpuAcceleration = options.gpuAcceleration ?? true;
 
-      const dragged = node.classList.contains(defaultClassDragged)
+      const dragged = node.classList.contains(defaultClassDragged);
 
-      node.classList.remove(defaultClass, defaultClassDragged)
+      node.classList.remove(defaultClass, defaultClassDragged);
 
-      defaultClass = options.defaultClass ?? DEFAULT_CLASS.MAIN
-      defaultClassDragging = options.defaultClassDragging ?? DEFAULT_CLASS.DRAGGING
-      defaultClassDragged = options.defaultClassDragged ?? DEFAULT_CLASS.DRAGGED
+      defaultClass = options.defaultClass ?? DEFAULT_CLASS.MAIN;
+      defaultClassDragging = options.defaultClassDragging ?? DEFAULT_CLASS.DRAGGING;
+      defaultClassDragged = options.defaultClassDragged ?? DEFAULT_CLASS.DRAGGED;
 
-      node.classList.add(defaultClass)
+      node.classList.add(defaultClass);
 
-      if (dragged) node.classList.add(defaultClassDragged)
+      if (dragged) node.classList.add(defaultClassDragged);
     },
   }
 }
 
 function isTouchEvent(event: MouseEvent | TouchEvent): event is TouchEvent {
-  return Boolean((event as TouchEvent).touches && (event as TouchEvent).touches.length)
+  return Boolean((event as TouchEvent).touches && (event as TouchEvent).touches.length);
 }
 
 function isString(val: unknown): val is string {
-  return typeof val === 'string'
+  return typeof val === 'string';
 }
 
 const snapToGrid = memoize(
@@ -472,20 +472,20 @@ const snapToGrid = memoize(
     const y = Math.round(pendingY / ySnap) * ySnap
     return [x, y]
   }
-)
+);
 
 function fireSvelteDragStopEvent(node: HTMLElement) {
   node.dispatchEvent(new CustomEvent('svelte-drag:end'))
 }
 
 function fireSvelteDragStartEvent(node: HTMLElement) {
-  node.dispatchEvent(new CustomEvent('svelte-drag:start'))
+  node.dispatchEvent(new CustomEvent('svelte-drag:start'));
 }
 
 function fireSvelteDragEvent(node: HTMLElement, translateX: number, translateY: number) {
   node.dispatchEvent(
     new CustomEvent('svelte-drag', { detail: { offsetX: translateX, offsetY: translateY } })
-  )
+  );
 }
 
 function setupListeners(
@@ -493,34 +493,34 @@ function setupListeners(
   dragEnd: () => void,
   drag: (e: TouchEvent | MouseEvent) => void
 ) {
-  const listen = addEventListener
+  const listen = addEventListener;
 
-  listen('touchstart', dragStart, false)
-  listen('touchend', dragEnd, false)
-  listen('touchmove', drag, false)
+  listen('touchstart', dragStart, false);
+  listen('touchend', dragEnd, false);
+  listen('touchmove', drag, false);
 
-  listen('mousedown', dragStart, false)
-  listen('mouseup', dragEnd, false)
-  listen('mousemove', drag, false)
+  listen('mousedown', dragStart, false);
+  listen('mouseup', dragEnd, false);
+  listen('mousemove', drag, false);
 }
 
 function getDragEl(handle: string | undefined, node: HTMLElement) {
-  if (!handle) return node
+  if (!handle) return node;
 
   // Valid!! Let's check if this selector exists or not
-  const handleEl = node.querySelector<HTMLElement>(handle)
+  const handleEl = node.querySelector<HTMLElement>(handle);
   if (handleEl === null)
     throw new Error(
       'Selector passed for `handle` option should be child of the element on which the action is applied'
-    )
+    );
 
-  return handleEl!
+  return handleEl!;
 }
 
 function getCancelElement(cancel: string | undefined, node: HTMLElement) {
-  if (!cancel) return
+  if (!cancel) return;
 
-  const cancelEl = node.querySelector<HTMLElement>(cancel)
+  const cancelEl = node.querySelector<HTMLElement>(cancel);
 
   if (cancelEl === null)
     throw new Error(
