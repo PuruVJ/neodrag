@@ -1,544 +1,564 @@
-import memoize from './memoize';
+import memoize from './memoize'
 
 export type SvelteDragBoundsCoords = {
-  /** Number of pixels from left of the document */
-  left: number;
+	/** Number of pixels from left of the document */
+	left: number
 
-  /** Number of pixels from top of the document */
-  top: number;
+	/** Number of pixels from top of the document */
+	top: number
 
-  /** Number of pixels from the right side of document */
-  right: number;
+	/** Number of pixels from the right side of document */
+	right: number
 
-  /** Number of pixels from the bottom of the document */
-  bottom: number;
-};
+	/** Number of pixels from the bottom of the document */
+	bottom: number
+}
 
-export type SvelteDragAxis = 'both' | 'x' | 'y' | 'none';
+export type SvelteDragAxis = 'both' | 'x' | 'y' | 'none'
 
-export type SvelteDragBounds = 'parent' | Partial<SvelteDragBoundsCoords> | string;
+export type SvelteDragBounds = 'parent' | Partial<SvelteDragBoundsCoords> | string
 
 export type SvelteDragOptions = {
-  /**
-   * Optionally limit the drag area
-   *
-   * Accepts `parent` as prefixed value, and limits it to its parent.
-   *
-   * Or, you can specify any selector and it will be bound to that.
-   *
-   * **Note**: We don't check whether the selector is bigger than the node element.
-   * You yourself will have to make sure of that, or it may lead to strange behavior
-   *
-   * Or, finally, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
-   * These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right` from right of window.
-   * If any of these properties are unspecified, they are assumed to be `0`.
-   *
-   * @example
-   * ```svelte
-   * <!-- Bound to parent element -->
-   * <div use:draggable={{ bounds: 'parent' }}>
-   *   Hello
-   * </div>
-   * ```
-   *
-   * @example
-   * ```svelte
-   * <!-- Bound to body -->
-   * <div use:draggable={{ bounds: 'body' }}>
-   *   Hello
-   * </div>
-   * ```
-   *
-   * @example
-   * ```svelte
-   * <!-- Bound to arbitrary coordinates -->
-   * <div use:draggable={{ bounds: { top: 100, right: 100, bottom: 100, left: 100 } }}>
-   *   Hello
-   * </div>
-   * ```
-   */
-  bounds?: SvelteDragBounds;
+	/**
+	 * Optionally limit the drag area
+	 *
+	 * Accepts `parent` as prefixed value, and limits it to its parent.
+	 *
+	 * Or, you can specify any selector and it will be bound to that.
+	 *
+	 * **Note**: We don't check whether the selector is bigger than the node element.
+	 * You yourself will have to make sure of that, or it may lead to strange behavior
+	 *
+	 * Or, finally, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
+	 * These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right` from right of window.
+	 * If any of these properties are unspecified, they are assumed to be `0`.
+	 *
+	 * @example
+	 * ```svelte
+	 * <!-- Bound to parent element -->
+	 * <div use:draggable={{ bounds: 'parent' }}>
+	 *   Hello
+	 * </div>
+	 * ```
+	 *
+	 * @example
+	 * ```svelte
+	 * <!-- Bound to body -->
+	 * <div use:draggable={{ bounds: 'body' }}>
+	 *   Hello
+	 * </div>
+	 * ```
+	 *
+	 * @example
+	 * ```svelte
+	 * <!-- Bound to arbitrary coordinates -->
+	 * <div use:draggable={{ bounds: { top: 100, right: 100, bottom: 100, left: 100 } }}>
+	 *   Hello
+	 * </div>
+	 * ```
+	 */
+	bounds?: SvelteDragBounds
 
-  /**
-   * Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
-   *
-   * - `both` - Element can move in any direction
-   * - `x` - Only horizontal movement possible
-   * - `y` - Only vertical movement possible
-   * - `none` - No movement at all
-   *
-   * @default 'both'
-   *
-   * @example
-   * ```svelte
-   * <!-- Drag only in x direction -->
-   * <div use:draggable={{ axis: 'x' }}>
-   *   Text
-   * </div>
-   * ```
-   */
-  axis?: SvelteDragAxis;
+	/**
+	 * Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
+	 *
+	 * - `both` - Element can move in any direction
+	 * - `x` - Only horizontal movement possible
+	 * - `y` - Only vertical movement possible
+	 * - `none` - No movement at all
+	 *
+	 * @default 'both'
+	 *
+	 * @example
+	 * ```svelte
+	 * <!-- Drag only in x direction -->
+	 * <div use:draggable={{ axis: 'x' }}>
+	 *   Text
+	 * </div>
+	 * ```
+	 */
+	axis?: SvelteDragAxis
 
-  /**
-   * If true, uses `translate3d` instead of `translate` to move the element around, and the hardware acceleration kicks in.
-   *
-   * `true` by default, but can be set to `false` if [blurry text issue](https://developpaper.com/question/why-does-the-use-of-css3-translate3d-result-in-blurred-display/) occur
-   *
-   * @default true
-   *
-   * @example
-   * ```svelte
-   * <!-- Disable GPU acceleration -->
-   * <div use:draggable={{ gpuAcceleration: false }}>
-   *   Text
-   * </div>
-   * ```
-   */
-  gpuAcceleration?: boolean;
+	/**
+	 * If true, uses `translate3d` instead of `translate` to move the element around, and the hardware acceleration kicks in.
+	 *
+	 * `true` by default, but can be set to `false` if [blurry text issue](https://developpaper.com/question/why-does-the-use-of-css3-translate3d-result-in-blurred-display/) occur
+	 *
+	 * @default true
+	 *
+	 * @example
+	 * ```svelte
+	 * <!-- Disable GPU acceleration -->
+	 * <div use:draggable={{ gpuAcceleration: false }}>
+	 *   Text
+	 * </div>
+	 * ```
+	 */
+	gpuAcceleration?: boolean
 
-  /**
-   * Applies `user-select: none` on `<body />` element when dragging,
-   * to prevent the irritating effect where dragging doesn't happen and the text is selected.
-   * Applied when dragging starts and removed when it stops.
-   *
-   * Can be disabled using this option
-   *
-   * @default true
-   *
-   * @example
-   * ```svelte
-   * <!-- Do not disable user selection -->
-   * <div use:draggable={{ applyUserSelectHack: false }}>
-   *   Text
-   * </div>
-   * ```
-   */
-  applyUserSelectHack?: boolean;
+	/**
+	 * Applies `user-select: none` on `<body />` element when dragging,
+	 * to prevent the irritating effect where dragging doesn't happen and the text is selected.
+	 * Applied when dragging starts and removed when it stops.
+	 *
+	 * Can be disabled using this option
+	 *
+	 * @default true
+	 *
+	 * @example
+	 * ```svelte
+	 * <!-- Do not disable user selection -->
+	 * <div use:draggable={{ applyUserSelectHack: false }}>
+	 *   Text
+	 * </div>
+	 * ```
+	 */
+	applyUserSelectHack?: boolean
 
-  /**
-   * Disables dragging altogether.
-   *
-   * @default false
-   *
-   * @example
-   * ```svelte
-   * <!-- Disable it entirely -->
-   * <div use:draggable={{ disabled: true }}>
-   *   Text
-   * </div>
-   * ```
-   */
-  disabled?: boolean;
+	/**
+	 * Disables dragging altogether.
+	 *
+	 * @default false
+	 *
+	 * @example
+	 * ```svelte
+	 * <!-- Disable it entirely -->
+	 * <div use:draggable={{ disabled: true }}>
+	 *   Text
+	 * </div>
+	 * ```
+	 */
+	disabled?: boolean
 
-  /**
-   * Applies a grid on the page to which the element snaps to when dragging, rather than the default continuous grid.
-   *
-   * `Note`: If you're programmatically creating the grid, do not set it to [0, 0] ever, that will stop drag at all. Set it to `undefined`.
-   *
-   * @default undefined
-   *
-   * @example
-   * ```svelte
-   * <!-- Snap to a grid of 10 by 10 -->
-   * <div use:draggable={{ grid: [10, 10] }}>
-   *   Text
-   * </div>
-   * ```
-   */
-  grid?: [number, number];
+	/**
+	 * Applies a grid on the page to which the element snaps to when dragging, rather than the default continuous grid.
+	 *
+	 * `Note`: If you're programmatically creating the grid, do not set it to [0, 0] ever, that will stop drag at all. Set it to `undefined`.
+	 *
+	 * @default undefined
+	 *
+	 * @example
+	 * ```svelte
+	 * <!-- Snap to a grid of 10 by 10 -->
+	 * <div use:draggable={{ grid: [10, 10] }}>
+	 *   Text
+	 * </div>
+	 * ```
+	 */
+	grid?: [number, number]
 
-  /**
-   * CSS Selector of an element inside the parent node(on which `use:draggable` is applied).
-   *
-   * If it is provided, Trying to drag inside the `cancel` selector will prevent dragging.
-   *
-   * @default undefined
-   *
-   * @example
-   * <!-- Grid has a cancel element -->
-   * <div use:draggable={{ cancel: '.cancel' }}>
-   *   Text
-   *   <div class="cancel">This won't drag</div>
-   * </div>
-   * ```
-   */
-  cancel?: string;
+	/**
+	 * CSS Selector of an element inside the parent node(on which `use:draggable` is applied).
+	 *
+	 * If it is provided, Trying to drag inside the `cancel` selector will prevent dragging.
+	 *
+	 * @default undefined
+	 *
+	 * @example
+	 * <!-- Grid has a cancel element -->
+	 * <div use:draggable={{ cancel: '.cancel' }}>
+	 *   Text
+	 *   <div class="cancel">This won't drag</div>
+	 * </div>
+	 * ```
+	 */
+	cancel?: string
 
-  /**
-   * CSS Selector of an element inside the parent node(on which `use:draggable` is applied).
-   *
-   * If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
-   *
-   * @default undefined
-   *
-   * @example
-   * <!-- Grid has a handle element -->
-   * <div use:draggable={{ handle: '.handel' }}>
-   *   This won't drag
-   *   <div class="handel">This sure will drag!!</div>
-   * </div>
-   * ```
-   */
-  handle?: string;
+	/**
+	 * CSS Selector of an element inside the parent node(on which `use:draggable` is applied).
+	 *
+	 * If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
+	 *
+	 * @default undefined
+	 *
+	 * @example
+	 * <!-- Grid has a handle element -->
+	 * <div use:draggable={{ handle: '.handel' }}>
+	 *   This won't drag
+	 *   <div class="handel">This sure will drag!!</div>
+	 * </div>
+	 * ```
+	 */
+	handle?: string
 
-  /**
-   * Class to apply on the element on which `use:draggable` is applied.
-   * Note that if `handle` is provided, it will still apply class on the parent element, **NOT** the handle
-   *
-   * @default 'svelte-draggable'
-   */
-  defaultClass?: string;
+	/**
+	 * Class to apply on the element on which `use:draggable` is applied.
+	 * Note that if `handle` is provided, it will still apply class on the parent element, **NOT** the handle
+	 *
+	 * @default 'svelte-draggable'
+	 */
+	defaultClass?: string
 
-  /**
-   * Class to apply on the parent element when it is dragging
-   *
-   * @default 'svelte-draggable-dragging'
-   */
-  defaultClassDragging?: string;
+	/**
+	 * Class to apply on the parent element when it is dragging
+	 *
+	 * @default 'svelte-draggable-dragging'
+	 */
+	defaultClassDragging?: string
 
-  /**
-   * Class to apply on the parent element if it has been dragged at least once.
-   *
-   * @default 'svelte-draggable-dragged'
-   */
-  defaultClassDragged?: string;
+	/**
+	 * Class to apply on the parent element if it has been dragged at least once.
+	 *
+	 * @default 'svelte-draggable-dragged'
+	 */
+	defaultClassDragged?: string
 
-  /**
-   * Offsets your element to the position you specify in the very beginning.
-   * `x` and `y` should be in pixels
-   *
-   
-   *
-   * @example
-   * <!-- Place the element at (300, 200) at the very beginning -->
-   * <div use:draggable={{ defaultPosition: { x: 300; y: 200 } }}>
-   *   Hello
-   * </div>
-   * ```
-   */
-  defaultPosition?: { x: number; y: number };
-};
+	/**
+	 * Offsets your element to the position you specify in the very beginning.
+	 * `x` and `y` should be in pixels
+	 *
+
+	 *
+	 * @example
+	 * <!-- Place the element at (300, 200) at the very beginning -->
+	 * <div use:draggable={{ defaultPosition: { x: 300; y: 200 } }}>
+	 *   Hello
+	 * </div>
+	 * ```
+	 */
+	defaultPosition?: { x: number; y: number }
+
+	/**
+	 * Stops the library from adding a transform style to the dragged object
+	 *
+
+	 *
+	 * @example
+	 * <!-- 'transform' won't be added to the element styles -->
+	 * <div use:draggable={{ disableTransform: true }}>
+	 *   Hello
+	 * </div>
+	 * ```
+	 */
+	disableTransform?: false
+
+
+}
 
 const DEFAULT_CLASS = {
-  MAIN: 'svelte-draggable',
-  DRAGGING: 'svelte-draggable-dragging',
-  DRAGGED: 'svelte-draggable-dragged',
-};
+	MAIN: 'svelte-draggable',
+	DRAGGING: 'svelte-draggable-dragging',
+	DRAGGED: 'svelte-draggable-dragged',
+}
 
 export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) => {
-  let {
-    bounds,
-    axis = 'both',
-    gpuAcceleration = true,
-    applyUserSelectHack = true,
-    disabled = false,
+	let {
+		bounds,
+		axis = 'both',
+		gpuAcceleration = true,
+		applyUserSelectHack = true,
+		disabled = false,
 
-    grid,
+		grid,
 
-    cancel,
-    handle,
+		cancel,
+		handle,
 
-    defaultClass = DEFAULT_CLASS.MAIN,
-    defaultClassDragging = DEFAULT_CLASS.DRAGGING,
-    defaultClassDragged = DEFAULT_CLASS.DRAGGED,
+		defaultClass = DEFAULT_CLASS.MAIN,
+		defaultClassDragging = DEFAULT_CLASS.DRAGGING,
+		defaultClassDragged = DEFAULT_CLASS.DRAGGED,
 
-    defaultPosition = { x: 0, y: 0 },
-  } = options;
+		defaultPosition = { x: 0, y: 0 },
 
-  let active = false;
+		disableTransform = false,
+	} = options
 
-  let [translateX, translateY] = [0, 0];
-  let [initialX, initialY] = [0, 0];
-  let [previousX, previousY] = [0, 0];
+	let active = false
 
-  // The offset of the client position relative to the node's top-left corner
-  let [clientToNodeOffsetX, clientToNodeOffsetY] = [0, 0];
+	let [translateX, translateY] = [0, 0]
+	let [initialX, initialY] = [0, 0]
+	let [previousX, previousY] = [0, 0]
 
-  let [xOffset, yOffset] = [defaultPosition.x, defaultPosition.y];
+	// The offset of the client position relative to the node's top-left corner
+	let [clientToNodeOffsetX, clientToNodeOffsetY] = [0, 0]
 
-  setTranslate(xOffset, yOffset, node, gpuAcceleration);
+	let [xOffset, yOffset] = [defaultPosition.x, defaultPosition.y]
 
-  let canMoveInX: boolean;
-  let canMoveInY: boolean;
+	if (!disableTransform) setTranslate(xOffset, yOffset, node, gpuAcceleration)
 
-  let bodyOriginalUserSelectVal = '';
+	let canMoveInX: boolean
+	let canMoveInY: boolean
 
-  let computedBounds: SvelteDragBoundsCoords;
-  let nodeRect: DOMRect;
+	let bodyOriginalUserSelectVal = ''
 
-  let dragEl: HTMLElement | undefined;
-  let cancelEl: HTMLElement | undefined;
+	let computedBounds: SvelteDragBoundsCoords
+	let nodeRect: DOMRect
 
-  setupListeners(dragStart, dragEnd, drag);
+	let dragEl: HTMLElement | undefined
+	let cancelEl: HTMLElement | undefined
 
-  // On mobile, touch can become extremely janky without it
-  node.style.touchAction = 'none';
+	setupListeners(dragStart, dragEnd, drag)
 
-  function dragStart(e: TouchEvent | MouseEvent) {
-    if (disabled) return;
+	// On mobile, touch can become extremely janky without it
+	node.style.touchAction = 'none'
 
-    node.classList.add(defaultClass);
+	function dragStart(e: TouchEvent | MouseEvent) {
+		if (disabled) return
 
-    dragEl = getDragEl(handle, node);
-    cancelEl = getCancelElement(cancel, node);
+		node.classList.add(defaultClass)
 
-    canMoveInX = ['both', 'x'].includes(axis);
-    canMoveInY = ['both', 'y'].includes(axis);
+		dragEl = getDragEl(handle, node)
+		cancelEl = getCancelElement(cancel, node)
 
-    // Compute bounds
-    if (typeof bounds !== 'undefined') computedBounds = computeBoundRect(bounds, node);
+		canMoveInX = ['both', 'x'].includes(axis)
+		canMoveInY = ['both', 'y'].includes(axis)
 
-    // Compute current node's bounding client Rectangle
-    nodeRect = node.getBoundingClientRect();
+		// Compute bounds
+		if (typeof bounds !== 'undefined') computedBounds = computeBoundRect(bounds, node)
 
-    if (isString(handle) && isString(cancel) && handle === cancel)
-      throw new Error("`handle` selector can't be same as `cancel` selector");
+		// Compute current node's bounding client Rectangle
+		nodeRect = node.getBoundingClientRect()
 
-    if (cancelEl?.contains(dragEl))
-      throw new Error(
-        "Element being dragged can't be a child of the element on which action is applied"
-      );
+		if (isString(handle) && isString(cancel) && handle === cancel)
+			throw new Error("`handle` selector can't be same as `cancel` selector")
 
-    if (dragEl.contains(e.target as HTMLElement) && !cancelEl?.contains(e.target as HTMLElement))
-      active = true;
+		if (cancelEl?.contains(dragEl))
+			throw new Error(
+				"Element being dragged can't be a child of the element on which action is applied"
+			)
 
-    if (!active) return;
+		if (dragEl.contains(e.target as HTMLElement) && !cancelEl?.contains(e.target as HTMLElement))
+			active = true
 
-    if (applyUserSelectHack) {
-      // Apply user-select: none on body to prevent misbehavior
-      bodyOriginalUserSelectVal = document.body.style.userSelect;
-      document.body.style.userSelect = 'none';
-    }
-    // Dispatch custom event
-    fireSvelteDragStartEvent(node);
+		if (!active) return
 
-    const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
+		if (applyUserSelectHack) {
+			// Apply user-select: none on body to prevent misbehavior
+			bodyOriginalUserSelectVal = document.body.style.userSelect
+			document.body.style.userSelect = 'none'
+		}
+		// Dispatch custom event
+		fireSvelteDragStartEvent(node)
 
-    if (canMoveInX) initialX = clientX - xOffset;
-    if (canMoveInY) initialY = clientY - yOffset;
+		const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e
 
-    // Only the bounds uses these properties at the moment,
-    // may open up in the future if others need it
-    if (computedBounds) {
-      clientToNodeOffsetX = clientX - nodeRect.left;
-      clientToNodeOffsetY = clientY - nodeRect.top;
-    }
-  }
+		if (canMoveInX) initialX = clientX - xOffset
+		if (canMoveInY) initialY = clientY - yOffset
 
-  function dragEnd() {
-    if (disabled) return;
+		// Only the bounds uses these properties at the moment,
+		// may open up in the future if others need it
+		if (computedBounds) {
+			clientToNodeOffsetX = clientX - nodeRect.left
+			clientToNodeOffsetY = clientY - nodeRect.top
+		}
+	}
 
-    // Apply class defaultClassDragged
-    node.classList.remove(defaultClassDragging);
-    node.classList.add(defaultClassDragged);
+	function dragEnd() {
+		if (disabled) return
 
-    if (applyUserSelectHack) document.body.style.userSelect = bodyOriginalUserSelectVal;
+		// Apply class defaultClassDragged
+		node.classList.remove(defaultClassDragging)
+		node.classList.add(defaultClassDragged)
 
-    fireSvelteDragStopEvent(node);
+		if (applyUserSelectHack) document.body.style.userSelect = bodyOriginalUserSelectVal
 
-    if (canMoveInX) initialX = translateX;
-    if (canMoveInX) initialY = translateY;
+		fireSvelteDragStopEvent(node)
 
-    active = false;
-  }
+		if (canMoveInX) initialX = translateX
+		if (canMoveInX) initialY = translateY
 
-  function drag(e: TouchEvent | MouseEvent) {
-    if (disabled) return;
+		active = false
+	}
 
-    if (!active) return;
+	function drag(e: TouchEvent | MouseEvent) {
+		if (disabled) return
 
-    // Apply class defaultClassDragging
-    node.classList.add(defaultClassDragging);
+		if (!active) return
 
-    e.preventDefault();
+		// Apply class defaultClassDragging
+		node.classList.add(defaultClassDragging)
 
-    nodeRect = node.getBoundingClientRect();
+		e.preventDefault()
 
-    const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
+		nodeRect = node.getBoundingClientRect()
 
-    // Get final values for clamping
-    let [finalX, finalY] = [clientX, clientY];
+		const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e
 
-    if (computedBounds) {
-      // Client position is limited to this virtual boundary to prevent node going out of bounds
-      const virtualClientBounds: SvelteDragBoundsCoords = {
-        left: computedBounds.left + clientToNodeOffsetX,
-        top: computedBounds.top + clientToNodeOffsetY,
-        right: computedBounds.right + clientToNodeOffsetX - nodeRect.width,
-        bottom: computedBounds.bottom + clientToNodeOffsetY - nodeRect.height,
-      };
+		// Get final values for clamping
+		let [finalX, finalY] = [clientX, clientY]
 
-      finalX = Math.min(Math.max(finalX, virtualClientBounds.left), virtualClientBounds.right);
-      finalY = Math.min(Math.max(finalY, virtualClientBounds.top), virtualClientBounds.bottom);
-    }
+		if (computedBounds) {
+			// Client position is limited to this virtual boundary to prevent node going out of bounds
+			const virtualClientBounds: SvelteDragBoundsCoords = {
+				left: computedBounds.left + clientToNodeOffsetX,
+				top: computedBounds.top + clientToNodeOffsetY,
+				right: computedBounds.right + clientToNodeOffsetX - nodeRect.width,
+				bottom: computedBounds.bottom + clientToNodeOffsetY - nodeRect.height,
+			}
 
-    if (Array.isArray(grid)) {
-      let [xSnap, ySnap] = grid;
+			finalX = Math.min(Math.max(finalX, virtualClientBounds.left), virtualClientBounds.right)
+			finalY = Math.min(Math.max(finalY, virtualClientBounds.top), virtualClientBounds.bottom)
+		}
 
-      if (isNaN(+xSnap) || xSnap < 0)
-        throw new Error('1st argument of `grid` must be a valid positive number');
+		if (Array.isArray(grid)) {
+			let [xSnap, ySnap] = grid
 
-      if (isNaN(+ySnap) || ySnap < 0)
-        throw new Error('2nd argument of `grid` must be a valid positive number');
+			if (isNaN(+xSnap) || xSnap < 0)
+				throw new Error('1st argument of `grid` must be a valid positive number')
 
-      let [deltaX, deltaY] = [finalX - previousX, finalY - previousY];
-      [deltaX, deltaY] = snapToGrid([xSnap, ySnap], deltaX, deltaY);
+			if (isNaN(+ySnap) || ySnap < 0)
+				throw new Error('2nd argument of `grid` must be a valid positive number')
 
-      if (!deltaX && !deltaY) return;
+			let [deltaX, deltaY] = [finalX - previousX, finalY - previousY];
+			[deltaX, deltaY] = snapToGrid([xSnap, ySnap], deltaX, deltaY)
 
-      [finalX, finalY] = [previousX + deltaX, previousY + deltaY];
-    }
+			if (!deltaX && !deltaY) return;
 
-    if (canMoveInX) translateX = finalX - initialX;
-    if (canMoveInY) translateY = finalY - initialY;
+			[finalX, finalY] = [previousX + deltaX, previousY + deltaY]
+		}
 
-    [xOffset, yOffset] = [translateX, translateY];
+		if (canMoveInX) translateX = finalX - initialX
+		if (canMoveInY) translateY = finalY - initialY;
 
-    fireSvelteDragEvent(node, translateX, translateY);
+		[xOffset, yOffset] = [translateX, translateY]
 
-    Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
-  }
+		fireSvelteDragEvent(node, translateX, translateY)
 
-  return {
-    destroy: () => {
-      const unlisten = removeEventListener;
+		if (!disableTransform) {
+			Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration))
+		}
+	}
 
-      unlisten('touchstart', dragStart, false);
-      unlisten('touchend', dragEnd, false);
-      unlisten('touchmove', drag, false);
+	return {
+		destroy: () => {
+			const unlisten = removeEventListener
 
-      unlisten('mousedown', dragStart, false);
-      unlisten('mouseup', dragEnd, false);
-      unlisten('mousemove', drag, false);
-    },
-    update: (options: SvelteDragOptions) => {
-      // Update all the values that need to be changed
-      axis = options.axis || 'both';
-      disabled = options.disabled ?? false;
-      handle = options.handle;
-      bounds = options.bounds;
-      cancel = options.cancel;
-      applyUserSelectHack = options.applyUserSelectHack ?? true;
-      grid = options.grid;
-      gpuAcceleration = options.gpuAcceleration ?? true;
+			unlisten('touchstart', dragStart, false)
+			unlisten('touchend', dragEnd, false)
+			unlisten('touchmove', drag, false)
 
-      const dragged = node.classList.contains(defaultClassDragged);
+			unlisten('mousedown', dragStart, false)
+			unlisten('mouseup', dragEnd, false)
+			unlisten('mousemove', drag, false)
+		},
+		update: (options: SvelteDragOptions) => {
+			// Update all the values that need to be changed
+			axis = options.axis || 'both'
+			disabled = options.disabled ?? false
+			handle = options.handle
+			bounds = options.bounds
+			cancel = options.cancel
+			applyUserSelectHack = options.applyUserSelectHack ?? true
+			grid = options.grid
+			gpuAcceleration = options.gpuAcceleration ?? true
 
-      node.classList.remove(defaultClass, defaultClassDragged);
+			const dragged = node.classList.contains(defaultClassDragged)
 
-      defaultClass = options.defaultClass ?? DEFAULT_CLASS.MAIN;
-      defaultClassDragging = options.defaultClassDragging ?? DEFAULT_CLASS.DRAGGING;
-      defaultClassDragged = options.defaultClassDragged ?? DEFAULT_CLASS.DRAGGED;
+			node.classList.remove(defaultClass, defaultClassDragged)
 
-      node.classList.add(defaultClass);
+			defaultClass = options.defaultClass ?? DEFAULT_CLASS.MAIN
+			defaultClassDragging = options.defaultClassDragging ?? DEFAULT_CLASS.DRAGGING
+			defaultClassDragged = options.defaultClassDragged ?? DEFAULT_CLASS.DRAGGED
 
-      if (dragged) node.classList.add(defaultClassDragged);
-    },
-  };
-};
+			node.classList.add(defaultClass)
+
+			if (dragged) node.classList.add(defaultClassDragged)
+		},
+	}
+}
 
 function isTouchEvent(event: MouseEvent | TouchEvent): event is TouchEvent {
-  return Boolean((event as TouchEvent).touches && (event as TouchEvent).touches.length);
+	return Boolean((event as TouchEvent).touches && (event as TouchEvent).touches.length)
 }
 
 function isString(val: unknown): val is string {
-  return typeof val === 'string';
+	return typeof val === 'string'
 }
 
 const snapToGrid = memoize(
-  ([xSnap, ySnap]: [number, number], pendingX: number, pendingY: number): [number, number] => {
-    const x = Math.round(pendingX / xSnap) * xSnap;
-    const y = Math.round(pendingY / ySnap) * ySnap;
-    return [x, y];
-  }
-);
+	([xSnap, ySnap]: [number, number], pendingX: number, pendingY: number): [number, number] => {
+		const x = Math.round(pendingX / xSnap) * xSnap
+		const y = Math.round(pendingY / ySnap) * ySnap
+		return [x, y]
+	}
+)
 
 function fireSvelteDragStopEvent(node: HTMLElement) {
-  node.dispatchEvent(new CustomEvent('svelte-drag:end'));
+	node.dispatchEvent(new CustomEvent('svelte-drag:end'))
 }
 
 function fireSvelteDragStartEvent(node: HTMLElement) {
-  node.dispatchEvent(new CustomEvent('svelte-drag:start'));
+	node.dispatchEvent(new CustomEvent('svelte-drag:start'))
 }
 
 function fireSvelteDragEvent(node: HTMLElement, translateX: number, translateY: number) {
-  node.dispatchEvent(
-    new CustomEvent('svelte-drag', { detail: { offsetX: translateX, offsetY: translateY } })
-  );
+	node.dispatchEvent(
+		new CustomEvent('svelte-drag', { detail: { offsetX: translateX, offsetY: translateY } })
+	)
 }
 
 function setupListeners(
-  dragStart: (e: TouchEvent | MouseEvent) => void,
-  dragEnd: () => void,
-  drag: (e: TouchEvent | MouseEvent) => void
+	dragStart: (e: TouchEvent | MouseEvent) => void,
+	dragEnd: () => void,
+	drag: (e: TouchEvent | MouseEvent) => void
 ) {
-  const listen = addEventListener;
+	const listen = addEventListener
 
-  listen('touchstart', dragStart, false);
-  listen('touchend', dragEnd, false);
-  listen('touchmove', drag, false);
+	listen('touchstart', dragStart, false)
+	listen('touchend', dragEnd, false)
+	listen('touchmove', drag, false)
 
-  listen('mousedown', dragStart, false);
-  listen('mouseup', dragEnd, false);
-  listen('mousemove', drag, false);
+	listen('mousedown', dragStart, false)
+	listen('mouseup', dragEnd, false)
+	listen('mousemove', drag, false)
 }
 
 function getDragEl(handle: string | undefined, node: HTMLElement) {
-  if (!handle) return node;
+	if (!handle) return node
 
-  // Valid!! Let's check if this selector exists or not
-  const handleEl = node.querySelector<HTMLElement>(handle);
-  if (handleEl === null)
-    throw new Error(
-      'Selector passed for `handle` option should be child of the element on which the action is applied'
-    );
+	// Valid!! Let's check if this selector exists or not
+	const handleEl = node.querySelector<HTMLElement>(handle)
+	if (handleEl === null)
+		throw new Error(
+			'Selector passed for `handle` option should be child of the element on which the action is applied'
+		)
 
-  return handleEl!;
+	return handleEl!
 }
 
 function getCancelElement(cancel: string | undefined, node: HTMLElement) {
-  if (!cancel) return;
+	if (!cancel) return
 
-  const cancelEl = node.querySelector<HTMLElement>(cancel);
+	const cancelEl = node.querySelector<HTMLElement>(cancel)
 
-  if (cancelEl === null)
-    throw new Error(
-      'Selector passed for `cancel` option should be child of the element on which the action is applied'
-    );
+	if (cancelEl === null)
+		throw new Error(
+			'Selector passed for `cancel` option should be child of the element on which the action is applied'
+		)
 
-  return cancelEl;
+	return cancelEl
 }
 
 const computeBoundRect = memoize(
-  (bounds: string | Partial<SvelteDragBoundsCoords>, rootNode: HTMLElement) => {
-    if (typeof bounds === 'object') {
-      // we have the left right etc
-      const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
+	(bounds: string | Partial<SvelteDragBoundsCoords>, rootNode: HTMLElement) => {
+		if (typeof bounds === 'object') {
+			// we have the left right etc
+			const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight]
 
-      const { top = 0, left = 0, right = 0, bottom = 0 } = bounds;
+			const { top = 0, left = 0, right = 0, bottom = 0 } = bounds
 
-      const computedRight = windowWidth - right;
-      const computedBottom = windowHeight - bottom;
+			const computedRight = windowWidth - right
+			const computedBottom = windowHeight - bottom
 
-      return { top, right: computedRight, bottom: computedBottom, left };
-    }
+			return { top, right: computedRight, bottom: computedBottom, left }
+		}
 
-    // It's a string
-    if (bounds === 'parent') return (rootNode.parentNode as HTMLElement).getBoundingClientRect();
+		// It's a string
+		if (bounds === 'parent') return (rootNode.parentNode as HTMLElement).getBoundingClientRect()
 
-    const node = document.querySelector<HTMLElement>(bounds);
+		const node = document.querySelector<HTMLElement>(bounds)
 
-    if (node === null)
-      throw new Error("The selector provided for bound doesn't exists in the document.");
+		if (node === null)
+			throw new Error("The selector provided for bound doesn't exists in the document.")
 
-    const computedBounds = node!.getBoundingClientRect();
+		const computedBounds = node!.getBoundingClientRect()
 
-    return computedBounds;
-  }
-);
+		return computedBounds
+	}
+)
 
 function setTranslate(xPos: number, yPos: number, el: HTMLElement, gpuAcceleration: boolean) {
-  el.style.transform = gpuAcceleration
-    ? `translate3d(${+xPos}px, ${+yPos}px, 0)`
-    : `translate(${+xPos}px, ${+yPos}px)`;
+	el.style.transform = gpuAcceleration
+		? `translate3d(${+xPos}px, ${+yPos}px, 0)`
+		: `translate(${+xPos}px, ${+yPos}px)`
 }
