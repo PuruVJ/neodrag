@@ -1,4 +1,4 @@
-import memoize from './memoize'
+import memoize from './memoize';
 
 export type SvelteDragBoundsCoords = {
   /** Number of pixels from left of the document */
@@ -14,9 +14,9 @@ export type SvelteDragBoundsCoords = {
   bottom: number
 }
 
-export type SvelteDragAxis = 'both' | 'x' | 'y' | 'none'
+export type SvelteDragAxis = 'both' | 'x' | 'y' | 'none';
 
-export type SvelteDragBounds = 'parent' | Partial<SvelteDragBoundsCoords> | string
+export type SvelteDragBounds = 'parent' | Partial<SvelteDragBoundsCoords> | string;
 
 export type SvelteDragOptions = {
   /**
@@ -525,41 +525,41 @@ function getCancelElement(cancel: string | undefined, node: HTMLElement) {
   if (cancelEl === null)
     throw new Error(
       'Selector passed for `cancel` option should be child of the element on which the action is applied'
-    )
+    );
 
-  return cancelEl
+  return cancelEl;
 }
 
 const computeBoundRect = memoize(
   (bounds: string | Partial<SvelteDragBoundsCoords>, rootNode: HTMLElement) => {
     if (typeof bounds === 'object') {
       // we have the left right etc
-      const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight]
+      const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
 
-      const { top = 0, left = 0, right = 0, bottom = 0 } = bounds
+      const { top = 0, left = 0, right = 0, bottom = 0 } = bounds;
 
-      const computedRight = windowWidth - right
-      const computedBottom = windowHeight - bottom
+      const computedRight = windowWidth - right;
+      const computedBottom = windowHeight - bottom;
 
-      return { top, right: computedRight, bottom: computedBottom, left }
+      return { top, right: computedRight, bottom: computedBottom, left };
     }
 
     // It's a string
-    if (bounds === 'parent') return (rootNode.parentNode as HTMLElement).getBoundingClientRect()
+    if (bounds === 'parent') return (rootNode.parentNode as HTMLElement).getBoundingClientRect();
 
-    const node = document.querySelector<HTMLElement>(bounds)
+    const node = document.querySelector<HTMLElement>(bounds);
 
     if (node === null)
-      throw new Error("The selector provided for bound doesn't exists in the document.")
+      throw new Error("The selector provided for bound doesn't exists in the document.");
 
-    const computedBounds = node!.getBoundingClientRect()
+    const computedBounds = node!.getBoundingClientRect();
 
-    return computedBounds
+    return computedBounds;
   }
 )
 
 function setTranslate(xPos: number, yPos: number, el: HTMLElement, gpuAcceleration: boolean) {
   el.style.transform = gpuAcceleration
     ? `translate3d(${+xPos}px, ${+yPos}px, 0)`
-    : `translate(${+xPos}px, ${+yPos}px)`
+    : `translate(${+xPos}px, ${+yPos}px)`;
 }
