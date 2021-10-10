@@ -19,7 +19,7 @@
     defaultPosition: { x: 0, y: 0 },
     disabled: false,
     gpuAcceleration: true,
-    grid: [100, 100],
+    // grid: [100, 100],
     // bounds: boundToBody ? 'body' : undefined,
     // bounds: { top: 100, left: 100, right: 100, bottom: 40 },
     // bounds: 'parent',
@@ -128,7 +128,12 @@
 
 <br />
 
-<div use:draggable={options} on:svelte-drag={(e) => console.log(e)} class="box">
+<div
+  use:draggable={options}
+  on:svelte-drag:start={console.log}
+  on:svelte-drag:end={console.log}
+  class="box"
+>
   hello
 
   <div class="handle">Le handel</div>

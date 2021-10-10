@@ -292,11 +292,11 @@ Example:
 
 Event signatures:
 
-`on:svelte-drag:start`: `(event: CustomEvent<null>) => void`. No internal state provided to `event.detail`
+`on:svelte-drag:start`: `(e: CustomEvent<{offsetX: number; offsetY: number }>) => void`. Provides the initial offset when dragging starts, on the `e.detail` object.
 
-`on:svelte-drag:`: `(event: CustomEvent<{offsetX: number; offsetY: number }>) => void`. Provides how far the element has been dragged from it's original position in `x` and `y` coordinates on the `event.detail` object
+`on:svelte-drag:`: `(e: CustomEvent<{offsetX: number; offsetY: number }>) => void`. Provides how far the element has been dragged from it's original position in `x` and `y` coordinates on the `event.detail` object
 
-`on:svelte-drag:end`: `(event: CustomEvent<null>) => void`. No internal state provided to `event.detail`.
+`on:svelte-drag:end`: `(e: CustomEvent<{offsetX: number; offsetY: number }>) => void`. No internal state provided to `event.detail`. Provides the final offset when dragging ends, on the `e.detail` object.
 
 If you're a TypeScript user, read on below 👇
 
@@ -307,8 +307,8 @@ The events above are custom events, and hence, not recognized by the TypeScript 
 ```ts
 export declare namespace svelte.JSX {
   interface HTMLAttributes<T> {
-    'onsvelte-drag:start'?: (e: CustomEvent<null>) => void;
-    'onsvelte-drag:end'?: (e: CustomEvent<null>) => void;
+    'onsvelte-drag:start'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
+    'onsvelte-drag:end'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
     'onsvelte-drag'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
   }
 }
@@ -353,7 +353,7 @@ export type SvelteDragBoundsCoords = {
 
 # Why an action and not a component?
 
-In case you're wondering why this library is an action, and not a component, the answer is simple: Actions usage is much much more simple and elegant than component for this case could ever be.
+In case you're wondering why this library is an action, and not a component, the answer is simple: Actions usage is much much simpler and elegant than a component for this case could ever be.
 
 If it were a component, its syntax would be like this 👇
 
@@ -379,7 +379,7 @@ This is ok, but what if there are more than 2 elements at the top.
 </Draggable>
 ```
 
-This poses a problem: How would I decide which of these to make a draggable? OfC, I could wrap the `<slot />` in a `<div>`, apply event listeners on it, set it to `display: contents`, but it would add an extra DOM element, and sometimes, that alone can make a huge difference!!
+This poses a problem: How would I decide which of these to make a draggable? Ofc, I could wrap the `<slot />` in a `<div>`, apply event listeners on it, set it to `display: contents`, but it would add an extra DOM element, and sometimes, that alone can make a huge difference!
 
 So to not add a wrapper myself, I would need to write here in docs to pass only one root element, and give an error when I detect multiple. or I'd need to enforce passing the ref of the element into the component using `bind:this`, like this 👇
 
@@ -395,7 +395,7 @@ let ref;
 </Draggable>
 ```
 
-You'd have to bind the element ref which you wanna make draggable and pass it to the component.
+You'd have to bind the element ref which you want to make a draggable, and pass it to the component.
 
 This is doable, but it adds an unnecessary amount of API layer, and the code isn't idiomatic and elegant, not to mention how much extra code I would have to add as the library author.
 

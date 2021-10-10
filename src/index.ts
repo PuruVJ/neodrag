@@ -269,6 +269,40 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
   let dragEl: HTMLElement | undefined;
   let cancelEl: HTMLElement | undefined;
 
+  function fireSvelteDragStopEvent(node: HTMLElement) {
+    node.dispatchEvent(
+      new CustomEvent('svelte-drag:end', { detail: { offsetX: translateX, offsetY: translateY } })
+    );
+  }
+
+  function fireSvelteDragStartEvent(node: HTMLElement) {
+    node.dispatchEvent(
+      new CustomEvent('svelte-drag:start', { detail: { offsetX: translateX, offsetY: translateY } })
+    );
+  }
+
+  function fireSvelteDragEvent(node: HTMLElement, translateX: number, translateY: number) {
+    node.dispatchEvent(
+      new CustomEvent('svelte-drag', { detail: { offsetX: translateX, offsetY: translateY } })
+    );
+  }
+
+  function setupListeners(
+    dragStart: (e: TouchEvent | MouseEvent) => void,
+    dragEnd: () => void,
+    drag: (e: TouchEvent | MouseEvent) => void
+  ) {
+    const listen = addEventListener;
+
+    listen('touchstart', dragStart, false);
+    listen('touchend', dragEnd, false);
+    listen('touchmove', drag, false);
+
+    listen('mousedown', dragStart, false);
+    listen('mouseup', dragEnd, false);
+    listen('mousemove', drag, false);
+  }
+
   setupListeners(dragStart, dragEnd, drag);
 
   // On mobile, touch can become extremely janky without it
@@ -452,36 +486,6 @@ const snapToGrid = memoize(
     return [x, y];
   }
 );
-
-function fireSvelteDragStopEvent(node: HTMLElement) {
-  node.dispatchEvent(new CustomEvent('svelte-drag:end'));
-}
-
-function fireSvelteDragStartEvent(node: HTMLElement) {
-  node.dispatchEvent(new CustomEvent('svelte-drag:start'));
-}
-
-function fireSvelteDragEvent(node: HTMLElement, translateX: number, translateY: number) {
-  node.dispatchEvent(
-    new CustomEvent('svelte-drag', { detail: { offsetX: translateX, offsetY: translateY } })
-  );
-}
-
-function setupListeners(
-  dragStart: (e: TouchEvent | MouseEvent) => void,
-  dragEnd: () => void,
-  drag: (e: TouchEvent | MouseEvent) => void
-) {
-  const listen = addEventListener;
-
-  listen('touchstart', dragStart, false);
-  listen('touchend', dragEnd, false);
-  listen('touchmove', drag, false);
-
-  listen('mousedown', dragStart, false);
-  listen('mouseup', dragEnd, false);
-  listen('mousemove', drag, false);
-}
 
 function getDragEl(handle: string | undefined, node: HTMLElement) {
   if (!handle) return node;
