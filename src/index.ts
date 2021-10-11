@@ -354,6 +354,7 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
   function dragEnd(e: MouseEvent | TouchEvent) {
     if (disabled) return;
 
+    // required, or the event will be fired for every single draggable instance present
     if (!node.contains(e.target as HTMLElement)) return;
 
     // Apply class defaultClassDragged
