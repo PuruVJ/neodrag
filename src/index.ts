@@ -287,23 +287,15 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
     );
   }
 
-  function setupListeners(
-    dragStart: (e: TouchEvent | MouseEvent) => void,
-    dragEnd: () => void,
-    drag: (e: TouchEvent | MouseEvent) => void
-  ) {
-    const listen = addEventListener;
+  const listen = addEventListener;
 
-    listen('touchstart', dragStart, false);
-    listen('touchend', dragEnd, false);
-    listen('touchmove', drag, false);
+  listen('touchstart', dragStart, false);
+  listen('touchend', dragEnd, false);
+  listen('touchmove', drag, false);
 
-    listen('mousedown', dragStart, false);
-    listen('mouseup', dragEnd, false);
-    listen('mousemove', drag, false);
-  }
-
-  setupListeners(dragStart, dragEnd, drag);
+  listen('mousedown', dragStart, false);
+  listen('mouseup', dragEnd, false);
+  listen('mousemove', drag, false);
 
   // On mobile, touch can become extremely janky without it
   node.style.touchAction = 'none';
@@ -359,8 +351,11 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
     }
   }
 
-  function dragEnd() {
+  function dragEnd(e: MouseEvent | TouchEvent) {
     if (disabled) return;
+
+    // required, or the event will be fired for every single draggable instance present
+    if (!node.contains(e.target as HTMLElement)) return;
 
     // Apply class defaultClassDragged
     node.classList.remove(defaultClassDragging);

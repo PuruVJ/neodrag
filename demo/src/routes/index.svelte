@@ -143,6 +143,36 @@
   <div class="cancel-2">Cancel 2</div>
 </div>
 
+<div
+  use:draggable={options}
+  on:svelte-drag:start={console.log}
+  on:svelte-drag:end={console.log}
+  class="box"
+>
+  hello
+
+  <div class="handle">Le handel</div>
+  <div class="cancel">Cancel</div>
+
+  <div class="handle-2">Le handel 2</div>
+  <div class="cancel-2">Cancel 2</div>
+</div>
+
+<div
+  use:draggable={options}
+  on:svelte-drag:start={console.log}
+  on:svelte-drag:end={console.log}
+  class="box"
+>
+  hello
+
+  <div class="handle">Le handel</div>
+  <div class="cancel">Cancel</div>
+
+  <div class="handle-2">Le handel 2</div>
+  <div class="cancel-2">Cancel 2</div>
+</div>
+
 <style>
   :global(body) {
     background-color: rgb(26, 32, 39);
