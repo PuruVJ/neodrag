@@ -50,9 +50,9 @@ Defining options elsewhere with typescript
 ```svelte
 <script lang="ts">
   import { draggable } from 'svelte-drag';
-  import type { SvelteDragOptions } from 'svelte-drag';
+  import type { DragOptions } from 'svelte-drag';
 
-  let options: SvelteDragOptions = {
+  let options: DragOptions = {
     axis: 'y',
     bounds: 'parent',
   };
@@ -319,24 +319,19 @@ export declare namespace svelte.JSX {
 This package exports these types you can use:
 
 ```ts
-import type {
-  SvelteDragAxis,
-  SvelteDragBounds,
-  SvelteDragBoundsCoords,
-  SvelteDragOptions,
-} from 'svelte-drag';
+import type { DragAxis, DragBounds, DragBoundsCoords, DragOptions } from 'svelte-drag';
 ```
 
-`SvelteDragOptions` is the documented list of all options provided by the component.
+`DragOptions` is the documented list of all options provided by the component.
 
-`SvelteDragAxis` is the type of `axis` option, and is equal to `'both' | 'x' | 'y' | 'none'`.
+`DragAxis` is the type of `axis` option, and is equal to `'both' | 'x' | 'y' | 'none'`.
 
-`SvelteDragBounds` is `'parent' | string | Partial<SvelteDragBoundsCoords>`, the complete type of `bounds` option.
+`DragBounds` is `'parent' | string | Partial<DragBoundsCoords>`, the complete type of `bounds` option.
 
-`SvelteDragBoundsCoords` is when you're specifying the `bounds` field using an object, this is the type needed for that.
+`SDragBoundsCoords` is when you're specifying the `bounds` field using an object, this is the type needed for that.
 
 ```ts
-export type SvelteDragBoundsCoords = {
+export type DragBoundsCoords = {
   /** Number of pixels from left of the window */
   left: number;
 
