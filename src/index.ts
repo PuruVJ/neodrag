@@ -1,6 +1,6 @@
 import memoize from './memoize';
 
-export type SvelteDragBoundsCoords = {
+export type DragBoundsCoords = {
   /** Number of pixels from left of the document */
   left: number;
 
@@ -14,11 +14,11 @@ export type SvelteDragBoundsCoords = {
   bottom: number;
 };
 
-export type SvelteDragAxis = 'both' | 'x' | 'y' | 'none';
+export type DragAxis = 'both' | 'x' | 'y' | 'none';
 
-export type SvelteDragBounds = 'parent' | Partial<SvelteDragBoundsCoords> | string;
+export type DragBounds = 'parent' | Partial<DragBoundsCoords> | string;
 
-export type SvelteDragOptions = {
+export type DragOptions = {
   /**
    * Optionally limit the drag area
    *
@@ -57,7 +57,7 @@ export type SvelteDragOptions = {
    * </div>
    * ```
    */
-  bounds?: SvelteDragBounds;
+  bounds?: DragBounds;
 
   /**
    * Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
@@ -77,7 +77,7 @@ export type SvelteDragOptions = {
    * </div>
    * ```
    */
-  axis?: SvelteDragAxis;
+  axis?: DragAxis;
 
   /**
    * If true, uses `translate3d` instead of `translate` to move the element around, and the hardware acceleration kicks in.
@@ -225,7 +225,7 @@ const DEFAULT_CLASS = {
   DRAGGED: 'svelte-draggable-dragged',
 };
 
-export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) => {
+export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
   let {
     bounds,
     axis = 'both',
@@ -263,7 +263,7 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
 
   let bodyOriginalUserSelectVal = '';
 
-  let computedBounds: SvelteDragBoundsCoords;
+  let computedBounds: DragBoundsCoords;
   let nodeRect: DOMRect;
 
   let dragEl: HTMLElement | undefined;
@@ -390,7 +390,7 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
 
     if (computedBounds) {
       // Client position is limited to this virtual boundary to prevent node going out of bounds
-      const virtualClientBounds: SvelteDragBoundsCoords = {
+      const virtualClientBounds: DragBoundsCoords = {
         left: computedBounds.left + clientToNodeOffsetX,
         top: computedBounds.top + clientToNodeOffsetY,
         right: computedBounds.right + clientToNodeOffsetX - nodeRect.width,
@@ -440,7 +440,7 @@ export const draggable = (node: HTMLElement, options: SvelteDragOptions = {}) =>
       unlisten('mouseup', dragEnd, false);
       unlisten('mousemove', drag, false);
     },
-    update: (options: SvelteDragOptions) => {
+    update: (options: DragOptions) => {
       // Update all the values that need to be changed
       axis = options.axis || 'both';
       disabled = options.disabled ?? false;
@@ -509,7 +509,7 @@ function getCancelElement(cancel: string | undefined, node: HTMLElement) {
 }
 
 const computeBoundRect = memoize(
-  (bounds: string | Partial<SvelteDragBoundsCoords>, rootNode: HTMLElement) => {
+  (bounds: string | Partial<DragBoundsCoords>, rootNode: HTMLElement) => {
     if (typeof bounds === 'object') {
       // we have the left right etc
       const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];

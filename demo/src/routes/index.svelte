@@ -1,13 +1,13 @@
 <script lang="ts">
   import { draggable } from '../../../dist';
-  import type { SvelteDragOptions } from '../../../dist';
+  import type { DragOptions } from '../../../dist';
 
   // import { draggable } from 'svelte-drag';
   // import type { Options } from 'svelte-drag';
 
   let boundToBody = false;
 
-  let options: SvelteDragOptions;
+  let options: DragOptions;
   $: options = {
     applyUserSelectHack: true,
     axis: 'both',
@@ -23,7 +23,7 @@
     // bounds: boundToBody ? 'body' : undefined,
     // bounds: { top: 100, left: 100, right: 100, bottom: 40 },
     // bounds: 'parent',
-  } as SvelteDragOptions;
+  } as DragOptions;
 
   // $: console.log(options);
 </script>
