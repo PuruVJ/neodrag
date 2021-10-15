@@ -1,4 +1,6 @@
 <script>
+  import { draggable } from '../src';
+
   export let name;
 
   let buttonText = 'Button';
@@ -10,4 +12,4 @@
 
 <h1>Hello {name}!</h1>
 
-<button on:click={handleClick}>{buttonText}</button>
+<button use:draggable on:click={handleClick}>{buttonText}</button>

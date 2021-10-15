@@ -44,6 +44,7 @@
   },
   "homepage": "https://github.com/PuruVJ/svelte-drag#readme",
   "devDependencies": {
+    "@babel/preset-env": "^7.15.8",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/svelte": "^3.0.3",
     "babel-jest": "^27.2.5",
