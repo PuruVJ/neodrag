@@ -322,7 +322,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
     if (cancelEl?.contains(dragEl))
       throw new Error(
-        "Element being dragged can't be a child of the element on which action is applied"
+        "Element being dragged can't be a child of the element on which `cancel` is applied"
       );
 
     if (dragEl.contains(e.target as HTMLElement) && !cancelEl?.contains(e.target as HTMLElement))

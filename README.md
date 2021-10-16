@@ -328,7 +328,7 @@ import type { DragAxis, DragBounds, DragBoundsCoords, DragOptions } from 'svelte
 
 `DragBounds` is `'parent' | string | Partial<DragBoundsCoords>`, the complete type of `bounds` option.
 
-`SDragBoundsCoords` is when you're specifying the `bounds` field using an object, this is the type needed for that.
+`DragBoundsCoords` is when you're specifying the `bounds` field using an object, this is the type needed for that.
 
 ```ts
 export type DragBoundsCoords = {
