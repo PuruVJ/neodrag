@@ -25,7 +25,7 @@ describe('BasicDraggable', () => {
 
     expect(element).toBeInTheDocument();
 
-    await drag(element, 50, 50);
+    await drag(element, 0, 0, 50, 50);
 
     expect(element).toHaveClass('svelte-draggable');
     expect(element).toHaveClass('svelte-draggable-dragged');
