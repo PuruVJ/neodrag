@@ -71,11 +71,11 @@ describe('BasicDraggable', () => {
 
     expect(element).toBeInTheDocument();
 
-    await drag(element, 0, 0, 200, 200);
+    await drag(element, 0, 0, -100, -100);
 
     expect(element).toHaveClass('svelte-draggable');
     expect(element).toHaveClass('svelte-draggable-dragged');
-    expect(element).toHaveStyle('transform: translate3d(90px, 90px, 0)');
+    expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
   });
 
   it('should be dragged by a touch event', async () => {
