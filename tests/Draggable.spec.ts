@@ -339,4 +339,44 @@ describe('Draggable', () => {
       expect(element).toHaveStyle('transform: translate3d(45px, 60px, 0)');
     });
   });
+
+  describe('gpuAcceleration', () => {
+    it('should use translate3d when enabled', () => {
+      const { getByText } = render(Draggable, { gpuAcceleration: true });
+
+      const element = getByText('Drag me!');
+
+      expect(element).toBeInTheDocument();
+      expect(element).not.toHaveClass('svelte-draggable');
+      expect(element).not.toHaveClass('svelte-draggable-dragged');
+      expect(element).not.toHaveStyle('transform: translate(0px, 0px)');
+      expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
+    });
+
+    it('should use translate when disabled', () => {
+      const { getByText } = render(Draggable, { gpuAcceleration: false });
+
+      const element = getByText('Drag me!');
+
+      expect(element).toBeInTheDocument();
+      expect(element).not.toHaveClass('svelte-draggable');
+      expect(element).not.toHaveClass('svelte-draggable-dragged');
+      expect(element).toHaveStyle('transform: translate(0px, 0px)');
+      expect(element).not.toHaveStyle('transform: translate3d(0px, 0px, 0)');
+    });
+
+    it('should drag when disabled', async () => {
+      const { getByText } = render(Draggable, { gpuAcceleration: false });
+
+      const element = getByText('Drag me!');
+
+      expect(element).toBeInTheDocument();
+
+      await drag(element, 0, 0, 50, 50);
+
+      expect(element).toHaveClass('svelte-draggable');
+      expect(element).toHaveClass('svelte-draggable-dragged');
+      expect(element).toHaveStyle('transform: translate(50px, 50px)');
+    });
+  });
 });
