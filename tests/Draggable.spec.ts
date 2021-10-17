@@ -47,6 +47,36 @@ describe('Draggable', () => {
     });
   });
 
+  describe('disabled', () => {
+    it('should not drag when disabled', async () => {
+      const { getByText } = render(Draggable, { disabled: true });
+
+      const element = getByText('Drag me!');
+
+      expect(element).toBeInTheDocument();
+
+      await drag(element, 0, 0, 50, 50);
+
+      expect(element).not.toHaveClass('svelte-draggable');
+      expect(element).not.toHaveClass('svelte-draggable-dragged');
+      expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
+    });
+
+    it('should not drag by touch when disabled', async () => {
+      const { getByText } = render(Draggable, { disabled: true });
+
+      const element = getByText('Drag me!');
+
+      expect(element).toBeInTheDocument();
+
+      await touchDrag(element, 0, 0, 50, 50);
+
+      expect(element).not.toHaveClass('svelte-draggable');
+      expect(element).not.toHaveClass('svelte-draggable-dragged');
+      expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
+    });
+  });
+
   describe('with coordinate bounds', () => {
     beforeEach(() => {
       Element.prototype.getBoundingClientRect = jest.fn(() => {
