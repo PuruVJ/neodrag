@@ -298,4 +298,45 @@ describe('Draggable', () => {
       expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
     });
   });
+
+  describe('grid', () => {
+    it('renders a basic div', () => {
+      const { getByText } = render(Draggable, { grid: [20, 20] });
+
+      const element = getByText('Drag me!');
+
+      expect(element).toBeInTheDocument();
+      expect(element).not.toHaveClass('svelte-draggable');
+      expect(element).not.toHaveClass('svelte-draggable-dragged');
+      expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
+    });
+
+    it('should restrict movement to the grid', async () => {
+      const { getByText } = render(Draggable, { grid: [20, 20] });
+
+      const element = getByText('Drag me!');
+
+      expect(element).toBeInTheDocument();
+
+      await drag(element, 0, 0, 51, 51);
+
+      expect(element).toHaveClass('svelte-draggable');
+      expect(element).toHaveClass('svelte-draggable-dragged');
+      expect(element).toHaveStyle('transform: translate3d(60px, 60px, 0)');
+    });
+
+    it('should restrict movement to an uneven grid', async () => {
+      const { getByText } = render(Draggable, { grid: [15, 20] });
+
+      const element = getByText('Drag me!');
+
+      expect(element).toBeInTheDocument();
+
+      await drag(element, 0, 0, 51, 51);
+
+      expect(element).toHaveClass('svelte-draggable');
+      expect(element).toHaveClass('svelte-draggable-dragged');
+      expect(element).toHaveStyle('transform: translate3d(45px, 60px, 0)');
+    });
+  });
 });
