@@ -509,33 +509,31 @@ function getCancelElement(cancel: string | undefined, node: HTMLElement) {
   return cancelEl;
 }
 
-const computeBoundRect = memoize(
-  (bounds: string | Partial<DragBoundsCoords>, rootNode: HTMLElement) => {
-    if (typeof bounds === 'object') {
-      // we have the left right etc
-      const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
+function computeBoundRect(bounds: string | Partial<DragBoundsCoords>, rootNode: HTMLElement) {
+  if (typeof bounds === 'object') {
+    // we have the left right etc
+    const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
 
-      const { top = 0, left = 0, right = 0, bottom = 0 } = bounds;
+    const { top = 0, left = 0, right = 0, bottom = 0 } = bounds;
 
-      const computedRight = windowWidth - right;
-      const computedBottom = windowHeight - bottom;
+    const computedRight = windowWidth - right;
+    const computedBottom = windowHeight - bottom;
 
-      return { top, right: computedRight, bottom: computedBottom, left };
-    }
-
-    // It's a string
-    if (bounds === 'parent') return (rootNode.parentNode as HTMLElement).getBoundingClientRect();
-
-    const node = document.querySelector<HTMLElement>(bounds);
-
-    if (node === null)
-      throw new Error("The selector provided for bound doesn't exists in the document.");
-
-    const computedBounds = node!.getBoundingClientRect();
-
-    return computedBounds;
+    return { top, right: computedRight, bottom: computedBottom, left };
   }
-);
+
+  // It's a string
+  if (bounds === 'parent') return (rootNode.parentNode as HTMLElement).getBoundingClientRect();
+
+  const node = document.querySelector<HTMLElement>(bounds);
+
+  if (node === null)
+    throw new Error("The selector provided for bound doesn't exists in the document.");
+
+  const computedBounds = node!.getBoundingClientRect();
+
+  return computedBounds;
+}
 
 function setTranslate(xPos: number, yPos: number, el: HTMLElement, gpuAcceleration: boolean) {
   el.style.transform = gpuAcceleration
