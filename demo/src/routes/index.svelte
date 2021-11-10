@@ -26,6 +26,9 @@
   } as DragOptions;
 
   // $: console.log(options);
+
+  let progressY = 0;
+  let progressX = 0;
 </script>
 
 <h1>Welcome to SvelteKit</h1>
@@ -128,7 +131,7 @@
 
 <br />
 
-<div use:draggable={options} on:svelte-drag={(e) => console.log(e.detail)} class="box">
+<div use:draggable={options} class="box">
   hello
 
   <div class="handle">Le handel</div>
@@ -138,8 +141,15 @@
   <div class="cancel-2">Cancel 2</div>
 </div>
 
-<div use:draggable={options} on:svelte-drag:end={(e) => console.log(e)} class="box">
-  hello
+<div
+  use:draggable={options}
+  on:svelte-drag={(e) => {
+    progressX = e.detail.offsetX;
+    progressY = e.detail.offsetY;
+  }}
+  class="box"
+>
+  2nd one
 
   <div class="handle">Le handel</div>
   <div class="cancel">Cancel</div>
@@ -148,7 +158,16 @@
   <div class="cancel-2">Cancel 2</div>
 </div>
 
-<div use:draggable={options} on:svelte-drag:end={(e) => console.log(e)} class="box">
+<br /><br /><br /><br /><br /><br />
+
+<input type="number" bind:value={progressY} />
+<input type="number" bind:value={progressX} />
+
+<div
+  use:draggable={{ controlledPosition: { y: progressY, x: progressX } }}
+  on:svelte-drag:end={(e) => console.log(e)}
+  class="box"
+>
   hello
 
   <div class="handle">Le handel</div>

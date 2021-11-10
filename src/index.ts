@@ -344,6 +344,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
       bodyOriginalUserSelectVal = document.body.style.userSelect;
       document.body.style.userSelect = 'none';
     }
+
     // Dispatch custom event
     fireSvelteDragStartEvent(node);
 
@@ -379,8 +380,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
   }
 
   function drag(e: TouchEvent | MouseEvent) {
-    if (disabled) return;
-
     if (!active) return;
 
     // Apply class defaultClassDragging
@@ -469,6 +468,13 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
       node.classList.add(defaultClass);
 
       if (dragged) node.classList.add(defaultClassDragged);
+
+      if (isControlled) {
+        xOffset = translateX = options.controlledPosition?.x || translateX;
+        yOffset = translateY = options.controlledPosition?.y || translateY;
+
+        Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
+      }
     },
   };
 };
