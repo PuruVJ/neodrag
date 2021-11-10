@@ -470,8 +470,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
       if (dragged) node.classList.add(defaultClassDragged);
 
       if (isControlled) {
-        xOffset = translateX = options.controlledPosition?.x || translateX;
-        yOffset = translateY = options.controlledPosition?.y || translateY;
+        xOffset = translateX = options.controlledPosition?.x ?? translateX;
+        yOffset = translateY = options.controlledPosition?.y ?? translateY;
 
         Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
       }
