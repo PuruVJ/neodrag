@@ -1,6 +1,6 @@
 {
   "name": "svelte-drag",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Svelte port of react-draggable",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
