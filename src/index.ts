@@ -355,9 +355,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
     if (disabled) return;
     if (!active) return;
 
-    // required, or the event will be fired for every single draggable instance present
-    if (!node.contains(e.target as HTMLElement)) return;
-
     // Apply class defaultClassDragged
     node.classList.remove(defaultClassDragging);
     node.classList.add(defaultClassDragged);
