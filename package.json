@@ -18,10 +18,10 @@
   },
   "scripts": {
     "test": "jest test",
-    "test:watch": "npm run test -- --watch",
+    "test:watch": "pnpm run test -- --watch",
     "watch": "tsup --watch",
     "prepublishOnly": "tsup",
-    "pub": "npm publish"
+    "pub": "pnpm publish"
   },
   "repository": {
     "type": "git",
