@@ -148,6 +148,11 @@ export type DragOptions = {
   grid?: [number, number];
 
   /**
+   * Controlled behavior
+   */
+  controlledPosition?: { x: number; y: number };
+
+  /**
    * CSS Selector of an element inside the parent node(on which `use:draggable` is applied).
    *
    * If it is provided, Trying to drag inside the `cancel` selector will prevent dragging.
@@ -235,6 +240,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
     grid,
 
+    controlledPosition,
+
     cancel,
     handle,
 
@@ -268,6 +275,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
   let dragEl: HTMLElement | undefined;
   let cancelEl: HTMLElement | undefined;
+
+  let isControlled = !!controlledPosition;
 
   function fireSvelteDragStopEvent(node: HTMLElement) {
     node.dispatchEvent(
@@ -354,9 +363,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
   function dragEnd(e: MouseEvent | TouchEvent) {
     if (disabled) return;
     if (!active) return;
-
-    // required, or the event will be fired for every single draggable instance present
-    if (!node.contains(e.target as HTMLElement)) return;
 
     // Apply class defaultClassDragged
     node.classList.remove(defaultClassDragging);

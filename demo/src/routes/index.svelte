@@ -128,12 +128,7 @@
 
 <br />
 
-<div
-  use:draggable={options}
-  on:svelte-drag:start={console.log}
-  on:svelte-drag:end={console.log}
-  class="box"
->
+<div use:draggable={options} on:svelte-drag={(e) => console.log(e.detail)} class="box">
   hello
 
   <div class="handle">Le handel</div>
@@ -143,12 +138,7 @@
   <div class="cancel-2">Cancel 2</div>
 </div>
 
-<div
-  use:draggable={options}
-  on:svelte-drag:start={console.log}
-  on:svelte-drag:end={console.log}
-  class="box"
->
+<div use:draggable={options} on:svelte-drag:end={(e) => console.log(e)} class="box">
   hello
 
   <div class="handle">Le handel</div>
@@ -158,12 +148,7 @@
   <div class="cancel-2">Cancel 2</div>
 </div>
 
-<div
-  use:draggable={options}
-  on:svelte-drag:start={console.log}
-  on:svelte-drag:end={console.log}
-  class="box"
->
+<div use:draggable={options} on:svelte-drag:end={(e) => console.log(e)} class="box">
   hello
 
   <div class="handle">Le handel</div>
