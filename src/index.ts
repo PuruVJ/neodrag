@@ -148,6 +148,31 @@ export type DragOptions = {
   grid?: [number, number];
 
   /**
+   * Control the position manually with your own state
+   *
+   * By default, the element will be draggable by mouse/finger, and all options will work as default while dragging.
+   *
+   * But changing the `position` option will also move the draggable around. These parameters are reactive,
+   * so using Svelte's reactive variables as values for position will work like a charm.
+   *
+   *
+   * Note: If you set `disabled: true`, you'll still be able to move the draggable through state variables. Only the user interactions won't work
+   *
+   * Examples:
+   *
+   * [Changing with inputs](https://svelte.dev/repl/e1e707358b37467ba272891715878a1d?version=3.44.1)
+   *
+   * [Changing with Sliders](https://svelte.dev/repl/6b437a1cdbfc4c748520a72330c6395b?version=3.44.1)
+   *
+   * [Draggable only through external state, not user input](https://svelte.dev/repl/0eae169f272e41ba9c07ef222ed2bf66?version=3.44.1)
+   *
+   * [Comes back to original position after drag end](https://svelte.dev/repl/83d3aa8c5e154b7baf1a9c417c217d2e?version=3.44.1)
+   *
+   * [Comes back to original position with transition](https://svelte.dev/repl/bc84ed4ca22f45acbc28de3e33199883?version=3.44.1)
+   */
+  position?: { x: number; y: number };
+
+  /**
    * CSS Selector of an element inside the parent node(on which `use:draggable` is applied).
    *
    * If it is provided, Trying to drag inside the `cancel` selector will prevent dragging.
@@ -235,6 +260,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
     grid,
 
+    position,
+
     cancel,
     handle,
 
@@ -268,6 +295,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
   let dragEl: HTMLElement | undefined;
   let cancelEl: HTMLElement | undefined;
+
+  let isControlled = !!position;
 
   function fireSvelteDragStopEvent(node: HTMLElement) {
     node.dispatchEvent(
@@ -325,7 +354,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
         "Element being dragged can't be a child of the element on which `cancel` is applied"
       );
 
-    if (dragEl.contains(e.target as HTMLElement) && !cancelEl?.contains(e.target as HTMLElement))
+    if (dragEl.contains(<HTMLElement>e.target) && !cancelEl?.contains(<HTMLElement>e.target))
       active = true;
 
     if (!active) return;
@@ -335,6 +364,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
       bodyOriginalUserSelectVal = document.body.style.userSelect;
       document.body.style.userSelect = 'none';
     }
+
     // Dispatch custom event
     fireSvelteDragStartEvent(node);
 
@@ -370,8 +400,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
   }
 
   function drag(e: TouchEvent | MouseEvent) {
-    if (disabled) return;
-
     if (!active) return;
 
     // Apply class defaultClassDragging
@@ -460,6 +488,13 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
       node.classList.add(defaultClass);
 
       if (dragged) node.classList.add(defaultClassDragged);
+
+      if (isControlled) {
+        xOffset = translateX = options.position?.x ?? translateX;
+        yOffset = translateY = options.position?.y ?? translateY;
+
+        Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
+      }
     },
   };
 };

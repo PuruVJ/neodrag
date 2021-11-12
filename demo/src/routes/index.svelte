@@ -1,6 +1,8 @@
 <script lang="ts">
   import { draggable } from '../../../dist';
+  import { spring, tweened } from 'svelte/motion';
   import type { DragOptions } from '../../../dist';
+  import { bounceIn, sineIn, sineOut } from 'svelte/easing';
 
   // import { draggable } from 'svelte-drag';
   // import type { Options } from 'svelte-drag';
@@ -26,6 +28,9 @@
   } as DragOptions;
 
   // $: console.log(options);
+
+  let progressY = tweened(0, { easing: sineIn });
+  let progressX = tweened(0, { easing: sineIn });
 </script>
 
 <h1>Welcome to SvelteKit</h1>
@@ -128,12 +133,7 @@
 
 <br />
 
-<div
-  use:draggable={options}
-  on:svelte-drag:start={console.log}
-  on:svelte-drag:end={console.log}
-  class="box"
->
+<div use:draggable={options} class="box">
   hello
 
   <div class="handle">Le handel</div>
@@ -145,11 +145,13 @@
 
 <div
   use:draggable={options}
-  on:svelte-drag:start={console.log}
-  on:svelte-drag:end={console.log}
+  on:svelte-drag={(e) => {
+    progressX = e.detail.offsetX;
+    progressY = e.detail.offsetY;
+  }}
   class="box"
 >
-  hello
+  2nd one
 
   <div class="handle">Le handel</div>
   <div class="cancel">Cancel</div>
@@ -157,21 +159,24 @@
   <div class="handle-2">Le handel 2</div>
   <div class="cancel-2">Cancel 2</div>
 </div>
+
+<br /><br /><br /><br /><br /><br />
+
+<input type="number" bind:value={$progressX} />
+<input type="number" bind:value={$progressY} />
 
 <div
-  use:draggable={options}
-  on:svelte-drag:start={console.log}
-  on:svelte-drag:end={console.log}
+  use:draggable={{ controlledPosition: { y: $progressY, x: $progressX } }}
+  on:svelte-drag={(e) => {
+    progressX.set(e.detail.offsetX, { duration: 0 });
+    progressY.set(e.detail.offsetY, { duration: 0 });
+  }}
+  on:svelte-drag:end={() => {
+    $progressX = 0;
+    $progressY = 0;
+  }}
   class="box"
->
-  hello
-
-  <div class="handle">Le handel</div>
-  <div class="cancel">Cancel</div>
-
-  <div class="handle-2">Le handel 2</div>
-  <div class="cancel-2">Cancel 2</div>
-</div>
+/>
 
 <style>
   :global(body) {
