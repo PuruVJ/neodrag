@@ -17,9 +17,12 @@ Inspired from the amazing [react-draggable](https://github.com/react-grid-layout
 # Installing
 
 ```bash
+pnpm add svelte-drag
+
+# npm
 npm install svelte-drag
 
-# If you're a Yarn person
+# yarn
 yarn add svelte-drag
 ```
 
