@@ -242,6 +242,21 @@ export type DragOptions = {
    * ```
    */
   defaultPosition?: { x: number; y: number };
+
+  /**
+   * Fires when dragging start
+   */
+  onDragStart?: (data: { offsetX: number; offsetY: number }) => void;
+
+  /**
+   * Fires when dragging is going on
+   */
+  onDrag?: (data: { offsetX: number; offsetY: number }) => void;
+
+  /**
+   * Fires when dragging ends
+   */
+  onDragEnd?: (data: { offsetX: number; offsetY: number }) => void;
 };
 
 const DEFAULT_CLASS = {
@@ -270,6 +285,10 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
     defaultClassDragged = DEFAULT_CLASS.DRAGGED,
 
     defaultPosition = { x: 0, y: 0 },
+
+    onDragStart,
+    onDrag,
+    onDragEnd,
   } = options;
 
   let active = false;
@@ -298,22 +317,25 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
   let isControlled = !!position;
 
-  function fireSvelteDragStopEvent(node: HTMLElement) {
-    node.dispatchEvent(
-      new CustomEvent('svelte-drag:end', { detail: { offsetX: translateX, offsetY: translateY } })
-    );
+  function fireSvelteDragStartEvent(node: HTMLElement) {
+    const data = { offsetX: translateX, offsetY: translateY };
+
+    node.dispatchEvent(new CustomEvent('svelte-drag:start', { detail: data }));
+    onDragStart?.(data);
   }
 
-  function fireSvelteDragStartEvent(node: HTMLElement) {
-    node.dispatchEvent(
-      new CustomEvent('svelte-drag:start', { detail: { offsetX: translateX, offsetY: translateY } })
-    );
+  function fireSvelteDragStopEvent(node: HTMLElement) {
+    const data = { offsetX: translateX, offsetY: translateY };
+
+    node.dispatchEvent(new CustomEvent('svelte-drag:end', { detail: data }));
+    onDragEnd?.(data);
   }
 
   function fireSvelteDragEvent(node: HTMLElement, translateX: number, translateY: number) {
-    node.dispatchEvent(
-      new CustomEvent('svelte-drag', { detail: { offsetX: translateX, offsetY: translateY } })
-    );
+    const data = { offsetX: translateX, offsetY: translateY };
+
+    node.dispatchEvent(new CustomEvent('svelte-drag', { detail: data }));
+    onDrag?.(data);
   }
 
   const listen = addEventListener;
