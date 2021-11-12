@@ -155,8 +155,20 @@ export type DragOptions = {
    * But changing the `position` option will also move the draggable around. These parameters are reactive,
    * so using Svelte's reactive variables as values for position will work like a charm.
    *
+   *
+   * Note: If you set `disabled: true`, you'll still be able to move the draggable through state variables. Only the user interactions won't work
+   *
    * Examples:
    *
+   * [Changing with inputs](https://svelte.dev/repl/e1e707358b37467ba272891715878a1d?version=3.44.1)
+   *
+   * [Changing with Sliders](https://svelte.dev/repl/6b437a1cdbfc4c748520a72330c6395b?version=3.44.1)
+   *
+   * [Draggable only through external state, not user input](https://svelte.dev/repl/0eae169f272e41ba9c07ef222ed2bf66?version=3.44.1)
+   *
+   * [Comes back to original position after drag end](https://svelte.dev/repl/83d3aa8c5e154b7baf1a9c417c217d2e?version=3.44.1)
+   *
+   * [Comes back to original position with transition](https://svelte.dev/repl/bc84ed4ca22f45acbc28de3e33199883?version=3.44.1)
    */
   position?: { x: number; y: number };
 

@@ -211,6 +211,16 @@ Applies a grid on the page to which the element snaps to when dragging, rather t
 
 `Note`: If you're programmatically creating the grid, do not set it to [0, 0] ever, that will stop drag at all. Set it to `undefined` to make it continuous once again.
 
+## position
+
+**type**: `{ x: number; y: number }`
+
+**Default Value**: `undefined`
+
+Controls the position of the element programmatically. Fully reactive.
+
+Read more below in the **Controlled vs Uncontrolled** section.
+
 ## cancel
 
 **type**: `string`
@@ -345,6 +355,32 @@ export type DragBoundsCoords = {
   bottom: number;
 };
 ```
+
+# Controlled vs Uncontrolled
+
+This is taken straight from React's philosophy(After all, this package is inspired from [react-draggable](https://github.com/react-grid-layout/react-draggable)).
+
+Uncontrolled means your app doesn't control the dragging of the app. Meaning, the user drags the element, it changes position, and you do something with that action. You yourself don't change position of the element or anything. This is the default behavior of this library.
+
+Controlled means your app, using state variables, changes the position of the element, or in simple terms, programmatically drag the element. You basically set the `position` property to `{ x: 10, y: 50 }`(or any other numbers), and voila! yur now controlling the position of the element programmatically 🥳🥳
+
+OFC, this library doesn't go fully **Controlled**. The user can still drag it around even when `position` is set.
+
+So, when you change `position`, the element position changes. However, when the element is dragged by user interaction, `position` is not changed. This is done intentionally, as two-way data binding here isn't possible and also will lead to unexpected behavior. To keep the `position` variable up to date, use the `on:svelte-drag` event to keep your state up to date to the draggable's internal state.
+
+To have it be strictly **Controlled**, meaning it can only be moved programmatically, add the `disabled` option to your draggable element's config
+
+```svelte
+<div use:draggable={{ position: { x: 0, y: 10 }, disabled: true }} />
+```
+
+Here are a bunch of examples showing controlled behavior 👇
+
+1. [Changing with inputs](https://svelte.dev/repl/e1e707358b37467ba272891715878a1d?version=3.44.1)
+2. [Changing with Sliders](https://svelte.dev/repl/6b437a1cdbfc4c748520a72330c6395b?version=3.44.1)
+3. [Draggable only through external state, not user input](https://svelte.dev/repl/0eae169f272e41ba9c07ef222ed2bf66?version=3.44.1)
+4. [Comes back to original position after drag end](https://svelte.dev/repl/83d3aa8c5e154b7baf1a9c417c217d2e?version=3.44.1)
+5. [Comes back to original position with transition](https://svelte.dev/repl/bc84ed4ca22f45acbc28de3e33199883?version=3.44.1)
 
 # Why an action and not a component?
 
