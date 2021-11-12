@@ -1,6 +1,8 @@
 <script lang="ts">
   import { draggable } from '../../../dist';
+  import { spring, tweened } from 'svelte/motion';
   import type { DragOptions } from '../../../dist';
+  import { bounceIn, sineIn, sineOut } from 'svelte/easing';
 
   // import { draggable } from 'svelte-drag';
   // import type { Options } from 'svelte-drag';
@@ -27,8 +29,8 @@
 
   // $: console.log(options);
 
-  let progressY = 0;
-  let progressX = 0;
+  let progressY = tweened(0, { easing: sineIn });
+  let progressX = tweened(0, { easing: sineIn });
 </script>
 
 <h1>Welcome to SvelteKit</h1>
@@ -160,22 +162,21 @@
 
 <br /><br /><br /><br /><br /><br />
 
-<input type="number" bind:value={progressY} />
-<input type="number" bind:value={progressX} />
+<input type="number" bind:value={$progressX} />
+<input type="number" bind:value={$progressY} />
 
 <div
-  use:draggable={{ controlledPosition: { y: progressY, x: progressX } }}
-  on:svelte-drag:end={(e) => console.log(e)}
+  use:draggable={{ controlledPosition: { y: $progressY, x: $progressX } }}
+  on:svelte-drag={(e) => {
+    progressX.set(e.detail.offsetX, { duration: 0 });
+    progressY.set(e.detail.offsetY, { duration: 0 });
+  }}
+  on:svelte-drag:end={() => {
+    $progressX = 0;
+    $progressY = 0;
+  }}
   class="box"
->
-  hello
-
-  <div class="handle">Le handel</div>
-  <div class="cancel">Cancel</div>
-
-  <div class="handle-2">Le handel 2</div>
-  <div class="cancel-2">Cancel 2</div>
-</div>
+/>
 
 <style>
   :global(body) {

@@ -148,9 +148,17 @@ export type DragOptions = {
   grid?: [number, number];
 
   /**
-   * Controlled behavior
+   * Control the position manually with your own state
+   *
+   * By default, the element will be draggable by mouse/finger, and all options will work as default while dragging.
+   *
+   * But changing the `position` option will also move the draggable around. These parameters are reactive,
+   * so using Svelte's reactive variables as values for position will work like a charm.
+   *
+   * Examples:
+   *
    */
-  controlledPosition?: { x: number; y: number };
+  position?: { x: number; y: number };
 
   /**
    * CSS Selector of an element inside the parent node(on which `use:draggable` is applied).
@@ -240,7 +248,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
     grid,
 
-    controlledPosition,
+    position,
 
     cancel,
     handle,
@@ -276,7 +284,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
   let dragEl: HTMLElement | undefined;
   let cancelEl: HTMLElement | undefined;
 
-  let isControlled = !!controlledPosition;
+  let isControlled = !!position;
 
   function fireSvelteDragStopEvent(node: HTMLElement) {
     node.dispatchEvent(
@@ -334,7 +342,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
         "Element being dragged can't be a child of the element on which `cancel` is applied"
       );
 
-    if (dragEl.contains(e.target as HTMLElement) && !cancelEl?.contains(e.target as HTMLElement))
+    if (dragEl.contains(<HTMLElement>e.target) && !cancelEl?.contains(<HTMLElement>e.target))
       active = true;
 
     if (!active) return;
@@ -470,8 +478,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
       if (dragged) node.classList.add(defaultClassDragged);
 
       if (isControlled) {
-        xOffset = translateX = options.controlledPosition?.x ?? translateX;
-        yOffset = translateY = options.controlledPosition?.y ?? translateY;
+        xOffset = translateX = options.position?.x ?? translateX;
+        yOffset = translateY = options.position?.y ?? translateY;
 
         Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
       }
