@@ -283,6 +283,30 @@ Class to apply on the parent element if it has been dragged at least once.
 
 Offsets your element to the position you specify in the very beginning. `x` and `y` should be in pixels
 
+## onDragStart
+
+**type**: `(data: { offsetX: number; offsetY: number }) => void`
+
+**Default Value**: `undefined`
+
+Fires when dragging start.
+
+## onDrag
+
+**type**: `(data: { offsetX: number; offsetY: number }) => void`
+
+**Default Value**: `undefined`
+
+Fires when dragging is going on.
+
+## onDragEnd
+
+**type**: `(data: { offsetX: number; offsetY: number }) => void`
+
+**Default Value**: `undefined`
+
+Fires when dragging ends.
+
 # Events
 
 `svelte-drag` emits 3 events, `on:svelte-drag`, `on:svelte-drag:start` & `on:svelte-drag:end`. These are all custom events, and can be listened on the node the `use:draggable` is applied to
