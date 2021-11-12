@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { draggable } from '../../../dist';
-  import { spring, tweened } from 'svelte/motion';
+  import { sineIn } from 'svelte/easing';
+  import { tweened } from 'svelte/motion';
   import type { DragOptions } from '../../../dist';
-  import { bounceIn, sineIn, sineOut } from 'svelte/easing';
+  import { draggable } from '../../../dist';
 
   // import { draggable } from 'svelte-drag';
   // import type { Options } from 'svelte-drag';
@@ -144,7 +144,7 @@
 </div>
 
 <div
-  use:draggable={options}
+  use:draggable={{ ...options }}
   on:svelte-drag={(e) => {
     progressX = e.detail.offsetX;
     progressY = e.detail.offsetY;
@@ -166,14 +166,16 @@
 <input type="number" bind:value={$progressY} />
 
 <div
-  use:draggable={{ controlledPosition: { y: $progressY, x: $progressX } }}
-  on:svelte-drag={(e) => {
-    progressX.set(e.detail.offsetX, { duration: 0 });
-    progressY.set(e.detail.offsetY, { duration: 0 });
-  }}
-  on:svelte-drag:end={() => {
-    $progressX = 0;
-    $progressY = 0;
+  use:draggable={{
+    position: { y: $progressY, x: $progressX },
+    onDrag: ({ offsetX, offsetY }) => {
+      progressX.set(offsetX, { duration: 0 });
+      progressY.set(offsetY, { duration: 0 });
+    },
+    onDragEnd: ({}) => {
+      $progressX = 0;
+      $progressY = 0;
+    },
   }}
   class="box"
 />

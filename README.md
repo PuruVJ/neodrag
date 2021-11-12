@@ -308,6 +308,38 @@ Event signatures:
 
 `on:svelte-drag:end`: `(e: CustomEvent<{offsetX: number; offsetY: number }>) => void`. No internal state provided to `event.detail`. Provides the final offset when dragging ends, on the `e.detail` object.
 
+### Alternative
+
+If you scroll up, you'll see 3 options, `onDragStart`, `onDrag` and `onDragEnd`. These are basically event handlers that you specify as methods of the options object.
+
+Why have two ways to listen to events? Because at the time of writing, the Svelte extension for VSCode doesn't work fully well with custom events when using TypeScript, even after they're explicitly typed by the user in TypeScript.
+
+I take TypeScript very seriously, hence I am going an extra step to provide duplicate implementations for event handling.
+
+How to use events-as-options? The syntax is similar to the custom events one 👇
+
+```svelte
+<div
+  use:draggable={{
+    onDragStart: ({ offsetX, offsetY }) => {
+      // Do something
+    },
+    onDrag: ({ offsetX, offsetY }) => {
+      // Do something
+    },
+    onDragEnd: ({ offsetX, offsetY }) => {
+      // Do something
+    },
+
+  }}
+  class="box"
+/>
+```
+
+Ultimately, this gives everyone a choice. non-TypeScript users will prefer the `on:svelte-drag:*` method because it is more idiomatic, and TypeScript users can go with events-as-options way to get better TS experience
+
+> Note: Do not use same event in two different ways. I.E., having `on:svelte-drag:start` and `onDragStart` at once will have both fire at the time when dragging starts. Use only one at a time.
+
 If you're a TypeScript user, read on below 👇
 
 # TypeScript
