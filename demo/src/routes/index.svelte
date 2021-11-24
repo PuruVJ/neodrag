@@ -214,7 +214,7 @@
 
   .canvas {
     flex-grow: 1;
-    background-color: blue;
+    background-color: #242629;
     border-left: 1px solid white;
   }
 
