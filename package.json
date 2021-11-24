@@ -1,63 +1,63 @@
 {
-  "name": "svelte-drag",
-  "version": "2.2.1",
-  "description": "Svelte port of react-draggable",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "type": "module",
-  "types": "dist/index.d.ts",
-  "typings": "dist/index.d.ts",
-  "files": [
-    "dist/"
-  ],
-  "sideEffects": false,
-  "exports": {
-    "import": "./dist/index.js",
-    "default": "./dist/index.js",
-    "require": "./dist/index.cjs"
-  },
-  "scripts": {
-    "test": "jest test",
-    "test:watch": "pnpm run test -- --watch",
-    "watch": "tsup --watch",
-    "prepublishOnly": "tsup",
-    "pub": "pnpm publish",
-    "format": "prettier --write --plugin-search-dir=. '**/*.{js,ts,tsx,json,svelte,html}'"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/PuruVJ/svelte-drag.git"
-  },
-  "keywords": [
-    "draggable",
-    "svelte",
-    "react-draggable",
-    "drag",
-    "svelte",
-    "small",
-    "tiny",
-    "performant"
-  ],
-  "author": "Puru Vijay",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/PuruVJ/svelte-drag/issues"
-  },
-  "homepage": "https://github.com/PuruVJ/svelte-drag#readme",
-  "devDependencies": {
-    "@babel/preset-env": "^7.16.4",
-    "@testing-library/jest-dom": "^5.15.1",
-    "@testing-library/svelte": "^3.0.3",
-    "babel-jest": "^27.3.1",
-    "jest": "^27.3.1",
-    "prettier": "^2.4.1",
-    "prettier-plugin-svelte": "^2.5.0",
-    "svelte": "^3.44.2",
-    "svelte-jester": "^2.1.5",
-    "svelte-preprocess": "^4.9.8",
-    "ts-jest": "^27.0.7",
-    "tsm": "^2.1.4",
-    "tsup": "^5.9.1",
-    "typescript": "^4.5.2"
-  }
+	"name": "svelte-drag",
+	"version": "2.2.1",
+	"description": "Svelte port of react-draggable",
+	"main": "dist/index.cjs",
+	"module": "dist/index.js",
+	"type": "module",
+	"types": "dist/index.d.ts",
+	"typings": "dist/index.d.ts",
+	"files": [
+		"dist/"
+	],
+	"sideEffects": false,
+	"exports": {
+		"import": "./dist/index.js",
+		"default": "./dist/index.js",
+		"require": "./dist/index.cjs"
+	},
+	"scripts": {
+		"test": "jest test",
+		"test:watch": "pnpm run test -- --watch",
+		"watch": "tsup --watch",
+		"prepublishOnly": "tsup",
+		"pub": "pnpm publish",
+		"format": "prettier --write --plugin-search-dir=. '**/*.{js,ts,tsx,json,svelte,html}'"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PuruVJ/svelte-drag.git"
+	},
+	"keywords": [
+		"draggable",
+		"svelte",
+		"react-draggable",
+		"drag",
+		"svelte",
+		"small",
+		"tiny",
+		"performant"
+	],
+	"author": "Puru Vijay",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/PuruVJ/svelte-drag/issues"
+	},
+	"homepage": "https://github.com/PuruVJ/svelte-drag#readme",
+	"devDependencies": {
+		"@babel/preset-env": "^7.16.4",
+		"@testing-library/jest-dom": "^5.15.1",
+		"@testing-library/svelte": "^3.0.3",
+		"babel-jest": "^27.3.1",
+		"jest": "^27.3.1",
+		"prettier": "^2.4.1",
+		"prettier-plugin-svelte": "^2.5.0",
+		"svelte": "^3.44.2",
+		"svelte-jester": "^2.1.5",
+		"svelte-preprocess": "^4.9.8",
+		"ts-jest": "^27.0.7",
+		"tsm": "^2.1.4",
+		"tsup": "^5.9.1",
+		"typescript": "^4.5.2"
+	}
 }
