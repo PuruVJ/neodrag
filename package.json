@@ -45,19 +45,19 @@
   },
   "homepage": "https://github.com/PuruVJ/svelte-drag#readme",
   "devDependencies": {
-    "@babel/preset-env": "^7.15.8",
-    "@testing-library/jest-dom": "^5.14.1",
+    "@babel/preset-env": "^7.16.4",
+    "@testing-library/jest-dom": "^5.15.1",
     "@testing-library/svelte": "^3.0.3",
-    "babel-jest": "^27.2.5",
-    "jest": "^27.2.5",
+    "babel-jest": "^27.3.1",
+    "jest": "^27.3.1",
     "prettier": "^2.4.1",
     "prettier-plugin-svelte": "^2.5.0",
     "svelte": "^3.44.2",
     "svelte-jester": "^2.1.5",
     "svelte-preprocess": "^4.9.8",
-    "ts-jest": "^27.0.6",
-    "tsm": "^2.1.2",
-    "tsup": "^5.4.0",
-    "typescript": "^4.4.3"
+    "ts-jest": "^27.0.7",
+    "tsm": "^2.1.4",
+    "tsup": "^5.9.1",
+    "typescript": "^4.5.2"
   }
 }
