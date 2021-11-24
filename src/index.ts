@@ -295,7 +295,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	let [translateX, translateY] = [0, 0];
 	let [initialX, initialY] = [0, 0];
-	let [previousX, previousY] = [0, 0];
 
 	// The offset of the client position relative to the node's top-left corner
 	let [clientToNodeOffsetX, clientToNodeOffsetY] = [0, 0];
@@ -436,6 +435,10 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		// Get final values for clamping
 		let [finalX, finalY] = [clientX, clientY];
 
+		// Calculate the current scale of the node
+		let scale = node.offsetWidth / nodeRect.width;
+		if (isNaN(scale)) scale = 1;
+
 		if (computedBounds) {
 			// Client position is limited to this virtual boundary to prevent node going out of bounds
 			const virtualClientBounds: DragBoundsCoords = {
@@ -458,16 +461,20 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			if (isNaN(+ySnap) || ySnap < 0)
 				throw new Error('2nd argument of `grid` must be a valid positive number');
 
-			let [deltaX, deltaY] = [finalX - previousX, finalY - previousY];
-			[deltaX, deltaY] = snapToGrid([xSnap, ySnap], deltaX, deltaY);
+			let [deltaX, deltaY] = [finalX - initialX, finalY - initialY];
+			[deltaX, deltaY] = snapToGrid(
+				[Math.floor(xSnap / scale), Math.floor(ySnap / scale)],
+				deltaX,
+				deltaY
+			);
 
 			if (!deltaX && !deltaY) return;
 
-			[finalX, finalY] = [previousX + deltaX, previousY + deltaY];
+			[finalX, finalY] = [initialX + deltaX, initialY + deltaY];
 		}
 
-		if (canMoveInX) translateX = finalX - initialX;
-		if (canMoveInY) translateY = finalY - initialY;
+		if (canMoveInX) translateX = (finalX - initialX) * scale;
+		if (canMoveInY) translateY = (finalY - initialY) * scale;
 
 		[xOffset, yOffset] = [translateX, translateY];
 

@@ -79,16 +79,39 @@ describe('Draggable', () => {
 
 	describe('with coordinate bounds', () => {
 		beforeEach(() => {
-			Element.prototype.getBoundingClientRect = jest.fn(() => {
-				return <any>{
-					width: 10,
-					height: 10,
-					top: 0,
-					left: 0,
-					bottom: 10,
-					right: 10,
-				};
+			const boundary = {
+				width: 10,
+				height: 10,
+				top: 0,
+				left: 0,
+				bottom: 10,
+				right: 10,
+			};
+
+			Object.defineProperties(window.HTMLElement.prototype, {
+				offsetLeft: {
+					get() {
+						return boundary.left;
+					},
+				},
+				offsetTop: {
+					get() {
+						return boundary.top;
+					},
+				},
+				offsetHeight: {
+					get() {
+						return boundary.height;
+					},
+				},
+				offsetWidth: {
+					get() {
+						return boundary.width;
+					},
+				},
 			});
+
+			HTMLElement.prototype.getBoundingClientRect = jest.fn(() => boundary as any);
 
 			Object.assign(window, {
 				innerWidth: 200,
