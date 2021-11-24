@@ -48,7 +48,7 @@ describe('CancelDraggable', () => {
     const element = getByText('This will drag!');
 
     expect(element).toHaveClass('svelte-draggable');
-    expect(element).toHaveClass('svelte-draggable-dragged');
+    expect(element).not.toHaveClass('svelte-draggable-dragged');
     expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
   });
 
@@ -78,7 +78,7 @@ describe('CancelDraggable', () => {
     const element = getByText('This will drag!');
 
     expect(element).toHaveClass('svelte-draggable');
-    expect(element).toHaveClass('svelte-draggable-dragged');
+    expect(element).not.toHaveClass('svelte-draggable-dragged');
     expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
   });
 });

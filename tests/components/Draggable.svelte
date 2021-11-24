@@ -1,7 +1,5 @@
 <script lang="ts">
-  import { DragBounds } from '../../dist';
-
-  import { draggable } from '../../src';
+  import { DragBounds, draggable } from '../../src';
 
   export let body = 'Drag me!';
   export let axis: 'both' | 'x' | 'y' | 'none' = 'both';
