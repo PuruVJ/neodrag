@@ -436,8 +436,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		let [finalX, finalY] = [clientX, clientY];
 
 		// Calculate the current scale of the node
-		let scale = node.offsetWidth / nodeRect.width;
-		if (isNaN(scale)) scale = 1;
+		let inverseScale = node.offsetWidth / nodeRect.width;
+		if (isNaN(inverseScale)) inverseScale = 1;
 
 		if (computedBounds) {
 			// Client position is limited to this virtual boundary to prevent node going out of bounds
@@ -463,7 +463,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 			let [deltaX, deltaY] = [finalX - initialX, finalY - initialY];
 			[deltaX, deltaY] = snapToGrid(
-				[Math.floor(xSnap / scale), Math.floor(ySnap / scale)],
+				[Math.floor(xSnap / inverseScale), Math.floor(ySnap / inverseScale)],
 				deltaX,
 				deltaY
 			);
@@ -473,8 +473,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			[finalX, finalY] = [initialX + deltaX, initialY + deltaY];
 		}
 
-		if (canMoveInX) translateX = (finalX - initialX) * scale;
-		if (canMoveInY) translateY = (finalY - initialY) * scale;
+		if (canMoveInX) translateX = (finalX - initialX) * inverseScale;
+		if (canMoveInY) translateY = (finalY - initialY) * inverseScale;
 
 		[xOffset, yOffset] = [translateX, translateY];
 
