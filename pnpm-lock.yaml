@@ -13,7 +13,7 @@ specifiers:
   svelte-preprocess: ^4.9.8
   ts-jest: ^27.0.7
   tsm: ^2.1.4
-  tsup: ^5.9.1
+  tsup: ^5.9.2
   typescript: ^4.5.2
 
 devDependencies:
@@ -29,7 +29,7 @@ devDependencies:
   svelte-preprocess: 4.9.8_svelte@3.44.2+typescript@4.5.2
   ts-jest: 27.0.7_a9b5b524bc1155f2e52dcd1c4b991b19
   tsm: 2.1.4
-  tsup: 5.9.1_typescript@4.5.2
+  tsup: 5.9.2_typescript@4.5.2
   typescript: 4.5.2
 
 packages:
@@ -1939,8 +1939,8 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001282
-      electron-to-chromium: 1.4.0
+      caniuse-lite: 1.0.30001283
+      electron-to-chromium: 1.4.1
       escalade: 3.1.1
       node-releases: 2.0.1
       picocolors: 1.0.0
@@ -1967,8 +1967,8 @@ packages:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
     dev: true
 
-  /bundle-require/2.1.3_esbuild@0.13.15:
-    resolution: {integrity: sha512-aBLb/RHIZ9l3jAAGCTl/32m6bOQc3bmMbf6hfw+e6kcZnJL1E5i+MhmgBgBWK90CN9XeOBa/1bh6TiSLgk8New==}
+  /bundle-require/2.1.8_esbuild@0.13.15:
+    resolution: {integrity: sha512-oOEg3A0hy/YzvNWNowtKD0pmhZKseOFweCbgyMqTIih4gRY1nJWsvrOCT27L9NbIyL5jMjTFrAUpGxxpW68Puw==}
     peerDependencies:
       esbuild: '>=0.13'
     dependencies:
@@ -2002,8 +2002,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /caniuse-lite/1.0.30001282:
-    resolution: {integrity: sha512-YhF/hG6nqBEllymSIjLtR2iWDDnChvhnVJqp+vloyt2tEHFG1yBR+ac2B/rOw0qOK0m0lEXU2dv4E/sMk5P9Kg==}
+  /caniuse-lite/1.0.30001283:
+    resolution: {integrity: sha512-9RoKo841j1GQFSJz/nCXOj0sD7tHBtlowjYlrqIUS812x9/emfBLBt6IyMz1zIaYc/eRL8Cs6HPUVi2Hzq4sIg==}
     dev: true
 
   /chalk/2.4.2:
@@ -2255,8 +2255,8 @@ packages:
       webidl-conversions: 5.0.0
     dev: true
 
-  /electron-to-chromium/1.4.0:
-    resolution: {integrity: sha512-+oXCt6SaIu8EmFTPx8wNGSB0tHQ5biDscnlf6Uxuz17e9CjzMRtGk9B8705aMPnj0iWr3iC74WuIkngCsLElmA==}
+  /electron-to-chromium/1.4.1:
+    resolution: {integrity: sha512-9ldvb6QMHiDpUNF1iSwBTiTT0qXEN+xIO5WlCJrC5gt0z74ofOiqR698vaJqYWnri0XZiF0YmnrFmGq/EmpGAA==}
     dev: true
 
   /emittery/0.8.1:
@@ -4323,8 +4323,8 @@ packages:
       esbuild: 0.13.15
     dev: true
 
-  /tsup/5.9.1_typescript@4.5.2:
-    resolution: {integrity: sha512-MWUykojp5MmcewspCLgXHjEdAwJHKbnsRUUfUvU0kxmz8TpspQY1H1TgPoErk0Hu/u9S86rruSfxSiqNEjpmxQ==}
+  /tsup/5.9.2_typescript@4.5.2:
+    resolution: {integrity: sha512-hQdRpkvQyVyqEZXLdUpuAWa8n7OnO9rfOKMXbsPlzcDG6APTpB8RogO6czq2KFZxPvbSus4ODDkpXOYcQS+8/g==}
     hasBin: true
     peerDependencies:
       typescript: ^4.2.3
@@ -4332,7 +4332,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      bundle-require: 2.1.3_esbuild@0.13.15
+      bundle-require: 2.1.8_esbuild@0.13.15
       cac: 6.7.12
       chokidar: 3.5.2
       debug: 4.3.2

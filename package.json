@@ -57,7 +57,7 @@
 		"svelte-preprocess": "^4.9.8",
 		"ts-jest": "^27.0.7",
 		"tsm": "^2.1.4",
-		"tsup": "^5.9.1",
+		"tsup": "^5.9.2",
 		"typescript": "^4.5.2"
 	}
 }
