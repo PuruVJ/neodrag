@@ -355,7 +355,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		let inverseScale = node.offsetWidth / nodeRect.width;
 		if (isNaN(inverseScale)) inverseScale = 1;
 		return inverseScale;
-	}
+	};
 
 	function dragStart(e: TouchEvent | MouseEvent) {
 		if (disabled) return;
@@ -399,8 +399,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
 		const inverseScale = calculateInverseScale();
 
-		if (canMoveInX) initialX = clientX - (xOffset / inverseScale);
-		if (canMoveInY) initialY = clientY - (yOffset / inverseScale);
+		if (canMoveInX) initialX = clientX - xOffset / inverseScale;
+		if (canMoveInY) initialY = clientY - yOffset / inverseScale;
 
 		// Only the bounds uses these properties at the moment,
 		// may open up in the future if others need it
