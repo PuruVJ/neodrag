@@ -350,6 +350,13 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	// On mobile, touch can become extremely janky without it
 	node.style.touchAction = 'none';
 
+	const calculateInverseScale = () => {
+		// Calculate the current scale of the node
+		let inverseScale = node.offsetWidth / nodeRect.width;
+		if (isNaN(inverseScale)) inverseScale = 1;
+		return inverseScale;
+	};
+
 	function dragStart(e: TouchEvent | MouseEvent) {
 		if (disabled) return;
 
@@ -390,9 +397,10 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		fireSvelteDragStartEvent(node);
 
 		const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
+		const inverseScale = calculateInverseScale();
 
-		if (canMoveInX) initialX = clientX - xOffset;
-		if (canMoveInY) initialY = clientY - yOffset;
+		if (canMoveInX) initialX = clientX - xOffset / inverseScale;
+		if (canMoveInY) initialY = clientY - yOffset / inverseScale;
 
 		// Only the bounds uses these properties at the moment,
 		// may open up in the future if others need it
@@ -435,9 +443,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		// Get final values for clamping
 		let [finalX, finalY] = [clientX, clientY];
 
-		// Calculate the current scale of the node
-		let inverseScale = node.offsetWidth / nodeRect.width;
-		if (isNaN(inverseScale)) inverseScale = 1;
+		const inverseScale = calculateInverseScale();
 
 		if (computedBounds) {
 			// Client position is limited to this virtual boundary to prevent node going out of bounds

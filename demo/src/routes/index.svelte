@@ -31,6 +31,11 @@
 
   let progressY = tweened(0, { easing: sineIn });
   let progressX = tweened(0, { easing: sineIn });
+
+  const minScale = 0.25;
+  const maxScale = 4;
+  const scaleStep = 0.05;
+  let scale = 1;
 </script>
 
 <main>
@@ -132,9 +137,17 @@
         <input type="checkbox" bind:checked={options.disabled} />
       </label>
     </div>
+
+    <div>
+      <label>
+        Scale
+        <input type="range" min={minScale} max={maxScale} step={scaleStep} bind:value={scale} />
+        {scale}
+      </label>
+    </div>
   </div>
 
-  <div class="canvas">
+  <div class="canvas" style="transform: scale({scale});">
     <div use:draggable={options} class="box">
       hello
 
@@ -146,12 +159,12 @@
     </div>
   </div>
 
-  <div class="canvas">
+  <div class="canvas" style="transform: scale({scale});">
     <div
       use:draggable={{ ...options }}
       on:svelte-drag={(e) => {
-        progressX = e.detail.offsetX;
-        progressY = e.detail.offsetY;
+        progressX.set(e.detail.offsetX);
+        progressY.set(e.detail.offsetY);
       }}
       class="box"
     >
@@ -165,7 +178,7 @@
     </div>
   </div>
 
-  <div class="canvas">
+  <div class="canvas" style="transform: scale({scale});">
     <input type="number" bind:value={$progressX} />
     <input type="number" bind:value={$progressY} />
     <div
@@ -214,6 +227,7 @@
 
   .canvas {
     flex-grow: 1;
+    transform-origin: top left;
     background-color: #242629;
     border-left: 1px solid white;
   }
