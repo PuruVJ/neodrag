@@ -6,7 +6,7 @@ Inspired from the amazing [react-draggable](https://github.com/react-grid-layout
 
 # Features
 
-- 🤏 Tiny - Only [2.1KB](https://bundlephobia.com/package/svelte-drag) min+gzip.
+- 🤏 Tiny - Only [2.2KB](https://bundlephobia.com/package/svelte-drag) min+gzip.
 - 🐇 Simple - Quite simple to use, and effectively no-config required!
 - 🧙‍♀️ Elegant - Svelte Action, to keep the usage simple, elegant and expressive.
 - 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
@@ -375,11 +375,11 @@ The events above are custom events, and hence, not recognized by the TypeScript 
 
 ```ts
 export declare namespace svelte.JSX {
-  interface HTMLAttributes<T> {
-    'onsvelte-drag:start'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
-    'onsvelte-drag:end'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
-    'onsvelte-drag'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
-  }
+	interface HTMLAttributes<T> {
+		'onsvelte-drag:start'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
+		'onsvelte-drag:end'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
+		'onsvelte-drag'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
+	}
 }
 ```
 
@@ -401,17 +401,17 @@ import type { DragAxis, DragBounds, DragBoundsCoords, DragOptions } from 'svelte
 
 ```ts
 export type DragBoundsCoords = {
-  /** Number of pixels from left of the window */
-  left: number;
+	/** Number of pixels from left of the window */
+	left: number;
 
-  /** Number of pixels from top of the window */
-  top: number;
+	/** Number of pixels from top of the window */
+	top: number;
 
-  /** Number of pixels from the right side of window */
-  right: number;
+	/** Number of pixels from the right side of window */
+	right: number;
 
-  /** Number of pixels from the bottom of the window */
-  bottom: number;
+	/** Number of pixels from the bottom of the window */
+	bottom: number;
 };
 ```
 

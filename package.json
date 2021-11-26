@@ -1,6 +1,6 @@
 {
 	"name": "svelte-drag",
-	"version": "2.3.1",
+	"version": "2.3.2",
 	"description": "Svelte Action to add dragging to your apps 😉",
 	"main": "dist/index.cjs",
 	"module": "dist/index.js",
