@@ -11,6 +11,7 @@
 
   let options: DragOptions;
   $: options = {
+    ignoreMultitouch: false,
     applyUserSelectHack: true,
     axis: 'both',
     cancel: '.cancel',
@@ -135,6 +136,13 @@
       <label>
         Disabled
         <input type="checkbox" bind:checked={options.disabled} />
+      </label>
+    </div>
+
+    <div>
+      <label>
+        Ignore Multitouch
+        <input type="checkbox" bind:checked={options.ignoreMultitouch} />
       </label>
     </div>
 
