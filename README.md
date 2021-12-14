@@ -196,6 +196,20 @@ Example 👇
 
 Applies `user-select: none` on `<body />` element when dragging, to prevent the irritating effect where dragging doesn't happen and the text is selected. Applied when dragging starts and removed when it stops.
 
+## ignoreMultitouch
+
+**type**: `boolean`
+
+**Default value**: `false`
+
+Ignores touch events with more than 1 touch.
+This helps when you have multiple elements on a canvas where you want to implement pinch-to-zoom behaviour.
+
+```svelte
+<!-- Ignore Multitouch -->
+<div use:draggable={{ ignoreMultitouch: true }}>Text</div>
+```
+
 ## disabled
 
 **type**: `boolean`
