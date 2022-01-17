@@ -17,12 +17,11 @@
 		"require": "./dist/index.cjs"
 	},
 	"scripts": {
-		"test": "jest test",
+		"test": "vitest test",
 		"test:watch": "pnpm run test -- --watch",
 		"watch": "tsup --watch",
 		"prepublishOnly": "tsup",
-		"pub": "pnpm publish",
-		"format": "prettier --write --plugin-search-dir=. '**/*.{js,ts,tsx,json,svelte,html}'"
+		"pub": "pnpm publish"
 	},
 	"repository": {
 		"type": "git",
@@ -45,19 +44,16 @@
 	},
 	"homepage": "https://github.com/PuruVJ/svelte-drag#readme",
 	"devDependencies": {
-		"@babel/preset-env": "^7.16.4",
-		"@testing-library/jest-dom": "^5.15.1",
+		"@sveltejs/vite-plugin-svelte": "^1.0.0-next.34",
+		"@testing-library/dom": "^8.11.2",
+		"@testing-library/jest-dom": "^5.16.1",
 		"@testing-library/svelte": "^3.0.3",
-		"babel-jest": "^27.3.1",
-		"jest": "^27.3.1",
-		"prettier": "^2.4.1",
-		"prettier-plugin-svelte": "^2.5.0",
-		"svelte": "^3.44.2",
-		"svelte-jester": "^2.1.5",
-		"svelte-preprocess": "^4.9.8",
-		"ts-jest": "^27.0.7",
-		"tsm": "^2.1.4",
-		"tsup": "^5.9.2",
-		"typescript": "^4.5.2"
+		"jsdom": "^19.0.0",
+		"svelte": "^3.46.2",
+		"svelte-preprocess": "^4.10.1",
+		"tsup": "^5.11.11",
+		"typescript": "^4.5.4",
+		"vite": "^2.7.12",
+		"vitest": "^0.1.18"
 	}
 }

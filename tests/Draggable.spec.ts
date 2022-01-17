@@ -1,5 +1,3 @@
-import '@testing-library/jest-dom';
-
 import { render } from '@testing-library/svelte';
 
 import Draggable from './components/Draggable.svelte';
