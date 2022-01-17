@@ -17,8 +17,8 @@
 		"require": "./dist/index.cjs"
 	},
 	"scripts": {
-		"test": "vitest test",
-		"test:watch": "pnpm run test -- --watch",
+		"test": "vitest run test",
+		"test:watch": "vitest test",
 		"watch": "tsup --watch",
 		"prepublishOnly": "tsup",
 		"pub": "pnpm publish"
