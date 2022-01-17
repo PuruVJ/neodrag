@@ -1,7 +1,5 @@
 import '@testing-library/jest-dom';
-
 import { render } from '@testing-library/svelte';
-
 import HandleDraggable from './components/HandleDraggable.svelte';
 import { drag, touchDrag } from './testHelpers';
 
