@@ -7,7 +7,8 @@
 		"declarationDir": "dist/",
 		"strict": true,
 		"esModuleInterop": true,
-		"moduleResolution": "Node"
+		"moduleResolution": "Node",
+		"types": ["vitest/global"]
 	},
 	"files": ["./src/index.ts"]
 }

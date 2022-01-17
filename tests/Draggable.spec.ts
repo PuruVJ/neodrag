@@ -1,5 +1,6 @@
 import { render } from '@testing-library/svelte';
-
+import { vi } from 'vitest';
+import '@testing-library/jest-dom';
 import Draggable from './components/Draggable.svelte';
 import { drag, touchDrag } from './testHelpers';
 
@@ -109,7 +110,7 @@ describe('Draggable', () => {
 				},
 			});
 
-			HTMLElement.prototype.getBoundingClientRect = jest.fn(() => boundary as any);
+			HTMLElement.prototype.getBoundingClientRect = vi.fn(() => boundary as any);
 
 			Object.assign(window, {
 				innerWidth: 200,
