@@ -16,7 +16,7 @@ export type DragBoundsCoords = {
 
 export type DragAxis = 'both' | 'x' | 'y' | 'none';
 
-export type DragBounds = 'parent' | Partial<DragBoundsCoords> | string;
+export type DragBounds = 'parent' | Partial<DragBoundsCoords> | (string & { _: never });
 
 export type DragOptions = {
 	/**
@@ -282,6 +282,8 @@ const DEFAULT_CLASS = {
 	DRAGGED: 'svelte-draggable-dragged',
 };
 
+let needForRAF = true;
+
 export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let {
 		bounds,
@@ -308,6 +310,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		onDrag,
 		onDragEnd,
 	} = options;
+
+	const tick = new Promise(requestAnimationFrame);
 
 	let active = false;
 
@@ -388,7 +392,9 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		canMoveInY = ['both', 'y'].includes(axis);
 
 		// Compute bounds
-		if (typeof bounds !== 'undefined') computedBounds = computeBoundRect(bounds, node);
+		if (typeof bounds !== 'undefined') {
+			computedBounds = computeBoundRect(bounds, node);
+		}
 
 		// Compute current node's bounding client Rectangle
 		nodeRect = node.getBoundingClientRect();
@@ -429,8 +435,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		}
 	}
 
-	function dragEnd(e: MouseEvent | TouchEvent) {
-		if (disabled) return;
+	function dragEnd() {
 		if (!active) return;
 
 		// Apply class defaultClassDragged
@@ -473,8 +478,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 				bottom: computedBounds.bottom + clientToNodeOffsetY - nodeRect.height,
 			};
 
-			finalX = Math.min(Math.max(finalX, virtualClientBounds.left), virtualClientBounds.right);
-			finalY = Math.min(Math.max(finalY, virtualClientBounds.top), virtualClientBounds.bottom);
+			finalX = clamp(finalX, virtualClientBounds.left, virtualClientBounds.right);
+			finalY = clamp(finalY, virtualClientBounds.top, virtualClientBounds.bottom);
 		}
 
 		if (Array.isArray(grid)) {
@@ -505,7 +510,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		fireSvelteDragEvent(node, translateX, translateY);
 
-		Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
+		tick.then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
+		// Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
 	}
 
 	return {
@@ -548,7 +554,10 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 				xOffset = translateX = options.position?.x ?? translateX;
 				yOffset = translateY = options.position?.y ?? translateY;
 
-				Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
+				if (needForRAF) {
+					needForRAF = false; // no need to call rAF up until next frame
+					requestAnimationFrame(() => setTranslate(translateX, translateY, node, gpuAcceleration)); // request 60fps animation
+				}
 			}
 		},
 	};
@@ -556,6 +565,10 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 function isTouchEvent(event: MouseEvent | TouchEvent): event is TouchEvent {
 	return Boolean((event as TouchEvent).touches && (event as TouchEvent).touches.length);
+}
+
+function clamp(val: number, min: number, max: number) {
+	return Math.min(Math.max(val, min), max);
 }
 
 function isString(val: unknown): val is string {
@@ -610,19 +623,24 @@ function computeBoundRect(bounds: string | Partial<DragBoundsCoords>, rootNode: 
 	}
 
 	// It's a string
-	if (bounds === 'parent') return (rootNode.parentNode as HTMLElement).getBoundingClientRect();
+	if (bounds === 'parent') {
+		const boundRect = (<HTMLElement>rootNode.parentNode).getBoundingClientRect();
+		return boundRect;
+	}
 
 	const node = document.querySelector<HTMLElement>(bounds);
 
 	if (node === null)
 		throw new Error("The selector provided for bound doesn't exists in the document.");
 
-	const computedBounds = node!.getBoundingClientRect();
+	const computedBounds = node.getBoundingClientRect();
 
 	return computedBounds;
 }
 
 function setTranslate(xPos: number, yPos: number, el: HTMLElement, gpuAcceleration: boolean) {
+	needForRAF = true; // rAF now consumes the movement instruction so a new one can come
+
 	el.style.transform = gpuAcceleration
 		? `translate3d(${+xPos}px, ${+yPos}px, 0)`
 		: `translate(${+xPos}px, ${+yPos}px)`;
