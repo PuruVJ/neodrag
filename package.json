@@ -2,18 +2,18 @@
 	"name": "svelte-drag",
 	"version": "3.0.0-beta.0",
 	"description": "Svelte Action to add dragging to your apps 😉",
-	"main": "dist/index.js",
-	"module": "dist/index.js",
+	"main": "index.js",
+	"module": "index.js",
 	"type": "module",
-	"types": "dist/index.d.ts",
+	"types": "index.d.ts",
 	"files": [
 		"*"
 	],
 	"sideEffects": false,
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
-			"module": "./dist/index.js"
+			"import": "./index.js",
+			"module": "./index.js"
 		},
 		"./package.json": "./package.json"
 	},
