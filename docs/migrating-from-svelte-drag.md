@@ -4,7 +4,7 @@
 
 ```bash
 npm un svelte-drag
-npm install @neodrag/svelte-drag
+npm install @neodrag/svelte
 ```
 
 And change the imports `import {draggable} from 'svelte-drag'` to `import {draggable} from '@neodrag/svelte'`
