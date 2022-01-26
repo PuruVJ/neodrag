@@ -10,7 +10,9 @@
 	},
 	"scripts": {
 		"dev": "pnpm dev -r",
-		"build": "pnpm build -r"
+		"build": "pnpm build -r",
+		"pub": "pnpm pub -r",
+		"pub:dry": "pnpm pub:dry -r"
 	},
 	"repository": {
 		"type": "git",
