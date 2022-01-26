@@ -4,13 +4,13 @@ specifiers:
   '@sveltejs/adapter-static': ^1.0.0-next.21
   '@sveltejs/kit': ^1.0.0-next.199
   svelte: ^3.44.2
-  svelte-drag: ^1.5.1
+  svelte-drag: ^2.4.0
   svelte-preprocess: ^4.9.8
   svelte2tsx: ^0.4.10
   typescript: ^4.5.2
 
 dependencies:
-  svelte-drag: 1.5.1
+  svelte-drag: 2.4.0
 
 devDependencies:
   '@sveltejs/adapter-static': 1.0.0-next.21
@@ -528,8 +528,8 @@ packages:
       min-indent: 1.0.1
     dev: true
 
-  /svelte-drag/1.5.1:
-    resolution: {integrity: sha512-FY+4IfuTzu+qxpxXmosdL7EWzuSCR+IQOLPKcTIIVvo0uqw1W1ot3ENj9j3YYPwH8Nx3XraEJj1zD7bncC0uEA==}
+  /svelte-drag/2.4.0:
+    resolution: {integrity: sha512-9WY3L1Y+3sAHufb4e7Ml4zHZWkTXL8DfB3NYovOL1ygImBFuMfHEhoeqo/qpWSU/wjO53nzn+T3nu9lHqATAyg==}
     dev: false
 
   /svelte-hmr/0.14.7_svelte@3.44.2:

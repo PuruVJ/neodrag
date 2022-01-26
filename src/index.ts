@@ -246,18 +246,18 @@ export type DragOptions = {
 	defaultClassDragged?: string;
 
 	/**
-   * Offsets your element to the position you specify in the very beginning.
-   * `x` and `y` should be in pixels
-   *
-   
-   *
-   * @example
-   * <!-- Place the element at (300, 200) at the very beginning -->
-   * <div use:draggable={{ defaultPosition: { x: 300; y: 200 } }}>
-   *   Hello
-   * </div>
-   * ```
-   */
+	 * Offsets your element to the position you specify in the very beginning.
+	 * `x` and `y` should be in pixels
+	 *
+	 *
+	 *
+	 * @example
+	 * <!-- Place the element at (300, 200) at the very beginning -->
+	 * <div use:draggable={{ defaultPosition: { x: 300; y: 200 } }}>
+	 *   Hello
+	 * </div>
+	 * ```
+	 */
 	defaultPosition?: { x: number; y: number };
 
 	/**
@@ -321,7 +321,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	// The offset of the client position relative to the node's top-left corner
 	let [clientToNodeOffsetX, clientToNodeOffsetY] = [0, 0];
 
-	let [xOffset, yOffset] = [defaultPosition.x, defaultPosition.y];
+	let { x: xOffset, y: yOffset } = { x: position?.x ?? 0, y: position?.y ?? 0 } ?? defaultPosition;
 
 	setTranslate(xOffset, yOffset, node, gpuAcceleration);
 
@@ -554,10 +554,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 				xOffset = translateX = options.position?.x ?? translateX;
 				yOffset = translateY = options.position?.y ?? translateY;
 
-				if (needForRAF) {
-					needForRAF = false; // no need to call rAF up until next frame
-					requestAnimationFrame(() => setTranslate(translateX, translateY, node, gpuAcceleration)); // request 60fps animation
-				}
+				tick.then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
 			}
 		},
 	};

@@ -30,8 +30,8 @@
 
   // $: console.log(options);
 
-  let progressY = tweened(0, { easing: sineIn });
-  let progressX = tweened(0, { easing: sineIn });
+  let progressY = tweened(0, { easing: sineIn, duration: 0 });
+  let progressX = tweened(100, { easing: sineIn, duration: 0 });
 
   const minScale = 0.25;
   const maxScale = 4;
@@ -193,12 +193,14 @@
       use:draggable={{
         position: { y: $progressY, x: $progressX },
         onDrag: ({ offsetX, offsetY }) => {
+          $progressX = 0;
+          $progressY = 0;
           progressX.set(offsetX, { duration: 0 });
           progressY.set(offsetY, { duration: 0 });
         },
         onDragEnd: ({}) => {
-          $progressX = 0;
-          $progressY = 0;
+          progressX.set(0, { duration: 300 });
+          progressY.set(0, { duration: 300 });
         },
       }}
       class="box"
