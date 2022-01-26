@@ -263,17 +263,17 @@ export type DragOptions = {
 	/**
 	 * Fires when dragging start
 	 */
-	onDragStart?: (data: { offsetX: number; offsetY: number }) => void;
+	onDragStart?: (data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void;
 
 	/**
 	 * Fires when dragging is going on
 	 */
-	onDrag?: (data: { offsetX: number; offsetY: number }) => void;
+	onDrag?: (data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void;
 
 	/**
 	 * Fires when dragging ends
 	 */
-	onDragEnd?: (data: { offsetX: number; offsetY: number }) => void;
+	onDragEnd?: (data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void;
 };
 
 const DEFAULT_CLASS = {
@@ -339,21 +339,33 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let isControlled = !!position;
 
 	function fireSvelteDragStartEvent(node: HTMLElement) {
-		const data = { offsetX: translateX, offsetY: translateY };
+		const data = {
+			offsetX: translateX,
+			offsetY: translateY,
+			domRect: node.getBoundingClientRect(),
+		};
 
 		node.dispatchEvent(new CustomEvent('svelte-drag:start', { detail: data }));
 		onDragStart?.(data);
 	}
 
 	function fireSvelteDragStopEvent(node: HTMLElement) {
-		const data = { offsetX: translateX, offsetY: translateY };
+		const data = {
+			offsetX: translateX,
+			offsetY: translateY,
+			domRect: node.getBoundingClientRect(),
+		};
 
 		node.dispatchEvent(new CustomEvent('svelte-drag:end', { detail: data }));
 		onDragEnd?.(data);
 	}
 
 	function fireSvelteDragEvent(node: HTMLElement, translateX: number, translateY: number) {
-		const data = { offsetX: translateX, offsetY: translateY };
+		const data = {
+			offsetX: translateX,
+			offsetY: translateY,
+			domRect: node.getBoundingClientRect(),
+		};
 
 		node.dispatchEvent(new CustomEvent('svelte-drag', { detail: data }));
 		onDrag?.(data);
