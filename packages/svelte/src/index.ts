@@ -230,23 +230,23 @@ export type DragOptions = {
 
 	/**
 	 * Class to apply on the element on which `use:draggable` is applied.
-	 * Note that if `handle` is provided, it will still apply class on the parent element, **NOT** the handle
+	 * Note that if `handle` is provided, it will still apply class on the element to which this action is applied, **NOT** the handle
 	 *
-	 * @default 'svelte-draggable'
+	 * neodrag'
 	 */
 	defaultClass?: string;
 
 	/**
-	 * Class to apply on the parent element when it is dragging
+	 * Class to apply on the element when it is dragging
 	 *
-	 * @default 'svelte-draggable-dragging'
+	 * @default 'neodrag-dragging'
 	 */
 	defaultClassDragging?: string;
 
 	/**
-	 * Class to apply on the parent element if it has been dragged at least once.
+	 * Class to apply on the element if it has been dragged at least once.
 	 *
-	 * @default 'svelte-draggable-dragged'
+	 * @default 'neodrag-dragged'
 	 */
 	defaultClassDragged?: string;
 
@@ -279,11 +279,11 @@ export type DragOptions = {
 	onDragEnd?: (data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void;
 };
 
-const DEFAULT_CLASS = {
-	MAIN: 'svelte-draggable',
-	DRAGGING: 'svelte-draggable-dragging',
-	DRAGGED: 'svelte-draggable-dragged',
-};
+const enum DEFAULT_CLASS {
+	MAIN = 'neodrag',
+	DRAGGING = 'neodrag-dragging',
+	DRAGGED = 'neodrag-dragged',
+}
 
 export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let {
@@ -347,21 +347,21 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	function fireSvelteDragStartEvent(node: HTMLElement) {
 		const data = getEventData();
-		node.dispatchEvent(new CustomEvent('svelte-drag:start', { detail: data }));
+		node.dispatchEvent(new CustomEvent('neodrag:start', { detail: data }));
 		onDragStart?.(data);
 	}
 
 	function fireSvelteDragStopEvent(node: HTMLElement) {
 		const data = getEventData();
 
-		node.dispatchEvent(new CustomEvent('svelte-drag:end', { detail: data }));
+		node.dispatchEvent(new CustomEvent('neodrag:end', { detail: data }));
 		onDragEnd?.(data);
 	}
 
 	function fireSvelteDragEvent(node: HTMLElement) {
 		const data = getEventData();
 
-		node.dispatchEvent(new CustomEvent('svelte-drag', { detail: data }));
+		node.dispatchEvent(new CustomEvent('neodrag', { detail: data }));
 		onDrag?.(data);
 	}
 

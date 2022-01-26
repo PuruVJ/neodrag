@@ -1,0 +1,22 @@
+{
+  "name": "svelte-drag-demo",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "svelte-kit dev",
+    "build": "svelte-kit build",
+    "preview": "svelte-kit preview"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "^1.0.0-next.26",
+    "@sveltejs/kit": "^1.0.0-next.242",
+    "svelte": "^3.46.2",
+    "svelte-preprocess": "^4.10.2",
+    "svelte2tsx": "^0.4.14",
+    "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "@neodrag/svelte": "workspace:*"
+  }
+}

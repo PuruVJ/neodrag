@@ -1,13 +1,11 @@
 export declare namespace svelte.JSX {
 	interface HTMLAttributes {
-		'onsvelte-drag:start'?: (
+		'onneodrag:start'?: (
 			e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>
 		) => void;
-		'onsvelte-drag:end'?: (
+		'onneodrag:end'?: (
 			e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>
 		) => void;
-		'onsvelte-drag'?: (
-			e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>
-		) => void;
+		onneodrag?: (e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>) => void;
 	}
 }

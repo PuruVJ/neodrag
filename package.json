@@ -1,61 +1,29 @@
 {
-	"name": "svelte-drag",
-	"version": "3.1.0",
-	"description": "Svelte Action to add dragging to your apps 😉",
-	"main": "index.js",
-	"module": "index.js",
+	"name": "neodrag",
+	"version": "1.0.0",
+	"description": "",
+	"private": true,
 	"type": "module",
-	"types": "index.d.ts",
-	"files": [
-		"*"
-	],
-	"sideEffects": false,
-	"exports": {
-		".": {
-			"import": "./index.js",
-			"module": "./index.js"
-		},
-		"./package.json": "./package.json"
-	},
 	"scripts": {
-		"test": "vitest run test",
-		"test:watch": "vitest test",
-		"watch": "tsup --watch",
-		"build": "tsup && cd scripts && tsm post.ts",
-		"pub": "pnpm build && cd dist && pnpm publish --no-git-checks"
+		"dev": "pnpm dev -r",
+		"build": "pnpm build -r",
+		"pub": "pnpm pub -r",
+		"pub:dry": "pnpm pub:dry -r"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/PuruVJ/svelte-drag.git"
 	},
-	"keywords": [
-		"draggable",
-		"svelte",
-		"react-draggable",
-		"drag",
-		"svelte",
-		"small",
-		"tiny",
-		"performant"
-	],
-	"author": "Puru Vijay",
+	"keywords": [],
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/PuruVJ/svelte-drag/issues"
+		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"homepage": "https://github.com/PuruVJ/svelte-drag#readme",
+	"homepage": "https://github.com/PuruVJ/neodrag#readme",
 	"devDependencies": {
-		"@sveltejs/vite-plugin-svelte": "^1.0.0-next.34",
-		"@testing-library/dom": "^8.11.2",
-		"@testing-library/jest-dom": "^5.16.1",
-		"@testing-library/svelte": "^3.0.3",
 		"jsdom": "^19.0.0",
 		"svelte": "^3.46.2",
-		"svelte-preprocess": "^4.10.1",
-		"tsm": "^2.2.1",
-		"tsup": "^5.11.11",
-		"typescript": "^4.5.4",
-		"vite": "^2.7.12",
-		"vitest": "^0.1.18"
+		"typescript": "^4.5.5",
+		"vite": "^2.7.13"
 	}
 }

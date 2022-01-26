@@ -1,0 +1,53 @@
+{
+	"name": "@neodrag/svelte",
+	"version": "1.0.0",
+	"description": "Svelte Action to add dragging to your apps 😉",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist/*"
+	],
+	"sideEffects": false,
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"module": "./dist/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"test": "vitest run test",
+		"test:watch": "vitest test",
+		"dev": "tsup --watch",
+		"build": "tsup ",
+		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
+		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PuruVJ/svelte-drag.git"
+	},
+	"keywords": [
+		"draggable",
+		"svelte",
+		"react-draggable",
+		"drag",
+		"svelte",
+		"small",
+		"tiny",
+		"performant",
+		"neodrag"
+	],
+	"author": "Puru Vijay",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/PuruVJ/svelte-drag/issues"
+	},
+	"homepage": "https://github.com/PuruVJ/svelte-drag#readme",
+	"devDependencies": {
+		"svelte-preprocess": "^4.10.2",
+		"tsup": "^5.11.11"
+	}
+}
