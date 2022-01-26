@@ -66,7 +66,7 @@ Defining options elsewhere with typescript
 
 # Options
 
-There's tons of options available for this package. All of them are already documented within the code itself, so you'll never have to leave the code editor.
+There are tons of options available for this package. All of them are already documented within the code itself, so you'll never have to leave the code editor.
 
 ## axis
 
