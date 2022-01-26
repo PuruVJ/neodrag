@@ -9,13 +9,15 @@
 
   let boundToBody = false;
 
+  let handleEl: HTMLElement;
+
   let options: DragOptions;
   $: options = {
     ignoreMultitouch: false,
     applyUserSelectHack: true,
     axis: 'both',
     cancel: '.cancel',
-    handle: '.handle',
+    handle: handleEl,
     defaultClass: 'svelte-drag',
     defaultClassDragged: 'svelte-dragged',
     defaultClassDragging: 'svelte-dragging',
@@ -25,7 +27,7 @@
     // grid: [100, 100],
     // bounds: boundToBody ? 'body' : undefined,
     // bounds: { top: 100, left: 100, right: 100, bottom: 40 },
-    // bounds: 'parent',
+    // bounds: 'body',
   } as DragOptions;
 
   // $: console.log(options);
@@ -159,7 +161,7 @@
     <div use:draggable={options} class="box">
       hello
 
-      <div class="handle">Le handel</div>
+      <div class="handle" bind:this={handleEl}>Le handel</div>
       <div class="cancel">Cancel</div>
 
       <div class="handle-2">Le handel 2</div>
@@ -169,7 +171,7 @@
 
   <div class="canvas" style="transform: scale({scale});">
     <div
-      use:draggable={{ ...options }}
+      use:draggable={{ cancel: '.cancel', bounds: document.body }}
       on:svelte-drag={(e) => {
         progressX.set(e.detail.offsetX);
         progressY.set(e.detail.offsetY);

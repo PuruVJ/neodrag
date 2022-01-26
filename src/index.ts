@@ -16,7 +16,12 @@ export type DragBoundsCoords = {
 
 export type DragAxis = 'both' | 'x' | 'y' | 'none';
 
-export type DragBounds = 'parent' | Partial<DragBoundsCoords> | (string & { _: never });
+export type DragBounds =
+	| HTMLElement
+	| Partial<DragBoundsCoords>
+	| 'parent'
+	| 'body'
+	| (string & Record<never, never>);
 
 export type DragOptions = {
 	/**
@@ -204,7 +209,7 @@ export type DragOptions = {
 	 * </div>
 	 * ```
 	 */
-	cancel?: string;
+	cancel?: string | HTMLElement;
 
 	/**
 	 * CSS Selector of an element inside the parent node(on which `use:draggable` is applied).
@@ -221,7 +226,7 @@ export type DragOptions = {
 	 * </div>
 	 * ```
 	 */
-	handle?: string;
+	handle?: string | HTMLElement;
 
 	/**
 	 * Class to apply on the element on which `use:draggable` is applied.
@@ -353,7 +358,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		onDragEnd?.(data);
 	}
 
-	function fireSvelteDragEvent(node: HTMLElement, translateX: number, translateY: number) {
+	function fireSvelteDragEvent(node: HTMLElement) {
 		const data = getEventData();
 
 		node.dispatchEvent(new CustomEvent('svelte-drag', { detail: data }));
@@ -386,7 +391,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		node.classList.add(defaultClass);
 
-		dragEl = getDragEl(handle, node);
+		dragEl = getHandleEl(handle, node);
 		cancelEl = getCancelElement(cancel, node);
 
 		canMoveInX = ['both', 'x'].includes(axis);
@@ -507,7 +512,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		[xOffset, yOffset] = [translateX, translateY];
 
-		fireSvelteDragEvent(node, translateX, translateY);
+		fireSvelteDragEvent(node);
 
 		tick.then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
 		// Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
@@ -579,8 +584,10 @@ const snapToGrid = memoize(
 	}
 );
 
-function getDragEl(handle: string | undefined, node: HTMLElement) {
+function getHandleEl(handle: DragOptions['handle'], node: HTMLElement) {
 	if (!handle) return node;
+
+	if (handle instanceof HTMLElement) return handle;
 
 	// Valid!! Let's check if this selector exists or not
 	const handleEl = node.querySelector<HTMLElement>(handle);
@@ -592,8 +599,10 @@ function getDragEl(handle: string | undefined, node: HTMLElement) {
 	return handleEl!;
 }
 
-function getCancelElement(cancel: string | undefined, node: HTMLElement) {
+function getCancelElement(cancel: DragOptions['cancel'], node: HTMLElement) {
 	if (!cancel) return;
+
+	if (cancel instanceof HTMLElement) return cancel;
 
 	const cancelEl = node.querySelector<HTMLElement>(cancel);
 
@@ -605,7 +614,9 @@ function getCancelElement(cancel: string | undefined, node: HTMLElement) {
 	return cancelEl;
 }
 
-function computeBoundRect(bounds: string | Partial<DragBoundsCoords>, rootNode: HTMLElement) {
+function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
+	if (bounds instanceof HTMLElement) return bounds.getBoundingClientRect();
+
 	if (typeof bounds === 'object') {
 		// we have the left right etc
 		const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
@@ -619,18 +630,13 @@ function computeBoundRect(bounds: string | Partial<DragBoundsCoords>, rootNode: 
 	}
 
 	// It's a string
-	if (bounds === 'parent') {
-		const boundRect = (<HTMLElement>rootNode.parentNode).getBoundingClientRect();
-		return boundRect;
-	}
+	if (bounds === 'parent') return (<HTMLElement>rootNode.parentNode).getBoundingClientRect();
 
-	const node = document.querySelector<HTMLElement>(bounds);
-
+	const node = document.querySelector<HTMLElement>(<string>bounds);
 	if (node === null)
 		throw new Error("The selector provided for bound doesn't exists in the document.");
 
 	const computedBounds = node.getBoundingClientRect();
-
 	return computedBounds;
 }
 

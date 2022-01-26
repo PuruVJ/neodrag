@@ -121,13 +121,13 @@ let axis;
 
 ## bounds
 
-**type**: `'parent' | string | { top?: number; right?: number; bottom?: number; left?: number }`
+**type**: `HTMLElement | 'parent' | string | { top?: number; right?: number; bottom?: number; left?: number }`
 
 **Default Value**: `undefined`
 
 Optionally limit the drag area
 
-Accepts `parent` as prefixed value, and limits it to its parent.
+`parent`: Limit to parent
 
 Or, you can specify any selector and it will be bound to that.
 
@@ -139,6 +139,12 @@ These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bott
 If any of these properties are unspecified, they are assumed to be `0`.
 
 **Examples**:
+
+Bound to any element
+
+```svelte
+<div use:draggable={{ bounds: document.querySelector('.some-element') }}>Hello</div>
+```
 
 Bound to parent
 
@@ -240,7 +246,7 @@ Read more below in the **Controlled vs Uncontrolled** section.
 
 ## cancel
 
-**type**: `string`
+**type**: `string | HTMLElement`
 
 **Default value**: `undefined`
 
@@ -255,7 +261,7 @@ CSS Selector of an element inside the parent node(on which `use:draggable` is ap
 
 ## handle
 
-**type**: `string`
+**type**: `string | HTMLElement`
 
 **Default Value**: `undefined`
 
@@ -265,6 +271,13 @@ CSS Selector of an element inside the parent node(on which `use:draggable` is ap
 <div use:draggable={{ handle: '.handle' }}>
   You shall not drag!!🧙‍♂️
   <div class="handle">This will drag 😁</div>
+</div>
+```
+
+```svelte
+<div use:draggable={{ handle }}>
+  You shall not drag!!🧙‍♂️
+  <div class="handle" bind:this={handle}>This will drag 😁</div>
 </div>
 ```
 
@@ -343,11 +356,11 @@ Example:
 
 Event signatures:
 
-`on:svelte-drag:start`: `(e: CustomEvent<{offsetX: number; offsetY: number }>) => void`. Provides the initial offset when dragging starts, on the `e.detail` object.
+`on:svelte-drag:start`: `(e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>) => void`. Provides the initial offset when dragging starts, on the `e.detail` object.
 
-`on:svelte-drag:`: `(e: CustomEvent<{offsetX: number; offsetY: number }>) => void`. Provides how far the element has been dragged from it's original position in `x` and `y` coordinates on the `event.detail` object
+`on:svelte-drag:`: `(e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>`. Provides how far the element has been dragged from it's original position in `x` and `y` coordinates on the `event.detail` object
 
-`on:svelte-drag:end`: `(e: CustomEvent<{offsetX: number; offsetY: number }>) => void`. No internal state provided to `event.detail`. Provides the final offset when dragging ends, on the `e.detail` object.
+`on:svelte-drag:end`: `(e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>) => void`. No internal state provided to `event.detail`. Provides the final offset when dragging ends, on the `e.detail` object.
 
 ### Alternative
 
@@ -362,13 +375,13 @@ How to use events-as-options? The syntax is similar to the custom events one �
 ```svelte
 <div
   use:draggable={{
-    onDragStart: ({ offsetX, offsetY }) => {
+    onDragStart: ({ offsetX, offsetY, domRect }) => {
       // Do something
     },
-    onDrag: ({ offsetX, offsetY }) => {
+    onDrag: ({ offsetX, offsetY, domRect }) => {
       // Do something
     },
-    onDragEnd: ({ offsetX, offsetY }) => {
+    onDragEnd: ({ offsetX, offsetY, domRect }) => {
       // Do something
     },
 
