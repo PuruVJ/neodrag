@@ -21,8 +21,8 @@
 		"test": "vitest run test",
 		"test:watch": "vitest test",
 		"watch": "tsup --watch",
-		"prepublishOnly": "tsup && cd scripts && tsm post.ts",
-		"pub": "cd dist && pnpm publish"
+		"build": "tsup && cd scripts && tsm post.ts",
+		"pub": "pnpm build && cd dist && pnpm publish --no-git-checks"
 	},
 	"repository": {
 		"type": "git",
