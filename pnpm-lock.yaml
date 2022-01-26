@@ -14,11 +14,11 @@ importers:
 
   packages/svelte:
     specifiers:
-      svelte-preprocess: ^4.10.1
+      svelte-preprocess: ^4.10.2
       tsm: ^2.2.1
       tsup: ^5.11.11
-      typescript: ^4.5.4
-      vitest: ^0.1.18
+      typescript: ^4.5.5
+      vitest: ^0.1.27
     devDependencies:
       svelte-preprocess: 4.10.2_svelte@3.46.2+typescript@4.5.5
       tsm: 2.2.1
@@ -28,13 +28,13 @@ importers:
 
   packages/svelte/demo:
     specifiers:
-      '@neodrag/svelte': workspace:..
-      '@sveltejs/adapter-static': ^1.0.0-next.21
-      '@sveltejs/kit': ^1.0.0-next.199
-      svelte: ^3.44.2
-      svelte-preprocess: ^4.9.8
-      svelte2tsx: ^0.4.10
-      typescript: ^4.5.2
+      '@neodrag/svelte': workspace:*
+      '@sveltejs/adapter-static': ^1.0.0-next.26
+      '@sveltejs/kit': ^1.0.0-next.242
+      svelte: ^3.46.2
+      svelte-preprocess: ^4.10.2
+      svelte2tsx: ^0.4.14
+      typescript: ^4.5.5
     dependencies:
       '@neodrag/svelte': link:..
     devDependencies:
@@ -44,9 +44,6 @@ importers:
       svelte-preprocess: 4.10.2_svelte@3.46.2+typescript@4.5.5
       svelte2tsx: 0.4.14_svelte@3.46.2+typescript@4.5.5
       typescript: 4.5.5
-
-  packages/svelte/dist:
-    specifiers: {}
 
 packages:
 
