@@ -220,9 +220,9 @@ export type DragOptions = {
 	 *
 	 * @example
 	 * <!-- Grid has a handle element -->
-	 * <div use:draggable={{ handle: '.handel' }}>
+	 * <div use:draggable={{ handle: '.handle' }}>
 	 *   This won't drag
-	 *   <div class="handel">This sure will drag!!</div>
+	 *   <div class="handle">This sure will drag!!</div>
 	 * </div>
 	 * ```
 	 */
