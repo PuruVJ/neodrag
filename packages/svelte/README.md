@@ -26,6 +26,10 @@ npm install @neodrag/svelte
 yarn add @neodrag/svelte
 ```
 
+# Migrating from svelte-drag
+
+svelte-drag is the predecessor of this package. To migrate, follow this short guide: [svelte-drag to @neodrag/svelte migration guide](https://github.com/PuruVJ/neodrag/blob/main/docs/migrating-from-svelte-drag.md)
+
 # Usage
 
 Basic usage
