@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"module": "ESNext",
+		"target": "ESNext",
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		// "declarationDir": "dist/",
+		"allowJs": true,
+		"checkJs": true,
+		"resolveJsonModule": true,
+
+		"strict": true,
+		"esModuleInterop": true,
+		"moduleResolution": "Node"
+	},
+	"include": ["*"]
+}

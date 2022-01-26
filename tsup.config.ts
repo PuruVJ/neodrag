@@ -7,9 +7,9 @@ export default defineConfig({
 	sourcemap: true,
 	clean: true,
 	dts: { banner },
-	format: ['esm', 'cjs'],
+	format: ['esm'],
 	external: [],
 	entryPoints: ['src/index.ts'],
-	minify: false,
-	target: 'es2018',
+	minify: true,
+	target: 'es2021',
 });
