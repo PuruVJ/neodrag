@@ -249,8 +249,6 @@ export type DragOptions = {
 	 * Offsets your element to the position you specify in the very beginning.
 	 * `x` and `y` should be in pixels
 	 *
-	 *
-	 *
 	 * @example
 	 * <!-- Place the element at (300, 200) at the very beginning -->
 	 * <div use:draggable={{ defaultPosition: { x: 300; y: 200 } }}>
