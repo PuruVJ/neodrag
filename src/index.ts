@@ -498,8 +498,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 				deltaY
 			);
 
-			if (!deltaX && !deltaY) return;
-
 			[finalX, finalY] = [initialX + deltaX, initialY + deltaY];
 		}
 
