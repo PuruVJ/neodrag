@@ -1,7 +1,6 @@
 {
 	"name": "neodrag",
 	"version": "1.0.1",
-	"description": "",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -10,16 +9,6 @@
 		"pub": "pnpm pub -r",
 		"pub:dry": "pnpm pub:dry -r"
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/PuruVJ/svelte-drag.git"
-	},
-	"keywords": [],
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/PuruVJ/neodrag/issues"
-	},
-	"homepage": "https://github.com/PuruVJ/neodrag#readme",
 	"devDependencies": {
 		"jsdom": "^19.0.0",
 		"svelte": "^3.46.2",
