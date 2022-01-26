@@ -3,11 +3,9 @@
 //
 
 function memoize(fn, options) {
-	var cache = options && options.cache ? options.cache : cacheDefault;
-
-	var serializer = options && options.serializer ? options.serializer : serializerDefault;
-
-	var strategy = options && options.strategy ? options.strategy : strategyDefault;
+	var cache = options?.cache ?? cacheDefault;
+	var serializer = options?.serializer ?? serializerDefault;
+	var strategy = options?.strategy ?? strategyDefault;
 
 	return strategy(fn, {
 		cache: cache,
@@ -74,9 +72,7 @@ function strategyMonadic(fn, options) {
 // Serializer
 //
 
-function serializerDefault() {
-	return JSON.stringify(arguments);
-}
+const serializerDefault = JSON.stringify;
 
 //
 // Cache

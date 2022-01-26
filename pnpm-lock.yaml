@@ -8,6 +8,7 @@ specifiers:
   jsdom: ^19.0.0
   svelte: ^3.46.2
   svelte-preprocess: ^4.10.1
+  tsm: ^2.2.1
   tsup: ^5.11.11
   typescript: ^4.5.4
   vite: ^2.7.12
@@ -21,6 +22,7 @@ devDependencies:
   jsdom: 19.0.0
   svelte: 3.46.2
   svelte-preprocess: 4.10.1_svelte@3.46.2+typescript@4.5.4
+  tsm: 2.2.1
   tsup: 5.11.11_typescript@4.5.4
   typescript: 4.5.4
   vite: 2.7.12
@@ -1862,6 +1864,14 @@ packages:
 
   /ts-interface-checker/0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
+    dev: true
+
+  /tsm/2.2.1:
+    resolution: {integrity: sha512-qvJB0baPnxQJolZru11mRgGTdNlx17WqgJnle7eht3Vhb+VUR4/zFA5hFl6NqRe7m8BD9w/6yu0B2XciRrdoJA==}
+    engines: {node: '>=12'}
+    hasBin: true
+    dependencies:
+      esbuild: 0.14.11
     dev: true
 
   /tsup/5.11.11_typescript@4.5.4:
