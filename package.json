@@ -2,12 +2,8 @@
 	"name": "neodrag",
 	"version": "1.0.0",
 	"description": "",
+	"private": true,
 	"type": "module",
-	"devDependencies": {
-		"jsdom": "^19.0.0",
-		"svelte": "^3.46.2",
-		"vite": "^2.7.13"
-	},
 	"scripts": {
 		"dev": "pnpm dev -r",
 		"build": "pnpm build -r",
@@ -23,5 +19,11 @@
 	"bugs": {
 		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"homepage": "https://github.com/PuruVJ/neodrag#readme"
+	"homepage": "https://github.com/PuruVJ/neodrag#readme",
+	"devDependencies": {
+		"jsdom": "^19.0.0",
+		"svelte": "^3.46.2",
+		"typescript": "^4.5.5",
+		"vite": "^2.7.13"
+	}
 }

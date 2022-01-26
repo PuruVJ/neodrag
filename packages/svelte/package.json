@@ -21,8 +21,9 @@
 		"test": "vitest run test",
 		"test:watch": "vitest test",
 		"dev": "tsup --watch",
-		"build": "tsup && cd scripts && tsm post.ts",
-		"pub": "pnpm build && cd dist && pnpm publish --no-git-checks --access public"
+		"build": "tsup ",
+		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
+		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public"
 	},
 	"repository": {
 		"type": "git",
@@ -47,9 +48,6 @@
 	"homepage": "https://github.com/PuruVJ/svelte-drag#readme",
 	"devDependencies": {
 		"svelte-preprocess": "^4.10.2",
-		"tsm": "^2.2.1",
-		"tsup": "^5.11.11",
-		"typescript": "^4.5.5",
-		"vitest": "^0.1.27"
+		"tsup": "^5.11.11"
 	}
 }
