@@ -1,4 +1,4 @@
-# svelte-drag
+# @neodrag/svelte
 
 A lightweight Svelte Action to make your elements draggable.
 
@@ -6,7 +6,7 @@ Inspired from the amazing [react-draggable](https://github.com/react-grid-layout
 
 # Features
 
-- 🤏 Tiny - Only [2.2KB](https://bundlephobia.com/package/svelte-drag) min+gzip.
+- 🤏 Tiny - Only [2.2KB](https://bundlephobia.com/package/@neodrag/svelte) min+gzip.
 - 🐇 Simple - Quite simple to use, and effectively no-config required!
 - 🧙‍♀️ Elegant - Svelte Action, to keep the usage simple, elegant and expressive.
 - 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
@@ -17,13 +17,13 @@ Inspired from the amazing [react-draggable](https://github.com/react-grid-layout
 # Installing
 
 ```bash
-pnpm add svelte-drag
+pnpm add @neodrag/svelte
 
 # npm
-npm install svelte-drag
+npm install @neodrag/svelte
 
 # yarn
-yarn add svelte-drag
+yarn add @neodrag/svelte
 ```
 
 # Usage
@@ -32,7 +32,7 @@ Basic usage
 
 ```svelte
 <script>
-  import { draggable } from 'svelte-drag';
+  import { draggable } from '@neodrag/svelte';
 </script>
 
 <div use:draggable>Hello</div>
@@ -42,7 +42,7 @@ With options
 
 ```svelte
 <script>
-  import { draggable } from 'svelte-drag';
+  import { draggable } from '@neodrag/svelte';
 </script>
 
 <div use:draggable={{ axis: 'x', grid: [10, 10] }}>Hello</div>
@@ -52,8 +52,8 @@ Defining options elsewhere with typescript
 
 ```svelte
 <script lang="ts">
-  import { draggable } from 'svelte-drag';
-  import type { DragOptions } from 'svelte-drag';
+  import { draggable } from '@neodrag/svelte';
+  import type { DragOptions } from '@neodrag/svelte';
 
   let options: DragOptions = {
     axis: 'y',
@@ -285,7 +285,7 @@ CSS Selector of an element inside the parent node(on which `use:draggable` is ap
 
 **type**: `string`
 
-**Default Value**: `'svelte-draggable'`
+**Default Value**: `'neodrag'`
 
 Class to apply on the element on which `use:draggable` is applied. <br/><br/> Note that if `handle` is provided, it will still apply class on the parent element, **NOT** the handle
 
@@ -293,7 +293,7 @@ Class to apply on the element on which `use:draggable` is applied. <br/><br/> No
 
 **type**: `string`
 
-**Default Value**: `'svelte-draggable-dragging'`
+**Default Value**: `'neodrag-dragging'`
 
 Class to apply on the parent element when it is dragging
 
@@ -301,7 +301,7 @@ Class to apply on the parent element when it is dragging
 
 **type**: `string`
 
-**Default Value**: `'svelte-draggable-dragged'`
+**Default Value**: `'neodrag-dragged'`
 
 Class to apply on the parent element if it has been dragged at least once.
 
@@ -339,16 +339,16 @@ Fires when dragging ends.
 
 # Events
 
-`svelte-drag` emits 3 events, `on:svelte-drag`, `on:svelte-drag:start` & `on:svelte-drag:end`. These are all custom events, and can be listened on the node the `use:draggable` is applied to
+`@neodrag/svelte` emits 3 events, `on:neodrag`, `on:neodrag:start` & `on:neodrag:end`. These are all custom events, and can be listened on the node the `use:draggable` is applied to
 
 Example:
 
 ```svelte
 <div
   use:draggable
-  on:svelte-drag:start={(e) => console.log('Dragging started', e)}
-  on:svelte-drag={(e) => console.log(e.detail)}
-  on:svelte-drag:end={(e) => console.log('Dragging stopped', e)}
+  on:neodrag:start={(e) => console.log('Dragging started', e)}
+  on:neodrag={(e) => console.log(e.detail)}
+  on:neodrag:end={(e) => console.log('Dragging stopped', e)}
 >
   Hello
 </div>
@@ -356,11 +356,11 @@ Example:
 
 Event signatures:
 
-`on:svelte-drag:start`: `(e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>) => void`. Provides the initial offset when dragging starts, on the `e.detail` object.
+`on:neodrag:start`: `(e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>) => void`. Provides the initial offset when dragging starts, on the `e.detail` object.
 
-`on:svelte-drag:`: `(e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>`. Provides how far the element has been dragged from it's original position in `x` and `y` coordinates on the `event.detail` object
+`on:neodrag:`: `(e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>`. Provides how far the element has been dragged from it's original position in `x` and `y` coordinates on the `event.detail` object
 
-`on:svelte-drag:end`: `(e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>) => void`. No internal state provided to `event.detail`. Provides the final offset when dragging ends, on the `e.detail` object.
+`on:neodrag:end`: `(e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>) => void`. No internal state provided to `event.detail`. Provides the final offset when dragging ends, on the `e.detail` object.
 
 ### Alternative
 
@@ -390,9 +390,9 @@ How to use events-as-options? The syntax is similar to the custom events one �
 />
 ```
 
-Ultimately, this gives everyone a choice. non-TypeScript users will prefer the `on:svelte-drag:*` method because it is more idiomatic, and TypeScript users can go with events-as-options way to get better TS experience
+Ultimately, this gives everyone a choice. non-TypeScript users will prefer the `on:neodrag:*` method because it is more idiomatic, and TypeScript users can go with events-as-options way to get better TS experience
 
-> Note: Do not use same event in two different ways. I.E., having `on:svelte-drag:start` and `onDragStart` at once will have both fire at the time when dragging starts. Use only one at a time.
+> Note: Do not use same event in two different ways. I.E., having `on:neodrag:start` and `onDragStart` at once will have both fire at the time when dragging starts. Use only one at a time.
 
 If you're a TypeScript user, read on below 👇
 
@@ -405,7 +405,7 @@ This library ships with proper TypeScript typings, for the best Developer Experi
 This package exports these types you can use:
 
 ```ts
-import type { DragAxis, DragBounds, DragBoundsCoords, DragOptions } from 'svelte-drag';
+import type { DragAxis, DragBounds, DragBoundsCoords, DragOptions } from '@neodrag/svelte';
 ```
 
 `DragOptions` is the documented list of all options provided by the component.
@@ -442,7 +442,7 @@ Controlled means your app, using state variables, changes the position of the el
 
 OFC, this library doesn't go fully **Controlled**. The user can still drag it around even when `position` is set.
 
-So, when you change `position`, the element position changes. However, when the element is dragged by user interaction, `position` is not changed. This is done intentionally, as two-way data binding here isn't possible and also will lead to unexpected behavior. To keep the `position` variable up to date, use the `on:svelte-drag` event to keep your state up to date to the draggable's internal state.
+So, when you change `position`, the element position changes. However, when the element is dragged by user interaction, `position` is not changed. This is done intentionally, as two-way data binding here isn't possible and also will lead to unexpected behavior. To keep the `position` variable up to date, use the `on:neodrag` event to keep your state up to date to the draggable's internal state.
 
 To have it be strictly **Controlled**, meaning it can only be moved programmatically, add the `disabled` option to your draggable element's config
 
@@ -532,7 +532,7 @@ I'll be straight about this: I don't know how to write tests. I've tried, but no
 
 So I need your help. If you wish to contribute and can add tests here, it would be great for everyone using this! 🙂
 
-Specifications here: [#7](https://github.com/PuruVJ/svelte-drag/issues/7)
+Specifications here: [#7](https://github.com/PuruVJ/neodrag/issues/7)
 
 # License
 

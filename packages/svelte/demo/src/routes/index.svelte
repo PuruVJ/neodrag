@@ -1,26 +1,18 @@
 <script lang="ts">
   import { sineIn } from 'svelte/easing';
   import { tweened } from 'svelte/motion';
-  import type { DragOptions } from '../../../src';
-  import { draggable } from '../../../src';
 
-  // import { draggable } from 'svelte-drag';
-  // import type { Options } from 'svelte-drag';
+  import { draggable, DragOptions } from '@neodrag/svelte';
 
   let boundToBody = false;
-
   let handleEl: HTMLElement;
 
-  let options: DragOptions;
   $: options = {
     ignoreMultitouch: false,
     applyUserSelectHack: true,
     axis: 'both',
     cancel: '.cancel',
     handle: handleEl,
-    defaultClass: 'svelte-drag',
-    defaultClassDragged: 'svelte-dragged',
-    defaultClassDragging: 'svelte-dragging',
     defaultPosition: { x: 0, y: 0 },
     disabled: false,
     gpuAcceleration: true,
@@ -171,10 +163,13 @@
 
   <div class="canvas" style="transform: scale({scale});">
     <div
-      use:draggable={{ cancel: '.cancel', bounds: document.body }}
-      on:svelte-drag={(e) => {
-        progressX.set(e.detail.offsetX);
-        progressY.set(e.detail.offsetY);
+      use:draggable={{
+        cancel: '.cancel',
+        bounds: document.body,
+        onDrag: ({ offsetX, offsetY }) => {
+          progressX.set(offsetX);
+          progressY.set(offsetY);
+        },
       }}
       class="box"
     >

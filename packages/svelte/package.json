@@ -1,19 +1,19 @@
 {
 	"name": "@neodrag/svelte",
-	"version": "3.1.0",
+	"version": "1.0.0",
 	"description": "Svelte Action to add dragging to your apps 😉",
-	"main": "index.js",
-	"module": "index.js",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
 	"type": "module",
-	"types": "index.d.ts",
+	"types": "./dist/index.d.ts",
 	"files": [
-		"*"
+		"dist/*"
 	],
 	"sideEffects": false,
 	"exports": {
 		".": {
-			"import": "./index.js",
-			"module": "./index.js"
+			"import": "./dist/index.js",
+			"module": "./dist/index.js"
 		},
 		"./package.json": "./package.json"
 	},
@@ -36,7 +36,8 @@
 		"svelte",
 		"small",
 		"tiny",
-		"performant"
+		"performant",
+		"neodrag"
 	],
 	"author": "Puru Vijay",
 	"license": "MIT",
