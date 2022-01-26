@@ -10,6 +10,6 @@ export default defineConfig({
 	format: ['esm'],
 	external: [],
 	entryPoints: ['src/index.ts'],
-	minify: false,
+	minify: true,
 	target: 'es2021',
 });
