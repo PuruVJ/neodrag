@@ -385,17 +385,7 @@ If you're a TypeScript user, read on below 👇
 
 # TypeScript
 
-The events above are custom events, and hence, not recognized by the TypeScript compiler, so your editor will basically yell at you and say these events do not exist. For that, you need to create a `types.d.ts` file in the `source` folder of your project and the code below to it 👇
-
-```ts
-export declare namespace svelte.JSX {
-	interface HTMLAttributes<T> {
-		'onsvelte-drag:start'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
-		'onsvelte-drag:end'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
-		'onsvelte-drag'?: (e: CustomEvent<{ offsetX: number; offsetY: number }>) => void;
-	}
-}
-```
+This library ships with proper TypeScript typings, for the best Developer Experience, whether authoring JS or TS.
 
 ## Types Exported from package
 

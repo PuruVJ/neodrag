@@ -263,17 +263,17 @@ export type DragOptions = {
 	/**
 	 * Fires when dragging start
 	 */
-	onDragStart?: (data: { offsetX: number; offsetY: number }) => void;
+	onDragStart?: (data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void;
 
 	/**
 	 * Fires when dragging is going on
 	 */
-	onDrag?: (data: { offsetX: number; offsetY: number }) => void;
+	onDrag?: (data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void;
 
 	/**
 	 * Fires when dragging ends
 	 */
-	onDragEnd?: (data: { offsetX: number; offsetY: number }) => void;
+	onDragEnd?: (data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void;
 };
 
 const DEFAULT_CLASS = {
@@ -281,8 +281,6 @@ const DEFAULT_CLASS = {
 	DRAGGING: 'svelte-draggable-dragging',
 	DRAGGED: 'svelte-draggable-dragged',
 };
-
-let needForRAF = true;
 
 export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let {
@@ -338,22 +336,27 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	let isControlled = !!position;
 
-	function fireSvelteDragStartEvent(node: HTMLElement) {
-		const data = { offsetX: translateX, offsetY: translateY };
+	const getEventData = () => ({
+		offsetX: translateX,
+		offsetY: translateY,
+		domRect: node.getBoundingClientRect(),
+	});
 
+	function fireSvelteDragStartEvent(node: HTMLElement) {
+		const data = getEventData();
 		node.dispatchEvent(new CustomEvent('svelte-drag:start', { detail: data }));
 		onDragStart?.(data);
 	}
 
 	function fireSvelteDragStopEvent(node: HTMLElement) {
-		const data = { offsetX: translateX, offsetY: translateY };
+		const data = getEventData();
 
 		node.dispatchEvent(new CustomEvent('svelte-drag:end', { detail: data }));
 		onDragEnd?.(data);
 	}
 
 	function fireSvelteDragEvent(node: HTMLElement, translateX: number, translateY: number) {
-		const data = { offsetX: translateX, offsetY: translateY };
+		const data = getEventData();
 
 		node.dispatchEvent(new CustomEvent('svelte-drag', { detail: data }));
 		onDrag?.(data);
@@ -634,8 +637,6 @@ function computeBoundRect(bounds: string | Partial<DragBoundsCoords>, rootNode: 
 }
 
 function setTranslate(xPos: number, yPos: number, el: HTMLElement, gpuAcceleration: boolean) {
-	needForRAF = true; // rAF now consumes the movement instruction so a new one can come
-
 	el.style.transform = gpuAcceleration
 		? `translate3d(${+xPos}px, ${+yPos}px, 0)`
 		: `translate(${+xPos}px, ${+yPos}px)`;
