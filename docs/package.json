@@ -11,6 +11,7 @@
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^1.0.0-next.26",
 		"@sveltejs/kit": "^1.0.0-next.245",
+		"sass": "^1.49.0",
 		"svelte": "^3.46.3",
 		"svelte-check": "^2.3.0",
 		"svelte-preprocess": "^4.10.2",
