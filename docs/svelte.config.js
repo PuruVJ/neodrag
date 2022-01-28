@@ -1,15 +1,35 @@
-import { mdsvex } from 'mdsvex';
-import mdsvexConfig from './mdsvex.config.js';
+// @ts-check
 import adapter from '@sveltejs/adapter-static';
+import { escapeSvelte, mdsvex } from 'mdsvex';
+import { getHighlighter } from 'shiki';
 import preprocess from 'svelte-preprocess';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	extensions: ['.svelte', ...mdsvexConfig.extensions],
+	extensions: ['.svelte', '.svelte.md', '.md', '.svx'],
 
 	// Consult https://github.com/sveltejs/svelte-preprocess
 	// for more information about preprocessors
-	preprocess: [preprocess(), mdsvex(mdsvexConfig)],
+	preprocess: [
+		preprocess(),
+		mdsvex({
+			extensions: ['.svelte.md', '.md', '.svx'],
+
+			highlight: {
+				highlighter: async (code, lang) => {
+					const highlighter = await getHighlighter({ theme: 'material-palenight' });
+					const highlightedCode = escapeSvelte(
+						highlighter.codeToHtml(code.replace(/\t/g, '  '), { lang })
+					);
+
+					return `{@html \`${highlightedCode}\` }`;
+				}
+			},
+
+			remarkPlugins: [],
+			rehypePlugins: []
+		})
+	],
 
 	kit: {
 		adapter: adapter(),

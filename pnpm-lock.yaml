@@ -22,6 +22,7 @@ importers:
       '@sveltejs/kit': ^1.0.0-next.245
       mdsvex: ^0.9.8
       sass: ^1.49.0
+      shiki: ^0.10.0
       svelte: ^3.46.3
       svelte-check: ^2.3.0
       svelte-preprocess: ^4.10.2
@@ -31,6 +32,7 @@ importers:
       '@sveltejs/kit': 1.0.0-next.245_sass@1.49.0+svelte@3.46.3
       mdsvex: 0.9.8_svelte@3.46.3
       sass: 1.49.0
+      shiki: 0.10.0
       svelte: 3.46.3
       svelte-check: 2.3.0_sass@1.49.0+svelte@3.46.3
       svelte-preprocess: 4.10.2_093f8ff786550aac36c0d22cd6f35c57
@@ -1123,6 +1125,10 @@ packages:
       - utf-8-validate
     dev: true
 
+  /jsonc-parser/3.0.0:
+    resolution: {integrity: sha512-fQzRfAbIBnR0IQvftw9FJveWiHp72Fg20giDrHz6TdfB12UH/uue0D3hm57UB5KgAVuniLMCaS8P1IMj9NR7cA==}
+    dev: true
+
   /kleur/4.1.4:
     resolution: {integrity: sha512-8QADVssbrFjivHWQU7KkMgptGTl6WAcSdlbBPY4uNF+mWr6DGcKrvY2w4FQJoXch7+fKMjj0dRrL75vk3k23OA==}
     engines: {node: '>=6'}
@@ -1515,6 +1521,14 @@ packages:
   /shebang-regex/3.0.0:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
+    dev: true
+
+  /shiki/0.10.0:
+    resolution: {integrity: sha512-iczxaIYeBFHTFrQPb9DVy2SKgYxC4Wo7Iucm7C17cCh2Ge/refnvHscUOxM85u57MfLoNOtjoEFUWt9gBexblA==}
+    dependencies:
+      jsonc-parser: 3.0.0
+      vscode-oniguruma: 1.6.1
+      vscode-textmate: 5.2.0
     dev: true
 
   /signal-exit/3.0.6:
@@ -2023,6 +2037,14 @@ packages:
       - less
       - sass
       - stylus
+    dev: true
+
+  /vscode-oniguruma/1.6.1:
+    resolution: {integrity: sha512-vc4WhSIaVpgJ0jJIejjYxPvURJavX6QG41vu0mGhqywMkQqulezEqEQ3cO3gc8GvcOpX6ycmKGqRoROEMBNXTQ==}
+    dev: true
+
+  /vscode-textmate/5.2.0:
+    resolution: {integrity: sha512-Uw5ooOQxRASHgu6C7GVvUxisKXfSgW4oFlO+aa+PAkgmH89O3CXxEEzNRNtHSqtXFTl0nAC1uYj0GMSH27uwtQ==}
     dev: true
 
   /w3c-hr-time/1.0.2:

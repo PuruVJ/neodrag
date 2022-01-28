@@ -1,0 +1,9 @@
+# Hello
+
+```svelte
+<script>
+	import Hello from './Hello.svelte';
+</script>
+
+<Hello name="World" />
+```

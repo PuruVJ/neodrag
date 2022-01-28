@@ -11,12 +11,13 @@
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^1.0.0-next.26",
 		"@sveltejs/kit": "^1.0.0-next.245",
+		"mdsvex": "^0.9.8",
 		"sass": "^1.49.0",
+		"shiki": "^0.10.0",
 		"svelte": "^3.46.3",
 		"svelte-check": "^2.3.0",
 		"svelte-preprocess": "^4.10.2",
-		"typescript": "^4.5.5",
-		"mdsvex": "^0.9.8"
+		"typescript": "^4.5.5"
 	},
 	"type": "module"
 }
