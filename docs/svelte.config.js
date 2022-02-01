@@ -1,4 +1,3 @@
-// @ts-check
 import adapter from '@sveltejs/adapter-static';
 import { mdsvex } from 'mdsvex';
 import preprocess from 'svelte-preprocess';
@@ -16,7 +15,15 @@ const config = {
 		adapter: adapter(),
 
 		// hydrate the <div id="svelte"> element in src/app.html
-		target: '#svelte'
+		target: '#svelte',
+
+		vite: {
+			resolve: {
+				alias: {
+					'🐭': new URL('./src/', import.meta.url).pathname
+				}
+			}
+		}
 	}
 };
 

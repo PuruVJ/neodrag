@@ -1,0 +1,51 @@
+body {
+	--transition-duration: 0ms;
+}
+
+body,
+body.light {
+	--app-color-primary: #6002ee;
+	--app-color-primary-rgb: 96, 2, 238;
+	--app-color-primary-shade: #4301a7;
+	--app-color-primary-tint: #904ef3;
+	--app-color-primary-contrast: #ffffff;
+
+	--app-color-dark: #222428;
+	--app-color-dark-rgb: 34, 34, 34;
+	--app-color-dark-contrast: #ffffff;
+
+	--app-color-light: #f4f5f8;
+	--app-color-light-rgb: 244, 244, 244;
+	--app-color-light-contrast: #000000;
+
+	/* The background color of shell */
+	--app-color-shell: white;
+
+	/* heading font */
+	--heading-font-family: 'Satoshi', -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto,
+		'Helvetica Neue', Arial, sans-serif;
+	--main-font-family: var(--heading-font-family);
+}
+
+body.dark {
+	--app-color-primary: #52fee7;
+	--app-color-primary-hsl: 172, 99%, 66%;
+	--app-color-primary-shade: #75feec;
+	--app-color-primary-tint: #42cbb9;
+	--app-color-primary-contrast: #081917;
+
+	--app-color-dark: #f4f5f8;
+	--app-color-dark-rgb: 244, 245, 248;
+	--app-color-dark-contrast: #000000;
+	--app-color-dark-contrast-rgb: 0, 0, 0;
+
+	--app-color-medium: #989aa2;
+	--app-color-medium-rgb: 152, 154, 162;
+	--app-color-medium-contrast: #000000;
+
+	--app-color-light: #222428;
+	--app-color-light-rgb: 34, 36, 40;
+	--app-color-light-contrast: #ffffff;
+
+	--app-color-shell: #222428;
+}

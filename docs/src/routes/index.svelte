@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { theme } from '🐭/stores/theme.store';
 	import BS from '../docs/bs.svx';
+
+	console.log($theme);
 </script>
 
 <h1>Welcome to SvelteKit</h1>
