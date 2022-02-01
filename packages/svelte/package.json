@@ -48,6 +48,6 @@
 	"homepage": "https://github.com/PuruVJ/svelte-drag#readme",
 	"devDependencies": {
 		"svelte-preprocess": "^4.10.2",
-		"tsup": "^5.11.11"
+		"tsup": "^5.11.13"
 	}
 }

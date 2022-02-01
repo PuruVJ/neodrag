@@ -14,8 +14,5 @@ export default defineMDSveXConfig({
 
 			return `{@html \`${highlightedCode}\` }`;
 		}
-	},
-
-	remarkPlugins: [],
-	rehypePlugins: []
+	}
 });
