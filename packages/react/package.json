@@ -42,7 +42,7 @@
 		"build": "rollup -c",
 		"watch": "rollup -cw"
 	},
-	"dependencies": {
+	"devDependencies": {
 		"@neodrag/svelte": "workspace:*"
 	}
 }
