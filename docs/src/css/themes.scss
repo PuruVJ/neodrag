@@ -4,8 +4,8 @@ body {
 
 body,
 body.light {
-	--app-color-primary: #6002ee;
-	--app-color-primary-rgb: 96, 2, 238;
+	--app-color-primary: hsl(355, 52%, 48%);
+	--app-color-primary-hsl: 355, 52%, 48%;
 	--app-color-primary-shade: #4301a7;
 	--app-color-primary-tint: #904ef3;
 	--app-color-primary-contrast: #ffffff;
@@ -28,8 +28,8 @@ body.light {
 }
 
 body.dark {
-	--app-color-primary: #52fee7;
-	--app-color-primary-hsl: 172, 99%, 66%;
+	--app-color-primary: hsl(353, 95%, 69%);
+	--app-color-primary-hsl: 353, 95%, 69%;
 	--app-color-primary-shade: #75feec;
 	--app-color-primary-tint: #42cbb9;
 	--app-color-primary-contrast: #081917;

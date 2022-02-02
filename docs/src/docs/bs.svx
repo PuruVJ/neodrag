@@ -1,6 +1,6 @@
 # Hello
 
-```svelte
+```html
 <script lang="ts">
 	import Hello from './Hello.svelte';
 
