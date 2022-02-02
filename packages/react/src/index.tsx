@@ -1,32 +1,32 @@
 import { draggable, DragOptions } from '@neodrag/svelte';
 import React, { useEffect, useRef } from 'react';
 
-export const Draggable: React.FC<DragOptions> = ({ children }) => {
-	const divRef = useRef<HTMLDivElement>(null);
-	useDraggable(divRef);
+export const Draggable: React.FC<DragOptions> = ({ children, ...options }) => {
+	const draggableRef = useDraggable(options);
 
-	return <div ref={divRef}>{children}</div>;
+	return <div ref={draggableRef}>{children}</div>;
 };
 
-export function useDraggable<RefType extends HTMLElement>(
-	nodeRef: React.RefObject<RefType>,
+export function useDraggable<RefType extends HTMLElement = HTMLDivElement>(
 	options: DragOptions = {}
-) {
-	const update = useRef<(options: DragOptions) => void>();
+): React.RefObject<RefType> {
+	const nodeRef = useRef<RefType>(null);
+	const updateRef = useRef<(options: DragOptions) => void>();
 
 	useEffect(() => {
 		if (typeof window === 'undefined') return;
-		if (!nodeRef.current) return;
+		const node = nodeRef.current;
+		if (!node) return;
 
-		const dragInstance = draggable(nodeRef.current, options);
-		update.current = dragInstance.update;
+		const { update, destroy } = draggable(node, options);
+		updateRef.current = update;
 
-		return () => dragInstance.destroy();
+		return destroy;
 	}, []);
 
-	useEffect(() => {
-		update.current?.(options);
-	}, [options]);
+	useEffect(() => updateRef.current?.(options), [options]);
+
+	return nodeRef;
 }
 
 export type { DragAxis, DragBounds, DragBoundsCoords, DragOptions } from '@neodrag/svelte';

@@ -21,8 +21,8 @@
 	"scripts": {
 		"test": "vitest run test",
 		"test:watch": "vitest test",
-		"dev": "tsup --watch",
-		"build": "tsup ",
+		"dev": "rollup -cw",
+		"build": "rollup -c ",
 		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public"
 	},
@@ -46,9 +46,5 @@
 	"bugs": {
 		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"homepage": "https://github.com/PuruVJ/neodrag/packages/svelte#readme",
-	"devDependencies": {
-		"svelte-preprocess": "^4.10.2",
-		"tsup": "^5.11.11"
-	}
+	"homepage": "https://github.com/PuruVJ/neodrag/packages/svelte#readme"
 }

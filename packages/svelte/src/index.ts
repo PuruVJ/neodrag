@@ -316,11 +316,15 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	let active = false;
 
-	let [translateX, translateY] = [0, 0];
-	let [initialX, initialY] = [0, 0];
+	let translateX = 0,
+		translateY = 0;
+
+	let initialX = 0,
+		initialY = 0;
 
 	// The offset of the client position relative to the node's top-left corner
-	let [clientToNodeOffsetX, clientToNodeOffsetY] = [0, 0];
+	let clientToNodeOffsetX = 0,
+		clientToNodeOffsetY = 0;
 
 	let { x: xOffset, y: yOffset } = { x: position?.x ?? 0, y: position?.y ?? 0 } ?? defaultPosition;
 
@@ -339,30 +343,32 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	let isControlled = !!position;
 
+	// Arbitrary constants for better minification
+	const bodyStyle = document.body.style;
+	const nodeClassList = node.classList;
+
 	const getEventData = () => ({
 		offsetX: translateX,
 		offsetY: translateY,
 		domRect: node.getBoundingClientRect(),
 	});
 
-	function fireSvelteDragStartEvent(node: HTMLElement) {
+	const callEvent = (fn: typeof onDrag) => {
 		const data = getEventData();
-		node.dispatchEvent(new CustomEvent('neodrag:start', { detail: data }));
-		onDragStart?.(data);
-	}
-
-	function fireSvelteDragStopEvent(node: HTMLElement) {
-		const data = getEventData();
-
-		node.dispatchEvent(new CustomEvent('neodrag:end', { detail: data }));
-		onDragEnd?.(data);
-	}
-
-	function fireSvelteDragEvent(node: HTMLElement) {
-		const data = getEventData();
-
 		node.dispatchEvent(new CustomEvent('neodrag', { detail: data }));
-		onDrag?.(data);
+		fn?.(data);
+	};
+
+	function fireSvelteDragStartEvent() {
+		callEvent(onDragStart);
+	}
+
+	function fireSvelteDragStopEvent() {
+		callEvent(onDragEnd);
+	}
+
+	function fireSvelteDragEvent() {
+		callEvent(onDrag);
 	}
 
 	const listen = addEventListener;
@@ -389,13 +395,13 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		if (disabled) return;
 		if (ignoreMultitouch && e.type === 'touchstart' && (e as TouchEvent).touches.length > 1) return;
 
-		node.classList.add(defaultClass);
+		nodeClassList.add(defaultClass);
 
 		dragEl = getHandleEl(handle, node);
 		cancelEl = getCancelElement(cancel, node);
 
-		canMoveInX = ['both', 'x'].includes(axis);
-		canMoveInY = ['both', 'y'].includes(axis);
+		canMoveInX = /(both|x)/.test(axis);
+		canMoveInY = /(both|y)/.test(axis);
 
 		// Compute bounds
 		if (typeof bounds !== 'undefined') {
@@ -420,12 +426,12 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		if (applyUserSelectHack) {
 			// Apply user-select: none on body to prevent misbehavior
-			bodyOriginalUserSelectVal = document.body.style.userSelect;
-			document.body.style.userSelect = 'none';
+			bodyOriginalUserSelectVal = bodyStyle.userSelect;
+			bodyStyle.userSelect = 'none';
 		}
 
 		// Dispatch custom event
-		fireSvelteDragStartEvent(node);
+		fireSvelteDragStartEvent();
 
 		const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
 		const inverseScale = calculateInverseScale();
@@ -445,12 +451,12 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		if (!active) return;
 
 		// Apply class defaultClassDragged
-		node.classList.remove(defaultClassDragging);
-		node.classList.add(defaultClassDragged);
+		nodeClassList.remove(defaultClassDragging);
+		nodeClassList.add(defaultClassDragged);
 
-		if (applyUserSelectHack) document.body.style.userSelect = bodyOriginalUserSelectVal;
+		if (applyUserSelectHack) bodyStyle.userSelect = bodyOriginalUserSelectVal;
 
-		fireSvelteDragStopEvent(node);
+		fireSvelteDragStopEvent();
 
 		if (canMoveInX) initialX = translateX;
 		if (canMoveInX) initialY = translateY;
@@ -462,7 +468,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		if (!active) return;
 
 		// Apply class defaultClassDragging
-		node.classList.add(defaultClassDragging);
+		nodeClassList.add(defaultClassDragging);
 
 		e.preventDefault();
 
@@ -471,7 +477,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
 
 		// Get final values for clamping
-		let [finalX, finalY] = [clientX, clientY];
+		let finalX = clientX,
+			finalY = clientY;
 
 		const inverseScale = calculateInverseScale();
 
@@ -497,22 +504,26 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			if (isNaN(+ySnap) || ySnap < 0)
 				throw new Error('2nd argument of `grid` must be a valid positive number');
 
-			let [deltaX, deltaY] = [finalX - initialX, finalY - initialY];
+			let deltaX = finalX - initialX,
+				deltaY = finalY - initialY;
+
 			[deltaX, deltaY] = snapToGrid(
 				[Math.floor(xSnap / inverseScale), Math.floor(ySnap / inverseScale)],
 				deltaX,
 				deltaY
 			);
 
-			[finalX, finalY] = [initialX + deltaX, initialY + deltaY];
+			finalX = initialX + deltaX;
+			finalY = initialY + deltaY;
 		}
 
 		if (canMoveInX) translateX = (finalX - initialX) * inverseScale;
 		if (canMoveInY) translateY = (finalY - initialY) * inverseScale;
 
-		[xOffset, yOffset] = [translateX, translateY];
+		xOffset = translateX;
+		yOffset = translateY;
 
-		fireSvelteDragEvent(node);
+		fireSvelteDragEvent();
 
 		tick.then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
 		// Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
@@ -542,17 +553,17 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			grid = options.grid;
 			gpuAcceleration = options.gpuAcceleration ?? true;
 
-			const dragged = node.classList.contains(defaultClassDragged);
+			const dragged = nodeClassList.contains(defaultClassDragged);
 
-			node.classList.remove(defaultClass, defaultClassDragged);
+			nodeClassList.remove(defaultClass, defaultClassDragged);
 
 			defaultClass = options.defaultClass ?? DEFAULT_CLASS.MAIN;
 			defaultClassDragging = options.defaultClassDragging ?? DEFAULT_CLASS.DRAGGING;
 			defaultClassDragged = options.defaultClassDragged ?? DEFAULT_CLASS.DRAGGED;
 
-			node.classList.add(defaultClass);
+			nodeClassList.add(defaultClass);
 
-			if (dragged) node.classList.add(defaultClassDragged);
+			if (dragged) nodeClassList.add(defaultClassDragged);
 
 			if (isControlled) {
 				xOffset = translateX = options.position?.x ?? translateX;
@@ -564,22 +575,20 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	};
 };
 
-function isTouchEvent(event: MouseEvent | TouchEvent): event is TouchEvent {
-	return Boolean((event as TouchEvent).touches && (event as TouchEvent).touches.length);
-}
+const isTouchEvent = (event: MouseEvent | TouchEvent): event is TouchEvent =>
+	!!(event as TouchEvent).touches?.length;
 
-function clamp(val: number, min: number, max: number) {
-	return Math.min(Math.max(val, min), max);
-}
+const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max);
 
-function isString(val: unknown): val is string {
-	return typeof val === 'string';
-}
+const isString = (val: unknown): val is string => typeof val === 'string';
 
 const snapToGrid = memoize(
 	([xSnap, ySnap]: [number, number], pendingX: number, pendingY: number): [number, number] => {
-		const x = Math.round(pendingX / xSnap) * xSnap;
-		const y = Math.round(pendingY / ySnap) * ySnap;
+		const calc = (val: number, snap: number) => Math.round(val / snap) * snap;
+
+		const x = calc(pendingX, xSnap);
+		const y = calc(pendingY, ySnap);
+
 		return [x, y];
 	}
 );
@@ -619,12 +628,11 @@ function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) 
 
 	if (typeof bounds === 'object') {
 		// we have the left right etc
-		const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
 
 		const { top = 0, left = 0, right = 0, bottom = 0 } = bounds;
 
-		const computedRight = windowWidth - right;
-		const computedBottom = windowHeight - bottom;
+		const computedRight = window.innerWidth - right;
+		const computedBottom = window.innerHeight - bottom;
 
 		return { top, right: computedRight, bottom: computedBottom, left };
 	}

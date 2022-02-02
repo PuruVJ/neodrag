@@ -44,12 +44,5 @@
 	},
 	"dependencies": {
 		"@neodrag/svelte": "workspace:*"
-	},
-	"devDependencies": {
-		"@rollup/plugin-node-resolve": "^13.1.3",
-		"esbuild": "^0.14.17",
-		"rollup": "^2.67.0",
-		"rollup-plugin-dts": "^4.1.0",
-		"rollup-plugin-esbuild": "^4.8.2"
 	}
 }
