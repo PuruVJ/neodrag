@@ -404,6 +404,24 @@ If you're a TypeScript user, read on below 👇
 
 This library ships with proper TypeScript typings, for the best Developer Experience, whether authoring JS or TS.
 
+## Events
+
+To get proper TypeScript typing for the events, add this line to your root `globals.d.ts` file:
+
+```ts
+/// <reference types="@neodrag/svelte/globals" />
+```
+
+Or, add to `tsconfig.json`:
+
+```json
+{
+	"compilerOptions": {
+		"types": ["@neodrag/svelte/globals"]
+	}
+}
+```
+
 ## Types Exported from package
 
 This package exports these types you can use:
