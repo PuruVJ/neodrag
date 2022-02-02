@@ -2,15 +2,16 @@ import { draggable, DragOptions } from '@neodrag/svelte';
 import React, { useEffect, useRef } from 'react';
 
 export const Draggable: React.FC<DragOptions> = ({ children, ...options }) => {
-	const draggableRef = useDraggable(options);
+	const draggableRef = useRef<HTMLDivElement>(null);
+	useDraggable(draggableRef, options);
 
 	return <div ref={draggableRef}>{children}</div>;
 };
 
 export function useDraggable<RefType extends HTMLElement = HTMLDivElement>(
+	nodeRef: React.RefObject<RefType>,
 	options: DragOptions = {}
-): React.RefObject<RefType> {
-	const nodeRef = useRef<RefType>(null);
+) {
 	const updateRef = useRef<(options: DragOptions) => void>();
 
 	useEffect(() => {

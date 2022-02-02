@@ -3,7 +3,7 @@ import { useRef } from 'react';
 
 function App() {
 	const draggableRef = useRef<HTMLDivElement>(null);
-	useDraggable<HTMLDivElement>({ onDrag: (e) => console.log(e) });
+	useDraggable<HTMLDivElement>(draggableRef, { onDrag: (e) => console.log(e) });
 
 	return <div ref={draggableRef}>Hello</div>;
 }
