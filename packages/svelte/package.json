@@ -28,7 +28,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/PuruVJ/svelte-drag.git"
+		"url": "git+https://github.com/PuruVJ/neodrag.git"
 	},
 	"keywords": [
 		"draggable",
@@ -44,9 +44,9 @@
 	"author": "Puru Vijay",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/PuruVJ/svelte-drag/issues"
+		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"homepage": "https://github.com/PuruVJ/svelte-drag#readme",
+	"homepage": "https://github.com/PuruVJ/neodrag/packages/svelte#readme",
 	"devDependencies": {
 		"svelte-preprocess": "^4.10.2",
 		"tsup": "^5.11.11"
