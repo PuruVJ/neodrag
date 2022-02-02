@@ -1,0 +1,55 @@
+{
+	"name": "@neodrag/react",
+	"version": "0.0.1",
+	"description": "Svelte Action to add dragging to your apps 😉",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist/*"
+	],
+	"sideEffects": false,
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"module": "./dist/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PuruVJ/neodrag.git"
+	},
+	"keywords": [
+		"draggable",
+		"react",
+		"react-draggable",
+		"drag",
+		"svelte",
+		"small",
+		"tiny",
+		"performant",
+		"neodrag"
+	],
+	"author": "Puru Vijay",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/PuruVJ/neodrag/issues"
+	},
+	"homepage": "https://github.com/PuruVJ/neodrag/packages/react#readme",
+	"scripts": {
+		"build": "rollup -c",
+		"watch": "rollup -cw"
+	},
+	"dependencies": {
+		"@neodrag/svelte": "workspace:*"
+	},
+	"devDependencies": {
+		"@rollup/plugin-node-resolve": "^13.1.3",
+		"esbuild": "^0.14.17",
+		"rollup": "^2.67.0",
+		"rollup-plugin-dts": "^4.1.0",
+		"rollup-plugin-esbuild": "^4.8.2"
+	}
+}
