@@ -5,11 +5,7 @@ export const Draggable: React.FC<DragOptions> = ({ children }) => {
 	const divRef = useRef<HTMLDivElement>(null);
 	useDraggable(divRef);
 
-	return (
-		<div ref={divRef} style={{ display: 'contents' }}>
-			{children}
-		</div>
-	);
+	return <div ref={divRef}>{children}</div>;
 };
 
 export function useDraggable<RefType extends HTMLElement>(

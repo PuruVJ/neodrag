@@ -1,16 +1,11 @@
-import { Draggable, useDraggable } from '@neodrag/react';
-import { useRef, useState } from 'react';
-import './App.css';
+import { useDraggable } from '@neodrag/react';
+import { useRef } from 'react';
 
 function App() {
-	const inputRef = useRef<HTMLInputElement>(null);
-	const draggableRef = useDraggable(inputRef);
+	const divRef = useRef<HTMLDivElement>(null);
+	useDraggable(divRef, { onDrag: (e) => console.log(e) });
 
-	return (
-		<Draggable>
-			<input className="App" ref={inputRef}></input>
-		</Draggable>
-	);
+	return <div ref={divRef}>Hola</div>;
 }
 
 export default App;
