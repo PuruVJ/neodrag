@@ -40,7 +40,8 @@
 	"homepage": "https://github.com/PuruVJ/neodrag/packages/react#readme",
 	"scripts": {
 		"build": "rollup -c",
-		"watch": "rollup -cw"
+		"watch": "rollup -cw",
+		"size": "echo 'React size:' && brotli-size dist/index.js"
 	},
 	"devDependencies": {
 		"@neodrag/svelte": "workspace:*"

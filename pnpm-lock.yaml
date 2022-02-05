@@ -12,6 +12,7 @@ importers:
       rollup-plugin-dts: ^4.1.0
       rollup-plugin-esbuild: ^4.8.2
       rollup-plugin-terser: ^7.0.2
+      sizesnap: ^0.1.0
       svelte: ^3.46.3
       svelte-preprocess: ^4.10.2
       typescript: ^4.5.5
@@ -26,6 +27,7 @@ importers:
       rollup-plugin-dts: 4.1.0_rollup@2.67.0+typescript@4.5.5
       rollup-plugin-esbuild: 4.8.2_esbuild@0.14.17+rollup@2.67.0
       rollup-plugin-terser: 7.0.2_rollup@2.67.0
+      sizesnap: 0.1.0
       svelte: 3.46.3
       svelte-preprocess: 4.10.2_svelte@3.46.3+typescript@4.5.5
       typescript: 4.5.5
@@ -1727,6 +1729,12 @@ packages:
     resolution: {integrity: sha512-GaNA54380uFefWghODBWEGisLZFj00nS5ACs6yHa9nLqlLpVLO8ChDGeKRjZnV4Nh4n0Qi7nhYZD/9fCPzEqkw==}
     dependencies:
       randombytes: 2.1.0
+    dev: true
+
+  /sizesnap/0.1.0:
+    resolution: {integrity: sha512-wB3zZ71mjyxozAYDqcFI+y6Qr+UYDzSJc0b/zUyOPoQ1eppMK3taCA5oqiG86weFGKPbxEXiHLrZlhrX5MB6gw==}
+    engines: {node: '>=12'}
+    hasBin: true
     dev: true
 
   /sorcery/0.10.0:
