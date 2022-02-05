@@ -6,7 +6,7 @@ Inspired from the amazing [react-draggable](https://github.com/react-grid-layout
 
 # Features
 
-- 🤏 Tiny - Only [1.94KB](https://bundlephobia.com/package/@neodrag/svelte) min+gzip.
+- 🤏 Tiny - Only 1.85KB min+brotli.
 - 🐇 Simple - Quite simple to use, and effectively no-config required!
 - 🧙‍♀️ Elegant - Svelte Action, to keep the usage simple, elegant and expressive.
 - 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
@@ -254,12 +254,23 @@ Read more below in the **Controlled vs Uncontrolled** section.
 
 **Default value**: `undefined`
 
-CSS Selector of an element inside the parent node(on which `use:draggable` is applied). If it is provided, Trying to drag inside the `cancel` selector will prevent dragging.
+CSS Selector of an element inside the parent node(on which `use:draggable` is applied). Can be an element too. If it is provided, Trying to drag inside the `cancel` selector will prevent dragging.
+
+Selector:
 
 ```svelte
 <div use:draggable={{ cancel: '.cancel' }}>
   This will drag!
   <div class="cancel">You shall not drag!!🧙‍♂️</div>
+</div>
+```
+
+Element:
+
+```svelte
+<div use:draggable={{ cancel }}>
+  This will drag!
+  <div class="cancel" bind:this={cancel}>You shall not drag!!🧙‍♂️</div>
 </div>
 ```
 
@@ -269,7 +280,7 @@ CSS Selector of an element inside the parent node(on which `use:draggable` is ap
 
 **Default Value**: `undefined`
 
-CSS Selector of an element inside the parent node(on which `use:draggable` is applied). If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
+CSS Selector of an element inside the parent node(on which `use:draggable` is applied). Can be an element too. If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
 
 ```svelte
 <div use:draggable={{ handle: '.handle' }}>
@@ -319,7 +330,7 @@ Offsets your element to the position you specify in the very beginning. `x` and 
 
 ## onDragStart
 
-**type**: `(data: { offsetX: number; offsetY: number }) => void`
+**type**: `(data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void`
 
 **Default Value**: `undefined`
 
@@ -327,7 +338,7 @@ Fires when dragging start.
 
 ## onDrag
 
-**type**: `(data: { offsetX: number; offsetY: number }) => void`
+**type**: `(data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void`
 
 **Default Value**: `undefined`
 
@@ -335,7 +346,7 @@ Fires when dragging is going on.
 
 ## onDragEnd
 
-**type**: `(data: { offsetX: number; offsetY: number }) => void`
+**type**: `(data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void`
 
 **Default Value**: `undefined`
 
