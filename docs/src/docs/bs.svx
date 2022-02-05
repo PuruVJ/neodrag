@@ -1,0 +1,11 @@
+# Hello
+
+```html
+<script lang="ts">
+	import Hello from './Hello.svelte';
+
+	let name: string = 'world';
+</script>
+
+<Hello name="World" />
+```

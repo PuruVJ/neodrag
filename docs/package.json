@@ -1,0 +1,25 @@
+{
+	"name": "docs",
+	"version": "0.0.1",
+	"scripts": {
+		"dev": "svelte-kit dev --port 1211",
+		"build": "svelte-kit build",
+		"preview": "svelte-kit preview",
+		"check": "svelte-check --tsconfig ./tsconfig.json"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-static": "^1.0.0-next.26",
+		"@sveltejs/kit": "^1.0.0-next.260",
+		"mdsvex": "^0.10.5",
+		"sass": "^1.49.7",
+		"shiki": "^0.10.0",
+		"svelte": "^3.46.4",
+		"svelte-check": "^2.4.2",
+		"svelte-preprocess": "^4.10.2",
+		"typescript": "^4.5.5"
+	},
+	"type": "module",
+	"dependencies": {
+		"svelte-local-storage-store": "^0.2.6"
+	}
+}
