@@ -37,30 +37,6 @@ export type DragOptions = {
 	 * Or, finally, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
 	 * These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right` from right of window.
 	 * If any of these properties are unspecified, they are assumed to be `0`.
-	 *
-	 * @example
-	 * ```svelte
-	 * <!-- Bound to parent element -->
-	 * <div use:draggable={{ bounds: 'parent' }}>
-	 *   Hello
-	 * </div>
-	 * ```
-	 *
-	 * @example
-	 * ```svelte
-	 * <!-- Bound to body -->
-	 * <div use:draggable={{ bounds: 'body' }}>
-	 *   Hello
-	 * </div>
-	 * ```
-	 *
-	 * @example
-	 * ```svelte
-	 * <!-- Bound to arbitrary coordinates -->
-	 * <div use:draggable={{ bounds: { top: 100, right: 100, bottom: 100, left: 100 } }}>
-	 *   Hello
-	 * </div>
-	 * ```
 	 */
 	bounds?: DragBounds;
 
@@ -73,14 +49,6 @@ export type DragOptions = {
 	 * - `none` - No movement at all
 	 *
 	 * @default 'both'
-	 *
-	 * @example
-	 * ```svelte
-	 * <!-- Drag only in x direction -->
-	 * <div use:draggable={{ axis: 'x' }}>
-	 *   Text
-	 * </div>
-	 * ```
 	 */
 	axis?: DragAxis;
 
@@ -90,14 +58,6 @@ export type DragOptions = {
 	 * `true` by default, but can be set to `false` if [blurry text issue](https://developpaper.com/question/why-does-the-use-of-css3-translate3d-result-in-blurred-display/) occur
 	 *
 	 * @default true
-	 *
-	 * @example
-	 * ```svelte
-	 * <!-- Disable GPU acceleration -->
-	 * <div use:draggable={{ gpuAcceleration: false }}>
-	 *   Text
-	 * </div>
-	 * ```
 	 */
 	gpuAcceleration?: boolean;
 
@@ -109,14 +69,6 @@ export type DragOptions = {
 	 * Can be disabled using this option
 	 *
 	 * @default true
-	 *
-	 * @example
-	 * ```svelte
-	 * <!-- Do not disable user selection -->
-	 * <div use:draggable={{ applyUserSelectHack: false }}>
-	 *   Text
-	 * </div>
-	 * ```
 	 */
 	applyUserSelectHack?: boolean;
 
@@ -127,13 +79,6 @@ export type DragOptions = {
 	 *
 	 * @default false
 	 *
-	 * @example
-	 * ```svelte
-	 * <!-- Ignore Multitouch -->
-	 * <div use:draggable={{ ignoreMultitouch: true }}>
-	 *   Text
-	 * </div>
-	 * ```
 	 */
 	ignoreMultitouch?: boolean;
 
@@ -141,14 +86,6 @@ export type DragOptions = {
 	 * Disables dragging altogether.
 	 *
 	 * @default false
-	 *
-	 * @example
-	 * ```svelte
-	 * <!-- Disable it entirely -->
-	 * <div use:draggable={{ disabled: true }}>
-	 *   Text
-	 * </div>
-	 * ```
 	 */
 	disabled?: boolean;
 
@@ -158,14 +95,6 @@ export type DragOptions = {
 	 * `Note`: If you're programmatically creating the grid, do not set it to [0, 0] ever, that will stop drag at all. Set it to `undefined`.
 	 *
 	 * @default undefined
-	 *
-	 * @example
-	 * ```svelte
-	 * <!-- Snap to a grid of 10 by 10 -->
-	 * <div use:draggable={{ grid: [10, 10] }}>
-	 *   Text
-	 * </div>
-	 * ```
 	 */
 	grid?: [number, number];
 
@@ -180,17 +109,6 @@ export type DragOptions = {
 	 *
 	 * Note: If you set `disabled: true`, you'll still be able to move the draggable through state variables. Only the user interactions won't work
 	 *
-	 * Examples:
-	 *
-	 * [Changing with inputs](https://svelte.dev/repl/e1e707358b37467ba272891715878a1d?version=3.44.1)
-	 *
-	 * [Changing with Sliders](https://svelte.dev/repl/6b437a1cdbfc4c748520a72330c6395b?version=3.44.1)
-	 *
-	 * [Draggable only through external state, not user input](https://svelte.dev/repl/0eae169f272e41ba9c07ef222ed2bf66?version=3.44.1)
-	 *
-	 * [Comes back to original position after drag end](https://svelte.dev/repl/83d3aa8c5e154b7baf1a9c417c217d2e?version=3.44.1)
-	 *
-	 * [Comes back to original position with transition](https://svelte.dev/repl/bc84ed4ca22f45acbc28de3e33199883?version=3.44.1)
 	 */
 	position?: { x: number; y: number };
 
@@ -200,14 +118,6 @@ export type DragOptions = {
 	 * If it is provided, Trying to drag inside the `cancel` selector will prevent dragging.
 	 *
 	 * @default undefined
-	 *
-	 * @example
-	 * <!-- Grid has a cancel element -->
-	 * <div use:draggable={{ cancel: '.cancel' }}>
-	 *   Text
-	 *   <div class="cancel">This won't drag</div>
-	 * </div>
-	 * ```
 	 */
 	cancel?: string | HTMLElement;
 
@@ -217,14 +127,6 @@ export type DragOptions = {
 	 * If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
 	 *
 	 * @default undefined
-	 *
-	 * @example
-	 * <!-- Grid has a handle element -->
-	 * <div use:draggable={{ handle: '.handle' }}>
-	 *   This won't drag
-	 *   <div class="handle">This sure will drag!!</div>
-	 * </div>
-	 * ```
 	 */
 	handle?: string | HTMLElement;
 
@@ -254,12 +156,6 @@ export type DragOptions = {
 	 * Offsets your element to the position you specify in the very beginning.
 	 * `x` and `y` should be in pixels
 	 *
-	 * @example
-	 * <!-- Place the element at (300, 200) at the very beginning -->
-	 * <div use:draggable={{ defaultPosition: { x: 300; y: 200 } }}>
-	 *   Hello
-	 * </div>
-	 * ```
 	 */
 	defaultPosition?: { x: number; y: number };
 
