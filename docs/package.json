@@ -9,12 +9,12 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^1.0.0-next.26",
-		"@sveltejs/kit": "^1.0.0-next.252",
+		"@sveltejs/kit": "^1.0.0-next.260",
 		"mdsvex": "^0.10.5",
-		"sass": "^1.49.4",
+		"sass": "^1.49.7",
 		"shiki": "^0.10.0",
-		"svelte": "^3.46.3",
-		"svelte-check": "^2.4.1",
+		"svelte": "^3.46.4",
+		"svelte-check": "^2.4.2",
 		"svelte-preprocess": "^4.10.2",
 		"typescript": "^4.5.5"
 	},
