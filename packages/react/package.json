@@ -1,14 +1,13 @@
 {
-	"name": "@neodrag/svelte",
-	"version": "1.1.0",
+	"name": "@neodrag/react",
+	"version": "0.0.1",
 	"description": "Svelte Action to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
 	"type": "module",
 	"types": "./dist/index.d.ts",
 	"files": [
-		"dist/*",
-		"globals.d.ts"
+		"dist/*"
 	],
 	"sideEffects": false,
 	"exports": {
@@ -18,22 +17,13 @@
 		},
 		"./package.json": "./package.json"
 	},
-	"scripts": {
-		"test": "vitest run test",
-		"test:watch": "vitest test",
-		"dev": "rollup -cw",
-		"build": "rollup -c ",
-		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
-		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public",
-		"size": "echo 'Svelte size:' && brotli-size dist/index.js"
-	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/PuruVJ/neodrag.git"
 	},
 	"keywords": [
 		"draggable",
-		"svelte",
+		"react",
 		"react-draggable",
 		"drag",
 		"svelte",
@@ -47,5 +37,13 @@
 	"bugs": {
 		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"homepage": "https://github.com/PuruVJ/neodrag/packages/svelte#readme"
+	"homepage": "https://github.com/PuruVJ/neodrag/packages/react#readme",
+	"scripts": {
+		"build": "rollup -c",
+		"watch": "rollup -cw",
+		"size": "echo 'React size:' && brotli-size dist/index.js"
+	},
+	"devDependencies": {
+		"@neodrag/svelte": "workspace:*"
+	}
 }

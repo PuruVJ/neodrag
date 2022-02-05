@@ -6,7 +6,7 @@ Inspired from the amazing [react-draggable](https://github.com/react-grid-layout
 
 # Features
 
-- 🤏 Tiny - Only [2.2KB](https://bundlephobia.com/package/@neodrag/svelte) min+gzip.
+- 🤏 Tiny - Only [1.94KB](https://bundlephobia.com/package/@neodrag/svelte) min+gzip.
 - 🐇 Simple - Quite simple to use, and effectively no-config required!
 - 🧙‍♀️ Elegant - Svelte Action, to keep the usage simple, elegant and expressive.
 - 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
@@ -403,6 +403,24 @@ If you're a TypeScript user, read on below 👇
 # TypeScript
 
 This library ships with proper TypeScript typings, for the best Developer Experience, whether authoring JS or TS.
+
+## Events
+
+To get proper TypeScript typing for the events, add this line to your root `globals.d.ts` file:
+
+```ts
+/// <reference types="@neodrag/svelte/globals" />
+```
+
+Or, add to `tsconfig.json`:
+
+```json
+{
+	"compilerOptions": {
+		"types": ["@neodrag/svelte/globals"]
+	}
+}
+```
 
 ## Types Exported from package
 
