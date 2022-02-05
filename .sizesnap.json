@@ -1,0 +1,12 @@
+{
+  "packages/react/dist/index.js": {
+    "size": "4.97KB",
+    "brotli": "1.91KB",
+    "gzip": "2.19KB"
+  },
+  "packages/svelte/dist/index.js": {
+    "size": "5.18KB",
+    "brotli": "1.89KB",
+    "gzip": "2.15KB"
+  }
+}

@@ -1,3 +1,4 @@
+//@ts-check
 import preprocess from 'svelte-preprocess';
 import adapter from '@sveltejs/adapter-static';
 
@@ -8,8 +9,6 @@ const config = {
   preprocess: preprocess(),
 
   kit: {
-    // hydrate the <div id="svelte"> element in src/app.html
-    target: '#svelte',
     adapter: adapter(),
 
     package: {
