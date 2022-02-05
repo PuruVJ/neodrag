@@ -1,9 +1,15 @@
 import { useDraggable } from '@neodrag/react';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 function App() {
 	const draggableRef = useRef<HTMLDivElement>(null);
-	useDraggable<HTMLDivElement>(draggableRef, { onDrag: (e) => console.log(e) });
+	const { dragState, isDragging } = useDraggable<HTMLDivElement>(draggableRef, {
+		onDrag: () => console.log('Muhahahahahah'),
+	});
+
+	useEffect(() => {
+		console.log({ isDragging, dragState });
+	}, [dragState, isDragging]);
 
 	return <div ref={draggableRef}>Hello</div>;
 }
