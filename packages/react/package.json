@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/react",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "React library to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
@@ -38,7 +38,7 @@
 	"bugs": {
 		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"homepage": "https://github.com/PuruVJ/neodrag/packages/react#readme",
+	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/react#readme",
 	"scripts": {
 		"build": "rollup -c",
 		"watch": "rollup -cw",
