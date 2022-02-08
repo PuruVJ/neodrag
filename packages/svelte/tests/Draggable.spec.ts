@@ -12,8 +12,8 @@ describe('Draggable', () => {
 			const element = getByText('Drag me!');
 
 			expect(element).toBeInTheDocument();
-			expect(element).not.toHaveClass('svelte-draggable');
-			expect(element).not.toHaveClass('svelte-draggable-dragged');
+			expect(element).not.toHaveClass('neodrag');
+			expect(element).not.toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
 
@@ -26,8 +26,8 @@ describe('Draggable', () => {
 
 			await drag(element, 0, 0, 50, 50);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(50px, 50px, 0)');
 		});
 
@@ -40,8 +40,8 @@ describe('Draggable', () => {
 
 			await touchDrag(element, 0, 0, 50, 50);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(50px, 50px, 0)');
 		});
 	});
@@ -56,8 +56,8 @@ describe('Draggable', () => {
 
 			await drag(element, 0, 0, 50, 50);
 
-			expect(element).not.toHaveClass('svelte-draggable');
-			expect(element).not.toHaveClass('svelte-draggable-dragged');
+			expect(element).not.toHaveClass('neodrag');
+			expect(element).not.toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
 
@@ -70,8 +70,8 @@ describe('Draggable', () => {
 
 			await touchDrag(element, 0, 0, 50, 50);
 
-			expect(element).not.toHaveClass('svelte-draggable');
-			expect(element).not.toHaveClass('svelte-draggable-dragged');
+			expect(element).not.toHaveClass('neodrag');
+			expect(element).not.toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
 	});
@@ -126,8 +126,8 @@ describe('Draggable', () => {
 			const element = getByText('Drag me!');
 
 			expect(element).toBeInTheDocument();
-			expect(element).not.toHaveClass('svelte-draggable');
-			expect(element).not.toHaveClass('svelte-draggable-dragged');
+			expect(element).not.toHaveClass('neodrag');
+			expect(element).not.toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
 
@@ -142,8 +142,8 @@ describe('Draggable', () => {
 
 			await drag(element, 0, 0, 50, 50);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(50px, 50px, 0)');
 		});
 
@@ -158,8 +158,8 @@ describe('Draggable', () => {
 
 			await touchDrag(element, 0, 0, 50, 50);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(50px, 50px, 0)');
 		});
 
@@ -174,8 +174,8 @@ describe('Draggable', () => {
 
 			await drag(element, 0, 0, 200, 200);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(90px, 90px, 0)');
 		});
 
@@ -190,8 +190,8 @@ describe('Draggable', () => {
 
 			await drag(element, 0, 0, -100, -100);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
 
@@ -206,8 +206,8 @@ describe('Draggable', () => {
 
 			await touchDrag(element, 0, 0, 200, 200);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(90px, 90px, 0)');
 		});
 
@@ -222,8 +222,8 @@ describe('Draggable', () => {
 
 			await touchDrag(element, 0, 0, -100, -100);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
 	});
@@ -235,8 +235,8 @@ describe('Draggable', () => {
 			const element = getByText('Drag me!');
 
 			expect(element).toBeInTheDocument();
-			expect(element).not.toHaveClass('svelte-draggable');
-			expect(element).not.toHaveClass('svelte-draggable-dragged');
+			expect(element).not.toHaveClass('neodrag');
+			expect(element).not.toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
 
@@ -249,8 +249,8 @@ describe('Draggable', () => {
 
 			await drag(element, 0, 0, 50, 50);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(50px, 0px, 0)');
 		});
 
@@ -263,8 +263,8 @@ describe('Draggable', () => {
 
 			await touchDrag(element, 0, 0, 50, 50);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(50px, 0px, 0)');
 		});
 	});
@@ -276,8 +276,8 @@ describe('Draggable', () => {
 			const element = getByText('Drag me!');
 
 			expect(element).toBeInTheDocument();
-			expect(element).not.toHaveClass('svelte-draggable');
-			expect(element).not.toHaveClass('svelte-draggable-dragged');
+			expect(element).not.toHaveClass('neodrag');
+			expect(element).not.toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
 
@@ -290,8 +290,8 @@ describe('Draggable', () => {
 
 			await drag(element, 0, 0, 50, 50);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 50px, 0)');
 		});
 
@@ -304,8 +304,8 @@ describe('Draggable', () => {
 
 			await touchDrag(element, 0, 0, 50, 50);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 50px, 0)');
 		});
 	});
@@ -317,8 +317,8 @@ describe('Draggable', () => {
 			const element = getByText('Drag me!');
 
 			expect(element).toBeInTheDocument();
-			expect(element).not.toHaveClass('svelte-draggable');
-			expect(element).not.toHaveClass('svelte-draggable-dragged');
+			expect(element).not.toHaveClass('neodrag');
+			expect(element).not.toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
 
@@ -331,8 +331,8 @@ describe('Draggable', () => {
 
 			await drag(element, 0, 0, 50, 50);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
 
@@ -345,8 +345,8 @@ describe('Draggable', () => {
 
 			await touchDrag(element, 0, 0, 50, 50);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
 	});
@@ -358,8 +358,8 @@ describe('Draggable', () => {
 			const element = getByText('Drag me!');
 
 			expect(element).toBeInTheDocument();
-			expect(element).not.toHaveClass('svelte-draggable');
-			expect(element).not.toHaveClass('svelte-draggable-dragged');
+			expect(element).not.toHaveClass('neodrag');
+			expect(element).not.toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
 
@@ -372,8 +372,8 @@ describe('Draggable', () => {
 
 			await drag(element, 0, 0, 51, 51);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(60px, 60px, 0)');
 		});
 
@@ -386,8 +386,8 @@ describe('Draggable', () => {
 
 			await drag(element, 0, 0, 51, 51);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate3d(45px, 60px, 0)');
 		});
 	});
@@ -399,8 +399,8 @@ describe('Draggable', () => {
 			const element = getByText('Drag me!');
 
 			expect(element).toBeInTheDocument();
-			expect(element).not.toHaveClass('svelte-draggable');
-			expect(element).not.toHaveClass('svelte-draggable-dragged');
+			expect(element).not.toHaveClass('neodrag');
+			expect(element).not.toHaveClass('neodrag-dragged');
 			expect(element).not.toHaveStyle('transform: translate(0px, 0px)');
 			expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
@@ -411,8 +411,8 @@ describe('Draggable', () => {
 			const element = getByText('Drag me!');
 
 			expect(element).toBeInTheDocument();
-			expect(element).not.toHaveClass('svelte-draggable');
-			expect(element).not.toHaveClass('svelte-draggable-dragged');
+			expect(element).not.toHaveClass('neodrag');
+			expect(element).not.toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate(0px, 0px)');
 			expect(element).not.toHaveStyle('transform: translate3d(0px, 0px, 0)');
 		});
@@ -426,8 +426,8 @@ describe('Draggable', () => {
 
 			await drag(element, 0, 0, 50, 50);
 
-			expect(element).toHaveClass('svelte-draggable');
-			expect(element).toHaveClass('svelte-draggable-dragged');
+			expect(element).toHaveClass('neodrag');
+			expect(element).toHaveClass('neodrag-dragged');
 			expect(element).toHaveStyle('transform: translate(50px, 50px)');
 		});
 	});

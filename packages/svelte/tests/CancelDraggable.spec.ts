@@ -10,8 +10,8 @@ describe('CancelDraggable', () => {
 		const element = getByText('This will drag!');
 
 		expect(element).toBeInTheDocument();
-		expect(element).not.toHaveClass('svelte-draggable');
-		expect(element).not.toHaveClass('svelte-draggable-dragged');
+		expect(element).not.toHaveClass('neodrag');
+		expect(element).not.toHaveClass('neodrag-dragged');
 		expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 
 		const cancelElement = getByText('You shall not drag!!');
@@ -29,8 +29,8 @@ describe('CancelDraggable', () => {
 
 		await drag(element, 0, 0, 50, 50);
 
-		expect(element).toHaveClass('svelte-draggable');
-		expect(element).toHaveClass('svelte-draggable-dragged');
+		expect(element).toHaveClass('neodrag');
+		expect(element).toHaveClass('neodrag-dragged');
 		expect(element).toHaveStyle('transform: translate3d(50px, 50px, 0)');
 	});
 
@@ -45,8 +45,8 @@ describe('CancelDraggable', () => {
 
 		const element = getByText('This will drag!');
 
-		expect(element).toHaveClass('svelte-draggable');
-		expect(element).not.toHaveClass('svelte-draggable-dragged');
+		expect(element).toHaveClass('neodrag');
+		expect(element).not.toHaveClass('neodrag-dragged');
 		expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 	});
 
@@ -59,8 +59,8 @@ describe('CancelDraggable', () => {
 
 		await touchDrag(element, 0, 0, 50, 50);
 
-		expect(element).toHaveClass('svelte-draggable');
-		expect(element).toHaveClass('svelte-draggable-dragged');
+		expect(element).toHaveClass('neodrag');
+		expect(element).toHaveClass('neodrag-dragged');
 		expect(element).toHaveStyle('transform: translate3d(50px, 50px, 0)');
 	});
 
@@ -75,8 +75,8 @@ describe('CancelDraggable', () => {
 
 		const element = getByText('This will drag!');
 
-		expect(element).toHaveClass('svelte-draggable');
-		expect(element).not.toHaveClass('svelte-draggable-dragged');
+		expect(element).toHaveClass('neodrag');
+		expect(element).not.toHaveClass('neodrag-dragged');
 		expect(element).toHaveStyle('transform: translate3d(0px, 0px, 0)');
 	});
 });
