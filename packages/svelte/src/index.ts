@@ -222,7 +222,9 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let clientToNodeOffsetX = 0,
 		clientToNodeOffsetY = 0;
 
-	let { x: xOffset, y: yOffset } = { x: position?.x ?? 0, y: position?.y ?? 0 } ?? defaultPosition;
+	let { x: xOffset, y: yOffset } = position
+		? { x: position?.x ?? 0, y: position?.y ?? 0 }
+		: defaultPosition;
 
 	setTranslate(xOffset, yOffset, node, gpuAcceleration);
 
