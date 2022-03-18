@@ -251,22 +251,22 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		domRect: node.getBoundingClientRect(),
 	});
 
-	const callEvent = (fn: typeof onDrag) => {
+	const callEvent = (eventName: 'neodrag:start' | 'neodrag' | 'neodrag:end', fn: typeof onDrag) => {
 		const data = getEventData();
-		node.dispatchEvent(new CustomEvent('neodrag', { detail: data }));
+		node.dispatchEvent(new CustomEvent(eventName, { detail: data }));
 		fn?.(data);
 	};
 
 	function fireSvelteDragStartEvent() {
-		callEvent(onDragStart);
+		callEvent('neodrag:start', onDragStart);
 	}
 
-	function fireSvelteDragStopEvent() {
-		callEvent(onDragEnd);
+	function fireSvelteDragEndEvent() {
+		callEvent('neodrag:end', onDragEnd);
 	}
 
 	function fireSvelteDragEvent() {
-		callEvent(onDrag);
+		callEvent('neodrag', onDrag);
 	}
 
 	const listen = addEventListener;
@@ -354,7 +354,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		if (applyUserSelectHack) bodyStyle.userSelect = bodyOriginalUserSelectVal;
 
-		fireSvelteDragStopEvent();
+		fireSvelteDragEndEvent();
 
 		if (canMoveInX) initialX = translateX;
 		if (canMoveInX) initialY = translateY;
