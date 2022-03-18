@@ -1,18 +1,29 @@
 import { draggable, type DragOptions } from '@neodrag/svelte';
-import { Ref, ref, watch } from 'vue';
+import { reactive, Ref, ref, toRefs, watch } from 'vue';
+
+type Nullish<T> = {
+	[key: string]: T[keyof T] | null;
+};
 
 type DragState = Parameters<Exclude<DragOptions['onDrag'], undefined>>[number];
 
 export function useDraggable(node: Ref<HTMLElement | undefined>, options: DragOptions = {}) {
 	const isDragging = ref(false);
-	const dragState = ref<DragState>();
+	const dragState = reactive<Nullish<DragState>>({
+		domRect: null,
+		offsetX: null,
+		offsetY: null,
+	});
+	const { domRect, offsetX, offsetY } = toRefs(dragState);
 
 	let updateInternal: (options: DragOptions) => void;
 
 	let { onDragStart, onDrag, onDragEnd } = options;
 
 	function callEvent(arg: DragState, cb: DragOptions['onDrag']) {
-		dragState.value = arg;
+		domRect.value = arg.domRect;
+		offsetX.value = arg.offsetX;
+		offsetY.value = arg.offsetY;
 		cb?.(arg);
 	}
 
@@ -30,6 +41,12 @@ export function useDraggable(node: Ref<HTMLElement | undefined>, options: DragOp
 		callEvent(arg, onDragEnd);
 	}
 
+	const customEvents = {
+		onDragStart: customOnDragStart,
+		onDrag: customOnDrag,
+		onDragEnd: customOnDragEnd,
+	};
+
 	watch(node, () => {
 		if (typeof window === 'undefined') return;
 		if (!node?.value) return;
@@ -38,9 +55,7 @@ export function useDraggable(node: Ref<HTMLElement | undefined>, options: DragOp
 
 		const { update, destroy } = draggable(node.value, {
 			...options,
-			onDragStart: customOnDragStart,
-			onDrag: customOnDrag,
-			onDragEnd: customOnDragEnd,
+			...customEvents,
 		});
 
 		updateInternal = update;
@@ -51,13 +66,11 @@ export function useDraggable(node: Ref<HTMLElement | undefined>, options: DragOp
 	watch(options, () => {
 		updateInternal?.({
 			...options,
-			onDragStart: customOnDragStart,
-			onDrag: customOnDrag,
-			onDragEnd: customOnDragEnd,
+			...customEvents,
 		});
 	});
 
-	return { isDragging, dragState };
+	return { isDragging, domRect, offsetX, offsetY };
 }
 
 export type { DragAxis, DragBounds, DragBoundsCoords, DragOptions } from '@neodrag/svelte';
