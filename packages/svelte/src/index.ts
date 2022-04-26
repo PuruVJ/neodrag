@@ -119,7 +119,7 @@ export type DragOptions = {
 	 *
 	 * @default undefined
 	 */
-	cancel?: string | HTMLElement;
+	cancel?: string | HTMLElement | HTMLElement[];
 
 	/**
 	 * CSS Selector of an element inside the parent node(on which `use:draggable` is applied).
@@ -237,7 +237,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let nodeRect: DOMRect;
 
 	let dragEl: HTMLElement | undefined;
-	let cancelEl: HTMLElement | undefined;
+	let cancelEl: HTMLElement | HTMLElement[] | undefined;
 
 	let isControlled = !!position;
 
@@ -312,12 +312,12 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		if (isString(handle) && isString(cancel) && handle === cancel)
 			throw new Error("`handle` selector can't be same as `cancel` selector");
 
-		if (cancelEl?.contains(dragEl))
+		if (cancelElementContains(cancelEl, dragEl))
 			throw new Error(
 				"Element being dragged can't be a child of the element on which `cancel` is applied"
 			);
 
-		if (dragEl.contains(<HTMLElement>e.target) && !cancelEl?.contains(<HTMLElement>e.target))
+		if (dragEl.contains(<HTMLElement>e.target) && !cancelElementContains(cancelEl, <HTMLElement>e.target))
 			active = true;
 
 		if (!active) return;
@@ -509,16 +509,31 @@ function getHandleEl(handle: DragOptions['handle'], node: HTMLElement) {
 function getCancelElement(cancel: DragOptions['cancel'], node: HTMLElement) {
 	if (!cancel) return;
 
-	if (cancel instanceof HTMLElement) return cancel;
+	if (cancel instanceof HTMLElement || Array.isArray(cancel)) return cancel;
 
-	const cancelEl = node.querySelector<HTMLElement>(cancel);
+	const cancelEls = node.querySelectorAll<HTMLElement>(cancel);
 
-	if (cancelEl === null)
+	if (cancelEls === null)
 		throw new Error(
 			'Selector passed for `cancel` option should be child of the element on which the action is applied'
 		);
 
-	return cancelEl;
+	return Array.from(cancelEls.values());
+}
+
+function cancelElementContains(
+	cancelElement: HTMLElement | HTMLElement[] | undefined,
+	element: HTMLElement
+): boolean {
+	if (cancelElement instanceof HTMLElement) {
+		return cancelElement.contains(element);
+	}
+
+	if (Array.isArray(cancelElement)) {
+		return cancelElement.some((el) => el.contains(element));
+	}
+
+	return false;
 }
 
 function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
