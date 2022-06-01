@@ -5,7 +5,7 @@
 	"type": "module",
 	"devDependencies": {
 		"@rollup/plugin-node-resolve": "^13.3.0",
-		"@sveltejs/vite-plugin-svelte": "^1.0.0-next.46",
+		"@sveltejs/vite-plugin-svelte": "^1.0.0-next.47",
 		"@testing-library/jest-dom": "^5.16.4",
 		"@testing-library/svelte": "^3.1.2",
 		"brotli-size-cli": "^1.0.0",

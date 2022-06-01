@@ -119,7 +119,7 @@ export type DragOptions = {
 	 *
 	 * @default undefined
 	 */
-	cancel?: string | HTMLElement;
+	cancel?: string | HTMLElement | HTMLElement[];
 
 	/**
 	 * CSS Selector of an element inside the parent node(on which `use:draggable` is applied).
@@ -128,7 +128,7 @@ export type DragOptions = {
 	 *
 	 * @default undefined
 	 */
-	handle?: string | HTMLElement;
+	handle?: string | HTMLElement | HTMLElement[];
 
 	/**
 	 * Class to apply on the element on which `use:draggable` is applied.
@@ -236,8 +236,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let computedBounds: DragBoundsCoords;
 	let nodeRect: DOMRect;
 
-	let dragEl: HTMLElement | undefined;
-	let cancelEl: HTMLElement | undefined;
+	let dragEl: HTMLElement | HTMLElement[] | undefined;
+	let cancelEl: HTMLElement | HTMLElement[] | undefined;
 
 	let isControlled = !!position;
 
@@ -312,12 +312,17 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		if (isString(handle) && isString(cancel) && handle === cancel)
 			throw new Error("`handle` selector can't be same as `cancel` selector");
 
-		if (cancelEl?.contains(dragEl))
+		if (cancelElementContains(cancelEl, dragEl))
 			throw new Error(
 				"Element being dragged can't be a child of the element on which `cancel` is applied"
 			);
 
-		if (dragEl.contains(<HTMLElement>e.target) && !cancelEl?.contains(<HTMLElement>e.target))
+		if (
+			(dragEl instanceof HTMLElement
+				? dragEl.contains(<HTMLElement>e.target)
+				: dragEl.some((el) => el.contains(<HTMLElement>e.target))) &&
+			!cancelElementContains(cancelEl, <HTMLElement>e.target)
+		)
 			active = true;
 
 		if (!active) return;
@@ -494,31 +499,48 @@ const snapToGrid = memoize(
 function getHandleEl(handle: DragOptions['handle'], node: HTMLElement) {
 	if (!handle) return node;
 
-	if (handle instanceof HTMLElement) return handle;
+	if (handle instanceof HTMLElement || Array.isArray(handle)) return handle;
 
 	// Valid!! Let's check if this selector exists or not
-	const handleEl = node.querySelector<HTMLElement>(handle);
-	if (handleEl === null)
+	const handleEls = node.querySelectorAll<HTMLElement>(handle);
+	if (handleEls === null)
 		throw new Error(
 			'Selector passed for `handle` option should be child of the element on which the action is applied'
 		);
 
-	return handleEl!;
+	return Array.from(handleEls.values());
 }
 
 function getCancelElement(cancel: DragOptions['cancel'], node: HTMLElement) {
 	if (!cancel) return;
 
-	if (cancel instanceof HTMLElement) return cancel;
+	if (cancel instanceof HTMLElement || Array.isArray(cancel)) return cancel;
 
-	const cancelEl = node.querySelector<HTMLElement>(cancel);
+	const cancelEls = node.querySelectorAll<HTMLElement>(cancel);
 
-	if (cancelEl === null)
+	if (cancelEls === null)
 		throw new Error(
 			'Selector passed for `cancel` option should be child of the element on which the action is applied'
 		);
 
-	return cancelEl;
+	return Array.from(cancelEls.values());
+}
+
+function cancelElementContains(
+	cancelElement: HTMLElement | HTMLElement[] | undefined,
+	element: HTMLElement | HTMLElement[]
+): boolean {
+	const dragElements = element instanceof HTMLElement ? [element] : element;
+
+	if (cancelElement instanceof HTMLElement) {
+		return dragElements.some((el) => cancelElement.contains(el));
+	}
+
+	if (Array.isArray(cancelElement)) {
+		return cancelElement.some((cancelEl) => dragElements.some((el) => cancelEl.contains(el)));
+	}
+
+	return false;
 }
 
 function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
