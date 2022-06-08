@@ -6,7 +6,7 @@ Inspired from the amazing [react-draggable](https://github.com/react-grid-layout
 
 # Features
 
-- 🤏 Tiny - Only 2KB min+brotli.
+- 🤏 Tiny - Only 2.02KB min+brotli.
 - 🐇 Simple - Quite simple to use, and effectively no-config required!
 - 🧙‍♀️ Elegant - React hook, to keep the usage simple, elegant and expressive.
 - 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
