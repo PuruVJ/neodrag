@@ -113,16 +113,16 @@ export type DragOptions = {
 	position?: { x: number; y: number };
 
 	/**
-	 * CSS Selector of an element inside the parent node(on which `use:draggable` is applied).
+	 * CSS Selector of an element or multiple elements inside the parent node(on which `use:draggable` is applied).
 	 *
-	 * If it is provided, Trying to drag inside the `cancel` selector will prevent dragging.
+	 * Can be an element or elements too. If it is provided, Trying to drag inside the `cancel` element(s) will prevent dragging.
 	 *
 	 * @default undefined
 	 */
 	cancel?: string | HTMLElement | HTMLElement[];
 
 	/**
-	 * CSS Selector of an element inside the parent node(on which `use:draggable` is applied).
+	 * CSS Selector of an element or multiple elements inside the parent node(on which `use:draggable` is applied). Can be an element or elements too.
 	 *
 	 * If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
 	 *
