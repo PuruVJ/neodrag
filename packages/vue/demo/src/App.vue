@@ -1,18 +1,29 @@
 <script setup lang="ts">
-import { useDraggable } from '@neodrag/vue';
-import { ref, watchEffect } from 'vue';
+import { DragAxis, vDraggable } from '@neodrag/vue';
+import HelloWorld from './components/HelloWorld.vue';
 
-let el = ref<HTMLDivElement>();
+let unmounted = $ref(false);
 
-const { isDragging, dragState } = $(useDraggable(el, { bounds: {} }));
+let axis = $ref<DragAxis>('both');
 
-watchEffect(() => {
-	console.log({ isDragging, dragState: dragState });
-});
+function switchAxis() {
+	if (axis === 'both') {
+		axis = 'x';
+	} else {
+		axis = 'both';
+	}
+}
+setTimeout(() => (unmounted = true), 3000);
 </script>
 
 <template>
-	<div class="box" ref="el">Hello</div>
+	<HelloWorld v-if="!unmounted" />
+
+	<div class="box" v-draggable>2nd</div>
+
+	<br /><br />
+
+	<button @click="switchAxis">Change axis</button>
 </template>
 
 <style scoped>
