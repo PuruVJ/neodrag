@@ -8,13 +8,13 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"vue": "^3.2.30",
-		"@neodrag/vue": "workspace:*"
+		"@neodrag/vue": "workspace:*",
+		"vue": "^3.2.37"
 	},
 	"devDependencies": {
-		"@vitejs/plugin-vue": "^2.2.0",
-		"typescript": "^4.5.5",
-		"vite": "^2.8.0",
-		"vue-tsc": "^0.31.2"
+		"@vitejs/plugin-vue": "^2.3.3",
+		"typescript": "^4.7.3",
+		"vite": "^2.9.12",
+		"vue-tsc": "^0.31.4"
 	}
 }
