@@ -6,7 +6,7 @@ Inspired from the amazing [react-draggable](https://github.com/react-grid-layout
 
 # Features
 
-- 🤏 Tiny - Only 1.85KB min+brotli.
+- 🤏 Tiny - Only 1.96KB min+brotli.
 - 🐇 Simple - Quite simple to use, and effectively no-config required!
 - 🧙‍♀️ Elegant - Svelte Action, to keep the usage simple, elegant and expressive.
 - 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
@@ -250,11 +250,11 @@ Read more below in the **Controlled vs Uncontrolled** section.
 
 ## cancel
 
-**type**: `string | HTMLElement`
+**type**: `string | HTMLElement | HTMLElement[]`
 
 **Default value**: `undefined`
 
-CSS Selector of an element inside the parent node(on which `use:draggable` is applied). Can be an element too. If it is provided, Trying to drag inside the `cancel` selector will prevent dragging.
+CSS Selector of an element or multiple elements inside the parent node(on which `use:draggable` is applied). Can be an element or elements too. If it is provided, Trying to drag inside the `cancel` element(s) will prevent dragging.
 
 Selector:
 
@@ -262,6 +262,16 @@ Selector:
 <div use:draggable={{ cancel: '.cancel' }}>
   This will drag!
   <div class="cancel">You shall not drag!!🧙‍♂️</div>
+</div>
+```
+
+Multiple elements with selector:
+
+```svelte
+<div use:draggable={{ cancel: '.cancel' }}>
+  This will drag!
+  <div class="cancel">You shall not drag!!🧙‍♂️</div>
+  <div class="cancel">You shall not drag too!!🧙‍♂️</div>
 </div>
 ```
 
@@ -274,25 +284,70 @@ Element:
 </div>
 ```
 
+Elements:
+
+```svelte
+<script>
+  let cancel1;
+  let cancel2;
+</script>
+
+<div use:draggable={{ cancel: [cancel1, cancel2] }}>
+  This will drag!
+  <div class="cancel" bind:this={cancel1}>You shall not drag!!🧙‍♂️</div>
+  <div class="cancel" bind:this={cancel2}>You shall not drag too!!🧙‍♂️</div>
+</div>
+```
+
 ## handle
 
-**type**: `string | HTMLElement`
+**type**: `string | HTMLElement | HTMLElement[]`
 
 **Default Value**: `undefined`
 
-CSS Selector of an element inside the parent node(on which `use:draggable` is applied). Can be an element too. If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
+CSS Selector of an element or multiple elements inside the parent node(on which `use:draggable` is applied). Can be an element or elements too. If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
+
+```svelte
+<div use:draggable={{ handle: '.handle' }}>
+You shall not drag!!🧙‍♂️
+<div class="handle">This will drag 😁</div>
+</div>
+```
+
+Multiple handles with selector:
 
 ```svelte
 <div use:draggable={{ handle: '.handle' }}>
   You shall not drag!!🧙‍♂️
-  <div class="handle">This will drag 😁</div>
+  <div class="handle">This will allow drag 😁</div>
+  <div class="handle">This will allow drag too 😁</div>
+  <div class="handle">This will allow drag three 😁</div>
 </div>
 ```
+
+Handle with element:
 
 ```svelte
 <div use:draggable={{ handle }}>
   You shall not drag!!🧙‍♂️
   <div class="handle" bind:this={handle}>This will drag 😁</div>
+</div>
+```
+
+Multiple handles with elements
+
+```svelte
+<script>
+  let handle1;
+  let handle2;
+  let handle3;
+</script>
+
+<div use:draggable={{ handle: [handle1, handle2, handle3] }}>
+  You shall not drag!!🧙‍♂️
+  <div class="handle" bind:this={handle1}>This will allow drag 😁</div>
+  <div class="handle" bind:this={handle2}>This will allow drag too 😁</div>
+  <div class="handle" bind:this={handle3}>This will allow drag three 😁</div>
 </div>
 ```
 
@@ -570,3 +625,7 @@ Specifications here: [#7](https://github.com/PuruVJ/neodrag/issues/7)
 # License
 
 MIT License
+
+```
+
+```
