@@ -23,6 +23,12 @@ export type DragBounds =
 	| 'body'
 	| (string & Record<never, never>);
 
+export type DragEventData = {
+	offsetX: number;
+	offsetY: number;
+	domRect: DOMRect;
+};
+
 export type DragOptions = {
 	/**
 	 * Optionally limit the drag area
@@ -134,7 +140,6 @@ export type DragOptions = {
 	 * Class to apply on the element on which `use:draggable` is applied.
 	 * Note that if `handle` is provided, it will still apply class on the element to which this action is applied, **NOT** the handle
 	 *
-	 * neodrag'
 	 */
 	defaultClass?: string;
 
@@ -162,17 +167,17 @@ export type DragOptions = {
 	/**
 	 * Fires when dragging start
 	 */
-	onDragStart?: (data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void;
+	onDragStart?: (data: DragEventData) => void;
 
 	/**
 	 * Fires when dragging is going on
 	 */
-	onDrag?: (data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void;
+	onDrag?: (data: DragEventData) => void;
 
 	/**
 	 * Fires when dragging ends
 	 */
-	onDragEnd?: (data: { offsetX: number; offsetY: number; domRect: DOMRect }) => void;
+	onDragEnd?: (data: DragEventData) => void;
 };
 
 const enum DEFAULT_CLASS {
@@ -245,7 +250,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	const bodyStyle = document.body.style;
 	const nodeClassList = node.classList;
 
-	const getEventData = () => ({
+	const getEventData: () => DragEventData = () => ({
 		offsetX: translateX,
 		offsetY: translateY,
 		domRect: node.getBoundingClientRect(),

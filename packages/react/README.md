@@ -479,4 +479,4 @@ This library is in dire need of tests. If you're interested in contributing, ple
 
 # License
 
-MIT License
+MIT License &copy; Puru Vijay

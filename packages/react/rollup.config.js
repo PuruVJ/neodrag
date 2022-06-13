@@ -7,7 +7,7 @@ import { terser } from 'rollup-plugin-terser';
 
 export default defineConfig([
 	{
-		input: './src/index.tsx',
+		input: './src/index.ts',
 		external: ['react', 'react-dom'],
 		plugins: [esbuild(), resolve(), terser()],
 		output: {
@@ -17,7 +17,7 @@ export default defineConfig([
 		},
 	},
 	{
-		input: './src/index.tsx',
+		input: './src/index.ts',
 		external: ['react', 'react-dom'],
 		plugins: [dts({ respectExternal: true })],
 		output: {

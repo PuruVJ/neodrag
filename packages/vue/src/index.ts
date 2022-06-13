@@ -15,4 +15,10 @@ export const vDraggable: Directive<HTMLElement, DragOptions | undefined> = {
 	},
 };
 
-export type { DragAxis, DragBounds, DragBoundsCoords, DragOptions } from '@neodrag/svelte';
+export type {
+	DragAxis,
+	DragBounds,
+	DragBoundsCoords,
+	DragOptions,
+	DragEventData,
+} from '@neodrag/svelte';

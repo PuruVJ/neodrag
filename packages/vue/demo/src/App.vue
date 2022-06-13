@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { DragAxis, vDraggable } from '@neodrag/vue';
+import { ref } from 'vue';
 import HelloWorld from './components/HelloWorld.vue';
 
 let unmounted = $ref(false);
-
 let axis = $ref<DragAxis>('both');
+
+let cancel1 = ref<HTMLDivElement>();
+let cancel2 = ref<HTMLDivElement>();
 
 function switchAxis() {
 	if (axis === 'both') {
@@ -13,13 +16,23 @@ function switchAxis() {
 		axis = 'both';
 	}
 }
+
 setTimeout(() => (unmounted = true), 3000);
+
+function onDrag(e: { offsetX: number; offsetY: number; domRect: DOMRect }) {
+	console.log(e);
+}
 </script>
 
 <template>
 	<HelloWorld v-if="!unmounted" />
 
-	<div class="box" v-draggable>2nd</div>
+	<div class="box" v-draggable="{ onDrag, grid: [10, 10], cancel: [cancel1!, cancel2!] }">
+		2nd
+		<br /><br />
+		<div class="cancel" ref="cancel1">Cancel me out</div>
+		<div class="cancel" ref="cancel2">Cancel me out pt 2</div>
+	</div>
 
 	<br /><br />
 

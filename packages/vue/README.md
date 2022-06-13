@@ -1,14 +1,14 @@
-# @neodrag/react
+# @neodrag/vue
 
-A lightweight Vue Composition API function to make your elements draggable.
+A lightweight Vue directive to make your elements draggable.
 
 Inspired from the amazing [react-draggable](https://github.com/react-grid-layout/react-draggable) library, and implements a similar API, but 3x smaller.
 
 # Features
 
-- 🤏 Tiny - Only 2KB min+brotli.
+- 🤏 Tiny - Only 1.98KB min+brotli.
 - 🐇 Simple - Quite simple to use, and effectively no-config required!
-- 🧙‍♀️ Elegant - React hook, to keep the usage simple, elegant and expressive.
+- 🧙‍♀️ Elegant - Vue directive, to keep the usage simple, elegant and straightforward.
 - 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
 - ⚛️ Reactive - Change options passed to it on the fly, it will **just work 🙂**
 
@@ -17,93 +17,56 @@ Inspired from the amazing [react-draggable](https://github.com/react-grid-layout
 # Installing
 
 ```bash
-pnpm add @neodrag/react
+pnpm add @neodrag/vue
 
 # npm
-npm install @neodrag/react
+npm install @neodrag/vue
 
 # yarn
-yarn add @neodrag/react
+yarn add @neodrag/vue
 ```
 
 # Usage
 
 Basic usage
 
-```tsx
-import { useDraggable } from '@neodrag/react';
+```vue
+<script setup>
+import { vDraggable } from '@neodrag/vue';
+</script>
 
-function App() {
-	const draggableRef = useRef(null);
-	useDraggable(draggableRef);
-
-	return <div ref={draggableRef}>Hello</div>;
-}
+<template>
+	<div v-draggable>I am draggable</div>
+</template>
 ```
 
 With options
 
-```tsx
-import { useDraggable } from '@neodrag/react';
+```vue
+<script setup>
+import { vDraggable } from '@neodrag/vue';
+</script>
 
-function App() {
-	const draggableRef = useRef(null);
-	useDraggable(draggableRef, { axis: 'x', grid: [10, 10] });
-
-	return <div ref={draggableRef}>Hello</div>;
-}
+<template>
+	<div v-draggable="{ axis: 'x', grid: [10, 10] }">I am draggable</div>
+</template>
 ```
 
 Defining options elsewhere with typescript
 
-```tsx
-import { useDraggable, DragOptions } from '@neodrag/react';
+```vue
+<script setup lang="ts">
+import { vDraggable, type DragOptions } from '@neodrag/vue';
 
-function App() {
-	const draggableRef = useRef(null);
+const options: DragOptions = {
+	axis: 'y',
+	bounds: 'parent',
+};
+</script>
 
-	const options: DragOptions = {
-		axis: 'y',
-		bounds: 'parent',
-	};
-
-	useDraggable(draggableRef, options);
-
-	return <div ref={draggableRef}>Hello</div>;
-}
-```
-
-Getting state
-
-```tsx
-import { useDraggable } from '@neodrag/react';
-
-function App() {
-	const draggableRef = useRef(null);
-
-	const { isDragging, dragState } = useDraggable(draggableRef);
-
-	useEffect(() => {
-		console.log({ isDragging, dragState });
-	}, [isDragging, dragState]);
-
-	return <div ref={draggableRef}>Hello</div>;
-}
-```
-
-`dragState` is of type:
-
-```ts
-{
-  /** Distance of element from original position on x-axis */
-  offsetX: number,
-
-  /** Distance of element from original position on y-axis */
-  offsetY: number,
-
-  /** element.getBoundingClientRect() result */
-  domRect: DOMRect,
-}
+<template>
+	<div v-draggable="options">I am draggable</div>
+</template>
 ```
 
 # Options
@@ -125,8 +88,9 @@ Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `no
 
 **Examples**:
 
-```tsx
-useDraggable(draggableRef, { axis: 'x' });
+```vue
+<!-- Drag only in x direction -->
+<div v-draggable="{ axis: 'x' }">Text</div>
 ```
 
 ## bounds
@@ -152,40 +116,40 @@ If any of these properties are unspecified, they are assumed to be `0`.
 
 Bound to any element
 
-```tsx
-useDraggable(draggableRef, { bounds: document.querySelector('.some-element') });
+```vue
+<div v-draggable="{ bounds: document.querySelector('.some-element') }">Hello</div>
 ```
 
 Bound to parent
 
-```tsx
-useDraggable(draggableRef, { bounds: 'parent' });
+```vue
+<div v-draggable="{ bounds: 'parent' }">Hello</div>
 ```
 
 Bound to body
 
-```tsx
-useDraggable(draggableRef, { bounds: 'body' });
+```vue
+<div v-draggable="{ bounds: 'body' }">Hello</div>
 ```
 
 Bound to an ancestor selector somewhere in page
 
-```tsx
-useDraggable(draggableRef, { bounds: '.way-up-in-the-dom' });
+```vue
+<div v-draggable="{ bounds: '.way-up-in-the-dom' }">Hello</div>
 ```
 
 Manually through coordinates. Empty object means bound to the `window`.
 
 **NOTE**: It isn't strictly empty object. If you omit any property from this object, it will be assumed as `0`.
 
-```tsx
-useDraggable(draggableRef, { bounds: {} });
+```vue
+<div v-draggable="{ bounds: {} }">Hello</div>
 ```
 
 Bound only to top and bottom, and unbounded horizontally in practice by setting bounds way beyond the screen.
 
-```tsx
-useDraggable(draggableRef, { bounds: { top: 0, bottom: 0, left: -1000, right: -1000 } });
+```vue
+<div v-draggable="{ bounds: { top: 0, bottom: 0, left: -1000, right: -1000 } }">Hello</div>
 ```
 
 ## gpuAcceleration
@@ -200,8 +164,8 @@ If true, uses `translate3d` instead of `translate` to move the element around, a
 
 Example 👇
 
-```tsx
-useDraggable(draggableRef, { gpuAcceleration: false });
+```vue
+<div v-draggable="{ gpuAcceleration: false }">Hello</div>
 ```
 
 ## applyUserSelectHack
@@ -212,6 +176,10 @@ useDraggable(draggableRef, { gpuAcceleration: false });
 
 Applies `user-select: none` on `<body />` element when dragging, to prevent the irritating effect where dragging doesn't happen and the text is selected. Applied when dragging starts and removed when it stops.
 
+```vue
+<div v-draggable="{ applyUserSelectHack: false }">Text</div>
+```
+
 ## ignoreMultitouch
 
 **type**: `boolean`
@@ -221,9 +189,9 @@ Applies `user-select: none` on `<body />` element when dragging, to prevent the 
 Ignores touch events with more than 1 touch.
 This helps when you have multiple elements on a canvas where you want to implement pinch-to-zoom behaviour.
 
-```tsx
+```vue
 <!-- Ignore Multitouch -->
-useDraggable(draggableRef, { ignoreMultitouch: true });
+<div v-draggable="{ ignoreMultitouch: true }">Text</div>
 ```
 
 ## disabled
@@ -256,74 +224,137 @@ Read more below in the **Controlled vs Uncontrolled** section.
 
 ## cancel
 
-**type**: `string | HTMLElement`
+**type**: `string | HTMLElement | HTMLElement[]`
 
 **Default value**: `undefined`
 
-CSS Selector of an element inside the parent node(on which `use:draggable` is applied). Can be an element too. If it is provided, Trying to drag inside the `cancel` selector will prevent dragging.
+CSS Selector of an element or multiple elements inside the parent node(on which `v-draggable` is applied). Can be an element or elements too. If it is provided, Trying to drag inside the `cancel` element(s) will prevent dragging.
 
 Selector:
 
-```tsx
-useDraggable(draggableRef, { cancel: '.cancel' });
-
-return (
-	<div ref={draggableRef}>
+```vue
+<template>
+	<div v-draggable="{ cancel: '.cancel' }">
 		This will drag!
 		<div class="cancel">You shall not drag!!🧙‍♂️</div>
 	</div>
-);
+</template>
 ```
 
-Ref:
+Multiple elements with selector:
 
-```tsx
-const cancelRef = useRef(null);
-
-useDraggable(draggableRef, { cancel: cancelRef.current });
-
-return (
-	<div ref={draggableRef}>
+```vue
+<template>
+	<div v-draggable="{ cancel: '.cancel' }">
 		This will drag!
-		<div ref={cancelRef}>You shall not drag!!🧙‍♂️</div>
+		<div class="cancel">You shall not drag!!🧙‍♂️</div>
+		<div class="cancel">You shall not drag too!!🧙‍♂️</div>
 	</div>
-);
+</template>
+```
+
+Element:
+
+```vue
+<script setup>
+import { vDraggable } from '@neodrag/vue';
+
+const cancel = ref();
+</script>
+
+<template>
+	<div v-draggable="{ cancel }">
+		This will drag!
+		<div class="cancel" ref="cancel">You shall not drag!!🧙‍♂️</div>
+	</div>
+</template>
+```
+
+Elements:
+
+```vue
+<script setup>
+import { vDraggable } from '@neodrag/vue';
+
+const cancel1 = ref();
+const cancel2 = ref();
+</script>
+
+<template>
+	<div v-draggable="{ cancel: [cancel1, cancel2] }">
+		This will drag!
+		<div class="cancel" ref="cancel1">Cancel me out</div>
+		<div class="cancel" ref="cancel2">Cancel me out pt 2</div>
+	</div>
+</template>
 ```
 
 ## handle
 
-**type**: `string | HTMLElement`
+**type**: `string | HTMLElement | HTMLElement[]`
 
 **Default Value**: `undefined`
 
-CSS Selector of an element inside the parent node(on which `use:draggable` is applied). If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
+CSS Selector of an element or multiple elements inside the parent node(on which `v-draggable` is applied). Can be an element or elements too. If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
 
-Selector:
-
-```tsx
-useDraggable(draggableRef, { handle: '.handle' });
-
-return (
-	<div ref={draggableRef}>
+```vue
+<template>
+	<div v-draggable="{ handle: '.handle' }">
 		You shall not drag!!🧙‍♂️
 		<div class="handle">This will drag 😁</div>
 	</div>
-);
+</template>
 ```
 
-Ref:
+Multiple handles with selector:
 
-```tsx
-const handleRef = useRef(null);
-
-useDraggable(draggableRef, { cancel: handleRef.current });
-
-return (
-	<div ref={draggableRef}>
+```vue
+<template>
+	<div v-draggable="{ handle: '.handle' }">
 		You shall not drag!!🧙‍♂️
-		<div ref={handleRef}>This will drag 😁</div>
+		<div class="handle">This will allow drag 😁</div>
+		<div class="handle">This will allow drag too 😁</div>
+		<div class="handle">This will allow drag three 😁</div>
 	</div>
-);
+</template>
+```
+
+Handle with element:
+
+```vue
+<script setup>
+import { vDraggable } from '@neodrag/vue';
+
+const handle = ref();
+</script>
+
+<template>
+	<div v-draggable="{ handle }">
+		You shall not drag!!🧙‍♂️
+		<div class="handle" ref="handle">This will drag 😁</div>
+	</div>
+</template>
+```
+
+Multiple handles with elements
+
+```vue
+<script setup>
+import { vDraggable } from '@neodrag/vue';
+
+const handle1 = ref();
+const handle2 = ref();
+const handle3 = ref();
+</script>
+
+<template>
+	<div v-draggable="{ handle: [handle1, handle2, handle3] }">
+		You shall not drag!!🧙‍♂️
+		<div class="handle" ref="handle1">This will allow drag 😁</div>
+		<div class="handle" ref="handle2">This will allow drag too 😁</div>
+		<div class="handle" ref="handle3">This will allow drag three 😁</div>
+	</div>
+</template>
 ```
 
 ## defaultClass
@@ -332,7 +363,7 @@ return (
 
 **Default Value**: `'neodrag'`
 
-Class to apply on the element on which `draggable` is applied. <br/><br/> Note that if `handle` is provided, it will still apply class on the parent element, **NOT** the handle
+Class to apply on the element on which `v-draggable` is applied. <br/><br/> Note that if `handle` is provided, it will still apply class on the parent element, **NOT** the handle
 
 ## defaultClassDragging
 
@@ -360,56 +391,83 @@ Offsets your element to the position you specify in the very beginning. `x` and 
 
 ## onDragStart
 
-**type**: `(data: { offsetX: number; offsetY: number, domRect: DOMRect }) => void`
+**type**: `(data: DragEventData) => void`
 
 **Default Value**: `undefined`
 
 Fires when dragging start.
 
+**Note**:
+
+```ts
+type DragEventData = { offsetX: number; offsetY: number; domRect: DOMRect };
+```
+
 ## onDrag
 
-**type**: `(data: { offsetX: number; offsetY: number, domRect: DOMRect }) => void`
+**type**: `(data: DragEventData) => void`
 
 **Default Value**: `undefined`
 
 Fires when dragging is going on.
 
+**Note**:
+
+```ts
+type DragEventData = { offsetX: number; offsetY: number; domRect: DOMRect };
+```
+
 ## onDragEnd
 
-**type**: `(data: { offsetX: number; offsetY: number, domRect: DOMRect }) => void`
+**type**: `(data: DragEventData) => void`
 
 **Default Value**: `undefined`
 
 Fires when dragging ends.
 
+**Note**:
+
+```ts
+type DragEventData = { offsetX: number; offsetY: number; domRect: DOMRect };
+```
+
 # Events
 
-`@neodrag/react` emits 3 events, `onDrag`, `onDragStart` & `onDragEnd`.
-
+`@neodrag/vue` emits 3 events, `onDrag`, `onDragStart` & `onDragEnd`.
 Example:
 
-```tsx
-useDraggable(draggableRef, {
-	ignoreMultitouch: true,
-
-	onDragStart: (data) => {
-		console.log('onDragStart', data);
-	},
-	onDrag: (data) => {
-		console.log('onDrag', data);
-	},
-	onDragEnd: (data) => {
-		console.log('onDragEnd', data);
-	},
-});
+```vue
+<template>
+	<div
+		v-draggable="{
+			onDragStart: (data) => console.log('Dragging started', data),
+			onDrag: (data) => console.log('Dragging', data),
+			onDragEnd: (data) => console.log('Dragging stopped', data),
+		}"
+	>
+		Hello
+	</div>
+</template>
 ```
+
+# TypeScript
+
+This library ships with proper TypeScript typings, for the best Developer Experience, whether authoring JS or TS.
+
+Or, add to `tsconfig.json`:
 
 ## Types Exported from package
 
 This package exports these types you can use:
 
 ```ts
-import type { DragAxis, DragBounds, DragBoundsCoords, DragOptions } from '@neodrag/react';
+import type {
+	DragAxis,
+	DragBounds,
+	DragBoundsCoords,
+	DragOptions,
+	DragEventData,
+} from '@neodrag/vue';
 ```
 
 `DragOptions` is the documented list of all options provided by the component.
@@ -436,9 +494,17 @@ export type DragBoundsCoords = {
 };
 ```
 
+```ts
+type DragEventData = {
+	offsetX: number;
+	offsetY: number;
+	domRect: DOMRect;
+};
+```
+
 # Controlled vs Uncontrolled
 
-This is taken straight from React's philosophy.
+This is taken straight from React's philosophy(After all, this package is inspired from [react-draggable](https://github.com/react-grid-layout/react-draggable)).
 
 Uncontrolled means your app doesn't control the dragging of the app. Meaning, the user drags the element, it changes position, and you do something with that action. You yourself don't change position of the element or anything. This is the default behavior of this library.
 
@@ -446,26 +512,15 @@ Controlled means your app, using state variables, changes the position of the el
 
 OFC, this library doesn't go fully **Controlled**. The user can still drag it around even when `position` is set.
 
-So, when you change `position`, the element position changes. However, when the element is dragged by user interaction, `position` is not changed. This is done intentionally, as two-way data binding here isn't possible and also will lead to unexpected behavior. To keep the `position` variable up to date, use the `on:neodrag` event to keep your state up to date to the draggable's internal state.
+So, when you change `position`, the element position changes. However, when the element is dragged by user interaction, `position` is not changed. This is done intentionally, as two-way data binding here isn't possible and also will lead to unexpected behavior. To keep the `position` variable up to date, use the `onDrag` event to keep your state up to date to the draggable's internal state.
 
 To have it be strictly **Controlled**, meaning it can only be moved programmatically, add the `disabled` option to your draggable element's config
 
-```tsx
-useDraggable(draggableRef, {
-	position: { x: 0, y: 10 },
-	disabled: true,
-});
+```vue
+<div v-draggable="{ position: { x: 0, y: 10 }, disabled: true }" />
 ```
 
-<!-- TODO
 Here are a bunch of examples showing controlled behavior 👇
-
-1. [Changing with inputs](https://svelte.dev/repl/e1e707358b37467ba272891715878a1d?version=3.44.1)
-2. [Changing with Sliders](https://svelte.dev/repl/6b437a1cdbfc4c748520a72330c6395b?version=3.44.1)
-3. [Draggable only through external state, not user input](https://svelte.dev/repl/0eae169f272e41ba9c07ef222ed2bf66?version=3.44.1)
-4. [Comes back to original position after drag end](https://svelte.dev/repl/83d3aa8c5e154b7baf1a9c417c217d2e?version=3.44.1)
-5. [Comes back to original position with transition](https://svelte.dev/repl/bc84ed4ca22f45acbc28de3e33199883?version=3.44.1)
--->
 
 # Contributing
 
@@ -473,10 +528,16 @@ Feel free to open an issue with a bug or feature request.
 
 If you wish to make a PR fixing something, please open an issue about it first!
 
-# Tests
+## Help needed 🛑
 
-This library is in dire need of tests. If you're interested in contributing, please open an issue with test case or whole Pull request for adding those.
+This library lacks something very important: **Automated Tests!**
+
+I'll be straight about this: I don't know how to write tests. I've tried, but not been able to.
+
+So I need your help. If you wish to contribute and can add tests here, it would be great for everyone using this! 🙂. There are already some tests but it could benefit from more test cases
+
+Specifications here: [#7](https://github.com/PuruVJ/neodrag/issues/7)
 
 # License
 
-MIT License
+MIT License &copy; Puru Vijay
