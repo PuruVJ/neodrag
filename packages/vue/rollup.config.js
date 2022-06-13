@@ -1,14 +1,14 @@
 // @ts-check
-import resolve from '@rollup/plugin-node-resolve';
 import { defineConfig } from 'rollup';
-import dts from 'rollup-plugin-dts';
 import esbuild from 'rollup-plugin-esbuild';
+import dts from 'rollup-plugin-dts';
+import resolve from '@rollup/plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
 
 export default defineConfig([
 	{
 		input: './src/index.ts',
-		external: ['react', 'react-dom'],
+		external: 'vue',
 		plugins: [esbuild(), resolve(), terser()],
 		output: {
 			file: './dist/index.js',
@@ -18,8 +18,8 @@ export default defineConfig([
 	},
 	{
 		input: './src/index.ts',
-		external: ['react', 'react-dom'],
-		plugins: [dts({ respectExternal: true })],
+		external: ['vue'],
+		plugins: [dts({ respectExternal: true, compilerOptions: { preserveSymlinks: false } })],
 		output: {
 			file: './dist/index.d.ts',
 			format: 'esm',

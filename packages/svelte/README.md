@@ -624,8 +624,4 @@ Specifications here: [#7](https://github.com/PuruVJ/neodrag/issues/7)
 
 # License
 
-MIT License
-
-```
-
-```
+MIT License &copy; Puru Vijay

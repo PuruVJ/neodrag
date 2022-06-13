@@ -1,15 +1,7 @@
-import { draggable, DragOptions } from '@neodrag/svelte';
+import { DragEventData, draggable, DragOptions } from '@neodrag/svelte';
 import React, { useEffect, useRef, useState } from 'react';
 
-// TODO: Implement this later after all @neodrag/* are done and tests written for
-// export const Draggable: React.FC<DragOptions> = ({ children, ...options }) => {
-// 	const draggableRef = useRef<HTMLDivElement>(null);
-// 	useDraggable(draggableRef, options);
-
-// 	return <div ref={draggableRef}>{children}</div>;
-// };
-
-type DragState = Parameters<Exclude<DragOptions['onDrag'], undefined>>[number];
+type DragState = DragEventData;
 
 export function useDraggable<RefType extends HTMLElement = HTMLDivElement>(
 	nodeRef: React.RefObject<RefType>,
@@ -72,4 +64,10 @@ export function useDraggable<RefType extends HTMLElement = HTMLDivElement>(
 	return { isDragging, dragState };
 }
 
-export type { DragAxis, DragBounds, DragBoundsCoords, DragOptions } from '@neodrag/svelte';
+export type {
+	DragAxis,
+	DragBounds,
+	DragBoundsCoords,
+	DragOptions,
+	DragEventData,
+} from '@neodrag/svelte';

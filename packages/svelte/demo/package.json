@@ -10,11 +10,11 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^1.0.0-next.34",
-    "@sveltejs/kit": "^1.0.0-next.347",
+    "@sveltejs/kit": "^1.0.0-next.350",
     "svelte": "^3.48.0",
-    "svelte-preprocess": "^4.10.6",
+    "svelte-preprocess": "^4.10.7",
     "svelte2tsx": "^0.5.10",
-    "typescript": "^4.7.2"
+    "typescript": "^4.7.3"
   },
   "dependencies": {
     "@neodrag/svelte": "workspace:*"
