@@ -11,7 +11,7 @@ This is a monorepo containing the following packages:
 
 - [x] [@neodrag/svelte](https://github.com/PuruVJ/neodrag/tree/main/packages/svelte#readme)
 - [x] [@neodrag/react](https://github.com/PuruVJ/neodrag/tree/main/packages/react#readme)
-- [ ] @neodrag/vue
+- [x] [@neodrag/vue](https://github.com/PuruVJ/neodrag/tree/main/packages/vue#readme)
 - [ ] @neodrag/solid
 - [ ] @neodrag/lit
 - [ ] @neodrag/vanilla
