@@ -1,0 +1,52 @@
+{
+	"name": "@neodrag/solid",
+	"version": "1.0.0",
+	"description": "Solid Primitive to add dragging to your apps 😉",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist/*"
+	],
+	"sideEffects": false,
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"module": "./dist/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PuruVJ/neodrag.git"
+	},
+	"keywords": [
+		"draggable",
+		"react",
+		"react-draggable",
+		"drag",
+		"neodrag",
+		"preact",
+		"small",
+		"tiny",
+		"performant",
+		"neodrag"
+	],
+	"author": "Puru Vijay",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/PuruVJ/neodrag/issues"
+	},
+	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/react#readme",
+	"scripts": {
+		"build": "rollup -c",
+		"watch": "rollup -cw",
+		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
+		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public",
+		"size": "echo 'React size:' && brotli-size dist/index.js"
+	},
+	"devDependencies": {
+		"@neodrag/svelte": "workspace:*"
+	}
+}
