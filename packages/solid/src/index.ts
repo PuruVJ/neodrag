@@ -1,23 +1,12 @@
 import { draggable, type DragOptions } from '@neodrag/svelte';
-import { createEffect, onCleanup, onMount, type Accessor } from 'solid-js';
-
-type UpdateRef = undefined | ((options: DragOptions) => void);
+import { createEffect, onCleanup, type Accessor } from 'solid-js';
 
 export const createDraggable = () => ({
 	draggable: (node: HTMLElement | undefined, options: Accessor<DragOptions>) => {
-		let updateRef: UpdateRef = undefined;
+		const { update, destroy } = draggable(node!, options());
 
-		onMount(() => {
-			if (!node) return;
-
-			const { update, destroy } = draggable(node, options());
-
-			updateRef = update;
-
-			onCleanup(destroy);
-		});
-
-		createEffect(() => updateRef?.(options()));
+		onCleanup(destroy);
+		createEffect(() => update(options()));
 	},
 });
 
