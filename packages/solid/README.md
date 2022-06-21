@@ -1,72 +1,84 @@
-# @neodrag/vue
+# @neodrag/solid
 
-A lightweight Vue directive to make your elements draggable.
+A lightweight SolidJS directive library to make your elements draggable.
 
 Inspired from the amazing [react-draggable](https://github.com/react-grid-layout/react-draggable) library, and implements a similar API, but 3x smaller.
 
 # Features
 
-- 🤏 Tiny - Only 1.98KB min+brotli.
+- 🤏 Tiny - Only 1.99KB min+brotli.
 - 🐇 Simple - Quite simple to use, and effectively no-config required!
-- 🧙‍♀️ Elegant - Vue directive, to keep the usage simple, elegant and straightforward.
+- 🧙‍♀️ Elegant - SolidJS directive, to keep the usage simple, elegant and straightforward.
 - 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
 - ⚛️ Reactive - Change options passed to it on the fly, it will **just work 🙂**
 
-[Try it in Stackblitz](https://stackblitz.com/edit/vitejs-vite-2pg1r1?file=src%2FApp.jsx)
+<!-- TODO [Try it in Stackblitz](https://svelte.dev/repl/fc972f90450c4945b6f2481d13eafa00?version=3.38.3) -->
 
 # Installing
 
 ```bash
-pnpm add @neodrag/vue
+pnpm add @neodrag/solid
 
 # npm
-npm install @neodrag/vue
+npm install @neodrag/solid
 
 # yarn
-yarn add @neodrag/vue
+yarn add @neodrag/solid
 ```
 
 # Usage
 
 Basic usage
 
-```vue
-<script setup>
-import { vDraggable } from '@neodrag/vue';
-</script>
+```tsx
+import { createDraggable } from '@neodrag/solid';
 
-<template>
-	<div v-draggable>I am draggable</div>
-</template>
+export const App: Component = () => {
+	const { draggable } = createDraggable();
+
+	return <div use:draggable>You can drag me</div>;
+};
 ```
 
 With options
 
-```vue
-<script setup>
-import { vDraggable } from '@neodrag/vue';
-</script>
+```tsx
+import { createDraggable } from '@neodrag/solid';
 
-<template>
-	<div v-draggable="{ axis: 'x', grid: [10, 10] }">I am draggable</div>
-</template>
+const { draggable } = createDraggable();
+
+<div use:draggable={{ axis: 'x', grid: [10, 10] }}>I am draggable</div>;
 ```
 
 Defining options elsewhere with typescript
 
-```vue
-<script setup lang="ts">
-import { vDraggable, type DragOptions } from '@neodrag/vue';
+```tsx
+import { createDraggable, type DragOptions } from '@neodrag/solid';
 
 const options: DragOptions = {
 	axis: 'y',
 	bounds: 'parent',
 };
-</script>
 
-<template>
-	<div v-draggable="options">I am draggable</div>
-</template>
+const { draggable } = createDraggable();
+
+<div use:draggable={options}>I am draggable</div>;
+```
+
+Reactive options:
+
+```tsx
+import { createSignal } from 'solid-js';
+import { createDraggable } from '@neodrag/solid';
+
+const [options, setOptions] = createSignal({
+	axis: 'y',
+	bounds: 'parent',
+});
+
+<div use:draggable={options()}>I am draggable</div>;
+
+// You can update `options` with `setOptions` anytime and it'll change. Neodrag will automatically update to the new options 😉
 ```
 
 # Options
@@ -88,9 +100,9 @@ Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `no
 
 **Examples**:
 
-```vue
-<!-- Drag only in x direction -->
-<div v-draggable="{ axis: 'x' }">Text</div>
+```tsx
+// Drag only in x direction
+<div use:draggable={{ axis: 'x' }}>Text</div>
 ```
 
 ## bounds
@@ -116,40 +128,40 @@ If any of these properties are unspecified, they are assumed to be `0`.
 
 Bound to any element
 
-```vue
-<div v-draggable="{ bounds: document.querySelector('.some-element') }">Hello</div>
+```tsx
+<div use:draggable={{ bounds: document.querySelector('.some-element') }}>Hello</div>
 ```
 
 Bound to parent
 
-```vue
-<div v-draggable="{ bounds: 'parent' }">Hello</div>
+```tsx
+<div use:draggable={{ bounds: 'parent' }}>Hello</div>
 ```
 
 Bound to body
 
-```vue
-<div v-draggable="{ bounds: 'body' }">Hello</div>
+```tsx
+<div use:draggable={{ bounds: 'body' }}>Hello</div>
 ```
 
 Bound to an ancestor selector somewhere in page
 
-```vue
-<div v-draggable="{ bounds: '.way-up-in-the-dom' }">Hello</div>
+```tsx
+<div use:draggable={{ bounds: '.way-up-in-the-dom' }}>Hello</div>
 ```
 
 Manually through coordinates. Empty object means bound to the `window`.
 
 **NOTE**: It isn't strictly empty object. If you omit any property from this object, it will be assumed as `0`.
 
-```vue
-<div v-draggable="{ bounds: {} }">Hello</div>
+```tsx
+<div use:draggable={{ bounds: {} }}>Hello</div>
 ```
 
 Bound only to top and bottom, and unbounded horizontally in practice by setting bounds way beyond the screen.
 
-```vue
-<div v-draggable="{ bounds: { top: 0, bottom: 0, left: -1000, right: -1000 } }">Hello</div>
+```tsx
+<div use:draggable={{ bounds: { top: 0, bottom: 0, left: -1000, right: -1000 } }}>Hello</div>
 ```
 
 ## gpuAcceleration
@@ -164,8 +176,8 @@ If true, uses `translate3d` instead of `translate` to move the element around, a
 
 Example 👇
 
-```vue
-<div v-draggable="{ gpuAcceleration: false }">Hello</div>
+```tsx
+<div use:draggable={{ gpuAcceleration: false }}>Hello</div>
 ```
 
 ## applyUserSelectHack
@@ -176,8 +188,8 @@ Example 👇
 
 Applies `user-select: none` on `<body />` element when dragging, to prevent the irritating effect where dragging doesn't happen and the text is selected. Applied when dragging starts and removed when it stops.
 
-```vue
-<div v-draggable="{ applyUserSelectHack: false }">Text</div>
+```tsx
+<div use:draggable={{ applyUserSelectHack: false }}>Text</div>
 ```
 
 ## ignoreMultitouch
@@ -191,7 +203,7 @@ This helps when you have multiple elements on a canvas where you want to impleme
 
 ```vue
 <!-- Ignore Multitouch -->
-<div v-draggable="{ ignoreMultitouch: true }">Text</div>
+<div use:draggable={{ ignoreMultitouch: true }}>Text</div>
 ```
 
 ## disabled
@@ -232,61 +244,51 @@ CSS Selector of an element or multiple elements inside the parent node(on which 
 
 Selector:
 
-```vue
-<template>
-	<div v-draggable="{ cancel: '.cancel' }">
-		This will drag!
-		<div class="cancel">You shall not drag!!🧙‍♂️</div>
-	</div>
-</template>
+```tsx
+<div use:draggable={{ cancel: '.cancel' }}>
+	This will drag!
+	<div class="cancel">You shall not drag!!🧙‍♂️</div>
+</div>
 ```
 
 Multiple elements with selector:
 
-```vue
-<template>
-	<div v-draggable="{ cancel: '.cancel' }">
-		This will drag!
-		<div class="cancel">You shall not drag!!🧙‍♂️</div>
-		<div class="cancel">You shall not drag too!!🧙‍♂️</div>
-	</div>
-</template>
+```tsx
+<div use:draggable={{ cancel: '.cancel' }}>
+	This will drag!
+	<div class="cancel">You shall not drag!!🧙‍♂️</div>
+	<div class="cancel">You shall not drag too!!🧙‍♂️</div>
+</div>
 ```
 
 Element:
 
-```vue
-<script setup>
-import { vDraggable } from '@neodrag/vue';
+```tsx
+let cancel: HTMLDivElement;
 
-const cancel = ref();
-</script>
-
-<template>
-	<div v-draggable="{ cancel }">
-		This will drag!
-		<div class="cancel" ref="cancel">You shall not drag!!🧙‍♂️</div>
+<div use:draggable={{ cancel }}>
+	This will drag!
+	<div class="cancel" ref={cancel}>
+		You shall not drag!!🧙‍♂️
 	</div>
-</template>
+</div>;
 ```
 
-Elements:
+Multiple Elements:
 
-```vue
-<script setup>
-import { vDraggable } from '@neodrag/vue';
+```tsx
+let cancel1;
+let cancel2;
 
-const cancel1 = ref();
-const cancel2 = ref();
-</script>
-
-<template>
-	<div v-draggable="{ cancel: [cancel1, cancel2] }">
-		This will drag!
-		<div class="cancel" ref="cancel1">Cancel me out</div>
-		<div class="cancel" ref="cancel2">Cancel me out pt 2</div>
+<div use:draggable={{ cancel: [cancel1, cancel2] }}>
+	This will drag!
+	<div class="cancel" ref={cancel1}>
+		Cancel me out
 	</div>
-</template>
+	<div class="cancel" ref={cancel2}>
+		Cancel me out pt 2
+	</div>
+</div>;
 ```
 
 ## handle
@@ -297,64 +299,58 @@ const cancel2 = ref();
 
 CSS Selector of an element or multiple elements inside the parent node(on which `v-draggable` is applied). Can be an element or elements too. If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
 
-```vue
-<template>
-	<div v-draggable="{ handle: '.handle' }">
-		You shall not drag!!🧙‍♂️
-		<div class="handle">This will drag 😁</div>
-	</div>
-</template>
+```tsx
+<div use:draggable={{ handle: '.handle' }}>
+	You shall not drag!!🧙‍♂️
+	<div class="handle">This will drag 😁</div>
+</div>
 ```
 
 Multiple handles with selector:
 
-```vue
-<template>
-	<div v-draggable="{ handle: '.handle' }">
-		You shall not drag!!🧙‍♂️
-		<div class="handle">This will allow drag 😁</div>
-		<div class="handle">This will allow drag too 😁</div>
-		<div class="handle">This will allow drag three 😁</div>
-	</div>
-</template>
+```tsx
+<div use:draggable={{ handle: '.handle' }}>
+	You shall not drag!!🧙‍♂️
+	<div class="handle">This will allow drag 😁</div>
+	<div class="handle">This will allow drag too 😁</div>
+	<div class="handle">This will allow drag three 😁</div>
+</div>
 ```
 
 Handle with element:
 
-```vue
-<script setup>
-import { vDraggable } from '@neodrag/vue';
+```tsx
+let handle;
 
-const handle = ref();
-</script>
-
-<template>
-	<div v-draggable="{ handle }">
-		You shall not drag!!🧙‍♂️
-		<div class="handle" ref="handle">This will drag 😁</div>
+<div use:draggable={{ handle }}>
+	You shall not drag!!🧙‍♂️
+	<div class="handle" ref={handle}>
+		This will drag 😁
 	</div>
-</template>
+</div>;
 ```
 
 Multiple handles with elements
 
-```vue
-<script setup>
-import { vDraggable } from '@neodrag/vue';
-
-const handle1 = ref();
-const handle2 = ref();
-const handle3 = ref();
-</script>
+```tsx
+let handle1;
+let handle2;
+let handle3;
 
 <template>
-	<div v-draggable="{ handle: [handle1, handle2, handle3] }">
+	<div use:draggable={{ handle: [handle1, handle2, handle3] }}>
 		You shall not drag!!🧙‍♂️
-		<div class="handle" ref="handle1">This will allow drag 😁</div>
-		<div class="handle" ref="handle2">This will allow drag too 😁</div>
-		<div class="handle" ref="handle3">This will allow drag three 😁</div>
+		<div class="handle" ref={handle1}>
+			This will allow drag 😁
+		</div>
+		<div class="handle" ref={handle2}>
+			This will allow drag too 😁
+		</div>
+		<div class="handle" ref={handle3}>
+			This will allow drag three 😁
+		</div>
 	</div>
-</template>
+</template>;
 ```
 
 ## defaultClass
@@ -433,26 +429,71 @@ type DragEventData = { offsetX: number; offsetY: number; domRect: DOMRect };
 
 # Events
 
-`@neodrag/vue` emits 3 events, `onDrag`, `onDragStart` & `onDragEnd`.
+`@neodrag/solid` emits 3 events, `onDrag`, `onDragStart` & `onDragEnd`.
 Example:
 
-```vue
-<template>
-	<div
-		v-draggable="{
-			onDragStart: (data) => console.log('Dragging started', data),
-			onDrag: (data) => console.log('Dragging', data),
-			onDragEnd: (data) => console.log('Dragging stopped', data),
-		}"
-	>
-		Hello
-	</div>
-</template>
+```tsx
+<div
+	use:draggable={{
+		onDragStart: (data) => console.log('Dragging started', data),
+		onDrag: (data) => console.log('Dragging', data),
+		onDragEnd: (data) => console.log('Dragging stopped', data),
+	}}
+>
+	Hello
+</div>
 ```
 
 # TypeScript
 
 This library ships with proper TypeScript typings, for the best Developer Experience, whether authoring JS or TS.
+
+To get proper TypeScript typing for the `use:draggable` syntax, add this line to your root `globals.d.ts` file:
+
+```ts
+/// <reference types="@neodrag/solid/globals" />
+```
+
+Or, add to `tsconfig.json`:
+
+```json
+{
+	"compilerOptions": {
+		"types": ["@neodrag/solid/globals"]
+	}
+}
+```
+
+However, these types will only work if you destructure the `draggable` directive as `draggable` only. If you rename it, like this:
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+
+const { draggable: myCustomDraggable } = createDraggable();
+
+<div use:myCustomDraggable>Drag me</div>;
+```
+
+It will give an error
+
+```txt
+Property 'use:myCustomDraggable' does not exist on type 'HTMLAttributes<HTMLDivElement>'.
+```
+
+In that case, you have to manually add to your `globals.d.ts` file this snippet:
+
+```ts
+import { DragOptions } from '@neodrag/solid';
+import 'solid-js';
+
+declare module 'solid-js' {
+	namespace JSX {
+		interface Directives {
+			myCustomDraggable: DragOptions;
+		}
+	}
+}
+```
 
 ## Types Exported from package
 
@@ -465,7 +506,7 @@ import type {
 	DragBoundsCoords,
 	DragOptions,
 	DragEventData,
-} from '@neodrag/vue';
+} from '@neodrag/solid';
 ```
 
 `DragOptions` is the documented list of all options provided by the component.
@@ -514,11 +555,47 @@ So, when you change `position`, the element position changes. However, when the 
 
 To have it be strictly **Controlled**, meaning it can only be moved programmatically, add the `disabled` option to your draggable element's config
 
-```vue
-<div v-draggable="{ position: { x: 0, y: 10 }, disabled: true }" />
+```tsx
+<div use:draggable={{ position: { x: 0, y: 10 }, disabled: true }} />
 ```
 
 Here are a bunch of examples showing controlled behavior 👇
+
+# Future plans
+
+Right now, if you look at the syntax, it looks like this:
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+
+const { draggable } = createDraggable();
+
+<div
+	use:draggable={
+		{
+			/* options */
+		}
+	}
+/>;
+```
+
+If you look closely, the `createDraggable` is completely useless. It could've just been:
+
+```tsx
+import { draggable } from '@neodrag/solid';
+
+<div
+	use:draggable={
+		{
+			/* options */
+		}
+	}
+/>;
+```
+
+So why an extra function? Because `use:draggable`, after compiled, is just treated as a string. This means, the typescript compiler/rollup will just remove the import named `draggable` completely, breaking the whole code. Hence a wrapper function is needed.
+
+In future, if SolidJS introduces a mechanism similar to [Svelte's actions](https://svelte.dev/tutorial/actions), I'll be able to get rid of that extra call entirely! So if you find this syntax a little more verbose, bear with me, it might become better :)
 
 # Contributing
 
