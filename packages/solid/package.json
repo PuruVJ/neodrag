@@ -1,13 +1,14 @@
 {
-	"name": "@neodrag/vue",
-	"version": "0.1.1",
-	"description": "Vue library to add dragging to your apps 😉",
+	"name": "@neodrag/solid",
+	"version": "0.0.1",
+	"description": "SolidJS library to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
 	"type": "module",
 	"types": "./dist/index.d.ts",
 	"files": [
-		"dist/*"
+		"dist/*",
+		"globals.d.ts"
 	],
 	"sideEffects": false,
 	"exports": {
@@ -23,7 +24,7 @@
 	},
 	"keywords": [
 		"draggable",
-		"vue",
+		"solid",
 		"react-draggable",
 		"drag",
 		"neodrag",
@@ -37,13 +38,13 @@
 	"bugs": {
 		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/vue#readme",
+	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/solid#readme",
 	"scripts": {
 		"build": "rollup -c",
 		"watch": "rollup -cw",
 		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public",
-		"size": "echo 'Vue size:' && brotli-size dist/index.js"
+		"size": "echo 'Solid size:' && brotli-size dist/index.js"
 	},
 	"devDependencies": {
 		"@neodrag/svelte": "workspace:*"

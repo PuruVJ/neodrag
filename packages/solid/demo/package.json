@@ -1,0 +1,21 @@
+{
+	"name": "vite-template-solid",
+	"version": "0.0.0",
+	"description": "",
+	"scripts": {
+		"start": "vite",
+		"dev": "vite",
+		"build": "vite build",
+		"serve": "vite preview"
+	},
+	"license": "MIT",
+	"devDependencies": {
+		"typescript": "^4.6.4",
+		"vite": "^2.9.9",
+		"vite-plugin-solid": "^2.2.6"
+	},
+	"dependencies": {
+		"solid-js": "^1.4.2",
+		"@neodrag/solid": "workspace:*"
+	}
+}
