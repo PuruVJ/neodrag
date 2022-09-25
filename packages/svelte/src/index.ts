@@ -416,7 +416,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 				deltaY = finalY - initialY;
 
 			[deltaX, deltaY] = snapToGrid(
-				[Math.floor(xSnap / inverseScale), Math.floor(ySnap / inverseScale)],
+				[xSnap / inverseScale, ySnap / inverseScale],
 				deltaX,
 				deltaY
 			);
@@ -425,8 +425,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			finalY = initialY + deltaY;
 		}
 
-		if (canMoveInX) translateX = (finalX - initialX) * inverseScale;
-		if (canMoveInY) translateY = (finalY - initialY) * inverseScale;
+		if (canMoveInX) translateX = Math.round((finalX - initialX) * inverseScale);
+		if (canMoveInY) translateY = Math.round((finalY - initialY) * inverseScale);
 
 		xOffset = translateX;
 		yOffset = translateY;
