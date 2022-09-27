@@ -9,12 +9,12 @@
 	},
 	"dependencies": {
 		"@neodrag/vue": "workspace:*",
-		"vue": "^3.2.37"
+		"vue": "^3.2.39"
 	},
 	"devDependencies": {
-		"@vitejs/plugin-vue": "^2.3.3",
-		"typescript": "^4.7.3",
-		"vite": "^2.9.12",
-		"vue-tsc": "^0.31.4"
+		"@vitejs/plugin-vue": "^3.1.0",
+		"typescript": "^4.8.3",
+		"vite": "^3.1.3",
+		"vue-tsc": "^0.40.13"
 	}
 }
