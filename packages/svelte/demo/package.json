@@ -1,22 +1,21 @@
 {
-  "name": "svelte-drag-demo",
-  "private": true,
-  "version": "0.0.1",
-  "type": "module",
-  "scripts": {
-    "dev": "svelte-kit dev",
-    "build": "svelte-kit build",
-    "preview": "svelte-kit preview"
-  },
-  "devDependencies": {
-    "@sveltejs/adapter-static": "1.0.0-next.43",
-    "@sveltejs/kit": "1.0.0-next.504",
-    "svelte": "^3.50.1",
-    "svelte-preprocess": "^4.10.7",
-    "svelte2tsx": "^0.5.19",
-    "typescript": "^4.8.3"
-  },
-  "dependencies": {
-    "@neodrag/svelte": "workspace:*"
-  }
+	"name": "demo",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"devDependencies": {
+		"@sveltejs/kit": "next",
+		"svelte": "^3.44.0",
+		"svelte-preprocess": "^4.10.6",
+		"typescript": "^4.7.4",
+		"vite": "^3.1.0"
+	},
+	"dependencies": {
+		"@neodrag/svelte": "workspace:*"
+	},
+	"type": "module"
 }
