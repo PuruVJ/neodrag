@@ -1,14 +1,14 @@
-# @neodrag/solid
+# @neodrag/vanilla
 
-A lightweight SolidJS directive library to make your elements draggable.
+A lightweight vanilla JS(plain JS) library to make your elements draggable.
 
 Inspired from the amazing [react-draggable](https://github.com/react-grid-layout/react-draggable) library, and implements a similar API, but 3x smaller.
 
 # Features
 
-- 🤏 Tiny - Only 1.99KB min+brotli.
+- 🤏 Tiny - Only 2.02KB min+brotli.
 - 🐇 Simple - Quite simple to use, and effectively no-config required!
-- 🧙‍♀️ Elegant - SolidJS directive, to keep the usage simple, elegant and straightforward.
+- 🧙‍♀️ Elegant - Single class, very easy to use.
 - 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
 - ⚛️ Reactive - Change options passed to it on the fly, it will **just work 🙂**
 
@@ -17,13 +17,13 @@ Inspired from the amazing [react-draggable](https://github.com/react-grid-layout
 # Installing
 
 ```bash
-pnpm add @neodrag/solid
+pnpm add @neodrag/vanilla
 
 # npm
-npm install @neodrag/solid
+npm install @neodrag/vanilla
 
 # yarn
-yarn add @neodrag/solid
+yarn add @neodrag/vanilla
 ```
 
 # Usage
@@ -31,54 +31,54 @@ yarn add @neodrag/solid
 Basic usage
 
 ```tsx
-import { createDraggable } from '@neodrag/solid';
+import { Draggable } from '@neodrag/vanilla';
 
-export const App: Component = () => {
-	const { draggable } = createDraggable();
-
-	return <div use:draggable>You can drag me</div>;
-};
+const dragInstance = new Draggable(document.querySelector('#drag'));
 ```
 
 With options
 
 ```tsx
-import { createDraggable } from '@neodrag/solid';
+import { Draggable } from '@neodrag/vanilla';
 
-const { draggable } = createDraggable();
-
-<div use:draggable={{ axis: 'x', grid: [10, 10] }}>I am draggable</div>;
+const dragInstance = new Draggable(document.querySelector('#drag'), {
+	axis: 'x',
+	grid: [10, 10],
+});
 ```
 
 Defining options elsewhere with typescript
 
 ```tsx
-import { createDraggable, type DragOptions } from '@neodrag/solid';
+import { Draggable } from '@neodrag/vanilla';
 
 const options: DragOptions = {
 	axis: 'y',
 	bounds: 'parent',
 };
 
-const { draggable } = createDraggable();
-
-<div use:draggable={options}>I am draggable</div>;
+const dragInstance = new Draggable(document.querySelector('#drag'), options);
 ```
 
-Reactive options:
+Update options:
 
-```tsx
-import { createSignal } from 'solid-js';
-import { createDraggable } from '@neodrag/solid';
+```ts
+import { Draggable } from '@neodrag/vanilla';
 
-const [options, setOptions] = createSignal({
-	axis: 'y',
-	bounds: 'parent',
+const dragInstance = new Draggable(document.querySelector('#drag'), {
+	axis: 'x',
+	grid: [10, 10],
 });
 
-<div use:draggable={options()}>I am draggable</div>;
+// Update the specific options. Will be merged with the existing options.
+dragInstance.update({
+	axis: 'y',
+});
 
-// You can update `options` with `setOptions` anytime and it'll change. Neodrag will automatically update to the new options 😉
+// Completely overrides existing options, in this case, the `grid` property is removed
+dragInstance.options = {
+	axis: 'y',
+};
 ```
 
 # Options
@@ -102,7 +102,7 @@ Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `no
 
 ```tsx
 // Drag only in x direction
-<div use:draggable={{ axis: 'x' }}>Text</div>
+new Draggable(el, { axis: 'x' });
 ```
 
 ## bounds
@@ -128,40 +128,40 @@ If any of these properties are unspecified, they are assumed to be `0`.
 
 Bound to any element
 
-```tsx
-<div use:draggable={{ bounds: document.querySelector('.some-element') }}>Hello</div>
+```ts
+new Draggable(el, { bounds: document.querySelector('.some-element') });
 ```
 
 Bound to parent
 
-```tsx
-<div use:draggable={{ bounds: 'parent' }}>Hello</div>
+```ts
+new Draggable(el, { bounds: 'parent' });
 ```
 
 Bound to body
 
-```tsx
-<div use:draggable={{ bounds: 'body' }}>Hello</div>
+```ts
+new Draggable(el, { bounds: 'body' });
 ```
 
 Bound to an ancestor selector somewhere in page
 
 ```tsx
-<div use:draggable={{ bounds: '.way-up-in-the-dom' }}>Hello</div>
+new Draggable(el, { bounds: '.way-up-in-the-dom' });
 ```
 
 Manually through coordinates. Empty object means bound to the `window`.
 
 **NOTE**: It isn't strictly empty object. If you omit any property from this object, it will be assumed as `0`.
 
-```tsx
-<div use:draggable={{ bounds: {} }}>Hello</div>
+```ts
+new Draggable(el, { bounds: {} });
 ```
 
 Bound only to top and bottom, and unbounded horizontally in practice by setting bounds way beyond the screen.
 
-```tsx
-<div use:draggable={{ bounds: { top: 0, bottom: 0, left: -1000, right: -1000 } }}>Hello</div>
+```ts
+new Draggable(el, { bounds: { top: 0, bottom: 0, left: -1000, right: -1000 } });
 ```
 
 ## gpuAcceleration
@@ -176,8 +176,8 @@ If true, uses `translate3d` instead of `translate` to move the element around, a
 
 Example 👇
 
-```tsx
-<div use:draggable={{ gpuAcceleration: false }}>Hello</div>
+```ts
+new Draggable(el, { gpuAcceleration: false });
 ```
 
 ## applyUserSelectHack
@@ -189,7 +189,7 @@ Example 👇
 Applies `user-select: none` on `<body />` element when dragging, to prevent the irritating effect where dragging doesn't happen and the text is selected. Applied when dragging starts and removed when it stops.
 
 ```tsx
-<div use:draggable={{ applyUserSelectHack: false }}>Text</div>
+new Draggable(el, { applyUserSelectHack: false });
 ```
 
 ## ignoreMultitouch
@@ -201,9 +201,8 @@ Applies `user-select: none` on `<body />` element when dragging, to prevent the 
 Ignores touch events with more than 1 touch.
 This helps when you have multiple elements on a canvas where you want to implement pinch-to-zoom behaviour.
 
-```vue
-<!-- Ignore Multitouch -->
-<div use:draggable={{ ignoreMultitouch: true }}>Text</div>
+```ts
+new Draggable(el, { ignoreMultitouch: true });
 ```
 
 ## disabled
@@ -240,55 +239,45 @@ Read more below in the **Controlled vs Uncontrolled** section.
 
 **Default value**: `undefined`
 
-CSS Selector of an element or multiple elements inside the parent node(on which `use:draggable` is applied). Can be an element or elements too. If it is provided, Trying to drag inside the `cancel` element(s) will prevent dragging.
+CSS Selector of an element or multiple elements inside the parent node(on which `Draggable` is applied). Can be an element or elements too. If it is provided, Trying to drag inside the `cancel` element(s) will prevent dragging.
 
-Selector:
+Selector(Selects multiple too using `el.querySelectorAll`):
 
-```tsx
-<div use:draggable={{ cancel: '.cancel' }}>
-	This will drag!
-	<div class="cancel">You shall not drag!!🧙‍♂️</div>
-</div>
-```
-
-Multiple elements with selector:
-
-```tsx
-<div use:draggable={{ cancel: '.cancel' }}>
-	This will drag!
-	<div class="cancel">You shall not drag!!🧙‍♂️</div>
-	<div class="cancel">You shall not drag too!!🧙‍♂️</div>
-</div>
+```ts
+new Draggable(el, { cancel: '.cancel' });
 ```
 
 Element:
 
-```tsx
-let cancel: HTMLDivElement;
+```ts
+new Draggable(el, { cancel: [el.querySelector('.cancel')] });
+```
 
-<div use:draggable={{ cancel }}>
-	This will drag!
-	<div class="cancel" ref={cancel}>
-		You shall not drag!!🧙‍♂️
-	</div>
-</div>;
+for this element structure:
+
+```html
+<div class="draggable">
+	I can be dragged
+	<div class="cancel">I won't allow dragging</div>
+</div>
 ```
 
 Multiple Elements:
 
-```tsx
-let cancel1;
-let cancel2;
+```ts
+new Draggable(el, {
+	cancel: [el.querySelector('.cancel1'), el.querySelector('.cancel2')],
+});
+```
 
-<div use:draggable={{ cancel: [cancel1, cancel2] }}>
+With html structure
+
+```html
+<div>
 	This will drag!
-	<div class="cancel" ref={cancel1}>
-		Cancel me out
-	</div>
-	<div class="cancel" ref={cancel2}>
-		Cancel me out pt 2
-	</div>
-</div>;
+	<div class="cancel">Cancel me out</div>
+	<div class="cancel">Cancel me out pt 2</div>
+</div>
 ```
 
 ## handle
@@ -297,10 +286,18 @@ let cancel2;
 
 **Default Value**: `undefined`
 
-CSS Selector of an element or multiple elements inside the parent node(on which `use:draggable` is applied). Can be an element or elements too. If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
+CSS Selector of an element or multiple elements inside the parent node(on which `Draggable` is applied). Can be an element or elements too. If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
 
-```tsx
-<div use:draggable={{ handle: '.handle' }}>
+Element:
+
+```ts
+new Draggable(el, { handle: '.handle' });
+```
+
+HTML structure:
+
+```html
+<div>
 	You shall not drag!!🧙‍♂️
 	<div class="handle">This will drag 😁</div>
 </div>
@@ -308,8 +305,12 @@ CSS Selector of an element or multiple elements inside the parent node(on which 
 
 Multiple handles with selector:
 
-```tsx
-<div use:draggable={{ handle: '.handle' }}>
+```ts
+new Draggable(el, { handle: '.handle' });
+```
+
+```html
+<div>
 	You shall not drag!!🧙‍♂️
 	<div class="handle">This will allow drag 😁</div>
 	<div class="handle">This will allow drag too 😁</div>
@@ -319,38 +320,34 @@ Multiple handles with selector:
 
 Handle with element:
 
-```tsx
-let handle;
+```ts
+new Draggable(el, { cancel: [el.querySelector('.cancel')] });
+```
 
-<div use:draggable={{ handle }}>
+```html
+<div>
 	You shall not drag!!🧙‍♂️
-	<div class="handle" ref={handle}>
-		This will drag 😁
-	</div>
-</div>;
+	<div class="handle">This will drag 😁</div>
+</div>
 ```
 
 Multiple handles with elements
 
-```tsx
-let handle1;
-let handle2;
-let handle3;
+```ts
+const handle1 = document.querySelector('.handle1');
+const handle2 = document.querySelector('.handle2');
+const handle3 = document.querySelector('.handle3');
 
-<template>
-	<div use:draggable={{ handle: [handle1, handle2, handle3] }}>
-		You shall not drag!!🧙‍♂️
-		<div class="handle" ref={handle1}>
-			This will allow drag 😁
-		</div>
-		<div class="handle" ref={handle2}>
-			This will allow drag too 😁
-		</div>
-		<div class="handle" ref={handle3}>
-			This will allow drag three 😁
-		</div>
-	</div>
-</template>;
+new Draggable(el, { handle: [handle1, handle2, handle3] });
+```
+
+```html
+<div>
+	You shall not drag!!🧙‍♂️
+	<div class="handle1">This will allow drag 😁</div>
+	<div class="handle2">This will allow drag too 😁</div>
+	<div class="handle3">This will allow drag three 😁</div>
+</div>
 ```
 
 ## defaultClass
@@ -359,7 +356,7 @@ let handle3;
 
 **Default Value**: `'neodrag'`
 
-Class to apply on the element on which `use:draggable` is applied. <br/><br/> Note that if `handle` is provided, it will still apply class on the parent element, **NOT** the handle
+Class to apply on the element on which `new Draggable` is applied. <br/><br/> Note that if `handle` is provided, it will still apply class on the parent element, **NOT** the handle
 
 ## defaultClassDragging
 
@@ -429,71 +426,20 @@ type DragEventData = { offsetX: number; offsetY: number; domRect: DOMRect };
 
 # Events
 
-`@neodrag/solid` emits 3 events, `onDrag`, `onDragStart` & `onDragEnd`.
+`@neodrag/vanilla` emits 3 events, `onDrag`, `onDragStart` & `onDragEnd`.
 Example:
 
 ```tsx
-<div
-	use:draggable={{
-		onDragStart: (data) => console.log('Dragging started', data),
-		onDrag: (data) => console.log('Dragging', data),
-		onDragEnd: (data) => console.log('Dragging stopped', data),
-	}}
->
-	Hello
-</div>
+new Draggable({
+	onDragStart: (data) => console.log('Dragging started', data),
+	onDrag: (data) => console.log('Dragging', data),
+	onDragEnd: (data) => console.log('Dragging stopped', data),
+});
 ```
 
 # TypeScript
 
 This library ships with proper TypeScript typings, for the best Developer Experience, whether authoring JS or TS.
-
-To get proper TypeScript typing for the `use:draggable` syntax, add this line to your root `globals.d.ts` file:
-
-```ts
-/// <reference types="@neodrag/solid/globals" />
-```
-
-Or, add to `tsconfig.json`:
-
-```json
-{
-	"compilerOptions": {
-		"types": ["@neodrag/solid/globals"]
-	}
-}
-```
-
-However, these types will only work if you destructure the `draggable` directive as `draggable` only. If you rename it, like this:
-
-```tsx
-import { createDraggable } from '@neodrag/solid';
-
-const { draggable: myCustomDraggable } = createDraggable();
-
-<div use:myCustomDraggable>Drag me</div>;
-```
-
-It will give an error
-
-```txt
-Property 'use:myCustomDraggable' does not exist on type 'HTMLAttributes<HTMLDivElement>'.
-```
-
-In that case, you have to manually add to your `globals.d.ts` file this snippet:
-
-```ts
-import { DragOptions } from '@neodrag/solid';
-import 'solid-js';
-
-declare module 'solid-js' {
-	namespace JSX {
-		interface Directives {
-			myCustomDraggable: DragOptions;
-		}
-	}
-}
-```
 
 ## Types Exported from package
 
@@ -556,46 +502,10 @@ So, when you change `position`, the element position changes. However, when the 
 To have it be strictly **Controlled**, meaning it can only be moved programmatically, add the `disabled` option to your draggable element's config
 
 ```tsx
-<div use:draggable={{ position: { x: 0, y: 10 }, disabled: true }} />
+new Draggable({ position: { x: 0, y: 10 }, disabled: true });
 ```
 
 Here are a bunch of examples showing controlled behavior 👇
-
-# Future plans
-
-Right now, if you look at the syntax, it looks like this:
-
-```tsx
-import { createDraggable } from '@neodrag/solid';
-
-const { draggable } = createDraggable();
-
-<div
-	use:draggable={
-		{
-			/* options */
-		}
-	}
-/>;
-```
-
-If you look closely, the `createDraggable` is completely useless. It could've just been:
-
-```tsx
-import { draggable } from '@neodrag/solid';
-
-<div
-	use:draggable={
-		{
-			/* options */
-		}
-	}
-/>;
-```
-
-So why an extra function? Because `use:draggable`, after compiled, is just treated as a string. This means, the typescript compiler/rollup will just remove the import named `draggable` completely, breaking the whole code. Hence a wrapper function is needed.
-
-In future, if SolidJS introduces a mechanism similar to [Svelte's actions](https://svelte.dev/tutorial/actions), I'll be able to get rid of that extra call entirely! So if you find this syntax a little more verbose, bear with me, it might become better :)
 
 # Contributing
 

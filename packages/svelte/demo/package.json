@@ -9,12 +9,12 @@
     "preview": "svelte-kit preview"
   },
   "devDependencies": {
-    "@sveltejs/adapter-static": "^1.0.0-next.34",
-    "@sveltejs/kit": "^1.0.0-next.350",
-    "svelte": "^3.48.0",
+    "@sveltejs/adapter-static": "1.0.0-next.43",
+    "@sveltejs/kit": "1.0.0-next.504",
+    "svelte": "^3.50.1",
     "svelte-preprocess": "^4.10.7",
-    "svelte2tsx": "^0.5.10",
-    "typescript": "^4.7.3"
+    "svelte2tsx": "^0.5.19",
+    "typescript": "^4.8.3"
   },
   "dependencies": {
     "@neodrag/svelte": "workspace:*"
