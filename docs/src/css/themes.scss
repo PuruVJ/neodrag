@@ -1,0 +1,9 @@
+body,
+body.light {
+	--app-color-primary-gradient: radial-gradient(
+		circle farthest-corner at 10% 20%,
+		rgba(161, 255, 255, 1) 11.3%,
+		rgba(6, 255, 255, 1) 41.2%,
+		rgb(4, 236, 236) 77.8%
+	);
+}
