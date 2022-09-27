@@ -8,6 +8,7 @@ This is a monorepo containing the following packages:
 - [@neodrag/react](https://github.com/PuruVJ/neodrag/tree/main/packages/react#readme)
 - [@neodrag/vue](https://github.com/PuruVJ/neodrag/tree/main/packages/vue#readme)
 - [@neodrag/solid](https://github.com/PuruVJ/neodrag/tree/main/packages/solid#readme)
+- [@neodrag/vanilla](https://github.com/PuruVJ/neodrag/tree/main/packages/vanilla#readme)
 
 ## Roadmap
 
@@ -15,5 +16,5 @@ This is a monorepo containing the following packages:
 - [x] [@neodrag/react](https://github.com/PuruVJ/neodrag/tree/main/packages/react#readme)
 - [x] [@neodrag/vue](https://github.com/PuruVJ/neodrag/tree/main/packages/vue#readme)
 - [x] [@neodrag/solid](https://github.com/PuruVJ/neodrag/tree/main/packages/solid#readme)
+- [x] [@neodrag/vanilla](https://github.com/PuruVJ/neodrag/tree/main/packages/vanilla#readme)
 - [ ] @neodrag/lit
-- [ ] @neodrag/vanilla
