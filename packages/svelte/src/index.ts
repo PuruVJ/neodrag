@@ -492,7 +492,7 @@ const isString = (val: unknown): val is string => typeof val === 'string';
 
 const snapToGrid = memoize(
 	([xSnap, ySnap]: [number, number], pendingX: number, pendingY: number): [number, number] => {
-		const calc = (val: number, snap: number) => Math.round(val / snap) * snap;
+		const calc = (val: number, snap: number) => Math.ceil(val / snap) * snap;
 
 		const x = calc(pendingX, xSnap);
 		const y = calc(pendingY, ySnap);
