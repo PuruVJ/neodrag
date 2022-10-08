@@ -1,0 +1,11 @@
+{
+	"$schema": "https://unpkg.com/@changesets/config@2.2.0/schema.json",
+	"changelog": ["@changesets/changelog-github", { "repo": "PuruVJ/neodrag" }],
+	"commit": false,
+	"fixed": [],
+	"linked": [],
+	"access": "restricted",
+	"baseBranch": "main",
+	"updateInternalDependencies": "patch",
+	"ignore": []
+}
