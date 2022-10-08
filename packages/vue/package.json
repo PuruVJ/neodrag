@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/vue",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Vue library to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
@@ -39,8 +39,8 @@
 	},
 	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/vue#readme",
 	"scripts": {
-		"build": "rollup -c",
-		"watch": "rollup -cw",
+		"compile": "rollup -c",
+		"compile:watch": "rollup -cw",
 		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public",
 		"size": "echo 'Vue size:' && brotli-size dist/index.js"

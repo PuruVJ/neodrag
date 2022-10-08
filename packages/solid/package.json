@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/solid",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "SolidJS library to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
@@ -40,8 +40,8 @@
 	},
 	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/solid#readme",
 	"scripts": {
-		"build": "rollup -c",
-		"watch": "rollup -cw",
+		"compile": "rollup -c",
+		"compile:watch": "rollup -cw",
 		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public",
 		"size": "echo 'Solid size:' && brotli-size dist/index.js"

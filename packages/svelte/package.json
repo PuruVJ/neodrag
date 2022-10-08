@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/svelte",
-	"version": "1.2.3",
+	"version": "1.2.4",
 	"description": "Svelte Action to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
@@ -21,8 +21,8 @@
 	"scripts": {
 		"test": "vitest run test",
 		"test:watch": "vitest test",
-		"dev": "rollup -cw",
-		"build": "rollup -c ",
+		"compile:watch": "rollup -cw",
+		"compile": "rollup -c ",
 		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public",
 		"size": "echo 'Svelte size:' && brotli-size dist/index.js"

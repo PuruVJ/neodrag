@@ -416,7 +416,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 				deltaY = finalY - initialY;
 
 			[deltaX, deltaY] = snapToGrid(
-				[Math.floor(xSnap / inverseScale), Math.floor(ySnap / inverseScale)],
+				[xSnap / inverseScale, ySnap / inverseScale],
 				deltaX,
 				deltaY
 			);
@@ -425,8 +425,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			finalY = initialY + deltaY;
 		}
 
-		if (canMoveInX) translateX = (finalX - initialX) * inverseScale;
-		if (canMoveInY) translateY = (finalY - initialY) * inverseScale;
+		if (canMoveInX) translateX = Math.round((finalX - initialX) * inverseScale);
+		if (canMoveInY) translateY = Math.round((finalY - initialY) * inverseScale);
 
 		xOffset = translateX;
 		yOffset = translateY;
@@ -492,7 +492,7 @@ const isString = (val: unknown): val is string => typeof val === 'string';
 
 const snapToGrid = memoize(
 	([xSnap, ySnap]: [number, number], pendingX: number, pendingY: number): [number, number] => {
-		const calc = (val: number, snap: number) => Math.round(val / snap) * snap;
+		const calc = (val: number, snap: number) => Math.ceil(val / snap) * snap;
 
 		const x = calc(pendingX, xSnap);
 		const y = calc(pendingY, ySnap);
