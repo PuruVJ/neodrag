@@ -6,8 +6,17 @@
 
 <style>
 	div {
-		width: 100px;
-		height: 100px;
-		background: var(--cyan-1);
+		display: grid;
+		place-items: center;
+
+		width: 200px;
+		height: 200px;
+
+		background: var(--app-color-primary-gradient);
+		color: var(--app-color-primary-contrast);
+
+		border-radius: 0.5rem;
+
+		font-size: large;
 	}
 </style>

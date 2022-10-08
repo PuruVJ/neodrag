@@ -4,6 +4,22 @@
 
 @import './themes';
 
-h1 {
+* {
+	color: var(--app-color-dark);
+}
+
+body {
+	background-color: var(--app-color-light);
+}
+
+h1,
+h2,
+h3 {
 	width: max-content;
+
+	color: var(--app-color-dark);
+}
+
+code {
+	color: var(--app-color-light);
 }
