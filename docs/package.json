@@ -19,6 +19,7 @@
 		"svelte": "^3.46.4"
 	},
 	"devDependencies": {
+		"@neodrag/svelte": "workspace:*",
 		"autoprefixer": "^10.4.12",
 		"postcss": "^8.4.16",
 		"postcss-jit-props": "^1.0.7",
@@ -27,6 +28,6 @@
 		"rollup": "^2.79.1",
 		"sass": "^1.55.0",
 		"typescript": "^4.8.3",
-		"@neodrag/svelte": "workspace:*"
+		"vite": "^3.1.3"
 	}
 }
