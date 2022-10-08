@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/react",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "React library to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",

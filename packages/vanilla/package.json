@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/vanilla",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "JS library to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
@@ -48,6 +48,6 @@
 		"size": "echo 'Vanilla size:' && brotli-size dist/index.js"
 	},
 	"devDependencies": {
-		"@neodrag/svelte": "workspace:1.2.3"
+		"@neodrag/svelte": "workspace:*"
 	}
 }
