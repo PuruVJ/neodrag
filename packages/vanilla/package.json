@@ -41,8 +41,8 @@
 	},
 	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/solid#readme",
 	"scripts": {
-		"build": "rollup -c",
-		"watch": "rollup -cw",
+		"compile": "rollup -c",
+		"compile:watch": "rollup -cw",
 		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public",
 		"size": "echo 'Vanilla size:' && brotli-size dist/index.js"

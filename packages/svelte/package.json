@@ -21,8 +21,8 @@
 	"scripts": {
 		"test": "vitest run test",
 		"test:watch": "vitest test",
-		"dev": "rollup -cw",
-		"build": "rollup -c ",
+		"compile:watch": "rollup -cw",
+		"compile": "rollup -c ",
 		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public",
 		"size": "echo 'Svelte size:' && brotli-size dist/index.js"
