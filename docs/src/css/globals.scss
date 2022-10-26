@@ -1,6 +1,5 @@
 /* optional imports that use the props */
 @import 'open-props/normalize';
-@import 'open-props/buttons';
 
 @import './themes';
 
@@ -9,7 +8,7 @@
 }
 
 body {
-	background-color: var(--app-color-light);
+	background-color: var(--app-color-shell);
 }
 
 h1,

@@ -17,6 +17,14 @@ body.light {
 	--app-color-light: var(--gray-1);
 	--app-color-light-contrast: var(--app-color-dark);
 	--app-color-light-hsl: 0, 0%, 98%;
+
+	--app-color-shell: hsl(200, 8%, 100%);
+
+	--app-color-brand-svelte: #ff3e00;
+	--app-color-brand-react: #0097b3;
+	--app-color-brand-vue: #3ba676;
+	--app-color-brand-solid: #2c4f7c;
+	--app-color-brand-vanilla: var(--app-color-dark);
 }
 
 body.dark {
@@ -25,4 +33,12 @@ body.dark {
 	--app-color-dark: var(--gray-1);
 
 	--app-color-light: var(--gray-9);
+
+	--app-color-shell: hsl(200, 8%, 7%);
+
+	--app-color-brand-svelte: #ff3e00;
+	--app-color-brand-react: #61dafc;
+	--app-color-brand-vue: #42b883;
+	--app-color-brand-solid: #8fa6c5;
+	--app-color-brand-vanilla: var(--app-color-dark);
 }

@@ -1,4 +1,6 @@
 ---
+import '@fontsource/jetbrains-mono/600.css';
+
 import '../css/globals.scss';
 
 export interface Props {
@@ -17,7 +19,7 @@ const { title } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body>
+	<body class="dark">
 		<slot />
 	</body>
 </html>
