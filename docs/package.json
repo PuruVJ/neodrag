@@ -17,21 +17,21 @@
 		"svelte-local-storage-store": "^0.3.1"
 	},
 	"devDependencies": {
-		"@astrojs/mdx": "^0.11.1",
-		"@astrojs/prefetch": "^0.0.8",
-		"@astrojs/svelte": "^1.0.0",
-		"astro": "^1.4.7",
+		"@astrojs/mdx": "^0.11.5",
+		"@astrojs/prefetch": "^0.1.0",
+		"@astrojs/svelte": "^1.0.2",
+		"astro": "^1.5.3",
 		"autoprefixer": "^10.4.12",
-		"postcss": "^8.4.17",
+		"postcss": "^8.4.18",
 		"postcss-jit-props": "^1.0.7",
 		"prettier": "^2.7.1",
-		"prettier-plugin-astro": "^0.5.4",
-		"rollup": "^2.79.1",
+		"prettier-plugin-astro": "^0.6.0",
+		"rollup": "^3.2.3",
 		"sass": "^1.55.0",
-		"svelte": "^3.51.0",
+		"svelte": "^3.52.0",
 		"svelte-fast-dimension": "^0.0.3",
 		"svelte-sequential-preprocessor": "^0.0.7",
 		"typescript": "^4.8.4",
-		"vite": "^3.1.7"
+		"vite": "^3.2.0"
 	}
 }
