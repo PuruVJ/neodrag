@@ -471,6 +471,11 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 			nodeClassList.add(defaultClass);
 
+			// Compute bounds
+			if (typeof bounds !== 'undefined') {
+				computedBounds = computeBoundRect(bounds, node);
+			}
+
 			if (dragged) nodeClassList.add(defaultClassDragged);
 
 			if (isControlled) {
