@@ -7,3 +7,11 @@
 ---
 
 Event data provides the root node
+
+```js
+{
+	onDrag: ({ node }) => {
+		console.log(node);
+	};
+}
+```
