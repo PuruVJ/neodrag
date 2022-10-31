@@ -217,8 +217,11 @@
 		display: grid;
 		grid-template-columns: repeat(auto-fill, 175px);
 		gap: 1rem;
+		place-content: center;
 
-		width: 60%;
+		min-width: 0;
+		width: 100%;
+		max-width: 50rem;
 
 		padding: 1rem;
 
