@@ -20,5 +20,13 @@ h3 {
 }
 
 code {
-	color: var(--app-color-light);
+	color: var(--app-color-dark);
+	background-color: var(--app-color-dark-contrast);
+
+	font-family: var(--app-font-family-mono);
+}
+
+pre code {
+	color: initial;
+	background-color: initial;
 }

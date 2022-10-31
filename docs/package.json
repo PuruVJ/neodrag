@@ -14,6 +14,7 @@
 		"@fontsource/jetbrains-mono": "^4.5.11",
 		"@neodrag/svelte": "workspace:*",
 		"open-props": "^1.4.16",
+		"svelte-body": "^1.3.6",
 		"svelte-local-storage-store": "^0.3.1"
 	},
 	"devDependencies": {

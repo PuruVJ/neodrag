@@ -15,4 +15,7 @@ export default defineConfig({
 		mdx(),
 		prefetch(),
 	],
+	vite: {
+		optimizeDeps: {},
+	},
 });

@@ -6,7 +6,8 @@
 	"scripts": {
 		"changeset": "changeset",
 		"ci:version": "changeset version",
-		"ci:release": "changeset publish"
+		"ci:release": "changeset publish",
+		"sizes": "tsm scripts/gather-sizes.ts"
 	},
 	"devDependencies": {
 		"@changesets/changelog-github": "^0.4.7",
@@ -17,8 +18,10 @@
 		"@testing-library/svelte": "^3.2.2",
 		"@types/react": "^18.0.21",
 		"@types/react-dom": "^18.0.6",
+		"brotli-size": "^4.0.0",
 		"brotli-size-cli": "^1.0.0",
 		"esbuild": "^0.15.10",
+		"fast-glob": "^3.2.12",
 		"jsdom": "^20.0.1",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
@@ -29,6 +32,7 @@
 		"solid-js": "^1.5.7",
 		"svelte": "^3.51.0",
 		"svelte-preprocess": "^4.10.7",
+		"tsm": "^2.2.2",
 		"typescript": "^4.8.4",
 		"vite": "^3.1.7",
 		"vitest": "^0.24.1",

@@ -27,6 +27,7 @@ export type DragEventData = {
 	offsetX: number;
 	offsetY: number;
 	domRect: DOMRect;
+	node: HTMLElement;
 };
 
 export type DragOptions = {
@@ -254,6 +255,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		offsetX: translateX,
 		offsetY: translateY,
 		domRect: node.getBoundingClientRect(),
+		node,
 	});
 
 	const callEvent = (eventName: 'neodrag:start' | 'neodrag' | 'neodrag:end', fn: typeof onDrag) => {
@@ -415,11 +417,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			let deltaX = finalX - initialX,
 				deltaY = finalY - initialY;
 
-			[deltaX, deltaY] = snapToGrid(
-				[xSnap / inverseScale, ySnap / inverseScale],
-				deltaX,
-				deltaY
-			);
+			[deltaX, deltaY] = snapToGrid([xSnap / inverseScale, ySnap / inverseScale], deltaX, deltaY);
 
 			finalX = initialX + deltaX;
 			finalY = initialY + deltaY;
