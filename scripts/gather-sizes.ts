@@ -3,7 +3,9 @@ import fg from 'fast-glob';
 import { writeFile, mkdir } from 'node:fs/promises';
 
 async function main() {
-	const files = await fg(new URL('../packages/*/dist/index.js', import.meta.url).pathname);
+	const files = (await fg(new URL('../packages/*/dist/index.js', import.meta.url).pathname)).filter(
+		(path) => !path.includes('core')
+	);
 
 	const contents = (
 		await Promise.all(

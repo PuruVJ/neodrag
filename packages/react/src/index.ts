@@ -1,4 +1,4 @@
-import { DragEventData, draggable, DragOptions } from '@neodrag/svelte';
+import { DragEventData, draggable, DragOptions } from '@neodrag/core';
 import React, { useEffect, useRef, useState } from 'react';
 
 type DragState = DragEventData;
@@ -70,4 +70,4 @@ export type {
 	DragBoundsCoords,
 	DragOptions,
 	DragEventData,
-} from '@neodrag/svelte';
+} from '@neodrag/core';

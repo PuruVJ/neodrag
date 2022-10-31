@@ -1,4 +1,4 @@
-import { draggable, type DragOptions } from '@neodrag/svelte';
+import { draggable, type DragOptions } from '@neodrag/core';
 
 export class Draggable {
 	private _dragInstance: ReturnType<typeof draggable>;
@@ -31,4 +31,4 @@ export type {
 	DragBoundsCoords,
 	DragEventData,
 	DragOptions,
-} from '@neodrag/svelte';
+} from '@neodrag/core';

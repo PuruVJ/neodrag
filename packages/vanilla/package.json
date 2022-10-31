@@ -39,7 +39,7 @@
 	"bugs": {
 		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/solid#readme",
+	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/vanilla#readme",
 	"scripts": {
 		"compile": "rollup -c",
 		"compile:watch": "rollup -cw",
@@ -48,6 +48,6 @@
 		"size": "echo 'Vanilla size:' && brotli-size dist/index.js"
 	},
 	"devDependencies": {
-		"@neodrag/svelte": "workspace:*"
+		"@neodrag/core": "workspace:*"
 	}
 }

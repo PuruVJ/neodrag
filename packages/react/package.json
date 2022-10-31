@@ -47,6 +47,6 @@
 		"size": "echo 'React size:' && brotli-size dist/index.js"
 	},
 	"devDependencies": {
-		"@neodrag/svelte": "workspace:*"
+		"@neodrag/core": "workspace:*"
 	}
 }

@@ -47,7 +47,7 @@
 		"size": "echo 'Solid size:' && brotli-size dist/index.js"
 	},
 	"devDependencies": {
-		"@neodrag/svelte": "workspace:*"
+		"@neodrag/core": "workspace:*"
 	},
 	"peerDependencies": {
 		"solid-js": "^1.0.0"

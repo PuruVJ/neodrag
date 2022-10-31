@@ -1,5 +1,5 @@
 import { type Directive } from 'vue';
-import { draggable, type DragOptions } from '@neodrag/svelte';
+import { draggable, type DragOptions } from '@neodrag/core';
 
 const draggableMap = new WeakMap<HTMLElement, ReturnType<typeof draggable>>();
 
@@ -21,4 +21,4 @@ export type {
 	DragBoundsCoords,
 	DragOptions,
 	DragEventData,
-} from '@neodrag/svelte';
+} from '@neodrag/core';

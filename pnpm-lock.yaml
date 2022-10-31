@@ -19,8 +19,8 @@ importers:
       jsdom: ^20.0.2
       react: ^18.2.0
       react-dom: ^18.2.0
-      rollup: ^3.2.4
-      rollup-plugin-dts: ^5.0.0
+      rollup: '2'
+      rollup-plugin-dts: '4'
       rollup-plugin-esbuild: ^4.10.1
       rollup-plugin-terser: ^7.0.2
       solid-js: ^1.6.1
@@ -34,7 +34,7 @@ importers:
     devDependencies:
       '@changesets/changelog-github': 0.4.7
       '@changesets/cli': 2.25.2
-      '@rollup/plugin-node-resolve': 15.0.1_rollup@3.2.4
+      '@rollup/plugin-node-resolve': 15.0.1_rollup@2.79.1
       '@sveltejs/vite-plugin-svelte': 1.1.0_svelte@3.52.0+vite@3.2.2
       '@testing-library/jest-dom': 5.16.5
       '@testing-library/svelte': 3.2.2_svelte@3.52.0
@@ -47,10 +47,10 @@ importers:
       jsdom: 20.0.2
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      rollup: 3.2.4
-      rollup-plugin-dts: 5.0.0_q2infpuebimry5rewrrx7hex4q
-      rollup-plugin-esbuild: 4.10.1_lfitvcio5xn46tfktytfivpiqi
-      rollup-plugin-terser: 7.0.2_rollup@3.2.4
+      rollup: 2.79.1
+      rollup-plugin-dts: 4.2.3_gypgyaqhine6mwjfvh7icfhviq
+      rollup-plugin-esbuild: 4.10.1_lecm7whau5ub3cwxpurr6hs4em
+      rollup-plugin-terser: 7.0.2_rollup@2.79.1
       solid-js: 1.6.1
       svelte: 3.52.0
       svelte-preprocess: 4.10.7_besnmoibwkhwtentvwuriss7pa
@@ -107,11 +107,14 @@ importers:
       typescript: 4.8.4
       vite: 3.2.2_sass@1.55.0
 
+  packages/core:
+    specifiers: {}
+
   packages/react:
     specifiers:
-      '@neodrag/svelte': workspace:*
+      '@neodrag/core': workspace:*
     devDependencies:
-      '@neodrag/svelte': link:../svelte
+      '@neodrag/core': link:../core
 
   packages/react/demo:
     specifiers:
@@ -128,9 +131,9 @@ importers:
 
   packages/solid:
     specifiers:
-      '@neodrag/svelte': workspace:*
+      '@neodrag/core': workspace:*
     devDependencies:
-      '@neodrag/svelte': link:../svelte
+      '@neodrag/core': link:../core
 
   packages/solid/demo:
     specifiers:
@@ -148,7 +151,10 @@ importers:
       vite-plugin-solid: 2.3.10_solid-js@1.6.1+vite@3.2.2
 
   packages/svelte:
-    specifiers: {}
+    specifiers:
+      '@neodrag/core': workspace:*
+    devDependencies:
+      '@neodrag/core': link:../core
 
   packages/svelte/demo:
     specifiers:
@@ -169,9 +175,9 @@ importers:
 
   packages/vanilla:
     specifiers:
-      '@neodrag/svelte': workspace:*
+      '@neodrag/core': workspace:*
     devDependencies:
-      '@neodrag/svelte': link:../svelte
+      '@neodrag/core': link:../core
 
   packages/vanilla/demo:
     specifiers:
@@ -186,9 +192,9 @@ importers:
 
   packages/vue:
     specifiers:
-      '@neodrag/svelte': workspace:*
+      '@neodrag/core': workspace:*
     devDependencies:
-      '@neodrag/svelte': link:../svelte
+      '@neodrag/core': link:../core
 
   packages/vue/demo:
     specifiers:
@@ -1321,7 +1327,7 @@ packages:
       tsm: 2.2.2
     dev: true
 
-  /@rollup/plugin-node-resolve/15.0.1_rollup@3.2.4:
+  /@rollup/plugin-node-resolve/15.0.1_rollup@2.79.1:
     resolution: {integrity: sha512-ReY88T7JhJjeRVbfCyNj+NXAG3IIsVMsX9b5/9jC98dRP8/yxlZdz7mHZbHk5zHr24wZZICS5AcXsFZAXYUQEg==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -1330,13 +1336,13 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.0.2_rollup@3.2.4
+      '@rollup/pluginutils': 5.0.2_rollup@2.79.1
       '@types/resolve': 1.20.2
       deepmerge: 4.2.2
       is-builtin-module: 3.2.0
       is-module: 1.0.0
       resolve: 1.22.1
-      rollup: 3.2.4
+      rollup: 2.79.1
     dev: true
 
   /@rollup/pluginutils/4.2.1:
@@ -1347,7 +1353,7 @@ packages:
       picomatch: 2.3.1
     dev: true
 
-  /@rollup/pluginutils/5.0.2_rollup@3.2.4:
+  /@rollup/pluginutils/5.0.2_rollup@2.79.1:
     resolution: {integrity: sha512-pTd9rIsP92h+B6wWwFbW8RkZv4hiR/xKsqre4SIuAOaOEQRxi0lqLke9k2/7WegC85GgUs9pjmOjCUi3In4vwA==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -1359,7 +1365,7 @@ packages:
       '@types/estree': 1.0.0
       estree-walker: 2.0.2
       picomatch: 2.3.1
-      rollup: 3.2.4
+      rollup: 2.79.1
     dev: true
 
   /@sinclair/typebox/0.24.51:
@@ -5909,21 +5915,21 @@ packages:
       sprintf-js: 1.1.2
     dev: true
 
-  /rollup-plugin-dts/5.0.0_q2infpuebimry5rewrrx7hex4q:
-    resolution: {integrity: sha512-OO8ayCvuJCKaQSShyVTARxGurVVk4ulzbuvz+0zFd1f93vlnWFU5pBMT7HFeS6uj7MvvZLx4kUAarGATSU1+Ng==}
-    engines: {node: '>=v14'}
+  /rollup-plugin-dts/4.2.3_gypgyaqhine6mwjfvh7icfhviq:
+    resolution: {integrity: sha512-jlcpItqM2efqfIiKzDB/IKOS9E9fDvbkJSGw5GtK/PqPGS9eC3R3JKyw2VvpTktZA+TNgJRMu1NTv244aTUzzQ==}
+    engines: {node: '>=v12.22.12'}
     peerDependencies:
-      rollup: ^3.0.0
+      rollup: ^2.55
       typescript: ^4.1
     dependencies:
       magic-string: 0.26.7
-      rollup: 3.2.4
+      rollup: 2.79.1
       typescript: 4.8.4
     optionalDependencies:
       '@babel/code-frame': 7.18.6
     dev: true
 
-  /rollup-plugin-esbuild/4.10.1_lfitvcio5xn46tfktytfivpiqi:
+  /rollup-plugin-esbuild/4.10.1_lecm7whau5ub3cwxpurr6hs4em:
     resolution: {integrity: sha512-/ymcRB283zjFp1JTBXO8ekxv0c9vRc2L6OTljghsLthQ4vqeDSDWa9BVz1tHiVrx6SbUnUpDPLC0K/MXK7j5TA==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -5936,19 +5942,19 @@ packages:
       esbuild: 0.15.12
       joycon: 3.1.1
       jsonc-parser: 3.2.0
-      rollup: 3.2.4
+      rollup: 2.79.1
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-  /rollup-plugin-terser/7.0.2_rollup@3.2.4:
+  /rollup-plugin-terser/7.0.2_rollup@2.79.1:
     resolution: {integrity: sha512-w3iIaU4OxcF52UUXiZNsNeuXIMDvFrr+ZXK6bFZ0Q60qyVfq4uLptoS4bbq3paG3x216eQllFZX7zt6TIImguQ==}
     peerDependencies:
       rollup: ^2.0.0
     dependencies:
       '@babel/code-frame': 7.18.6
       jest-worker: 26.6.2
-      rollup: 3.2.4
+      rollup: 2.79.1
       serialize-javascript: 4.0.0
       terser: 5.15.1
     dev: true

@@ -47,5 +47,8 @@
 	"bugs": {
 		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/react#readme"
+	"devDependencies": {
+		"@neodrag/core": "workspace:*"
+	},
+	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/svelte#readme"
 }
