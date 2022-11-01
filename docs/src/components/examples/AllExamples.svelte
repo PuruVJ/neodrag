@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { draggable, DragOptions } from '@neodrag/svelte';
 	import { style } from 'svelte-body';
+	import { tweened } from 'svelte/motion';
+	import { expoOut } from 'svelte/easing';
 
 	let trackMyPosition = {
 		x: 0,
@@ -15,12 +17,12 @@
 		top: 100,
 		left: 200,
 		bottom: 200,
-		right: 400,
+		right: 100,
 	};
 
 	let isBackdropVisible = false;
 
-	let zIndices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	let zIndices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 	function getNodeIndex(node: HTMLElement) {
 		return Array.from(node.parentNode?.children!).indexOf(node);
@@ -59,6 +61,19 @@
 			}, 200);
 		},
 	};
+
+	let returnToPositionVal = {
+		x: 0,
+		y: 0,
+	};
+
+	let returnToPositionTransitionVal = tweened(
+		{
+			x: 0,
+			y: 0,
+		},
+		{ easing: expoOut, duration: 1200 }
+	);
 </script>
 
 <svelte:body
@@ -210,6 +225,42 @@
 		Bounds
 		<code>top: 20 <br /> bottom: 50 <br /> left: 200 <br /> right: 400</code>
 	</div>
+
+	<div
+		class="box"
+		style:z-index={zIndices[12]}
+		use:draggable={{
+			position: returnToPositionVal,
+			onDrag: (data) => {
+				dragHandlers.onDrag?.(data);
+				returnToPositionVal = { x: data.offsetX, y: data.offsetY };
+			},
+			onDragEnd: (data) => {
+				dragHandlers.onDragEnd?.(data);
+				returnToPositionVal = { x: 0, y: 0 };
+			},
+		}}
+	>
+		I will return to my position on drop
+	</div>
+
+	<div
+		class="box"
+		style:z-index={zIndices[12]}
+		use:draggable={{
+			position: $returnToPositionTransitionVal,
+			onDrag: (data) => {
+				dragHandlers.onDrag?.(data);
+				returnToPositionTransitionVal.set({ x: data.offsetX, y: data.offsetY }, { duration: 0 });
+			},
+			onDragEnd: (data) => {
+				dragHandlers.onDragEnd?.(data);
+				$returnToPositionTransitionVal = { x: 0, y: 0 };
+			},
+		}}
+	>
+		I will return to my position on drop, but with style! 😉
+	</div>
 </div>
 
 <style lang="scss">
@@ -323,7 +374,7 @@
 	}
 
 	.backdrop {
-		position: fixed;
+		position: absolute;
 		top: 0;
 		left: 0;
 		z-index: 19;
@@ -333,7 +384,7 @@
 		height: 100vh;
 		width: 100vw;
 
-		backdrop-filter: blur(40px);
+		backdrop-filter: blur(20px) brightness(0.5);
 
 		opacity: 0;
 
@@ -345,7 +396,7 @@
 	}
 
 	.markers {
-		position: fixed;
+		position: absolute;
 		top: 0;
 		left: 0;
 		z-index: 19;
