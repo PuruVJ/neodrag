@@ -6,9 +6,9 @@ body.light {
 		rgba(6, 255, 255, 1) 41.2%,
 		rgb(4, 236, 236) 77.8%
 	);
-	--app-color-primary-contrast: hsl(0 0% 10%);
-
 	--app-color-primary: rgb(4, 236, 236);
+	--app-color-primary-contrast: hsl(0 0% 10%);
+	--app-color-primary-contrast-hsl: 0, 0%, 10%;
 
 	--app-color-dark: hsl(0 0% 10%);
 	--app-color-dark-contrast: var(--app-color-light);

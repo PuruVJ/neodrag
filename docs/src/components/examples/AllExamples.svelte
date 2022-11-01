@@ -2,7 +2,10 @@
 	import { draggable, DragOptions } from '@neodrag/svelte';
 	import { style } from 'svelte-body';
 	import { tweened } from 'svelte/motion';
-	import { expoOut } from 'svelte/easing';
+	import { expoOut, sineIn } from 'svelte/easing';
+	import { fade } from 'svelte/transition';
+
+	let reset = 0;
 
 	let trackMyPosition = {
 		x: 0,
@@ -22,7 +25,7 @@
 
 	let isBackdropVisible = false;
 
-	let zIndices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	let zIndices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 	function getNodeIndex(node: HTMLElement) {
 		return Array.from(node.parentNode?.children!).indexOf(node);
@@ -80,7 +83,9 @@
 	use:style={{ boxShadow: hightlightBody ? 'inset 0 0 0 2px var(--app-color-primary)' : '' }}
 />
 
-<div class="backdrop" class:visible={isBackdropVisible || showMarkers} />
+{#if isBackdropVisible || showMarkers}
+	<div class="backdrop" transition:fade={{ duration: 200, easing: sineIn }} />
+{/if}
 
 <div
 	class="markers"
@@ -106,162 +111,207 @@
 	</div>
 </div>
 
-<div class="examples-container" class:highlight={highlightParent}>
-	<div class="box" style:z-index={zIndices[0]} use:draggable={{ ...dragHandlers }}>
-		I will drag in all directions
+{#key reset}
+	<button on:click={() => reset++}>Reset examples</button>
+	<div class="examples-container" class:highlight={highlightParent}>
+		<div class="box" style:z-index={zIndices[0]} use:draggable={{ ...dragHandlers }}>
+			I will drag in all directions
+		</div>
+
+		<div class="box" style:z-index={zIndices[1]} use:draggable={{ axis: 'x', ...dragHandlers }}>
+			I will drag horizontally
+		</div>
+
+		<div class="box" style:z-index={zIndices[2]} use:draggable={{ axis: 'y', ...dragHandlers }}>
+			I will drag vertically
+		</div>
+
+		<div class="box" style:z-index={zIndices[3]} use:draggable={{ axis: 'none', ...dragHandlers }}>
+			<span><code>axis: none</code> disables dragging</span>
+		</div>
+
+		<div
+			class="box track-position"
+			style:z-index={zIndices[4]}
+			use:draggable={{
+				...dragHandlers,
+				onDrag: ({ offsetX, offsetY, domRect, node }) => {
+					dragHandlers.onDrag?.({ offsetX, offsetY, domRect, node });
+					trackMyPosition = { x: offsetX, y: offsetY };
+				},
+			}}
+		>
+			I track my position:
+			<code>x: {trackMyPosition.x} <br /> y: {trackMyPosition.y}</code>
+		</div>
+
+		<div
+			class="box"
+			style:z-index={zIndices[5]}
+			use:draggable={{ handle: '.handle', ...dragHandlers }}
+		>
+			<button class="handle">Drag here</button>
+
+			I can only be dragged by the handle 👆
+		</div>
+
+		<div
+			class="box multiple-handles"
+			style:z-index={zIndices[6]}
+			use:draggable={{ handle: '.handle', ...dragHandlers }}
+		>
+			I can be dragged with all the handles
+
+			<div class="handle" />
+			<div class="handle" />
+			<div class="handle" />
+			<div class="handle" />
+		</div>
+
+		<div
+			class="box"
+			style:z-index={zIndices[7]}
+			use:draggable={{ cancel: '.cancel', ...dragHandlers }}
+		>
+			I can be dragged anywhere
+
+			<button
+				class="cancel"
+				style:color="hsla(var(--app-color-primary-contrast-hsl), 0.6)"
+				style:font-size="0.8rem"
+			>
+				except for this box
+			</button>
+		</div>
+
+		<div
+			class="box"
+			style:z-index={zIndices[8]}
+			use:draggable={{ grid: [25, 25], ...dragHandlers }}
+		>
+			I snap to 25x25 grid
+		</div>
+
+		<div
+			class="box"
+			style:z-index={zIndices[9]}
+			use:draggable={{ grid: [100, 25], ...dragHandlers }}
+		>
+			I snap to 100x25 grid
+		</div>
+
+		<div
+			class="box"
+			style:z-index={zIndices[10]}
+			use:draggable={{
+				bounds: 'parent',
+				onDrag: ({ node }) => {
+					highlightParent = true;
+					node.style.zIndex = '20';
+				},
+
+				onDragEnd: ({ node }) => {
+					highlightParent = false;
+
+					setTimeout(() => {
+						updateZIndex(node);
+					}, 200);
+				},
+			}}
+		>
+			I can be dragged within my parents container only
+		</div>
+
+		<div
+			class="box"
+			style:z-index={zIndices[11]}
+			use:draggable={{
+				bounds: 'body',
+				onDrag: ({ node }) => {
+					hightlightBody = true;
+					node.style.zIndex = '20';
+				},
+				onDragEnd: ({ node }) => {
+					hightlightBody = false;
+
+					setTimeout(() => {
+						updateZIndex(node);
+					}, 200);
+				},
+			}}
+		>
+			I can be dragged within the body
+		</div>
+
+		<div
+			class="box"
+			style:z-index={zIndices[12]}
+			use:draggable={{
+				bounds: coordBounds,
+				onDrag: ({ node }) => {
+					showMarkers = true;
+					node.style.zIndex = '20';
+				},
+				onDragEnd: ({ node }) => {
+					showMarkers = false;
+
+					setTimeout(() => {
+						updateZIndex(node);
+					}, 200);
+				},
+			}}
+		>
+			Bounds
+			<code>top: 20 <br /> bottom: 50 <br /> left: 200 <br /> right: 400</code>
+		</div>
+
+		<div
+			class="box"
+			style:z-index={zIndices[13]}
+			use:draggable={{
+				position: returnToPositionVal,
+				onDrag: (data) => {
+					dragHandlers.onDrag?.(data);
+					returnToPositionVal = { x: data.offsetX, y: data.offsetY };
+				},
+				onDragEnd: (data) => {
+					dragHandlers.onDragEnd?.(data);
+					returnToPositionVal = { x: 0, y: 0 };
+				},
+			}}
+		>
+			I will return to my position on drop
+		</div>
+
+		<div
+			class="box"
+			style:z-index={zIndices[14]}
+			use:draggable={{
+				position: $returnToPositionTransitionVal,
+				onDrag: (data) => {
+					dragHandlers.onDrag?.(data);
+					returnToPositionTransitionVal.set({ x: data.offsetX, y: data.offsetY }, { duration: 0 });
+				},
+				onDragEnd: (data) => {
+					dragHandlers.onDragEnd?.(data);
+					$returnToPositionTransitionVal = { x: 0, y: 0 };
+				},
+			}}
+		>
+			I will return to my position on drop, but with style! 😉
+		</div>
+
+		<div
+			class="box"
+			style:z-index={zIndices[15]}
+			use:draggable={{ disabled: true, ...dragHandlers }}
+		>
+			<code>disabled: true</code>
+
+			Can't drag me at all
+		</div>
 	</div>
-
-	<div class="box" style:z-index={zIndices[1]} use:draggable={{ axis: 'x', ...dragHandlers }}>
-		I will drag horizontally
-	</div>
-
-	<div class="box" style:z-index={zIndices[2]} use:draggable={{ axis: 'y', ...dragHandlers }}>
-		I will drag vertically
-	</div>
-
-	<div class="box" style:z-index={zIndices[3]} use:draggable={{ axis: 'none', ...dragHandlers }}>
-		<span><code>axis: none</code> disables dragging</span>
-	</div>
-
-	<div
-		class="box track-position"
-		style:z-index={zIndices[4]}
-		use:draggable={{
-			...dragHandlers,
-			onDrag: ({ offsetX, offsetY, domRect, node }) => {
-				dragHandlers.onDrag?.({ offsetX, offsetY, domRect, node });
-				trackMyPosition = { x: offsetX, y: offsetY };
-			},
-		}}
-	>
-		I track my position:
-		<code>x: {trackMyPosition.x} <br /> y: {trackMyPosition.y}</code>
-	</div>
-
-	<div
-		class="box"
-		style:z-index={zIndices[5]}
-		use:draggable={{ handle: '.handle', ...dragHandlers }}
-	>
-		<button class="handle">Drag here</button>
-
-		I can only be dragged by the handle 👆
-	</div>
-
-	<div
-		class="box multiple-handles"
-		style:z-index={zIndices[6]}
-		use:draggable={{ handle: '.handle', ...dragHandlers }}
-	>
-		I can be dragged with all the handles
-
-		<div class="handle" />
-		<div class="handle" />
-		<div class="handle" />
-		<div class="handle" />
-	</div>
-
-	<div class="box" style:z-index={zIndices[7]} use:draggable={{ grid: [25, 25], ...dragHandlers }}>
-		I snap to 25x25 grid
-	</div>
-
-	<div class="box" style:z-index={zIndices[8]} use:draggable={{ grid: [100, 25], ...dragHandlers }}>
-		I snap to 100x25 grid
-	</div>
-
-	<div
-		class="box"
-		style:z-index={zIndices[9]}
-		use:draggable={{
-			bounds: 'parent',
-			onDrag: ({ node }) => {
-				highlightParent = true;
-				node.style.zIndex = '20';
-			},
-
-			onDragEnd: ({ node }) => {
-				highlightParent = false;
-				updateZIndex(node);
-			},
-		}}
-	>
-		I can be dragged within my parents container only
-	</div>
-
-	<div
-		class="box"
-		style:z-index={zIndices[10]}
-		use:draggable={{
-			bounds: 'body',
-			onDrag: ({ node }) => {
-				hightlightBody = true;
-				node.style.zIndex = '20';
-			},
-			onDragEnd: ({ node }) => {
-				hightlightBody = false;
-				updateZIndex(node);
-			},
-		}}
-	>
-		I can be dragged within the body
-	</div>
-
-	<div
-		class="box"
-		style:z-index={zIndices[11]}
-		use:draggable={{
-			bounds: coordBounds,
-			onDrag: ({ node }) => {
-				showMarkers = true;
-				node.style.zIndex = '20';
-			},
-			onDragEnd: ({ node }) => {
-				showMarkers = false;
-
-				updateZIndex(node);
-			},
-		}}
-	>
-		Bounds
-		<code>top: 20 <br /> bottom: 50 <br /> left: 200 <br /> right: 400</code>
-	</div>
-
-	<div
-		class="box"
-		style:z-index={zIndices[12]}
-		use:draggable={{
-			position: returnToPositionVal,
-			onDrag: (data) => {
-				dragHandlers.onDrag?.(data);
-				returnToPositionVal = { x: data.offsetX, y: data.offsetY };
-			},
-			onDragEnd: (data) => {
-				dragHandlers.onDragEnd?.(data);
-				returnToPositionVal = { x: 0, y: 0 };
-			},
-		}}
-	>
-		I will return to my position on drop
-	</div>
-
-	<div
-		class="box"
-		style:z-index={zIndices[12]}
-		use:draggable={{
-			position: $returnToPositionTransitionVal,
-			onDrag: (data) => {
-				dragHandlers.onDrag?.(data);
-				returnToPositionTransitionVal.set({ x: data.offsetX, y: data.offsetY }, { duration: 0 });
-			},
-			onDragEnd: (data) => {
-				dragHandlers.onDragEnd?.(data);
-				$returnToPositionTransitionVal = { x: 0, y: 0 };
-			},
-		}}
-	>
-		I will return to my position on drop, but with style! 😉
-	</div>
-</div>
+{/key}
 
 <style lang="scss">
 	.examples-container {
@@ -272,7 +322,7 @@
 
 		min-width: 0;
 		width: 100%;
-		max-width: 50rem;
+		max-width: 60rem;
 
 		padding: 1rem;
 
@@ -293,7 +343,7 @@
 		position: relative;
 
 		display: grid;
-		place-items: center;
+		place-content: center;
 
 		text-align: center;
 
@@ -374,7 +424,7 @@
 	}
 
 	.backdrop {
-		position: absolute;
+		position: fixed;
 		top: 0;
 		left: 0;
 		z-index: 19;
@@ -385,14 +435,6 @@
 		width: 100vw;
 
 		backdrop-filter: blur(20px) brightness(0.5);
-
-		opacity: 0;
-
-		transition: opacity 200ms ease-in;
-
-		&.visible {
-			opacity: 1;
-		}
 	}
 
 	.markers {
