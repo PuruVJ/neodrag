@@ -23,6 +23,7 @@
 		"@astrojs/prefetch": "^0.1.0",
 		"@astrojs/svelte": "^1.0.2",
 		"astro": "^1.6.2",
+		"astro-compress": "^1.1.1",
 		"autoprefixer": "^10.4.13",
 		"postcss": "^8.4.18",
 		"postcss-jit-props": "^1.0.7",

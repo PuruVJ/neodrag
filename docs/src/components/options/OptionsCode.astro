@@ -1,7 +1,7 @@
 ---
 import type { Framework } from 'src/helpers/constants';
 
-const framework = Astro.url.pathname.split('/').at(-1) as Framework;
+const framework = Astro.url.pathname.split('/').filter(Boolean).at(-1) as Framework;
 ---
 
 {framework === 'react' && <slot name="react" />}
