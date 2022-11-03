@@ -1,0 +1,22 @@
+---
+type OptionsFrontMatter = {
+	title: string;
+	type: string;
+	defaultValue: string;
+};
+
+const optionsMD = await Astro.glob<OptionsFrontMatter>('./content/*.option.mdx');
+---
+
+{
+	optionsMD.map(({ Content, frontmatter: { defaultValue, title, type } }) => (
+		<>
+			<h2>{title}</h2>
+			Type: <code>{type}</code> <br />
+			Default Value: <code>{defaultValue}</code>
+			<Content />
+		</>
+	))
+}
+
+<style lang="scss"></style>
