@@ -4,9 +4,49 @@ type: "'both' | 'x' | 'y' | 'none'"
 defaultValue: "'both'"
 ---
 
+import Code from '../OptionsCode.astro';
+import Example from '../OptionsExample.astro';
+
 Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
 
 - `both` - Element can move in any direction
 - `x` - Only horizontal movement possible
 - `y` - Only vertical movement possible
 - `none` - No movement at all
+
+<Example>
+  <Code slot="codes">
+    <div slot="svelte">
+      ```svelte
+      <div use:draggable={{ axis: 'both' }}>Both directions</div>
+      ```
+    </div>
+
+    <div slot="react">
+      ```ts
+      useDraggable(draggableRef, { axis: 'both' });
+      ```
+    </div>
+
+    <div slot="vue">
+      ```vue
+      <template>
+        <div v-draggable="{{ axis: 'both' }}">Both directions</div>
+      </template>
+      ```
+    </div>
+
+    <div slot="solid">
+      ```jsx
+      <div use:draggable={{ axis: 'x' }}>Text</div>
+      ```
+    </div>
+
+    <div slot="vanilla">
+      ```js
+      new Draggable(el, { axis: 'x' });
+      ```
+    </div>
+
+  </Code>
+</Example>
