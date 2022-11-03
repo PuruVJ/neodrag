@@ -7,3 +7,28 @@
 		<slot name="codes" />
 	</div>
 </div>
+
+<style lang="scss">
+	.demo :global(.option-demo-box) {
+		--size: 175px;
+
+		position: relative;
+
+		display: grid;
+		place-content: center;
+
+		text-align: center;
+
+		width: var(--size);
+		height: var(--size);
+
+		background-color: var(--app-color-primary);
+
+		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035), 0px 100px 80px rgba(0, 0, 0, 0.07);
+
+		border-radius: 0.5rem;
+
+		font-size: large;
+		color: var(--app-color-primary-contrast);
+	}
+</style>

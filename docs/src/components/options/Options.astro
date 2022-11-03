@@ -5,7 +5,7 @@ type OptionsFrontMatter = {
 	defaultValue: string;
 };
 
-const optionsMD = await Astro.glob<OptionsFrontMatter>('./content/*.option.mdx');
+const optionsMD = await Astro.glob<OptionsFrontMatter>('./content/*/*.option.mdx');
 ---
 
 {
