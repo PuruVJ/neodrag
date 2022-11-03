@@ -20,12 +20,12 @@
 		"@types/react-dom": "^18.0.8",
 		"brotli-size": "^4.0.0",
 		"brotli-size-cli": "^1.0.0",
-		"esbuild": "^0.15.12",
+		"esbuild": "^0.15.13",
 		"fast-glob": "^3.2.12",
 		"jsdom": "^20.0.2",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"rollup": "2",
+		"rollup": "^2.79.1",
 		"rollup-plugin-dts": "4",
 		"rollup-plugin-esbuild": "^4.10.1",
 		"rollup-plugin-terser": "^7.0.2",
@@ -35,7 +35,7 @@
 		"tsm": "^2.2.2",
 		"typescript": "^4.8.4",
 		"vite": "^3.2.2",
-		"vitest": "^0.24.4",
+		"vitest": "^0.24.5",
 		"vue": "^3.2.41"
 	}
 }
