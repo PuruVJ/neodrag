@@ -6,6 +6,7 @@ defaultValue: "'both'"
 
 import Code from '../../OptionsCode.astro';
 import Example from '../../OptionsExample.astro';
+import Examples from '../../OptionsExamples.astro';
 
 import BothAxisExample from './BothAxis.example.svelte';
 import XAxisExample from './XAxis.example.svelte';
@@ -21,182 +22,188 @@ export const shortDescription = 'Axis on which the element can be dragged on.';
 - `y` - Only vertical movement possible
 - `none` - No movement at all
 
-<Example>
-  <BothAxisExample client:visible slot="demo" />
+<Examples>
+  <Example>
+    <BothAxisExample client:visible slot="demo" />
 
-  <Code slot="codes">
-    <div slot="svelte">
-      ```svelte
-      <div use:draggable={{ axis: 'both' }}>
-        Both directions
-      </div>
-      ```
-    </div>
-
-    <div slot="vue">
-      ```vue
-      <template>
-        <div v-draggable="{{ axis: 'both' }}">
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ axis: 'both' }}>
           Both directions
         </div>
-      </template>
-      ```
-    </div>
-
-    <div slot="solid">
-      ```jsx
-      <div use:draggable={{ axis: 'both' }}>
-        Both directions
+        ```
       </div>
-      ```
-    </div>
 
-    <div slot="react">
-      ```ts
-      useDraggable(draggableRef, { axis: 'both' });
-      ```
-    </div>
-
-    <div slot="vanilla">
-      ```js
-      new Draggable(el, { axis: 'both' });
-      ```
-    </div>
-
-  </Code>
-</Example>
-
-<Example>
-  <XAxisExample client:visible slot="demo" />
-
-  <Code slot="codes">
-    <div slot="svelte">
-      ```svelte
-      <div use:draggable={{ axis: 'x' }}>
-        Horizontal
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ axis: 'both' }}">
+            Both directions
+          </div>
+        </template>
+        ```
       </div>
-      ```
-    </div>
 
-    <div slot="vue">
-      ```vue
-      <template>
-        <div v-draggable="{{ axis: 'x' }}">
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ axis: 'both' }}>
+          Both directions
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { axis: 'both' });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { axis: 'both' });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <XAxisExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ axis: 'x' }}>
           Horizontal
         </div>
-      </template>
-      ```
-    </div>
-
-    <div slot="solid">
-      ```jsx
-      <div use:draggable={{ axis: 'x' }}>
-        Horizontal
+        ```
       </div>
-      ```
-    </div>
 
-    <div slot="react">
-      ```ts
-      useDraggable(draggableRef, { axis: 'x' });
-      ```
-    </div>
-
-    <div slot="vanilla">
-      ```js
-      new Draggable(el, { axis: 'x' });
-      ```
-    </div>
-
-  </Code>
-</Example>
-
-<Example>
-  <YAxisExample client:visible slot="demo" />
-
-  <Code slot="codes">
-    <div slot="svelte">
-      ```svelte
-      <div use:draggable={{ axis: 'y' }}>
-        Vertical
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ axis: 'x' }}">
+            Horizontal
+          </div>
+        </template>
+        ```
       </div>
-      ```
-    </div>
 
-    <div slot="vue">
-      ```vue
-      <template>
-        <div v-draggable="{{ axis: 'y' }}">
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ axis: 'x' }}>
+          Horizontal
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { axis: 'x' });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { axis: 'x' });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <YAxisExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ axis: 'y' }}>
           Vertical
         </div>
-      </template>
-      ```
-    </div>
-
-    <div slot="solid">
-      ```jsx
-      <div use:draggable={{ axis: 'y' }}>
-        Vertical
+        ```
       </div>
-      ```
-    </div>
 
-    <div slot="react">
-      ```ts
-      useDraggable(draggableRef, { axis: 'y' });
-      ```
-    </div>
-
-    <div slot="vanilla">
-      ```js
-      new Draggable(el, { axis: 'y' });
-      ```
-    </div>
-
-  </Code>
-</Example>
-
-<Example>
-  <NoneAxisExample client:visible slot="demo" />
-
-  <Code slot="codes">
-    <div slot="svelte">
-      ```svelte
-      <div use:draggable={{ axis: 'none' }}>
-        None axis: Won't drag
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ axis: 'y' }}">
+            Vertical
+          </div>
+        </template>
+        ```
       </div>
-      ```
-    </div>
 
-    <div slot="vue">
-      ```vue
-      <template>
-        <div v-draggable="{{ axis: 'none' }}">
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ axis: 'y' }}>
+          Vertical
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { axis: 'y' });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { axis: 'y' });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <NoneAxisExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ axis: 'none' }}>
           None axis: Won't drag
         </div>
-      </template>
-      ```
-    </div>
-
-    <div slot="solid">
-      ```jsx
-      <div use:draggable={{ axis: 'none' }}>
-        None axis: Won't drag
+        ```
       </div>
-      ```
-    </div>
 
-    <div slot="react">
-      ```ts
-      useDraggable(draggableRef, { axis: 'none' });
-      ```
-    </div>
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ axis: 'none' }}">
+            None axis: Won't drag
+          </div>
+        </template>
+        ```
+      </div>
 
-    <div slot="vanilla">
-      ```js
-      new Draggable(el, { axis: 'none' });
-      ```
-    </div>
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ axis: 'none' }}>
+          None axis: Won't drag
+        </div>
+        ```
+      </div>
 
-  </Code>
-</Example>
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { axis: 'none' });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { axis: 'none' });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+</Examples>
