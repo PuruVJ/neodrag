@@ -7,9 +7,14 @@ defaultValue: "'both'"
 import Code from '../../OptionsCode.astro';
 import Example from '../../OptionsExample.astro';
 
-import BothAxisExample from './BothAxis.example.svelte'
+import BothAxisExample from './BothAxis.example.svelte';
+import XAxisExample from './XAxis.example.svelte';
+import YAxisExample from './YAxis.example.svelte';
+import NoneAxisExample from './NoneAxis.example.svelte';
 
-Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
+export const shortDescription = 'Axis on which the element can be dragged on.';
+
+{shortDescription} Valid values: `both`, `x`, `y`, `none`.
 
 - `both` - Element can move in any direction
 - `x` - Only horizontal movement possible
@@ -22,7 +27,27 @@ Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `no
   <Code slot="codes">
     <div slot="svelte">
       ```svelte
-      <div use:draggable={{ axis: 'both' }}>Both directions</div>
+      <div use:draggable={{ axis: 'both' }}>
+        Both directions
+      </div>
+      ```
+    </div>
+
+    <div slot="vue">
+      ```vue
+      <template>
+        <div v-draggable="{{ axis: 'both' }}">
+          Both directions
+        </div>
+      </template>
+      ```
+    </div>
+
+    <div slot="solid">
+      ```jsx
+      <div use:draggable={{ axis: 'both' }}>
+        Both directions
+      </div>
       ```
     </div>
 
@@ -32,23 +57,144 @@ Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `no
       ```
     </div>
 
+    <div slot="vanilla">
+      ```js
+      new Draggable(el, { axis: 'both' });
+      ```
+    </div>
+
+  </Code>
+</Example>
+
+<Example>
+  <XAxisExample client:visible slot="demo" />
+
+  <Code slot="codes">
+    <div slot="svelte">
+      ```svelte
+      <div use:draggable={{ axis: 'x' }}>
+        Horizontal
+      </div>
+      ```
+    </div>
+
     <div slot="vue">
       ```vue
       <template>
-        <div v-draggable="{{ axis: 'both' }}">Both directions</div>
+        <div v-draggable="{{ axis: 'x' }}">
+          Horizontal
+        </div>
       </template>
       ```
     </div>
 
     <div slot="solid">
       ```jsx
-      <div use:draggable={{ axis: 'x' }}>Text</div>
+      <div use:draggable={{ axis: 'x' }}>
+        Horizontal
+      </div>
+      ```
+    </div>
+
+    <div slot="react">
+      ```ts
+      useDraggable(draggableRef, { axis: 'x' });
       ```
     </div>
 
     <div slot="vanilla">
       ```js
       new Draggable(el, { axis: 'x' });
+      ```
+    </div>
+
+  </Code>
+</Example>
+
+<Example>
+  <YAxisExample client:visible slot="demo" />
+
+  <Code slot="codes">
+    <div slot="svelte">
+      ```svelte
+      <div use:draggable={{ axis: 'y' }}>
+        Vertical
+      </div>
+      ```
+    </div>
+
+    <div slot="vue">
+      ```vue
+      <template>
+        <div v-draggable="{{ axis: 'y' }}">
+          Vertical
+        </div>
+      </template>
+      ```
+    </div>
+
+    <div slot="solid">
+      ```jsx
+      <div use:draggable={{ axis: 'y' }}>
+        Vertical
+      </div>
+      ```
+    </div>
+
+    <div slot="react">
+      ```ts
+      useDraggable(draggableRef, { axis: 'y' });
+      ```
+    </div>
+
+    <div slot="vanilla">
+      ```js
+      new Draggable(el, { axis: 'y' });
+      ```
+    </div>
+
+  </Code>
+</Example>
+
+<Example>
+  <NoneAxisExample client:visible slot="demo" />
+
+  <Code slot="codes">
+    <div slot="svelte">
+      ```svelte
+      <div use:draggable={{ axis: 'none' }}>
+        None axis: Won't drag
+      </div>
+      ```
+    </div>
+
+    <div slot="vue">
+      ```vue
+      <template>
+        <div v-draggable="{{ axis: 'none' }}">
+          None axis: Won't drag
+        </div>
+      </template>
+      ```
+    </div>
+
+    <div slot="solid">
+      ```jsx
+      <div use:draggable={{ axis: 'none' }}>
+        None axis: Won't drag
+      </div>
+      ```
+    </div>
+
+    <div slot="react">
+      ```ts
+      useDraggable(draggableRef, { axis: 'none' });
+      ```
+    </div>
+
+    <div slot="vanilla">
+      ```js
+      new Draggable(el, { axis: 'none' });
       ```
     </div>
 

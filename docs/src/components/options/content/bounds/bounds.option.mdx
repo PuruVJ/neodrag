@@ -1,0 +1,84 @@
+---
+title: bounds
+type: "HTMLElement | 'parent' | string | DragBoundsCoords"
+defaultValue: 'undefined'
+---
+
+import Code from '../../OptionsCode.astro';
+import Example from '../../OptionsExample.astro';
+
+import ParentBoundsExample from './ParentBounds.example.svelte';
+
+Optionally limit the drag area
+
+`parent`: Limit to parent
+
+Or, you can specify any selector and it will be bound to that.
+
+**Note**: This library doesn't check whether the selector is bigger than the node element.
+You yourself will have to make sure of that, or it may lead to unexpected behavior.
+
+Or, finally, you can pass an object of type `DragBoundsCoords`.
+These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right` from right of window.
+If any of these properties are unspecified, they are assumed to be `0`.
+
+```ts
+export type DragBoundsCoords = {
+  /** Number of pixels from left of the document */
+  left: number;
+
+  /** Number of pixels from top of the document */
+  top: number;
+
+  /** Number of pixels from the right side of document */
+  right: number;
+
+  /** Number of pixels from the bottom of the document */
+  bottom: number;
+};
+```
+
+<Example>
+  <ParentBoundsExample client:idle slot="demo" />
+
+  <Code slot="codes">
+    <div slot="svelte">
+      ```svelte
+      <div use:draggable={{ axis: 'both' }}>
+        Bound to parent
+      </div>
+      ```
+    </div>
+
+    <div slot="vue">
+      ```vue
+      <template>
+        <div v-draggable="{{ axis: 'both' }}">
+          Both directions
+        </div>
+      </template>
+      ```
+    </div>
+
+    <div slot="solid">
+      ```jsx
+      <div use:draggable={{ axis: 'both' }}>
+        Both directions
+      </div>
+      ```
+    </div>
+
+    <div slot="react">
+      ```ts
+      useDraggable(draggableRef, { axis: 'both' });
+      ```
+    </div>
+
+    <div slot="vanilla">
+      ```js
+      new Draggable(el, { axis: 'both' });
+      ```
+    </div>
+
+  </Code>
+</Example>

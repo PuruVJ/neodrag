@@ -15,6 +15,10 @@ const optionsMD = await Astro.glob<OptionsFrontMatter>('./content/*/*.option.mdx
 			Type: <code>{type}</code> <br />
 			Default Value: <code>{defaultValue}</code>
 			<Content />
+			<>
+				<br />
+				<br />
+			</>
 		</>
 	))
 }
