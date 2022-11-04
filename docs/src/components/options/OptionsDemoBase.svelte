@@ -2,6 +2,7 @@
 	import { draggable, type DragOptions } from '@neodrag/svelte';
 
 	export let options: DragOptions = {};
+	export let customClass = '';
 
 	let position = options.position ?? options.defaultPosition ?? { x: 0, y: 0 };
 
@@ -14,10 +15,8 @@
 	}
 </script>
 
-<section class="container">
+<section class="container options-demo-base-container {customClass}">
 	{#key key}
-		<button class="reset" on:click={() => key++}>Reset</button>
-
 		<div class="parent">
 			<slot name="parent-contents" />
 
@@ -36,6 +35,8 @@
 		</div>
 
 		<div class="offset">{position.x}, {position.y}</div>
+
+		<button class="reset" on:click={() => key++}>Reset</button>
 	{/key}
 </section>
 

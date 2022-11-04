@@ -8,8 +8,11 @@ import Code from '../../OptionsCode.astro';
 import Example from '../../OptionsExample.astro';
 
 import ParentBoundsExample from './ParentBounds.example.svelte';
+import BodyBoundsExample from './BodyBounds.example.svelte';
 
-Optionally limit the drag area
+export const shortDescription = 'Optionally limit the drag area';
+
+{shortDescription}
 
 `parent`: Limit to parent
 
@@ -39,13 +42,14 @@ export type DragBoundsCoords = {
 ```
 
 <Example>
+  {/* TODO: Replace with client:visible once this is fixed */}
   <ParentBoundsExample client:idle slot="demo" />
 
   <Code slot="codes">
     <div slot="svelte">
       ```svelte
-      <div use:draggable={{ axis: 'both' }}>
-        Bound to parent
+      <div use:draggable={{ bounds: 'parent' }}>
+        Can't go outside the parent element
       </div>
       ```
     </div>
@@ -53,8 +57,8 @@ export type DragBoundsCoords = {
     <div slot="vue">
       ```vue
       <template>
-        <div v-draggable="{{ axis: 'both' }}">
-          Both directions
+        <div v-draggable="{{ bounds: 'parent' }}">
+          Can't go outside the parent element
         </div>
       </template>
       ```
@@ -62,21 +66,67 @@ export type DragBoundsCoords = {
 
     <div slot="solid">
       ```jsx
-      <div use:draggable={{ axis: 'both' }}>
-        Both directions
+      <div use:draggable={{ bounds: 'parent' }}>
+        Can't go outside the parent element
       </div>
       ```
     </div>
 
     <div slot="react">
       ```ts
-      useDraggable(draggableRef, { axis: 'both' });
+      useDraggable(draggableRef, { bounds: 'parent' });
       ```
     </div>
 
     <div slot="vanilla">
       ```js
-      new Draggable(el, { axis: 'both' });
+      new Draggable(el, { bounds: 'parent' });
+      ```
+    </div>
+
+  </Code>
+</Example>
+
+<Example>
+  {/* TODO: Replace with client:visible once this is fixed */}
+  <BodyBoundsExample client:idle slot="demo" />
+
+  <Code slot="codes">
+    <div slot="svelte">
+      ```svelte
+      <div use:draggable={{ bounds: 'parent' }}>
+        Can't go outside body
+      </div>
+      ```
+    </div>
+
+    <div slot="vue">
+      ```vue
+      <template>
+        <div v-draggable="{{ bounds: 'parent' }}">
+          Can't go outside body
+        </div>
+      </template>
+      ```
+    </div>
+
+    <div slot="solid">
+      ```jsx
+      <div use:draggable={{ bounds: 'parent' }}>
+        Can't go outside body
+      </div>
+      ```
+    </div>
+
+    <div slot="react">
+      ```ts
+      useDraggable(draggableRef, { bounds: 'parent' });
+      ```
+    </div>
+
+    <div slot="vanilla">
+      ```js
+      new Draggable(el, { bounds: 'parent' });
       ```
     </div>
 

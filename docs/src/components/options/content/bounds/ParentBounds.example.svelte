@@ -3,7 +3,9 @@
 </script>
 
 <div style="display: contents">
-	<OptionsDemoBase options={{ bounds: 'parent' }}>Horizontal</OptionsDemoBase>
+	<OptionsDemoBase options={{ bounds: 'parent' }}>
+		Can't go outside the parent element
+	</OptionsDemoBase>
 </div>
 
 <style lang="scss">
