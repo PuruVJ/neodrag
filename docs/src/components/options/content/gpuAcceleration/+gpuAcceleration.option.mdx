@@ -1,5 +1,5 @@
 ---
-title: gpuAcceleration
+title: 'gpuAcceleration'
 type: 'boolean'
 defaultValue: 'true'
 ---
@@ -11,16 +11,15 @@ import Examples from '../../OptionsExamples.svelte';
 import NoAccelerationExample from './NoAcceleration.example.svelte';
 import AccelerationExample from './Acceleration.example.svelte';
 
-If true, uses `translate3d` instead of `translate` to move the element around, and the hardware acceleration kicks in.
+export let shortDescription =
+  'If true, uses `translate3d` instead of `translate` to move the element around, and the hardware acceleration kicks in.';
+
+{shortDescription}
 
 `true` by default, but can be set to `false` if [blurry text issue](https://developpaper.com/question/why-does-the-use-of-css3-translate3d-result-in-blurred-display/) occurs.
 
-Examples 👇
-
-:::note
-
+::: note
 Depending on the device, you may not see much difference
-
 :::
 
 <Examples>
@@ -31,8 +30,8 @@ Depending on the device, you may not see much difference
     <Code slot="codes">
       <div slot="svelte">
         ```svelte
-        <div use:draggable={{ bounds: 'parent' }}>
-          Can't go outside the parent element
+        <div use:draggable={{ gpuAcceleration: true }}>
+          GPU acceleration on
         </div>
         ```
       </div>
@@ -40,8 +39,8 @@ Depending on the device, you may not see much difference
       <div slot="vue">
         ```vue
         <template>
-          <div v-draggable="{{ bounds: 'parent' }}">
-            Can't go outside the parent element
+          <div v-draggable="{{ gpuAcceleration: true }}">
+            GPU acceleration on
           </div>
         </template>
         ```
@@ -49,21 +48,21 @@ Depending on the device, you may not see much difference
 
       <div slot="solid">
         ```jsx
-        <div use:draggable={{ bounds: 'parent' }}>
-          Can't go outside the parent element
+        <div use:draggable={{ gpuAcceleration: true }}>
+          GPU acceleration on
         </div>
         ```
       </div>
 
       <div slot="react">
         ```ts
-        useDraggable(draggableRef, { bounds: 'parent' });
+        useDraggable(draggableRef, { gpuAcceleration: true });
         ```
       </div>
 
       <div slot="vanilla">
         ```js
-        new Draggable(el, { bounds: 'parent' });
+        new Draggable(el, { gpuAcceleration: true });
         ```
       </div>
 
@@ -78,8 +77,8 @@ Depending on the device, you may not see much difference
     <Code slot="codes">
       <div slot="svelte">
         ```svelte
-        <div use:draggable={{ bounds: 'parent' }}>
-          Can't go outside the parent element
+        <div use:draggable={{ gpuAcceleration: false }}>
+          GPU acceleration off
         </div>
         ```
       </div>
@@ -87,8 +86,8 @@ Depending on the device, you may not see much difference
       <div slot="vue">
         ```vue
         <template>
-          <div v-draggable="{{ bounds: 'parent' }}">
-            Can't go outside the parent element
+          <div v-draggable="{{ gpuAcceleration: false }}">
+            GPU acceleration off
           </div>
         </template>
         ```
@@ -96,21 +95,21 @@ Depending on the device, you may not see much difference
 
       <div slot="solid">
         ```jsx
-        <div use:draggable={{ bounds: 'parent' }}>
-          Can't go outside the parent element
+        <div use:draggable={{ gpuAcceleration: false }}>
+          GPU acceleration off
         </div>
         ```
       </div>
 
       <div slot="react">
         ```ts
-        useDraggable(draggableRef, { bounds: 'parent' });
+        useDraggable(draggableRef, { gpuAcceleration: false });
         ```
       </div>
 
       <div slot="vanilla">
         ```js
-        new Draggable(el, { bounds: 'parent' });
+        new Draggable(el, { gpuAcceleration: false });
         ```
       </div>
 

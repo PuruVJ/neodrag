@@ -1,5 +1,5 @@
 {
-	"name": "@example/basics",
+	"name": "docs",
 	"type": "module",
 	"version": "0.0.2",
 	"private": true,
@@ -31,9 +31,7 @@
 		"postcss-jit-props": "^1.0.7",
 		"prettier": "^2.7.1",
 		"prettier-plugin-astro": "^0.7.0",
-		"remark": "^14.0.2",
-		"remark-directive": "^2.0.1",
-		"remark-fenced-divs": "^2.0.1",
+		"remark-custom-container": "^1.1.1",
 		"rollup": "^3.2.5",
 		"sass": "^1.55.0",
 		"svelte": "^3.52.0",
