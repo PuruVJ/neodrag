@@ -1,0 +1,120 @@
+---
+title: gpuAcceleration
+type: 'boolean'
+defaultValue: 'true'
+---
+
+import Code from '../../OptionsCode.astro';
+import Example from '../../OptionsExample.astro';
+import Examples from '../../OptionsExamples.svelte';
+
+import NoAccelerationExample from './NoAcceleration.example.svelte';
+import AccelerationExample from './Acceleration.example.svelte';
+
+If true, uses `translate3d` instead of `translate` to move the element around, and the hardware acceleration kicks in.
+
+`true` by default, but can be set to `false` if [blurry text issue](https://developpaper.com/question/why-does-the-use-of-css3-translate3d-result-in-blurred-display/) occurs.
+
+Examples 👇
+
+:::note
+
+Depending on the device, you may not see much difference
+
+:::
+
+<Examples>
+  <Example>
+    {/* TODO: Replace with client:visible once this is fixed */}
+    <AccelerationExample client:idle slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ bounds: 'parent' }}>
+          Can't go outside the parent element
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ bounds: 'parent' }}">
+            Can't go outside the parent element
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ bounds: 'parent' }}>
+          Can't go outside the parent element
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { bounds: 'parent' });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { bounds: 'parent' });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    {/* TODO: Replace with client:visible once this is fixed */}
+    <NoAccelerationExample client:idle slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ bounds: 'parent' }}>
+          Can't go outside the parent element
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ bounds: 'parent' }}">
+            Can't go outside the parent element
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ bounds: 'parent' }}>
+          Can't go outside the parent element
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { bounds: 'parent' });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { bounds: 'parent' });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+</Examples>

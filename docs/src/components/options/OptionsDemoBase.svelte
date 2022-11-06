@@ -34,7 +34,11 @@
 			</div>
 		</div>
 
-		<div class="offset">{position.x}, {position.y}</div>
+		<div class="offset">
+			<slot name="position" x={position.x} y={position.y}>
+				{position.x}, {position.y}
+			</slot>
+		</div>
 
 		<button class="reset" on:click={() => key++}>Reset</button>
 	{/key}
