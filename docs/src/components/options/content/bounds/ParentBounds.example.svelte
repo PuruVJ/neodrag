@@ -2,7 +2,7 @@
 	import OptionsDemoBase from '$components/options/OptionsDemoBase.svelte';
 </script>
 
-<div style="display: contents">
+<div>
 	<OptionsDemoBase options={{ bounds: 'parent' }}>
 		Can't go outside the parent element
 	</OptionsDemoBase>
