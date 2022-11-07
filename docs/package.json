@@ -25,6 +25,7 @@
 		"@iconify/json": "^2.1.134",
 		"astro": "^1.6.3",
 		"astro-compress": "^1.1.1",
+		"astrojs-service-worker": "^0.0.8",
 		"autoprefixer": "^10.4.13",
 		"postcss": "^8.4.18",
 		"postcss-jit-props": "^1.0.7",
