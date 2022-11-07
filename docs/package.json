@@ -22,6 +22,7 @@
 		"@astrojs/mdx": "^0.11.5",
 		"@astrojs/prefetch": "^0.1.1",
 		"@astrojs/svelte": "^1.0.2",
+		"@iconify/json": "^2.1.134",
 		"astro": "^1.6.3",
 		"astro-compress": "^1.1.1",
 		"autoprefixer": "^10.4.13",
@@ -36,6 +37,7 @@
 		"svelte-fast-dimension": "^0.0.3",
 		"svelte-sequential-preprocessor": "^0.0.7",
 		"typescript": "^4.8.4",
+		"unplugin-icons": "^0.14.13",
 		"vite": "^3.2.2"
 	}
 }

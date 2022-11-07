@@ -9,6 +9,7 @@ import { defineConfig } from 'astro/config';
 import { fastDimension } from 'svelte-fast-dimension';
 import autoPreprocess from 'svelte-preprocess';
 import sequential from 'svelte-sequential-preprocessor';
+import UnpluginIcons from 'unplugin-icons/vite';
 
 // import remarkCustomContainer from 'remark-custom-container';
 
@@ -24,5 +25,9 @@ export default defineConfig({
 	markdown: {
 		// @ts-ignore
 		// remarkPlugins: [remarkCustomContainer],
+	},
+
+	vite: {
+		plugins: [UnpluginIcons({ autoInstall: true, compiler: 'svelte' })],
 	},
 });
