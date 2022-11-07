@@ -10,18 +10,27 @@
 
 <style lang="scss">
 	.container {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 1rem;
-	}
+		// For parent component
+		scroll-snap-align: start;
 
-	.demo {
-		padding: 0 1rem;
+		display: grid;
+		grid-template-rows: 1fr auto;
+
+		width: 600px;
+
+		box-shadow: 0 0 0 1px hsla(var(--app-color-dark-hsl), 0.3);
+		border-radius: 1rem;
 	}
 
 	.code-sample {
 		display: grid;
-
 		align-items: center;
+
+		padding: 1rem;
+
+		border-bottom-left-radius: inherit;
+		border-bottom-right-radius: inherit;
+
+		background-color: #0d1117;
 	}
 </style>

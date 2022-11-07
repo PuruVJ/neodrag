@@ -85,6 +85,7 @@ importers:
       svelte: ^3.52.0
       svelte-body: ^1.3.6
       svelte-fast-dimension: ^0.0.3
+      svelte-inview: ^3.0.1
       svelte-local-storage-store: ^0.3.1
       svelte-sequential-preprocessor: ^0.0.7
       typescript: ^4.8.4
@@ -96,6 +97,7 @@ importers:
       astro-seo: 0.6.0
       open-props: 1.4.21
       svelte-body: 1.3.6
+      svelte-inview: 3.0.1_svelte@3.52.0
       svelte-local-storage-store: 0.3.1_svelte@3.52.0
     devDependencies:
       '@astrojs/mdx': 0.11.5_rollup@3.2.5
@@ -8231,6 +8233,14 @@ packages:
     dependencies:
       svelte: 3.52.0
     dev: true
+
+  /svelte-inview/3.0.1_svelte@3.52.0:
+    resolution: {integrity: sha512-kmlD4l/z5tqMqGuWLOSz6Ys2ISJ2WXg01jFVygugma0XA45UeYNGjoRazp+gMvaWoHqCQPx6D8cH9YQBS1pZxA==}
+    peerDependencies:
+      svelte: ^3.0.0
+    dependencies:
+      svelte: 3.52.0
+    dev: false
 
   /svelte-local-storage-store/0.3.1_svelte@3.52.0:
     resolution: {integrity: sha512-pG+jjBY8oZWQ1XRnVkLIuPPbPqBWVtj0IINQBjkZSpJ+OqMs285efd+oiGdk4vBDnqomw81SForn+KH1j3HguA==}

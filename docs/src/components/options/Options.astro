@@ -8,7 +8,14 @@ type OptionsFrontMatter = {
 	shortDescription: string;
 };
 
-const ORDER = ['axis', 'bounds', 'gpuAcceleration', 'applyUserSelectHack', 'ignoreMultitouch'];
+const ORDER = [
+	'axis',
+	'bounds',
+	'gpuAcceleration',
+	'applyUserSelectHack',
+	'ignoreMultitouch',
+	'disabled',
+];
 
 const optionsMD = await Astro.glob<OptionsFrontMatter>('./content/*/+option.mdx');
 

@@ -61,7 +61,7 @@
 		display: grid;
 		place-items: center;
 
-		border-radius: 1rem;
+		border-radius: 1rem 1rem 0 0;
 
 		height: 30rem;
 		width: 100%;
