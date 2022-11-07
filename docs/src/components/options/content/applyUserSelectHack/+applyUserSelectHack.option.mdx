@@ -20,8 +20,8 @@ Applies `user-select: none` on `<body />` element when dragging, to prevent the 
     <Code slot="codes">
       <div slot="svelte">
         ```svelte
-        <div use:draggable={{ gpuAcceleration: true }}>
-          GPU acceleration on
+        <div use:draggable={{ applyUserSelectHack: true }}>
+          User Select disabled
         </div>
         ```
       </div>
@@ -29,8 +29,8 @@ Applies `user-select: none` on `<body />` element when dragging, to prevent the 
       <div slot="vue">
         ```vue
         <template>
-          <div v-draggable="{{ gpuAcceleration: true }}">
-            GPU acceleration on
+          <div v-draggable="{{ applyUserSelectHack: true }}">
+            User Select disabled
           </div>
         </template>
         ```
@@ -38,21 +38,21 @@ Applies `user-select: none` on `<body />` element when dragging, to prevent the 
 
       <div slot="solid">
         ```jsx
-        <div use:draggable={{ gpuAcceleration: true }}>
-          GPU acceleration on
+        <div use:draggable={{ applyUserSelectHack: true }}>
+          User Select disabled
         </div>
         ```
       </div>
 
       <div slot="react">
         ```ts
-        useDraggable(draggableRef, { gpuAcceleration: true });
+        useDraggable(draggableRef, { applyUserSelectHack: true });
         ```
       </div>
 
       <div slot="vanilla">
         ```js
-        new Draggable(el, { gpuAcceleration: true });
+        new Draggable(el, { applyUserSelectHack: true });
         ```
       </div>
 
@@ -66,8 +66,8 @@ Applies `user-select: none` on `<body />` element when dragging, to prevent the 
     <Code slot="codes">
       <div slot="svelte">
         ```svelte
-        <div use:draggable={{ gpuAcceleration: false }}>
-          GPU acceleration off
+        <div use:draggable={{ applyUserSelectHack: false }}>
+          User Select enabled
         </div>
         ```
       </div>
@@ -75,8 +75,8 @@ Applies `user-select: none` on `<body />` element when dragging, to prevent the 
       <div slot="vue">
         ```vue
         <template>
-          <div v-draggable="{{ gpuAcceleration: false }}">
-            GPU acceleration off
+          <div v-draggable="{{ applyUserSelectHack: false }}">
+            User Select enabled
           </div>
         </template>
         ```
@@ -84,21 +84,21 @@ Applies `user-select: none` on `<body />` element when dragging, to prevent the 
 
       <div slot="solid">
         ```jsx
-        <div use:draggable={{ gpuAcceleration: false }}>
-          GPU acceleration off
+        <div use:draggable={{ applyUserSelectHack: false }}>
+          User Select enabled
         </div>
         ```
       </div>
 
       <div slot="react">
         ```ts
-        useDraggable(draggableRef, { gpuAcceleration: false });
+        useDraggable(draggableRef, { applyUserSelectHack: false });
         ```
       </div>
 
       <div slot="vanilla">
         ```js
-        new Draggable(el, { gpuAcceleration: false });
+        new Draggable(el, { applyUserSelectHack: false });
         ```
       </div>
 

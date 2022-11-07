@@ -1,12 +1,6 @@
 <script lang="ts">
 	import OptionsDemoBase from '$components/options/OptionsDemoBase.svelte';
-
-	const browser = !import.meta.env.SSR;
-
-	const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-
-	const isDesktop =
-		browser && !navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i);
+	import { isDesktop, isMac } from 'src/helpers/utils';
 </script>
 
 <OptionsDemoBase options={{ applyUserSelectHack: false }}>
