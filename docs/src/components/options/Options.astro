@@ -8,24 +8,28 @@ type OptionsFrontMatter = {
 	shortDescription: string;
 };
 
-const ORDER = ['axis', 'bounds', 'gpuAcceleration', 'applyUserSelectHack'];
+const ORDER = ['axis', 'bounds', 'gpuAcceleration', 'applyUserSelectHack', 'ignoreMultitouch'];
 
-const optionsMD = await Astro.glob<OptionsFrontMatter>('./content/*/+*.option.mdx');
+const optionsMD = await Astro.glob<OptionsFrontMatter>('./content/*/+option.mdx');
 
-if (optionsMD.length > ORDER.length) {
-	const excludedOptions = optionsMD
-		.map((o) => o.frontmatter.title)
-		.filter((o) => !ORDER.includes(o));
+function validate() {
+	if (optionsMD.length > ORDER.length) {
+		const excludedOptions = optionsMD
+			.map((o) => o.frontmatter.title)
+			.filter((o) => !ORDER.includes(o));
 
-	throw new Error(`Add \`${excludedOptions.join(', ')}\` properties to ORDER array`);
-}
+		throw new Error(`Add \`${excludedOptions.join(', ')}\` properties to ORDER array`);
+	}
 
-for (const option of optionsMD) {
-	// @ts-ignore
-	if (!option.shortDescription) {
-		throw new Error(`Add \`shortDescription\` to ${option.frontmatter.title}`);
+	for (const option of optionsMD) {
+		// @ts-ignore
+		if (!option.shortDescription) {
+			throw new Error(`Add \`shortDescription\` to ${option.frontmatter.title}`);
+		}
 	}
 }
+
+validate();
 
 const orderedOptionsMD = ORDER.map(
 	(property) => optionsMD.find((option) => option.frontmatter.title === property)!
