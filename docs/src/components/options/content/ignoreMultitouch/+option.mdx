@@ -8,7 +8,105 @@ import Code from '../../OptionsCode.astro';
 import Example from '../../OptionsExample.astro';
 import Examples from '../../OptionsExamples.svelte';
 
+import IgnoredMultitouchExample from './IgnoredMultitouch.example.svelte';
+import MultitouchExample from './Multitouch.example.svelte';
+
 export const shortDescription = 'Ignores touch events with more than 1 touch.';
 
 {shortDescription}
 This helps when you have multiple elements on a canvas where you want to implement pinch-to-zoom behaviour.
+
+<Examples>
+  <Example>
+    <IgnoredMultitouchExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ ignoreMultitouch: true }}>
+          Multi touch gnored
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ ignoreMultitouch: true }}">
+            Multi touch gnored
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ ignoreMultitouch: true }}>
+          Multi touch gnored
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { ignoreMultitouch: true });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { ignoreMultitouch: true });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <MultitouchExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ ignoreMultitouch: false }}>
+          Multi touch allowed
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ ignoreMultitouch: true }}">
+            Multi touch allowed
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ ignoreMultitouch: true }}>
+          Multi touch allowed
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { ignoreMultitouch: true });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { ignoreMultitouch: true });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+</Examples>
