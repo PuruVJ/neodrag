@@ -4,6 +4,7 @@ import prefetch from '@astrojs/prefetch';
 import svelte from '@astrojs/svelte';
 import compress from 'astro-compress';
 import serviceWorker from 'astrojs-service-worker';
+import critters from 'astro-critters';
 
 import { defineConfig } from 'astro/config';
 
@@ -12,7 +13,7 @@ import autoPreprocess from 'svelte-preprocess';
 import sequential from 'svelte-sequential-preprocessor';
 import UnpluginIcons from 'unplugin-icons/vite';
 
-// import remarkCustomContainer from 'remark-custom-container';
+import remarkCustomContainer from 'remark-custom-container';
 
 // https://astro.build/config
 export default defineConfig({
@@ -22,11 +23,12 @@ export default defineConfig({
 		prefetch(),
 		compress(),
 		serviceWorker(),
+		critters(),
 	],
 
 	markdown: {
 		// @ts-ignore
-		// remarkPlugins: [remarkCustomContainer],
+		remarkPlugins: [remarkCustomContainer],
 	},
 
 	vite: {
