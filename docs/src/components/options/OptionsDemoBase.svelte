@@ -1,4 +1,6 @@
 <script lang="ts">
+	import IonReloadIcon from '~icons/ion/reload';
+
 	import { draggable, type DragOptions } from '@neodrag/svelte';
 
 	export let options: DragOptions = {};
@@ -34,14 +36,22 @@
 			</div>
 		</div>
 
+		{#if $$slots.bottom}
+			<div class="bottom">
+				<slot name="bottom" />
+			</div>
+		{/if}
+
 		<div class="offset">
 			<slot name="position" x={position.x} y={position.y}>
 				{position.x}, {position.y}
 			</slot>
 		</div>
-
-		<button class="reset" on:click={() => key++}>Reset</button>
 	{/key}
+
+	<button class="reset" on:click={() => key++} title="Reset">
+		<IonReloadIcon />
+	</button>
 </section>
 
 <style lang="scss">
@@ -61,8 +71,22 @@
 
 	.reset {
 		position: absolute;
-		right: 0;
-		top: 0;
+		right: 8px;
+		top: 8px;
+
+		font-size: 1.2rem;
+
+		padding: 0.5rem;
+
+		border-radius: 8px;
+
+		&:hover :global(svg) {
+			transform: rotate(100deg) scale(1.2);
+		}
+
+		:global(svg) {
+			transition: transform 0.2s ease-in-out;
+		}
 	}
 
 	.box {
@@ -92,5 +116,12 @@
 		position: absolute;
 		bottom: 10px;
 		right: 10px;
+
+		color: hsla(var(--app-color-dark-hsl), 0.7);
+	}
+
+	.bottom {
+		position: absolute;
+		bottom: 2rem;
 	}
 </style>

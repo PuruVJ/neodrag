@@ -5,11 +5,25 @@ type OptionsFrontMatter = {
 	defaultValue: string;
 };
 
+const ORDER = ['axis', 'bounds', 'gpuAcceleration', 'applyUserSelectHack'];
+
 const optionsMD = await Astro.glob<OptionsFrontMatter>('./content/*/+*.option.mdx');
+
+if (optionsMD.length > ORDER.length) {
+	const excludedOptions = optionsMD
+		.map((o) => o.frontmatter.title)
+		.filter((o) => !ORDER.includes(o));
+
+	throw new Error(`Add \`${excludedOptions.join(', ')}\` properties to ORDER array`);
+}
+
+const orderedOptionsMD = ORDER.map(
+	(property) => optionsMD.find((option) => option.frontmatter.title === property)!
+);
 ---
 
 {
-	optionsMD.map(({ Content, frontmatter: { defaultValue, title, type } }) => (
+	orderedOptionsMD.map(({ Content, frontmatter: { defaultValue, title, type } }) => (
 		<>
 			<h2>{title}</h2>
 			Type: <code>{type}</code> <br />
