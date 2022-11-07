@@ -3,7 +3,7 @@ import mdx from '@astrojs/mdx';
 import prefetch from '@astrojs/prefetch';
 import svelte from '@astrojs/svelte';
 import compress from 'astro-compress';
-import serviceWorker from 'astrojs-service-worker'
+import serviceWorker from 'astrojs-service-worker';
 
 import { defineConfig } from 'astro/config';
 
@@ -21,7 +21,7 @@ export default defineConfig({
 		mdx(),
 		prefetch(),
 		compress(),
-		serviceWorker()
+		serviceWorker(),
 	],
 
 	markdown: {
