@@ -10,6 +10,9 @@
 
 <style lang="scss">
 	div :global(.parent) {
+		display: grid;
+		place-content: center;
+
 		width: 90%;
 		height: 70%;
 
