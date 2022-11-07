@@ -61,6 +61,8 @@
 		display: grid;
 		place-items: center;
 
+		border-radius: 1rem;
+
 		height: 30rem;
 		width: 100%;
 
@@ -80,12 +82,16 @@
 
 		border-radius: 8px;
 
+		background-color: hsla(var(--app-color-dark-hsl), 0.3);
+
 		&:hover :global(svg) {
 			transform: rotate(100deg) scale(1.2);
 		}
 
 		:global(svg) {
 			transition: transform 0.2s ease-in-out;
+
+			color: var(--app-color-dark);
 		}
 	}
 

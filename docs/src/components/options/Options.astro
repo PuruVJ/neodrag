@@ -1,8 +1,11 @@
 ---
+import {} from 'astro/types';
+
 type OptionsFrontMatter = {
 	title: string;
 	type: string;
 	defaultValue: string;
+	shortDescription: string;
 };
 
 const ORDER = ['axis', 'bounds', 'gpuAcceleration', 'applyUserSelectHack'];
@@ -17,9 +20,16 @@ if (optionsMD.length > ORDER.length) {
 	throw new Error(`Add \`${excludedOptions.join(', ')}\` properties to ORDER array`);
 }
 
+for (const option of optionsMD) {
+	// @ts-ignore
+	if (!option.shortDescription) {
+		throw new Error(`Add \`shortDescription\` to ${option.frontmatter.title}`);
+	}
+}
+
 const orderedOptionsMD = ORDER.map(
 	(property) => optionsMD.find((option) => option.frontmatter.title === property)!
-);
+) as typeof optionsMD & { shortDescription: string }[];
 ---
 
 {
