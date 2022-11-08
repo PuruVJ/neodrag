@@ -118,7 +118,7 @@
 
 		padding: 1rem;
 
-		background-color: var(--app-color-primary);
+		background-image: var(--app-color-primary-gradient);
 
 		border-radius: 0.5rem;
 		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035), 0px 100px 80px rgba(0, 0, 0, 0.07);
