@@ -79,7 +79,7 @@
 		margin-left: 0rem;
 
 		overflow-x: auto;
-		overscroll-behavior-x: contain;
+		overscroll-behavior-x: none;
 		scroll-snap-type: x mandatory;
 		scroll-padding-left: 4rem;
 		scroll-snap-stop: always;

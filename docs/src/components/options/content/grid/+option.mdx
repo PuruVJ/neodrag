@@ -28,8 +28,8 @@ If you're programmatically creating the grid, do not set it to \[0, 0\] ever, th
     <Code slot="codes">
       <div slot="svelte">
         ```svelte
-        <div use:draggable={{ gpuAcceleration: true }}>
-          GPU acceleration on
+        <div use:draggable={{ grid: [50, 50] }}>
+          Snaps to 50x50 grid
         </div>
         ```
       </div>
@@ -37,8 +37,8 @@ If you're programmatically creating the grid, do not set it to \[0, 0\] ever, th
       <div slot="vue">
         ```vue
         <template>
-          <div v-draggable="{{ gpuAcceleration: true }}">
-            GPU acceleration on
+          <div v-draggable="{{ grid: [50, 50] }}">
+            Snaps to 50x50 grid
           </div>
         </template>
         ```
@@ -46,21 +46,21 @@ If you're programmatically creating the grid, do not set it to \[0, 0\] ever, th
 
       <div slot="solid">
         ```jsx
-        <div use:draggable={{ gpuAcceleration: true }}>
-          GPU acceleration on
+        <div use:draggable={{ grid: [50, 50] }}>
+          Snaps to 50x50 grid
         </div>
         ```
       </div>
 
       <div slot="react">
         ```ts
-        useDraggable(draggableRef, { gpuAcceleration: true });
+        useDraggable(draggableRef, { grid: [50, 50] });
         ```
       </div>
 
       <div slot="vanilla">
         ```js
-        new Draggable(el, { gpuAcceleration: true });
+        new Draggable(el, { grid: [50, 50] });
         ```
       </div>
 
@@ -74,8 +74,8 @@ If you're programmatically creating the grid, do not set it to \[0, 0\] ever, th
     <Code slot="codes">
       <div slot="svelte">
         ```svelte
-        <div use:draggable={{ gpuAcceleration: true }}>
-          GPU acceleration on
+        <div use:draggable={{ grid: [72, 91] }}>
+          Snaps to 72x91 grid
         </div>
         ```
       </div>
@@ -83,8 +83,8 @@ If you're programmatically creating the grid, do not set it to \[0, 0\] ever, th
       <div slot="vue">
         ```vue
         <template>
-          <div v-draggable="{{ gpuAcceleration: true }}">
-            GPU acceleration on
+          <div v-draggable="{{ grid: [72, 91] }}">
+            Snaps to 72x91 grid
           </div>
         </template>
         ```
@@ -92,21 +92,21 @@ If you're programmatically creating the grid, do not set it to \[0, 0\] ever, th
 
       <div slot="solid">
         ```jsx
-        <div use:draggable={{ gpuAcceleration: true }}>
-          GPU acceleration on
+        <div use:draggable={{ grid: [72, 91] }}>
+          Snaps to 72x91 grid
         </div>
         ```
       </div>
 
       <div slot="react">
         ```ts
-        useDraggable(draggableRef, { gpuAcceleration: true });
+        useDraggable(draggableRef, { grid: [72, 91] });
         ```
       </div>
 
       <div slot="vanilla">
         ```js
-        new Draggable(el, { gpuAcceleration: true });
+        new Draggable(el, { grid: [72, 91] });
         ```
       </div>
 
