@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { inview } from 'svelte-inview';
+
 	import PrevArrowIcon from '~icons/material-symbols/arrow-back-rounded';
 	import NextArrowIcon from '~icons/material-symbols/arrow-forward-rounded';
 

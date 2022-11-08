@@ -1,0 +1,117 @@
+---
+title: 'grid'
+type: '[number, number]'
+defaultValue: 'undefined'
+---
+
+import Code from '../../OptionsCode.astro';
+import Example from '../../OptionsExample.astro';
+import Examples from '../../OptionsExamples.svelte';
+
+import SquareGridExample from './SquareGrid.example.svelte';
+import RectangleGridExample from './RectangleGrid.example.svelte';
+
+export const shortDescription =
+  'Applies a grid on the page to which the element snaps to when dragging, rather than the default continuous grid.';
+
+{shortDescription}
+
+::: note
+If you're programmatically creating the grid, do not set it to \[0, 0\] ever, that will stop drag at all. Set it to `undefined` to make it continuous once again
+:::
+
+<Examples client:load>
+
+  <Example>
+    <SquareGridExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ gpuAcceleration: true }}>
+          GPU acceleration on
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ gpuAcceleration: true }}">
+            GPU acceleration on
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ gpuAcceleration: true }}>
+          GPU acceleration on
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { gpuAcceleration: true });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { gpuAcceleration: true });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <RectangleGridExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ gpuAcceleration: true }}>
+          GPU acceleration on
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ gpuAcceleration: true }}">
+            GPU acceleration on
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ gpuAcceleration: true }}>
+          GPU acceleration on
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { gpuAcceleration: true });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { gpuAcceleration: true });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+</Examples>

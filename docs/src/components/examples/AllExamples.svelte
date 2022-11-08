@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { draggable, DragOptions } from '@neodrag/svelte';
+	import { browser } from 'src/helpers/utils';
+	import squircle from 'src/worklet/squircle?url';
 	import { style } from 'svelte-body';
-	import { tweened } from 'svelte/motion';
 	import { expoOut, sineIn } from 'svelte/easing';
+	import { tweened } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
 
 	let reset = 0;
@@ -77,6 +79,12 @@
 		},
 		{ easing: expoOut, duration: 1200 }
 	);
+
+	if (browser)
+		if ('paintWorklet' in CSS) {
+			// @ts-ignore
+			CSS.paintWorklet.addModule(squircle);
+		}
 </script>
 
 <svelte:body
@@ -353,8 +361,11 @@
 		background-color: var(--app-color-dark);
 
 		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035), 0px 100px 80px rgba(0, 0, 0, 0.07);
-
 		border-radius: 0.5rem;
+
+		mask-image: paint(squircle);
+		--squircle-radius: 200px;
+		--squircle-smooth: 1;
 
 		font-size: large;
 

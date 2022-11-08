@@ -1,7 +1,8 @@
 <script lang="ts">
 	import IonReloadIcon from '~icons/ion/reload';
-
 	import { draggable, type DragOptions } from '@neodrag/svelte';
+	import { browser } from 'src/helpers/utils';
+	import squircle from 'src/worklet/squircle?url';
 
 	export let options: DragOptions = {};
 	export let customClass = '';
@@ -15,6 +16,12 @@
 
 		position = options.position ?? options.defaultPosition ?? { x: 0, y: 0 };
 	}
+
+	if (browser)
+		if ('paintWorklet' in CSS) {
+			// @ts-ignore
+			CSS.paintWorklet.addModule(squircle);
+		}
 </script>
 
 <section class="container options-demo-base-container {customClass}">
@@ -108,13 +115,18 @@
 		width: var(--size);
 		height: var(--size);
 
+		padding: 1rem;
+
 		background-color: var(--app-color-primary);
 
+		border-radius: 0.5rem;
 		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035), 0px 100px 80px rgba(0, 0, 0, 0.07);
 
-		border-radius: 0.5rem;
+		mask-image: paint(squircle);
+		--squircle-radius: 200px;
+		--squircle-smooth: 1;
 
-		font-size: large;
+		font-size: 1rem;
 		color: var(--app-color-primary-contrast);
 	}
 
