@@ -10,6 +10,7 @@ import Examples from '../../OptionsExamples.svelte';
 
 import SquareGridExample from './SquareGrid.example.svelte';
 import RectangleGridExample from './RectangleGrid.example.svelte';
+import InactiveGridExample from './InactiveGrid.example.svelte';
 
 export const shortDescription =
   'Applies a grid on the page to which the element snaps to when dragging, rather than the default continuous grid.';
@@ -114,4 +115,49 @@ If you're programmatically creating the grid, do not set it to \[0, 0\] ever, th
 
   </Example>
 
+  <Example>
+    <InactiveGridExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ grid: [0, 0] }}>
+          Snaps to 0x0 grid - Won't drag at all
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ grid: [0, 0] }}">
+            Snaps to 0x0 grid - Won't drag at all
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ grid: [0, 0] }}>
+          Snaps to 0x0 grid - Won't drag at all
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { grid: [0, 0] });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { grid: [0, 0] });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
 </Examples>

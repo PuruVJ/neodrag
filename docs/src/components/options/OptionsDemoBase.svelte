@@ -70,7 +70,7 @@
 
 		border-radius: 1rem 1rem 0 0;
 
-		height: 30rem;
+		height: 25rem;
 		width: 100%;
 
 		overflow: hidden;
@@ -90,6 +90,7 @@
 		border-radius: 8px;
 
 		background-color: hsla(var(--app-color-dark-hsl), 0.3);
+		backdrop-filter: blur(5px) brightness(50%) grayscale(0.4);
 
 		&:hover :global(svg) {
 			transform: rotate(100deg) scale(1.2);
