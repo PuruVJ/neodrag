@@ -14,6 +14,10 @@
   }
   ```
 
+### Patch Changes
+
+- Fix behavior when snap provided as 0
+
 ## 1.0.1
 
 ### Patch Changes

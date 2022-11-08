@@ -419,6 +419,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 			[deltaX, deltaY] = snapToGrid([xSnap / inverseScale, ySnap / inverseScale], deltaX, deltaY);
 
+			console.log({ deltaX, deltaY });
+
 			finalX = initialX + deltaX;
 			finalY = initialY + deltaY;
 		}
@@ -490,7 +492,7 @@ const isString = (val: unknown): val is string => typeof val === 'string';
 
 const snapToGrid = memoize(
 	([xSnap, ySnap]: [number, number], pendingX: number, pendingY: number): [number, number] => {
-		const calc = (val: number, snap: number) => Math.ceil(val / snap) * snap;
+		const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
 
 		const x = calc(pendingX, xSnap);
 		const y = calc(pendingY, ySnap);
