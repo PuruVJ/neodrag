@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { inview } from 'svelte-inview';
+	import { slide } from 'svelte/transition';
 
 	import PrevArrowIcon from '~icons/material-symbols/arrow-back-rounded';
 	import NextArrowIcon from '~icons/material-symbols/arrow-forward-rounded';
@@ -9,6 +10,8 @@
 
 	let optionsExamplesContainerEl: HTMLElement;
 	let slotParent: HTMLDivElement;
+
+	let expanded = false;
 
 	function scroll(direction: 'prev' | 'next') {
 		const numChildren = slotParent.children.item(0)!.children.length;
@@ -23,6 +26,8 @@
 </script>
 
 <section class="container">
+	<button on:click={() => (expanded = !expanded)}>Toggle</button>
+
 	<button
 		class="nav-button prev"
 		class:visible={prevNavButtonVisible}
@@ -31,7 +36,12 @@
 		<PrevArrowIcon />
 	</button>
 
-	<section class="container options-examples" bind:this={optionsExamplesContainerEl}>
+	<!-- {#if expanded} -->
+	<section
+		class="container options-examples"
+		transition:slide={{ duration: 500 }}
+		bind:this={optionsExamplesContainerEl}
+	>
 		<span
 			class="hider prev"
 			use:inview={{ threshold: 0.01 }}
@@ -39,7 +49,7 @@
 		/>
 
 		<!-- Element needed for astro bug, astro puts this at the end of `.container` rather than at the right place -->
-		<div bind:this={slotParent} style="display: contents;">
+		<div class="hack" bind:this={slotParent} style="display: contents;">
 			<slot />
 		</div>
 
@@ -49,6 +59,7 @@
 			on:change={(e) => (nextNavButtonVisible = !e.detail.inView)}
 		/>
 	</section>
+	<!-- {/if} -->
 
 	<button
 		class="nav-button next"
@@ -71,8 +82,9 @@
 		grid-auto-flow: column;
 		grid-auto-columns: minmax(auto, 600px);
 		gap: 2rem;
+		place-items: start;
 
-		width: auto;
+		width: 100%;
 
 		padding: 2rem;
 		margin: 1rem 0;

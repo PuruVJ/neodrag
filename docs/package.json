@@ -14,7 +14,7 @@
 		"@fontsource/jetbrains-mono": "^4.5.11",
 		"@neodrag/svelte": "workspace:*",
 		"astro-seo": "^0.6.0",
-		"open-props": "^1.4.21",
+		"open-props": "^1.4.23",
 		"svelte-body": "^1.3.6",
 		"svelte-inview": "^3.0.1",
 		"svelte-local-storage-store": "^0.3.1"
@@ -24,7 +24,7 @@
 		"@astrojs/prefetch": "^0.1.1",
 		"@astrojs/svelte": "^1.0.2",
 		"@iconify/json": "^2.1.134",
-		"astro": "^1.6.3",
+		"astro": "^1.6.5",
 		"astro-compress": "^1.1.1",
 		"astro-critters": "^1.1.0",
 		"astrojs-service-worker": "^0.0.8",
@@ -41,6 +41,6 @@
 		"svelte-sequential-preprocessor": "^0.0.7",
 		"typescript": "^4.8.4",
 		"unplugin-icons": "^0.14.13",
-		"vite": "^3.2.2"
+		"vite": "^3.2.3"
 	}
 }
