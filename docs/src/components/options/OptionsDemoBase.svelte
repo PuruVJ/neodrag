@@ -123,7 +123,7 @@
 		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035), 0px 100px 80px rgba(0, 0, 0, 0.07);
 
 		mask-image: paint(squircle);
-		--squircle-radius: 200px;
+		--squircle-radius: 50px;
 		--squircle-smooth: 1;
 
 		font-size: 1rem;

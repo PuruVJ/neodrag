@@ -364,7 +364,7 @@
 		border-radius: 0.5rem;
 
 		mask-image: paint(squircle);
-		--squircle-radius: 200px;
+		--squircle-radius: 50px;
 		--squircle-smooth: 1;
 
 		font-size: large;

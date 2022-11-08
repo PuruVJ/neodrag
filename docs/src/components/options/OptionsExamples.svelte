@@ -82,6 +82,7 @@
 		overscroll-behavior-x: contain;
 		scroll-snap-type: x mandatory;
 		scroll-padding-left: 4rem;
+		scroll-snap-stop: always;
 	}
 
 	.nav-button {
