@@ -17,7 +17,7 @@ const ORDER = [
 	'disabled',
 ];
 
-const optionsMD = await Astro.glob<OptionsFrontMatter>('../../content/*/+option.mdx');
+const optionsMD = await Astro.glob<OptionsFrontMatter>('../../content/options/*/+option.mdx');
 
 function validate() {
 	if (optionsMD.length > ORDER.length) {
