@@ -11,7 +11,7 @@
 	let optionsExamplesContainerEl: HTMLElement;
 	let slotParent: HTMLDivElement;
 
-	let expanded = false;
+	// let expanded = false;
 
 	function scroll(direction: 'prev' | 'next') {
 		const numChildren = slotParent.children.item(0)!.children.length;
@@ -26,7 +26,7 @@
 </script>
 
 <section class="container">
-	<button on:click={() => (expanded = !expanded)}>Toggle</button>
+	<!-- <button on:click={() => (expanded = !expanded)}>Toggle</button> -->
 
 	<button
 		class="nav-button prev"

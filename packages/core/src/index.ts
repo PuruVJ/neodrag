@@ -419,8 +419,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 			[deltaX, deltaY] = snapToGrid([xSnap / inverseScale, ySnap / inverseScale], deltaX, deltaY);
 
-			console.log({ deltaX, deltaY });
-
 			finalX = initialX + deltaX;
 			finalY = initialY + deltaY;
 		}
