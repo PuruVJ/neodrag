@@ -14,7 +14,6 @@ importers:
       '@types/react': ^18.0.25
       '@types/react-dom': ^18.0.8
       brotli-size: ^4.0.0
-      brotli-size-cli: ^1.0.0
       esbuild: ^0.15.13
       fast-glob: ^3.2.12
       jsdom: ^20.0.2
@@ -26,6 +25,7 @@ importers:
       solid-js: ^1.6.1
       svelte: ^3.53.0
       svelte-preprocess: ^4.10.7
+      tsm: ^2.2.2
       typescript: ^4.8.4
       vite: ^3.2.3
       vitest: ^0.25.1
@@ -41,7 +41,6 @@ importers:
       '@types/react': 18.0.25
       '@types/react-dom': 18.0.8
       brotli-size: 4.0.0
-      brotli-size-cli: 1.0.0
       esbuild: 0.15.13
       fast-glob: 3.2.12
       jsdom: 20.0.2
@@ -53,6 +52,7 @@ importers:
       solid-js: 1.6.1
       svelte: 3.53.0
       svelte-preprocess: 4.10.7_rpbg6almxrvsbzmggmcariaqva
+      tsm: 2.2.2
       typescript: 4.8.4
       vite: 3.2.3
       vitest: 0.25.1_jsdom@20.0.2
@@ -3341,16 +3341,6 @@ packages:
     resolution: {integrity: sha512-ex5W9DoOQ/LUEU3PMdLs9ua/CYZl1678NUkKOdUSi8Aw5F1idieaiRURCBFJCwVcrD1J8Iy3vfWSloaMwO2qFg==}
     dependencies:
       wcwidth: 1.0.1
-    dev: true
-
-  /brotli-size-cli/1.0.0:
-    resolution: {integrity: sha512-eX+2WEZDvjWg045PxVN3eDYWCqyNuKmunjCZX9Ps0wohWMxGfiMP+efWVAuU/2kL81A4qfmHOAWWKFRV56XkCw==}
-    engines: {node: '>=13'}
-    hasBin: true
-    dependencies:
-      brotli-size: 4.0.0
-      pretty-bytes: 5.6.0
-      sade: 1.8.1
     dev: true
 
   /brotli-size/4.0.0:

@@ -23,6 +23,8 @@ async function main() {
 		await mkdir(new URL('../docs/src/data', import.meta.url).pathname);
 	} catch (error) {}
 
+	console.table(Object.entries(contents).sort((a, b) => (a[0] > b[0] ? 1 : -1)));
+
 	writeFile(
 		new URL('../docs/src/data/sizes.json', import.meta.url),
 		JSON.stringify(contents, null, 2)
