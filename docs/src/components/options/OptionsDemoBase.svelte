@@ -7,6 +7,7 @@
 	export let options: DragOptions = {};
 	export let customClass = '';
 	export let size = '8rem';
+	export let draggableEl: HTMLDivElement | undefined = undefined;
 
 	let position = options.position ?? options.defaultPosition ?? { x: 0, y: 0 };
 
@@ -32,6 +33,7 @@
 
 			<div
 				class="box"
+				bind:this={draggableEl}
 				use:draggable={{
 					...options,
 					onDrag: (data) => {
@@ -44,9 +46,9 @@
 			</div>
 		</div>
 
-		{#if $$slots.bottom}
-			<div class="bottom">
-				<slot name="bottom" />
+		{#if $$slots.caption}
+			<div class="caption">
+				<slot name="caption" />
 			</div>
 		{/if}
 
@@ -138,8 +140,19 @@
 		color: hsla(var(--app-color-dark-hsl), 0.7);
 	}
 
-	.bottom {
+	.caption {
 		position: absolute;
 		bottom: 2rem;
+
+		display: flex;
+		align-items: center;
+		gap: 1ch;
+
+		background-color: hsla(var(--app-color-dark-hsl), 0.1);
+		backdrop-filter: blur(40px);
+
+		padding: 0.25rem 0.5rem;
+
+		border-radius: 8px;
 	}
 </style>

@@ -8,6 +8,7 @@
 	<br /><br />
 
 	<div class="cancel">This won't drag</div>
+	<div class="cancel">This won't drag</div>
 </OptionsDemoBase>
 
 <style lang="scss">

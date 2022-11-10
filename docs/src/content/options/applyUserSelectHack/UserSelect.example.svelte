@@ -1,16 +1,17 @@
 <script lang="ts">
 	import OptionsDemoBase from '$components/options/OptionsDemoBase.svelte';
 	import { isDesktop, isMac } from 'src/helpers/utils';
+	import CommandIcon from '~icons/bi/command';
 </script>
 
 <OptionsDemoBase options={{ applyUserSelectHack: false }}>
 	User Select enabled
 
-	<svelte:fragment slot="bottom">
+	<svelte:fragment slot="caption">
 		{#if isDesktop}
 			Hit <kbd>
 				{#if isMac}
-					<span style="font-size: 1.3rem;"> &#8984; </span>
+					<CommandIcon height="1rem" width="1rem" />
 				{:else}
 					ctrl
 				{/if} + A
@@ -20,3 +21,11 @@
 		{/if}
 	</svelte:fragment>
 </OptionsDemoBase>
+
+<style lang="scss">
+	@import './user-select.mixin.scss';
+
+	kbd {
+		@include userSelectKBD();
+	}
+</style>

@@ -8,7 +8,8 @@ import Code from '$components/options/OptionsCode.astro';
 import Example from '$components/options/OptionsExample.astro';
 import Examples from '$components/options/OptionsExamples.svelte';
 
-import SingleCancelExample from './SingleCancel.example.svelte';
+import SingleCancelSelectorExample from './SingleCancelSelector.example.svelte';
+import MultipleCancelSelectorExample from './MultipleCancelSelector.example.svelte';
 
 export const shortDescription = 'Element inside draggable that does not trigger dragging';
 
@@ -17,7 +18,7 @@ Can be an element or elements too. If it is provided, Trying to drag inside the 
 
 <Examples client:load>
   <Example>
-    <SingleCancelExample client:visible slot="demo" />
+    <SingleCancelSelectorExample client:visible slot="demo" />
 
     <Code slot="codes">
       <div slot="svelte">
@@ -65,8 +66,87 @@ Can be an element or elements too. If it is provided, Trying to drag inside the 
       </div>
 
       <div slot="vanilla">
+         ```js
+        new Draggable(draggableEl, { cancel: '.cancel' });
+        ```
+
+        ```html
+        <div class="draggable">
+          This will drag!
+
+          <div className="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <MultipleCancelSelectorExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ cancel: '.cancel' }}>
+          This will drag!
+
+          <div class="cancel">This won't drag</div>
+          <div class="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ cancel: '.cancel' }}">
+            This will drag!
+
+            <div class="cancel">This won't drag</div>
+            <div class="cancel">This won't drag</div>
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ cancel: '.cancel' }}>
+          This will drag!
+
+          <div class="cancel">This won't drag</div>
+          <div class="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```tsx
+        useDraggable(draggableRef, { cancel: '.cancel' });
+
+        <div ref={draggableRef}>
+          This will drag!
+
+          <div className="cancel">This won't drag</div>
+          <div className="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="vanilla">
         ```js
-        new Draggable(el, { cancel: '.cancel' });
+        new Draggable(draggableEl, { cancel: '.cancel' });
+        ```
+
+        ```html
+        <div class="draggable">
+          This will drag!
+
+          <div className="cancel">This won't drag</div>
+          <div className="cancel">This won't drag</div>
+        </div>
         ```
       </div>
 
@@ -74,4 +154,3 @@ Can be an element or elements too. If it is provided, Trying to drag inside the 
 
   </Example>
 </Examples>
-````

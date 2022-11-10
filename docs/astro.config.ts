@@ -32,6 +32,7 @@ export default defineConfig({
 	},
 
 	vite: {
+		// @ts-ignore
 		plugins: [UnpluginIcons({ autoInstall: true, compiler: 'svelte' })],
 	},
 });

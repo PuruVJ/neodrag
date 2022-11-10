@@ -31,3 +31,8 @@ pre code {
 	color: initial;
 	background-color: initial;
 }
+
+kbd {
+	font-family: var(--app-font-family-mono);
+	font-weight: 400;
+}

@@ -2456,7 +2456,7 @@ packages:
       magic-string: 0.26.7
       svelte: 3.53.0
       svelte-hmr: 0.15.0_svelte@3.53.0
-      vite: 3.2.3
+      vite: 3.2.3_sass@1.56.1
     transitivePeerDependencies:
       - supports-color
     dev: true
