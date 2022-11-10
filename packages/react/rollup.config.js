@@ -3,7 +3,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import { defineConfig } from 'rollup';
 import dts from 'rollup-plugin-dts';
 import esbuild from 'rollup-plugin-esbuild';
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 
 export default defineConfig([
 	{
