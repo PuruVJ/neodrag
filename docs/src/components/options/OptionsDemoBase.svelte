@@ -6,6 +6,7 @@
 
 	export let options: DragOptions = {};
 	export let customClass = '';
+	export let size = '8rem';
 
 	let position = options.position ?? options.defaultPosition ?? { x: 0, y: 0 };
 
@@ -24,7 +25,7 @@
 		}
 </script>
 
-<section class="container options-demo-base-container {customClass}">
+<section class="container options-demo-base-container {customClass}" style:--size={size}>
 	{#key key}
 		<div class="parent">
 			<slot name="parent-contents" />
@@ -104,8 +105,6 @@
 	}
 
 	.box {
-		--size: 8rem;
-
 		position: relative;
 
 		display: grid;
@@ -113,8 +112,8 @@
 
 		text-align: center;
 
-		width: var(--size);
-		height: var(--size);
+		width: var(--size, 8rem);
+		height: var(--size, 8rem);
 
 		padding: 1rem;
 

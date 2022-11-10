@@ -1,4 +1,6 @@
 ---
+import slugify from 'slugify';
+
 type OptionsFrontMatter = {
 	title: string;
 	type: string;
@@ -15,6 +17,7 @@ const ORDER = [
 	'applyUserSelectHack',
 	'ignoreMultitouch',
 	'disabled',
+	'cancel',
 ];
 
 const optionsMD = await Astro.glob<OptionsFrontMatter>('../../content/options/*/+option.mdx');
@@ -46,7 +49,7 @@ const orderedOptionsMD = ORDER.map(
 {
 	orderedOptionsMD.map(({ Content, frontmatter: { defaultValue, title, type } }) => (
 		<>
-			<h2>{title}</h2>
+			<h2 id={slugify(title)}>{title}</h2>
 			Type: <code>{type}</code> <br />
 			Default Value: <code>{defaultValue}</code> <br />
 			<Content />
