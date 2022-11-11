@@ -29,6 +29,7 @@ export default defineConfig({
 	markdown: {
 		// @ts-ignore
 		remarkPlugins: [remarkCustomContainer],
+		extendDefaultPlugins: true,
 	},
 
 	vite: {
