@@ -8,6 +8,15 @@
 	export let customClass = '';
 	export let size = '8rem';
 	export let draggableEl: HTMLDivElement | undefined = undefined;
+	export let renderParent = false;
+
+	$: finalOptions = {
+		...options,
+		onDrag: (data) => {
+			options.onDrag?.(data);
+			position = { x: data.offsetX, y: data.offsetY };
+		},
+	} as DragOptions;
 
 	let position = options.position ?? options.defaultPosition ?? { x: 0, y: 0 };
 
@@ -28,23 +37,17 @@
 
 <section class="container options-demo-base-container {customClass}" style:--size={size}>
 	{#key key}
-		<div class="parent">
-			<slot name="parent-contents" />
-
-			<div
-				class="box"
-				bind:this={draggableEl}
-				use:draggable={{
-					...options,
-					onDrag: (data) => {
-						options.onDrag?.(data);
-						position = { x: data.offsetX, y: data.offsetY };
-					},
-				}}
-			>
+		{#if renderParent}
+			<div class="parent">
+				<div class="box" bind:this={draggableEl} use:draggable={finalOptions}>
+					<slot />
+				</div>
+			</div>
+		{:else}
+			<div class="box" bind:this={draggableEl} use:draggable={finalOptions}>
 				<slot />
 			</div>
-		</div>
+		{/if}
 
 		{#if $$slots.caption}
 			<div class="caption">
@@ -121,7 +124,7 @@
 
 		background-image: var(--app-color-primary-gradient);
 
-		border-radius: 0.5rem;
+		border-radius: 1rem 1rem 0 0;
 		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035), 0px 100px 80px rgba(0, 0, 0, 0.07);
 
 		mask-image: paint(squircle);
@@ -154,5 +157,9 @@
 		padding: 0.25rem 0.5rem;
 
 		border-radius: 8px;
+	}
+
+	.parent {
+		overflow: hidden;
 	}
 </style>

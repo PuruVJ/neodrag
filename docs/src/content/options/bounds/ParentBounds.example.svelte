@@ -3,7 +3,7 @@
 </script>
 
 <div>
-	<OptionsDemoBase options={{ bounds: 'parent' }}>
+	<OptionsDemoBase options={{ bounds: 'parent' }} renderParent={true}>
 		Can't go outside the parent element
 	</OptionsDemoBase>
 </div>

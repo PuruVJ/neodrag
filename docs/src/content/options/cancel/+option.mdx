@@ -9,6 +9,7 @@ import Example from '$components/options/OptionsExample.astro';
 import Examples from '$components/options/OptionsExamples.svelte';
 
 import SingleCancelSelectorExample from './SingleCancelSelector.example.svelte';
+import SingleCancelElementExample from './SingleCancelElement.example.svelte';
 import MultipleCancelSelectorExample from './MultipleCancelSelector.example.svelte';
 
 export const shortDescription = 'Element inside draggable that does not trigger dragging';
@@ -131,6 +132,85 @@ Can be an element or elements too. If it is provided, Trying to drag inside the 
 
           <div className="cancel">This won't drag</div>
           <div className="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(draggableEl, { cancel: '.cancel' });
+        ```
+
+        ```html
+        <div class="draggable">
+          This will drag!
+
+          <div className="cancel">This won't drag</div>
+          <div className="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <SingleCancelElementExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <script>
+          let cancelEl: HTMLElement;
+        </script>
+
+        <div use:draggable={{ cancel: cancelEl }}>
+          This will drag!
+
+          <div bind:this={cancelEl}>This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <script setup>
+        const cancel = ref<HTMLDivElement>();
+        </script>
+
+        <template>
+          <div v-draggable="{ cancel }">
+            This will drag!
+            <div class="cancel" ref="cancel">You shall not drag!!🧙‍♂️</div>
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        let cancelEl: HTMLDivElement;
+
+        <div use:draggable={{ cancel: cancelEl }}>
+          This will drag!
+          <div class="cancel" ref={cancelEl}>
+            This won't drag
+          </div>
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```tsx
+        const cancelEl = useRef<HTMLDivElement>();
+
+        useDraggable(draggableRef, { cancel: cancelEl });
+
+        <div ref={draggableRef}>
+          This will drag!
+
+          <div ref={cancelEl}>This won't drag</div>
         </div>
         ```
       </div>

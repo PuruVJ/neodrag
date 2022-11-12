@@ -1,17 +1,18 @@
 <script lang="ts">
 	import OptionsDemoBase from '$components/options/OptionsDemoBase.svelte';
+
+	let cancelEl: HTMLDivElement;
 </script>
 
-<OptionsDemoBase size="10rem" options={{ cancel: '.cancel' }}>
+<OptionsDemoBase size="10rem" options={{ cancel: cancelEl }}>
 	This will drag!
 
 	<br /><br />
 
-	<div class="cancel">This won't drag</div>
-	<div class="cancel">This won't drag</div>
+	<div class="cancel" bind:this={cancelEl}>This won't drag</div>
 
 	<svelte:fragment slot="caption">
-		Multiple <code>cancel</code> passed as element.
+		Single <code>cancel</code> passed as element.
 	</svelte:fragment>
 </OptionsDemoBase>
 
