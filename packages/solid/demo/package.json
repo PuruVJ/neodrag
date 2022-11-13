@@ -16,6 +16,6 @@
 	},
 	"dependencies": {
 		"@neodrag/solid": "workspace:*",
-		"solid-js": "^1.6.1"
+		"solid-js": "^1.6.2"
 	}
 }
