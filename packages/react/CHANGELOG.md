@@ -14,6 +14,10 @@
   }
   ```
 
+### Minor Changes
+
+- Allow refs in handle and cancel
+
 ### Patch Changes
 
 - Fix behavior when snap provided as 0
