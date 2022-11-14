@@ -24,7 +24,7 @@ This helps when you have multiple elements on a canvas where you want to impleme
       <div slot="svelte">
         ```svelte
         <div use:draggable={{ ignoreMultitouch: true }}>
-          Multi touch gnored
+          Multi touch ignored
         </div>
         ```
       </div>
@@ -33,7 +33,7 @@ This helps when you have multiple elements on a canvas where you want to impleme
         ```vue
         <template>
           <div v-draggable="{{ ignoreMultitouch: true }}">
-            Multi touch gnored
+            Multi touch ignored
           </div>
         </template>
         ```
@@ -42,7 +42,7 @@ This helps when you have multiple elements on a canvas where you want to impleme
       <div slot="solid">
         ```jsx
         <div use:draggable={{ ignoreMultitouch: true }}>
-          Multi touch gnored
+          Multi touch ignored
         </div>
         ```
       </div>
@@ -78,7 +78,7 @@ This helps when you have multiple elements on a canvas where you want to impleme
       <div slot="vue">
         ```vue
         <template>
-          <div v-draggable="{{ ignoreMultitouch: true }}">
+          <div v-draggable="{{ ignoreMultitouch: false }}">
             Multi touch allowed
           </div>
         </template>
@@ -87,7 +87,7 @@ This helps when you have multiple elements on a canvas where you want to impleme
 
       <div slot="solid">
         ```jsx
-        <div use:draggable={{ ignoreMultitouch: true }}>
+        <div use:draggable={{ ignoreMultitouch: false }}>
           Multi touch allowed
         </div>
         ```
@@ -95,13 +95,13 @@ This helps when you have multiple elements on a canvas where you want to impleme
 
       <div slot="react">
         ```ts
-        useDraggable(draggableRef, { ignoreMultitouch: true });
+        useDraggable(draggableRef, { ignoreMultitouch: false });
         ```
       </div>
 
       <div slot="vanilla">
         ```js
-        new Draggable(el, { ignoreMultitouch: true });
+        new Draggable(el, { ignoreMultitouch: false });
         ```
       </div>
 

@@ -106,13 +106,13 @@ Can be an element or elements too. If it is provided, Trying to drag inside the 
       <div slot="vue">
         ```vue
         <script setup lang="ts">
-        const cancel = ref<HTMLDivElement>();
+        const cancelEl = ref<HTMLDivElement>();
         </script>
 
         <template>
-          <div v-draggable="{ cancel }">
+          <div v-draggable="{ cancel: cancelEl }">
             This will drag!
-            <div ref="cancel">You shall not drag!!🧙‍♂️</div>
+            <div ref="cancelEl">You shall not drag!!🧙‍♂️</div>
           </div>
         </template>
         ```
