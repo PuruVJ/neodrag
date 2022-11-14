@@ -12,10 +12,14 @@
 
 	let expanded = !browser;
 
-	$: if (browser && expanded) handleScroll;
+	$: if (browser && expanded) handleScroll();
 
 	function handleScroll() {
-		const { scrollLeft, scrollWidth, clientWidth } = optionsExamplesContainerEl;
+		const {
+			scrollLeft = 0,
+			scrollWidth = 1000,
+			clientWidth = 800,
+		} = optionsExamplesContainerEl || {};
 
 		prevNavButtonVisible = scrollLeft > 0;
 		nextNavButtonVisible = scrollLeft + clientWidth < scrollWidth;
@@ -46,6 +50,7 @@
 		</button>
 
 		<section
+			id="playwright-options-examples"
 			class="container options-examples"
 			transition:slide={{ duration: 500 }}
 			bind:this={optionsExamplesContainerEl}
