@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from 'src/helpers/utils';
+	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
 	import PrevArrowIcon from '~icons/material-symbols/arrow-back-rounded';
@@ -10,9 +11,13 @@
 
 	let optionsExamplesContainerEl: HTMLElement;
 
-	let expanded = !browser;
+	// let expanded = !browser;
 
-	$: if (browser && expanded) handleScroll();
+	// $: if (browser && expanded) handleScroll();
+
+	onMount(() => {
+		handleScroll();
+	});
 
 	function handleScroll() {
 		const {
@@ -38,37 +43,37 @@
 </script>
 
 <section class="container">
-	<button on:click={() => (expanded = !expanded)}>Toggle</button>
+	<!-- <button on:click={() => (expanded = !expanded)}>Toggle</button> -->
 
-	{#if expanded}
-		<button
-			class="nav-button prev"
-			class:visible={prevNavButtonVisible}
-			on:click={() => scroll('prev')}
-		>
-			<PrevArrowIcon />
-		</button>
+	<!-- {#if expanded} -->
+	<button
+		class="nav-button prev"
+		class:visible={prevNavButtonVisible}
+		on:click={() => scroll('prev')}
+	>
+		<PrevArrowIcon />
+	</button>
 
-		<section
-			id="playwright-options-examples"
-			class="container options-examples"
-			transition:slide={{ duration: 500 }}
-			bind:this={optionsExamplesContainerEl}
-			on:scroll={handleScroll}
-		>
-			<!-- Element needed for astro bug, astro puts this at the end of `.container` rather than at the right place -->
+	<section
+		id="playwright-options-examples"
+		class="container options-examples"
+		transition:slide={{ duration: 500 }}
+		bind:this={optionsExamplesContainerEl}
+		on:scroll={handleScroll}
+	>
+		<!-- Element needed for astro bug, astro puts this at the end of `.container` rather than at the right place -->
 
-			<slot />
-		</section>
+		<slot />
+	</section>
 
-		<button
-			class="nav-button next"
-			class:visible={nextNavButtonVisible}
-			on:click={() => scroll('next')}
-		>
-			<NextArrowIcon />
-		</button>
-	{/if}
+	<button
+		class="nav-button next"
+		class:visible={nextNavButtonVisible}
+		on:click={() => scroll('next')}
+	>
+		<NextArrowIcon />
+	</button>
+	<!-- {/if} -->
 </section>
 
 <style lang="scss">
