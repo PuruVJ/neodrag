@@ -18,7 +18,7 @@
 		"@testing-library/jest-dom": "^5.16.5",
 		"@testing-library/svelte": "^3.2.2",
 		"@types/react": "^18.0.25",
-		"@types/react-dom": "^18.0.8",
+		"@types/react-dom": "^18.0.9",
 		"brotli-size": "^4.0.0",
 		"esbuild": "^0.15.13",
 		"fast-glob": "^3.2.12",
@@ -34,7 +34,7 @@
 		"tsm": "^2.2.2",
 		"typescript": "^4.8.4",
 		"vite": "^3.2.3",
-		"vitest": "^0.25.1",
+		"vitest": "^0.25.2",
 		"vue": "^3.2.45"
 	}
 }
