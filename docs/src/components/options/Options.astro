@@ -47,19 +47,36 @@ const orderedOptionsMD = ORDER.map(
 ) as typeof optionsMD & { shortDescription: string }[];
 ---
 
-{
-	orderedOptionsMD.map(({ Content, frontmatter: { defaultValue, title, type } }) => (
-		<>
-			<h2 id={slugify(title)}>{title}</h2>
-			Type: <code>{type}</code> <br />
-			Default Value: <code>{defaultValue}</code> <br />
-			<Content />
+<section class="options-examples container">
+	{
+		orderedOptionsMD.map(({ Content, frontmatter: { defaultValue, title, type } }) => (
 			<>
-				<br />
-				<br />
+				<h2 id={slugify(title)}>{title}</h2>
+				Type: <code>{type}</code> <br />
+				Default Value: <code>{defaultValue}</code> <br />
+				<Content />
+				<section>
+					<br />
+					<br />
+				</section>
 			</>
-		</>
-	))
-}
+		))
+	}
+</section>
 
-<style lang="scss"></style>
+<style lang="scss">
+	@keyframes fade-in {
+		0% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
+
+	.container {
+		animation: fade-in ease 1s;
+		animation-iteration-count: 1;
+		animation-fill-mode: forwards;
+	}
+</style>

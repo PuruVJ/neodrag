@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from 'src/helpers/utils';
 	import { inview } from 'svelte-inview';
 	import { slide } from 'svelte/transition';
 
@@ -11,7 +12,7 @@
 	let optionsExamplesContainerEl: HTMLElement;
 	let slotParent: HTMLDivElement;
 
-	// let expanded = false;
+	let expanded = !browser;
 
 	function scroll(direction: 'prev' | 'next') {
 		const numChildren = slotParent.children.item(0)!.children.length;
@@ -26,48 +27,48 @@
 </script>
 
 <section class="container">
-	<!-- <button on:click={() => (expanded = !expanded)}>Toggle</button> -->
+	<button on:click={() => (expanded = !expanded)}>Toggle</button>
 
-	<button
-		class="nav-button prev"
-		class:visible={prevNavButtonVisible}
-		on:click={() => scroll('prev')}
-	>
-		<PrevArrowIcon />
-	</button>
+	{#if expanded}
+		<button
+			class="nav-button prev"
+			class:visible={prevNavButtonVisible}
+			on:click={() => scroll('prev')}
+		>
+			<PrevArrowIcon />
+		</button>
 
-	<!-- {#if expanded} -->
-	<section
-		class="container options-examples"
-		transition:slide={{ duration: 500 }}
-		bind:this={optionsExamplesContainerEl}
-	>
-		<span
-			class="hider prev"
-			use:inview={{ threshold: 0.01 }}
-			on:change={(e) => (prevNavButtonVisible = !e.detail.inView)}
-		/>
+		<section
+			class="container options-examples"
+			transition:slide={{ duration: 500 }}
+			bind:this={optionsExamplesContainerEl}
+		>
+			<span
+				class="hider prev"
+				use:inview={{ threshold: 0.01 }}
+				on:change={(e) => (prevNavButtonVisible = !e.detail.inView)}
+			/>
 
-		<!-- Element needed for astro bug, astro puts this at the end of `.container` rather than at the right place -->
-		<div class="hack" bind:this={slotParent} style="display: contents;">
-			<slot />
-		</div>
+			<!-- Element needed for astro bug, astro puts this at the end of `.container` rather than at the right place -->
+			<div class="hack" bind:this={slotParent} style="display: contents;">
+				<slot />
+			</div>
 
-		<span
-			class="hider next"
-			use:inview={{ threshold: 0.01 }}
-			on:change={(e) => (nextNavButtonVisible = !e.detail.inView)}
-		/>
-	</section>
-	<!-- {/if} -->
+			<span
+				class="hider next"
+				use:inview={{ threshold: 0.01 }}
+				on:change={(e) => (nextNavButtonVisible = !e.detail.inView)}
+			/>
+		</section>
 
-	<button
-		class="nav-button next"
-		class:visible={nextNavButtonVisible}
-		on:click={() => scroll('next')}
-	>
-		<NextArrowIcon />
-	</button>
+		<button
+			class="nav-button next"
+			class:visible={nextNavButtonVisible}
+			on:click={() => scroll('next')}
+		>
+			<NextArrowIcon />
+		</button>
+	{/if}
 </section>
 
 <style lang="scss">
