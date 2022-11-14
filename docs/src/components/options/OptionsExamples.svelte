@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { browser } from 'src/helpers/utils';
-	import { inview } from 'svelte-inview';
 	import { slide } from 'svelte/transition';
 
 	import PrevArrowIcon from '~icons/material-symbols/arrow-back-rounded';
@@ -10,12 +9,20 @@
 	let nextNavButtonVisible = false;
 
 	let optionsExamplesContainerEl: HTMLElement;
-	let slotParent: HTMLDivElement;
 
 	let expanded = !browser;
 
+	$: if (browser && expanded) handleScroll;
+
+	function handleScroll() {
+		const { scrollLeft, scrollWidth, clientWidth } = optionsExamplesContainerEl;
+
+		prevNavButtonVisible = scrollLeft > 0;
+		nextNavButtonVisible = scrollLeft + clientWidth < scrollWidth;
+	}
+
 	function scroll(direction: 'prev' | 'next') {
-		const numChildren = slotParent.children.item(0)!.children.length;
+		const numChildren = optionsExamplesContainerEl.children.item(0)!.children.length;
 		const scrollWidth = optionsExamplesContainerEl.scrollWidth;
 
 		const distanceToScroll = scrollWidth / numChildren;
@@ -42,23 +49,11 @@
 			class="container options-examples"
 			transition:slide={{ duration: 500 }}
 			bind:this={optionsExamplesContainerEl}
+			on:scroll={handleScroll}
 		>
-			<span
-				class="hider prev"
-				use:inview={{ threshold: 0.01 }}
-				on:change={(e) => (prevNavButtonVisible = !e.detail.inView)}
-			/>
-
 			<!-- Element needed for astro bug, astro puts this at the end of `.container` rather than at the right place -->
-			<div class="hack" bind:this={slotParent} style="display: contents;">
-				<slot />
-			</div>
 
-			<span
-				class="hider next"
-				use:inview={{ threshold: 0.01 }}
-				on:change={(e) => (nextNavButtonVisible = !e.detail.inView)}
-			/>
+			<slot />
 		</section>
 
 		<button
@@ -84,6 +79,8 @@
 		grid-auto-columns: minmax(auto, 600px);
 		gap: 2rem;
 		place-items: start;
+
+		will-change: height;
 
 		width: 100%;
 
@@ -157,10 +154,5 @@
 		& :global(svg path) {
 			color: var(--app-color-dark-contrast);
 		}
-	}
-
-	.hider {
-		width: 1px;
-		height: 100%;
 	}
 </style>
