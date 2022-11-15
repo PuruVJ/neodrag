@@ -19,6 +19,7 @@ const ORDER = [
 	'disabled',
 	'handle',
 	'cancel',
+	'defaultClass',
 ];
 
 const optionsMD = await Astro.glob<OptionsFrontMatter>('../../content/options/*/+option.mdx');
@@ -63,5 +64,3 @@ const orderedOptionsMD = ORDER.map(
 		))
 	}
 </section>
-
-<style lang="scss"></style>
