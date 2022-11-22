@@ -5,6 +5,9 @@
 	"type": "module",
 	"scripts": {
 		"changeset": "changeset",
+		"compile:watch": "nx run-many --target=compile:watch --parallel=true --all=true",
+		"compile": "nx run-many --target=compile --parallel=true --all=true",
+		"docs:build": "nx build docs --verbose",
 		"ci:version": "changeset version",
 		"ci:release": "changeset publish",
 		"sizes": "tsm scripts/gather-sizes.ts"
@@ -35,6 +38,7 @@
 		"typescript": "^4.9.3",
 		"vite": "^3.2.4",
 		"vitest": "^0.25.3",
-		"vue": "^3.2.45"
+		"vue": "^3.2.45",
+		"nx": "15.2.1"
 	}
 }
