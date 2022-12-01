@@ -1,0 +1,34 @@
+---
+import HeroExample from '$components/home/HeroExample.svelte';
+import MultiframeworkNPMInstall from '$components/home/MultiframeworkNPMInstall.svelte';
+import Layout from '$layouts/Layout.astro';
+---
+
+<Layout title="Neodrag: One draggable to rule them all">
+	<HeroExample client:load />
+	<h1>Neodrag</h1>
+	<p>One draggable to rule them all</p>
+
+	<MultiframeworkNPMInstall client:load />
+
+	<h2>Features</h2>
+	<ul>
+		<li>Cross framework</li>
+		<li>Bring your own state</li>
+
+		<!-- Show with the counter with values going from 10KB to 1.96 KB -->
+		<li>Tiny: Only 1.96KB</li>
+
+		<li>Feature rich</li>
+		<li>Zero config</li>
+		<li>SSR friendly</li>
+	</ul>
+</Layout>
+
+<style lang="scss">
+	h1 {
+		background-image: var(--app-color-primary-gradient);
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+</style>

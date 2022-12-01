@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/vanilla",
-	"version": "1.0.1",
+	"version": "2.0.0",
 	"description": "JS library to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
@@ -39,15 +39,14 @@
 	"bugs": {
 		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/solid#readme",
+	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/vanilla#readme",
 	"scripts": {
 		"compile": "tsup",
 		"compile:watch": "tsup --watch",
 		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
-		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public",
-		"size": "echo 'Vanilla size:' && brotli-size dist/index.js"
+		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public"
 	},
 	"devDependencies": {
-		"@neodrag/svelte": "workspace:*"
+		"@neodrag/core": "workspace:*"
 	}
 }

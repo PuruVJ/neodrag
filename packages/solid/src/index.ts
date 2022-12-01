@@ -1,4 +1,4 @@
-import { draggable, type DragOptions } from '@neodrag/svelte';
+import { draggable, type DragOptions } from '@neodrag/core';
 import { createEffect, onCleanup, type Accessor } from 'solid-js';
 
 export const createDraggable = () => ({
@@ -16,4 +16,4 @@ export type {
 	DragBoundsCoords,
 	DragEventData,
 	DragOptions,
-} from '@neodrag/svelte';
+} from '@neodrag/core';

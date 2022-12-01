@@ -1,0 +1,38 @@
+/* optional imports that use the props */
+@import 'open-props/normalize';
+
+@import './themes';
+
+* {
+	color: var(--app-color-dark);
+}
+
+html,
+body {
+	background-color: var(--app-color-shell);
+}
+
+h1,
+h2,
+h3 {
+	width: max-content;
+
+	color: var(--app-color-dark);
+}
+
+code {
+	color: var(--app-color-dark);
+	background-color: var(--app-color-dark-contrast);
+
+	font-family: var(--app-font-family-mono);
+}
+
+pre code {
+	color: initial;
+	background-color: initial;
+}
+
+kbd {
+	font-family: var(--app-font-family-mono);
+	font-weight: 400;
+}

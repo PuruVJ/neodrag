@@ -1,0 +1,34 @@
+---
+import type { MarkdownLayoutProps } from 'astro';
+import Layout from './Layout.astro';
+
+import sizes from '../data/sizes.json';
+import AllExamples from '$components/examples/AllExamples.svelte';
+
+type Props = MarkdownLayoutProps<{
+	title: string;
+	description: string;
+	date: string;
+}>;
+
+const { frontmatter } = Astro.props;
+
+const framework = frontmatter.url?.split('/').at(-1) as keyof typeof sizes;
+const size = sizes[framework];
+---
+
+<Layout title={frontmatter.title}>
+	<div class="all-examples-container">
+		<!-- <AllExamples client:load /> -->
+	</div>
+	<slot />
+</Layout>
+
+<style lang="scss">
+	.all-examples-container {
+		display: grid;
+		place-items: center;
+
+		padding: 1rem;
+	}
+</style>

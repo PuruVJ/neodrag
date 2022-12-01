@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/react",
-	"version": "1.0.1",
+	"version": "2.0.0",
 	"description": "React library to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
@@ -43,10 +43,9 @@
 		"compile": "tsup",
 		"compile:watch": "tsup --watch",
 		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
-		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public",
-		"size": "echo 'React size:' && brotli-size dist/index.js"
+		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public"
 	},
 	"devDependencies": {
-		"@neodrag/svelte": "workspace:*"
+		"@neodrag/core": "workspace:*"
 	}
 }

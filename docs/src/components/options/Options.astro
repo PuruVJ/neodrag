@@ -1,0 +1,66 @@
+---
+import slugify from 'slugify';
+
+type OptionsFrontMatter = {
+	title: string;
+	type: string;
+	defaultValue: string;
+	shortDescription: string;
+};
+
+const ORDER = [
+	'axis',
+	'bounds',
+	'grid',
+	'position',
+	'gpuAcceleration',
+	'applyUserSelectHack',
+	'ignoreMultitouch',
+	'disabled',
+	'handle',
+	'cancel',
+	'defaultClass',
+];
+
+const optionsMD = await Astro.glob<OptionsFrontMatter>('../../content/options/*/+option.mdx');
+
+function validate() {
+	if (optionsMD.length > ORDER.length) {
+		const excludedOptions = optionsMD
+			.map((o) => o.frontmatter.title)
+			.filter((o) => !ORDER.includes(o));
+
+		throw new Error(`Add \`${excludedOptions.join(', ')}\` properties to ORDER array`);
+	}
+
+	for (const option of optionsMD) {
+		// @ts-ignore
+		if (!option.shortDescription) {
+			throw new Error(`Add \`shortDescription\` to ${option.frontmatter.title}`);
+		}
+	}
+}
+
+validate();
+
+const orderedOptionsMD = ORDER.map(
+	(property) => optionsMD.find((option) => option.frontmatter.title === property)!
+) as typeof optionsMD & { shortDescription: string }[];
+---
+
+<section class="options-examples container">
+	{
+		orderedOptionsMD.map(({ Content, frontmatter: { defaultValue, title, type } }) => (
+			<>
+				<h2 id={slugify(title)}>{title}</h2>
+				Type: <code>{type}</code> <br />
+				Default Value: <code>{defaultValue}</code> <br />
+				<Content />
+				<section>
+					<br />
+					<br />
+				</section>
+			</>
+		))
+	}
+</section>
