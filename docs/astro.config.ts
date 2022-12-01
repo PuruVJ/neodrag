@@ -15,6 +15,8 @@ import sequential from 'svelte-sequential-preprocessor';
 import UnpluginIcons from 'unplugin-icons/vite';
 import AutoImport from 'unplugin-auto-import/astro';
 
+import container from 'remark-custom-container';
+
 // https://astro.build/config
 export default defineConfig({
 	integrations: [
@@ -43,6 +45,8 @@ export default defineConfig({
 
 	markdown: {
 		extendDefaultPlugins: true,
+		// @ts-ignore
+		remarkPlugins: [container],
 	},
 
 	vite: {

@@ -34,6 +34,7 @@
 		"postcss-jit-props": "^1.0.7",
 		"prettier": "^2.8.0",
 		"prettier-plugin-astro": "^0.7.0",
+		"remark-custom-container": "^1.2.0",
 		"rollup": "^3.5.1",
 		"sass": "^1.56.1",
 		"svelte": "^3.53.1",

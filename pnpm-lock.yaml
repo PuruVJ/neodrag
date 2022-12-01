@@ -71,6 +71,7 @@ importers:
       postcss-jit-props: ^1.0.7
       prettier: ^2.8.0
       prettier-plugin-astro: ^0.7.0
+      remark-custom-container: ^1.2.0
       rollup: ^3.5.1
       sass: ^1.56.1
       slugify: ^1.6.5
@@ -107,6 +108,7 @@ importers:
       postcss-jit-props: 1.0.7_postcss@8.4.19
       prettier: 2.8.0
       prettier-plugin-astro: 0.7.0
+      remark-custom-container: 1.2.0
       rollup: 3.5.1
       sass: 1.56.1
       svelte: 3.53.1
@@ -8145,6 +8147,12 @@ packages:
   /relateurl/0.2.7:
     resolution: {integrity: sha512-G08Dxvm4iDN3MLM0EsP62EDV9IuhXPR6blNz6Utcp7zyV3tr4HVNINt6MpaRWbxoOHT3Q7YN2P+jaHX8vUbgog==}
     engines: {node: '>= 0.10'}
+    dev: true
+
+  /remark-custom-container/1.2.0:
+    resolution: {integrity: sha512-Ivwu3uY45ZDJzV/ReUaXQXrBD/l6v/O6jLyjZHXEU1F3EQCkRbL/7ZJb2ROgtjLO8elP0tTc3uKFC9edVlohLA==}
+    dependencies:
+      unist-util-visit: 4.1.1
     dev: true
 
   /remark-frontmatter/4.0.1:
