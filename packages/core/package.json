@@ -18,8 +18,8 @@
 		"./package.json": "./package.json"
 	},
 	"scripts": {
-		"compile:watch": "rollup -cw",
-		"compile": "rollup -c "
+		"compile:watch": "tsup --watch",
+		"compile": "tsup"
 	},
 	"repository": {
 		"type": "git",
