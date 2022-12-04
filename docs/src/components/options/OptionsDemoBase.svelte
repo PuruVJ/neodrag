@@ -2,7 +2,7 @@
 	import IonReloadIcon from '~icons/ion/reload';
 	import { draggable, type DragOptions } from '@neodrag/svelte';
 	import { browser } from 'src/helpers/utils';
-	import squircle from 'src/worklet/squircle?url';
+	import squircle from '../../worklet/squircle?url';
 
 	export let options: DragOptions = {};
 	export let customClass = '';

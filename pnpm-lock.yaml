@@ -2614,7 +2614,7 @@ packages:
       magic-string: 0.26.7
       svelte: 3.53.1
       svelte-hmr: 0.15.1_svelte@3.53.1
-      vite: 3.2.4_terser@5.16.1
+      vite: 3.2.4_sass@1.56.1
       vitefu: 0.2.2_vite@3.2.4
     transitivePeerDependencies:
       - supports-color
@@ -9892,7 +9892,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 3.2.4_terser@5.16.1
+      vite: 3.2.4_sass@1.56.1
     dev: true
 
   /vitest/0.25.3_jsdom@20.0.3+terser@5.16.1:

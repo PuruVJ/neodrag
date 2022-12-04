@@ -12,6 +12,7 @@ const ORDER = [
 	'axis',
 	'bounds',
 	'grid',
+	'defaultPosition',
 	'position',
 	'gpuAcceleration',
 	'applyUserSelectHack',
@@ -20,6 +21,11 @@ const ORDER = [
 	'handle',
 	'cancel',
 	'defaultClass',
+	'defaultClassDragging',
+	'defaultClassDragged',
+	'onDragStart',
+	'onDrag',
+	'onDragEnd',
 ];
 
 const optionsMD = await Astro.glob<OptionsFrontMatter>('../../content/options/*/+option.mdx');
