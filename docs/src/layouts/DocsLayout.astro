@@ -1,34 +1,120 @@
 ---
 import type { MarkdownLayoutProps } from 'astro';
+import { Code } from 'astro/components';
+
 import Layout from './Layout.astro';
+import Nav from '$components/docs/Nav.astro';
 
 import sizes from '../data/sizes.json';
-import AllExamples from '$components/examples/AllExamples.svelte';
 
 type Props = MarkdownLayoutProps<{
 	title: string;
-	description: string;
-	date: string;
+	tagline: string;
 }>;
 
 const { frontmatter } = Astro.props;
+const { tagline, title, url } = frontmatter;
 
-const framework = frontmatter.url?.split('/').at(-1) as keyof typeof sizes;
+const framework = url?.split('/').at(-1) as keyof typeof sizes;
 const size = sizes[framework];
+
+const installCode = `
+pnpm add ${title}
+
+# npm
+npm install ${title}
+
+# yarn
+yarn add ${title}
+`.trim();
 ---
 
-<Layout title={frontmatter.title}>
-	<div class="all-examples-container">
-		<!-- <AllExamples client:load /> -->
-	</div>
-	<slot />
+<Layout title={title}>
+	<section class="docs-container">
+		<aside>
+			<Nav />
+		</aside>
+
+		<main>
+			<article>
+				<h1>{title}</h1>
+				<p>{tagline}</p>
+
+				<!-- TODO: Replace this with a component that opens a mini dialog on click to show what it does. -->
+				<button class="tag">
+					{size}KB min+br
+				</button>
+
+				<Code code={installCode} lang="sh" />
+
+				<slot />
+
+				<h2>Credits</h2>
+				<p>
+					Inspired from the amazing
+					<a href="https://github.com/react-grid-layout/react-draggable">
+						react-draggable
+					</a>
+					library, and implements the same API.
+				</p>
+			</article>
+		</main>
+	</section>
 </Layout>
 
 <style lang="scss">
+	.docs-container {
+		display: grid;
+		grid-template-columns: 300px auto;
+		gap: 1rem;
+
+		width: 100%;
+		height: auto;
+	}
+
+	aside {
+		height: 100%;
+	}
+
 	.all-examples-container {
 		display: grid;
 		place-items: center;
 
 		padding: 1rem;
+	}
+
+	main {
+		min-width: 0;
+		height: 100vh;
+
+		padding-right: 1rem;
+
+		overflow-y: auto;
+	}
+</style>
+
+<style lang="scss" is:global>
+	p {
+		margin: 1.5rem 0;
+
+		max-width: 100%;
+	}
+
+	body {
+		overflow: hidden;
+	}
+
+	pre.astro-code {
+		--font-size: 1rem;
+		border-radius: 0.6rem;
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding: 1rem;
+		font-size: var(--font-size) !important;
+		line-height: 1.3 !important;
+		margin: 1.5rem 0;
+
+		max-width: 100%;
+		width: 100%;
 	}
 </style>

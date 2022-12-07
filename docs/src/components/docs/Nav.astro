@@ -1,0 +1,77 @@
+---
+import { FRAMEWORKS } from 'src/helpers/constants';
+
+const { pathname } = Astro.url;
+---
+
+<!-- Component should be wrapped in an <aside> or <header> -->
+<div class="nav container">
+	<h3>Neodrag Logo</h3>
+
+	<nav>
+		<ul>
+			{
+				FRAMEWORKS.map(({ name }) => (
+					<li>
+						<a
+							href={`/docs/${name}`}
+							aria-current={pathname.endsWith(name) ? 'page' : 'false'}
+						>
+							@neodrag/{name}
+						</a>
+					</li>
+				))
+			}
+		</ul>
+
+		<hr />
+
+		<section>
+			Migrating
+			<ul>
+				<li>
+					<a
+						href="/docs/migrating/svelte-drag"
+						aria-current={pathname.endsWith('/docs/migrating/svelte-drag')
+							? 'page'
+							: 'false'}
+					>
+						Svelte Drag to Neodrag</a
+					>
+				</li>
+			</ul>
+		</section>
+	</nav>
+
+	<span class="spacer"></span>
+
+	<span>&copy; 2021-{new Date().getUTCFullYear()} Puru Vijay</span>
+</div>
+
+<style lang="scss">
+	.container {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+
+		height: 100%;
+	}
+
+	nav {
+		flex: 1 1 auto;
+	}
+
+	ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	hr {
+		margin: 1rem 0;
+	}
+
+	.spacer {
+		flex: 1 1 auto;
+	}
+</style>

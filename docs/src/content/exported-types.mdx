@@ -1,0 +1,23 @@
+`DragOptions` is the documented list of all options provided by the component.
+
+`DragAxis` is the type of `axis` option, and is equal to `'both' | 'x' | 'y' | 'none'`.
+
+`DragBounds` is `'parent' | string | Partial<DragBoundsCoords>`, the complete type of `bounds` option.
+
+`DragBoundsCoords` is when you're specifying the `bounds` field using an object, this is the type needed for that.
+
+```ts
+export type DragBoundsCoords = {
+  /** Number of pixels from left of the window */
+  left: number;
+
+  /** Number of pixels from top of the window */
+  top: number;
+
+  /** Number of pixels from the right side of window */
+  right: number;
+
+  /** Number of pixels from the bottom of the window */
+  bottom: number;
+};
+```

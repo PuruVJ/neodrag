@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { browser } from 'src/helpers/utils';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
