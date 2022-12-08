@@ -58,6 +58,7 @@ importers:
       '@astrojs/prefetch': ^0.1.1
       '@astrojs/svelte': ^1.0.2
       '@fontsource/jetbrains-mono': ^4.5.11
+      '@fontsource/plus-jakarta-sans': ^4.5.10
       '@iconify/json': ^2.1.147
       '@neodrag/svelte': workspace:*
       astro: ^1.6.12
@@ -87,6 +88,7 @@ importers:
       vite: ^3.2.4
     dependencies:
       '@fontsource/jetbrains-mono': 4.5.11
+      '@fontsource/plus-jakarta-sans': 4.5.10
       '@neodrag/svelte': link:../packages/svelte
       astro-seo: 0.6.0
       open-props: 1.5.1
@@ -2219,6 +2221,10 @@ packages:
 
   /@fontsource/jetbrains-mono/4.5.11:
     resolution: {integrity: sha512-IW1qgWGkjlN1O6Jf+6LWF9DpcdXhyQEXhTlzfVKrWHX+ProuOT5FcrEAj34AR+19CgAb9Sheda2slORnybBsdw==}
+    dev: false
+
+  /@fontsource/plus-jakarta-sans/4.5.10:
+    resolution: {integrity: sha512-WWyrjO6qyL7j3itLJUEE/rHRyDfypsoIvpvI6Ld0vyEae49P613cm5UBRe5zMnPjNC7dXBQ8/fjbszbifkL6BA==}
     dev: false
 
   /@iconify/json/2.1.147:

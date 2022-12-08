@@ -30,14 +30,18 @@
 	}
 
 	function scroll(direction: 'prev' | 'next') {
-		const numChildren = optionsExamplesContainerEl.children.item(0)!.children.length;
+		const numChildren =
+			optionsExamplesContainerEl.children.item(0)!.children.length;
 		const scrollWidth = optionsExamplesContainerEl.scrollWidth;
 
 		const distanceToScroll = scrollWidth / numChildren;
 
 		const finalScrollVal = distanceToScroll * (direction === 'prev' ? -1 : 1);
 
-		optionsExamplesContainerEl.scrollBy({ left: finalScrollVal, behavior: 'smooth' });
+		optionsExamplesContainerEl.scrollBy({
+			left: finalScrollVal,
+			behavior: 'smooth',
+		});
 	}
 </script>
 
@@ -121,8 +125,8 @@
 		width: 4rem;
 
 		border-radius: 50%;
-		box-shadow: 0px 3px 5px -1px rgb(0 0 0 / 20%), 0px 6px 10px 0px rgb(0 0 0 / 14%),
-			0px 1px 18px 0px rgb(0 0 0 / 12%);
+		box-shadow: 0px 3px 5px -1px rgb(0 0 0 / 20%),
+			0px 6px 10px 0px rgb(0 0 0 / 14%), 0px 1px 18px 0px rgb(0 0 0 / 12%);
 
 		transform: translateY(-50%) scale3d(var(--scale), var(--scale), 1);
 
@@ -130,15 +134,15 @@
 		transition-property: transform, box-shadow, background-color;
 
 		&:hover {
-			box-shadow: 0px 5px 5px -3px rgb(0 0 0 / 20%), 0px 8px 10px 1px rgb(0 0 0 / 14%),
-				0px 3px 14px 2px rgb(0 0 0 / 12%);
+			box-shadow: 0px 5px 5px -3px rgb(0 0 0 / 20%),
+				0px 8px 10px 1px rgb(0 0 0 / 14%), 0px 3px 14px 2px rgb(0 0 0 / 12%);
 
 			background-color: hsla(var(--app-color-dark-hsl), 0.8);
 		}
 
 		&:active {
-			box-shadow: 0px 7px 8px -4px rgb(0 0 0 / 20%), 0px 12px 17px 2px rgb(0 0 0 / 14%),
-				0px 5px 22px 4px rgb(0 0 0 / 12%);
+			box-shadow: 0px 7px 8px -4px rgb(0 0 0 / 20%),
+				0px 12px 17px 2px rgb(0 0 0 / 14%), 0px 5px 22px 4px rgb(0 0 0 / 12%);
 
 			background-color: hsla(var(--app-color-dark-hsl), 1);
 		}

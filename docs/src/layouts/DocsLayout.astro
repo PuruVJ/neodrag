@@ -91,13 +91,25 @@ yarn add ${title}
 
 		overflow-y: auto;
 	}
+
+	// article {
+	// 	display: flex;
+	// 	flex-direction: column;
+	// 	align-items: center;
+	// }
 </style>
 
 <style lang="scss" is:global>
+	:root {
+		--entity-width: 80ch;
+	}
+
 	p {
 		margin: 1.5rem 0;
 
-		max-width: 100%;
+		max-width: var(--entity-width);
+
+		font-size: 1.3rem;
 	}
 
 	body {
@@ -114,7 +126,7 @@ yarn add ${title}
 		line-height: 1.3 !important;
 		margin: 1.5rem 0;
 
-		max-width: 100%;
-		width: 100%;
+		max-width: var(--entity-width);
+		width: var(--entity-width);
 	}
 </style>

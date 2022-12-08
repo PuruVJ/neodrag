@@ -6,7 +6,9 @@ const { pathname } = Astro.url;
 
 <!-- Component should be wrapped in an <aside> or <header> -->
 <div class="nav container">
-	<h3>Neodrag Logo</h3>
+	<p class="h2 logo">
+		<img src="/logo.svg" /> neodrag
+	</p>
 
 	<nav>
 		<ul>
@@ -55,6 +57,20 @@ const { pathname } = Astro.url;
 		gap: 1rem;
 
 		height: 100%;
+	}
+
+	.logo {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+
+		font-weight: 600;
+
+		margin: 1rem;
+
+		img {
+			width: 4rem;
+		}
 	}
 
 	nav {

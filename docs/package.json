@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"@fontsource/jetbrains-mono": "^4.5.11",
+		"@fontsource/plus-jakarta-sans": "^4.5.10",
 		"@neodrag/svelte": "workspace:*",
 		"astro-seo": "^0.6.0",
 		"open-props": "^1.5.1",
