@@ -2,24 +2,29 @@
 import { FRAMEWORKS } from 'src/helpers/constants';
 
 const { pathname } = Astro.url;
+
+const ariaCurrentVal = (path: string) =>
+	pathname.endsWith(path) ? 'page' : 'false';
 ---
 
 <!-- Component should be wrapped in an <aside> or <header> -->
 <div class="nav container">
-	<p class="h2 logo">
+	<a href="/" class="h2 logo unstyled">
 		<img src="/logo.svg" /> neodrag
-	</p>
+	</a>
 
 	<nav>
-		<ul>
+		<ul class="group">
+			<div class="title">Libraries</div>
 			{
 				FRAMEWORKS.map(({ name }) => (
 					<li>
 						<a
 							href={`/docs/${name}`}
-							aria-current={pathname.endsWith(name) ? 'page' : 'false'}
+							aria-current={ariaCurrentVal(name)}
+							class="unstyled"
 						>
-							@neodrag/{name}
+							{name}
 						</a>
 					</li>
 				))
@@ -28,21 +33,18 @@ const { pathname } = Astro.url;
 
 		<hr />
 
-		<section>
-			Migrating
-			<ul>
-				<li>
-					<a
-						href="/docs/migrating/svelte-drag"
-						aria-current={pathname.endsWith('/docs/migrating/svelte-drag')
-							? 'page'
-							: 'false'}
-					>
-						Svelte Drag to Neodrag</a
-					>
-				</li>
-			</ul>
-		</section>
+		<ul class="group">
+			<div class="title">Guides</div>
+			<li>
+				<a
+					href="/docs/migrating/svelte-drag"
+					aria-current={ariaCurrentVal('/docs/migrating/svelte-drag')}
+					class="unstyled"
+				>
+					Svelte Drag to Neodrag</a
+				>
+			</li>
+		</ul>
 	</nav>
 
 	<span class="spacer"></span>
@@ -64,6 +66,8 @@ const { pathname } = Astro.url;
 		align-items: center;
 		gap: 0.5rem;
 
+		text-decoration: none;
+
 		font-weight: 600;
 
 		margin: 1rem;
@@ -75,12 +79,40 @@ const { pathname } = Astro.url;
 
 	nav {
 		flex: 1 1 auto;
+
+		padding: 0.5rem;
 	}
 
 	ul {
 		list-style: none;
 		padding: 0;
 		margin: 0;
+	}
+
+	li {
+		padding: 0;
+	}
+
+	nav a {
+		&,
+		&:visited {
+			display: block;
+
+			padding: 0.25rem 0.5;
+
+			text-decoration: none;
+			color: var(--app-color-light-contrast);
+
+			border-radius: 8px;
+
+			transition: background-color 0.15s ease-in-out;
+
+			margin: 0;
+		}
+
+		&:hover {
+			background-color: hsla(var(--app-color-dark-hsl), 0.2);
+		}
 	}
 
 	hr {

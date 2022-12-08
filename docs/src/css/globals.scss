@@ -70,3 +70,42 @@ kbd {
 	font-family: var(--app-font-family-mono);
 	font-weight: 400;
 }
+
+a[href]:visited:not(.unstyled),
+a[href]:not(.unstyled) {
+	--distance: calc(50% - 0.375rem);
+	--opacity: 0.35;
+	--duration: 150ms;
+	--easing: ease-in-out;
+
+	color: var(--app-color-primary);
+	font-weight: 600 !important;
+	text-decoration: none;
+
+	padding: 0 0.25rem;
+
+	background-image: linear-gradient(
+		transparent 0%,
+		transparent var(--distance),
+		hsla(var(--app-color-primary-hsl), var(--opacity)) var(--distance),
+		hsla(var(--app-color-primary-hsl), var(--opacity)) 100%
+	);
+	background-size: 100% 200%;
+	background-position: 0 0;
+
+	transition: var(--duration) var(--easing);
+	transition-property: color, background-position, background-image,
+		border-radius;
+
+	&:hover,
+	&:focus-visible {
+		background-position: 0 100%;
+
+		color: var(--app-color-primary-contrast);
+		font-weight: 600 !important;
+
+		border-radius: 0.25rem;
+
+		--opacity: 1;
+	}
+}

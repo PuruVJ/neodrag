@@ -67,13 +67,12 @@ const orderedOptionsMD = ORDER.map(
 			({ Content, frontmatter: { defaultValue, title, type } }) => (
 				<>
 					<h3 id={slugify(title)}>{title}</h3>
-					Type: <code>{type}</code> <br />
-					Default Value: <code>{defaultValue}</code> <br />
+					<p>
+						Type: <code>{type}</code> <br />
+						Default Value: <code>{defaultValue}</code>
+					</p>
+
 					<Content />
-					<section>
-						<br />
-						<br />
-					</section>
 				</>
 			)
 		)

@@ -1,3 +1,20 @@
+import { Code } from 'astro/components';
+
+### Types Exported from package
+
+This package exports these types you can use:
+
+<Code
+  lang="ts"
+  code={`import type {
+  DragAxis,
+  DragBounds,
+  DragBoundsCoords,
+  DragOptions,
+  DragEventData,
+} from '@neodrag/${props.framework}';`}
+></Code>
+
 `DragOptions` is the documented list of all options provided by the component.
 
 `DragAxis` is the type of `axis` option, and is equal to `'both' | 'x' | 'y' | 'none'`.

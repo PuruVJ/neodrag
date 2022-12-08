@@ -37,7 +37,11 @@ yarn add ${title}
 
 		<main>
 			<article>
-				<h1>{title}</h1>
+				<h1>
+					@neodrag/<span style={`color: var(--app-color-brand-${framework})`}
+						>{framework}</span
+					>
+				</h1>
 				<p>{tagline}</p>
 
 				<!-- TODO: Replace this with a component that opens a mini dialog on click to show what it does. -->
@@ -97,19 +101,23 @@ yarn add ${title}
 	// 	flex-direction: column;
 	// 	align-items: center;
 	// }
+
+	.docs-container {
+		:global(p, pre.astro-code) {
+			max-width: var(--entity-width);
+		}
+
+		:global(p, a) {
+			margin: 1.5rem 0;
+
+			font-size: 1.3rem;
+		}
+	}
 </style>
 
 <style lang="scss" is:global>
 	:root {
-		--entity-width: 80ch;
-	}
-
-	p {
-		margin: 1.5rem 0;
-
-		max-width: var(--entity-width);
-
-		font-size: 1.3rem;
+		--entity-width: clamp(400px, 60vw, 800px);
 	}
 
 	body {
@@ -123,10 +131,9 @@ yarn add ${title}
 		overflow-y: hidden;
 		padding: 1rem;
 		font-size: var(--font-size) !important;
-		line-height: 1.3 !important;
+		line-height: 1.5 !important;
 		margin: 1.5rem 0;
 
-		max-width: var(--entity-width);
 		width: var(--entity-width);
 	}
 </style>
