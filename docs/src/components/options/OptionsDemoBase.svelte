@@ -1,7 +1,7 @@
 <script lang="ts">
-	import IonReloadIcon from '~icons/ion/reload';
 	import { draggable, type DragOptions } from '@neodrag/svelte';
 	import { browser } from 'src/helpers/utils';
+	import IonReloadIcon from '~icons/ion/reload';
 	import squircle from '../../worklet/squircle?url';
 
 	export let options: DragOptions = {};
@@ -35,7 +35,10 @@
 		}
 </script>
 
-<section class="container options-demo-base-container {customClass}" style:--size={size}>
+<section
+	class="container options-demo-base-container {customClass}"
+	style:--size={size}
+>
 	{#key key}
 		{#if renderParent}
 			<div class="parent">
@@ -125,7 +128,8 @@
 		background-image: var(--app-color-primary-gradient);
 
 		border-radius: 1rem 1rem 0 0;
-		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035), 0px 100px 80px rgba(0, 0, 0, 0.07);
+		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035),
+			0px 100px 80px rgba(0, 0, 0, 0.07);
 
 		mask-image: paint(squircle);
 		--squircle-radius: 50px;
