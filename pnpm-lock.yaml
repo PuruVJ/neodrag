@@ -67,11 +67,14 @@ importers:
       astro-seo: ^0.6.0
       astrojs-service-worker: ^0.0.8
       autoprefixer: ^10.4.13
+      hast-util-to-string: ^2.0.0
+      hastscript: ^7.1.0
       open-props: ^1.5.1
       postcss: ^8.4.19
       postcss-jit-props: ^1.0.8
       prettier: ^2.8.1
       prettier-plugin-astro: ^0.7.0
+      rehype-autolink-headings: ^6.1.1
       remark-custom-container: ^1.2.0
       rollup: ^3.7.0
       sass: ^1.56.2
@@ -106,10 +109,13 @@ importers:
       astro-critters: 1.1.18
       astrojs-service-worker: 0.0.8
       autoprefixer: 10.4.13_postcss@8.4.19
+      hast-util-to-string: 2.0.0
+      hastscript: 7.1.0
       postcss: 8.4.19
       postcss-jit-props: 1.0.8_postcss@8.4.19
       prettier: 2.8.1
       prettier-plugin-astro: 0.7.0
+      rehype-autolink-headings: 6.1.1
       remark-custom-container: 1.2.0
       rollup: 3.7.0
       sass: 1.56.2
@@ -2611,7 +2617,7 @@ packages:
       magic-string: 0.26.7
       svelte: 3.54.0
       svelte-hmr: 0.15.1_svelte@3.54.0
-      vite: 3.2.5_terser@5.16.1
+      vite: 3.2.5_sass@1.56.2
       vitefu: 0.2.2_vite@3.2.5
     transitivePeerDependencies:
       - supports-color
@@ -5463,6 +5469,16 @@ packages:
       web-namespaces: 2.0.1
     dev: true
 
+  /hast-util-has-property/2.0.0:
+    resolution: {integrity: sha512-4Qf++8o5v14us4Muv3HRj+Er6wTNGA/N9uCaZMty4JWvyFKLdhULrv4KE1b65AthsSO9TXSZnjuxS8ecIyhb0w==}
+    dev: true
+
+  /hast-util-heading-rank/2.1.0:
+    resolution: {integrity: sha512-w+Rw20Q/iWp2Bcnr6uTrYU6/ftZLbHKhvc8nM26VIWpDqDMlku2iXUVTeOlsdoih/UKQhY7PHQ+vZ0Aqq8bxtQ==}
+    dependencies:
+      '@types/hast': 2.3.4
+    dev: true
+
   /hast-util-is-element/2.1.2:
     resolution: {integrity: sha512-thjnlGAnwP8ef/GSO1Q8BfVk2gundnc2peGQqEg2kUt/IqesiGg/5mSwN2fE7nLzy61pg88NG6xV+UrGOrx9EA==}
     dependencies:
@@ -5538,6 +5554,12 @@ packages:
       property-information: 6.2.0
       web-namespaces: 2.0.1
       zwitch: 2.0.4
+    dev: true
+
+  /hast-util-to-string/2.0.0:
+    resolution: {integrity: sha512-02AQ3vLhuH3FisaMM+i/9sm4OXGSq1UhOOCpTLLQtHdL3tZt7qil69r8M8iDkZYyC0HCFylcYoP+8IO7ddta1A==}
+    dependencies:
+      '@types/hast': 2.3.4
     dev: true
 
   /hast-util-whitespace/2.0.0:
@@ -7846,6 +7868,18 @@ packages:
       jsesc: 0.5.0
     dev: true
 
+  /rehype-autolink-headings/6.1.1:
+    resolution: {integrity: sha512-NMYzZIsHM3sA14nC5rAFuUPIOfg+DFmf9EY1YMhaNlB7+3kK/ZlE6kqPfuxr1tsJ1XWkTrMtMoyHosU70d35mA==}
+    dependencies:
+      '@types/hast': 2.3.4
+      extend: 3.0.2
+      hast-util-has-property: 2.0.0
+      hast-util-heading-rank: 2.1.0
+      hast-util-is-element: 2.1.2
+      unified: 10.1.2
+      unist-util-visit: 4.1.1
+    dev: true
+
   /rehype-parse/8.0.4:
     resolution: {integrity: sha512-MJJKONunHjoTh4kc3dsM1v3C9kGrrxvA3U8PxZlP2SjH8RNUSrb+lF7Y0KVaUDnGH2QZ5vAn7ulkiajM9ifuqg==}
     dependencies:
@@ -9660,7 +9694,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 3.2.5_terser@5.16.1
+      vite: 3.2.5_sass@1.56.2
     dev: true
 
   /vitefu/0.2.3_vite@3.2.5:

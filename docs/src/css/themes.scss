@@ -31,6 +31,9 @@ body.light {
 	--app-color-brand-vanilla: var(--app-color-dark);
 
 	--app-font-family-mono: 'Jetbrains mono', var(--font-mono);
+	--app-font-family-main: system-ui, -apple-system, BlinkMacSystemFont,
+		'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue',
+		sans-serif;
 }
 
 body.dark {
@@ -47,7 +50,7 @@ body.dark {
 	--app-color-shell: hsl(200, 8%, 7%);
 	--app-color-shell-contrast: var(--gray-1);
 
-	--app-color-brand-svelte: #ff3e00;
+	--app-color-brand-svelte: #ff511a;
 	--app-color-brand-react: #61dafc;
 	--app-color-brand-vue: #42b883;
 	--app-color-brand-solid: #8fa6c5;
