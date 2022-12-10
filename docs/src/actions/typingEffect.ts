@@ -4,12 +4,8 @@ export function typingEffect(element: HTMLElement, speed: number) {
 	element.innerHTML = '';
 
 	let i = 0;
-	let timer = setInterval(function () {
-		console.log(1);
-		if (i < text.length) {
-			element.append(text.charAt(i));
-			i++;
-		}
+	const timer = setInterval(() => {
+		if (i < text.length) element.append(text.charAt(++i));
 	}, speed);
 
 	return {
