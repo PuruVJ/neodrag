@@ -5,7 +5,8 @@
 		"paths": {
 			"$layouts/*": ["src/layouts/*"],
 			"$components/*": ["src/components/*"],
-			"$stores/*": ["src/stores/*"]
+			"$stores/*": ["src/stores/*"],
+			"$actions/*": ["src/actions/*"]
 		}
 	},
 	"include": ["./markdown/*", "./src/auto-imports.d.ts"]
