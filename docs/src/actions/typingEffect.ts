@@ -5,7 +5,7 @@ export function typingEffect(element: HTMLElement, speed: number) {
 
 	let i = 0;
 	const timer = setInterval(() => {
-		if (i < text.length) element.append(text.charAt(++i));
+		if (i < text.length) element.append(text.charAt(i++));
 	}, speed);
 
 	return {
