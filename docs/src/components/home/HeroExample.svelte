@@ -10,6 +10,7 @@
 	// @ts-ignore
 	import PawIcon from '~icons/mdi/paw';
 	import ScrollDownIndicator from './ScrollDownIndicator.svelte';
+	import { browser } from 'src/helpers/utils';
 
 	let headingText = 'Try dragging the box below';
 
@@ -48,7 +49,7 @@
 <div class="container">
 	{#key headingText}
 		<p class="h3" class:hidden={false} use:typingEffect={60}>
-			{headingText}
+			{browser ? headingText : ''}
 		</p>
 	{/key}
 
