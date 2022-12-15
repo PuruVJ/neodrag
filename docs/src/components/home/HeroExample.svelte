@@ -94,7 +94,13 @@
 			on:mouseenter={() => (showCustomCursor = false)}
 			on:mouseleave={() => (showCustomCursor = true)}
 		>
-			<ScrollDownIndicator link="#main-content" />
+			<ScrollDownIndicator
+				link="#main-content"
+				on:click={() =>
+					document
+						.querySelector('#main-content')
+						?.scrollIntoView({ block: 'start' })}
+			/>
 		</div>
 	{/if}
 </div>

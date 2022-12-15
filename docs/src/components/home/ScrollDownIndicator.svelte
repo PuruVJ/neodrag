@@ -2,7 +2,7 @@
 	export let link: string;
 </script>
 
-<a href={link} class="scroll-down unstyled">
+<a href={link} class="scroll-down unstyled" on:click|preventDefault>
 	<div class="dot" />
 </a>
 
