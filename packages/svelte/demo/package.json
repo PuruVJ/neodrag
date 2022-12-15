@@ -8,11 +8,11 @@
 		"preview": "vite preview"
 	},
 	"devDependencies": {
-		"@sveltejs/kit": "1.0.0-next.577",
-		"svelte": "^3.54.0",
-		"svelte-preprocess": "^4.10.6",
+		"@sveltejs/kit": "1.0.0",
+		"svelte": "^3.55.0",
+		"svelte-preprocess": "^5.0.0",
 		"typescript": "^4.9.4",
-		"vite": "^3.2.5"
+		"vite": "^4.0.1"
 	},
 	"dependencies": {
 		"@neodrag/svelte": "workspace:*"

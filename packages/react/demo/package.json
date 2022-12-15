@@ -11,8 +11,8 @@
 		"@neodrag/react": "workspace:*"
 	},
 	"devDependencies": {
-		"@vitejs/plugin-react": "^2.2.0",
+		"@vitejs/plugin-react": "^3.0.0",
 		"typescript": "^4.9.4",
-		"vite": "^3.2.5"
+		"vite": "^4.0.1"
 	}
 }
