@@ -131,7 +131,7 @@
 		position: absolute;
 		top: 25vh;
 
-		font-family: var(--app-font-family-mono);
+		font-family: var(--app-font-mono);
 		color: hsla(var(--app-color-dark-hsl), 0.6);
 		word-spacing: 4px;
 

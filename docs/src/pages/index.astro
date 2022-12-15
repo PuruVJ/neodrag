@@ -8,8 +8,10 @@ import Layout from '$layouts/Layout.astro';
 	<HeroExample client:load />
 
 	<main id="main-content">
-		<h1>Neodrag</h1>
-		<p>One draggable to rule them all</p>
+		<section class="tagline">
+			<h1>Neodrag</h1>
+			<p class="h2">One draggable to rule them all</p>
+		</section>
 
 		<MultiframeworkNPMInstall client:load />
 
@@ -29,10 +31,20 @@ import Layout from '$layouts/Layout.astro';
 </Layout>
 
 <style lang="scss">
-	h1 {
-		background-image: var(--app-color-primary-gradient);
-		background-clip: text;
-		-webkit-text-fill-color: transparent;
+	.tagline {
+		h1,
+		p {
+			margin: 0;
+		}
+
+		h1 {
+			background-image: var(--app-color-primary-gradient);
+			background-clip: text;
+			-webkit-text-fill-color: transparent;
+
+			font-size: clamp(3rem, 20vw, 8rem);
+			line-height: 1.28;
+		}
 	}
 
 	main {

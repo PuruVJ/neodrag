@@ -1,30 +1,33 @@
 <script lang="ts">
 	// TODO: MAKE IT FANCYYCYYYYYYYYYYYY 😡😡😡😡😡😡😡😡😡😡😡😡😡😡😡
 	import { FRAMEWORKS } from 'src/helpers/constants';
-	import { selectedFramework } from '$stores/user-preferences.store';
+	import { onMount } from 'svelte';
+	import SpinnerItem from './SpinnerItem.svelte';
 
 	// let frameworks = ['vanilla', 'svelte', 'react', 'vue', 'solid'];
-	let frameworks = [...FRAMEWORKS];
+	let frameworks = ['react', 'vue', 'svelte', 'solid', 'vanilla'].map(
+		(name) => FRAMEWORKS.find((f) => f.name === name)!
+	)!;
 
-	// const baseFontSize = 1;
+	let spinnerHeight = 0;
+	let theta = (2 * Math.PI) / 3;
+	$: radius =
+		spinnerHeight === 0 ? 0 : spinnerHeight / (2 * Math.sin(theta / 2));
 
-	// const fontSizeOutput = [
-	// 	baseFontSize,
-	// 	baseFontSize * 1.1,
-	// 	baseFontSize * 1.414,
-	// 	baseFontSize * 2,
-	// 	baseFontSize * 1.414,
-	// 	baseFontSize * 1.1,
-	// 	baseFontSize,
-	// ];
+	let mouseY: number | null = null;
 </script>
 
 <section class="animation-frameworks">
 	<span class="prefix"> pnpm add @neodrag/ </span>
-	<ul class="spinner">
-		{#each frameworks as { name }}
+	<ul
+		class="spinner"
+		bind:clientHeight={spinnerHeight}
+		on:mousemove={(e) => (mouseY = e.clientY)}
+		on:mouseleave={() => (mouseY = null)}
+	>
+		{#each frameworks as { name }, idx}
 			<li style:color="var(--app-color-brand-{name})" class="framework">
-				<button on:click={() => ($selectedFramework = name)}>{name}</button>
+				<SpinnerItem {spinnerHeight} frameworkName={name} {mouseY} />
 			</li>
 		{/each}
 	</ul>
@@ -52,6 +55,8 @@
 		padding: 0;
 
 		font-size: inherit;
+
+		width: 40%;
 	}
 
 	.framework {

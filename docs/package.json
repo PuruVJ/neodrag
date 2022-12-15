@@ -16,6 +16,7 @@
 		"@neodrag/svelte": "workspace:*",
 		"astro-seo": "^0.6.0",
 		"open-props": "^1.5.1",
+		"popmotion": "^11.0.5",
 		"slugify": "^1.6.5",
 		"svelte-body": "^1.3.6",
 		"svelte-inview": "^3.0.1",
