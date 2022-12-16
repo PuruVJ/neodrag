@@ -9545,7 +9545,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 4.0.1_sass@1.56.2
+      vite: 4.0.1_terser@5.16.1
     dev: true
 
   /vitest/0.25.8_jsdom@20.0.3+terser@5.16.1:

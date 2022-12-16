@@ -14,7 +14,7 @@
 
 	const fontWeightOutput = [100, 300, 900, 300, 100];
 
-	$: distanceLimit = spinnerHeight;
+	$: distanceLimit = spinnerHeight / 2;
 	$: beyondTheDistanceLimit = distanceLimit + 1;
 	$: distanceInput = [
 		-distanceLimit,
