@@ -25,8 +25,6 @@
 		vanilla: () => {},
 	};
 
-	$: console.log(resetFns);
-
 	// let frameworks = ['vanilla', 'svelte', 'react', 'vue', 'solid'];
 	const frameworks = ['solid', 'vanilla', 'react', 'vue', 'svelte']
 		.map((name) => FRAMEWORKS.find((f) => f.name === name)!)!
