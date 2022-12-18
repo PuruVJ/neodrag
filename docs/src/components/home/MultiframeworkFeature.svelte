@@ -17,6 +17,16 @@
 
 	let logoEl: HTMLImageElement;
 
+	let resetFns = {
+		svelte: () => {},
+		react: () => {},
+		vue: () => {},
+		solid: () => {},
+		vanilla: () => {},
+	};
+
+	$: console.log(resetFns);
+
 	// let frameworks = ['vanilla', 'svelte', 'react', 'vue', 'solid'];
 	const frameworks = ['solid', 'vanilla', 'react', 'vue', 'svelte']
 		.map((name) => FRAMEWORKS.find((f) => f.name === name)!)!
@@ -32,17 +42,23 @@
 		}));
 </script>
 
-<img bind:this={logoEl} src="/logo.svg" class="logo" alt="Neodrag logo" />
+<section>
+	<button on:click={() => Object.values(resetFns).forEach((fn) => fn())}>
+		Reset
+	</button>
 
-<section class="animation-frameworks">
-	{#each frameworks as { name, icon: Icon }}
-		<div>
-			<FrameworkButton framework={name} {logoEl}>
-				<Icon />
-			</FrameworkButton>
-		</div>
-	{/each}
+	<section class="animation-frameworks">
+		{#each frameworks as { name, icon: Icon }}
+			<div>
+				<FrameworkButton bind:resetFns framework={name} {logoEl}>
+					<Icon />
+				</FrameworkButton>
+			</div>
+		{/each}
+	</section>
 </section>
+
+<img bind:this={logoEl} src="/logo.svg" class="logo" alt="Neodrag logo" />
 
 <style lang="scss">
 	@mixin on-circle($item-count, $circle-size, $item-size) {

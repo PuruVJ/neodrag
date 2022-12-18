@@ -3,9 +3,20 @@
 	import { draggable } from '@neodrag/svelte';
 	import { portal } from '$actions/portal';
 	import { fade } from 'svelte/transition';
+	import { tweened } from 'svelte/motion';
+	import { expoOut } from 'svelte/easing';
 
 	export let logoEl: HTMLImageElement;
 	export let framework: Framework;
+	export let resetFns: Record<Framework, () => void>;
+
+	$: if (framework) {
+		resetFns[framework] = reset;
+	}
+
+	const reset = () => {
+		$draggablePosition = { x: 0, y: 0 };
+	};
 
 	let buttonEl: HTMLButtonElement;
 
@@ -16,6 +27,17 @@
 		width: 0,
 		angle: 0,
 	};
+
+	let draggablePosition = tweened(
+		{ x: 0, y: 0 },
+		{ easing: expoOut, duration: 1200 }
+	);
+
+	$: {
+		$draggablePosition;
+
+		updateLinePosition(buttonEl, logoEl);
+	}
 
 	function getOffset(el: HTMLElement) {
 		const rect = el.getBoundingClientRect();
@@ -30,7 +52,7 @@
 
 	const THICKNESS = 2;
 
-	function doThing(node: HTMLElement, rootEl: HTMLElement) {
+	function updateLinePosition(node: HTMLElement, rootEl: HTMLElement) {
 		if (!rootEl) return;
 
 		const rootRect = getOffset(rootEl);
@@ -60,12 +82,12 @@
 
 	function connect(node: HTMLElement, rootEl: HTMLElement) {
 		// TODO: Investigate replacing with resizeobserver
-		window.addEventListener('resize', () => doThing(node, rootEl));
+		window.addEventListener('resize', () => updateLinePosition(node, rootEl));
 
 		return {
 			update(newRootEl: HTMLElement) {
 				rootEl = newRootEl;
-				doThing(node, rootEl);
+				updateLinePosition(node, rootEl);
 			},
 		};
 	}
@@ -73,7 +95,13 @@
 
 <button
 	bind:this={buttonEl}
-	use:draggable={{ onDrag: () => doThing(buttonEl, logoEl) }}
+	use:draggable={{
+		position: $draggablePosition,
+		onDrag: ({ offsetX, offsetY }) => {
+			draggablePosition.set({ x: offsetX, y: offsetY }, { duration: 0 });
+		},
+		onDragEnd: () => updateLinePosition(buttonEl, logoEl),
+	}}
 	use:connect={logoEl}
 >
 	<slot />
