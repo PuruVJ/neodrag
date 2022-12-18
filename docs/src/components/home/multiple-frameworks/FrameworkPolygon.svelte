@@ -13,7 +13,7 @@
 	// @ts-ignore
 	import LogosVanillaIcon from '~icons/logos/javascript';
 
-	import FrameworkButton from './FrameworkButton.svelte';
+	import FrameworkButton from './FrameworkVertex.svelte';
 
 	let logoEl: HTMLImageElement;
 
