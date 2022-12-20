@@ -12,6 +12,8 @@
 	import LogosSolidIcon from '~icons/logos/solidjs-icon';
 	// @ts-ignore
 	import LogosVanillaIcon from '~icons/logos/javascript';
+	// @ts-ignore
+	import IonReloadIcon from '~icons/ion/reload';
 
 	import FrameworkButton from './FrameworkVertex.svelte';
 
@@ -40,23 +42,32 @@
 		}));
 </script>
 
-<section>
-	<button on:click={() => Object.values(resetFns).forEach((fn) => fn())}>
-		Reset
+<section class="container framework-polygon">
+	<button
+		class="reset"
+		on:click={() => Object.values(resetFns).forEach((fn) => fn())}
+	>
+		<IonReloadIcon />
 	</button>
 
 	<section class="animation-frameworks">
 		{#each frameworks as { name, icon: Icon }}
 			<div>
-				<FrameworkButton bind:resetFns framework={name} {logoEl}>
+				<FrameworkButton on:select bind:resetFns framework={name} {logoEl}>
 					<Icon />
 				</FrameworkButton>
 			</div>
 		{/each}
 	</section>
-</section>
 
-<img bind:this={logoEl} src="/logo.svg" class="logo" alt="Neodrag logo" />
+	<img
+		bind:this={logoEl}
+		src="/logo.svg"
+		draggable="false"
+		class="logo"
+		alt="Neodrag logo"
+	/>
+</section>
 
 <style lang="scss">
 	@mixin on-circle($item-count, $circle-size, $item-size) {
@@ -91,6 +102,13 @@
 		}
 	}
 
+	.container {
+		display: grid;
+		place-items: center;
+
+		position: relative;
+	}
+
 	.logo {
 		position: absolute;
 		top: 50%;
@@ -105,10 +123,35 @@
 		display: flex;
 		align-items: flex-start;
 
-		margin: 0 auto;
-		padding: 0 1rem;
+		// margin: 0 auto;
+
 		font-size: 3rem;
 		font-weight: 600;
 		font-family: 'Jetbrains Mono', monospace;
+	}
+
+	.reset {
+		position: absolute;
+		right: 8px;
+		top: 8px;
+
+		font-size: 1.2rem;
+
+		padding: 0.5rem;
+
+		border-radius: 8px;
+
+		background-color: hsla(var(--app-color-dark-hsl), 0.3);
+		backdrop-filter: blur(5px) brightness(50%) grayscale(0.4);
+
+		&:hover :global(svg) {
+			transform: rotate(100deg) scale(1.2);
+		}
+
+		:global(svg) {
+			transition: transform 0.2s ease-in-out;
+
+			color: var(--app-color-dark);
+		}
 	}
 </style>

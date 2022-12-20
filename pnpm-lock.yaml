@@ -82,6 +82,7 @@ importers:
       slugify: ^1.6.5
       svelte: ^3.55.0
       svelte-body: ^1.3.6
+      svelte-copy: ^1.3.0
       svelte-fast-dimension: ^0.0.3
       svelte-inview: ^3.0.1
       svelte-local-storage-store: ^0.3.2
@@ -99,6 +100,7 @@ importers:
       popmotion: 11.0.5
       slugify: 1.6.5
       svelte-body: 1.3.6
+      svelte-copy: 1.3.0
       svelte-inview: 3.0.1_svelte@3.55.0
       svelte-local-storage-store: 0.3.2_svelte@3.55.0
     devDependencies:
@@ -8547,6 +8549,10 @@ packages:
     dependencies:
       clsx: 1.2.1
       csstype: 3.1.1
+    dev: false
+
+  /svelte-copy/1.3.0:
+    resolution: {integrity: sha512-C3v7/RNhMsRoXgAdIW8VSb7A5+/fV/NXDdlm7mXlKN9jXRC5fwG0HvjsgqhKgitlXOJtYf9UvAK+NPSAv+qPbg==}
     dev: false
 
   /svelte-fast-dimension/0.0.3_svelte@3.55.0:

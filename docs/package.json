@@ -19,6 +19,7 @@
 		"popmotion": "^11.0.5",
 		"slugify": "^1.6.5",
 		"svelte-body": "^1.3.6",
+		"svelte-copy": "^1.3.0",
 		"svelte-inview": "^3.0.1",
 		"svelte-local-storage-store": "^0.3.2"
 	},

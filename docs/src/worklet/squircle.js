@@ -75,11 +75,22 @@ if (typeof registerPaint !== 'undefined') {
 		paint(ctx, geom, properties) {
 			const customRatio = properties.get('--squircle-ratio');
 			const smoothRatio = 10;
-			const distanceRatio = parseFloat(customRatio) ? parseFloat(customRatio) : 1.8;
-			const squircleSmooth = parseFloat(properties.get('--squircle-smooth') * smoothRatio);
-			const squircleRadius = parseInt(properties.get('--squircle-radius'), 10) * distanceRatio;
-			const squrcleOutline = parseFloat(properties.get('--squircle-outline'), 10);
-			const squrcleColor = properties.get('--squircle-fill').toString().replace(/\s/g, '');
+			const distanceRatio = parseFloat(customRatio)
+				? parseFloat(customRatio)
+				: 1.8;
+			const squircleSmooth = parseFloat(
+				properties.get('--squircle-smooth') * smoothRatio
+			);
+			const squircleRadius =
+				parseInt(properties.get('--squircle-radius'), 10) * distanceRatio;
+			const squrcleOutline = parseFloat(
+				properties.get('--squircle-outline'),
+				10
+			);
+			const squrcleColor = properties
+				.get('--squircle-fill')
+				.toString()
+				.replace(/\s/g, '');
 
 			const isSmooth = () => {
 				if (typeof properties.get('--squircle-smooth')[0] !== 'undefined') {
@@ -109,7 +120,14 @@ if (typeof registerPaint !== 'undefined') {
 			};
 
 			if (squircleRadius < geom.width / 2 && squircleRadius < geom.height / 2) {
-				drawSquircle(ctx, geom, squircleRadius, isSmooth(), isOutline(), isColor());
+				drawSquircle(
+					ctx,
+					geom,
+					squircleRadius,
+					isSmooth(),
+					isOutline(),
+					isColor()
+				);
 			} else {
 				drawSquircle(
 					ctx,

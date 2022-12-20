@@ -6,7 +6,8 @@
 			"$layouts/*": ["src/layouts/*"],
 			"$components/*": ["src/components/*"],
 			"$stores/*": ["src/stores/*"],
-			"$actions/*": ["src/actions/*"]
+			"$actions/*": ["src/actions/*"],
+			"$helpers/*": ["src/helpers/*"]
 		}
 	},
 	"include": ["./markdown/*", "./src/auto-imports.d.ts"]
