@@ -23,8 +23,8 @@ body {
 	width: max-content;
 
 	color: var(--app-color-dark);
-
 	font-family: var(--app-font-heading);
+	word-break: break-all;
 
 	margin: 0.75em 0 0.25em;
 }

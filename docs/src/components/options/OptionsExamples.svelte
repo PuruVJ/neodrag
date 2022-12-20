@@ -2,7 +2,9 @@
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
+	//@ts-ignore
 	import PrevArrowIcon from '~icons/material-symbols/arrow-back-rounded';
+	//@ts-ignore
 	import NextArrowIcon from '~icons/material-symbols/arrow-forward-rounded';
 
 	let prevNavButtonVisible = false;

@@ -42,7 +42,7 @@ export default defineConfig({
 		mdx(),
 		prefetch(),
 		compress(),
-		// serviceWorker(),
+		serviceWorker(),
 		critters(),
 		AutoImport({
 			dts: './src/auto-imports.d.ts',

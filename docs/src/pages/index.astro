@@ -1,7 +1,8 @@
 ---
 import HeroExample from '$components/home/HeroExample.svelte';
-import MultiframeworkNPMInstall from '$components/home/MultiframeworkNPMInstall.svelte';
+import FrameworkPolygon from '$components/home/features/multiple-frameworks/FrameworkPolygon.svelte';
 import Layout from '$layouts/Layout.astro';
+import MultipleFrameworksFeature from '$components/home/features/multiple-frameworks/MultipleFrameworksFeature.svelte';
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
@@ -10,10 +11,16 @@ import Layout from '$layouts/Layout.astro';
 	<main id="main-content">
 		<section class="tagline">
 			<h1>Neodrag</h1>
-			<p class="h2">One draggable to rule them all</p>
+			<p class="h4">One draggable to rule them all</p>
 		</section>
 
-		<MultiframeworkNPMInstall client:load />
+		<br /><br /><br /><br />
+
+		<section class="feature-multi-frameworks">
+			<MultipleFrameworksFeature client:visible />
+		</section>
+
+		<img src="/framework-logos/svelte.svg" alt="{name} logo" />
 
 		<h2>Features</h2>
 		<ul>
@@ -51,5 +58,20 @@ import Layout from '$layouts/Layout.astro';
 		position: relative;
 
 		z-index: 2;
+
+		padding: 0 1rem;
+	}
+
+	.feature-multi-frameworks {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+
+		& > div:nth-child(1) {
+			max-width: 40vw;
+
+			p {
+				font-size: 1.5rem;
+			}
+		}
 	}
 </style>

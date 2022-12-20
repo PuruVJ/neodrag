@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { draggable, DragOptions } from '@neodrag/svelte';
 	import { browser } from 'src/helpers/utils';
+	//@ts-ignore
 	import squircle from 'src/worklet/squircle?url';
 	import { style } from 'svelte-body';
 	import { expoOut, sineIn } from 'svelte/easing';
@@ -49,11 +50,16 @@
 		}, Infinity);
 
 		if (zIndices[index] > zIndices.length) {
-			zIndices = zIndices.map((z) => (z >= lowestZIndex ? z - lowestZIndex : z));
+			zIndices = zIndices.map((z) =>
+				z >= lowestZIndex ? z - lowestZIndex : z
+			);
 		}
 	}
 
-	const dragHandlers: Pick<DragOptions, 'onDrag' | 'onDragStart' | 'onDragEnd'> = {
+	const dragHandlers: Pick<
+		DragOptions,
+		'onDrag' | 'onDragStart' | 'onDragEnd'
+	> = {
 		onDrag: ({ node }) => {
 			isBackdropVisible = true;
 			node.style.zIndex = '20';
@@ -88,7 +94,9 @@
 </script>
 
 <svelte:body
-	use:style={{ boxShadow: hightlightBody ? 'inset 0 0 0 2px var(--app-color-primary)' : '' }}
+	use:style={{
+		boxShadow: hightlightBody ? 'inset 0 0 0 2px var(--app-color-primary)' : '',
+	}}
 />
 
 {#if isBackdropVisible || showMarkers}
@@ -122,19 +130,35 @@
 {#key reset}
 	<button on:click={() => reset++}>Reset examples</button>
 	<div class="examples-container" class:highlight={highlightParent}>
-		<div class="box" style:z-index={zIndices[0]} use:draggable={{ ...dragHandlers }}>
+		<div
+			class="box"
+			style:z-index={zIndices[0]}
+			use:draggable={{ ...dragHandlers }}
+		>
 			I will drag in all directions
 		</div>
 
-		<div class="box" style:z-index={zIndices[1]} use:draggable={{ axis: 'x', ...dragHandlers }}>
+		<div
+			class="box"
+			style:z-index={zIndices[1]}
+			use:draggable={{ axis: 'x', ...dragHandlers }}
+		>
 			I will drag horizontally
 		</div>
 
-		<div class="box" style:z-index={zIndices[2]} use:draggable={{ axis: 'y', ...dragHandlers }}>
+		<div
+			class="box"
+			style:z-index={zIndices[2]}
+			use:draggable={{ axis: 'y', ...dragHandlers }}
+		>
 			I will drag vertically
 		</div>
 
-		<div class="box" style:z-index={zIndices[3]} use:draggable={{ axis: 'none', ...dragHandlers }}>
+		<div
+			class="box"
+			style:z-index={zIndices[3]}
+			use:draggable={{ axis: 'none', ...dragHandlers }}
+		>
 			<span><code>axis: none</code> disables dragging</span>
 		</div>
 
@@ -298,7 +322,10 @@
 				position: $returnToPositionTransitionVal,
 				onDrag: (data) => {
 					dragHandlers.onDrag?.(data);
-					returnToPositionTransitionVal.set({ x: data.offsetX, y: data.offsetY }, { duration: 0 });
+					returnToPositionTransitionVal.set(
+						{ x: data.offsetX, y: data.offsetY },
+						{ duration: 0 }
+					);
 				},
 				onDragEnd: (data) => {
 					dragHandlers.onDragEnd?.(data);
@@ -360,7 +387,8 @@
 
 		background-color: var(--app-color-dark);
 
-		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035), 0px 100px 80px rgba(0, 0, 0, 0.07);
+		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035),
+			0px 100px 80px rgba(0, 0, 0, 0.07);
 		border-radius: 0.5rem;
 
 		mask-image: paint(squircle);
@@ -604,12 +632,14 @@
 
 				content: '';
 
-				box-shadow: inset var(--marker-size) var(--marker-size) 0px 1px var(--app-color-primary);
+				box-shadow: inset var(--marker-size) var(--marker-size) 0px 1px
+					var(--app-color-primary);
 
 				height: calc(var(--marker-size) * 8);
 				width: calc(var(--marker-size) * 8);
 
-				transform: translate(var(--translate)) rotate(var(--rotate)) scale(var(--scale));
+				transform: translate(var(--translate)) rotate(var(--rotate))
+					scale(var(--scale));
 			}
 		}
 	}
