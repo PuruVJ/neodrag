@@ -9,7 +9,7 @@
 	},
 	"devDependencies": {
 		"typescript": "^4.9.4",
-		"vite": "^4.0.1"
+		"vite": "^4.0.2"
 	},
 	"dependencies": {
 		"@neodrag/vanilla": "workspace:*"
