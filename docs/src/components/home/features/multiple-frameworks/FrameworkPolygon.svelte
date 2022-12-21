@@ -1,17 +1,7 @@
 <script lang="ts">
 	// TODO: MAKE IT FANCYYCYYYYYYYYYYYY 😡😡😡😡😡😡😡😡😡😡😡😡😡😡😡
+	import { FRAMEWORK_ICONS } from '$helpers/framework-icons';
 	import { FRAMEWORKS } from 'src/helpers/constants';
-
-	// @ts-ignore
-	import LogosSvelteIcon from '~icons/logos/svelte-icon';
-	// @ts-ignore
-	import LogosReactIcon from '~icons/logos/react';
-	// @ts-ignore
-	import LogosVueIcon from '~icons/logos/vue';
-	// @ts-ignore
-	import LogosSolidIcon from '~icons/logos/solidjs-icon';
-	// @ts-ignore
-	import LogosVanillaIcon from '~icons/logos/javascript';
 	// @ts-ignore
 	import IonReloadIcon from '~icons/ion/reload';
 
@@ -32,13 +22,7 @@
 		.map((name) => FRAMEWORKS.find((f) => f.name === name)!)!
 		.map(({ name }) => ({
 			name,
-			icon: {
-				svelte: LogosSvelteIcon,
-				react: LogosReactIcon,
-				vue: LogosVueIcon,
-				solid: LogosSolidIcon,
-				vanilla: LogosVanillaIcon,
-			}[name],
+			icon: FRAMEWORK_ICONS[name],
 		}));
 </script>
 

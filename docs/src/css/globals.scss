@@ -116,3 +116,19 @@ kbd {
 	white-space: nowrap;
 	border-width: 0;
 }
+
+// Set the text-FRAMEWORK
+// Map of frameworks
+$frameworks: svelte, react, vue, solid, vanilla;
+
+@each $framework in $frameworks {
+	// Set the text-FRAMEWORK
+	.text-#{$framework} {
+		color: var(--app-color-brand-#{$framework});
+		fill: var(--app-color-brand-#{$framework});
+	}
+
+	.bg-#{$framework} {
+		background-color: var(--app-color-brand-#{$framework});
+	}
+}
