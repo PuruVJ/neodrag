@@ -1,11 +1,29 @@
 <script lang="ts">
+	import type { Framework } from '$helpers/constants';
 	import { FRAMEWORK_ICONS } from '$helpers/framework-icons';
 	import SIZES from '../../../../data/sizes.json';
+
+	const sortedFrameworks = Object.entries(SIZES).sort(
+		([, aSize], [, bSize]) => +aSize - +bSize
+	) as unknown as [Framework, number][];
+
+	const minSize = sortedFrameworks[0][1];
 </script>
 
 <div class="demo">
-	{#each Object.entries(FRAMEWORK_ICONS) as [framework, Icon]}
-		<Icon />
+	{#each sortedFrameworks.map( ([framework, size]) => [framework, size, FRAMEWORK_ICONS[framework]] ) as [framework, size, Icon]}
+		<div class="framework-container">
+			<div class="icon" style:font-size={(size / minSize) ** 7 * 2 + 'rem'}>
+				<Icon />
+			</div>
+			<div
+				class="size"
+				style:font-size={(size / minSize) ** 4 + 'rem'}
+				style:left="calc(1rem + {(size / minSize) ** 8 * 2}rem)"
+			>
+				{size} <span class="kb">KB</span>
+			</div>
+		</div>
 	{/each}
 </div>
 
@@ -19,7 +37,7 @@
 	<br />
 
 	<p style="color: hsla(var(--app-color-dark-hsl), 0.8)">
-		Ranging from <code>{SIZES.svelte}KB</code> for
+		Ranges from <code>{SIZES.svelte}KB</code> for
 		<span class="text-svelte">Svelte</span>
 		to
 		<code>{SIZES.react}KB</code> for <span class="text-react">React</span>.
@@ -35,6 +53,41 @@
 </div>
 
 <style lang="scss">
+	.demo {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		align-items: center;
+	}
+
+	.framework-container {
+		position: relative;
+
+		.size {
+			position: absolute;
+			left: 3rem;
+			top: 50%;
+
+			display: flex;
+			gap: 3px;
+
+			transform: translateY(-50%);
+
+			font-size: 1.2rem;
+			font-family: var(--app-font-mono);
+
+			// background-color: hsla(var(--app-color-dark-hsl), 0.2);
+
+			padding: 0.3rem 0.7rem;
+
+			border-radius: 60px;
+
+			.kb {
+				color: hsla(var(--app-color-dark-hsl), 0.6);
+			}
+		}
+	}
+
 	.intro {
 		display: grid;
 		align-content: center;
