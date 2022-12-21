@@ -17,6 +17,8 @@
 		vanilla: () => {},
 	};
 
+	let zIndices = [0, 0, 0, 0, 0];
+
 	// let frameworks = ['vanilla', 'svelte', 'react', 'vue', 'solid'];
 	const frameworks = ['solid', 'vanilla', 'react', 'vue', 'svelte']
 		.map((name) => FRAMEWORKS.find((f) => f.name === name)!)!
@@ -24,6 +26,27 @@
 			name,
 			icon: FRAMEWORK_ICONS[name],
 		}));
+
+	/**
+	 * This function updates z index of selected element. But if any element has z index of more than 50,
+	 * it reduces z index of all of them by the minimum z index of all elements.
+	 * @param node
+	 */
+	function updateZIndex(index: number) {
+		zIndices[index] = Math.max(...zIndices) + 1;
+
+		// get the lowest non zero index from the z index array
+		const lowestZIndex = zIndices.reduce((acc, curr) => {
+			if (curr === 0) return acc;
+			return Math.min(acc, curr);
+		}, Infinity);
+
+		if (zIndices[index] > zIndices.length) {
+			zIndices = zIndices.map((z) =>
+				z >= lowestZIndex ? z - lowestZIndex : z
+			);
+		}
+	}
 </script>
 
 <section class="container framework-polygon">
@@ -35,9 +58,18 @@
 	</button>
 
 	<section class="animation-frameworks">
-		{#each frameworks as { name, icon: Icon }}
-			<div>
-				<FrameworkButton on:select bind:resetFns framework={name} {logoEl}>
+		{#each frameworks as { name, icon: Icon }, idx}
+			<div style:z-index={zIndices[idx]}>
+				<FrameworkButton
+					on:select
+					on:drag-start={() => {
+						// zIndices[idx] = zIndices.length;
+						updateZIndex(idx);
+					}}
+					bind:resetFns
+					framework={name}
+					{logoEl}
+				>
 					<Icon />
 				</FrameworkButton>
 			</div>
@@ -97,6 +129,8 @@
 		position: absolute;
 		top: 50%;
 		left: 50%;
+		z-index: 7;
+
 		transform: translate(-50%, -50%);
 		width: 10rem;
 	}

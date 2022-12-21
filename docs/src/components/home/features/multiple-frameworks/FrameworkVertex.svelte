@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { portal } from '$actions/portal';
-	import { draggable } from '@neodrag/svelte';
+	import { DragEventData, draggable } from '@neodrag/svelte';
 	import type { Framework } from 'src/helpers/constants';
 	import { createEventDispatcher, onDestroy } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { tweened } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
-
-	import { elementsOverlap } from '$helpers/utils';
 
 	export let logoEl: HTMLImageElement;
 	export let framework: Framework;
@@ -15,6 +13,9 @@
 
 	const dispatch = createEventDispatcher<{
 		select: { framework: Framework };
+		'drag-start': DragEventData;
+		drag: DragEventData;
+		'drag-end': DragEventData;
 	}>();
 
 	$: if (framework) {
@@ -45,8 +46,6 @@
 
 		if (buttonEl && logoEl) updateLinePosition(buttonEl, logoEl);
 	}
-
-	let lastDraggingTime: null | Date = null;
 
 	function getOffset(el: HTMLElement) {
 		const rect = el.getBoundingClientRect();
@@ -130,11 +129,19 @@
 	bind:this={buttonEl}
 	use:draggable={{
 		position: $draggablePosition,
-		onDrag: ({ offsetX, offsetY }) =>
-			draggablePosition.set({ x: offsetX, y: offsetY }, { duration: 0 }),
-		onDragEnd: () => {
+		onDragStart: (data) => {
+			dispatch('drag-start', data);
+		},
+		onDrag: (data) => {
+			dispatch('drag', data);
+			draggablePosition.set(
+				{ x: data.offsetX, y: data.offsetY },
+				{ duration: 0 }
+			);
+		},
+		onDragEnd: (data) => {
+			dispatch('drag-end', data);
 			updateLinePosition(buttonEl, logoEl);
-			lastDraggingTime = new Date();
 		},
 	}}
 	use:connect={logoEl}
