@@ -1,8 +1,8 @@
 ---
-import HeroExample from '$components/home/HeroExample.svelte';
-import FrameworkPolygon from '$components/home/features/multiple-frameworks/FrameworkPolygon.svelte';
-import Layout from '$layouts/Layout.astro';
 import MultipleFrameworksFeature from '$components/home/features/multiple-frameworks/MultipleFrameworksFeature.svelte';
+import HeroExample from '$components/home/HeroExample.svelte';
+import Layout from '$layouts/Layout.astro';
+import LogosGithubIcon from '~icons/logos/github-icon';
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
@@ -11,7 +11,18 @@ import MultipleFrameworksFeature from '$components/home/features/multiple-framew
 	<main id="main-content">
 		<section class="tagline">
 			<h1>Neodrag</h1>
-			<p class="h4">One draggable to rule them all</p>
+			<p class="h4" style="text-align: center; width: 100%">
+				One draggable to rule them all
+			</p>
+
+			<br /><br /><br />
+
+			<div class="group">
+				<a href="/docs">Getting Started</a>
+				<a href="https://github.com/puruvj/neodrag">
+					<LogosGithubIcon /> Github
+				</a>
+			</div>
 		</section>
 
 		<br /><br /><br /><br />
@@ -39,6 +50,11 @@ import MultipleFrameworksFeature from '$components/home/features/multiple-framew
 
 <style lang="scss">
 	.tagline {
+		display: grid;
+		place-content: center;
+
+		height: 70vh;
+
 		h1,
 		p {
 			margin: 0;
@@ -51,6 +67,39 @@ import MultipleFrameworksFeature from '$components/home/features/multiple-framew
 
 			font-size: clamp(3rem, 20vw, 8rem);
 			line-height: 1.28;
+		}
+
+		.group {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 1rem;
+
+			margin-top: 1rem;
+
+			a {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 1rem;
+
+				padding: 1rem 2rem;
+
+				border-radius: 1rem !important;
+
+				font-size: 1.4rem;
+
+				:global(svg path) {
+					fill: var(--app-color-primary);
+
+					transition: fill 150ms ease-in;
+				}
+
+				&:hover {
+					:global(svg path) {
+						fill: var(--app-color-primary-light);
+					}
+				}
+			}
 		}
 	}
 
