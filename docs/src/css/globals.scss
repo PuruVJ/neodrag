@@ -132,3 +132,8 @@ $frameworks: svelte, react, vue, solid, vanilla;
 		background-color: var(--app-color-brand-#{$framework});
 	}
 }
+
+::selection {
+	background-color: var(--app-color-primary);
+	color: var(--app-color-primary-contrast);
+}
