@@ -78,6 +78,7 @@
 		place-items: center;
 
 		border-radius: 1rem 1rem 0 0;
+		box-shadow: var(--inner-shadow-4);
 
 		height: 25rem;
 		width: 100%;
