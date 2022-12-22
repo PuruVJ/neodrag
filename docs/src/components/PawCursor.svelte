@@ -28,7 +28,7 @@
 		const observer = new MutationObserver(function (mutations) {
 			mutations.forEach(function (mutation) {
 				if (mutation.type === 'attributes' || mutation.type === 'childList') {
-					if (mutation.attributeName === 'data-paw-cursor')
+					if ((mutation.target as HTMLElement).matches?.(selector))
 						result.set([...get(result), mutation.target as T]);
 				}
 			});
