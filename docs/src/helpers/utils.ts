@@ -1,5 +1,3 @@
-import { get, Writable, writable } from 'svelte/store';
-
 export const browser = !import.meta.env.SSR;
 
 export const isMac =
