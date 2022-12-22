@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { draggable, type DragOptions } from '@neodrag/svelte';
 	import { browser } from 'src/helpers/utils';
+	import { onMount } from 'svelte';
 	import IonReloadIcon from '~icons/ion/reload';
 	import squircle from '../../worklet/squircle?url';
 
@@ -18,6 +19,58 @@
 		},
 	} as DragOptions;
 
+	function getPawableElements(): Partial<
+		Record<'include' | 'exclude', (HTMLElement | undefined)[] | undefined>
+	> {
+		if (!options.handle && !options.cancel) return { include: [draggableEl] };
+
+		// Because this is a controlled demo, there will be either only a handle or a cancel. Both can't exist together.
+		if (options.handle) {
+			// Get all the handle elements inside the draggableEl based on `options.handle`
+			console.log(options.handle);
+			if (typeof options.handle === 'string')
+				return {
+					include: Array.from<HTMLElement>(
+						draggableEl!.querySelectorAll(options.handle)
+					),
+				};
+			else if (options.handle instanceof HTMLElement)
+				return { include: [options.handle] };
+			else {
+				return { include: options.handle };
+			}
+		}
+
+		if (options.cancel) {
+			// Get all the handle elements inside the draggableEl based on `options.cancel`
+			if (typeof options.cancel === 'string')
+				return {
+					exclude: Array.from<HTMLElement>(
+						draggableEl!.querySelectorAll(options.cancel)
+					),
+				};
+			else if (options.cancel instanceof HTMLElement)
+				return { exclude: [options.cancel] };
+			else {
+				return { exclude: options.cancel };
+			}
+		}
+
+		return {};
+	}
+
+	function setPawCursor() {
+		const { include = [draggableEl], exclude = [] } = getPawableElements()!;
+
+		for (const el of include) {
+			el && (el.dataset.pawCursor = 'true');
+		}
+
+		for (const el of exclude) {
+			el && (el.dataset.pawCursor = 'false');
+		}
+	}
+
 	let position = options.position ?? options.defaultPosition ?? { x: 0, y: 0 };
 
 	let key = 0;
@@ -33,6 +86,13 @@
 			// @ts-ignore
 			CSS.paintWorklet.addModule(squircle);
 		}
+
+	$: {
+		if (draggableEl) {
+			options;
+			setPawCursor();
+		}
+	}
 </script>
 
 <section

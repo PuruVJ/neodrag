@@ -126,6 +126,7 @@
 </script>
 
 <button
+	data-paw-cursor="true"
 	bind:this={buttonEl}
 	use:draggable={{
 		position: $draggablePosition,

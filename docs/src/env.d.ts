@@ -1,7 +1,16 @@
 /// <reference types="astro/client" />
-/// <reference types="unplugin-icons/types/svelte" />
-/// <reference types="svelte2tsx/svelte-jsx" />
-/// <reference types="svelte" />
+
+declare module 'virtual:icons/*' {
+	export { SvelteComponentDev as default } from 'svelte/internal';
+}
+
+declare module '~icons/*' {
+	import { SvelteComponentTyped } from 'svelte';
+
+	export default class extends SvelteComponentTyped<
+		import('svelte/elements').SVGAttributes<SVGSVGElement>
+	> {}
+}
 
 type ObjectKeys<Obj> = Obj extends object
 	? (keyof Obj)[]

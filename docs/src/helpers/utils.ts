@@ -1,3 +1,5 @@
+import { get, Writable, writable } from 'svelte/store';
+
 export const browser = !import.meta.env.SSR;
 
 export const isMac =
@@ -18,3 +20,5 @@ export const elementsOverlap = (el1: HTMLElement, el2: HTMLElement) => {
 		domRect1.left > domRect2.right
 	);
 };
+
+export const waitFor = (ms: number) => new Promise((r) => setTimeout(r, ms));
