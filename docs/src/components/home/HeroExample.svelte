@@ -9,14 +9,13 @@
 	import squircle from '../../worklet/squircle.js?url';
 	// @ts-ignore
 	import PawIcon from '~icons/mdi/paw';
-	import ScrollDownIndicator from './ScrollDownIndicator.svelte';
+
 	import { browser } from 'src/helpers/utils';
 
 	let headingText = 'Try dragging the box below';
 
 	let boxWiggles = true;
 
-	let showScrollIndicator = false;
 	let showCustomCursor = true;
 
 	let coordsCursor: {
@@ -66,11 +65,6 @@
 				dragPosition.set({ x: offsetX, y: offsetY }, { duration: 0 }),
 			onDragEnd: () => {
 				$dragPosition = { x: 0, y: 0 };
-
-				setTimeout(() => {
-					headingText = 'Welcome to Neodrag';
-					showScrollIndicator = true;
-				}, 1500);
 			},
 		}}
 	>
@@ -87,28 +81,17 @@
 	>
 		<PawIcon style="font-size: 2rem;" />
 	</div>
-
-	{#if showScrollIndicator}
-		<div
-			class="scroll-indicator"
-			on:mouseenter={() => (showCustomCursor = false)}
-			on:mouseleave={() => (showCustomCursor = true)}
-		>
-			<ScrollDownIndicator
-				link="#main-content"
-				on:click={() =>
-					document
-						.querySelector('#main-content')
-						?.scrollIntoView({ block: 'start' })}
-			/>
-		</div>
-	{/if}
 </div>
 
 <style lang="scss">
 	.container {
-		width: 100%;
-		height: 100vh;
+		width: auto;
+		height: 100%;
+
+		background-color: hsla(var(--app-color-dark-hsl), 0.1);
+
+		border-radius: 1rem;
+		box-shadow: var(--inner-shadow-4);
 
 		display: grid;
 		place-items: center;
@@ -254,22 +237,6 @@
 		40%,
 		60% {
 			transform: translate(16px);
-		}
-	}
-
-	.scroll-indicator {
-		position: absolute;
-		bottom: 2rem;
-		left: 50%;
-
-		transform: translateX(-50%);
-
-		cursor: initial;
-
-		padding: 4rem;
-
-		&:hover ~ :global(.cursor) {
-			display: none;
 		}
 	}
 </style>

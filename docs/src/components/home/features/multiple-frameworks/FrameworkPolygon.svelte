@@ -5,7 +5,7 @@
 	// @ts-ignore
 	import IonReloadIcon from '~icons/ion/reload';
 
-	import FrameworkButton from './FrameworkVertex.svelte';
+	import FrameworkVertex from './FrameworkVertex.svelte';
 
 	let logoEl: HTMLImageElement;
 
@@ -60,7 +60,7 @@
 	<section class="animation-frameworks">
 		{#each frameworks as { name, icon: Icon }, idx}
 			<div style:z-index={zIndices[idx]}>
-				<FrameworkButton
+				<FrameworkVertex
 					on:select
 					on:drag-start={() => {
 						// zIndices[idx] = zIndices.length;
@@ -71,7 +71,7 @@
 					{logoEl}
 				>
 					<Icon />
-				</FrameworkButton>
+				</FrameworkVertex>
 			</div>
 		{/each}
 	</section>
@@ -132,11 +132,11 @@
 		z-index: 7;
 
 		transform: translate(-50%, -50%);
-		width: 10rem;
+		width: 7rem;
 	}
 
 	.animation-frameworks {
-		@include on-circle($item-count: 5, $circle-size: 40rem, $item-size: 4rem);
+		@include on-circle($item-count: 5, $circle-size: 30rem, $item-size: 3rem);
 
 		display: flex;
 		align-items: flex-start;
