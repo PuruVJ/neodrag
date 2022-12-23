@@ -14,6 +14,26 @@
   }
   ```
 
+- Remove `@neodrag/svelte/globals` for typings.
+
+If you have this in your `tsconfig.json`:
+
+```json
+{
+	"compilerOptions": {
+		"types": ["@neodrag/svelte/globals"]
+	}
+}
+```
+
+or in your `.d.ts` file:
+
+```ts
+/// <reference types="@neodrag/svelte/globals" />
+```
+
+Remove it. It is no longer needed.
+
 ### Patch Changes
 
 - Fix behavior when snap provided as 0
