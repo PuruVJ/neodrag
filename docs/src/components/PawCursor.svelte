@@ -81,7 +81,7 @@
 	}
 </script>
 
-<svelte:window on:mousemove={handleMouseMove} />
+<svelte:window on:mousemove|passive={handleMouseMove} />
 
 <div
 	class="cursor"

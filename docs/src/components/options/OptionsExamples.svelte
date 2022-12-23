@@ -60,7 +60,6 @@
 	</button>
 
 	<section
-		id="playwright-options-examples"
 		class="container options-examples"
 		transition:slide={{ duration: 500 }}
 		bind:this={optionsExamplesContainerEl}

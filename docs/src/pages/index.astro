@@ -1,10 +1,11 @@
 ---
 import LogosGithubIcon from '~icons/logos/github-icon';
 
+import BundleSizeFeature from '$components/home/features/bundle-sizes/BundleSizeFeature.svelte';
+import FeatureRichFeature from '$components/home/features/feature-rich/FeatureRichFeature.svelte';
 import MultipleFrameworksFeature from '$components/home/features/multiple-frameworks/MultipleFrameworksFeature.svelte';
 import HeroExample from '$components/home/HeroExample.svelte';
 import Layout from '$layouts/Layout.astro';
-import BundleSizeFeature from '$components/home/features/bundle-sizes/BundleSizeFeature.svelte';
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
@@ -40,6 +41,10 @@ import BundleSizeFeature from '$components/home/features/bundle-sizes/BundleSize
 
 		<section class="feature-bundle-sizes">
 			<BundleSizeFeature client:visible />
+		</section>
+
+		<section class="feature-feature-rich">
+			<FeatureRichFeature client:visible />
 		</section>
 
 		<h2>Features</h2>
