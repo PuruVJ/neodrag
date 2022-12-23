@@ -69,10 +69,14 @@
 				},
 				{ capture: true, passive: true }
 			);
-			el.addEventListener('mouseout', () => {
-				showCustomCursor = false;
-				initialCursor && (el.style.cursor = initialCursor);
-			});
+			el.addEventListener(
+				'mouseout',
+				() => {
+					showCustomCursor = false;
+					initialCursor && (el.style.cursor = initialCursor);
+				},
+				{ passive: true }
+			);
 		}
 	}
 </script>
