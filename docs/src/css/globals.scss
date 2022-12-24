@@ -19,6 +19,10 @@ body {
 	font-family: var(--app-font-main);
 }
 
+body {
+	height: auto;
+}
+
 :is(h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5) {
 	width: max-content;
 

@@ -150,7 +150,7 @@
 
 		background-image: var(--app-color-primary-gradient);
 
-		border-radius: 1rem 1rem 0 0;
+		border-radius: 1rem;
 		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035),
 			0px 100px 80px rgba(0, 0, 0, 0.07);
 

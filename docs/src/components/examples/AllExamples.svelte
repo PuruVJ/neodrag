@@ -128,10 +128,10 @@
 </div>
 
 {#key reset}
-	<button on:click={() => reset++}>Reset examples</button>
 	<div class="examples-container" class:highlight={highlightParent}>
 		<div
 			class="box"
+			data-paw-cursor="true"
 			style:z-index={zIndices[0]}
 			use:draggable={{ ...dragHandlers }}
 		>
@@ -140,6 +140,7 @@
 
 		<div
 			class="box"
+			data-paw-cursor="true"
 			style:z-index={zIndices[1]}
 			use:draggable={{ axis: 'x', ...dragHandlers }}
 		>
@@ -149,6 +150,7 @@
 		<div
 			class="box"
 			style:z-index={zIndices[2]}
+			data-paw-cursor="true"
 			use:draggable={{ axis: 'y', ...dragHandlers }}
 		>
 			I will drag vertically
@@ -157,6 +159,7 @@
 		<div
 			class="box"
 			style:z-index={zIndices[3]}
+			data-paw-cursor="true"
 			use:draggable={{ axis: 'none', ...dragHandlers }}
 		>
 			<span><code>axis: none</code> disables dragging</span>
@@ -165,6 +168,7 @@
 		<div
 			class="box track-position"
 			style:z-index={zIndices[4]}
+			data-paw-cursor="true"
 			use:draggable={{
 				...dragHandlers,
 				onDrag: ({ offsetX, offsetY, domRect, node }) => {
@@ -182,7 +186,7 @@
 			style:z-index={zIndices[5]}
 			use:draggable={{ handle: '.handle', ...dragHandlers }}
 		>
-			<button class="handle">Drag here</button>
+			<button class="handle" data-paw-cursor="true">Drag here</button>
 
 			I can only be dragged by the handle 👆
 		</div>
@@ -194,21 +198,23 @@
 		>
 			I can be dragged with all the handles
 
-			<div class="handle" />
-			<div class="handle" />
-			<div class="handle" />
-			<div class="handle" />
+			<div class="handle" data-paw-cursor="true" />
+			<div class="handle" data-paw-cursor="true" />
+			<div class="handle" data-paw-cursor="true" />
+			<div class="handle" data-paw-cursor="true" />
 		</div>
 
 		<div
 			class="box"
 			style:z-index={zIndices[7]}
+			data-paw-cursor="true"
 			use:draggable={{ cancel: '.cancel', ...dragHandlers }}
 		>
 			I can be dragged anywhere
 
 			<button
 				class="cancel"
+				data-paw-cursor="false"
 				style:color="hsla(var(--app-color-primary-contrast-hsl), 0.6)"
 				style:font-size="0.8rem"
 			>
@@ -218,6 +224,7 @@
 
 		<div
 			class="box"
+			data-paw-cursor="true"
 			style:z-index={zIndices[8]}
 			use:draggable={{ grid: [25, 25], ...dragHandlers }}
 		>
@@ -226,6 +233,7 @@
 
 		<div
 			class="box"
+			data-paw-cursor="true"
 			style:z-index={zIndices[9]}
 			use:draggable={{ grid: [100, 25], ...dragHandlers }}
 		>
@@ -234,6 +242,7 @@
 
 		<div
 			class="box"
+			data-paw-cursor="true"
 			style:z-index={zIndices[10]}
 			use:draggable={{
 				bounds: 'parent',
@@ -256,6 +265,7 @@
 
 		<div
 			class="box"
+			data-paw-cursor="true"
 			style:z-index={zIndices[11]}
 			use:draggable={{
 				bounds: 'body',
@@ -277,6 +287,7 @@
 
 		<div
 			class="box"
+			data-paw-cursor="true"
 			style:z-index={zIndices[12]}
 			use:draggable={{
 				bounds: coordBounds,
@@ -299,6 +310,7 @@
 
 		<div
 			class="box"
+			data-paw-cursor="true"
 			style:z-index={zIndices[13]}
 			use:draggable={{
 				position: returnToPositionVal,
@@ -317,6 +329,7 @@
 
 		<div
 			class="box"
+			data-paw-cursor="true"
 			style:z-index={zIndices[14]}
 			use:draggable={{
 				position: $returnToPositionTransitionVal,
@@ -338,6 +351,7 @@
 
 		<div
 			class="box"
+			data-paw-cursor="true"
 			style:z-index={zIndices[15]}
 			use:draggable={{ disabled: true, ...dragHandlers }}
 		>
@@ -347,6 +361,8 @@
 		</div>
 	</div>
 {/key}
+
+<button on:click={() => reset++}>Reset examples</button>
 
 <style lang="scss">
 	.examples-container {
@@ -368,7 +384,7 @@
 		}
 
 		* {
-			color: var(--app-color-dark-contrast);
+			color: var(--app-color-light-contrast);
 		}
 	}
 
@@ -385,7 +401,7 @@
 		width: var(--size);
 		height: var(--size);
 
-		background-color: var(--app-color-dark);
+		background-color: var(--app-color-light);
 
 		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035),
 			0px 100px 80px rgba(0, 0, 0, 0.07);
@@ -400,6 +416,26 @@
 		&:global(.neodrag-dragging) {
 			background-color: var(--app-color-primary);
 			color: var(--app-color-primary-contrast);
+
+			--opacity: 1;
+		}
+
+		&::before {
+			content: '';
+
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: -1;
+
+			height: 100%;
+			width: 100%;
+
+			opacity: var(--opacity, 0);
+
+			transition: opacity 150ms ease-in;
+
+			background-image: var(--app-color-primary-gradient);
 		}
 	}
 
@@ -419,10 +455,9 @@
 
 			border-radius: 20px;
 
-			background-color: var(--app-color-primary-contrast);
+			background-color: var(--app-color-dark);
 
 			transition: all 100ms ease-in;
-			cursor: move;
 		}
 
 		.handle:nth-child(1) {
