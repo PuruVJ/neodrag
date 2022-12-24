@@ -20,57 +20,6 @@
 		},
 	} as DragOptions;
 
-	function getPawableElements(): Partial<
-		Record<'include' | 'exclude', (HTMLElement | undefined)[] | undefined>
-	> {
-		if (!options.handle && !options.cancel) return { include: [draggableEl] };
-
-		// Because this is a controlled demo, there will be either only a handle or a cancel. Both can't exist together.
-		if (options.handle) {
-			// Get all the handle elements inside the draggableEl based on `options.handle`
-			if (typeof options.handle === 'string')
-				return {
-					include: Array.from<HTMLElement>(
-						draggableEl!.querySelectorAll(options.handle)
-					),
-				};
-			else if (options.handle instanceof HTMLElement)
-				return { include: [options.handle] };
-			else {
-				return { include: options.handle };
-			}
-		}
-
-		if (options.cancel) {
-			// Get all the handle elements inside the draggableEl based on `options.cancel`
-			if (typeof options.cancel === 'string')
-				return {
-					exclude: Array.from<HTMLElement>(
-						draggableEl!.querySelectorAll(options.cancel)
-					),
-				};
-			else if (options.cancel instanceof HTMLElement)
-				return { exclude: [options.cancel] };
-			else {
-				return { exclude: options.cancel };
-			}
-		}
-
-		return {};
-	}
-
-	function setPawCursor() {
-		const { include = [draggableEl], exclude = [] } = getPawableElements()!;
-
-		for (const el of include) {
-			el && (el.dataset.pawCursor = 'true');
-		}
-
-		for (const el of exclude) {
-			el && (el.dataset.pawCursor = 'false');
-		}
-	}
-
 	let position = options.position ?? options.defaultPosition ?? { x: 0, y: 0 };
 
 	let key = 0;
@@ -88,9 +37,51 @@
 		}
 
 	$: {
+		options; // watch
+
 		if (draggableEl) {
-			options;
 			setPawCursor();
+		}
+	}
+
+	type IncludeExclude = (HTMLElement | undefined)[] | undefined;
+	function getPawableElements(): [
+		include: IncludeExclude,
+		exclude: IncludeExclude
+	] {
+		for (const option of ['handle', 'cancel'] as const) {
+			const arr: [IncludeExclude, IncludeExclude] = [, undefined];
+			const idx = option === 'handle' ? 0 : 1;
+
+			const optionVal = options[option];
+
+			if (optionVal) {
+				// Get all the handle elements inside the draggableEl based on `options.handle`
+				if (typeof optionVal === 'string')
+					arr[idx] = Array.from<HTMLElement>(
+						draggableEl!.querySelectorAll(optionVal)
+					);
+				else if (optionVal instanceof HTMLElement) arr[idx] = [optionVal];
+				else {
+					arr[idx] = optionVal;
+				}
+			}
+
+			return arr;
+		}
+
+		return [, undefined];
+	}
+
+	function setPawCursor() {
+		const [include = [draggableEl], exclude = []] = getPawableElements();
+
+		for (const el of include) {
+			el && (el.dataset.pawCursor = 'true');
+		}
+
+		for (const el of exclude) {
+			el && (el.dataset.pawCursor = 'false');
 		}
 	}
 </script>
@@ -188,7 +179,7 @@
 
 		background-image: var(--app-color-primary-gradient);
 
-		border-radius: 1rem 1rem 0 0;
+		border-radius: 1.5rem;
 		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035),
 			0px 100px 80px rgba(0, 0, 0, 0.07);
 
