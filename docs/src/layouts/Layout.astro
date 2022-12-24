@@ -22,9 +22,30 @@ const { title } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body class="dark">
+	<body>
 		<slot />
 
 		<PawCursor client:load />
+
+		<script>
+			import { theme } from '$stores/user-preferences.store';
+
+			const themeLocal = JSON.parse(localStorage.getItem('neodrag:theme')!);
+
+			if (!themeLocal) {
+				if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+					theme.set('dark');
+				} else {
+					theme.set('light');
+				}
+			} else {
+				theme.set(themeLocal);
+			}
+
+			theme.subscribe(($theme) => {
+				document.body.classList.remove('dark', 'light');
+				document.body.classList.add($theme);
+			});
+		</script>
 	</body>
 </html>

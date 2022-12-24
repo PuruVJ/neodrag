@@ -6,6 +6,7 @@ import FeatureRichFeature from '$components/home/features/feature-rich/FeatureRi
 import MultipleFrameworksFeature from '$components/home/features/multiple-frameworks/MultipleFrameworksFeature.svelte';
 import HeroExample from '$components/home/HeroExample.svelte';
 import Layout from '$layouts/Layout.astro';
+import SSRFriendlyFeature from '$components/home/features/ssr-friendly/SSRFriendlyFeature.svelte';
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
@@ -43,22 +44,13 @@ import Layout from '$layouts/Layout.astro';
 			<BundleSizeFeature client:visible />
 		</section>
 
+		<section class="feature-ssr-friendly">
+			<SSRFriendlyFeature client:visible />
+		</section>
+
 		<section class="feature-feature-rich">
 			<FeatureRichFeature client:visible />
 		</section>
-
-		<h2>Features</h2>
-		<ul>
-			<li>Cross framework</li>
-			<li>Bring your own state</li>
-
-			<!-- Show with the counter with values going from 10KB to 1.96 KB -->
-			<li>Tiny: Only 1.96KB</li>
-
-			<li>Feature rich</li>
-			<li>Zero config</li>
-			<li>SSR friendly</li>
-		</ul>
 	</main>
 </Layout>
 
@@ -137,7 +129,8 @@ import Layout from '$layouts/Layout.astro';
 
 	.feature-multi-frameworks,
 	.feature-bundle-sizes,
-	.feature-feature-rich {
+	.feature-feature-rich,
+	.feature-ssr-friendly {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 
