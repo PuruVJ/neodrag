@@ -27,4 +27,10 @@
 		display: flex;
 		justify-content: center;
 	}
+
+	p {
+		font-size: 1.3rem;
+
+		max-width: 50ch;
+	}
 </style>
