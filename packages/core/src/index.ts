@@ -287,7 +287,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	listen('mousemove', drag, false);
 
 	// On mobile, touch can become extremely janky without it
-	node.style.touchAction = 'manipulation';
+	node.style.touchAction = 'none';
 
 	const calculateInverseScale = () => {
 		// Calculate the current scale of the node
