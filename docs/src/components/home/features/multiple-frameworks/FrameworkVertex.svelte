@@ -175,8 +175,7 @@
 		height: max-content;
 
 		:global(svg) {
-			min-width: 2.5rem;
-			width: 2.5rem;
+			min-width: clamp(2rem, 5vw, 2.5rem);
 
 			transition: transform 0.2s ease;
 

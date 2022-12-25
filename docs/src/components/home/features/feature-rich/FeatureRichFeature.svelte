@@ -1,5 +1,5 @@
 <script lang="ts">
-	import AllExamples from '$components/examples/AllExamples.svelte';
+	import AllExamples from '$components/examples/KitchenSinkDemo.svelte';
 </script>
 
 <div class="demo">

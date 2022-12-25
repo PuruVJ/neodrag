@@ -366,8 +366,10 @@
 
 <style lang="scss">
 	.examples-container {
+		--size: clamp(120px, 20vw, 175px);
+
 		display: grid;
-		grid-template-columns: repeat(auto-fill, 175px);
+		grid-template-columns: repeat(auto-fill, var(--size));
 		gap: 1rem;
 		place-content: center;
 
@@ -389,7 +391,7 @@
 	}
 
 	.box {
-		--size: 175px;
+		--size: clamp(120px, 20vw, 175px);
 
 		position: relative;
 
@@ -397,6 +399,7 @@
 		place-content: center;
 
 		text-align: center;
+		font-size: clamp(0.8rem, 2vw, 1rem);
 
 		width: var(--size);
 		height: var(--size);
@@ -410,8 +413,6 @@
 		mask-image: paint(squircle);
 		--squircle-radius: 50px;
 		--squircle-smooth: 1;
-
-		font-size: large;
 
 		&:global(.neodrag-dragging) {
 			background-color: var(--app-color-primary);
