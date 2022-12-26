@@ -29,12 +29,12 @@ jobs:
         run: pnpm install --no-frozen-lockfile
       - name: Build all packages
         run: pnpm -r compile
-      - name: create and publish versions
-        uses: changesets/action@v1
-        with:
-          version: pnpm ci:version
-          commit: 'chore: update versions'
-          title: 'chore: update versions'
-          publish: pnpm ci:release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: create and publish versions
+      #   uses: changesets/action@v1
+      #   with:
+      #     version: pnpm ci:version
+      #     commit: 'chore: update versions'
+      #     title: 'chore: update versions'
+      #     publish: pnpm ci:release
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
