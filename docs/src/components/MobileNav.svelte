@@ -12,12 +12,25 @@
 	import { portal } from '$actions/portal';
 	import { prefersReducedMotion, theme } from '$stores/user-preferences.store';
 
+	const isTablet = globalThis.matchMedia('(max-width: 768px)')?.matches;
+
 	let shadow = false;
 
 	let isNavOpen = false;
 
 	$: navTransition = !$prefersReducedMotion ? slide : fade;
 </script>
+
+<svelte:head>
+	<meta
+		name="theme-color"
+		content={$theme === 'dark'
+			? shadow && isTablet
+				? '#1a2124'
+				: '#101213'
+			: '#f0f0f0'}
+	/>
+</svelte:head>
 
 <div
 	class="view-judge"
