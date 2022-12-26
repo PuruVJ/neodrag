@@ -160,18 +160,14 @@
 
 		&.prev {
 			left: 1rem;
-
-			@include media('<=sm-tablet') {
-				left: 0rem;
-			}
 		}
 
 		&.next {
 			right: 1rem;
+		}
 
-			@include media('<=sm-tablet') {
-				right: 0rem;
-			}
+		@include media('<=sm-tablet') {
+			display: none;
 		}
 
 		& :global(svg) {
