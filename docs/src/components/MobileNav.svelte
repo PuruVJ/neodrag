@@ -42,7 +42,11 @@
 
 {#if isNavOpen}
 	<!-- svelte-ignore a11y-autofocus -->
-	<nav class:dark={$theme === 'dark'} autofocus transition:navTransition={{}}>
+	<nav
+		class:dark={$theme === 'dark' && shadow}
+		autofocus
+		transition:navTransition={{}}
+	>
 		<button class="close-button" on:click={() => (isNavOpen = false)}>
 			<CloseIcon />
 		</button>
@@ -88,7 +92,7 @@
 		}
 
 		&.dark.shadow {
-			background-color: #282a2b;
+			background-color: #1a2124;
 		}
 	}
 
@@ -124,7 +128,7 @@
 		width: 100%;
 
 		&.dark {
-			background-color: #282a2b;
+			background-color: #1a2124;
 		}
 
 		button {
