@@ -22,7 +22,7 @@
 	@import '../feature-box';
 
 	img {
-		width: clamp(10rem, 60%, 30rem);
+		width: clamp(10rem, 80%, 25rem);
 	}
 
 	.frameworks-list {
