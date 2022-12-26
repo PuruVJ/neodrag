@@ -10,7 +10,11 @@
 		y: number;
 	};
 
+	let isTouchDevice = globalThis.matchMedia('(hover: none)').matches;
+
 	function handleMouseMove(e: MouseEvent) {
+		if (isTouchDevice) return;
+
 		coordsCursor ??= { x: 0, y: 0 };
 
 		coordsCursor.x = e.clientX;
@@ -45,14 +49,17 @@
 		return result;
 	}
 
-	$: pawCursorEls = globalThis.document
-		? querySelectorAllLive(
-				document.body,
-				'[data-paw-cursor="true"], [data-paw-cursor="false"]'
-		  )
-		: writable([]);
+	$: pawCursorEls =
+		globalThis.document && !isTouchDevice
+			? querySelectorAllLive(
+					document.body,
+					'[data-paw-cursor="true"], [data-paw-cursor="false"]'
+			  )
+			: writable([]);
 
 	$: {
+		if (isTouchDevice) break $;
+
 		for (const el of $pawCursorEls) {
 			let initialCursor = '';
 			el.addEventListener(
@@ -115,6 +122,10 @@
 
 		:global(svg path) {
 			fill: var(--app-color-dark);
+		}
+
+		@media (hover: none) {
+			display: none;
 		}
 	}
 </style>

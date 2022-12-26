@@ -7,9 +7,8 @@
 			"$components/*": ["src/components/*"],
 			"$stores/*": ["src/stores/*"],
 			"$actions/*": ["src/actions/*"],
-			"$helpers/*": ["src/helpers/*"],
-			"$stores/*": ["src/stores/*"]
+			"$helpers/*": ["src/helpers/*"]
 		}
 	},
-	"include": ["./markdown/*", "./src/auto-imports.d.ts"]
+	"include": ["./markdown/*", "./src/auto-imports.d.ts", ",./src/**/*.{ts, js}"]
 }
