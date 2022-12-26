@@ -70,10 +70,10 @@
 
 		font-weight: 600;
 
-		margin: 1rem;
+		margin: 0.25rem 1rem;
 
 		img {
-			width: 3rem;
+			width: clamp(2rem, 5vw, 3rem);
 		}
 	}
 

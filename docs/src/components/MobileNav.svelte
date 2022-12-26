@@ -10,7 +10,7 @@
 	import Nav from './docs/Nav.svelte';
 
 	import { portal } from '$actions/portal';
-	import { prefersReducedMotion } from '$stores/user-preferences.store';
+	import { prefersReducedMotion, theme } from '$stores/user-preferences.store';
 
 	let shadow = false;
 
@@ -27,7 +27,7 @@
 	on:leave={() => (shadow = true)}
 />
 
-<header class:shadow>
+<header class:shadow class:dark={$theme === 'dark'}>
 	<a href="/" class="logo unstyled">
 		<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" />
 		<p class="h3">Neodrag</p>
@@ -41,7 +41,8 @@
 </header>
 
 {#if isNavOpen}
-	<nav transition:navTransition={{}}>
+	<!-- svelte-ignore a11y-autofocus -->
+	<nav class:dark={$theme === 'dark'} autofocus transition:navTransition={{}}>
 		<button class="close-button" on:click={() => (isNavOpen = false)}>
 			<CloseIcon />
 		</button>
@@ -70,8 +71,8 @@
 		display: grid;
 		grid-template-columns: auto 1fr auto;
 
-		padding: 0.25rem 0.5rem;
-		width: calc(100% - 2rem);
+		padding: 0.25rem 0.25rem;
+		width: calc(100% - 1.5rem);
 
 		border-radius: 0 0 1rem 1rem;
 
@@ -84,6 +85,10 @@
 
 		&.shadow {
 			box-shadow: 0 3.4px 6.3px #00000019, 0 27px 50px #0000001a;
+		}
+
+		&.dark.shadow {
+			background-color: #282a2b;
 		}
 	}
 
@@ -117,6 +122,10 @@
 
 		height: 100%;
 		width: 100%;
+
+		&.dark {
+			background-color: #282a2b;
+		}
 
 		button {
 			position: absolute;

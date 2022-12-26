@@ -81,6 +81,8 @@
 </section>
 
 <style lang="scss">
+	@import '../../css/breakpoints';
+
 	.container {
 		position: relative;
 	}
@@ -107,6 +109,10 @@
 		scroll-snap-type: x mandatory;
 		scroll-padding-left: 4rem;
 		scroll-snap-stop: always;
+
+		@include media('<=sm-tablet') {
+			scroll-padding-left: 1rem;
+		}
 	}
 
 	.nav-button {
@@ -154,10 +160,18 @@
 
 		&.prev {
 			left: 1rem;
+
+			@include media('<=sm-tablet') {
+				left: 0rem;
+			}
 		}
 
 		&.next {
 			right: 1rem;
+
+			@include media('<=sm-tablet') {
+				right: 0rem;
+			}
 		}
 
 		& :global(svg) {
