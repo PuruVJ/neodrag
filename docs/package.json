@@ -27,7 +27,7 @@
 		"@astrojs/mdx": "^0.13.0",
 		"@astrojs/prefetch": "^0.1.1",
 		"@astrojs/svelte": "^1.0.2",
-		"@iconify/json": "^2.1.156",
+		"@iconify/json": "^2.1.157",
 		"astro": "^1.7.2",
 		"astro-compress": "^1.1.24",
 		"astro-critters": "^1.1.24",
