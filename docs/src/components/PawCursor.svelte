@@ -3,6 +3,8 @@
 	// @ts-ignore
 	import PawIcon from '~icons/mdi/paw';
 
+	import { mounted } from '$stores/mounted.store';
+
 	let showCustomCursor = false;
 
 	let coordsCursor: {
@@ -95,12 +97,15 @@
 	style:top="{coordsCursor?.y ?? 0}px"
 	style:left="{coordsCursor?.x ?? 0}px"
 	style:--opacity={showCustomCursor && coordsCursor ? 1 : 0}
+	style:display={$mounted ? 'block' : 'none'}
 >
 	<PawIcon style="font-size: 2rem;" />
 </div>
 
 <style lang="scss">
 	.cursor {
+		display: none;
+
 		position: fixed;
 		top: 0;
 		left: 0;

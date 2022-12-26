@@ -111,9 +111,11 @@
 			cursor: none;
 		}
 
-		&:hover {
-			.cursor {
-				display: block;
+		@media (hover: hover) {
+			&:hover {
+				.cursor {
+					display: block;
+				}
 			}
 		}
 	}
