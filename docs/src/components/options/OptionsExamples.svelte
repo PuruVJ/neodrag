@@ -81,6 +81,8 @@
 </section>
 
 <style lang="scss">
+	@import '../../css/breakpoints';
+
 	.container {
 		position: relative;
 	}
@@ -107,6 +109,10 @@
 		scroll-snap-type: x mandatory;
 		scroll-padding-left: 4rem;
 		scroll-snap-stop: always;
+
+		@include media('<=sm-tablet') {
+			scroll-padding-left: 1rem;
+		}
 	}
 
 	.nav-button {
@@ -122,8 +128,8 @@
 		background-color: hsla(var(--app-color-dark-hsl), 0.6);
 		backdrop-filter: blur(5px);
 
-		height: 4rem;
-		width: 4rem;
+		height: clamp(2rem, 10vw, 4rem);
+		width: clamp(2rem, 10vw, 4rem);
 
 		border-radius: 50%;
 		box-shadow: 0px 3px 5px -1px rgb(0 0 0 / 20%),
@@ -154,10 +160,18 @@
 
 		&.prev {
 			left: 1rem;
+
+			@include media('<=sm-tablet') {
+				left: 0rem;
+			}
 		}
 
 		&.next {
 			right: 1rem;
+
+			@include media('<=sm-tablet') {
+				right: 0rem;
+			}
 		}
 
 		& :global(svg) {

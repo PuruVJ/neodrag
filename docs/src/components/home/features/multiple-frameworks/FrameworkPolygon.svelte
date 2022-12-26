@@ -86,6 +86,8 @@
 </section>
 
 <style lang="scss">
+	@import '../../../../css/breakpoints';
+
 	@mixin on-circle($item-count, $circle-size, $item-size) {
 		position: relative;
 		width: $circle-size;
@@ -132,11 +134,16 @@
 		z-index: 7;
 
 		transform: translate(-50%, -50%);
-		width: 7rem;
+
+		width: clamp(4rem, 20vw, 7rem);
 	}
 
 	.animation-frameworks {
 		@include on-circle($item-count: 5, $circle-size: 30rem, $item-size: 3rem);
+
+		@include media('<sm-tablet') {
+			@include on-circle($item-count: 5, $circle-size: 20rem, $item-size: 2rem);
+		}
 
 		display: flex;
 		align-items: flex-start;

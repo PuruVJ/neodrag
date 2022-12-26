@@ -1,34 +1,34 @@
----
-import { FRAMEWORKS } from 'src/helpers/constants';
+<script lang="ts">
+	import { FRAMEWORKS } from '$helpers/constants';
 
-const { pathname } = Astro.url;
+	const pathname = globalThis?.location?.pathname ?? '';
 
-const ariaCurrentVal = (path: string) =>
-	pathname.endsWith(path) ? 'page' : 'false';
----
+	const ariaCurrentVal = (path: string) =>
+		pathname.endsWith(path) ? 'page' : 'false';
+</script>
 
 <!-- Component should be wrapped in an <aside> or <header> -->
 <div class="nav container">
 	<a href="/" class="h3 logo unstyled">
-		<img src="/logo.svg" /> neodrag
+		<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" />
+		Neodrag
 	</a>
 
 	<nav>
 		<ul class="group">
 			<div class="title">Libraries</div>
-			{
-				FRAMEWORKS.map(({ name }) => (
-					<li>
-						<a
-							href={`/docs/${name}`}
-							aria-current={ariaCurrentVal(name)}
-							class="unstyled"
-						>
-							{name}
-						</a>
-					</li>
-				))
-			}
+
+			{#each FRAMEWORKS as { name }}
+				<li>
+					<a
+						href={`/docs/${name}`}
+						aria-current={ariaCurrentVal(name)}
+						class="unstyled"
+					>
+						{name}
+					</a>
+				</li>
+			{/each}
 		</ul>
 
 		<hr />
@@ -47,7 +47,7 @@ const ariaCurrentVal = (path: string) =>
 		</ul>
 	</nav>
 
-	<span class="spacer"></span>
+	<span class="spacer" />
 
 	<span>&copy; 2021-{new Date().getUTCFullYear()} Puru Vijay</span>
 </div>
@@ -70,10 +70,10 @@ const ariaCurrentVal = (path: string) =>
 
 		font-weight: 600;
 
-		margin: 1rem;
+		margin: 0.25rem 1rem;
 
 		img {
-			width: 3rem;
+			width: clamp(2rem, 5vw, 3rem);
 		}
 	}
 

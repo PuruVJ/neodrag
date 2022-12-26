@@ -19,6 +19,8 @@
 </div>
 
 <style lang="scss">
+	@import '../feature-box';
+
 	img {
 		width: clamp(10rem, 60%, 30rem);
 	}
@@ -29,8 +31,6 @@
 	}
 
 	p {
-		font-size: 1.3rem;
-
-		max-width: 50ch;
+		@include paragraph();
 	}
 </style>

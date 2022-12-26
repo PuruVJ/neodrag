@@ -1,9 +1,10 @@
 ---
 import type { MarkdownLayoutProps } from 'astro';
 
-import Nav from '$components/docs/Nav.astro';
+import Nav from '$components/docs/Nav.svelte';
 import InstallationMDX from '../content/installation.mdx';
 import Layout from './Layout.astro';
+import MobileNav from '$components/MobileNav.svelte';
 
 import sizes from '../data/sizes.json';
 
@@ -20,9 +21,13 @@ const size = sizes[framework];
 ---
 
 <Layout title={title}>
-	<section class="docs-container">
+	<div class="mobile-nav">
+		<MobileNav client:load />
+	</div>
+
+	<section class="docs-container" id="docs-container">
 		<aside>
-			<Nav />
+			<Nav client:load />
 		</aside>
 
 		<main>
@@ -57,6 +62,16 @@ const size = sizes[framework];
 </Layout>
 
 <style lang="scss">
+	@import '../css/breakpoints';
+
+	.mobile-nav {
+		display: none;
+
+		@include media('<tablet') {
+			display: block;
+		}
+	}
+
 	.docs-container {
 		display: grid;
 		grid-template-columns: 300px auto;
@@ -64,45 +79,60 @@ const size = sizes[framework];
 
 		width: 100%;
 		height: auto;
+
+		@include media('<tablet') {
+			grid-template-columns: 1fr;
+
+			aside {
+				display: none;
+			}
+		}
 	}
 
 	aside {
 		height: 100%;
 	}
 
-	.all-examples-container {
-		display: grid;
-		place-items: center;
-
-		padding: 1rem;
-	}
-
 	main {
+		// Needed for the navigation bar intersection observer
+		position: relative;
+
 		min-width: 0;
 		height: 100vh;
 
-		padding-right: 1rem;
+		padding: 0 1rem;
 
 		overflow-y: auto;
 		scroll-behavior: smooth;
+
+		@include media('<=sm-tablet') {
+			padding: 4rem 1rem;
+		}
 	}
 
-	// article {
-	// 	display: flex;
-	// 	flex-direction: column;
-	// 	align-items: center;
-	// }
+	h1 {
+		margin: 0 !important;
+	}
 
 	.docs-container {
-		:global(p, pre.astro-code) {
-			max-width: var(--entity-width);
+		:global(p, pre.astro-code, blockquote) {
+			max-width: clamp(20ch, 100vw, var(--entity-width));
+
+			@include media('<tablet') {
+				max-width: 100%;
+			}
 		}
 
 		:global(p, a) {
 			margin: 1.5rem 0;
 
-			font-size: 1.2rem;
+			font-size: clamp(1.1rem, 2vw, 1.2rem);
 			line-height: 1.618;
+		}
+
+		:global(code) {
+			font-family: var(--app-font-mono);
+			font-size: 0.9em;
 		}
 
 		:global(h1, h2, h3, h4, h5) {
@@ -130,6 +160,8 @@ const size = sizes[framework];
 </style>
 
 <style lang="scss" is:global>
+	@import '../css/breakpoints';
+
 	:root {
 		--entity-width: clamp(400px, 60vw, 800px);
 	}
@@ -149,5 +181,9 @@ const size = sizes[framework];
 		margin: 1.5rem 0;
 
 		width: var(--entity-width);
+
+		@include media('<tablet') {
+			width: 100%;
+		}
 	}
 </style>

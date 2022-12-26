@@ -10,6 +10,31 @@
 	const minSize = sortedFrameworks[0][1];
 </script>
 
+<div class="intro">
+	<h2>Small bundle size</h2>
+	<p>
+		Neodrag will never be heavy on your app. It's designed to be as small as
+		possible, so you can use it without worrying about your bundle size.
+	</p>
+
+	<br />
+
+	<p style="color: hsla(var(--app-color-dark-hsl), 0.8)">
+		Ranges from <code>{SIZES.svelte}KB</code> for
+		<span class="text-svelte">Svelte</span>
+		to
+		<code>{SIZES.react}KB</code> for <span class="text-react">React</span>.
+
+		<br /><br />
+
+		<sub style="color: inherit;">
+			*Sizes in brotli after terser minification
+		</sub>
+	</p>
+
+	<br /><br />
+</div>
+
 <div class="demo">
 	{#each sortedFrameworks.map( ([framework, size]) => [framework, size, FRAMEWORK_ICONS[framework]] ) as [framework, size, Icon]}
 		<div class="framework-container">
@@ -27,32 +52,9 @@
 	{/each}
 </div>
 
-<div class="intro">
-	<h2>Small bundle size</h2>
-	<p>
-		Neodrag will never be heavy on your app. It's designed to be as small as
-		possible, so you can use it without worrying about your bundle size.
-	</p>
-
-	<br />
-
-	<p style="color: hsla(var(--app-color-dark-hsl), 0.8)">
-		Ranges from <code>{SIZES.svelte}KB</code> for
-		<span class="text-svelte">Svelte</span>
-		to
-		<code>{SIZES.react}KB</code> for <span class="text-react">React</span>.
-
-		<br /><br /> <br /><br />
-
-		<sub style="color: inherit;">
-			*Sizes in brotli after terser minification
-		</sub>
-	</p>
-
-	<br /><br />
-</div>
-
 <style lang="scss">
+	@import '../feature-box';
+
 	.demo {
 		display: flex;
 		flex-direction: column;
@@ -98,8 +100,6 @@
 	}
 
 	p {
-		font-size: 1.3rem;
-
-		max-width: 50ch;
+		@include paragraph();
 	}
 </style>

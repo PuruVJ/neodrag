@@ -188,7 +188,7 @@
 		--squircle-smooth: 1;
 
 		font-size: 1rem;
-		color: var(--app-color-primary-contrast);
+		color: var(--app-color-primary-contrast) !important;
 	}
 
 	.offset {

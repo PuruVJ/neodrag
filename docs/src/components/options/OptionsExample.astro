@@ -9,6 +9,8 @@
 </div>
 
 <style lang="scss">
+	@import '../../css/breakpoints';
+
 	.container {
 		// For parent component
 		scroll-snap-align: start;
@@ -20,6 +22,11 @@
 
 		box-shadow: 0 0 0 1px hsla(var(--app-color-dark-hsl), 0.3);
 		border-radius: 1rem;
+
+		@include media('<=sm-tablet') {
+			min-width: 80vw;
+			width: 100%;
+		}
 	}
 
 	.code-sample {

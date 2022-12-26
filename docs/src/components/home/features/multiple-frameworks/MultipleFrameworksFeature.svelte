@@ -83,6 +83,8 @@
 </div>
 
 <style lang="scss">
+	@import '../feature-box';
+
 	.intro {
 		display: grid;
 		align-content: center;
@@ -93,9 +95,7 @@
 	}
 
 	p {
-		font-size: 1.3rem;
-
-		max-width: 50ch;
+		@include paragraph();
 	}
 
 	code {
@@ -103,7 +103,7 @@
 
 		background-color: transparent;
 
-		font-size: 2rem;
+		font-size: clamp(1.1rem, 3vw, 2rem);
 		color: hsla(var(--app-color-dark-hsl), 0.8);
 
 		border: 1px solid hsla(var(--app-color-dark-hsl), 0.2);

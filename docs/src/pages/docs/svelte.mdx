@@ -74,11 +74,11 @@ Example:
 
 Event signatures:
 
-`on:neodrag:start`: `(e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>) => void`. Provides the initial offset when dragging starts, on the `e.detail` object.
+`on:neodrag:start`: `(e: CustomEvent<DragEventData>) => void`. Provides the initial offset when dragging starts, on the `e.detail` object.
 
-`on:neodrag:`: `(e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>`. Provides how far the element has been dragged from it's original position in `x` and `y` coordinates on the `event.detail` object
+`on:neodrag:`: `(e: CustomEvent<DragEventData>`. Provides how far the element has been dragged from it's original position in `x` and `y` coordinates on the `event.detail` object
 
-`on:neodrag:end`: `(e: CustomEvent<{ offsetX: number; offsetY: number; domRect: DOMRect }>) => void`. No internal state provided to `event.detail`. Provides the final offset when dragging ends, on the `e.detail` object.
+`on:neodrag:end`: `(e: CustomEvent<DragEventData>) => void`. No internal state provided to `event.detail`. Provides the final offset when dragging ends, on the `e.detail` object.
 
 ### Alternative
 
@@ -117,8 +117,6 @@ If you're a TypeScript user, read on below 👇
 ## TypeScript
 
 This library ships with proper TypeScript typings, for the best Developer Experience, whether authoring JS or TS.
-
-### Events
 
 <ExportedTypesMDX framework="svelte" />
 

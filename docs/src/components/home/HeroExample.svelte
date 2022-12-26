@@ -69,7 +69,7 @@
 		}}
 	>
 		<div class="paw">
-			<PawIcon style="font-size: 7.37rem;" />
+			<PawIcon />
 		</div>
 	</div>
 
@@ -84,7 +84,11 @@
 </div>
 
 <style lang="scss">
+	@import '../../css/breakpoints';
+
 	.container {
+		position: relative;
+
 		width: auto;
 		height: 100%;
 
@@ -97,6 +101,10 @@
 		place-items: center;
 		place-content: center;
 		gap: 2rem;
+
+		@include media('<desktop') {
+			height: 80vh;
+		}
 
 		&,
 		& * {
@@ -112,11 +120,12 @@
 
 	p {
 		position: absolute;
-		top: 25vh;
+		top: 25%;
 
 		font-family: var(--app-font-mono);
 		color: hsla(var(--app-color-dark-hsl), 0.6);
 		word-spacing: 4px;
+		font-size: clamp(1rem, 2vw, 2.5rem);
 
 		max-width: fit-content;
 
@@ -132,7 +141,7 @@
 	}
 
 	.box {
-		--size: 12rem;
+		--size: clamp(4rem, 20vw, 12rem);
 
 		position: relative;
 
@@ -204,9 +213,8 @@
 	}
 
 	.paw {
-		position: absolute;
-		bottom: 6px;
-		right: 6px;
+		width: var(--size);
+		height: var(--size);
 
 		opacity: 0;
 
@@ -214,6 +222,20 @@
 
 		transition: 0.1s ease-in-out;
 		transition-property: opacity, transform;
+
+		:global(svg) {
+			position: absolute;
+			right: calc(0.03 * var(--size));
+			bottom: calc(0.03 * var(--size));
+
+			// width: 61%;
+			min-width: clamp(
+				calc(0.61 * 4rem),
+				calc(0.61 * 20vw),
+				calc(0.61 * 12rem)
+			);
+			// height: auto;
+		}
 
 		:global(svg path) {
 			fill: #201b1b !important;

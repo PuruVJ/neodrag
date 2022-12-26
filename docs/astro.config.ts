@@ -41,9 +41,9 @@ export default defineConfig({
 		svelte({ preprocess: sequential([autoPreprocess(), fastDimension()]) }),
 		mdx(),
 		prefetch(),
-		compress(),
+		// compress(),
 		// serviceWorker(),
-		critters(),
+		// critters(),
 		AutoImport({
 			dts: './src/auto-imports.d.ts',
 			imports: [
