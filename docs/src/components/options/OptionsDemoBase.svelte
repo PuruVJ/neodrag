@@ -49,8 +49,9 @@
 		include: IncludeExclude,
 		exclude: IncludeExclude
 	] {
+		const arr: [IncludeExclude, IncludeExclude] = [, undefined];
+
 		for (const option of ['handle', 'cancel'] as const) {
-			const arr: [IncludeExclude, IncludeExclude] = [, undefined];
 			const idx = option === 'handle' ? 0 : 1;
 
 			const optionVal = options[option];
@@ -66,11 +67,9 @@
 					arr[idx] = optionVal;
 				}
 			}
-
-			return arr;
 		}
 
-		return [, undefined];
+		return arr;
 	}
 
 	function setPawCursor() {
