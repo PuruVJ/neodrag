@@ -1,0 +1,46 @@
+---
+import type { MarkdownLayoutProps } from 'astro';
+
+import InstallationMDX from '../content/installation.mdx';
+import DocsLayout from './DocsLayout.astro';
+
+import sizes from '../data/sizes.json';
+
+type Props = MarkdownLayoutProps<{
+	title: string;
+	tagline: string;
+}>;
+
+const { frontmatter } = Astro.props;
+const { tagline, title, url } = frontmatter;
+
+const framework = url?.split('/').at(-1) as keyof typeof sizes;
+const size = sizes[framework];
+---
+
+<DocsLayout title={title}>
+	<h1>
+		@neodrag/<span style={`color: var(--app-color-brand-${framework})`}
+			>{framework}</span
+		>
+	</h1>
+	<p>{tagline}</p>
+
+	<!-- TODO: Replace this with a component that opens a mini dialog on click to show what it does. -->
+	<button class="tag">
+		{size}KB min+br
+	</button>
+
+	<InstallationMDX framework={framework} />
+
+	<slot />
+
+	<h2>Credits</h2>
+	<p>
+		Inspired from the amazing
+		<a href="https://github.com/react-grid-layout/react-draggable">
+			react-draggable
+		</a>
+		library, and implements the same API.
+	</p>
+</DocsLayout>

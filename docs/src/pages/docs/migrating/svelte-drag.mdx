@@ -1,13 +1,13 @@
 ---
-layout: '$layouts/Layout.astro'
+layout: '$layouts/DocsLayout.astro'
 ---
 
-# svelte-drag to @neodrag/svelte migration guide
+# svelte-drag <span class="font-mono" style="transform: translateY(10%)">-></span> neodrag
 
 ## Installing
 
 ```bash
-npm un svelte-drag
+npm uninstall svelte-drag
 npm install @neodrag/svelte
 ```
 
@@ -27,5 +27,7 @@ Options passed to the object are still the same as latest version of svelte-drag
 Events have been renamed
 
 `on:svelte-drag` -> `on:neodrag`
+
 `on:svelte-drag:start` -> `on:neodrag:start`
+
 `on:svelte-drag:end` -> `on:neodrag:end`
