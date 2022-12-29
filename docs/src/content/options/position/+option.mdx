@@ -8,9 +8,319 @@ import Code from '$components/options/OptionsCode.astro';
 import Example from '$components/options/OptionsExample.astro';
 import Examples from '$components/options/OptionsExamples.svelte';
 
+import PositionExample from './Position.example.svelte';
+import DisabledPositionExample from './DisabledPosition.example.svelte';
+
 export const shortDescription =
   'Controls the position of the element programmatically. Fully reactive.';
 
 {shortDescription}
 
 Read about [Controlled vs Uncontrolled](#controlled-vs-uncontrolled) components.
+
+<Examples client:load>
+  <Example>
+    <PositionExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <script>
+          let position = { x: 0, y: 0 };
+        </script>
+
+        <div
+          use:draggable={{
+            position,
+            onDrag: ({ offsetX, offsetY }) => {
+              position = { x: offsetX, y: offsetY };
+            },
+          }}
+        >
+          I can be moved with the slider too
+        </div>
+
+        X: <input type="range" min="0" max="300" bind:value={position.x} />
+        Y: <input type="range" min="0" max="300" bind:value={position.y} />
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <script setup>
+        import { vDraggable } from '@neodrag/vue';
+
+        const position = ref({ x: 0, y: 0 });
+        </script>
+
+        <template>
+          <div
+            v-draggable="{
+              position,
+              onDrag: ({ offsetX, offsetY }) => {
+                position = { x: offsetX, y: offsetY };
+              },
+            }"
+          >
+            I can be moved with the slider too
+          </div>
+
+          X: <input type="range" min="0" max="300" v-model="position.x" />
+          Y: <input type="range" min="0" max="300" v-model="position.y" />
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        const [position, setPosition] = createSignal({ x: 0, y: 0 });
+
+        <div
+          use:draggable={{
+            position: position(),
+            onDrag: ({ offsetX, offsetY }) => setPosition({ x: offsetX, y: offsetY }),
+          }}
+        >
+          I can be moved with the slider too
+        </div>
+        X:
+        <input
+          type="range"
+          min="0"
+          max="300"
+          value={position().x}
+          onInput={(e) => setPosition({ x: +e.target.value, y: position().y })}
+        />
+        Y:
+        <input
+          type="range"
+          min="0"
+          max="300"
+          value={position().y}
+          onInput={(e) => setPosition({ x: position().x, y: +e.target.value })}
+        />
+        ```
+      </div>
+
+      <div slot="react">
+        ```tsx
+        const [position, setPosition] = useState({ x: 0, y: 0 });
+
+        const draggableRef = useRef(null);
+
+        useDraggable(draggableRef, {
+          position,
+          onDrag: ({ offsetX, offsetY }) => setPosition({ x: offsetX, y: offsetY }),
+        });
+
+        <div ref={draggableRef}>I can be moved with the slider too</div>
+
+        X:
+        <input
+          type="range"
+          min="0"
+          max="300"
+          value={position.x}
+          onInput={(e) => setPosition({ x: +e.target.value, y: position.y })}
+        />
+
+        Y:
+        <input
+          type="range"
+          min="0"
+          max="300"
+          value={position.y}
+          onInput={(e) => setPosition({ x: position.x, y: +e.target.value })}
+        />
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```html
+        <div class="box">I am draggable</div>
+
+        X: <input type="range" min="0" max="300" value="0" id="x" />
+        Y: <input type="range" min="0" max="300" value="0" id="y" />
+        ```
+
+        ```js
+        const draggableEl = document.querySelector<HTMLDivElement>('.box')!;
+        const xSlider = document.querySelector<HTMLInputElement>('#x')!;
+        const ySlider = document.querySelector<HTMLInputElement>('#y')!;
+
+        let position = { x: 0, y: 0 };
+
+        const dragInstance = new Draggable(draggableEl, {
+          position,
+          onDrag: ({ offsetX, offsetY }) => {
+            position = { x: offsetX, y: offsetY };
+
+            xSlider.value = offsetX.toString();
+            ySlider.value = offsetY.toString();
+          },
+        });
+
+        xSlider.addEventListener('input', (e: Event) => {
+          position.x = +e.target.value;
+          dragInstance.updateOptions({ position });
+        });
+
+        ySlider.addEventListener('input', (e: Event) => {
+          position.y = +e.target.value;
+          dragInstance.updateOptions({ position });
+        });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <DisabledPositionExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <script>
+          let position = { x: 0, y: 0 };
+        </script>
+
+        <div
+          use:draggable={{
+            position,
+            disabled: true
+          }}
+        >
+          I can be moved with the slider too
+        </div>
+
+        X: <input type="range" min="0" max="300" bind:value={position.x} />
+        Y: <input type="range" min="0" max="300" bind:value={position.y} />
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <script setup>
+        import { vDraggable } from '@neodrag/vue';
+
+        const position = ref({ x: 0, y: 0 });
+        </script>
+
+        <template>
+          <div
+            v-draggable="{
+              position,
+              disabled: true
+            }"
+          >
+            I can be moved with the slider too
+          </div>
+
+          X: <input type="range" min="0" max="300" v-model="position.x" />
+          Y: <input type="range" min="0" max="300" v-model="position.y" />
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        const [position, setPosition] = createSignal({ x: 0, y: 0 });
+
+        <div
+          use:draggable={{
+            position: position(),
+            disabled: true
+          }}
+        >
+          I can be moved with the slider too
+        </div>
+        X:
+        <input
+          type="range"
+          min="0"
+          max="300"
+          value={position().x}
+          onInput={(e) => setPosition({ x: +e.target.value, y: position().y })}
+        />
+        Y:
+        <input
+          type="range"
+          min="0"
+          max="300"
+          value={position().y}
+          onInput={(e) => setPosition({ x: position().x, y: +e.target.value })}
+        />
+        ```
+      </div>
+
+      <div slot="react">
+        ```tsx
+        const [position, setPosition] = useState({ x: 0, y: 0 });
+
+        const draggableRef = useRef(null);
+
+        useDraggable(draggableRef, {
+          position,
+          disabled: true
+        });
+
+        <div ref={draggableRef}>I can be moved with the slider too</div>
+
+        X:
+        <input
+          type="range"
+          min="0"
+          max="300"
+          value={position.x}
+          onInput={(e) => setPosition({ x: +e.target.value, y: position.y })}
+        />
+
+        Y:
+        <input
+          type="range"
+          min="0"
+          max="300"
+          value={position.y}
+          onInput={(e) => setPosition({ x: position.x, y: +e.target.value })}
+        />
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```html
+        <div class="box">I am draggable</div>
+
+        X: <input type="range" min="0" max="300" value="0" id="x" />
+        Y: <input type="range" min="0" max="300" value="0" id="y" />
+        ```
+
+        ```js
+        const draggableEl = document.querySelector<HTMLDivElement>('.box')!;
+        const xSlider = document.querySelector<HTMLInputElement>('#x')!;
+        const ySlider = document.querySelector<HTMLInputElement>('#y')!;
+
+        let position = { x: 0, y: 0 };
+
+        const dragInstance = new Draggable(draggableEl, {
+          position,
+          disabled: true
+        });
+
+        xSlider.addEventListener('input', (e: Event) => {
+          position.x = +e.target.value;
+          dragInstance.updateOptions({ position });
+        });
+
+        ySlider.addEventListener('input', (e: Event) => {
+          position.y = +e.target.value;
+          dragInstance.updateOptions({ position });
+        });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+</Examples>

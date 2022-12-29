@@ -7,27 +7,30 @@
 	import squircle from '../../worklet/squircle?url';
 
 	export let options: DragOptions = {};
+	export let position = options.position ??
+		options.defaultPosition ?? { x: 0, y: 0 };
 	export let customClass = '';
 	export let size = '8rem';
 	export let draggableEl: HTMLDivElement | undefined = undefined;
 	export let renderParent = false;
+	export let styledCaption = true;
 
 	$: finalOptions = {
 		...options,
+		position,
 		onDrag: (data) => {
 			options.onDrag?.(data);
 			position = { x: data.offsetX, y: data.offsetY };
 		},
 	} as DragOptions;
 
-	let position = options.position ?? options.defaultPosition ?? { x: 0, y: 0 };
-
 	let key = 0;
 
 	$: {
 		key;
 
-		position = options.position ?? options.defaultPosition ?? { x: 0, y: 0 };
+		finalOptions.position = position = options.position ??
+			options.defaultPosition ?? { x: 0, y: 0 };
 	}
 
 	if (browser)
@@ -103,7 +106,7 @@
 		{/if}
 
 		{#if $$slots.caption}
-			<div class="caption">
+			<div class="caption" class:styled={styledCaption}>
 				<slot name="caption" />
 			</div>
 		{/if}
@@ -206,12 +209,14 @@
 		align-items: center;
 		gap: 1ch;
 
-		background-color: hsla(var(--app-color-dark-hsl), 0.1);
-		backdrop-filter: blur(40px);
+		&.styled {
+			background-color: hsla(var(--app-color-dark-hsl), 0.1);
+			backdrop-filter: blur(40px);
 
-		padding: 0.25rem 0.5rem;
+			padding: 0.25rem 0.5rem;
 
-		border-radius: 8px;
+			border-radius: 8px;
+		}
 	}
 
 	.parent {

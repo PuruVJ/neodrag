@@ -6,6 +6,8 @@ body.light {
 	--app-color-primary-contrast: hsl(0, 0%, 95%);
 	--app-color-primary-contrast-hsl: 0, 0%, 10%;
 
+	--brand: var(--app-color-primary);
+
 	--app-color-primary-gradient: radial-gradient(
 		circle farthest-corner at 10% 20%,
 		#f093fb 0%,
@@ -43,6 +45,8 @@ body.dark {
 	--app-color-primary-hsl: 352, 89%, 74%;
 	--app-color-primary-contrast: hsl(0 0% 10%);
 	--app-color-primary-contrast-hsl: 0, 0%, 10%;
+
+	--brand: var(--app-color-primary);
 
 	--app-color-dark: hsl(210, 17%, 95%);
 	--app-color-dark-hsl: 210, 17%, 95%;
