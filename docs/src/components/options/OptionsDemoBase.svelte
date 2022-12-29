@@ -7,13 +7,13 @@
 	import squircle from '../../worklet/squircle?url';
 
 	export let options: DragOptions = {};
-	export let position = options.position ??
-		options.defaultPosition ?? { x: 0, y: 0 };
+	export let position = getDefaultPosition();
 	export let customClass = '';
 	export let size = '8rem';
 	export let draggableEl: HTMLDivElement | undefined = undefined;
 	export let renderParent = false;
 	export let styledCaption = true;
+	export let containerEl: HTMLElement | undefined = undefined;
 
 	$: finalOptions = {
 		...options,
@@ -29,8 +29,7 @@
 	$: {
 		key;
 
-		finalOptions.position = position = options.position ??
-			options.defaultPosition ?? { x: 0, y: 0 };
+		finalOptions.position = position = getDefaultPosition();
 	}
 
 	if (browser)
@@ -86,11 +85,16 @@
 			el && (el.dataset.pawCursor = 'false');
 		}
 	}
+
+	function getDefaultPosition() {
+		return options.position ?? options.defaultPosition ?? { x: 0, y: 0 };
+	}
 </script>
 
 <section
 	class="container options-demo-base-container {customClass}"
 	style:--size={size}
+	bind:this={containerEl}
 >
 	{#key key}
 		{#if renderParent}

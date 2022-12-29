@@ -1,6 +1,6 @@
 ---
 title: bounds
-type: "HTMLElement | string | DragBoundsCoords"
+type: 'HTMLElement | string | DragBoundsCoords'
 defaultValue: 'undefined'
 ---
 
@@ -10,6 +10,7 @@ import Examples from '$components/options/OptionsExamples.svelte';
 
 import ParentBoundsExample from './ParentBounds.example.svelte';
 import BodyBoundsExample from './BodyBounds.example.svelte';
+import CoordinateBoundsExample from './CoordinateBounds.example.svelte';
 
 export const shortDescription = 'Optionally limit the drag area';
 
@@ -134,8 +135,70 @@ export type DragBoundsCoords = {
     </Code>
 
   </Example>
+
+  <Example>
+    <CoordinateBoundsExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div
+          use:draggable={{
+            bounds: { top: 60, left: 20, bottom: 35, right: 30 },
+          }}
+        >
+          Limited to:
+
+          top: 60
+          left: 20
+          bottom: 35
+          right: 30
+        </div>
+
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ bounds: { top: 60, left: 20, bottom: 35, right: 30 } }}">
+            Limited to:
+
+            top: 60
+            left: 20
+            bottom: 35
+            right: 30
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ bounds: { top: 60, left: 20, bottom: 35, right: 30 } }}>
+          Limited to:
+
+          top: 60
+          left: 20
+          bottom: 35
+          right: 30
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { bounds: { top: 60, left: 20, bottom: 35, right: 30 } });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { bounds: { top: 60, left: 20, bottom: 35, right: 30 } });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
 </Examples>
-
-{/* TODO: Coordinates from window */}
-
-{/* TODO: Another element not even related to this one */}
