@@ -102,6 +102,8 @@
 
 			text-decoration: none;
 			color: var(--app-color-light-contrast);
+			font-family: var(--app-font-mono);
+			font-size: 1rem;
 
 			border-radius: 8px;
 
@@ -121,5 +123,20 @@
 
 	.spacer {
 		flex: 1 1 auto;
+	}
+
+	.group .title {
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--app-color-light-contrast);
+		margin-bottom: 1ch;
+	}
+
+	.group a {
+		&[aria-current='page'] {
+			background-color: hsla(var(--app-color-primary-hsl), 0.2);
+		}
 	}
 </style>

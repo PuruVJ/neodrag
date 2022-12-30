@@ -11,6 +11,7 @@
 
 	import { portal } from '$actions/portal';
 	import { prefersReducedMotion, theme } from '$stores/user-preferences.store';
+	import { expoOut, quintOut, sineOut } from 'svelte/easing';
 
 	const isTablet = globalThis.matchMedia('(max-width: 768px)')?.matches;
 
@@ -58,7 +59,7 @@
 	<nav
 		class:dark={$theme === 'dark' && shadow}
 		autofocus
-		transition:navTransition={{}}
+		transition:navTransition={{ easing: expoOut, duration: 800 }}
 	>
 		<button class="close-button" on:click={() => (isNavOpen = false)}>
 			<CloseIcon />

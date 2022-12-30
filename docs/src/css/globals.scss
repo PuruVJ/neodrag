@@ -26,7 +26,7 @@ body {
 }
 
 body {
-	height: auto;
+	height: auto !important;
 
 	accent-color: var(--app-color-primary);
 }

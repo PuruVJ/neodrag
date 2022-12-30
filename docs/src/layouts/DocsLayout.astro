@@ -137,6 +137,20 @@ const { title } = Astro.props;
 
 	body {
 		overflow: hidden;
+
+		background-image: radial-gradient(
+			ellipse farthest-corner at 100% 2%,
+			hsla(var(--app-color-primary-hsl), 0.35),
+			var(--app-color-primary-contrast)
+		);
+
+		&.light {
+			background-image: radial-gradient(
+				ellipse farthest-corner at 0% 2%,
+				hsla(var(--app-color-primary-hsl), 0.2),
+				var(--app-color-primary-contrast)
+			);
+		}
 	}
 
 	pre.astro-code {

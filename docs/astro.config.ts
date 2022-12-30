@@ -5,6 +5,7 @@ import svelte from '@astrojs/svelte';
 import compress from 'astro-compress';
 import critters from 'astro-critters';
 import serviceWorker from 'astrojs-service-worker';
+import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 
 import { defineConfig } from 'astro/config';
 
@@ -68,6 +69,7 @@ export default defineConfig({
 		// @ts-ignore
 		remarkPlugins: [container],
 		rehypePlugins: [
+			rehypeHeadingIds,
 			[
 				rehypeAutolinkHeadings,
 				{
