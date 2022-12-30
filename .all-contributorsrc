@@ -1,0 +1,25 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "sidharth-anand",
+      "name": "Sidharth Anand",
+      "avatar_url": "https://avatars.githubusercontent.com/u/55060749?v=4",
+      "profile": "https://github.com/sidharth-anand",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "neodrag",
+  "projectOwner": "PuruVJ"
+}
