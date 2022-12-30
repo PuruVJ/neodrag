@@ -10,6 +10,15 @@
 
 	let reset = 0;
 
+	$: {
+		reset;
+
+		trackMyPosition = {
+			x: 0,
+			y: 0,
+		};
+	}
+
 	let trackMyPosition = {
 		x: 0,
 		y: 0,
@@ -28,7 +37,7 @@
 
 	let isBackdropVisible = false;
 
-	let zIndices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	let zIndices = Array.from<number>({ length: 15 }).fill(0);
 
 	function getNodeIndex(node: HTMLElement) {
 		return Array.from(node.parentNode?.children!).indexOf(node);

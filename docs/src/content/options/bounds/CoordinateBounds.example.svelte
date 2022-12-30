@@ -3,7 +3,6 @@
 	import { browser } from '$helpers/utils';
 	import type { DragBoundsCoords } from '@neodrag/svelte';
 	import { onDestroy } from 'svelte';
-	import { debounce } from 'throttle-debounce';
 	import { throttle } from 'throttle-debounce';
 
 	let containerEl: HTMLElement | undefined;
