@@ -5,10 +5,18 @@
 
 	const ariaCurrentVal = (path: string) =>
 		pathname.endsWith(path) ? 'page' : 'false';
+
+	const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(
+		pathname
+	)?.[1];
 </script>
 
 <!-- Component should be wrapped in an <aside> or <header> -->
-<div class="nav container">
+<div
+	class="nav container"
+	style:--primary={framework && `var(--app-color-brand-${framework})`}
+	style:--primary-hsl={framework && `var(--app-color-brand-${framework}-hsl)`}
+>
 	<a href="/" class="h3 logo unstyled">
 		<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" />
 		Neodrag
@@ -105,15 +113,15 @@
 			font-family: var(--app-font-mono);
 			font-size: 1rem;
 
-			border-radius: 8px;
+			border-radius: 4px;
 
-			transition: background-color 0.15s ease-in-out;
+			transition: background-color 0.05s ease-in;
 
 			margin: 0;
 		}
 
 		&:hover {
-			background-color: hsla(var(--app-color-dark-hsl), 0.2);
+			background-color: hsla(var(--primary-hsl), 0.1);
 		}
 	}
 
@@ -136,7 +144,7 @@
 
 	.group a {
 		&[aria-current='page'] {
-			background-color: hsla(var(--app-color-primary-hsl), 0.2);
+			background-color: hsla(var(--primary-hsl), 0.2);
 		}
 	}
 </style>

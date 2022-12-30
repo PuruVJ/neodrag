@@ -26,11 +26,40 @@ body.light {
 	--app-color-shell: hsl(200, 8%, 100%);
 	--app-color-shell-contrast: hsl(0, 0%, 10%);
 
-	--app-color-brand-svelte: #ff3e00;
-	--app-color-brand-react: #0097b3;
-	--app-color-brand-vue: #3ba676;
-	--app-color-brand-solid: #2c4f7c;
+	--app-color-brand-svelte: hsl(15, 100%, 50%);
+	--app-color-brand-svelte-hsl: 15, 100%, 50%;
+	--app-color-brand-svelte-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-svelte-hsl), 0.2) 0%,
+		var(--app-color-shell) 100%
+	);
+
+	--app-color-brand-react: hsl(189, 100%, 35%);
+	--app-color-brand-react-hsl: 189, 100%, 35%;
+	--app-color-brand-react-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-react-hsl), 0.3),
+		var(--app-color-shell)
+	);
+
+	--app-color-brand-vue: hsl(153, 48%, 44%);
+	--app-color-brand-vue-hsl: 153, 48%, 44%;
+	--app-color-brand-vue-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-vue-hsl), 0.3) 0%,
+		var(--app-color-shell) 100%
+	);
+
+	--app-color-brand-solid: hsl(214, 48%, 33%);
+	--app-color-brand-solid-hsl: 214, 48%, 33%;
+	--app-color-brand-solid-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-solid-hsl), 0.4) 0%,
+		var(--app-color-shell) 100%
+	);
+
 	--app-color-brand-vanilla: var(--app-color-dark);
+	--app-color-brand-vanilla-hsl: var(--app-color-dark-hsl);
 
 	--app-font-mono: 'Jetbrains mono', var(--font-mono);
 	--app-font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
@@ -57,9 +86,38 @@ body.dark {
 	--app-color-shell: #101213;
 	--app-color-shell-contrast: var(--gray-1);
 
-	--app-color-brand-svelte: #ff511a;
-	--app-color-brand-react: #61dafc;
-	--app-color-brand-vue: #42b883;
-	--app-color-brand-solid: #8fa6c5;
+	--app-color-brand-svelte: hsl(14, 100%, 55%);
+	--app-color-brand-svelte-hsl: 14, 100%, 55%;
+	--app-color-brand-svelte-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-svelte-hsl), 0.2) 0%,
+		var(--app-color-shell) 100%
+	);
+
+	--app-color-brand-react: hsl(193, 96%, 68%);
+	--app-color-brand-react-hsl: 193, 96%, 68%;
+	--app-color-brand-react-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-react-hsl), 0.2) 0%,
+		var(--app-color-shell) 100%
+	);
+
+	--app-color-brand-vue: hsl(153, 47%, 49%);
+	--app-color-brand-vue-hsl: 153, 47%, 49%;
+	--app-color-brand-vue-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-vue-hsl), 0.3) 0%,
+		var(--app-color-shell) 100%
+	);
+
+	--app-color-brand-solid: hsl(214, 32%, 67%);
+	--app-color-brand-solid-hsl: 214, 32%, 67%;
+	--app-color-brand-solid-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-solid-hsl), 0.3) 0%,
+		var(--app-color-shell) 100%
+	);
+
 	--app-color-brand-vanilla: var(--app-color-dark);
+	--app-color-brand-vanilla-hsl: var(--app-color-dark-hsl);
 }
