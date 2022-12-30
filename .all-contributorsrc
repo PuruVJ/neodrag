@@ -1,0 +1,26 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "bluwy",
+      "name": "Bjorn Lu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34116392?v=4",
+      "profile": "https://bjornlu.com",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "neodrag",
+  "projectOwner": "PuruVJ"
+}
