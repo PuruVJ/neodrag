@@ -1,0 +1,31 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "PuruVJ",
+      "name": "Puru Vijay",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47742487?v=4",
+      "profile": "https://puruvj.dev",
+      "contributions": [
+        "infra",
+        "code",
+        "maintenance",
+        "content",
+        "doc",
+        "financial",
+        "research"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "neodrag",
+  "projectOwner": "PuruVJ"
+}
