@@ -1,0 +1,88 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "PuruVJ",
+      "name": "Puru Vijay",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47742487?v=4",
+      "profile": "https://puruvj.dev",
+      "contributions": [
+        "infra",
+        "code",
+        "maintenance",
+        "content",
+        "doc",
+        "financial",
+        "research"
+      ]
+    },
+    {
+      "login": "bluwy",
+      "name": "Bjorn Lu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34116392?v=4",
+      "profile": "https://bjornlu.com/",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "matrushka",
+      "name": "Baris Gumustas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/53268?v=4",
+      "profile": "https://github.com/matrushka",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "sidharth-anand",
+      "name": "Sidharth Anand",
+      "avatar_url": "https://avatars.githubusercontent.com/u/55060749?v=4",
+      "profile": "https://github.com/sidharth-anand",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Tropix126",
+      "name": "Tropical",
+      "avatar_url": "https://avatars.githubusercontent.com/u/42101043?v=4",
+      "profile": "https://github.com/Tropix126",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "AphLute",
+      "name": "AphLute",
+      "avatar_url": "https://avatars.githubusercontent.com/u/80430144?v=4",
+      "profile": "https://earth.suncapped.com/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "tascodes",
+      "name": "Tas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32209335?v=4",
+      "profile": "https://github.com/tascodes",
+      "contributions": [
+        "infra",
+        "code",
+        "test"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "neodrag",
+  "projectOwner": "PuruVJ"
+}
