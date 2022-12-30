@@ -1,0 +1,27 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "tascodes",
+      "name": "Tas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32209335?v=4",
+      "profile": "http://tas.codes",
+      "contributions": [
+        "infra",
+        "code",
+        "test"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "neodrag",
+  "projectOwner": "PuruVJ"
+}
