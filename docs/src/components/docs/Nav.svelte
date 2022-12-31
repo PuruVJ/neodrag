@@ -14,8 +14,10 @@
 <!-- Component should be wrapped in an <aside> or <header> -->
 <div
 	class="nav container"
-	style:--primary={framework && `var(--app-color-brand-${framework})`}
-	style:--primary-hsl={framework && `var(--app-color-brand-${framework}-hsl)`}
+	style:--primary={framework ? `var(--app-color-brand-${framework})` : null}
+	style:--primary-hsl={framework
+		? `var(--app-color-brand-${framework}-hsl)`
+		: null}
 >
 	<a href="/" class="h3 logo unstyled">
 		<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" />
@@ -57,10 +59,21 @@
 
 	<span class="spacer" />
 
-	<span>&copy; 2021-{new Date().getUTCFullYear()} Puru Vijay</span>
+	<span class="copyright"
+		>&copy; 2021-{new Date().getUTCFullYear()}
+		<a
+			href="https://twitter.com/puruvjdev"
+			target="blank"
+			rel="noopener noreferrer"
+		>
+			Puru Vijay</a
+		></span
+	>
 </div>
 
 <style lang="scss">
+	@import '../../css/breakpoints';
+
 	.container {
 		display: flex;
 		flex-direction: column;
@@ -80,6 +93,10 @@
 
 		margin: 0.25rem 1rem;
 
+		@include media('>=tablet') {
+			margin: 1rem;
+		}
+
 		img {
 			width: clamp(2rem, 5vw, 3rem);
 		}
@@ -98,7 +115,7 @@
 	}
 
 	li {
-		padding: 0;
+		padding: 0.25rem 0;
 	}
 
 	nav a {
@@ -106,7 +123,7 @@
 		&:visited {
 			display: block;
 
-			padding: 0.25rem 0.5;
+			padding: 0.25rem 0.75rem;
 
 			text-decoration: none;
 			color: var(--app-color-light-contrast);
@@ -121,7 +138,10 @@
 		}
 
 		&:hover {
-			background-color: hsla(var(--primary-hsl), 0.1);
+			background-color: hsla(
+				var(--primary-hsl, var(--app-color-primary-hsl)),
+				0.1
+			);
 		}
 	}
 
@@ -144,7 +164,26 @@
 
 	.group a {
 		&[aria-current='page'] {
-			background-color: hsla(var(--primary-hsl), 0.2);
+			background-color: hsla(
+				var(--primary-hsl, var(--app-color-primary-hsl)),
+				0.2
+			);
+		}
+	}
+
+	.copyright {
+		width: 100%;
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 0.5rem;
+
+		font-family: var(--app-font-mono);
+		font-size: 0.9rem;
+
+		a {
+			font-size: inherit;
 		}
 	}
 </style>

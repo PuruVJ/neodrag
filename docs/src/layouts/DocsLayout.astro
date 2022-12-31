@@ -1,16 +1,22 @@
 ---
+import type { MarkdownLayoutProps } from 'astro';
+
 import Nav from '$components/docs/Nav.svelte';
+import Footer from '$components/Footer.svelte';
 import MobileNav from '$components/MobileNav.svelte';
 import Layout from './Layout.astro';
 
-type Props = {
-	title: string;
-};
+type Props =
+	| MarkdownLayoutProps<{
+			title: string;
+	  }>
+	| { title: string };
 
-const { title } = Astro.props;
+const { frontmatter, title } = Astro.props;
+const { title: frontmatterTitle } = frontmatter || {};
 ---
 
-<Layout title={title}>
+<Layout title={title ?? frontmatterTitle}>
 	<div class="mobile-nav">
 		<MobileNav client:load />
 	</div>
@@ -70,6 +76,7 @@ const { title } = Astro.props;
 		padding: 0 1rem;
 
 		overflow-y: auto;
+		overflow-x: hidden;
 		scroll-behavior: smooth;
 
 		@include media('<=sm-tablet') {
@@ -100,6 +107,9 @@ const { title } = Astro.props;
 		:global(code) {
 			font-family: var(--app-font-mono);
 			font-size: 0.9em;
+			word-break: break-all;
+
+			max-width: 100%;
 		}
 
 		:global(h1, h2, h3, h4, h5) {
@@ -138,30 +148,50 @@ const { title } = Astro.props;
 
 		&.svelte {
 			background-image: var(--app-color-brand-svelte-body-gradient);
+			--selection-color: var(--app-color-brand-svelte);
+			--app-color-scrolling-navbar: var(--app-color-brand-svelte-navbar);
 		}
 
 		&.vue {
 			background-image: var(--app-color-brand-vue-body-gradient);
+			--selection-color: var(--app-color-brand-vue);
+			--app-color-scrolling-navbar: var(--app-color-brand-vue-navbar);
 		}
 
 		&.react {
 			background-image: var(--app-color-brand-react-body-gradient);
+			--selection-color: var(--app-color-brand-react);
+			--app-color-scrolling-navbar: var(--app-color-brand-react-navbar);
 		}
 
 		&.solid {
 			background-image: var(--app-color-brand-solid-body-gradient);
+			--selection-color: var(--app-color-brand-solid);
+			--app-color-scrolling-navbar: var(--app-color-brand-solid-navbar);
 		}
 
-		&:not(.framework).dark {
-			background-image: radial-gradient(
-				ellipse farthest-corner at 100% 2%,
-				hsla(var(--app-color-primary-hsl), 0.35),
-				var(--app-color-primary-contrast)
-			);
+		&.vanilla {
+			background-image: var(--app-color-brand-vanilla-body-gradient);
+			--selection-color: var(--app-color-brand-vanilla);
+			--app-color-scrolling-navbar: var(--app-color-brand-vanilla-navbar);
+		}
+
+		&:not(.framework) {
+			&.dark {
+				--app-color-scrolling-navbar: #60383e;
+
+				background-image: radial-gradient(
+					ellipse farthest-corner at 100% 2%,
+					hsla(var(--app-color-primary-hsl), 0.35),
+					var(--app-color-primary-contrast)
+				);
+			}
 
 			&.light {
+				--app-color-scrolling-navbar: #efd3d6;
+
 				background-image: radial-gradient(
-					ellipse farthest-corner at 0% 2%,
+					ellipse farthest-corner at 100% 2%,
 					hsla(var(--app-color-primary-hsl), 0.2),
 					var(--app-color-primary-contrast)
 				);

@@ -11,7 +11,7 @@
 
 	import { portal } from '$actions/portal';
 	import { prefersReducedMotion, theme } from '$stores/user-preferences.store';
-	import { expoOut, quintOut, sineOut } from 'svelte/easing';
+	import { expoOut } from 'svelte/easing';
 
 	const isTablet = globalThis.matchMedia('(max-width: 768px)')?.matches;
 
@@ -99,14 +99,9 @@
 		transition: 150ms ease-in;
 		transition-property: background-color, box-shadow;
 
-		background-color: var(--app-color-shell);
-
 		&.shadow {
 			box-shadow: 0 3.4px 6.3px #00000019, 0 27px 50px #0000001a;
-		}
-
-		&.dark.shadow {
-			background-color: #1a2124;
+			background-color: var(--app-color-scrolling-navbar);
 		}
 	}
 
@@ -136,7 +131,7 @@
 		left: 0;
 		z-index: 10000;
 
-		background-color: var(--app-color-shell);
+		background-color: var(--app-color-scrolling-navbar);
 
 		height: 100%;
 		width: 100%;
