@@ -2,8 +2,8 @@
 import type { MarkdownLayoutProps } from 'astro';
 
 import Nav from '$components/docs/Nav.svelte';
-import Footer from '$components/Footer.svelte';
 import MobileNav from '$components/MobileNav.svelte';
+import ToC from '$components/ToC.svelte';
 import Layout from './Layout.astro';
 
 type Props =
@@ -17,6 +17,7 @@ const { title: frontmatterTitle } = frontmatter || {};
 ---
 
 <Layout title={title ?? frontmatterTitle}>
+	<ToC client:only />
 	<div class="mobile-nav">
 		<MobileNav client:load />
 	</div>
@@ -177,6 +178,8 @@ const { title: frontmatterTitle } = frontmatter || {};
 		}
 
 		&:not(.framework) {
+			--selection-color: var(--app-color-primary);
+
 			&.dark {
 				--app-color-scrolling-navbar: #60383e;
 

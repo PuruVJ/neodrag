@@ -29,7 +29,7 @@
 			<div class="title">Libraries</div>
 
 			{#each FRAMEWORKS as { name }}
-				<li>
+				<li style="text-transform: capitalize;">
 					<a
 						href={`/docs/${name}`}
 						aria-current={ariaCurrentVal(name)}
@@ -65,6 +65,7 @@
 			href="https://twitter.com/puruvjdev"
 			target="blank"
 			rel="noopener noreferrer"
+			class:framework
 		>
 			Puru Vijay</a
 		></span
@@ -183,10 +184,12 @@
 		font-size: 0.9rem;
 
 		a {
-			--app-color-primary: var(--primary);
-			--app-color-primary-hsl: var(--primary-hsl);
-
 			font-size: inherit;
+
+			&.framework {
+				--app-color-primary: var(--primary);
+				--app-color-primary-hsl: var(--primary-hsl);
+			}
 		}
 	}
 </style>

@@ -1,5 +1,4 @@
 <script lang="ts">
-	// TODO: MAKE IT FANCYYCYYYYYYYYYYYY 😡😡😡😡😡😡😡😡😡😡😡😡😡😡😡
 	import { FRAMEWORK_ICONS } from '$helpers/framework-icons';
 	import { FRAMEWORKS } from 'src/helpers/constants';
 	// @ts-ignore
