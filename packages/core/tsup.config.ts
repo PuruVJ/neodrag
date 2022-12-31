@@ -5,6 +5,6 @@ export default defineConfig({
 	minify: 'terser',
 	format: 'esm',
 	dts: { resolve: true },
-	clean: true,
+
 	sourcemap: true,
 });
