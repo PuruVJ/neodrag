@@ -16,7 +16,7 @@
 
 	const positionX = tweened(0, { duration: 400, easing: expoOut });
 
-	$: {
+	function changeTheme() {
 		if ($positionX / containerWidth > 0.5) {
 			$theme = 'dark';
 		} else {
@@ -25,7 +25,12 @@
 	}
 </script>
 
-<button on:click={() => ($positionX = 0)}>
+<button
+	on:click={() => {
+		$positionX = 0;
+		changeTheme();
+	}}
+>
 	<SunnyIcon />
 </button>
 
@@ -38,21 +43,27 @@
 			axis: 'x',
 			bounds: 'parent',
 			position: { x: $positionX, y: 0 },
-			onDrag: ({ offsetX }) => positionX.set(offsetX, { duration: 0 }),
+			onDrag: ({ offsetX }) => {
+				positionX.set(offsetX, { duration: 0 });
+			},
 			onDragEnd: ({ offsetX, node }) => {
-				if (offsetX / containerWidth > 0.5) {
+				if (offsetX / containerWidth > 0.3) {
 					$positionX = containerWidth - node.getBoundingClientRect().width;
 				} else {
 					$positionX = 0;
 				}
+
+				changeTheme();
 			},
 		}}
 	/>
 </button>
 
 <button
-	on:click={() =>
-		($positionX = containerWidth - draggableEl.getBoundingClientRect().width)}
+	on:click={() => {
+		$positionX = containerWidth - draggableEl.getBoundingClientRect().width;
+		changeTheme();
+	}}
 >
 	<MoonIcon />
 </button>
