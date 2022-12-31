@@ -1,1 +1,0 @@
-export { inview } from './inview';

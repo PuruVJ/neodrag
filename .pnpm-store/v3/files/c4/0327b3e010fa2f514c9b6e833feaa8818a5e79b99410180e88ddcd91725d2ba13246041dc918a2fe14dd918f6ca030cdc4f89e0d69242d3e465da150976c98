@@ -1,6 +1,0 @@
-{
-  "extends": "./base.tsconfig.json",
-  "compilerOptions": {
-    "paths": {}
-  }
-}

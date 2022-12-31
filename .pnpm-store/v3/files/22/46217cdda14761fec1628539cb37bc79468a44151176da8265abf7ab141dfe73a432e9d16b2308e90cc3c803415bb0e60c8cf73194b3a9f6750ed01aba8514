@@ -1,6 +1,0 @@
-<Fragment>
-{/** prettier-ignore */}<li />
-
-</Fragment>
-export default function Index__AstroComponent_(_props: Record<string, any>): any {}
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiaW5kZXguYXN0cm8iXSwKICAic291cmNlc0NvbnRlbnQiOiBbIlxuXHUwMDNjIS0tIHByZXR0aWVyLWlnbm9yZSAtLVx1MDAzZVxuXHUwMDNjbGkgL1x1MDAzZVxuIl0sCiAgIm1hcHBpbmdzIjogIkFBQUEsQUFBQTtBQUFBLElBQ0ksQ0FBQyxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQyxBQURwQixJQUVBLENBQUMsRUFBRSxDQUFDLEVBQUU7QUFDTixBQUhBO0FBQUE7IiwKICAibmFtZXMiOiBbXQp9

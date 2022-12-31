@@ -1,1 +1,0 @@
-exports.define=c=>c;

@@ -1,5 +1,0 @@
-import { PreprocessorGroup } from 'svelte/types/compiler/preprocess';
-
-declare function fastDimension(): PreprocessorGroup;
-
-export { fastDimension };

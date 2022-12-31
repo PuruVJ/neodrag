@@ -1,6 +1,0 @@
-{
-  "extends": "./circular.tsconfig.json",
-  "compilerOptions": {
-    "allowJs": true
-  }
-}

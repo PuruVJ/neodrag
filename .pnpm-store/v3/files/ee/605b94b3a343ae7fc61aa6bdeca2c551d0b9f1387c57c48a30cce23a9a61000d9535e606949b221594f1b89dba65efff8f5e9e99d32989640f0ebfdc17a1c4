@@ -1,6 +1,0 @@
-{
-	"project": "./src/tsconfig.json",
-	"out": "vscode-uri.lsif",
-	"source": "./package.json",
-	"package": "./package.json"
-}

@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "allowJs": false,
-    "baseUrl": "./",
-    "paths": {
-      "simple": ["./simple"]
-    }
-  }
-}

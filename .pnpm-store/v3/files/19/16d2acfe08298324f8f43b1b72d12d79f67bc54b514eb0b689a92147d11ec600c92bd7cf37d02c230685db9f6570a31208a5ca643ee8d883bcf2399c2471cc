@@ -1,7 +1,0 @@
----
-const { card, site, creator } = Astro.props.twitter;
----
-
-{card ? <meta name="twitter:card" content={card} /> : null}
-{site ? <meta name="twitter:site" content={site} /> : null}
-{creator ? <meta name="twitter:creator" content={creator} /> : null}

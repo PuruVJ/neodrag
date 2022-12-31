@@ -1,6 +1,0 @@
----
-const { props } = Astro;
----
-
-{props.extend.link?.map((attributes) => <link {...attributes} />)}
-{props.extend.meta?.map( ({ content, httpEquiv, name, property }) => <meta content={content} http-eqiv={httpEquiv} name={name} property={property} /> )}
