@@ -80,16 +80,6 @@ export type DragOptions = {
 	applyUserSelectHack?: boolean;
 
 	/**
-	 * Ignores touch events with more than 1 touch.
-	 * This helps when you have multiple elements on a canvas where you want to implement
-	 * pinch-to-zoom behaviour.
-	 *
-	 * @default false
-	 *
-	 */
-	ignoreMultitouch?: boolean;
-
-	/**
 	 * Disables dragging altogether.
 	 *
 	 * @default false
@@ -194,7 +184,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		gpuAcceleration = true,
 		applyUserSelectHack = true,
 		disabled = false,
-		ignoreMultitouch = false,
 
 		grid,
 
@@ -278,13 +267,9 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	const listen = addEventListener;
 
-	listen('touchstart', dragStart, false);
-	listen('touchend', dragEnd, false);
-	listen('touchmove', drag, false);
-
-	listen('mousedown', dragStart, false);
-	listen('mouseup', dragEnd, false);
-	listen('mousemove', drag, false);
+	listen('pointerdown', dragStart, false);
+	listen('pointerup', dragEnd, false);
+	listen('pointermove', drag, false);
 
 	// On mobile, touch can become extremely janky without it
 	node.style.touchAction = 'none';
@@ -296,9 +281,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		return inverseScale;
 	};
 
-	function dragStart(e: TouchEvent | MouseEvent) {
+	function dragStart(e: PointerEvent) {
 		if (disabled) return;
-		if (ignoreMultitouch && e.type === 'touchstart' && (e as TouchEvent).touches.length > 1) return;
 
 		nodeClassList.add(defaultClass);
 
@@ -331,8 +315,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			!cancelElementContains(cancelEl, <HTMLElement>e.target)
 		)
 			active = true;
-
-		if (!active) return;
+		else return;
 
 		if (applyUserSelectHack) {
 			// Apply user-select: none on body to prevent misbehavior
@@ -343,7 +326,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		// Dispatch custom event
 		fireSvelteDragStartEvent();
 
-		const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
+		const { clientX, clientY } = e;
 		const inverseScale = calculateInverseScale();
 
 		if (canMoveInX) initialX = clientX - xOffset / inverseScale;
@@ -374,7 +357,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		active = false;
 	}
 
-	function drag(e: TouchEvent | MouseEvent) {
+	function drag(e: PointerEvent) {
 		if (!active) return;
 
 		// Apply class defaultClassDragging
@@ -384,7 +367,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		nodeRect = node.getBoundingClientRect();
 
-		const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
+		const { clientX, clientY } = e;
 
 		// Get final values for clamping
 		let finalX = clientX,
@@ -439,19 +422,15 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		destroy: () => {
 			const unlisten = removeEventListener;
 
-			unlisten('touchstart', dragStart, false);
-			unlisten('touchend', dragEnd, false);
-			unlisten('touchmove', drag, false);
-
-			unlisten('mousedown', dragStart, false);
-			unlisten('mouseup', dragEnd, false);
-			unlisten('mousemove', drag, false);
+			unlisten('pointerdown', dragStart, false);
+			unlisten('pointerup', dragEnd, false);
+			unlisten('pointermove', drag, false);
 		},
 		update: (options: DragOptions) => {
 			// Update all the values that need to be changed
 			axis = options.axis || 'both';
 			disabled = options.disabled ?? false;
-			ignoreMultitouch = options.ignoreMultitouch ?? false;
+
 			handle = options.handle;
 			bounds = options.bounds;
 			cancel = options.cancel;
@@ -480,9 +459,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		},
 	};
 };
-
-const isTouchEvent = (event: MouseEvent | TouchEvent): event is TouchEvent =>
-	!!(event as TouchEvent).touches?.length;
 
 const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max);
 
