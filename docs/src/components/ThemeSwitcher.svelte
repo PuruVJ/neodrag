@@ -9,6 +9,8 @@
 	import { tweened } from 'svelte/motion';
 
 	import { theme } from '$stores/user-preferences.store';
+	import { mounted } from '$stores/mounted.store';
+	import { onMount } from 'svelte';
 
 	let containerWidth = 0;
 
@@ -22,6 +24,14 @@
 		} else {
 			$theme = 'light';
 		}
+	}
+
+	$: {
+		if ($mounted)
+			$positionX =
+				$theme === 'dark'
+					? containerWidth - draggableEl.getBoundingClientRect().width
+					: 0;
 	}
 </script>
 
