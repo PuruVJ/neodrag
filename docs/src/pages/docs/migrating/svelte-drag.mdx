@@ -1,0 +1,34 @@
+---
+layout: '$layouts/DocsLayout.astro'
+title: 'Migrating svelte-drag to neodrag'
+---
+
+# svelte-drag to neodrag
+
+## Installing
+
+```bash
+npm uninstall svelte-drag
+npm install @neodrag/svelte
+```
+
+Change the imports
+
+```diff
+- import { draggable } from 'svelte-drag'
++ import { draggable } from '@neodrag/svelte'
+```
+
+## Options
+
+Options passed to the object are still the same as latest version of svelte-drag. No changes there
+
+## Events
+
+Events have been renamed
+
+`on:svelte-drag` -> `on:neodrag`
+
+`on:svelte-drag:start` -> `on:neodrag:start`
+
+`on:svelte-drag:end` -> `on:neodrag:end`

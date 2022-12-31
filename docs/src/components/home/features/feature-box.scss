@@ -1,0 +1,5 @@
+@mixin paragraph {
+	font-size: clamp(1rem, 2vw, 1.3rem);
+
+	// max-width: clamp(20ch, 80vw, 100ch);
+}

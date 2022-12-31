@@ -1,0 +1,194 @@
+---
+import LogosGithubIcon from '~icons/logos/github-icon';
+
+import BundleSizeFeature from '$components/home/features/bundle-sizes/BundleSizeFeature.svelte';
+import FeatureRichFeature from '$components/home/features/feature-rich/FeatureRichFeature.svelte';
+import MultipleFrameworksFeature from '$components/home/features/multiple-frameworks/MultipleFrameworksFeature.svelte';
+import SSRFriendlyFeature from '$components/home/features/ssr-friendly/SSRFriendlyFeature.svelte';
+import HeroExample from '$components/home/HeroExample.svelte';
+import Layout from '$layouts/Layout.astro';
+import ExploreFrameworks from '$components/home/ExploreFrameworks.svelte';
+---
+
+<Layout title="Neodrag: One draggable to rule them all">
+	<main id="main-content">
+		<section class="tagline">
+			<div class="intro">
+				<h1>Neodrag</h1>
+				<p class="h4">One draggable to rule them all</p>
+
+				<br /><br /><br />
+
+				<div class="group">
+					<a href="/docs">Getting Started</a>
+					<a href="https://github.com/puruvj/neodrag">
+						<LogosGithubIcon target={} /> Github
+					</a>
+				</div>
+			</div>
+
+			<div class="demo">
+				<HeroExample client:load />
+			</div>
+		</section>
+
+		<h2 class="h1" style="text-align: center; width: 100%">Features</h2>
+
+		<br /><br /><br />
+
+		<section class="feature-multi-frameworks two-col">
+			<MultipleFrameworksFeature client:visible />
+		</section>
+
+		<section class="feature-bundle-sizes two-col">
+			<BundleSizeFeature client:visible />
+		</section>
+
+		<section class="feature-ssr-friendly two-col">
+			<SSRFriendlyFeature client:visible />
+		</section>
+
+		<section class="feature-feature-rich">
+			<FeatureRichFeature client:visible />
+		</section>
+
+		<section class="explore-frameworks">
+			<ExploreFrameworks client:visible />
+		</section>
+	</main>
+</Layout>
+
+<style lang="scss">
+	@import '../css/breakpoints';
+
+	.tagline {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		align-items: center;
+		gap: 5rem;
+
+		margin-bottom: 6rem;
+
+		padding: 1rem 0;
+
+		min-height: 100vh;
+
+		.demo {
+			height: 100%;
+		}
+
+		@include media('<desktop') {
+			grid-template-columns: 1fr;
+			// gap: 1rem;
+		}
+
+		h1,
+		p {
+			margin: 0;
+		}
+
+		h1 {
+			background-image: var(--app-color-primary-gradient);
+			background-clip: text;
+			-webkit-text-fill-color: transparent;
+
+			font-size: clamp(3rem, 20vw, 8rem);
+			line-height: 1.28;
+
+			width: max-content;
+		}
+
+		p {
+			font-size: clamp(1rem, 5vw, 2rem);
+		}
+
+		.group {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 1rem;
+
+			margin-top: 1rem;
+
+			a[href] {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 1rem;
+
+				padding: 1rem 2rem;
+
+				border-radius: 1rem !important;
+
+				font-size: 1.4rem;
+				text-align: center;
+
+				@include media('<sm-tablet') {
+					font-size: 1rem;
+
+					padding: 0.5rem 1rem;
+				}
+
+				:global(svg path) {
+					fill: var(--app-color-primary);
+
+					transition: fill 150ms ease-in;
+				}
+
+				&:hover {
+					:global(svg path) {
+						fill: var(--app-color-primary-light);
+					}
+				}
+			}
+		}
+	}
+
+	main {
+		position: relative;
+
+		z-index: 2;
+
+		padding: 0 1rem;
+
+		width: 100%;
+	}
+
+	.two-col {
+		display: flex;
+		flex: 1 1 auto;
+
+		width: 100%;
+
+		margin-bottom: clamp(3rem, 100vw, 10rem);
+
+		&:nth-of-type(2n + 1) {
+			flex-direction: row-reverse;
+		}
+
+		@include media('<desktop') {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+
+			flex-direction: column !important;
+		}
+
+		:global(.intro, .demo) {
+			flex: 1 1;
+		}
+	}
+
+	.feature-feature-rich {
+		grid-template-columns: 1fr;
+
+		margin-bottom: clamp(3rem, 100vw, 10rem);
+	}
+
+	.explore-frameworks {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 4rem;
+
+		padding-bottom: clamp(3rem, 100vw, 10rem);
+	}
+</style>

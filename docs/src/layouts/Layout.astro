@@ -1,0 +1,55 @@
+---
+import PawCursor from '$components/PawCursor.svelte';
+import '@fontsource/jetbrains-mono/variable.css';
+import '@fontsource/plus-jakarta-sans/400.css';
+import '@fontsource/plus-jakarta-sans/500.css';
+
+import '../css/globals.scss';
+
+export interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+
+const bodyClass =
+	/\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pathname)?.[1] ??
+	'';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.png" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body class:list={[bodyClass, bodyClass && 'framework']}>
+		<slot />
+
+		<PawCursor client:load />
+
+		<script>
+			import { theme } from '$stores/user-preferences.store';
+
+			const themeLocal = JSON.parse(localStorage.getItem('neodrag:theme')!);
+
+			if (!themeLocal) {
+				if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+					theme.set('dark');
+				} else {
+					theme.set('light');
+				}
+			} else {
+				theme.set(themeLocal);
+			}
+
+			theme.subscribe(($theme) => {
+				document.body.classList.remove('dark', 'light');
+				document.body.classList.add($theme);
+			});
+		</script>
+	</body>
+</html>

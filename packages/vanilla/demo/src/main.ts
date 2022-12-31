@@ -1,11 +1,28 @@
 import './style.css';
 import { Draggable } from '@neodrag/vanilla';
 
-const box = document.querySelector<HTMLDivElement>('.box')!;
+const draggableEl = document.querySelector<HTMLDivElement>('.box')!;
+const xSlider = document.querySelector<HTMLInputElement>('#x')!;
+const ySlider = document.querySelector<HTMLInputElement>('#y')!;
 
-const dragInstance = new Draggable(box, { axis: 'both', grid: [10, 10] });
+let position = { x: 0, y: 0 };
 
-document.querySelector('button')!.onclick = () => {
-	dragInstance.options = { axis: dragInstance.options.axis === 'both' ? 'x' : 'both' };
-	console.log(dragInstance.options);
-};
+const dragInstance = new Draggable(draggableEl, {
+	position,
+	onDrag: ({ offsetX, offsetY }) => {
+		position = { x: offsetX, y: offsetY };
+
+		xSlider.value = offsetX.toString();
+		ySlider.value = offsetY.toString();
+	},
+});
+
+xSlider.addEventListener('input', (e: Event) => {
+	position.x = +e.target.value;
+	dragInstance.updateOptions({ position });
+});
+
+ySlider.addEventListener('input', (e: Event) => {
+	position.y = +e.target.value;
+	dragInstance.updateOptions({ position });
+});

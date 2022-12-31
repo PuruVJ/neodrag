@@ -1,0 +1,64 @@
+---
+title: defaultPosition
+type: '{ x: number; y: number }'
+defaultValue: '{ x: 0, y: 0 }'
+---
+
+import Code from '$components/options/OptionsCode.astro';
+import Example from '$components/options/OptionsExample.astro';
+import Examples from '$components/options/OptionsExamples.svelte';
+
+import DefaultPositionExample from './DefaultPosition.example.svelte';
+
+export const shortDescription =
+  'Offsets your element to the position you specify in the very beginning';
+
+{shortDescription}. `x` and `y` should be in pixels. Ignored if [position](#position) is passed.
+
+<Examples client:load>
+  <Example>
+    <DefaultPositionExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ defaultPosition: { x: 100, y: 40 } }}>
+          Shifted by (100, 40)
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ defaultPosition: { x: 100, y: 40 } }}">
+            Shifted by (100, 40)
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ defaultPosition: { x: 100, y: 40 } }}>
+          Shifted by (100, 40)
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { defaultPosition: { x: 100, y: 40 } });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { defaultPosition: { x: 100, y: 40 } });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+</Examples>

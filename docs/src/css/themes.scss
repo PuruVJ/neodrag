@@ -1,0 +1,144 @@
+body,
+body.light {
+	// #a1182b
+	--app-color-primary: hsl(352, 74%, 36%);
+	--app-color-primary-hsl: 352, 74%, 36%;
+	--app-color-primary-contrast: hsl(0, 0%, 95%);
+	--app-color-primary-contrast-hsl: 0, 0%, 10%;
+
+	--brand: var(--app-color-primary);
+
+	--app-color-primary-gradient: radial-gradient(
+		circle farthest-corner at 10% 20%,
+		#f093fb 0%,
+		#f5576c 100%
+	);
+	--app-color-primary-gradient-contrast: hsl(0 0% 10%);
+
+	--app-color-dark: hsl(0 0% 10%);
+	--app-color-dark-contrast: var(--app-color-light);
+	--app-color-dark-hsl: 0, 0%, 10%;
+	--app-color-dark-hs: 0, 0%;
+
+	--app-color-light: var(--gray-1);
+	--app-color-light-contrast: var(--app-color-dark);
+	--app-color-light-hsl: 0, 0%, 98%;
+
+	--app-color-shell: hsl(200, 8%, 100%);
+	--app-color-shell-contrast: hsl(0, 0%, 10%);
+
+	--app-color-brand-svelte: hsl(15, 100%, 50%);
+	--app-color-brand-svelte-hsl: 15, 100%, 50%;
+	--app-color-brand-svelte-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-svelte-hsl), 0.2) 0%,
+		var(--app-color-shell) 100%
+	);
+	--app-color-brand-svelte-navbar: #ffd9cc;
+
+	--app-color-brand-react: hsl(189, 100%, 35%);
+	--app-color-brand-react-hsl: 189, 100%, 35%;
+	--app-color-brand-react-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-react-hsl), 0.3),
+		var(--app-color-shell)
+	);
+	--app-color-brand-react-navbar: #e6f7ff;
+
+	--app-color-brand-vue: #3aa676;
+	--app-color-brand-vue-hsl: 153, 48%, 44%;
+	--app-color-brand-vue-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-vue-hsl), 0.3) 0%,
+		var(--app-color-shell) 100%
+	);
+	--app-color-brand-vue-navbar: #c4e4d6;
+
+	--app-color-brand-solid: #2c4f7d;
+	--app-color-brand-solid-hsl: 214, 48%, 33%;
+	--app-color-brand-solid-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-solid-hsl), 0.4) 0%,
+		var(--app-color-shell) 100%
+	);
+	--app-color-brand-solid-navbar: #c0cad8;
+
+	--app-color-brand-vanilla: var(--app-color-dark);
+	--app-color-brand-vanilla-hsl: var(--app-color-dark-hsl);
+	--app-color-brand-vanilla-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(53, 93%, 54%, 0.4) 0%,
+		var(--app-color-shell) 100%
+	);
+	--app-color-brand-vanilla-navbar: #fdf5bb;
+
+	--app-font-mono: 'Jetbrains mono', var(--font-mono);
+	--app-font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+		Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	--app-font-heading: 'Plus Jakarta sans', system-ui, -apple-system,
+		BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+		'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+body.dark {
+	--app-color-primary: #f88292;
+	--app-color-primary-hsl: 352, 89%, 74%;
+	--app-color-primary-contrast: hsl(0 0% 10%);
+	--app-color-primary-contrast-hsl: 0, 0%, 10%;
+
+	--brand: var(--app-color-primary);
+
+	--app-color-dark: hsl(210, 17%, 95%);
+	--app-color-dark-hsl: 210, 17%, 95%;
+	--app-color-dark-hs: 210, 17%;
+
+	--app-color-light: var(--gray-9);
+
+	--app-color-shell: #101213;
+	--app-color-shell-contrast: var(--gray-1);
+
+	--app-color-brand-svelte: hsl(14, 100%, 55%);
+	--app-color-brand-svelte-hsl: 14, 100%, 55%;
+	--app-color-brand-svelte-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-svelte-hsl), 0.2) 0%,
+		var(--app-color-shell) 100%
+	);
+	--app-color-brand-svelte-navbar: #311b16;
+
+	--app-color-brand-react: hsl(193, 96%, 68%);
+	--app-color-brand-react-hsl: 193, 96%, 68%;
+	--app-color-brand-react-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-react-hsl), 0.2) 0%,
+		var(--app-color-shell) 100%
+	);
+	--app-color-brand-react-navbar: #1c2d33;
+
+	--app-color-brand-vue: hsl(153, 47%, 49%);
+	--app-color-brand-vue-hsl: 153, 47%, 49%;
+	--app-color-brand-vue-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-vue-hsl), 0.3) 0%,
+		var(--app-color-shell) 100%
+	);
+	--app-color-brand-vue-navbar: #1b3429;
+
+	--app-color-brand-solid: hsl(214, 32%, 67%);
+	--app-color-brand-solid-hsl: 214, 32%, 67%;
+	--app-color-brand-solid-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-solid-hsl), 0.3) 0%,
+		var(--app-color-shell) 100%
+	);
+	--app-color-brand-solid-navbar: #2b3138;
+
+	--app-color-brand-vanilla: var(--app-color-dark);
+	--app-color-brand-vanilla-hsl: var(--app-color-dark-hsl);
+	--app-color-brand-vanilla-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(53, 93%, 54%, 0.4) 0%,
+		var(--app-color-shell) 100%
+	);
+	--app-color-brand-vanilla-navbar: #4f491e;
+}

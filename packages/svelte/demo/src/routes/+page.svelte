@@ -150,7 +150,7 @@
 	</div>
 
 	<div class="canvas" style="transform: scale({scale});">
-		<div use:draggable={options} class="box">
+		<div use:draggable={options} on:neodrag:start={(e) => console.log(e.detail)} class="box">
 			hello
 
 			<div class="handle" bind:this={handleEl}>Le handel</div>

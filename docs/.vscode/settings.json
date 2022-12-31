@@ -1,0 +1,15 @@
+{
+	"cssvar.files": [
+		"./node_modules/open-props/open-props.min.css",
+		// if you have an alternative path to where your styles are located
+		// you can add it in this array of files
+		"../src/css/globals.scss",
+		"../src/css/themes.scss"
+	],
+
+	// Do not ignore node_modules css files, which is ignored by default
+	"cssvar.ignore": [],
+
+	// add support for autocomplete in JS or JS like files
+	"cssvar.extensions": ["css", "jsx", "tsx", "astro", "svelte", "vue"]
+}
