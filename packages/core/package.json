@@ -1,0 +1,30 @@
+{
+	"name": "@neodrag/core",
+	"private": "true",
+	"version": "2.0.0-next.2",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist/*"
+	],
+	"sideEffects": false,
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"module": "./dist/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"compile:watch": "tsup --watch",
+		"compile": "tsup"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PuruVJ/neodrag.git"
+	},
+	"author": "Puru Vijay",
+	"license": "MIT"
+}

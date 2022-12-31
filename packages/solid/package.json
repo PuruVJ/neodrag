@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/solid",
-	"version": "0.1.1",
+	"version": "2.0.0-next.2",
 	"description": "SolidJS library to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
