@@ -183,6 +183,9 @@
 		font-size: 0.9rem;
 
 		a {
+			--app-color-primary: var(--primary);
+			--app-color-primary-hsl: var(--primary-hsl);
+
 			font-size: inherit;
 		}
 	}
