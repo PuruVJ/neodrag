@@ -80,6 +80,16 @@ export type DragOptions = {
 	applyUserSelectHack?: boolean;
 
 	/**
+	 * Ignores touch events with more than 1 touch.
+	 * This helps when you have multiple elements on a canvas where you want to implement
+	 * pinch-to-zoom behaviour.
+	 *
+	 * @default false
+	 *
+	 */
+	ignoreMultitouch?: boolean;
+
+	/**
 	 * Disables dragging altogether.
 	 *
 	 * @default false
@@ -184,6 +194,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		gpuAcceleration = true,
 		applyUserSelectHack = true,
 		disabled = false,
+		ignoreMultitouch = false,
 
 		grid,
 
@@ -283,6 +294,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	function dragStart(e: PointerEvent) {
 		if (disabled) return;
+
+		if (ignoreMultitouch && !e.isPrimary) return;
 
 		nodeClassList.add(defaultClass);
 
@@ -430,7 +443,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			// Update all the values that need to be changed
 			axis = options.axis || 'both';
 			disabled = options.disabled ?? false;
-
+			ignoreMultitouch = options.ignoreMultitouch ?? false;
 			handle = options.handle;
 			bounds = options.bounds;
 			cancel = options.cancel;
