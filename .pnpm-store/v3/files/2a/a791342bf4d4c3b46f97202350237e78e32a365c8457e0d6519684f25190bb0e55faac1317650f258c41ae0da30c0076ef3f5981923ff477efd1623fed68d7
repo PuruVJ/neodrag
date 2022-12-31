@@ -1,0 +1,114 @@
+{
+  "name": "is-what",
+  "sideEffects": false,
+  "type": "module",
+  "version": "4.1.8",
+  "description": "JS type check (TypeScript supported) functions like `isPlainObject() isArray()` etc. A simple & small integration.",
+  "module": "./dist/index.es.js",
+  "main": "./dist/index.cjs",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=12.13"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "lint": "tsc --noEmit && eslint ./src --ext .ts",
+    "build": "rollup --bundleConfigAsCjs -c ./scripts/build.js",
+    "release": "npm run lint && del dist && npm run build && np"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mesqueeb/is-what.git"
+  },
+  "keywords": [
+    "javascript",
+    "typescript",
+    "typechecker",
+    "check-type",
+    "javascript-type",
+    "primitive-types",
+    "plain-object",
+    "plain-objects",
+    "class-instance",
+    "class-identifier",
+    "type-checking",
+    "type-checker",
+    "type-check",
+    "define-type",
+    "get-type",
+    "what-type",
+    "is-object",
+    "is-plain-obj",
+    "is-plain-object"
+  ],
+  "author": "Luca Ban - Mesqueeb",
+  "funding": "https://github.com/sponsors/mesqueeb",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mesqueeb/is-what/issues"
+  },
+  "homepage": "https://github.com/mesqueeb/is-what#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "del-cli": "^5.0.0",
+    "eslint": "^8.28.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-tree-shaking": "^1.10.0",
+    "np": "^7.6.2",
+    "prettier": "^2.8.0",
+    "rollup": "^3.5.0",
+    "rollup-plugin-typescript2": "^0.34.1",
+    "typescript": "^4.9.3",
+    "vitest": "^0.25.3"
+  },
+  "ava": {
+    "extensions": {
+      "ts": "module"
+    },
+    "nodeArguments": [
+      "--loader=ts-node/esm"
+    ]
+  },
+  "np": {
+    "yarn": false,
+    "branch": "production"
+  },
+  "eslintConfig": {
+    "ignorePatterns": [
+      "node_modules",
+      "dist",
+      "scripts",
+      "test"
+    ],
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint",
+      "tree-shaking"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "prettier"
+    ],
+    "rules": {
+      "@typescript-eslint/no-empty-function": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/ban-ts-ignore": "off",
+      "tree-shaking/no-side-effects-in-initialization": "error",
+      "@typescript-eslint/ban-ts-comment": "off"
+    }
+  }
+}

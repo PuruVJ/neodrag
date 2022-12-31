@@ -1,0 +1,1 @@
+{"version":3,"file":"default-base.js","sourceRoot":"","sources":["../../../../../packages/nx/src/utils/default-base.ts"],"names":[],"mappings":";;;AAAA,iDAAyC;AAEzC,SAAgB,iBAAiB;IAC/B,MAAM,aAAa,GAAG,MAAM,CAAC;IAC7B,IAAI;QACF,OAAO,CACL,IAAA,wBAAQ,EAAC,qCAAqC,CAAC,CAAC,QAAQ,EAAE,CAAC,IAAI,EAAE;YACjE,aAAa,CACd,CAAC;KACH;IAAC,WAAM;QACN,OAAO,aAAa,CAAC;KACtB;AACH,CAAC;AAVD,8CAUC"}

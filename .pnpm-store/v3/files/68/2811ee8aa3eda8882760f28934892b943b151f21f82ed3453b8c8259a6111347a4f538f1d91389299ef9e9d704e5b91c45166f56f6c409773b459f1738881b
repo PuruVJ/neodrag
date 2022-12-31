@@ -1,0 +1,126 @@
+{
+  "name": "tsconfig-resolver",
+  "version": "3.0.1",
+  "description": "Walk up the tree to resolve `tsconfig.json` configuration objects.",
+  "keywords": [
+    "tsconfig",
+    "typescript",
+    "json",
+    "read",
+    "parse",
+    "file",
+    "fs",
+    "graceful",
+    "load",
+    "find",
+    "up",
+    "find-up",
+    "findup",
+    "look-up",
+    "look",
+    "search",
+    "match",
+    "resolve",
+    "parent",
+    "parents",
+    "folder",
+    "directory",
+    "walk",
+    "walking",
+    "path"
+  ],
+  "funding": "https://github.com/sponsors/ifiokjr",
+  "license": "MIT",
+  "author": {
+    "name": "Ifiok Jr.",
+    "email": "ifiokotung@gmail.com",
+    "url": "https://ifiokjr.com"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "module": "dist/tsconfig-resolver.esm.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsdx build",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "start": "tsdx watch",
+    "test": "tsdx test"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint",
+      "pre-push": "yarn tsc --noEmit && yarn lint && yarn test"
+    }
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-packagejson",
+      "prettier-plugin-sorted"
+    ],
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "all"
+  },
+  "resolutions": {
+    "mem": ">=4",
+    "minimist": ">=1.2.2"
+  },
+  "dependencies": {
+    "@types/json5": "^0.0.30",
+    "@types/resolve": "^1.17.0",
+    "json5": "^2.1.3",
+    "resolve": "^1.17.0",
+    "strip-bom": "^4.0.0",
+    "type-fest": "^0.13.1"
+  },
+  "devDependencies": {
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/git": "^9.0.0",
+    "@sindresorhus/tsconfig": "0.7.0",
+    "@types/jest": "^25.2.1",
+    "conventional-changelog-conventionalcommits": "^4.2.3",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.2",
+    "prettier-plugin-packagejson": "^2.2.3",
+    "prettier-plugin-sorted": "^2.0.0",
+    "semantic-release": "^17.0.7",
+    "tsdx": "^0.13.2",
+    "tslib": "^1.11.2",
+    "typescript": "^3.8.3"
+  },
+  "peerDependencies": {},
+  "release": {
+    "plugins": [
+      [
+        "@semantic-release/commit-analyzer",
+        {
+          "preset": "conventionalcommits"
+        }
+      ],
+      [
+        "@semantic-release/release-notes-generator",
+        {
+          "preset": "conventionalcommits"
+        }
+      ],
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/github",
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "package.json",
+            "CHANGELOG.md"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ]
+    ]
+  }
+}

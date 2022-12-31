@@ -1,0 +1,1 @@
+var o=async(e,t)=>{switch(!0){case e instanceof Map:{const a=new Map;for(const[n,r]of e)a.set(await t(n),await t(r));return a}case e instanceof Set:{const a=new Set;for(const n of e)a.add(await t(n));return a}case e instanceof Array:{const a=new Array;for(const n of e)a.push(await t(n));return a}default:return await t(e)}};export{o as default};

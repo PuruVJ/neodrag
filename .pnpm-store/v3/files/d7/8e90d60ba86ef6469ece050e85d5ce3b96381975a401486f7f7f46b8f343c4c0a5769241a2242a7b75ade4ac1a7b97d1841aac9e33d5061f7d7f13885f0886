@@ -1,0 +1,190 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+(function (factory) {
+    if (typeof module === "object" && typeof module.exports === "object") {
+        var v = factory(require, exports);
+        if (v !== undefined) module.exports = v;
+    }
+    else if (typeof define === "function" && define.amd) {
+        define(["require", "exports", "./htmlScanner", "../utils/arrays", "../htmlLanguageTypes"], factory);
+    }
+})(function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.HTMLParser = exports.Node = void 0;
+    var htmlScanner_1 = require("./htmlScanner");
+    var arrays_1 = require("../utils/arrays");
+    var htmlLanguageTypes_1 = require("../htmlLanguageTypes");
+    var Node = /** @class */ (function () {
+        function Node(start, end, children, parent) {
+            this.start = start;
+            this.end = end;
+            this.children = children;
+            this.parent = parent;
+            this.closed = false;
+        }
+        Object.defineProperty(Node.prototype, "attributeNames", {
+            get: function () { return this.attributes ? Object.keys(this.attributes) : []; },
+            enumerable: false,
+            configurable: true
+        });
+        Node.prototype.isSameTag = function (tagInLowerCase) {
+            if (this.tag === undefined) {
+                return tagInLowerCase === undefined;
+            }
+            else {
+                return tagInLowerCase !== undefined && this.tag.length === tagInLowerCase.length && this.tag.toLowerCase() === tagInLowerCase;
+            }
+        };
+        Object.defineProperty(Node.prototype, "firstChild", {
+            get: function () { return this.children[0]; },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(Node.prototype, "lastChild", {
+            get: function () { return this.children.length ? this.children[this.children.length - 1] : void 0; },
+            enumerable: false,
+            configurable: true
+        });
+        Node.prototype.findNodeBefore = function (offset) {
+            var idx = (0, arrays_1.findFirst)(this.children, function (c) { return offset <= c.start; }) - 1;
+            if (idx >= 0) {
+                var child = this.children[idx];
+                if (offset > child.start) {
+                    if (offset < child.end) {
+                        return child.findNodeBefore(offset);
+                    }
+                    var lastChild = child.lastChild;
+                    if (lastChild && lastChild.end === child.end) {
+                        return child.findNodeBefore(offset);
+                    }
+                    return child;
+                }
+            }
+            return this;
+        };
+        Node.prototype.findNodeAt = function (offset) {
+            var idx = (0, arrays_1.findFirst)(this.children, function (c) { return offset <= c.start; }) - 1;
+            if (idx >= 0) {
+                var child = this.children[idx];
+                if (offset > child.start && offset <= child.end) {
+                    return child.findNodeAt(offset);
+                }
+            }
+            return this;
+        };
+        return Node;
+    }());
+    exports.Node = Node;
+    var HTMLParser = /** @class */ (function () {
+        function HTMLParser(dataManager) {
+            this.dataManager = dataManager;
+        }
+        HTMLParser.prototype.parseDocument = function (document) {
+            return this.parse(document.getText(), this.dataManager.getVoidElements(document.languageId));
+        };
+        HTMLParser.prototype.parse = function (text, voidElements) {
+            var scanner = (0, htmlScanner_1.createScanner)(text, undefined, undefined, true);
+            var htmlDocument = new Node(0, text.length, [], void 0);
+            var curr = htmlDocument;
+            var endTagStart = -1;
+            var endTagName = undefined;
+            var pendingAttribute = null;
+            var token = scanner.scan();
+            while (token !== htmlLanguageTypes_1.TokenType.EOS) {
+                switch (token) {
+                    case htmlLanguageTypes_1.TokenType.StartTagOpen:
+                        var child = new Node(scanner.getTokenOffset(), text.length, [], curr);
+                        curr.children.push(child);
+                        curr = child;
+                        break;
+                    case htmlLanguageTypes_1.TokenType.StartTag:
+                        curr.tag = scanner.getTokenText();
+                        break;
+                    case htmlLanguageTypes_1.TokenType.StartTagClose:
+                        if (curr.parent) {
+                            curr.end = scanner.getTokenEnd(); // might be later set to end tag position
+                            if (scanner.getTokenLength()) {
+                                curr.startTagEnd = scanner.getTokenEnd();
+                                if (curr.tag && this.dataManager.isVoidElement(curr.tag, voidElements)) {
+                                    curr.closed = true;
+                                    curr = curr.parent;
+                                }
+                            }
+                            else {
+                                // pseudo close token from an incomplete start tag
+                                curr = curr.parent;
+                            }
+                        }
+                        break;
+                    case htmlLanguageTypes_1.TokenType.StartTagSelfClose:
+                        if (curr.parent) {
+                            curr.closed = true;
+                            curr.end = scanner.getTokenEnd();
+                            curr.startTagEnd = scanner.getTokenEnd();
+                            curr = curr.parent;
+                        }
+                        break;
+                    case htmlLanguageTypes_1.TokenType.EndTagOpen:
+                        endTagStart = scanner.getTokenOffset();
+                        endTagName = undefined;
+                        break;
+                    case htmlLanguageTypes_1.TokenType.EndTag:
+                        endTagName = scanner.getTokenText().toLowerCase();
+                        break;
+                    case htmlLanguageTypes_1.TokenType.EndTagClose:
+                        var node = curr;
+                        // see if we can find a matching tag
+                        while (!node.isSameTag(endTagName) && node.parent) {
+                            node = node.parent;
+                        }
+                        if (node.parent) {
+                            while (curr !== node) {
+                                curr.end = endTagStart;
+                                curr.closed = false;
+                                curr = curr.parent;
+                            }
+                            curr.closed = true;
+                            curr.endTagStart = endTagStart;
+                            curr.end = scanner.getTokenEnd();
+                            curr = curr.parent;
+                        }
+                        break;
+                    case htmlLanguageTypes_1.TokenType.AttributeName: {
+                        pendingAttribute = scanner.getTokenText();
+                        var attributes = curr.attributes;
+                        if (!attributes) {
+                            curr.attributes = attributes = {};
+                        }
+                        attributes[pendingAttribute] = null; // Support valueless attributes such as 'checked'
+                        break;
+                    }
+                    case htmlLanguageTypes_1.TokenType.AttributeValue: {
+                        var value = scanner.getTokenText();
+                        var attributes = curr.attributes;
+                        if (attributes && pendingAttribute) {
+                            attributes[pendingAttribute] = value;
+                            pendingAttribute = null;
+                        }
+                        break;
+                    }
+                }
+                token = scanner.scan();
+            }
+            while (curr.parent) {
+                curr.end = text.length;
+                curr.closed = false;
+                curr = curr.parent;
+            }
+            return {
+                roots: htmlDocument.children,
+                findNodeBefore: htmlDocument.findNodeBefore.bind(htmlDocument),
+                findNodeAt: htmlDocument.findNodeAt.bind(htmlDocument)
+            };
+        };
+        return HTMLParser;
+    }());
+    exports.HTMLParser = HTMLParser;
+});

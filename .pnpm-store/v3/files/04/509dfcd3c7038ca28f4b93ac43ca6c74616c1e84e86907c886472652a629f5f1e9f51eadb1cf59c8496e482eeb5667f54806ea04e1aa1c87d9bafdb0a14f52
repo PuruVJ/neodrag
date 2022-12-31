@@ -1,0 +1,40 @@
+const plugin = () => {
+    return {
+        version: 1,
+        getEmbeddedFileNames(fileName, sfc) {
+            const names = [];
+            if (sfc.script) {
+                names.push(fileName + '.script_format.' + sfc.script.lang);
+            }
+            if (sfc.scriptSetup) {
+                names.push(fileName + '.scriptSetup_format.' + sfc.scriptSetup.lang);
+            }
+            return names;
+        },
+        resolveEmbeddedFile(_fileName, sfc, embeddedFile) {
+            const scriptMatch = embeddedFile.fileName.match(/^(.*)\.script_format\.([^.]+)$/);
+            const scriptSetupMatch = embeddedFile.fileName.match(/^(.*)\.scriptSetup_format\.([^.]+)$/);
+            const script = scriptMatch ? sfc.script : scriptSetupMatch ? sfc.scriptSetup : undefined;
+            if (script) {
+                embeddedFile.capabilities = {
+                    diagnostic: false,
+                    foldingRange: true,
+                    documentFormatting: {
+                        initialIndentBracket: ['{', '}'],
+                    },
+                    documentSymbol: true,
+                    codeAction: false,
+                    inlayHint: false,
+                };
+                embeddedFile.content.push([
+                    script.content,
+                    script.name,
+                    0,
+                    {},
+                ]);
+            }
+        },
+    };
+};
+module.exports = plugin;
+//# sourceMappingURL=vue-sfc-scripts.js.map

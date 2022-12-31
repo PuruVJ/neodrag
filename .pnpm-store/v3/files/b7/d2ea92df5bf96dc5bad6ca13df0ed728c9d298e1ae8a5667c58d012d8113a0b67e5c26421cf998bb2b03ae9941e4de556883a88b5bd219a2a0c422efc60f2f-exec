@@ -1,0 +1,52 @@
+{
+    "name": "@types/sharp",
+    "version": "0.31.0",
+    "description": "TypeScript definitions for sharp",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/sharp",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Wooseop Kim",
+            "url": "https://github.com/wooseopkim",
+            "githubUsername": "wooseopkim"
+        },
+        {
+            "name": "Bradley Odell",
+            "url": "https://github.com/BTOdell",
+            "githubUsername": "BTOdell"
+        },
+        {
+            "name": "Jamie Woodbury",
+            "url": "https://github.com/JamieWoodbury",
+            "githubUsername": "JamieWoodbury"
+        },
+        {
+            "name": "Floris de Bijl",
+            "url": "https://github.com/Fdebijl",
+            "githubUsername": "Fdebijl"
+        },
+        {
+            "name": "Billy Kwok",
+            "url": "https://github.com/billykwok",
+            "githubUsername": "billykwok"
+        },
+        {
+            "name": "Espen Hovlandsdal",
+            "url": "https://github.com/rexxars",
+            "githubUsername": "rexxars"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/sharp"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/node": "*"
+    },
+    "typesPublisherContentHash": "4dbdc95d384788c48ac9243e31986ffe0171aeb55cc78a52bcf693bfc6842c04",
+    "typeScriptVersion": "4.1"
+}

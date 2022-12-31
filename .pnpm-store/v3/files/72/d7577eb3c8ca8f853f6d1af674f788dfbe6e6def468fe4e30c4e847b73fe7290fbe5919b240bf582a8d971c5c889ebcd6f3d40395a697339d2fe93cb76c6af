@@ -1,0 +1,36 @@
+{
+	"name": "files-pipeline",
+	"version": "0.0.2",
+	"type": "module",
+	"description": "🧪 Pipeline for files.",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/lightrix/files-pipeline.git"
+	},
+	"homepage": "https://github.com/lightrix/files-pipeline#readme",
+	"bugs": {
+		"url": "https://github.com/lightrix/files-pipeline/issues"
+	},
+	"license": "MIT",
+	"private": false,
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"keywords": [
+		"files",
+		"pipeline"
+	],
+	"scripts": {
+		"build": "lightrix build src/index.ts src/lib/**/*.ts src/options/index.ts"
+	},
+	"dependencies": {
+		"deepmerge-ts": "4.2.2",
+		"fast-glob": "3.2.12"
+	},
+	"devDependencies": {
+		"@lightrix/config": "0.0.7",
+		"@lightrix/scripts": "0.1.2"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

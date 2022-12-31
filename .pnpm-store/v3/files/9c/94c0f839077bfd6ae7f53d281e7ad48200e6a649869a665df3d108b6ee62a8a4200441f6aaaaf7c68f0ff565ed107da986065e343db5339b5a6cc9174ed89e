@@ -1,0 +1,47 @@
+{
+  "name": "@emmetio/css-abbreviation",
+  "version": "2.1.4",
+  "description": "Parses Emmet CSS abbreviation into AST tree",
+  "main": "./dist/css-abbreviation.cjs.js",
+  "module": "./dist/css-abbreviation.es.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "lint": "tslint ./src/*.ts",
+    "test": "mocha",
+    "build": "rollup -c",
+    "clean": "rm -rf ./dist",
+    "prepare": "npm run lint && npm test && npm run clean && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emmetio/emmet.git"
+  },
+  "keywords": [],
+  "author": "Sergey Chikuyonok <serge.che@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/emmetio/emmet/issues"
+  },
+  "homepage": "https://github.com/emmetio/emmet#readme",
+  "dependencies": {
+    "@emmetio/scanner": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^12.7.2",
+    "mocha": "^7.1.1",
+    "rollup": "^2.6.0",
+    "rollup-plugin-typescript2": "^0.27.0",
+    "ts-lint": "^4.5.1",
+    "ts-node": "^8.8.2",
+    "typescript": "^3.8.3"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "mocha": {
+    "require": "ts-node/register",
+    "spec": "./test/*.ts"
+  },
+  "gitHead": "94fb2871d555636cadd7b48906980d3a87fc66c8"
+}

@@ -1,0 +1,7 @@
+{
+	"compilerOptions": {
+		"outDir": "dist"
+	},
+	"extends": "@lightrix/config/base/ts",
+	"include": ["src"]
+}

@@ -1,0 +1,5 @@
+[33m@astrojs/prefetch:build: [0mcache hit, replaying output [2m594795f337c2be67[0m
+[33m@astrojs/prefetch:build: [0m
+[33m@astrojs/prefetch:build: [0m> @astrojs/prefetch@0.1.1 build /home/runner/work/astro/astro/packages/integrations/prefetch
+[33m@astrojs/prefetch:build: [0m> astro-scripts build "src/**/*.ts" && tsc
+[33m@astrojs/prefetch:build: [0m

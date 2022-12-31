@@ -1,0 +1,67 @@
+{
+  "name": "svelte2tsx",
+  "version": "0.5.22",
+  "description": "Convert Svelte components to TSX for type checking",
+  "author": "David Pershouse",
+  "license": "MIT",
+  "keywords": [
+    "svelte",
+    "typescript"
+  ],
+  "homepage": "https://github.com/sveltejs/language-tools/tree/master/packages/svelte2tsx",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sveltejs/language-tools/tree/master/packages/svelte2tsx"
+  },
+  "type": "commonjs",
+  "main": "index.js",
+  "module": "index.mjs",
+  "types": "index.d.ts",
+  "devDependencies": {
+    "@jridgewell/trace-mapping": "^0.3.9",
+    "@rollup/plugin-commonjs": "^15.0.0",
+    "@rollup/plugin-json": "^4.0.0",
+    "@rollup/plugin-node-resolve": "^9.0.0",
+    "@rollup/plugin-typescript": "^6.0.0",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "^8.10.53",
+    "@types/unist": "^2.0.3",
+    "@types/vfile": "^3.0.2",
+    "magic-string": "^0.25.7",
+    "mocha": "^9.2.0",
+    "periscopic": "^2.0.2",
+    "rollup": "2.52.7",
+    "rollup-plugin-delete": "^2.0.0",
+    "source-map-support": "^0.5.16",
+    "sourcemap-codec": "^1.4.8",
+    "svelte": "~3.49.0",
+    "tiny-glob": "^0.2.6",
+    "tslib": "^1.10.0",
+    "typescript": "^4.9.3"
+  },
+  "peerDependencies": {
+    "svelte": "^3.24",
+    "typescript": "^4.1.2"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build",
+    "dev": "rollup -c -w",
+    "test": "mocha test/test.ts"
+  },
+  "files": [
+    "index.mjs",
+    "index.js",
+    "index.d.ts",
+    "README.md",
+    "LICENSE",
+    "svelte-jsx.d.ts",
+    "svelte-native-jsx.d.ts",
+    "svelte-shims.d.ts",
+    "svelte-html-do-not-use.d.ts"
+  ],
+  "dependencies": {
+    "dedent-js": "^1.0.1",
+    "pascal-case": "^3.1.1"
+  }
+}

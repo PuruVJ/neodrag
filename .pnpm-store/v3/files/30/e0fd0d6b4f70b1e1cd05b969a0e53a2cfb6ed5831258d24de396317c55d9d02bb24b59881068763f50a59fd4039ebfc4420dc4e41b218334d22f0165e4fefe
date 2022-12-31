@@ -1,0 +1,5 @@
+declare function resize(node: HTMLElement): {
+    destroy(): void;
+};
+
+export { resize };

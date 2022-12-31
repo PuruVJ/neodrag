@@ -1,0 +1,65 @@
+{
+  "name": "@antfu/utils",
+  "version": "0.5.2",
+  "packageManager": "pnpm@7.0.1",
+  "description": "Opinionated collection of common JavaScript / TypeScript utils by @antfu",
+  "keywords": [
+    "utils"
+  ],
+  "homepage": "https://github.com/antfu/utils#readme",
+  "bugs": {
+    "url": "https://github.com/antfu/utils/issues"
+  },
+  "license": "MIT",
+  "author": "Anthony Fu <anthonyfu117@hotmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antfu/utils.git"
+  },
+  "funding": "https://github.com/sponsors/antfu",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "*.d.ts"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "npm run build -- --watch",
+    "lint": "eslint .",
+    "prepublishOnly": "npm run build",
+    "release": "bumpp --commit --push --tag && npm publish",
+    "start": "esno src/index.ts",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^0.23.0",
+    "@antfu/ni": "^0.16.2",
+    "@rollup/plugin-alias": "^3.1.9",
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@types/node": "^17.0.31",
+    "@types/throttle-debounce": "^2.1.0",
+    "bumpp": "^7.1.1",
+    "eslint": "^8.15.0",
+    "esno": "^0.14.1",
+    "p-limit": "^4.0.0",
+    "rollup": "^2.72.1",
+    "rollup-plugin-dts": "^4.2.1",
+    "rollup-plugin-esbuild": "^4.9.1",
+    "throttle-debounce": "^3.0.1",
+    "typescript": "^4.6.4",
+    "vite": "^2.9.8",
+    "vitest": "^0.12.3"
+  }
+}

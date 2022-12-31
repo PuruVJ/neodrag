@@ -1,0 +1,356 @@
+{
+  "name": "@iconify/utils",
+  "type": "module",
+  "description": "Common functions for working with Iconify icon sets used by various packages.",
+  "author": "Vjacheslav Trushkin",
+  "version": "2.0.3",
+  "license": "MIT",
+  "bugs": "https://github.com/iconify/iconify/issues",
+  "homepage": "https://iconify.design/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iconify/iconify.git",
+    "directory": "packages/utils"
+  },
+  "sideEffects": false,
+  "main": "lib/index.cjs",
+  "module": "lib/index.mjs",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./lib/index.cjs",
+      "import": "./lib/index.mjs",
+      "types": "./lib/index.d.ts"
+    },
+    "./*": "./*",
+    "./lib/colors": {
+      "require": "./lib/colors/index.cjs",
+      "import": "./lib/colors/index.mjs",
+      "types": "./lib/colors/index.d.ts"
+    },
+    "./lib/colors/index": {
+      "require": "./lib/colors/index.cjs",
+      "import": "./lib/colors/index.mjs",
+      "types": "./lib/colors/index.d.ts"
+    },
+    "./lib/colors/keywords": {
+      "require": "./lib/colors/keywords.cjs",
+      "import": "./lib/colors/keywords.mjs",
+      "types": "./lib/colors/keywords.d.ts"
+    },
+    "./lib/colors/types": {
+      "require": "./lib/colors/types.cjs",
+      "import": "./lib/colors/types.mjs",
+      "types": "./lib/colors/types.d.ts"
+    },
+    "./lib/css/common": {
+      "require": "./lib/css/common.cjs",
+      "import": "./lib/css/common.mjs",
+      "types": "./lib/css/common.d.ts"
+    },
+    "./lib/css/format": {
+      "require": "./lib/css/format.cjs",
+      "import": "./lib/css/format.mjs",
+      "types": "./lib/css/format.d.ts"
+    },
+    "./lib/css/icon": {
+      "require": "./lib/css/icon.cjs",
+      "import": "./lib/css/icon.mjs",
+      "types": "./lib/css/icon.d.ts"
+    },
+    "./lib/css/icons": {
+      "require": "./lib/css/icons.cjs",
+      "import": "./lib/css/icons.mjs",
+      "types": "./lib/css/icons.d.ts"
+    },
+    "./lib/css/types": {
+      "require": "./lib/css/types.cjs",
+      "import": "./lib/css/types.mjs",
+      "types": "./lib/css/types.d.ts"
+    },
+    "./lib/customisations/bool": {
+      "require": "./lib/customisations/bool.cjs",
+      "import": "./lib/customisations/bool.mjs",
+      "types": "./lib/customisations/bool.d.ts"
+    },
+    "./lib/customisations/defaults": {
+      "require": "./lib/customisations/defaults.cjs",
+      "import": "./lib/customisations/defaults.mjs",
+      "types": "./lib/customisations/defaults.d.ts"
+    },
+    "./lib/customisations/flip": {
+      "require": "./lib/customisations/flip.cjs",
+      "import": "./lib/customisations/flip.mjs",
+      "types": "./lib/customisations/flip.d.ts"
+    },
+    "./lib/customisations/merge": {
+      "require": "./lib/customisations/merge.cjs",
+      "import": "./lib/customisations/merge.mjs",
+      "types": "./lib/customisations/merge.d.ts"
+    },
+    "./lib/customisations/rotate": {
+      "require": "./lib/customisations/rotate.cjs",
+      "import": "./lib/customisations/rotate.mjs",
+      "types": "./lib/customisations/rotate.d.ts"
+    },
+    "./lib/emoji/regex/base": {
+      "require": "./lib/emoji/regex/base.cjs",
+      "import": "./lib/emoji/regex/base.mjs",
+      "types": "./lib/emoji/regex/base.d.ts"
+    },
+    "./lib/emoji/regex/create": {
+      "require": "./lib/emoji/regex/create.cjs",
+      "import": "./lib/emoji/regex/create.mjs",
+      "types": "./lib/emoji/regex/create.d.ts"
+    },
+    "./lib/emoji/regex/numbers": {
+      "require": "./lib/emoji/regex/numbers.cjs",
+      "import": "./lib/emoji/regex/numbers.mjs",
+      "types": "./lib/emoji/regex/numbers.d.ts"
+    },
+    "./lib/emoji/regex/similar": {
+      "require": "./lib/emoji/regex/similar.cjs",
+      "import": "./lib/emoji/regex/similar.mjs",
+      "types": "./lib/emoji/regex/similar.d.ts"
+    },
+    "./lib/emoji/regex/tree": {
+      "require": "./lib/emoji/regex/tree.cjs",
+      "import": "./lib/emoji/regex/tree.mjs",
+      "types": "./lib/emoji/regex/tree.d.ts"
+    },
+    "./lib/emoji/cleanup": {
+      "require": "./lib/emoji/cleanup.cjs",
+      "import": "./lib/emoji/cleanup.mjs",
+      "types": "./lib/emoji/cleanup.d.ts"
+    },
+    "./lib/emoji/convert": {
+      "require": "./lib/emoji/convert.cjs",
+      "import": "./lib/emoji/convert.mjs",
+      "types": "./lib/emoji/convert.d.ts"
+    },
+    "./lib/emoji/data": {
+      "require": "./lib/emoji/data.cjs",
+      "import": "./lib/emoji/data.mjs",
+      "types": "./lib/emoji/data.d.ts"
+    },
+    "./lib/emoji/format": {
+      "require": "./lib/emoji/format.cjs",
+      "import": "./lib/emoji/format.mjs",
+      "types": "./lib/emoji/format.d.ts"
+    },
+    "./lib/emoji/parse-test": {
+      "require": "./lib/emoji/parse-test.cjs",
+      "import": "./lib/emoji/parse-test.mjs",
+      "types": "./lib/emoji/parse-test.d.ts"
+    },
+    "./lib/emoji/variations": {
+      "require": "./lib/emoji/variations.cjs",
+      "import": "./lib/emoji/variations.mjs",
+      "types": "./lib/emoji/variations.d.ts"
+    },
+    "./lib/icon-set/convert-info": {
+      "require": "./lib/icon-set/convert-info.cjs",
+      "import": "./lib/icon-set/convert-info.mjs",
+      "types": "./lib/icon-set/convert-info.d.ts"
+    },
+    "./lib/icon-set/expand": {
+      "require": "./lib/icon-set/expand.cjs",
+      "import": "./lib/icon-set/expand.mjs",
+      "types": "./lib/icon-set/expand.d.ts"
+    },
+    "./lib/icon-set/get-icon": {
+      "require": "./lib/icon-set/get-icon.cjs",
+      "import": "./lib/icon-set/get-icon.mjs",
+      "types": "./lib/icon-set/get-icon.d.ts"
+    },
+    "./lib/icon-set/get-icons": {
+      "require": "./lib/icon-set/get-icons.cjs",
+      "import": "./lib/icon-set/get-icons.mjs",
+      "types": "./lib/icon-set/get-icons.d.ts"
+    },
+    "./lib/icon-set/minify": {
+      "require": "./lib/icon-set/minify.cjs",
+      "import": "./lib/icon-set/minify.mjs",
+      "types": "./lib/icon-set/minify.d.ts"
+    },
+    "./lib/icon-set/parse": {
+      "require": "./lib/icon-set/parse.cjs",
+      "import": "./lib/icon-set/parse.mjs",
+      "types": "./lib/icon-set/parse.d.ts"
+    },
+    "./lib/icon-set/tree": {
+      "require": "./lib/icon-set/tree.cjs",
+      "import": "./lib/icon-set/tree.mjs",
+      "types": "./lib/icon-set/tree.d.ts"
+    },
+    "./lib/icon-set/validate": {
+      "require": "./lib/icon-set/validate.cjs",
+      "import": "./lib/icon-set/validate.mjs",
+      "types": "./lib/icon-set/validate.d.ts"
+    },
+    "./lib/icon-set/validate-basic": {
+      "require": "./lib/icon-set/validate-basic.cjs",
+      "import": "./lib/icon-set/validate-basic.mjs",
+      "types": "./lib/icon-set/validate-basic.d.ts"
+    },
+    "./lib/icon/defaults": {
+      "require": "./lib/icon/defaults.cjs",
+      "import": "./lib/icon/defaults.mjs",
+      "types": "./lib/icon/defaults.d.ts"
+    },
+    "./lib/icon/merge": {
+      "require": "./lib/icon/merge.cjs",
+      "import": "./lib/icon/merge.mjs",
+      "types": "./lib/icon/merge.d.ts"
+    },
+    "./lib/icon/name": {
+      "require": "./lib/icon/name.cjs",
+      "import": "./lib/icon/name.mjs",
+      "types": "./lib/icon/name.d.ts"
+    },
+    "./lib/icon/transformations": {
+      "require": "./lib/icon/transformations.cjs",
+      "import": "./lib/icon/transformations.mjs",
+      "types": "./lib/icon/transformations.d.ts"
+    },
+    "./lib": {
+      "require": "./lib/index.cjs",
+      "import": "./lib/index.mjs",
+      "types": "./lib/index.d.ts"
+    },
+    "./lib/index": {
+      "require": "./lib/index.cjs",
+      "import": "./lib/index.mjs",
+      "types": "./lib/index.d.ts"
+    },
+    "./lib/loader/custom": {
+      "require": "./lib/loader/custom.cjs",
+      "import": "./lib/loader/custom.mjs",
+      "types": "./lib/loader/custom.d.ts"
+    },
+    "./lib/loader/fs": {
+      "require": "./lib/loader/fs.cjs",
+      "import": "./lib/loader/fs.mjs",
+      "types": "./lib/loader/fs.d.ts"
+    },
+    "./lib/loader/install-pkg": {
+      "require": "./lib/loader/install-pkg.cjs",
+      "import": "./lib/loader/install-pkg.mjs",
+      "types": "./lib/loader/install-pkg.d.ts"
+    },
+    "./lib/loader/loader": {
+      "require": "./lib/loader/loader.cjs",
+      "import": "./lib/loader/loader.mjs",
+      "types": "./lib/loader/loader.d.ts"
+    },
+    "./lib/loader/modern": {
+      "require": "./lib/loader/modern.cjs",
+      "import": "./lib/loader/modern.mjs",
+      "types": "./lib/loader/modern.d.ts"
+    },
+    "./lib/loader/node-loader": {
+      "require": "./lib/loader/node-loader.cjs",
+      "import": "./lib/loader/node-loader.mjs",
+      "types": "./lib/loader/node-loader.d.ts"
+    },
+    "./lib/loader/node-loaders": {
+      "require": "./lib/loader/node-loaders.cjs",
+      "import": "./lib/loader/node-loaders.mjs",
+      "types": "./lib/loader/node-loaders.d.ts"
+    },
+    "./lib/loader/types": {
+      "require": "./lib/loader/types.cjs",
+      "import": "./lib/loader/types.mjs",
+      "types": "./lib/loader/types.d.ts"
+    },
+    "./lib/loader/utils": {
+      "require": "./lib/loader/utils.cjs",
+      "import": "./lib/loader/utils.mjs",
+      "types": "./lib/loader/utils.d.ts"
+    },
+    "./lib/loader/warn": {
+      "require": "./lib/loader/warn.cjs",
+      "import": "./lib/loader/warn.mjs",
+      "types": "./lib/loader/warn.d.ts"
+    },
+    "./lib/misc/strings": {
+      "require": "./lib/misc/strings.cjs",
+      "import": "./lib/misc/strings.mjs",
+      "types": "./lib/misc/strings.d.ts"
+    },
+    "./lib/misc/objects": {
+      "require": "./lib/misc/objects.cjs",
+      "import": "./lib/misc/objects.mjs",
+      "types": "./lib/misc/objects.d.ts"
+    },
+    "./lib/svg/build": {
+      "require": "./lib/svg/build.cjs",
+      "import": "./lib/svg/build.mjs",
+      "types": "./lib/svg/build.d.ts"
+    },
+    "./lib/svg/encode-svg-for-css": {
+      "require": "./lib/svg/encode-svg-for-css.cjs",
+      "import": "./lib/svg/encode-svg-for-css.mjs",
+      "types": "./lib/svg/encode-svg-for-css.d.ts"
+    },
+    "./lib/svg/html": {
+      "require": "./lib/svg/html.cjs",
+      "import": "./lib/svg/html.mjs",
+      "types": "./lib/svg/html.d.ts"
+    },
+    "./lib/svg/id": {
+      "require": "./lib/svg/id.cjs",
+      "import": "./lib/svg/id.mjs",
+      "types": "./lib/svg/id.d.ts"
+    },
+    "./lib/svg/size": {
+      "require": "./lib/svg/size.cjs",
+      "import": "./lib/svg/size.mjs",
+      "types": "./lib/svg/size.d.ts"
+    },
+    "./lib/svg/trim": {
+      "require": "./lib/svg/trim.cjs",
+      "import": "./lib/svg/trim.mjs",
+      "types": "./lib/svg/trim.d.ts"
+    },
+    "./lib/svg/url": {
+      "require": "./lib/svg/url.cjs",
+      "import": "./lib/svg/url.mjs",
+      "types": "./lib/svg/url.d.ts"
+    }
+  },
+  "files": [
+    "lib",
+    "*.d.ts"
+  ],
+  "dependencies": {
+    "@antfu/install-pkg": "^0.1.1",
+    "@antfu/utils": "^0.5.2",
+    "@iconify/types": "^2.0.0",
+    "debug": "^4.3.4",
+    "kolorist": "^1.6.0",
+    "local-pkg": "^0.4.2"
+  },
+  "devDependencies": {
+    "@iconify-json/flat-color-icons": "^1.1.3",
+    "@types/debug": "^4.1.7",
+    "@types/jest": "^29.2.4",
+    "@typescript-eslint/eslint-plugin": "^5.46.0",
+    "eslint": "^8.29.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.9.4",
+    "unbuild": "^0.8.11",
+    "vitest": "^0.23.4"
+  },
+  "scripts": {
+    "clean": "rimraf lib tsconfig.tsbuildinfo",
+    "lint": "eslint --fix src/**/*.ts",
+    "prebuild": "pnpm run lint && pnpm run clean",
+    "build": "unbuild",
+    "test:cjs": "vitest --config vitest.config.cjs",
+    "test:esm": "vitest --config vitest.config.mjs",
+    "test": "pnpm run test:cjs && pnpm run test:esm"
+  }
+}

@@ -1,0 +1,11 @@
+---
+const { publishedTime, modifiedTime, expirationTime, authors, section, tags } =
+  Astro.props.openGraph.article;
+---
+
+{publishedTime ? <meta property="article:published_time" content={publishedTime} /> : null}
+{modifiedTime ? <meta property="article:modified_time" content={modifiedTime} /> : null}
+{expirationTime ? <meta property="article:expiration_time" content={expirationTime} /> : null}
+{authors ? authors.map( (author) => <meta property="article:author" content={author} /> ) : null}
+{section ? <meta property="article:section" content={section} /> : null}
+{tags ? tags.map((tag) => <meta property="article:tag" content={tag} />) : null}

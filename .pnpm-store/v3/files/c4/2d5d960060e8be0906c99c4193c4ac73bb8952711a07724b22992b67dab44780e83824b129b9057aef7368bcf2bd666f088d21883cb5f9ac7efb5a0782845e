@@ -1,0 +1,14 @@
+@custom-media --dark (prefers-color-scheme: dark);
+
+:root {
+  --red: #f00;
+  --pink: #ffc0cb;
+  --h: 200;
+  --s: 50%;
+  --l: 50%;
+  --size-1: 1rem;
+  --size-2: 2rem;
+  --fade-in: fade-in .5s ease;
+}
+
+@keyframes fade-in {to { opacity: 1 }}

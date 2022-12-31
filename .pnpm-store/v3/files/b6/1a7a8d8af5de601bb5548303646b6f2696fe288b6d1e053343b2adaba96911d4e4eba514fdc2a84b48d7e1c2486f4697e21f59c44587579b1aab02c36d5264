@@ -1,0 +1,69 @@
+{
+  "name": "mixme",
+  "description": "A library for recursive merging of Javascript objects",
+  "version": "0.5.4",
+  "author": "David Worms <david@adaltas.com> (https://www.adaltas.com)",
+  "contributors": [],
+  "devDependencies": {
+    "@commitlint/cli": "^13.1.0",
+    "@commitlint/config-conventional": "^13.1.0",
+    "@babel/core": "^7.15.5",
+    "@babel/preset-env": "^7.15.6",
+    "coffeescript": "^2.6.0",
+    "husky": "^7.0.2",
+    "mocha": "^9.1.1",
+    "pinst": "^2.1.6",
+    "rollup": "^2.56.3",
+    "rollup-plugin-babel": "^4.4.0",
+    "should": "^13.2.3",
+    "standard-version": "^9.3.1"
+  },
+  "engines": {
+    "node": ">= 8.0.0"
+  },
+  "homepage": "https://github.com/adaltas/node-mixme",
+  "bugs": {
+    "url": "https://github.com/adaltas/node-mixme/issues"
+  },
+  "keywords": [
+    "merge",
+    "deep",
+    "extend",
+    "copy",
+    "clone",
+    "recursive"
+  ],
+  "files": [
+    "/dist"
+  ],
+  "license": "MIT",
+  "main": "dist/mixme.cjs.js",
+  "module": "dist/mixme.esm.js",
+  "mocha": {
+    "throw-deprecation": true,
+    "require": [
+      "should",
+      "./coffee.config.js"
+    ],
+    "inline-diffs": true,
+    "timeout": 40000,
+    "reporter": "spec",
+    "recursive": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adaltas/node-mixme.git"
+  },
+  "scripts": {
+    "_postinstall": "husky install",
+    "prepublishOnly": "pinst --disable",
+    "postpublish": "pinst --enable",
+    "build": "coffee -b -o lib src src && rollup -c",
+    "pretest": "npm run build",
+    "test": "mocha 'test/**/*.coffee'",
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch",
+    "release:major": "standard-version --release-as major"
+  }
+}

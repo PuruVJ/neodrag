@@ -1,0 +1,34 @@
+{
+  "name": "supports-esm",
+  "version": "1.0.0",
+  "description": "Detect at runtime if Node.js supports ECMAScript modules",
+  "main": "index.js",
+  "exports": "./index.js",
+  "files": [
+    "index.js"
+  ],
+  "dependencies": {
+    "has-package-exports": "^1.1.0"
+  },
+  "devDependencies": {
+    "semver": "^7.3.2"
+  },
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/targos/supports-esm.git"
+  },
+  "keywords": [
+    "ESM",
+    "support",
+    "ES Modules"
+  ],
+  "author": "Michaël Zasso <targos@protonmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/targos/supports-esm/issues"
+  },
+  "homepage": "https://github.com/targos/supports-esm#readme"
+}

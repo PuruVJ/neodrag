@@ -1,0 +1,32 @@
+{
+  "name": "astrojs-service-worker",
+  "version": "0.0.8",
+  "description": "An Astro integration that generates a Service Worker. Powered by Workbox.",
+  "license": "MIT",
+  "author": "Tate <tatethurston@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tatethurston/astrojs-service-worker"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "types": "index.d.ts",
+  "dependencies": {
+    "workbox-build": "^6.5.4"
+  },
+  "keywords": [
+    "astro",
+    "astrojs",
+    "service worker",
+    "offline",
+    "astro-component",
+    "performance"
+  ],
+  "main": "./index.js",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "default": "./index.js"
+    }
+  }
+}

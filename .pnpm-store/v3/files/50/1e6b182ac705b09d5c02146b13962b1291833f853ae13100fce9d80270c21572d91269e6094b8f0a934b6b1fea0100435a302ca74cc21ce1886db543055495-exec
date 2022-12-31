@@ -1,0 +1,37 @@
+{
+    "name": "@types/csso",
+    "version": "5.0.0",
+    "description": "TypeScript definitions for csso",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/csso",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Christian Rackerseder",
+            "url": "https://github.com/screendriver",
+            "githubUsername": "screendriver"
+        },
+        {
+            "name": "Erik Källén",
+            "url": "https://github.com/erik-kallen",
+            "githubUsername": "erik-kallen"
+        },
+        {
+            "name": "Piotr Błażejewicz",
+            "url": "https://github.com/peterblazejewicz",
+            "githubUsername": "peterblazejewicz"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/csso"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/css-tree": "*"
+    },
+    "typesPublisherContentHash": "9e4fda0ab87050fa1d4be6777a65e487a34292cab67fece90c1dc22945aaf047",
+    "typeScriptVersion": "3.8"
+}

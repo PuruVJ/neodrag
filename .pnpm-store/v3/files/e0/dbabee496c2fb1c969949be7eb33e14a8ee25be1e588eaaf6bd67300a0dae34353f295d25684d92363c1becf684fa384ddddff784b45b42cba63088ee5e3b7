@@ -1,0 +1,52 @@
+{
+  "name": "svelte-local-storage-store",
+  "version": "0.3.2",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=0.14"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshnuss/svelte-local-storage-store.git"
+  },
+  "scripts": {
+    "build": "tsup index.ts --format esm,cjs --sourcemap --dts",
+    "prepublishOnly": "npm test && npm run lint",
+    "prepare": "npm run build",
+    "lint": "eslint .",
+    "fix": "eslint . --fix",
+    "semantic-release": "semantic-release",
+    "test": "jest --coverage",
+    "test:watch": "yarn run test -- --watch"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.18.6",
+    "@types/jest": "^27.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/parser": "^5.5.0",
+    "babel-jest": "^27.4.2",
+    "codecov": "^3.8.3",
+    "eslint": "^8.3.0",
+    "eslint-plugin-jest": "^25.2.4",
+    "jest": "^27.5.1",
+    "rollup-plugin-svelte": "^7.1.0",
+    "semantic-release": "19.0.3",
+    "svelte": "^3.48.0",
+    "ts-jest": "^27.0.7",
+    "tsup": "^6.1.2",
+    "typescript": "^4.7.4"
+  },
+  "keywords": [
+    "svelte"
+  ],
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "svelte": "^3.48.0"
+  }
+}

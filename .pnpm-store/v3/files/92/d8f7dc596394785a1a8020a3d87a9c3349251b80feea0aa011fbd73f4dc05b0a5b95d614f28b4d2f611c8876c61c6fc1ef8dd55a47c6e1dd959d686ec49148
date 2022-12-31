@@ -1,0 +1,48 @@
+{
+  "name": "solid-refresh",
+  "description": "Universal HMR for SolidJS",
+  "author": "Ryan Carniato",
+  "license": "MIT",
+  "version": "0.4.1",
+  "homepage": "https://github.com/solidjs/solid-refresh#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/solidjs/solid-refresh"
+  },
+  "main": "dist/solid-refresh.js",
+  "module": "dist/solid-refresh.mjs",
+  "files": [
+    "dist",
+    "babel.js"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "contributors": [
+    "Alexis Munsayac"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rollup -c",
+    "test": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.5",
+    "@rollup/plugin-node-resolve": "13.3.0",
+    "@rollup/plugin-typescript": "^8.3.3",
+    "@types/babel__core": "^7.1.19",
+    "rollup": "^2.75.7",
+    "solid-js": "^1.4.4",
+    "typescript": "^4.7.4",
+    "vitest": "^0.15.1"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.3"
+  },
+  "dependencies": {
+    "@babel/generator": "^7.18.2",
+    "@babel/helper-module-imports": "^7.16.7",
+    "@babel/types": "^7.18.4"
+  }
+}

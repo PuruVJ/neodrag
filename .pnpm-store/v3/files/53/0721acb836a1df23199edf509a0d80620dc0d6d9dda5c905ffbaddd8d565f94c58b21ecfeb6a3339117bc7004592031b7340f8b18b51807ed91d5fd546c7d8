@@ -1,0 +1,52 @@
+{
+	"name": "astro-compress",
+	"version": "1.1.24",
+	"type": "module",
+	"description": "🗜️ AstroJS compression utilities. Compress HTML, CSS, JavaScript and more.",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/astro-community/astro-compress.git"
+	},
+	"homepage": "https://github.com/astro-community/astro-compress#readme",
+	"bugs": {
+		"url": "https://github.com/astro-community/astro-compress/issues"
+	},
+	"license": "MIT",
+	"private": false,
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"keywords": [
+		"astro-integration",
+		"astro-component",
+		"astro",
+		"compression",
+		"css",
+		"html",
+		"img",
+		"javascript",
+		"performance",
+		"svg"
+	],
+	"scripts": {
+		"build": "lightrix build src/index.ts src/lib/**/*.ts src/options/index.ts"
+	},
+	"dependencies": {
+		"@types/csso": "5.0.0",
+		"@types/html-minifier-terser": "7.0.0",
+		"@types/sharp": "0.31.0",
+		"csso": "5.0.5",
+		"files-pipeline": "0.0.2",
+		"html-minifier-terser": "7.1.0",
+		"sharp": "0.31.2",
+		"svgo": "3.0.2",
+		"terser": "5.16.1"
+	},
+	"devDependencies": {
+		"@lightrix/config": "0.0.7",
+		"@lightrix/scripts": "0.1.2",
+		"astro": "1.7.2"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

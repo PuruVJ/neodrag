@@ -1,0 +1,467 @@
+# @astrojs/markdown-remark
+
+## 1.2.0
+
+### Minor Changes
+
+- [#5654](https://github.com/withastro/astro/pull/5654) [`2c65b433b`](https://github.com/withastro/astro/commit/2c65b433bf840a1bb93b0a1947df5949e33512ff) Thanks [@delucis](https://github.com/delucis)! - Refactor and export `rehypeHeadingIds` plugin
+
+  The `rehypeHeadingIds` plugin injects IDs for all headings in a Markdown document and can now also handle MDX inputs if needed. You can import and use this plugin if you need heading IDs to be injected _before_ other rehype plugins run.
+
+### Patch Changes
+
+- [#5648](https://github.com/withastro/astro/pull/5648) [`853081d1c`](https://github.com/withastro/astro/commit/853081d1c857d8ad8a9634c37ed8fd123d32d241) Thanks [@bholmesdev](https://github.com/bholmesdev)! - Prevent relative image paths in `src/content/`
+
+## 1.1.3
+
+### Patch Changes
+
+- [#4842](https://github.com/withastro/astro/pull/4842) [`812658ad2`](https://github.com/withastro/astro/commit/812658ad2ab3732a99e35c4fd903e302e723db46) Thanks [@bluwy](https://github.com/bluwy)! - Fix non-hoisted remark/rehype plugin loading
+
+- [#4842](https://github.com/withastro/astro/pull/4842) [`812658ad2`](https://github.com/withastro/astro/commit/812658ad2ab3732a99e35c4fd903e302e723db46) Thanks [@bluwy](https://github.com/bluwy)! - Add missing dependencies, support strict dependency installation (e.g. pnpm)
+
+## 1.1.2
+
+### Patch Changes
+
+- [#4787](https://github.com/withastro/astro/pull/4787) [`df54595a8`](https://github.com/withastro/astro/commit/df54595a8836448a621fceeb38fbaacde1bb27cf) Thanks [@merceyz](https://github.com/merceyz)! - declare `hast-util-to-html` as a dependency
+
+## 1.1.1
+
+### Patch Changes
+
+- [#4519](https://github.com/withastro/astro/pull/4519) [`a2e8e76c3`](https://github.com/withastro/astro/commit/a2e8e76c303e8d6f39c24c122905a10f06907997) Thanks [@JuanM04](https://github.com/JuanM04)! - Upgraded Shiki to v0.11.1
+
+## 1.1.0
+
+### Minor Changes
+
+- [#4474](https://github.com/withastro/astro/pull/4474) [`ac0321824`](https://github.com/withastro/astro/commit/ac03218247763e4782824e220a384fd20ae6d769) Thanks [@bholmesdev](https://github.com/bholmesdev)! - Add "extends" to markdown plugin config to preserve Astro defaults
+
+* [#4138](https://github.com/withastro/astro/pull/4138) [`839097c84`](https://github.com/withastro/astro/commit/839097c84e830542c17c18d8337a88de8885c356) Thanks [@gtnbssn](https://github.com/gtnbssn)! - Makes remark-rehype options available in astro.config.mjs
+
+## 1.1.0-next.0
+
+### Minor Changes
+
+- [#4474](https://github.com/withastro/astro/pull/4474) [`ac0321824`](https://github.com/withastro/astro/commit/ac03218247763e4782824e220a384fd20ae6d769) Thanks [@bholmesdev](https://github.com/bholmesdev)! - Add "extends" to markdown plugin config to preserve Astro defaults
+
+* [#4138](https://github.com/withastro/astro/pull/4138) [`839097c84`](https://github.com/withastro/astro/commit/839097c84e830542c17c18d8337a88de8885c356) Thanks [@gtnbssn](https://github.com/gtnbssn)! - Makes remark-rehype options available in astro.config.mjs
+
+## 1.0.0
+
+### Major Changes
+
+- [`04ad44563`](https://github.com/withastro/astro/commit/04ad445632c67bdd60c1704e1e0dcbcaa27b9308) - > Astro v1.0 is out! Read the [official announcement post](https://astro.build/blog/astro-1/).
+
+  **No breaking changes**. This package is now officially stable and compatible with `astro@1.0.0`!
+
+### Patch Changes
+
+- Updated dependencies [[`04ad44563`](https://github.com/withastro/astro/commit/04ad445632c67bdd60c1704e1e0dcbcaa27b9308)]:
+  - @astrojs/prism@1.0.0
+
+## 0.14.1
+
+### Patch Changes
+
+- [#4176](https://github.com/withastro/astro/pull/4176) [`2675b8633`](https://github.com/withastro/astro/commit/2675b8633c5d5c45b237ec87940d5eaf1bfb1b4b) Thanks [@bholmesdev](https://github.com/bholmesdev)! - Support frontmatter injection for MD and MDX using remark and rehype plugins
+
+* [#4137](https://github.com/withastro/astro/pull/4137) [`471c6f784`](https://github.com/withastro/astro/commit/471c6f784e21399676c8b2002665ffdf83a1c59e) Thanks [@bholmesdev](https://github.com/bholmesdev)! - Speed up internal markdown builds with new vite-plugin markdown
+
+- [#4169](https://github.com/withastro/astro/pull/4169) [`16034f0dd`](https://github.com/withastro/astro/commit/16034f0dd5b3683e9e022dbd413e85bd18d2b031) Thanks [@hippotastic](https://github.com/hippotastic)! - Fix double-escaping of non-highlighted code blocks in Astro-flavored markdown
+
+## 0.14.0
+
+### Minor Changes
+
+- [#4114](https://github.com/withastro/astro/pull/4114) [`64432bcb8`](https://github.com/withastro/astro/commit/64432bcb873efd0e4297c00fc9583a1fe516dfe7) Thanks [@Princesseuh](https://github.com/Princesseuh)! - Refactor `@astrojs/mdx` and `@astrojs/markdown-remark` to use `@astrojs/prism` instead of duplicating the code
+
+### Patch Changes
+
+- Updated dependencies [[`64432bcb8`](https://github.com/withastro/astro/commit/64432bcb873efd0e4297c00fc9583a1fe516dfe7)]:
+  - @astrojs/prism@0.7.0
+
+## 0.13.0
+
+### Minor Changes
+
+- [`ba11b3399`](https://github.com/withastro/astro/commit/ba11b33996d79c32da947986edb0f32dbcc04aaf) Thanks [@RafidMuhymin](https://github.com/RafidMuhymin)! - fixed generated slugs in markdown that ends with a dash
+
+* [#4016](https://github.com/withastro/astro/pull/4016) [`00fab4ce1`](https://github.com/withastro/astro/commit/00fab4ce135eb799cac69140403d7724686733d6) Thanks [@bholmesdev](https://github.com/bholmesdev)! - The use of components and JSX expressions in Markdown are no longer supported by default.
+
+  For long term support, migrate to the `@astrojs/mdx` integration for MDX support (including `.mdx` pages!).
+
+  Not ready to migrate to MDX? Add the legacy flag to your Astro config to re-enable the previous Markdown support.
+
+  ```js
+  // https://astro.build/config
+  export default defineConfig({
+    legacy: {
+      astroFlavoredMarkdown: true,
+    },
+  });
+  ```
+
+- [#4031](https://github.com/withastro/astro/pull/4031) [`6e27a5fdc`](https://github.com/withastro/astro/commit/6e27a5fdc21276cad26cd50e16a2709a40a7cbac) Thanks [@natemoo-re](https://github.com/natemoo-re)! - **BREAKING** Renamed Markdown utility function `getHeaders()` to `getHeadings()`.
+
+### Patch Changes
+
+- [#4008](https://github.com/withastro/astro/pull/4008) [`399d7e269`](https://github.com/withastro/astro/commit/399d7e269834d11c046b390705a9a53d3738f3cf) Thanks [@bholmesdev](https://github.com/bholmesdev)! - Avoid parsing JSX, components, and Astro islands when using "plain" md mode. This brings `markdown.mode: 'md'` in-line with our docs description.
+
+## 0.12.0
+
+### Minor Changes
+
+- [#3924](https://github.com/withastro/astro/pull/3924) [`07fb544da`](https://github.com/withastro/astro/commit/07fb544dab142a3d4bb9d0d878aab34eaea447b2) Thanks [@FredKSchott](https://github.com/FredKSchott)! - Remove unused ssr-utils file
+
+### Patch Changes
+
+- Updated dependencies [[`31f9c0bf0`](https://github.com/withastro/astro/commit/31f9c0bf029ffa4b470e620f2c32e1370643e81e)]:
+  - @astrojs/prism@0.6.1
+
+## 0.11.7
+
+### Patch Changes
+
+- [#3919](https://github.com/withastro/astro/pull/3919) [`01a55467d`](https://github.com/withastro/astro/commit/01a55467d561974f843a9e0cd6963af7c840abb9) Thanks [@FredKSchott](https://github.com/FredKSchott)! - Add back missing ssr-utils.js file
+
+## 0.11.6
+
+### Patch Changes
+
+- [#3911](https://github.com/withastro/astro/pull/3911) [`ca45c0c27`](https://github.com/withastro/astro/commit/ca45c0c270f5ca3f7d2fb113a235d415cecdb333) Thanks [@JuanM04](https://github.com/JuanM04)! - Don't throw when Shiki doesn't recognize a language
+
+- Updated dependencies [[`b48767985`](https://github.com/withastro/astro/commit/b48767985359bd359df8071324952ea5f2bc0d86)]:
+  - @astrojs/prism@0.6.0
+
+## 0.11.5
+
+### Patch Changes
+
+- [#3669](https://github.com/withastro/astro/pull/3669) [`93e1020b1`](https://github.com/withastro/astro/commit/93e1020b1e8549b08cf5646e1ebc3ae34e14ebc8) Thanks [@natemoo-re](https://github.com/natemoo-re)! - Tooling: reintroduce smoke test across example projects
+
+## 0.11.4
+
+### Patch Changes
+
+- Updated dependencies [[`1cc5b7890`](https://github.com/withastro/astro/commit/1cc5b78905633608e5b07ad291f916f54e67feb1)]:
+  - @astrojs/prism@0.5.0
+
+## 0.11.3
+
+### Patch Changes
+
+- [#3638](https://github.com/withastro/astro/pull/3638) [`80c71c7c`](https://github.com/withastro/astro/commit/80c71c7c56d15dc05ec0c5a848130aad222d7d51) Thanks [@tony-sull](https://github.com/tony-sull)! - Fix: HTML comments in markdown code blocks should not be wrapped in JS comments
+
+* [#3612](https://github.com/withastro/astro/pull/3612) [`fca58cfd`](https://github.com/withastro/astro/commit/fca58cfd91b68501ec82350ab023170b208d8ce7) Thanks [@bholmesdev](https://github.com/bholmesdev)! - Fix: "vpath" import error when building for netlify edge
+
+- [#3630](https://github.com/withastro/astro/pull/3630) [`48e67fe0`](https://github.com/withastro/astro/commit/48e67fe05398dc4b1fca12db36c1b37bb341277a) Thanks [@tony-sull](https://github.com/tony-sull)! - Encodes ampersand characters in code blocks
+
+* [#3620](https://github.com/withastro/astro/pull/3620) [`05aa7244`](https://github.com/withastro/astro/commit/05aa72442cd4512b94abdb39623e8caa2c1839b0) Thanks [@hippotastic](https://github.com/hippotastic)! - Remove extra newlines around Markdown components
+
+## 0.11.2
+
+### Patch Changes
+
+- [#3572](https://github.com/withastro/astro/pull/3572) [`5c73f614`](https://github.com/withastro/astro/commit/5c73f614e8f579e04fe61c948b69be7bc6d81d5d) Thanks [@hippotastic](https://github.com/hippotastic)! - Fix remarkMdxish performance issue on huge sites
+
+## 0.11.1
+
+### Patch Changes
+
+- [#3564](https://github.com/withastro/astro/pull/3564) [`76fb01cf`](https://github.com/withastro/astro/commit/76fb01cff1002f2a37e93869378802156c4eca7c) Thanks [@hippotastic](https://github.com/hippotastic)! - Fix autolinking of URLs inside links
+
+* [#3554](https://github.com/withastro/astro/pull/3554) [`c549f161`](https://github.com/withastro/astro/commit/c549f161cadd76a666672556f2c2d63b5f97f00d) Thanks [@hippotastic](https://github.com/hippotastic)! - Allow AlpineJS syntax extensions in Markdown
+
+## 0.11.0
+
+### Minor Changes
+
+- [#3502](https://github.com/withastro/astro/pull/3502) [`939fe159`](https://github.com/withastro/astro/commit/939fe159255cecf1cab5c1b3da2670d30ac8e4a7) Thanks [@nokazn](https://github.com/nokazn)! - Fix cases for JSX-like expressions in code blocks of headings
+
+### Patch Changes
+
+- [#3514](https://github.com/withastro/astro/pull/3514) [`6c955ca6`](https://github.com/withastro/astro/commit/6c955ca643a7a071609ce8a5258cc7faf5a636b2) Thanks [@hippotastic](https://github.com/hippotastic)! - Fix Markdown errors missing source filename
+
+* [#3516](https://github.com/withastro/astro/pull/3516) [`30578015`](https://github.com/withastro/astro/commit/30578015919e019cd8dd354288a45c1fc63bd01f) Thanks [@hippotastic](https://github.com/hippotastic)! - Fix: Allow self-closing tags in Markdown
+
+## 0.10.2
+
+### Patch Changes
+
+- [#3486](https://github.com/withastro/astro/pull/3486) [`119ecf8d`](https://github.com/withastro/astro/commit/119ecf8d469f034eaf1b1217523954d29f492cb6) Thanks [@hippotastic](https://github.com/hippotastic)! - Fix components in markdown regressions
+
+## 0.10.1
+
+### Patch Changes
+
+- [#3444](https://github.com/withastro/astro/pull/3444) [`51db2b9b`](https://github.com/withastro/astro/commit/51db2b9b4efd899bdd7efc481a5f226b3b040614) Thanks [@bholmesdev](https://github.com/bholmesdev)! - Fix: markdown imports failing due to internal dependency issue
+
+## 0.10.0
+
+### Minor Changes
+
+- [#3410](https://github.com/withastro/astro/pull/3410) [`cfae9760`](https://github.com/withastro/astro/commit/cfae9760b252052b6189e96398b819a4337634a8) Thanks [@natemoo-re](https://github.com/natemoo-re)! - Significantally more stable behavior for "Markdown + Components" usage, which now handles component serialization much more similarly to MDX. Also supports switching between Components and Markdown without extra newlines, removes wrapping `<p>` tags from standalone components, and improves JSX expression handling.
+
+## 0.9.4
+
+### Patch Changes
+
+- [#3275](https://github.com/withastro/astro/pull/3275) [`8f8f05c1`](https://github.com/withastro/astro/commit/8f8f05c1b99d073a43af3020ba3922ea2d5b466d) Thanks [@matthewp](https://github.com/matthewp)! - Fixes regression in passing JS args to islands
+
+## 0.9.3
+
+### Patch Changes
+
+- [#3234](https://github.com/withastro/astro/pull/3234) [`de123b28`](https://github.com/withastro/astro/commit/de123b28b3ff398b800cb598f20326ca85a0fb60) Thanks [@JuanM04](https://github.com/JuanM04)! - Removed `rehype-slug` in favor of our own implementation. The behavior of the slugging should remain the same
+
+* [#3234](https://github.com/withastro/astro/pull/3234) [`de123b28`](https://github.com/withastro/astro/commit/de123b28b3ff398b800cb598f20326ca85a0fb60) Thanks [@JuanM04](https://github.com/JuanM04)! - Moved some type from `astro` to `@astrojs/markdown-remark`
+
+## 0.9.2
+
+### Patch Changes
+
+- [#3152](https://github.com/withastro/astro/pull/3152) [`9ba1f4f8`](https://github.com/withastro/astro/commit/9ba1f4f8251155b69398a8af22d6ab8587b96120) Thanks [@bholmesdev](https://github.com/bholmesdev)! - Fix JSX expression inconsistencies within markdown files
+
+## 0.9.1
+
+### Patch Changes
+
+- [#3108](https://github.com/withastro/astro/pull/3108) [`ef198ff8`](https://github.com/withastro/astro/commit/ef198ff8351ac8fbc868e209f9cd410dc8b6f265) Thanks [@FredKSchott](https://github.com/FredKSchott)! - shiki: Add `diff` symbol handling to disable `user-select` on `+`/`-` symbols.
+
+## 0.9.0
+
+### Minor Changes
+
+- [`53162534`](https://github.com/withastro/astro/commit/53162534450e160f65b95e7ef1523a106347ca28) Thanks [@FredKSchott](https://github.com/FredKSchott)! - - Removed `renderMarkdownWithFrontmatter` because it wasn't being used
+  - All options of `renderMarkdown` are now required — see the exported interface `AstroMarkdownOptions`
+  - New types: RemarkPlugin, RehypePlugin and ShikiConfig
+
+## 0.8.2
+
+### Patch Changes
+
+- [#2970](https://github.com/withastro/astro/pull/2970) [`b835e285`](https://github.com/withastro/astro/commit/b835e285defb4f31fc5ac1039c7f607c07f3c00b) Thanks [@JuanM04](https://github.com/JuanM04)! - Improved type checking
+
+## 0.8.1
+
+### Patch Changes
+
+- [#2971](https://github.com/withastro/astro/pull/2971) [`ad3c3916`](https://github.com/withastro/astro/commit/ad3c391696c5b9cc350a22831717682e73e25776) Thanks [@JuanM04](https://github.com/JuanM04)! - Escape expressions when mode == 'md'
+
+## 0.8.0
+
+### Minor Changes
+
+- [`e425f896`](https://github.com/withastro/astro/commit/e425f896b668d98033ad3b998b50c1f28bc7f6ee) Thanks [@FredKSchott](https://github.com/FredKSchott)! - Update config options to respect [RFC0019](https://github.com/withastro/rfcs/blob/main/proposals/0019-config-finalization.md)
+
+## 0.7.0
+
+### Minor Changes
+
+- [#2824](https://github.com/withastro/astro/pull/2824) [`0a3d3e51`](https://github.com/withastro/astro/commit/0a3d3e51a66af80fa949ba0f5e2104439d2be634) Thanks [@bholmesdev](https://github.com/bholmesdev)! - Change shiki to our default markdown syntax highlighter. This includes updates to all relevant starter projects that used Prism-specific styles.
+
+### Patch Changes
+
+- [#2870](https://github.com/withastro/astro/pull/2870) [`d763ec18`](https://github.com/withastro/astro/commit/d763ec183ea391ad79ca16bf2b2e76848fc1180c) Thanks [@FredKSchott](https://github.com/FredKSchott)! - Fix a shiki performance issue affecting large sites
+
+- Updated dependencies [[`2db97f10`](https://github.com/withastro/astro/commit/2db97f10dc50f9498413181b78c477fe8833895b)]:
+  - @astrojs/prism@0.4.1
+
+## 0.7.0-next.1
+
+### Patch Changes
+
+- [#2870](https://github.com/withastro/astro/pull/2870) [`d763ec18`](https://github.com/withastro/astro/commit/d763ec183ea391ad79ca16bf2b2e76848fc1180c) Thanks [@FredKSchott](https://github.com/FredKSchott)! - Fix a shiki performance issue affecting large sites
+
+- Updated dependencies [[`2db97f10`](https://github.com/withastro/astro/commit/2db97f10dc50f9498413181b78c477fe8833895b)]:
+  - @astrojs/prism@0.4.1-next.0
+
+## 0.7.0-next.0
+
+### Minor Changes
+
+- [#2824](https://github.com/withastro/astro/pull/2824) [`0a3d3e51`](https://github.com/withastro/astro/commit/0a3d3e51a66af80fa949ba0f5e2104439d2be634) Thanks [@bholmesdev](https://github.com/bholmesdev)! - Change shiki to our default markdown syntax highlighter. This includes updates to all relevant starter projects that used Prism-specific styles.
+
+## 0.6.4
+
+### Patch Changes
+
+- [#2706](https://github.com/withastro/astro/pull/2706) [`b2c37385`](https://github.com/withastro/astro/commit/b2c37385f94614232d9a378ef2ef3264d5405cc8) Thanks [@JuanM04](https://github.com/JuanM04)! - Changed `data-astro-raw` to `is:raw` internally
+
+## 0.6.3
+
+### Patch Changes
+
+- [#2697](https://github.com/withastro/astro/pull/2697) [`91765d79`](https://github.com/withastro/astro/commit/91765d79b1ec1181417fb6a4604a9e20564bb10e) Thanks [@FredKSchott](https://github.com/FredKSchott)! - Improve performance by optimizing calls to `getHighlighter`
+
+## 0.6.2
+
+### Patch Changes
+
+- [#2628](https://github.com/withastro/astro/pull/2628) [`9b7e2ab2`](https://github.com/withastro/astro/commit/9b7e2ab2516cd36520364490df8e3482008292e3) Thanks [@JuanM04](https://github.com/JuanM04)! - Fixed shiki to work with `{ "type": "module" }`
+
+## 0.6.1
+
+### Patch Changes
+
+- [#2534](https://github.com/withastro/astro/pull/2534) [`cfeaa941`](https://github.com/withastro/astro/commit/cfeaa9414acdecec6f5d66ee0e33fe4fde574eee) Thanks [@JuanM04](https://github.com/JuanM04)! - Now you can use local plugins by passing a function instead of an `import`
+
+* [#2518](https://github.com/withastro/astro/pull/2518) [`2bc91543`](https://github.com/withastro/astro/commit/2bc91543ceeb5f3dd45e201bf75d79f186e85141) Thanks [@JuanM04](https://github.com/JuanM04)! - Added the ability to use custom themes and langs with Shiki (`<Code />` and `@astrojs/markdown-remark`)
+
+- [#2497](https://github.com/withastro/astro/pull/2497) [`6fe1b027`](https://github.com/withastro/astro/commit/6fe1b0279fce5a7a0e90ff79746ea0b641da3e21) Thanks [@JuanM04](https://github.com/JuanM04)! - Add Shiki as an alternative to Prism
+
+* [#2518](https://github.com/withastro/astro/pull/2518) [`2bc91543`](https://github.com/withastro/astro/commit/2bc91543ceeb5f3dd45e201bf75d79f186e85141) Thanks [@JuanM04](https://github.com/JuanM04)! - Added `wrap` to Shiki config
+
+- [#2564](https://github.com/withastro/astro/pull/2564) [`d71c4620`](https://github.com/withastro/astro/commit/d71c46207af40de6811596ca4f5e10aa9006377b) Thanks [@JuanM04](https://github.com/JuanM04)! - Fixed curly braces inside Shiki codeblocks
+
+## 0.6.1-next.2
+
+### Patch Changes
+
+- [#2564](https://github.com/withastro/astro/pull/2564) [`d71c4620`](https://github.com/withastro/astro/commit/d71c46207af40de6811596ca4f5e10aa9006377b) Thanks [@JuanM04](https://github.com/JuanM04)! - Fixed curly braces inside Shiki codeblocks
+
+## 0.6.1-next.1
+
+### Patch Changes
+
+- [#2534](https://github.com/withastro/astro/pull/2534) [`cfeaa941`](https://github.com/withastro/astro/commit/cfeaa9414acdecec6f5d66ee0e33fe4fde574eee) Thanks [@JuanM04](https://github.com/JuanM04)! - Now you can use local plugins by passing a function instead of an `import`
+
+* [#2518](https://github.com/withastro/astro/pull/2518) [`2bc91543`](https://github.com/withastro/astro/commit/2bc91543ceeb5f3dd45e201bf75d79f186e85141) Thanks [@JuanM04](https://github.com/JuanM04)! - Added the ability to use custom themes and langs with Shiki (`<Code />` and `@astrojs/markdown-remark`)
+
+- [#2518](https://github.com/withastro/astro/pull/2518) [`2bc91543`](https://github.com/withastro/astro/commit/2bc91543ceeb5f3dd45e201bf75d79f186e85141) Thanks [@JuanM04](https://github.com/JuanM04)! - Added `wrap` to Shiki config
+
+## 0.6.1-next.0
+
+### Patch Changes
+
+- [#2497](https://github.com/withastro/astro/pull/2497) [`6fe1b027`](https://github.com/withastro/astro/commit/6fe1b0279fce5a7a0e90ff79746ea0b641da3e21) Thanks [@JuanM04](https://github.com/JuanM04)! - Add Shiki as an alternative to Prism
+
+## 0.6.0
+
+### Minor Changes
+
+- [#2202](https://github.com/withastro/astro/pull/2202) [`45cea6ae`](https://github.com/withastro/astro/commit/45cea6aec5a310fed4cb8da0d96670d6b99a2539) Thanks [@jonathantneal](https://github.com/jonathantneal)! - Officially drop support for Node v12. The minimum supported version is now Node v14.15+,
+
+### Patch Changes
+
+- Updated dependencies [[`45cea6ae`](https://github.com/withastro/astro/commit/45cea6aec5a310fed4cb8da0d96670d6b99a2539)]:
+  - @astrojs/prism@0.4.0
+
+## 0.5.0
+
+### Minor Changes
+
+- 679d4395: - Upgraded dependencies
+  - Replaced `remark-slug` with `rehype-slug` because [it was deprecated](https://github.com/remarkjs/remark-slug)
+  - Replaced `@silvenon/remark-smartypants` with `remark-smartypants` because its name was changed
+  - Disable **all** built-in plugins when custom remark and/or rehype plugins are added
+  - Removed `remark-footnotes` because [`remark-gfm` now supports footnotes](https://github.com/remarkjs/remark-gfm/releases/tag/3.0.0)
+  - Re-added `remark-smartypants` and `rehype-slug` to the default plugins list
+
+## 0.4.0
+
+### Minor Changes
+
+- e6aaeff5: Initial release.
+
+### Patch Changes
+
+- Updated dependencies [e6aaeff5]
+  - @astrojs/prism@0.3.0
+
+## 0.4.0-next.2
+
+### Patch Changes
+
+- 00d2b625: Move gray-matter to deps
+
+## 0.4.0-next.1
+
+### Patch Changes
+
+- 7eaabbb0: Fix bug where code blocks would not be escaped properly
+
+## 0.4.0-next.0
+
+### Minor Changes
+
+- d84bfe71: Adds prism support within the Markdown plugin.
+
+### Patch Changes
+
+- Updated dependencies [d84bfe71]
+  - @astrojs/prism@0.3.0-next.0
+
+## 0.3.1
+
+### Patch Changes
+
+- b03f8771: Fix parsing of an empty `<pre></pre>` tag in markdown files, which expected the pre tag to have a child
+- b03f8771: Fix the importing of `unified` `Plugin` and `UnifiedPlugin` types
+
+## 0.3.0
+
+### Minor Changes
+
+- 397d8f3d: Upgrade `@astrojs/markdown-support` dependencies. The `remark-rehype@9` upgrade enables accessible footnotes with `remark-footnotes`.
+
+## 0.2.4
+
+### Patch Changes
+
+- a421329f: Fix the left-brace issue
+
+## 0.2.3
+
+### Patch Changes
+
+- 460e625: Move remaining missing dependencies
+
+## 0.2.2
+
+### Patch Changes
+
+- 7015356: Move rehype-raw to a dependency
+
+## 0.2.1
+
+### Patch Changes
+
+- 70f0a09: Added remark-slug to default plugins
+
+## 0.2.0
+
+### Minor Changes
+
+- d396943: Add support for [`remark`](https://github.com/remarkjs/remark#readme) and [`rehype`](https://github.com/rehypejs/rehype#readme) plugins for both `.md` pages and `.astro` pages using the [`<Markdown>`](/docs/guides/markdown-content.md) component.
+
+  For example, the `astro.config.mjs` could be updated to include the following. [Read the Markdown documentation](/docs/guides/markdown-content.md) for more information.
+
+  > **Note** Enabling custom `remarkPlugins` or `rehypePlugins` removes Astro's built-in support for [GitHub-flavored Markdown](https://github.github.com/gfm/) support, [Footnotes](https://github.com/remarkjs/remark-footnotes) syntax, [Smartypants](https://github.com/silvenon/remark-smartypants). You must explicitly add these plugins to your `astro.config.mjs` file, if desired.
+
+  ```js
+  export default {
+    markdownOptions: {
+      remarkPlugins: ['remark-slug', ['remark-autolink-headings', { behavior: 'prepend' }]],
+      rehypePlugins: ['rehype-slug', ['rehype-autolink-headings', { behavior: 'prepend' }]],
+    },
+  };
+  ```
+
+### Patch Changes
+
+- f83407e: Expose `html` to `Astro.fetchContent` (#571)
+
+## 0.1.2
+
+### Patch Changes
+
+- f9f2da4: Add repository key to all package.json
+
+## 0.1.1
+
+### Patch Changes
+
+- 50e6f49: Fixes issues with using astro via the create script

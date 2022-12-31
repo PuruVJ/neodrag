@@ -1,0 +1,5 @@
+[35m@astrojs/svelte:build: [0mcache hit, replaying output [2m73d9a3cf37dcc67d[0m
+[35m@astrojs/svelte:build: [0m
+[35m@astrojs/svelte:build: [0m> @astrojs/svelte@1.0.2 build /home/runner/work/astro/astro/packages/integrations/svelte
+[35m@astrojs/svelte:build: [0m> astro-scripts build "src/index.ts" && astro-scripts build "src/editor.cts" --force-cjs --no-clean-dist && tsc
+[35m@astrojs/svelte:build: [0m

@@ -1,0 +1,28 @@
+function parseAstroRequest(id) {
+  const [filename, rawQuery] = id.split(`?`, 2);
+  const query = Object.fromEntries(new URLSearchParams(rawQuery).entries());
+  if (query.astro != null) {
+    query.astro = true;
+  }
+  if (query.src != null) {
+    query.src = true;
+  }
+  if (query.index != null) {
+    query.index = Number(query.index);
+  }
+  if (query.raw != null) {
+    query.raw = true;
+  }
+  return {
+    filename,
+    query
+  };
+}
+function isAstroScript(id) {
+  const parsed = parseAstroRequest(id);
+  return parsed.query.type === "script";
+}
+export {
+  isAstroScript,
+  parseAstroRequest
+};

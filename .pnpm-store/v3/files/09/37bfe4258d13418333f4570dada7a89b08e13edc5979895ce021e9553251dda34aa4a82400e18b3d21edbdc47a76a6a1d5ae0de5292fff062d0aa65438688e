@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.paths.json",
+  "compilerOptions": {
+    "baseUrl": "simple",
+    "paths": {
+      "g": ["./g"],
+      "b": ["./b"]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+---
+const { openGraph } = Astro.props;
+---
+
+<meta property="og:title" content={openGraph.basic.title} />
+<meta property="og:type" content={openGraph.basic.type} />
+<meta property="og:image" content={openGraph.basic.image} />
+<meta property="og:url" content={openGraph.basic.url || Astro.url.href} />

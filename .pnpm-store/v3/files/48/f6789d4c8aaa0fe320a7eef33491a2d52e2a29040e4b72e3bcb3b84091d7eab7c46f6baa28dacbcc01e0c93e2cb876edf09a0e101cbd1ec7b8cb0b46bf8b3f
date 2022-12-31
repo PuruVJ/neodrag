@@ -1,0 +1,59 @@
+{
+  "name": "svelte-fast-dimension",
+  "description": "Fast dimension bindings using ResizeObservers",
+  "version": "0.0.3",
+  "license": "MIT",
+  "author": "Bjorn Lu",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./action": {
+      "import": "./dist/action.js",
+      "require": "./dist/action.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": "^12.20 || ^14.13.1 || >= 16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bluwy/svelte-fast-dimension.git",
+    "directory": "packages/svelte-fast-dimension"
+  },
+  "bugs": {
+    "url": "https://github.com/bluwy/svelte-fast-dimension/issues"
+  },
+  "homepage": "https://github.com/bluwy/svelte-fast-dimension#readme",
+  "keywords": [
+    "svelte",
+    "preprocess",
+    "dimension",
+    "resize-observer"
+  ],
+  "dependencies": {
+    "magic-string": "^0.25.7"
+  },
+  "peerDependencies": {
+    "svelte": "^3.43.1"
+  },
+  "devDependencies": {
+    "svelte": "^3.44.1",
+    "uvu": "^0.5.2"
+  },
+  "scripts": {
+    "dev": "tsup-node --sourcemap --watch src",
+    "build": "tsup-node --dts",
+    "test": "tsm node_modules/uvu/bin.js tests",
+    "test:update": "tsm node_modules/uvu/bin.js tests -u"
+  }
+}

@@ -1,0 +1,17 @@
+{
+	"root": true,
+
+	"extends": "@ljharb",
+
+	"overrides": [
+		{
+			"files": "test/**",
+			"env": {
+				"browser": true,
+			},
+			"rules": {
+				"id-length": 0,
+			},
+		},
+	]
+}

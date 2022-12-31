@@ -1,0 +1,62 @@
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    include:
+      - main
+pr: none
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: microsoft/vscode-engineering
+      ref: main
+      endpoint: Monaco
+
+parameters:
+  - name: publishPackage
+    displayName: 🚀 Publish vscode-uri
+    type: boolean
+    default: false
+
+extends:
+  template: azure-pipelines/npm-package/pipeline.yml@templates
+  parameters:
+    npmPackages:
+      - name: vscode-uri
+
+        buildSteps:
+          - script: yarn --frozen-lockfile
+            displayName: Install dependencies
+
+          - script: yarn compile
+            displayName: Compile npm package
+
+          - script: yarn pack-production
+            displayName: Webpack for prod
+
+        testPlatforms:
+          - name: Linux
+            nodeVersions:
+              - 16.x
+
+        testSteps:
+          - script: yarn --frozen-lockfile
+            displayName: Install dependencies
+
+          - script: yarn compile
+            displayName: Compile npm package
+
+          - bash: |
+              /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+              echo ">>> Started xvfb"
+            displayName: Start xvfb
+            condition: eq(variables['Agent.OS'], 'Linux')
+
+          - script: yarn test
+            displayName: Test npm package
+            env:
+              DISPLAY: ':99.0'
+
+        publishPackage: ${{ parameters.publishPackage }}

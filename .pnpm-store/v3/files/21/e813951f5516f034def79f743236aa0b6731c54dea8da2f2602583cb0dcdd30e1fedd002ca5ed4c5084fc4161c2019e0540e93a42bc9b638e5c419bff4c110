@@ -1,0 +1,1 @@
+{"version":3,"file":"exec-is-server-available.js","sourceRoot":"","sources":["../../../../../../packages/nx/src/daemon/client/exec-is-server-available.ts"],"names":[],"mappings":";;;AAAA,qCAAwC;AAExC,CAAC,GAAS,EAAE;IACV,IAAI;QACF,OAAO,CAAC,GAAG,CAAC,MAAM,qBAAY,CAAC,iBAAiB,EAAE,CAAC,CAAC;KACrD;IAAC,WAAM;QACN,OAAO,CAAC,GAAG,CAAC,KAAK,CAAC,CAAC;KACpB;AACH,CAAC,CAAA,CAAC,EAAE,CAAC"}

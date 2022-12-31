@@ -1,0 +1,45 @@
+{
+  "name": "mlly",
+  "version": "1.0.0",
+  "description": "Missing ECMAScript module utils for Node.js",
+  "repository": "unjs/mlly",
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    "require": "./dist/index.cjs",
+    "import": "./dist/index.mjs"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "vitest",
+    "lint": "eslint --ext .ts src test",
+    "release": "pnpm test && pnpm build && standard-version && pnpm publish && git push --follow-tags",
+    "test": "pnpm lint && vitest run"
+  },
+  "dependencies": {
+    "acorn": "^8.8.1",
+    "pathe": "^1.0.0",
+    "pkg-types": "^1.0.0",
+    "ufo": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "@vitest/coverage-c8": "^0.25.2",
+    "c8": "^7.12.0",
+    "eslint": "^8.27.0",
+    "eslint-config-unjs": "^0.0.2",
+    "jiti": "^1.16.0",
+    "standard-version": "^9.5.0",
+    "typescript": "^4.8.4",
+    "unbuild": "^0.9.4",
+    "vitest": "^0.25.2"
+  },
+  "packageManager": "pnpm@7.14.1"
+}

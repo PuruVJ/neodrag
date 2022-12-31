@@ -1,0 +1,12 @@
+---
+const { image } = Astro.props.openGraph.basic;
+const { url, secureUrl, type, width, height, alt } =
+  Astro.props.openGraph.image;
+---
+
+<meta property="og:image:url" content={image} />
+{secureUrl ? <meta property="og:image:secure_url" content={secureUrl} /> : null}
+{type ? <meta property="og:image:type" content={type} /> : null}
+{width ? <meta property="og:image:width" content={width} /> : null}
+{!(height === null) ? <meta property="og:image:height" content={height} /> : null}
+{!(alt === null) ? <meta property="og:image:alt" content={alt} /> : null}

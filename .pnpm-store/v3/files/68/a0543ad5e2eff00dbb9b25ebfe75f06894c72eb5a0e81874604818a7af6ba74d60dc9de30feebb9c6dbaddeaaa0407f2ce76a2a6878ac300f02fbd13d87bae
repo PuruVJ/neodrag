@@ -1,0 +1,47 @@
+{
+  "name": "pathe",
+  "version": "0.3.9",
+  "description": "Universal filesystem path utils",
+  "repository": "unjs/pathe",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils.mjs",
+      "require": "./dist/utils.cjs",
+      "types": "./dist/utils.d.ts"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "utils.d.ts"
+  ],
+  "devDependencies": {
+    "@nuxtjs/eslint-config-typescript": "latest",
+    "@types/node": "^16.11.64",
+    "@vitest/coverage-c8": "^0.23.4",
+    "c8": "^7.12.0",
+    "eslint": "latest",
+    "jiti": "^1.16.0",
+    "standard-version": "latest",
+    "typescript": "^4.8.4",
+    "unbuild": "^0.8.11",
+    "vitest": "^0.23.4"
+  },
+  "packageManager": "pnpm@7.13.2",
+  "scripts": {
+    "build": "unbuild",
+    "dev": "vitest",
+    "lint": "eslint --ext .ts .",
+    "release": "pnpm vitest run && standard-version && git push --follow-tags && pnpm publish",
+    "test": "pnpm lint && vitest run --coverage",
+    "test:types": "tsc --noEmit"
+  }
+}

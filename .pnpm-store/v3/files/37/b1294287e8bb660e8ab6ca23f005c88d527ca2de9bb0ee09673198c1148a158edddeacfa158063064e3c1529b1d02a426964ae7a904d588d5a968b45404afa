@@ -1,0 +1,122 @@
+---
+import OpenGraphArticleTags from "./components/OpenGraphArticleTags.astro";
+import OpenGraphBasicTags from "./components/OpenGraphBasicTags.astro";
+import OpenGraphImageTags from "./components/OpenGraphImageTags.astro";
+import OpenGraphOptionalTags from "./components/OpenGraphOptionalTags.astro";
+import ExtendedTags from "./components/ExtendedTags.astro";
+import TwitterTags from "./components/TwitterTags.astro";
+
+export interface Link extends HTMLLinkElement {
+  prefetch: boolean;
+}
+
+export interface Meta extends HTMLMetaElement {
+  property: string;
+}
+
+export interface Props {
+  title?: string;
+  charset?: string;
+  description?: string;
+  canonical?: string;
+  nofollow?: boolean;
+  noindex?: boolean;
+  openGraph?: {
+    basic: {
+      title: string;
+      type: string;
+      image: string;
+      url?: string;
+    };
+    optional?: {
+      audio?: string;
+      description?: string;
+      determiner?: string;
+      locale?: string;
+      localeAlternate?: string[];
+      siteName?: string;
+      video?: string;
+    };
+    image?: {
+      url?: string;
+      secureUrl?: string;
+      type?: string;
+      width?: number;
+      height?: number;
+      alt?: string;
+    };
+    article?: {
+      publishedTime?: string;
+      modifiedTime?: string;
+      expirationTime?: string;
+      authors?: string[];
+      section?: string;
+      tags?: string[];
+    };
+  };
+  twitter?: {
+    card?: string;
+    site?: string;
+    creator?: string;
+  };
+  extend?: {
+    link?: Partial<Link>[];
+    meta?: Partial<Meta>[];
+  };
+}
+
+const { props } = Astro;
+const { title, description, canonical, noindex, nofollow, charset } = props;
+
+function validateProps(props) {
+  const { openGraph, description } = props;
+
+  if (openGraph) {
+    if (
+      !openGraph.basic ||
+      openGraph.basic.title == null ||
+      openGraph.basic.type == null ||
+      openGraph.basic.image == null
+    ) {
+      throw new Error(
+        "If you pass the openGraph prop, you have to at least define the title, type, and image basic properties!"
+      );
+    }
+  }
+
+  if (title && openGraph?.basic.title) {
+    if (title == openGraph.basic.title) {
+      console.warn(
+        "WARNING(astro-seo): You passed the same value to `title` and `openGraph.optional.title`. This is most likely not what you want. See docs for more."
+      );
+    }
+  }
+
+  if (openGraph?.basic?.image && !openGraph?.image?.alt) {
+    console.warn(
+      "WARNING(astro-seo): You defined `openGraph.basic.image`, but didn't define `openGraph.image.alt`. This is stongly discouraged.'"
+    );
+  }
+}
+
+validateProps(props);
+---
+
+{title ? <title set:html={title}></title> : null}
+
+{charset ? <meta charset={charset}> : null}
+
+<link rel="canonical" href={canonical || Astro.url.href} />
+
+{description ? <meta name="description" content={description} /> : null}
+
+<meta
+  name="robots"
+  content={`${noindex ? "noindex" : "index"}, ${nofollow ? "nofollow" : "follow"}`} />
+
+{props.openGraph && <OpenGraphBasicTags {...props} />}
+{props.openGraph?.optional && <OpenGraphOptionalTags {...props} />}
+{props.openGraph?.image && <OpenGraphImageTags {...props} />}
+{props.openGraph?.article && <OpenGraphArticleTags {...props} />}
+{props.twitter && <TwitterTags {...props} />}
+{props.extend && <ExtendedTags {...props} />}

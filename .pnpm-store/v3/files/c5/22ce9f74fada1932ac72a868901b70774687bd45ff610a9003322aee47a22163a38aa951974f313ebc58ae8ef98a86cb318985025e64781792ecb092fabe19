@@ -1,0 +1,6 @@
+{
+  "extends": "./circular2.tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "oops"
+  }
+}
