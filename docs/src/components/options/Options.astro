@@ -87,8 +87,12 @@ const orderedOptionsMD = ORDER.map(
 						</a>
 					</h3>
 					<p>
-						Type: <code>{type}</code> <br />
-						Default Value: <code>{defaultValue}</code>
+						Type:
+						<span class="code-like" style="font-family: var(--app-font-mono)">
+							{type}
+						</span>
+						<br />
+						Default Value: <span class="code-like">{defaultValue}</span>
 					</p>
 
 					<Content />
@@ -97,3 +101,16 @@ const orderedOptionsMD = ORDER.map(
 		)
 	}
 </section>
+
+<style lang="scss">
+	.code-like {
+		font-family: var(--app-font-mono);
+		font-size: 0.8em;
+
+		padding: 0.125rem 0.25rem;
+
+		background-color: hsla(var(--app-color-dark-hsl), 0.1);
+
+		border-radius: 4px;
+	}
+</style>

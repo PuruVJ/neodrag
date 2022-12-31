@@ -13,6 +13,7 @@ body.light {
 		#f093fb 0%,
 		#f5576c 100%
 	);
+	--app-color-primary-gradient-contrast: hsl(0 0% 10%);
 
 	--app-color-dark: hsl(0 0% 10%);
 	--app-color-dark-contrast: var(--app-color-light);

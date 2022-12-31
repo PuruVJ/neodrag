@@ -166,7 +166,7 @@
 		border-radius: 8px;
 
 		background-color: hsla(var(--app-color-dark-hsl), 0.3);
-		backdrop-filter: blur(5px) brightness(50%) grayscale(0.4);
+		backdrop-filter: blur(5px);
 
 		&:hover :global(svg) {
 			transform: rotate(100deg) scale(1.2);

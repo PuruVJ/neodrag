@@ -54,16 +54,24 @@
 
 <style lang="scss">
 	@import '../feature-box';
+	@import '../../../../css/breakpoints';
 
 	.demo {
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
 		align-items: center;
+
+		@include media('<desktop') {
+			justify-content: center;
+		}
 	}
 
 	.framework-container {
 		position: relative;
+
+		display: flex;
+		align-content: center;
 
 		.size {
 			position: absolute;
@@ -71,6 +79,7 @@
 			top: 50%;
 
 			display: flex;
+			align-items: center;
 			gap: 3px;
 
 			transform: translateY(-50%);
@@ -78,14 +87,18 @@
 			font-size: 1.2rem;
 			font-family: var(--app-font-mono);
 
-			// background-color: hsla(var(--app-color-dark-hsl), 0.2);
-
 			padding: 0.3rem 0.7rem;
 
 			border-radius: 60px;
 
 			.kb {
 				color: hsla(var(--app-color-dark-hsl), 0.6);
+			}
+
+			@include media('<desktop') {
+				position: static;
+
+				transform: initial;
 			}
 		}
 	}
