@@ -136,10 +136,6 @@
 		height: 100%;
 		width: 100%;
 
-		&.dark {
-			background-color: #1a2124;
-		}
-
 		button {
 			position: absolute;
 			right: 0.75rem;
