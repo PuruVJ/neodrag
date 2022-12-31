@@ -7,6 +7,7 @@ import MultipleFrameworksFeature from '$components/home/features/multiple-framew
 import SSRFriendlyFeature from '$components/home/features/ssr-friendly/SSRFriendlyFeature.svelte';
 import HeroExample from '$components/home/HeroExample.svelte';
 import Layout from '$layouts/Layout.astro';
+import ExploreFrameworks from '$components/home/ExploreFrameworks.svelte';
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
@@ -49,6 +50,10 @@ import Layout from '$layouts/Layout.astro';
 
 		<section class="feature-feature-rich">
 			<FeatureRichFeature client:visible />
+		</section>
+
+		<section class="explore-frameworks">
+			<ExploreFrameworks client:visible />
 		</section>
 	</main>
 </Layout>
@@ -174,5 +179,16 @@ import Layout from '$layouts/Layout.astro';
 
 	.feature-feature-rich {
 		grid-template-columns: 1fr;
+
+		margin-bottom: clamp(3rem, 100vw, 10rem);
+	}
+
+	.explore-frameworks {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 4rem;
+
+		padding-bottom: clamp(3rem, 100vw, 10rem);
 	}
 </style>

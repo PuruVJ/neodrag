@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ThemeSwitcher from '$components/ThemeSwitcher.svelte';
 	import { FRAMEWORKS } from '$helpers/constants';
 
 	const pathname = globalThis?.location?.pathname ?? '';
@@ -58,6 +59,10 @@
 	</nav>
 
 	<span class="spacer" />
+
+	<div class="theme-switcher">
+		<ThemeSwitcher />
+	</div>
 
 	<span class="copyright"
 		>&copy; 2021-{new Date().getUTCFullYear()}
@@ -191,5 +196,15 @@
 				--app-color-primary-hsl: var(--primary-hsl);
 			}
 		}
+	}
+
+	.theme-switcher {
+		display: flex;
+		justify-content: center;
+		gap: 1rem;
+
+		font-size: 1.5rem;
+
+		width: 100%;
 	}
 </style>

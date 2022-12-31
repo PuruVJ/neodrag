@@ -151,36 +151,42 @@ const { title: frontmatterTitle } = frontmatter || {};
 
 		&.svelte {
 			background-image: var(--app-color-brand-svelte-body-gradient);
-			--selection-color: var(--app-color-brand-svelte);
+			--secondary-color: var(--app-color-brand-svelte);
+			--secondary-color-hsl: var(--app-color-brand-svelte-hsl);
 			--app-color-scrolling-navbar: var(--app-color-brand-svelte-navbar);
 		}
 
 		&.vue {
 			background-image: var(--app-color-brand-vue-body-gradient);
-			--selection-color: var(--app-color-brand-vue);
+			--secondary-color: var(--app-color-brand-vue);
+			--secondary-color-hsl: var(--app-color-brand-vue-hsl);
 			--app-color-scrolling-navbar: var(--app-color-brand-vue-navbar);
 		}
 
 		&.react {
 			background-image: var(--app-color-brand-react-body-gradient);
-			--selection-color: var(--app-color-brand-react);
+			--secondary-color: var(--app-color-brand-react);
+			--secondary-color-hsl: var(--app-color-brand-react-hsl);
 			--app-color-scrolling-navbar: var(--app-color-brand-react-navbar);
 		}
 
 		&.solid {
 			background-image: var(--app-color-brand-solid-body-gradient);
-			--selection-color: var(--app-color-brand-solid);
+			--secondary-color: var(--app-color-brand-solid);
+			--secondary-color-hsl: var(--app-color-brand-solid-hsl);
 			--app-color-scrolling-navbar: var(--app-color-brand-solid-navbar);
 		}
 
 		&.vanilla {
 			background-image: var(--app-color-brand-vanilla-body-gradient);
-			--selection-color: var(--app-color-brand-vanilla);
+			--secondary-color: var(--app-color-brand-vanilla);
+			--secondary-color-hsl: var(--app-color-brand-vanilla-hsl);
 			--app-color-scrolling-navbar: var(--app-color-brand-vanilla-navbar);
 		}
 
 		&:not(.framework) {
-			--selection-color: var(--app-color-primary);
+			--secondary-color: var(--app-color-primary);
+			--secondary-color-hsl: var(--app-color-primary-hsl);
 
 			&.dark {
 				--app-color-scrolling-navbar: #60383e;

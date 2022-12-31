@@ -384,9 +384,9 @@
 
 		min-width: 0;
 		width: 100%;
-		max-width: 60rem;
+		max-width: 70rem;
 
-		padding: 1rem;
+		padding: 1rem 7rem;
 
 		border-radius: 0.5rem;
 
@@ -400,8 +400,6 @@
 	}
 
 	.box {
-		--size: clamp(120px, 20vw, 175px);
-
 		position: relative;
 
 		display: grid;

@@ -203,11 +203,11 @@
 
 		&.highlighted {
 			.placeholder {
-				background-color: var(--selection-color);
+				background-color: var(--secondary-color);
 			}
 
 			a {
-				color: var(--selection-color);
+				color: var(--secondary-color);
 			}
 		}
 	}
