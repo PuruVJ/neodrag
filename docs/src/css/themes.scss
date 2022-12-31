@@ -103,6 +103,7 @@ body.dark {
 		hsla(var(--app-color-brand-svelte-hsl), 0.2) 0%,
 		var(--app-color-shell) 100%
 	);
+	--app-color-brand-svelte-navbar: #311b16;
 
 	--app-color-brand-react: hsl(193, 96%, 68%);
 	--app-color-brand-react-hsl: 193, 96%, 68%;
@@ -111,6 +112,7 @@ body.dark {
 		hsla(var(--app-color-brand-react-hsl), 0.2) 0%,
 		var(--app-color-shell) 100%
 	);
+	--app-color-brand-react-navbar: #1c2d33;
 
 	--app-color-brand-vue: hsl(153, 47%, 49%);
 	--app-color-brand-vue-hsl: 153, 47%, 49%;
@@ -119,6 +121,7 @@ body.dark {
 		hsla(var(--app-color-brand-vue-hsl), 0.3) 0%,
 		var(--app-color-shell) 100%
 	);
+	--app-color-brand-vue-navbar: #1b3429;
 
 	--app-color-brand-solid: hsl(214, 32%, 67%);
 	--app-color-brand-solid-hsl: 214, 32%, 67%;
@@ -127,6 +130,7 @@ body.dark {
 		hsla(var(--app-color-brand-solid-hsl), 0.3) 0%,
 		var(--app-color-shell) 100%
 	);
+	--app-color-brand-solid-navbar: #1c2d33;
 
 	--app-color-brand-vanilla: var(--app-color-dark);
 	--app-color-brand-vanilla-hsl: var(--app-color-dark-hsl);
@@ -135,4 +139,5 @@ body.dark {
 		hsla(53, 93%, 54%, 0.4) 0%,
 		var(--app-color-shell) 100%
 	);
+	--app-color-brand-vanilla-navbar: #4f491e;
 }
