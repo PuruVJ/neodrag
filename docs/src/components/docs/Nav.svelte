@@ -145,7 +145,7 @@
 
 		&:hover {
 			background-color: hsla(
-				var(--primary-hsl, var(--app-color-primary-hsl)),
+				var(--secondary-color-hsl, var(--app-color-primary-hsl)),
 				0.1
 			);
 		}
@@ -171,7 +171,7 @@
 	.group a {
 		&[aria-current='page'] {
 			background-color: hsla(
-				var(--primary-hsl, var(--app-color-primary-hsl)),
+				var(--secondary-color-hsl, var(--app-color-primary-hsl)),
 				0.2
 			);
 		}
@@ -192,8 +192,8 @@
 			font-size: inherit;
 
 			&.framework {
-				--app-color-primary: var(--primary);
-				--app-color-primary-hsl: var(--primary-hsl);
+				--app-color-primary: var(--secondary-color);
+				--app-color-primary-hsl: var(--secondary-color-hsl);
 			}
 		}
 	}

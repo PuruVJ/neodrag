@@ -9,6 +9,11 @@
 	color: var(--app-color-dark);
 }
 
+*:focus-visible {
+	box-shadow: 0 0 0 4px
+		hsla(var(--secondary-color-hsl, --app-color-primary-hsl), 0.25);
+}
+
 html {
 	width: 100%;
 }
