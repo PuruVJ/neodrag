@@ -24,12 +24,12 @@ const size = sizes[framework];
 			>{framework}</span
 		>
 	</h1>
-	<p>{tagline}</p>
 
-	<!-- TODO: Replace this with a component that opens a mini dialog on click to show what it does. -->
-	<button class="tag">
-		{size}KB min+br
-	</button>
+	<span class="tag">
+		{size}KB
+	</span>
+
+	<p>{tagline}</p>
 
 	<InstallationMDX framework={framework} />
 
@@ -44,3 +44,17 @@ const size = sizes[framework];
 		library, and implements the same API.
 	</p>
 </DocsLayout>
+
+<style lang="scss">
+	.tag {
+		background: var(--selection-color);
+		border-radius: 24px;
+		color: var(--app-color-primary-contrast);
+		display: inline-block;
+		font-size: 0.9rem;
+		font-weight: 600;
+		line-height: 1;
+		padding: 0.75rem 0.75rem;
+		text-transform: uppercase;
+	}
+</style>
