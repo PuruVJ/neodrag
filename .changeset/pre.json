@@ -12,6 +12,7 @@
     "@neodrag/vue": "2.0.0"
   },
   "changesets": [
-    "brave-keys-yawn"
+    "brave-keys-yawn",
+    "clean-pans-change"
   ]
 }
