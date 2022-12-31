@@ -17,7 +17,7 @@
 	let headingEls: NodeListOf<HTMLHeadingElement>;
 	let scrollableMainEl: HTMLElement;
 
-	let isNavHidden = false;
+	let isNavOverlapping = false;
 	let headingIDsHighlighted: string[] = [];
 
 	let anchorEls: Record<string, HTMLAnchorElement> = {};
@@ -32,7 +32,7 @@
 					heading.textContent?.replaceAll(/\t/gi, '')?.replaceAll(/\n/gi, '') ??
 					'';
 
-				const level = parseInt(heading.tagName[1], 10);
+				const level = +heading.tagName[1];
 
 				return {
 					id,
@@ -50,12 +50,12 @@
 			const isIntersecting = elementsOverlap(el, navEl);
 
 			if (isIntersecting) {
-				isNavHidden = true;
+				isNavOverlapping = true;
 				return;
 			}
 		}
 
-		isNavHidden = false;
+		isNavOverlapping = false;
 	}
 
 	const throttledHandleScroll = throttle(100, handleScroll);
@@ -74,32 +74,32 @@
 
 		// Now set up the intersection observers on headings. In case they are in viewport
 
-		const observer = new IntersectionObserver(
-			(entries) => {
-				// TODO: Add proper highlight later
-				// for (const entry of entries) {
-				// 	if (entry.isIntersecting) {
-				// 		headingIDsHighlighted.push(entry.target.id);
-				// 	} else {
-				// 		if (headingIDsHighlighted.length > 1)
-				// 			headingIDsHighlighted = headingIDsHighlighted.filter(
-				// 				(id) => id !== entry.target.id
-				// 			);
-				// 	}
-				// }
-				// headingIDsHighlighted = headingIDsHighlighted;
-				// console.log(headingIDsHighlighted);
-			},
-			{
-				root: scrollableMainEl,
-				rootMargin: '-25% 0',
-				threshold: [1],
-			}
-		);
+		// const observer = new IntersectionObserver(
+		// 	(entries) => {
+		// 		// TODO: Add proper highlight later
+		// 		// for (const entry of entries) {
+		// 		// 	if (entry.isIntersecting) {
+		// 		// 		headingIDsHighlighted.push(entry.target.id);
+		// 		// 	} else {
+		// 		// 		if (headingIDsHighlighted.length > 1)
+		// 		// 			headingIDsHighlighted = headingIDsHighlighted.filter(
+		// 		// 				(id) => id !== entry.target.id
+		// 		// 			);
+		// 		// 	}
+		// 		// }
+		// 		// headingIDsHighlighted = headingIDsHighlighted;
+		// 		// console.log(headingIDsHighlighted);
+		// 	},
+		// 	{
+		// 		root: scrollableMainEl,
+		// 		rootMargin: '-25% 0',
+		// 		threshold: [1],
+		// 	}
+		// );
 
-		for (const heading of Array.from(headingEls)) {
-			observer.observe(heading);
-		}
+		// for (const heading of Array.from(headingEls)) {
+		// 	observer.observe(heading);
+		// }
 	});
 
 	onDestroy(() => {
@@ -107,7 +107,10 @@
 	});
 </script>
 
-<aside class:hidden={isNavHidden} aria-label="Links to sections in this Page">
+<aside
+	class:hidden={isNavOverlapping}
+	aria-label="Links to sections in this Page"
+>
 	<nav bind:this={navEl}>
 		<ul>
 			{#each headings as { id, level, text, length }}
@@ -130,6 +133,20 @@
 </aside>
 
 <style lang="scss">
+	@import '../css/breakpoints';
+
+	// .reveal-toc {
+	// 	position: fixed;
+	// 	top: 0;
+	// 	right: 0;
+	// 	z-index: 11;
+	// 	display: grid;
+	// 	align-items: center;
+	// 	&.hidden {
+	// 		pointer-events: none;
+	// 		opacity: 0;
+	// 	}
+	// }
 	aside {
 		position: fixed;
 		top: 0;
@@ -143,6 +160,10 @@
 		height: 100%;
 
 		transition: opacity 150ms ease-in;
+
+		@include media('<desktop') {
+			display: none;
+		}
 
 		&.hidden {
 			pointer-events: none;
@@ -214,5 +235,7 @@
 		background-color: hsla(var(--app-color-dark-hsl), 0.7);
 
 		border-radius: 0 2px 2px 0;
+
+		pointer-events: none;
 	}
 </style>
