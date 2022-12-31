@@ -8,9 +8,8 @@
 	import { expoOut } from 'svelte/easing';
 	import { tweened } from 'svelte/motion';
 
-	import { theme } from '$stores/user-preferences.store';
 	import { mounted } from '$stores/mounted.store';
-	import { onMount } from 'svelte';
+	import { theme } from '$stores/user-preferences.store';
 
 	let containerWidth = 0;
 
