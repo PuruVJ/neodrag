@@ -1,5 +1,11 @@
 # @neodrag/vue
 
+## 2.0.0-next.2
+
+### Patch Changes
+
+- [#92](https://github.com/PuruVJ/neodrag/pull/92) [`820307b`](https://github.com/PuruVJ/neodrag/commit/820307b9e2ed5884b2c4d167ba2f7ae2bad14f87) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Add recomputeBounds option
+
 ## 2.0.0-next.1
 
 ### Patch Changes
