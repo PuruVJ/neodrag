@@ -1,5 +1,3 @@
-import memoize from './memoize';
-
 export type DragBoundsCoords = {
 	/** Number of pixels from left of the document */
 	left: number;
@@ -71,6 +69,13 @@ export type DragOptions = {
 	 * @default 'both'
 	 */
 	axis?: DragAxis;
+
+	/**
+	 * If true, falls back to emitting transform: translate(x, y) instead of the new translate property.
+	 *
+	 * @default false
+	 */
+	legacyTranslate?: boolean;
 
 	/**
 	 * If true, uses `translate3d` instead of `translate` to move the element around, and the hardware acceleration kicks in.
@@ -209,6 +214,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		bounds,
 		axis = 'both',
 		gpuAcceleration = true,
+		legacyTranslate = false,
 		applyUserSelectHack = true,
 		disabled = false,
 		ignoreMultitouch = false,
@@ -233,8 +239,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		onDragEnd,
 	} = options;
 
-	const tick = new Promise(requestAnimationFrame);
-
 	let active = false;
 
 	let translateX = 0,
@@ -251,7 +255,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		? { x: position?.x ?? 0, y: position?.y ?? 0 }
 		: defaultPosition;
 
-	setTranslate(xOffset, yOffset, node, gpuAcceleration);
+	setTranslate(xOffset, yOffset);
 
 	let canMoveInX: boolean;
 	let canMoveInY: boolean;
@@ -272,6 +276,19 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	// Arbitrary constants for better minification
 	const bodyStyle = document.body.style;
 	const nodeClassList = node.classList;
+
+	function setTranslate(xPos = translateX, yPos = translateY) {
+		if (legacyTranslate) {
+			let common = `${+xPos}px, ${+yPos}px`;
+			return setStyle(
+				node,
+				'transform',
+				gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common}})`
+			);
+		}
+
+		setStyle(node, 'translate', `${+xPos}px ${+yPos}px ${gpuAcceleration ? '1px' : ''}`);
+	}
 
 	const getEventData: () => DragEventData = () => ({
 		offsetX: translateX,
@@ -305,7 +322,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	listen('pointermove', drag, false);
 
 	// On mobile, touch can become extremely janky without it
-	node.style.touchAction = 'none';
+	setStyle(node, 'touch-action', 'none');
 
 	const calculateInverseScale = () => {
 		// Calculate the current scale of the node
@@ -449,8 +466,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		fireSvelteDragEvent();
 
-		tick.then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
-		// Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
+		setTranslate();
 	}
 
 	return {
@@ -490,7 +506,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 				xOffset = translateX = options.position?.x ?? translateX;
 				yOffset = translateY = options.position?.y ?? translateY;
 
-				tick.then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
+				setTranslate();
 			}
 		},
 	};
@@ -500,16 +516,18 @@ const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, 
 
 const isString = (val: unknown): val is string => typeof val === 'string';
 
-const snapToGrid = memoize(
-	([xSnap, ySnap]: [number, number], pendingX: number, pendingY: number): [number, number] => {
-		const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
+const snapToGrid = (
+	[xSnap, ySnap]: [number, number],
+	pendingX: number,
+	pendingY: number
+): [number, number] => {
+	const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
 
-		const x = calc(pendingX, xSnap);
-		const y = calc(pendingY, ySnap);
+	const x = calc(pendingX, xSnap);
+	const y = calc(pendingY, ySnap);
 
-		return [x, y];
-	}
-);
+	return [x, y];
+};
 
 function getHandleEl(handle: DragOptions['handle'], node: HTMLElement) {
 	if (!handle) return node;
@@ -585,8 +603,5 @@ function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) 
 	return computedBounds;
 }
 
-function setTranslate(xPos: number, yPos: number, el: HTMLElement, gpuAcceleration: boolean) {
-	el.style.transform = gpuAcceleration
-		? `translate3d(${+xPos}px, ${+yPos}px, 0)`
-		: `translate(${+xPos}px, ${+yPos}px)`;
-}
+const setStyle = (el: HTMLElement, style: string, value: string) =>
+	el.style.setProperty(style, value);
