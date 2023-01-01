@@ -1,0 +1,58 @@
+<div class="options-example container" data-options-example>
+	<div class="demo">
+		<slot name="demo" />
+	</div>
+
+	<div class="code-sample">
+		<slot name="codes" />
+	</div>
+</div>
+
+<style lang="scss">
+	@import '../../css/breakpoints';
+
+	.container {
+		// For parent component
+		scroll-snap-align: start;
+
+		display: grid;
+		grid-template-rows: 1fr auto;
+
+		width: 600px;
+
+		box-shadow: 0 0 0 1px hsla(var(--app-color-dark-hsl), 0.3);
+		border-radius: 1rem;
+
+		@include media('<=sm-tablet') {
+			min-width: 80vw;
+			width: 100%;
+		}
+	}
+
+	.code-sample {
+		display: grid;
+		align-items: center;
+
+		padding: 1rem;
+
+		border-bottom-left-radius: inherit;
+		border-bottom-right-radius: inherit;
+
+		background-color: #0d1117;
+
+		> :global(div) {
+			display: grid;
+			gap: 1rem;
+		}
+
+		:global(pre.astro-code) {
+			--font-size: 1rem;
+
+			font-size: var(--font-size) !important;
+			line-height: 1;
+			margin: 0 0;
+
+			width: 100%;
+		}
+	}
+</style>

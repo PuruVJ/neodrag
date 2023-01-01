@@ -1,0 +1,235 @@
+---
+import type { MarkdownLayoutProps } from 'astro';
+
+import Nav from '$components/docs/Nav.svelte';
+import MobileNav from '$components/MobileNav.svelte';
+import ToC from '$components/ToC.svelte';
+import Layout from './Layout.astro';
+
+type Props =
+	| MarkdownLayoutProps<{
+			title: string;
+	  }>
+	| { title: string };
+
+const { frontmatter, title } = Astro.props;
+const { title: frontmatterTitle } = frontmatter || {};
+---
+
+<Layout title={title ?? frontmatterTitle}>
+	<ToC client:only />
+	<div class="mobile-nav">
+		<MobileNav client:load />
+	</div>
+
+	<section class="docs-container" id="docs-container">
+		<aside>
+			<Nav client:load />
+		</aside>
+
+		<main>
+			<article>
+				<slot />
+			</article>
+		</main>
+	</section>
+</Layout>
+
+<style lang="scss">
+	@import '../css/breakpoints';
+
+	.mobile-nav {
+		display: none;
+
+		@include media('<tablet') {
+			display: block;
+		}
+	}
+
+	.docs-container {
+		display: grid;
+		grid-template-columns: 300px auto;
+		gap: 1rem;
+
+		width: 100%;
+		height: auto;
+
+		@include media('<tablet') {
+			grid-template-columns: 1fr;
+
+			aside {
+				display: none;
+			}
+		}
+	}
+
+	aside {
+		height: 100%;
+	}
+
+	main {
+		// Needed for the navigation bar intersection observer
+		position: relative;
+
+		min-width: 0;
+		height: 100vh;
+
+		padding: 0 1rem;
+
+		overflow-y: auto;
+		overflow-x: hidden;
+		scroll-behavior: smooth;
+
+		@include media('<=sm-tablet') {
+			padding: 4rem 1rem;
+		}
+	}
+
+	h1 {
+		margin: 0 !important;
+	}
+
+	.docs-container {
+		:global(p, pre.astro-code, blockquote) {
+			max-width: clamp(20ch, 100vw, var(--entity-width));
+
+			@include media('<tablet') {
+				max-width: 100%;
+			}
+		}
+
+		:global(p, a) {
+			margin: 1.5rem 0;
+
+			font-size: clamp(1.1rem, 2vw, 1.2rem);
+			line-height: 1.618;
+		}
+
+		:global(code) {
+			font-family: var(--app-font-mono);
+			font-size: 0.9em;
+			word-break: break-all;
+
+			max-width: 100%;
+
+			background-color: hsla(var(--app-color-dark-hsl), 0.1);
+		}
+
+		:global(h1, h2, h3, h4, h5) {
+			--anchor-opacity: 1;
+
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		:global(:where(h1, h2, h3, h4, h5):hover) {
+			--anchor-opacity: 1;
+		}
+
+		:global(:where(.heading-anchor)) {
+			opacity: var(--anchor-opacity);
+
+			font-family: var(--app-font-mono);
+			font-size: 0.7em;
+			text-decoration: none;
+
+			height: auto;
+		}
+	}
+</style>
+
+<style lang="scss" is:global>
+	@import '../css/breakpoints';
+
+	:root {
+		--entity-width: clamp(400px, 60vw, 800px);
+	}
+
+	body {
+		overflow: hidden;
+
+		&.svelte {
+			background-image: var(--app-color-brand-svelte-body-gradient);
+			--secondary-color: var(--app-color-brand-svelte);
+			--secondary-color-hsl: var(--app-color-brand-svelte-hsl);
+			--app-color-scrolling-navbar: var(--app-color-brand-svelte-navbar);
+		}
+
+		&.vue {
+			background-image: var(--app-color-brand-vue-body-gradient);
+			--secondary-color: var(--app-color-brand-vue);
+			--secondary-color-hsl: var(--app-color-brand-vue-hsl);
+			--app-color-scrolling-navbar: var(--app-color-brand-vue-navbar);
+		}
+
+		&.react {
+			background-image: var(--app-color-brand-react-body-gradient);
+			--secondary-color: var(--app-color-brand-react);
+			--secondary-color-hsl: var(--app-color-brand-react-hsl);
+			--app-color-scrolling-navbar: var(--app-color-brand-react-navbar);
+		}
+
+		&.solid {
+			background-image: var(--app-color-brand-solid-body-gradient);
+			--secondary-color: var(--app-color-brand-solid);
+			--secondary-color-hsl: var(--app-color-brand-solid-hsl);
+			--app-color-scrolling-navbar: var(--app-color-brand-solid-navbar);
+		}
+
+		&.vanilla {
+			background-image: var(--app-color-brand-vanilla-body-gradient);
+			--secondary-color: var(--app-color-brand-vanilla);
+			--secondary-color-hsl: var(--app-color-brand-vanilla-hsl);
+			--app-color-scrolling-navbar: var(--app-color-brand-vanilla-navbar);
+		}
+
+		&:not(.framework) {
+			--secondary-color: var(--app-color-primary);
+			--secondary-color-hsl: var(--app-color-primary-hsl);
+
+			&.dark {
+				--app-color-scrolling-navbar: #60383e;
+
+				background-image: radial-gradient(
+					ellipse farthest-corner at 100% 2%,
+					hsla(var(--app-color-primary-hsl), 0.35),
+					var(--app-color-primary-contrast)
+				);
+			}
+
+			&.light {
+				--app-color-scrolling-navbar: #efd3d6;
+
+				background-image: radial-gradient(
+					ellipse farthest-corner at 100% 2%,
+					hsla(var(--app-color-primary-hsl), 0.2),
+					var(--app-color-primary-contrast)
+				);
+			}
+		}
+	}
+
+	pre.astro-code {
+		--font-size: 1rem;
+		border-radius: 0.6rem;
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding: 1rem;
+		font-size: var(--font-size) !important;
+		line-height: 1.5 !important;
+		margin: 1.5rem 0;
+
+		width: var(--entity-width);
+
+		@include media('<tablet') {
+			width: 100%;
+		}
+
+		code {
+			font-size: var(--font-size) !important;
+
+			background-color: transparent;
+		}
+	}
+</style>

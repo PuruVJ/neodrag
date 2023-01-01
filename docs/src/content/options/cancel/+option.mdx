@@ -1,0 +1,325 @@
+---
+title: 'cancel'
+type: 'string | HTMLElement | HTMLElement[]'
+defaultValue: 'undefined'
+---
+
+import Code from '$components/options/OptionsCode.astro';
+import Example from '$components/options/OptionsExample.astro';
+import Examples from '$components/options/OptionsExamples.svelte';
+
+import SingleCancelSelectorExample from './SingleCancelSelector.example.svelte';
+import SingleCancelElementExample from './SingleCancelElement.example.svelte';
+import MultipleCancelSelectorExample from './MultipleCancelSelector.example.svelte';
+import MultipleCancelElementExample from './MultipleCancelElement.example.svelte';
+
+export const shortDescription = 'Element inside draggable that does not trigger dragging';
+
+CSS Selector of an element or multiple elements inside the parent node(on which `use:draggable` is applied).
+Can be an element or elements too. If it is provided, Trying to drag inside the `cancel` element(s) will prevent dragging.
+
+<Examples client:load>
+  <Example>
+    <SingleCancelSelectorExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ cancel: '.cancel' }}>
+          This will drag!
+
+          <div class="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ cancel: '.cancel' }}">
+            This will drag!
+
+            <div class="cancel">This won't drag</div>
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ cancel: '.cancel' }}>
+          This will drag!
+
+          <div class="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```tsx
+        useDraggable(draggableRef, { cancel: '.cancel' });
+
+        <div ref={draggableRef}>
+          This will drag!
+
+          <div className="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="vanilla">
+         ```js
+        new Draggable(draggableEl, { cancel: '.cancel' });
+        ```
+
+        ```html
+        <div class="draggable">
+          This will drag!
+
+          <div class="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <SingleCancelElementExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <script lang="ts">
+          let cancelEl: HTMLElement;
+        </script>
+
+        <div use:draggable={{ cancel: cancelEl }}>
+          This will drag!
+
+          <div bind:this={cancelEl}>This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <script setup lang="ts">
+        const cancelEl = ref<HTMLDivElement>();
+        </script>
+
+        <template>
+          <div v-draggable="{ cancel: cancelEl }">
+            This will drag!
+            <div ref="cancelEl">You shall not drag!!🧙‍♂️</div>
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        let cancelEl: HTMLDivElement;
+
+        <div use:draggable={{ cancel: cancelEl }}>
+          This will drag!
+
+          <div ref={cancelEl}>This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```tsx
+        const cancelEl = useRef<HTMLDivElement>();
+
+        useDraggable(draggableRef, { cancel: cancelEl });
+
+        <div ref={draggableRef}>
+          This will drag!
+
+          <div ref={cancelEl}>This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        const cancelEl = document.querySelector('.cancel');
+        new Draggable(draggableEl, { cancel: cancelEl });
+        ```
+
+        ```html
+        <div class="draggable">
+          This will drag!
+
+          <div class="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <MultipleCancelSelectorExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ cancel: '.cancel' }}>
+          This will drag!
+
+          <div class="cancel">This won't drag</div>
+          <div class="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ cancel: '.cancel' }}">
+            This will drag!
+
+            <div class="cancel">This won't drag</div>
+            <div class="cancel">This won't drag</div>
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ cancel: '.cancel' }}>
+          This will drag!
+
+          <div class="cancel">This won't drag</div>
+          <div class="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```tsx
+        useDraggable(draggableRef, { cancel: '.cancel' });
+
+        <div ref={draggableRef}>
+          This will drag!
+
+          <div className="cancel">This won't drag</div>
+          <div className="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(draggableEl, { cancel: '.cancel' });
+        ```
+
+        ```html
+        <div class="draggable">
+          This will drag!
+
+          <div class="cancel">This won't drag</div>
+          <div class="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <MultipleCancelElementExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <script lang="ts">
+          let cancel1: HTMLDivElement;
+          let cancel2: HTMLDivElement;
+        </script>
+
+        <div use:draggable={{ cancel: [cancel1, cancel2] }}>
+          This will drag!
+
+          <div bind:this={cancel1}>This won't drag</div>
+          <div bind:this={cancel2}>This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <script setup lang="ts">
+        const cancel1 = ref();
+        const cancel2 = ref();
+        </script>
+
+        <template>
+          <div v-draggable="{ cancel: [cancel1, cancel2] }">
+            This will drag!
+
+            <div ref="cancel1">This won't drag</div>
+            <div ref="cancel2">This won't drag</div>
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        let cancel1: HTMLDivElement;
+        let cancel2: HTMLDivElement;
+
+        <div use:draggable={{ cancel: [cancel1, cancel2] }}>
+          This will drag!
+
+          <div ref={cancel1}>This won't drag</div>
+          <div ref={cancel2}>This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```tsx
+        const cancel1 = useRef<HTMLDivElement>();
+        const cancel2 = useRef<HTMLDivElement>();
+
+        useDraggable(draggableRef, { cancel: [cancel1, cancel2] });
+
+        <div ref={draggableRef}>
+          This will drag!
+
+          <div ref={cancel1}>This won't drag</div>
+          <div ref={cancel2}>This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        const cancel1 = document.querySelector('.cancel1');
+        const cancel2 = document.querySelector('.cancel2');
+        new Draggable(draggableEl, { cancel: [cancel1, cancel2] });
+        ```
+
+        ```html
+        <div class="draggable">
+          This will drag!
+
+          <div class="cancel1">This won't drag</div>
+          <div class="cancel2">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+</Examples>

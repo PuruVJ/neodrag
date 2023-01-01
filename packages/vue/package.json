@@ -39,13 +39,12 @@
 	},
 	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/vue#readme",
 	"scripts": {
-		"compile": "rollup -c",
-		"compile:watch": "rollup -cw",
+		"compile": "tsup",
+		"compile:watch": "tsup --watch",
 		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
-		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public",
-		"size": "echo 'Vue size:' && brotli-size dist/index.js"
+		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public"
 	},
 	"devDependencies": {
-		"@neodrag/svelte": "workspace:*"
+		"@neodrag/core": "workspace:*"
 	}
 }

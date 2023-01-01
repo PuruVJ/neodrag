@@ -1,0 +1,116 @@
+---
+import slugify from 'slugify';
+
+import PhLinkThin from '~icons/ph/link-thin';
+
+type OptionsFrontMatter = {
+	title: string;
+	type: string;
+	defaultValue: string;
+	shortDescription: string;
+};
+
+const ORDER = [
+	'axis',
+	'bounds',
+	'grid',
+	'defaultPosition',
+	'position',
+	'gpuAcceleration',
+	'applyUserSelectHack',
+	'ignoreMultitouch',
+	'disabled',
+	'handle',
+	'cancel',
+	'defaultClass',
+	'defaultClassDragging',
+	'defaultClassDragged',
+	'onDragStart',
+	'onDrag',
+	'onDragEnd',
+];
+
+const optionsMD = await Astro.glob<OptionsFrontMatter>(
+	'../../content/options/*/+option.mdx'
+);
+
+function validate() {
+	if (optionsMD.length > ORDER.length) {
+		const excludedOptions = optionsMD
+			.map((o) => o.frontmatter.title)
+			.filter((o) => !ORDER.includes(o));
+
+		throw new Error(
+			`Add \`${excludedOptions.join(', ')}\` properties to ORDER array`
+		);
+	}
+
+	for (const option of optionsMD) {
+		// @ts-ignore
+		if (!option.shortDescription) {
+			throw new Error(
+				`Add \`shortDescription\` to ${option.frontmatter.title}`
+			);
+		}
+	}
+}
+
+validate();
+
+const orderedOptionsMD = ORDER.map(
+	(property) =>
+		optionsMD.find((option) => option.frontmatter.title === property)!
+) as typeof optionsMD & { shortDescription: string }[];
+---
+
+<section class="options-examples container">
+	{
+		orderedOptionsMD.map(
+			({ Content, frontmatter: { defaultValue, title, type } }) => (
+				<>
+					<h3 id={slugify(title)}>
+						{title}
+
+						<a
+							aria-hidden="true"
+							tabindex="-1"
+							class="unstyled heading-anchor"
+							href={`#${slugify(title)}`}
+						>
+							<PhLinkThin
+								{
+								/* @ts-ignore */ }
+								style="color: var(--app-color-dark)"
+								width="1em"
+								height="1em"
+							/>
+						</a>
+					</h3>
+					<p>
+						Type:
+						<span class="code-like" style="font-family: var(--app-font-mono)">
+							{type}
+						</span>
+						<br />
+						Default Value: <span class="code-like">{defaultValue}</span>
+					</p>
+
+					<Content />
+				</>
+			)
+		)
+	}
+</section>
+
+<style lang="scss">
+	.code-like {
+		font-family: var(--app-font-mono);
+		font-size: 0.8em;
+
+		padding: 0.125rem 0.25rem;
+
+		background-color: hsla(var(--app-color-dark-hsl), 0.1);
+
+		border-radius: 4px;
+	}
+</style>
