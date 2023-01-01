@@ -48,6 +48,19 @@ export type DragOptions = {
 	bounds?: DragBounds;
 
 	/**
+	 * When to recalculate the dimensions of the `bounds` element.
+	 *
+	 * By default, bounds are recomputed only on dragStart. Use this options to change that behavior.
+	 *
+	 * @default '{ dragStart: true, drag: false, dragEnd: false }'
+	 */
+	recomputeBounds?: {
+		dragStart?: boolean;
+		drag?: boolean;
+		dragEnd?: boolean;
+	};
+
+	/**
 	 * Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
 	 *
 	 * - `both` - Element can move in any direction
@@ -187,6 +200,10 @@ const enum DEFAULT_CLASS {
 	DRAGGED = 'neodrag-dragged',
 }
 
+const DEFAULT_RECOMPUTE_BOUNDS: DragOptions['recomputeBounds'] = {
+	dragStart: true,
+};
+
 export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let {
 		bounds,
@@ -195,6 +212,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		applyUserSelectHack = true,
 		disabled = false,
 		ignoreMultitouch = false,
+
+		recomputeBounds = DEFAULT_RECOMPUTE_BOUNDS,
 
 		grid,
 
@@ -239,13 +258,16 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	let bodyOriginalUserSelectVal = '';
 
-	let computedBounds: DragBoundsCoords;
+	let computedBounds: DragBoundsCoords | undefined;
 	let nodeRect: DOMRect;
 
 	let dragEl: HTMLElement | HTMLElement[] | undefined;
 	let cancelEl: HTMLElement | HTMLElement[] | undefined;
 
 	let isControlled = !!position;
+
+	// Set proper defaults for recomputeBounds
+	recomputeBounds = { ...DEFAULT_RECOMPUTE_BOUNDS, ...recomputeBounds };
 
 	// Arbitrary constants for better minification
 	const bodyStyle = document.body.style;
@@ -278,13 +300,9 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	const listen = addEventListener;
 
-	listen('touchstart', dragStart, false);
-	listen('touchend', dragEnd, false);
-	listen('touchmove', drag, false);
-
-	listen('mousedown', dragStart, false);
-	listen('mouseup', dragEnd, false);
-	listen('mousemove', drag, false);
+	listen('pointerdown', dragStart, false);
+	listen('pointerup', dragEnd, false);
+	listen('pointermove', drag, false);
 
 	// On mobile, touch can become extremely janky without it
 	node.style.touchAction = 'none';
@@ -296,9 +314,10 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		return inverseScale;
 	};
 
-	function dragStart(e: TouchEvent | MouseEvent) {
+	function dragStart(e: PointerEvent) {
 		if (disabled) return;
-		if (ignoreMultitouch && e.type === 'touchstart' && (e as TouchEvent).touches.length > 1) return;
+
+		if (ignoreMultitouch && !e.isPrimary) return;
 
 		nodeClassList.add(defaultClass);
 
@@ -309,9 +328,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		canMoveInY = /(both|y)/.test(axis);
 
 		// Compute bounds
-		if (typeof bounds !== 'undefined') {
-			computedBounds = computeBoundRect(bounds, node);
-		}
+		if (recomputeBounds.dragStart) computedBounds = computeBoundRect(bounds, node);
 
 		// Compute current node's bounding client Rectangle
 		nodeRect = node.getBoundingClientRect();
@@ -331,8 +348,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			!cancelElementContains(cancelEl, <HTMLElement>e.target)
 		)
 			active = true;
-
-		if (!active) return;
+		else return;
 
 		if (applyUserSelectHack) {
 			// Apply user-select: none on body to prevent misbehavior
@@ -343,7 +359,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		// Dispatch custom event
 		fireSvelteDragStartEvent();
 
-		const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
+		const { clientX, clientY } = e;
 		const inverseScale = calculateInverseScale();
 
 		if (canMoveInX) initialX = clientX - xOffset / inverseScale;
@@ -360,6 +376,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	function dragEnd() {
 		if (!active) return;
 
+		if (recomputeBounds.dragEnd) computedBounds = computeBoundRect(bounds, node);
+
 		// Apply class defaultClassDragged
 		nodeClassList.remove(defaultClassDragging);
 		nodeClassList.add(defaultClassDragged);
@@ -374,8 +392,10 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		active = false;
 	}
 
-	function drag(e: TouchEvent | MouseEvent) {
+	function drag(e: PointerEvent) {
 		if (!active) return;
+
+		if (recomputeBounds.drag) computedBounds = computeBoundRect(bounds, node);
 
 		// Apply class defaultClassDragging
 		nodeClassList.add(defaultClassDragging);
@@ -384,11 +404,9 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		nodeRect = node.getBoundingClientRect();
 
-		const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
-
 		// Get final values for clamping
-		let finalX = clientX,
-			finalY = clientY;
+		let finalX = e.clientX,
+			finalY = e.clientY;
 
 		const inverseScale = calculateInverseScale();
 
@@ -439,13 +457,9 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		destroy: () => {
 			const unlisten = removeEventListener;
 
-			unlisten('touchstart', dragStart, false);
-			unlisten('touchend', dragEnd, false);
-			unlisten('touchmove', drag, false);
-
-			unlisten('mousedown', dragStart, false);
-			unlisten('mouseup', dragEnd, false);
-			unlisten('mousemove', drag, false);
+			unlisten('pointerdown', dragStart, false);
+			unlisten('pointerup', dragEnd, false);
+			unlisten('pointermove', drag, false);
 		},
 		update: (options: DragOptions) => {
 			// Update all the values that need to be changed
@@ -454,6 +468,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			ignoreMultitouch = options.ignoreMultitouch ?? false;
 			handle = options.handle;
 			bounds = options.bounds;
+			recomputeBounds = options.recomputeBounds ?? DEFAULT_RECOMPUTE_BOUNDS;
 			cancel = options.cancel;
 			applyUserSelectHack = options.applyUserSelectHack ?? true;
 			grid = options.grid;
@@ -480,9 +495,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		},
 	};
 };
-
-const isTouchEvent = (event: MouseEvent | TouchEvent): event is TouchEvent =>
-	!!(event as TouchEvent).touches?.length;
 
 const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max);
 
@@ -547,6 +559,8 @@ function cancelElementContains(
 }
 
 function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
+	if (bounds === undefined) return;
+
 	if (bounds instanceof HTMLElement) return bounds.getBoundingClientRect();
 
 	if (typeof bounds === 'object') {
