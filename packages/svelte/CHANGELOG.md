@@ -1,5 +1,11 @@
 # @neodrag/svelte
 
+## 2.0.0-next.3
+
+### Patch Changes
+
+- [`8dd0d88`](https://github.com/PuruVJ/neodrag/commit/8dd0d88ff0458c0bd6d20e3649371fdf732c9ebb) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Add recomputeBounds option
+
 ## 2.0.0-next.2
 
 ### Patch Changes

@@ -1,15 +1,18 @@
 {
-	"mode": "pre",
-	"tag": "next",
-	"initialVersions": {
-		"docs": "0.0.2",
-		"@neodrag/core": "2.0.0",
-		"@neodrag/react": "2.0.0",
-		"demo": "0.0.2",
-		"@neodrag/solid": "2.0.0",
-		"@neodrag/svelte": "2.0.0",
-		"@neodrag/vanilla": "2.0.0",
-		"@neodrag/vue": "2.0.0"
-	},
-	"changesets": ["brave-keys-yawn", "clean-pans-change", "hip-peas-flash"]
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "docs": "0.0.2",
+    "@neodrag/core": "2.0.0",
+    "@neodrag/react": "2.0.0",
+    "demo": "0.0.2",
+    "@neodrag/solid": "2.0.0",
+    "@neodrag/svelte": "2.0.0",
+    "@neodrag/vanilla": "2.0.0",
+    "@neodrag/vue": "2.0.0"
+  },
+  "changesets": [
+    "brave-keys-yawn",
+    "hip-peas-flesh"
+  ]
 }
