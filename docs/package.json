@@ -27,6 +27,7 @@
 	"devDependencies": {
 		"@astrojs/mdx": "^0.14.0",
 		"@astrojs/prefetch": "^0.1.1",
+		"@astrojs/sitemap": "^1.0.0",
 		"@astrojs/svelte": "^1.0.2",
 		"@iconify/json": "^2.1.159",
 		"@types/throttle-debounce": "^5.0.0",

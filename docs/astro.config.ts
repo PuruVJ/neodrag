@@ -1,5 +1,6 @@
 // @ts-check
 import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
 import prefetch from '@astrojs/prefetch';
 import svelte from '@astrojs/svelte';
 import compress from 'astro-compress';
@@ -38,13 +39,15 @@ const AnchorLinkIcon = h(
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://neodrag.dev',
 	integrations: [
 		svelte({ preprocess: sequential([autoPreprocess(), fastDimension()]) }),
 		mdx(),
+		sitemap(),
 		prefetch(),
-		// compress(),
-		// serviceWorker(),
-		// critters(),
+		compress(),
+		serviceWorker(),
+		critters(),
 		AutoImport({
 			dts: './src/auto-imports.d.ts',
 			imports: [
