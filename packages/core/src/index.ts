@@ -48,6 +48,19 @@ export type DragOptions = {
 	bounds?: DragBounds;
 
 	/**
+	 * When to recalculate the dimensions of the `bounds` element.
+	 *
+	 * By default, bounds are recomputed only on dragStart. Use this options to change that behavior.
+	 *
+	 * @default '{ dragStart: true, drag: false, dragEnd: false }'
+	 */
+	recomputeBounds?: {
+		dragStart?: boolean;
+		drag?: boolean;
+		dragEnd?: boolean;
+	};
+
+	/**
 	 * Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
 	 *
 	 * - `both` - Element can move in any direction
@@ -187,6 +200,10 @@ const enum DEFAULT_CLASS {
 	DRAGGED = 'neodrag-dragged',
 }
 
+const DEFAULT_RECOMPUTE_BOUNDS: DragOptions['recomputeBounds'] = {
+	dragStart: true,
+};
+
 export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let {
 		bounds,
@@ -195,6 +212,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		applyUserSelectHack = true,
 		disabled = false,
 		ignoreMultitouch = false,
+
+		recomputeBounds = DEFAULT_RECOMPUTE_BOUNDS,
 
 		grid,
 
@@ -239,13 +258,16 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	let bodyOriginalUserSelectVal = '';
 
-	let computedBounds: DragBoundsCoords;
+	let computedBounds: DragBoundsCoords | undefined;
 	let nodeRect: DOMRect;
 
 	let dragEl: HTMLElement | HTMLElement[] | undefined;
 	let cancelEl: HTMLElement | HTMLElement[] | undefined;
 
 	let isControlled = !!position;
+
+	// Set proper defaults for recomputeBounds
+	recomputeBounds = { ...DEFAULT_RECOMPUTE_BOUNDS, ...recomputeBounds };
 
 	// Arbitrary constants for better minification
 	const bodyStyle = document.body.style;
@@ -306,9 +328,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		canMoveInY = /(both|y)/.test(axis);
 
 		// Compute bounds
-		if (typeof bounds !== 'undefined') {
-			computedBounds = computeBoundRect(bounds, node);
-		}
+		if (recomputeBounds.dragStart) computedBounds = computeBoundRect(bounds, node);
 
 		// Compute current node's bounding client Rectangle
 		nodeRect = node.getBoundingClientRect();
@@ -356,6 +376,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	function dragEnd() {
 		if (!active) return;
 
+		if (recomputeBounds.dragEnd) computedBounds = computeBoundRect(bounds, node);
+
 		// Apply class defaultClassDragged
 		nodeClassList.remove(defaultClassDragging);
 		nodeClassList.add(defaultClassDragged);
@@ -373,6 +395,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	function drag(e: PointerEvent) {
 		if (!active) return;
 
+		if (recomputeBounds.drag) computedBounds = computeBoundRect(bounds, node);
+
 		// Apply class defaultClassDragging
 		nodeClassList.add(defaultClassDragging);
 
@@ -380,11 +404,9 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		nodeRect = node.getBoundingClientRect();
 
-		const { clientX, clientY } = e;
-
 		// Get final values for clamping
-		let finalX = clientX,
-			finalY = clientY;
+		let finalX = e.clientX,
+			finalY = e.clientY;
 
 		const inverseScale = calculateInverseScale();
 
@@ -446,6 +468,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			ignoreMultitouch = options.ignoreMultitouch ?? false;
 			handle = options.handle;
 			bounds = options.bounds;
+			recomputeBounds = options.recomputeBounds ?? DEFAULT_RECOMPUTE_BOUNDS;
 			cancel = options.cancel;
 			applyUserSelectHack = options.applyUserSelectHack ?? true;
 			grid = options.grid;
@@ -536,6 +559,8 @@ function cancelElementContains(
 }
 
 function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
+	if (bounds === undefined) return;
+
 	if (bounds instanceof HTMLElement) return bounds.getBoundingClientRect();
 
 	if (typeof bounds === 'object') {
