@@ -24,8 +24,8 @@ export type DragBounds =
 export type DragEventData = {
 	offsetX: number;
 	offsetY: number;
-	domRect: DOMRect;
-	node: HTMLElement;
+	rootNode: HTMLElement;
+	targetNode: HTMLElement;
 };
 
 export type DragOptions = {
@@ -267,8 +267,10 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let computedBounds: DragBoundsCoords | undefined;
 	let nodeRect: DOMRect;
 
-	let dragEl: HTMLElement | HTMLElement[] | undefined;
-	let cancelEl: HTMLElement | HTMLElement[] | undefined;
+	let dragEls: HTMLElement | HTMLElement[] | undefined;
+	let cancelEls: HTMLElement | HTMLElement[] | undefined;
+
+	let currentlyDraggedEl: HTMLElement;
 
 	let isControlled = !!position;
 
@@ -295,8 +297,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	const getEventData: () => DragEventData = () => ({
 		offsetX: translateX,
 		offsetY: translateY,
-		domRect: node.getBoundingClientRect(),
-		node,
+		rootNode: node,
+		targetNode: currentlyDraggedEl,
 	});
 
 	const callEvent = (eventName: 'neodrag:start' | 'neodrag' | 'neodrag:end', fn: typeof onDrag) => {
@@ -340,8 +342,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		nodeClassList.add(defaultClass);
 
-		dragEl = getHandleEl(handle, node);
-		cancelEl = getCancelElement(cancel, node);
+		dragEls = getHandleEls(handle, node);
+		cancelEls = getCancelElements(cancel, node);
 
 		canMoveInX = /(both|x)/.test(axis);
 		canMoveInY = /(both|y)/.test(axis);
@@ -355,19 +357,22 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		if (isString(handle) && isString(cancel) && handle === cancel)
 			throw new Error("`handle` selector can't be same as `cancel` selector");
 
-		if (cancelElementContains(cancelEl, dragEl))
+		if (cancelElementContains(cancelEls, dragEls))
 			throw new Error(
 				"Element being dragged can't be a child of the element on which `cancel` is applied"
 			);
 
 		if (
-			(dragEl instanceof HTMLElement
-				? dragEl.contains(<HTMLElement>e.target)
-				: dragEl.some((el) => el.contains(<HTMLElement>e.target))) &&
-			!cancelElementContains(cancelEl, <HTMLElement>e.target)
-		)
+			(instanceOf(dragEls, HTMLElement)
+				? dragEls.contains(<HTMLElement>e.target)
+				: dragEls.some((el) => el.contains(<HTMLElement>e.target))) &&
+			!cancelElementContains(cancelEls, <HTMLElement>e.target)
+		) {
+			currentlyDraggedEl = instanceOf(dragEls, HTMLElement)
+				? node
+				: dragEls.find((el) => el.contains(<HTMLElement>e.target))!;
 			active = true;
-		else return;
+		} else return;
 
 		if (applyUserSelectHack) {
 			// Apply user-select: none on body to prevent misbehavior
@@ -532,10 +537,10 @@ const snapToGrid = (
 	return [x, y];
 };
 
-function getHandleEl(handle: DragOptions['handle'], node: HTMLElement) {
+function getHandleEls(handle: DragOptions['handle'], node: HTMLElement) {
 	if (!handle) return node;
 
-	if (handle instanceof HTMLElement || Array.isArray(handle)) return handle;
+	if (instanceOf(handle, HTMLElement) || Array.isArray(handle)) return handle;
 
 	// Valid!! Let's check if this selector exists or not
 	const handleEls = node.querySelectorAll<HTMLElement>(handle);
@@ -547,10 +552,10 @@ function getHandleEl(handle: DragOptions['handle'], node: HTMLElement) {
 	return Array.from(handleEls.values());
 }
 
-function getCancelElement(cancel: DragOptions['cancel'], node: HTMLElement) {
+function getCancelElements(cancel: DragOptions['cancel'], node: HTMLElement) {
 	if (!cancel) return;
 
-	if (cancel instanceof HTMLElement || Array.isArray(cancel)) return cancel;
+	if (instanceOf(cancel, HTMLElement) || Array.isArray(cancel)) return cancel;
 
 	const cancelEls = node.querySelectorAll<HTMLElement>(cancel);
 
@@ -566,9 +571,9 @@ function cancelElementContains(
 	cancelElement: HTMLElement | HTMLElement[] | undefined,
 	element: HTMLElement | HTMLElement[]
 ): boolean {
-	const dragElements = element instanceof HTMLElement ? [element] : element;
+	const dragElements = instanceOf(element, HTMLElement) ? [element] : element;
 
-	if (cancelElement instanceof HTMLElement) {
+	if (instanceOf(cancelElement, HTMLElement)) {
 		return dragElements.some((el) => cancelElement.contains(el));
 	}
 
@@ -582,7 +587,7 @@ function cancelElementContains(
 function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
 	if (bounds === undefined) return;
 
-	if (bounds instanceof HTMLElement) return bounds.getBoundingClientRect();
+	if (instanceOf(bounds, HTMLElement)) return bounds.getBoundingClientRect();
 
 	if (typeof bounds === 'object') {
 		// we have the left right etc
@@ -608,3 +613,8 @@ function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) 
 
 const setStyle = (el: HTMLElement, style: string, value: string) =>
 	el.style.setProperty(style, value);
+
+const instanceOf = <Obj extends unknown, Target extends new (...args: any) => any>(
+	obj: Obj,
+	type: Target
+): obj is InstanceType<Target> => obj instanceof type;
