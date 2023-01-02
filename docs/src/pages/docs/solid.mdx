@@ -88,23 +88,8 @@ Example:
 
 This library ships with proper TypeScript typings, for the best Developer Experience, whether authoring JS or TS.
 
-To get proper TypeScript typing for the `use:draggable` syntax, add this line to your root `globals.d.ts` file:
-
-```ts
-/// <reference types="@neodrag/solid/globals" />
-```
-
-Or, add to `tsconfig.json`:
-
-```json
-{
-  "compilerOptions": {
-    "types": ["@neodrag/solid/globals"]
-  }
-}
-```
-
-However, these types will only work if you destructure the `draggable` directive as `draggable` only. If you rename it, like this:
+However, if you destructure the result of `createDraggable()` to something other than `draggable`, you will get errors.
+If you rename it, like this:
 
 ```tsx
 import { createDraggable } from '@neodrag/solid';

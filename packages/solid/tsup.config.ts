@@ -5,7 +5,19 @@ export default defineConfig({
 	external: ['solid-js'],
 	minify: 'terser',
 	format: 'esm',
-	dts: { resolve: true },
+	dts: {
+		resolve: true,
+		banner: `import 'solid-js';
+
+declare module 'solid-js' {	
+    namespace JSX {
+        interface Directives {
+            draggable: DragOptions;
+        }
+    }
+}
+`,
+	},
 	clean: true,
 	sourcemap: true,
 });

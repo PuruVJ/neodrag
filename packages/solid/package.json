@@ -7,8 +7,7 @@
 	"type": "module",
 	"types": "./dist/index.d.ts",
 	"files": [
-		"dist/*",
-		"globals.d.ts"
+		"dist/*"
 	],
 	"sideEffects": false,
 	"exports": {
