@@ -71,9 +71,11 @@ export type DragOptions = {
 	axis?: DragAxis;
 
 	/**
-	 * If true, falls back to emitting transform: translate(x, y) instead of the new translate property.
+	 * If false, uses the new translate property instead of transform: translate(); to move the element around.
 	 *
-	 * @default false
+	 * At present this is true by default, but will be changed to false in a future major version.
+	 *
+	 * @default true
 	 */
 	legacyTranslate?: boolean;
 
@@ -214,7 +216,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		bounds,
 		axis = 'both',
 		gpuAcceleration = true,
-		legacyTranslate = false,
+		legacyTranslate = true,
 		applyUserSelectHack = true,
 		disabled = false,
 		ignoreMultitouch = false,
@@ -489,6 +491,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			applyUserSelectHack = options.applyUserSelectHack ?? true;
 			grid = options.grid;
 			gpuAcceleration = options.gpuAcceleration ?? true;
+			legacyTranslate = options.legacyTranslate ?? true;
 
 			const dragged = nodeClassList.contains(defaultClassDragged);
 
