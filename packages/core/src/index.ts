@@ -285,7 +285,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			return setStyle(
 				node,
 				'transform',
-				gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common}})`
+				gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common})`
 			);
 		}
 
