@@ -25,7 +25,7 @@ export type DragEventData = {
 	offsetX: number;
 	offsetY: number;
 	rootNode: HTMLElement;
-	targetNode: HTMLElement;
+	currentNode: HTMLElement;
 };
 
 export type DragOptions = {
@@ -298,7 +298,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		offsetX: translateX,
 		offsetY: translateY,
 		rootNode: node,
-		targetNode: currentlyDraggedEl,
+		currentNode: currentlyDraggedEl,
 	});
 
 	const callEvent = (eventName: 'neodrag:start' | 'neodrag' | 'neodrag:end', fn: typeof onDrag) => {
