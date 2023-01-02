@@ -83,22 +83,20 @@ Event signatures:
 
 If you scroll up, you'll see 3 options, `onDragStart`, `onDrag` and `onDragEnd`. These are basically event handlers that you specify as methods of the options object.
 
-Why have two ways to listen to events? Because at the time of writing, the Svelte extension for VSCode doesn't work fully well with custom events when using TypeScript, even after they're explicitly typed by the user in TypeScript.
-
-I take TypeScript very seriously, hence I am going an extra step to provide duplicate implementations for event handling.
+Sometimes it helps to be able to put all your event listeners in one object and merge with that later on. To provide that ease of use, the events-as-objects exist.
 
 How to use events-as-options? The syntax is similar to the custom events one 👇
 
 ```svelte
 <div
   use:draggable={{
-    onDragStart: ({ offsetX, offsetY, domRect }) => {
+    onDragStart: ({ offsetX, offsetY, rootNode, currentNode }) => {
       // Do something
     },
-    onDrag: ({ offsetX, offsetY, domRect }) => {
+    onDrag: ({ offsetX, offsetY, rootNode, currentNode }) => {
       // Do something
     },
-    onDragEnd: ({ offsetX, offsetY, domRect }) => {
+    onDragEnd: ({ offsetX, offsetY, rootNode, currentNode }) => {
       // Do something
     },
 
