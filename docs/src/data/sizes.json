@@ -3,20 +3,20 @@
     "size": "1.95",
     "version": "2.0.0-next.3"
   },
-  "solid": {
-    "size": "1.73",
-    "version": "2.0.0-next.3"
-  },
-  "vue": {
-    "size": "1.74",
-    "version": "2.0.0-next.3"
-  },
   "svelte": {
-    "size": "1.67",
+    "size": "1.66",
+    "version": "2.0.0-next.3"
+  },
+  "solid": {
+    "size": "1.74",
     "version": "2.0.0-next.3"
   },
   "vanilla": {
     "size": "1.76",
+    "version": "2.0.0-next.3"
+  },
+  "vue": {
+    "size": "1.74",
     "version": "2.0.0-next.3"
   }
 }
