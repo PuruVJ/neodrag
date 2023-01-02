@@ -4,10 +4,10 @@
 	import SIZES from '../../../../data/sizes.json';
 
 	const sortedFrameworks = Object.entries(SIZES).sort(
-		([, aSize], [, bSize]) => +aSize - +bSize
-	) as unknown as [Framework, number][];
+		([, { size: aSize }], [, { size: bSize }]) => +aSize - +bSize
+	) as unknown as [Framework, typeof SIZES[keyof typeof SIZES]][];
 
-	const minSize = sortedFrameworks[0][1];
+	const minSize = +sortedFrameworks[0][1].size;
 </script>
 
 <div class="intro">
@@ -20,10 +20,10 @@
 	<br />
 
 	<p style="color: hsla(var(--app-color-dark-hsl), 0.8)">
-		Ranges from <code>{SIZES.svelte}KB</code> for
+		Ranges from <code>{SIZES.svelte.size}KB</code> for
 		<span class="text-svelte">Svelte</span>
 		to
-		<code>{SIZES.react}KB</code> for <span class="text-react">React</span>.
+		<code>{SIZES.react.size}KB</code> for <span class="text-react">React</span>.
 
 		<br /><br />
 
@@ -36,7 +36,7 @@
 </div>
 
 <div class="demo">
-	{#each sortedFrameworks.map( ([framework, size]) => [framework, size, FRAMEWORK_ICONS[framework]] ) as [framework, size, Icon]}
+	{#each sortedFrameworks.map( ([framework, { size }]) => [framework, size, FRAMEWORK_ICONS[framework]] ) as [framework, size, Icon]}
 		<div class="framework-container">
 			<div class="icon" style:font-size={(size / minSize) ** 7 * 2 + 'rem'}>
 				<Icon />
