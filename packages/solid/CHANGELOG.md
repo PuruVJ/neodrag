@@ -1,5 +1,11 @@
 # @neodrag/solid
 
+## 2.0.0-next.3
+
+### Patch Changes
+
+- [#95](https://github.com/PuruVJ/neodrag/pull/95) [`0f513db2`](https://github.com/PuruVJ/neodrag/commit/0f513db2c0a88ed03f0472311a03b6ae0e4f9483) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Add `legacyTranslate` option, remove memoization code, align to browser's RAF throttling
+
 ## 2.0.0-next.2
 
 ### Patch Changes
