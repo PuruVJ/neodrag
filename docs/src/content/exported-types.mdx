@@ -31,9 +31,16 @@ export type DragAxis = 'both' | 'x' | 'y' | 'none';
 export type DragBounds = 'parent' | string | Partial<DragBoundsCoords>;
 
 export type DragEventData = {
+  /** How much element moved from its original position horizontally */
   offsetX: number;
+
+  /** How much element moved from its original position vertically */
   offsetY: number;
+
+  /** The node on which the draggable is applied */
   rootNode: HTMLElement;
+
+  /** */
   currentNode: HTMLElement;
 };
 
