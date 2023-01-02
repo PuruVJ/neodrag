@@ -1,5 +1,11 @@
 # @neodrag/vanilla
 
+## 2.0.0-next.4
+
+### Patch Changes
+
+- Expose rootNode and currentNode from events. Remove node and domRect
+
 ## 2.0.0-next.3
 
 ### Patch Changes
