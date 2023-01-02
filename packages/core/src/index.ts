@@ -267,8 +267,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let computedBounds: DragBoundsCoords | undefined;
 	let nodeRect: DOMRect;
 
-	let dragEls: HTMLElement | HTMLElement[] | undefined;
-	let cancelEls: HTMLElement | HTMLElement[] | undefined;
+	let dragEls: HTMLElement[];
+	let cancelEls: HTMLElement[];
 
 	let currentlyDraggedEl: HTMLElement;
 
@@ -340,6 +340,12 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		if (ignoreMultitouch && !e.isPrimary) return;
 
+		// Compute bounds
+		if (recomputeBounds.dragStart) computedBounds = computeBoundRect(bounds, node);
+
+		if (isString(handle) && isString(cancel) && handle === cancel)
+			throw new Error("`handle` selector can't be same as `cancel` selector");
+
 		nodeClassList.add(defaultClass);
 
 		dragEls = getHandleEls(handle, node);
@@ -348,31 +354,22 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		canMoveInX = /(both|x)/.test(axis);
 		canMoveInY = /(both|y)/.test(axis);
 
-		// Compute bounds
-		if (recomputeBounds.dragStart) computedBounds = computeBoundRect(bounds, node);
-
-		// Compute current node's bounding client Rectangle
-		nodeRect = node.getBoundingClientRect();
-
-		if (isString(handle) && isString(cancel) && handle === cancel)
-			throw new Error("`handle` selector can't be same as `cancel` selector");
-
 		if (cancelElementContains(cancelEls, dragEls))
 			throw new Error(
 				"Element being dragged can't be a child of the element on which `cancel` is applied"
 			);
 
 		if (
-			(instanceOf(dragEls, HTMLElement)
-				? dragEls.contains(<HTMLElement>e.target)
-				: dragEls.some((el) => el.contains(<HTMLElement>e.target))) &&
-			!cancelElementContains(cancelEls, <HTMLElement>e.target)
+			dragEls.some((el) => el.contains(<HTMLElement>e.target)) &&
+			!cancelElementContains(cancelEls, [<HTMLElement>e.target])
 		) {
-			currentlyDraggedEl = instanceOf(dragEls, HTMLElement)
-				? node
-				: dragEls.find((el) => el.contains(<HTMLElement>e.target))!;
+			currentlyDraggedEl =
+				dragEls.length === 1 ? node : dragEls.find((el) => el.contains(<HTMLElement>e.target))!;
 			active = true;
 		} else return;
+
+		// Compute current node's bounding client Rectangle
+		nodeRect = node.getBoundingClientRect();
 
 		if (applyUserSelectHack) {
 			// Apply user-select: none on body to prevent misbehavior
@@ -537,10 +534,11 @@ const snapToGrid = (
 	return [x, y];
 };
 
-function getHandleEls(handle: DragOptions['handle'], node: HTMLElement) {
-	if (!handle) return node;
+function getHandleEls(handle: DragOptions['handle'], node: HTMLElement): HTMLElement[] {
+	if (!handle) return [node];
 
-	if (instanceOf(handle, HTMLElement) || Array.isArray(handle)) return handle;
+	if (isHTMLElement(handle)) return [handle];
+	if (Array.isArray(handle)) return handle;
 
 	// Valid!! Let's check if this selector exists or not
 	const handleEls = node.querySelectorAll<HTMLElement>(handle);
@@ -552,10 +550,11 @@ function getHandleEls(handle: DragOptions['handle'], node: HTMLElement) {
 	return Array.from(handleEls.values());
 }
 
-function getCancelElements(cancel: DragOptions['cancel'], node: HTMLElement) {
-	if (!cancel) return;
+function getCancelElements(cancel: DragOptions['cancel'], node: HTMLElement): HTMLElement[] {
+	if (!cancel) return [];
 
-	if (instanceOf(cancel, HTMLElement) || Array.isArray(cancel)) return cancel;
+	if (isHTMLElement(cancel)) return [cancel];
+	if (Array.isArray(cancel)) return cancel;
 
 	const cancelEls = node.querySelectorAll<HTMLElement>(cancel);
 
@@ -567,27 +566,13 @@ function getCancelElements(cancel: DragOptions['cancel'], node: HTMLElement) {
 	return Array.from(cancelEls.values());
 }
 
-function cancelElementContains(
-	cancelElement: HTMLElement | HTMLElement[] | undefined,
-	element: HTMLElement | HTMLElement[]
-): boolean {
-	const dragElements = instanceOf(element, HTMLElement) ? [element] : element;
-
-	if (instanceOf(cancelElement, HTMLElement)) {
-		return dragElements.some((el) => cancelElement.contains(el));
-	}
-
-	if (Array.isArray(cancelElement)) {
-		return cancelElement.some((cancelEl) => dragElements.some((el) => cancelEl.contains(el)));
-	}
-
-	return false;
-}
+const cancelElementContains = (cancelElements: HTMLElement[], dragElements: HTMLElement[]) =>
+	cancelElements.some((cancelEl) => dragElements.some((el) => cancelEl.contains(el)));
 
 function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
 	if (bounds === undefined) return;
 
-	if (instanceOf(bounds, HTMLElement)) return bounds.getBoundingClientRect();
+	if (isHTMLElement(bounds)) return bounds.getBoundingClientRect();
 
 	if (typeof bounds === 'object') {
 		// we have the left right etc
@@ -607,14 +592,10 @@ function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) 
 	if (node === null)
 		throw new Error("The selector provided for bound doesn't exists in the document.");
 
-	const computedBounds = node.getBoundingClientRect();
-	return computedBounds;
+	return node.getBoundingClientRect();
 }
 
 const setStyle = (el: HTMLElement, style: string, value: string) =>
 	el.style.setProperty(style, value);
 
-const instanceOf = <Obj extends unknown, Target extends new (...args: any) => any>(
-	obj: Obj,
-	type: Target
-): obj is InstanceType<Target> => obj instanceof type;
+const isHTMLElement = (obj: unknown): obj is HTMLElement => obj instanceof HTMLElement;

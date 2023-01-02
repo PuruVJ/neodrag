@@ -69,15 +69,15 @@
 		DragOptions,
 		'onDrag' | 'onDragStart' | 'onDragEnd'
 	> = {
-		onDrag: ({ node }) => {
+		onDrag: ({ rootNode }) => {
 			isBackdropVisible = true;
-			node.style.zIndex = '20';
+			rootNode.style.zIndex = '20';
 		},
-		onDragEnd: ({ node }) => {
+		onDragEnd: ({ rootNode }) => {
 			isBackdropVisible = false;
 
 			setTimeout(() => {
-				updateZIndex(node);
+				updateZIndex(rootNode);
 			}, 200);
 		},
 	};
@@ -180,8 +180,8 @@
 			data-paw-cursor="true"
 			use:draggable={{
 				...dragHandlers,
-				onDrag: ({ offsetX, offsetY, domRect, node }) => {
-					dragHandlers.onDrag?.({ offsetX, offsetY, domRect, node });
+				onDrag: ({ offsetX, offsetY, rootNode, currentNode }) => {
+					dragHandlers.onDrag?.({ offsetX, offsetY, rootNode, currentNode });
 					trackMyPosition = { x: offsetX, y: offsetY };
 				},
 			}}
@@ -255,16 +255,16 @@
 			style:z-index={zIndices[10]}
 			use:draggable={{
 				bounds: 'parent',
-				onDrag: ({ node }) => {
+				onDrag: ({ rootNode }) => {
 					highlightParent = true;
-					node.style.zIndex = '20';
+					rootNode.style.zIndex = '20';
 				},
 
-				onDragEnd: ({ node }) => {
+				onDragEnd: ({ rootNode }) => {
 					highlightParent = false;
 
 					setTimeout(() => {
-						updateZIndex(node);
+						updateZIndex(rootNode);
 					}, 200);
 				},
 			}}
@@ -278,15 +278,15 @@
 			style:z-index={zIndices[11]}
 			use:draggable={{
 				bounds: 'body',
-				onDrag: ({ node }) => {
+				onDrag: ({ rootNode }) => {
 					hightlightBody = true;
-					node.style.zIndex = '20';
+					rootNode.style.zIndex = '20';
 				},
-				onDragEnd: ({ node }) => {
+				onDragEnd: ({ rootNode }) => {
 					hightlightBody = false;
 
 					setTimeout(() => {
-						updateZIndex(node);
+						updateZIndex(rootNode);
 					}, 200);
 				},
 			}}
@@ -300,15 +300,15 @@
 			style:z-index={zIndices[12]}
 			use:draggable={{
 				bounds: coordBounds,
-				onDrag: ({ node }) => {
+				onDrag: ({ rootNode }) => {
 					showMarkers = true;
-					node.style.zIndex = '20';
+					rootNode.style.zIndex = '20';
 				},
-				onDragEnd: ({ node }) => {
+				onDragEnd: ({ rootNode }) => {
 					showMarkers = false;
 
 					setTimeout(() => {
-						updateZIndex(node);
+						updateZIndex(rootNode);
 					}, 200);
 				},
 			}}
