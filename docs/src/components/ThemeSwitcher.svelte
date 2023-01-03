@@ -54,6 +54,7 @@
 			position: { x: $positionX, y: 0 },
 			onDrag: ({ offsetX }) => {
 				positionX.set(offsetX, { duration: 0 });
+				changeTheme();
 			},
 			onDragEnd: ({ offsetX, rootNode }) => {
 				if (offsetX / containerWidth > 0.3) {
