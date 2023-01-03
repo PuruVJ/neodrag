@@ -26,5 +26,8 @@
 		"url": "git+https://github.com/PuruVJ/neodrag.git"
 	},
 	"author": "Puru Vijay",
-	"license": "MIT"
+	"license": "MIT",
+	"devDependencies": {
+		"@neodrag/tsup-config": "workspace:*"
+	}
 }
