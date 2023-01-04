@@ -35,7 +35,7 @@ const bodyClass =
 	<body class:list={[bodyClass, bodyClass && 'framework']}>
 		<slot />
 
-		<PawCursor client:load />
+		<PawCursor client:only />
 
 		<script>
 			import { theme } from '$stores/user-preferences.store';
