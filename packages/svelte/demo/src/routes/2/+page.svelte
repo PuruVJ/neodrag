@@ -5,8 +5,8 @@
 <div
 	use:draggable={{
 		handle: '.handle',
-		onDragStart: ({ rootNode, currentNode }) => {
-			console.log(rootNode, currentNode);
+		transform: ({ offsetX, offsetY, rootNode }) => {
+			rootNode.style.translate = `${offsetX}px ${offsetY}px 0`;
 		},
 	}}
 >

@@ -89,6 +89,24 @@ export type DragOptions = {
 	gpuAcceleration?: boolean;
 
 	/**
+	 * Custom transform function. If provided, this function will be used to apply the DOM transformations to the root node to move it.
+	 * Existing transform logic, including `gpuAcceleration` and `legacyTranslate`, will be ignored.
+	 *
+	 * You can return a string to apply to a `transform` property, or not return anything and apply your transformations using `rootNode.style.transform = VALUE`
+	 *
+	 * @default undefined
+	 */
+	transform?: ({
+		offsetX,
+		offsetY,
+		rootNode,
+	}: {
+		offsetX: number;
+		offsetY: number;
+		rootNode: HTMLElement;
+	}) => string | undefined | void;
+
+	/**
 	 * Applies `user-select: none` on `<body />` element when dragging,
 	 * to prevent the irritating effect where dragging doesn't happen and the text is selected.
 	 * Applied when dragging starts and removed when it stops.
@@ -215,8 +233,11 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let {
 		bounds,
 		axis = 'both',
+
 		gpuAcceleration = true,
 		legacyTranslate = true,
+		transform,
+
 		applyUserSelectHack = true,
 		disabled = false,
 		ignoreMultitouch = false,
@@ -282,16 +303,24 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	const nodeClassList = node.classList;
 
 	function setTranslate(xPos = translateX, yPos = translateY) {
-		if (legacyTranslate) {
-			let common = `${+xPos}px, ${+yPos}px`;
-			return setStyle(
-				node,
-				'transform',
-				gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common})`
-			);
+		if (!transform) {
+			if (legacyTranslate) {
+				let common = `${+xPos}px, ${+yPos}px`;
+				return setStyle(
+					node,
+					'transform',
+					gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common})`
+				);
+			}
+
+			return setStyle(node, 'translate', `${+xPos}px ${+yPos}px ${gpuAcceleration ? '1px' : ''}`);
 		}
 
-		setStyle(node, 'translate', `${+xPos}px ${+yPos}px ${gpuAcceleration ? '1px' : ''}`);
+		// Call transform function if provided
+		const transformCalled = transform({ offsetX: xPos, offsetY: yPos, rootNode: node });
+		if (isString(transformCalled)) {
+			setStyle(node, 'transform', transformCalled);
+		}
 	}
 
 	const getEventData: () => DragEventData = () => ({
@@ -494,6 +523,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			grid = options.grid;
 			gpuAcceleration = options.gpuAcceleration ?? true;
 			legacyTranslate = options.legacyTranslate ?? true;
+			transform = options.transform;
 
 			const dragged = nodeClassList.contains(defaultClassDragged);
 
