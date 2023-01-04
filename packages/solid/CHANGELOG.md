@@ -1,5 +1,11 @@
 # @neodrag/solid
 
+## 2.0.0-next.5
+
+### Patch Changes
+
+- [#97](https://github.com/PuruVJ/neodrag/pull/97) [`9e5c464`](https://github.com/PuruVJ/neodrag/commit/9e5c46477c7781bc75a57944983434a0c8ceff77) Thanks [@PuruVJ](https://github.com/PuruVJ)! - New output formats
+
 ## 2.0.0-next.4
 
 ### Patch Changes
