@@ -9,11 +9,13 @@
     "@neodrag/solid": "2.0.0",
     "@neodrag/svelte": "2.0.0",
     "@neodrag/vanilla": "2.0.0",
-    "@neodrag/vue": "2.0.0"
+    "@neodrag/vue": "2.0.0",
+    "@neodrag/tsup-config": "1.0.0"
   },
   "changesets": [
     "brave-keys-yawn",
     "brown-deers-look",
+    "curly-news-boil",
     "curvy-moons-mate",
     "hip-peas-flesh"
   ]
