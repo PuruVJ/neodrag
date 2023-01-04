@@ -7,7 +7,7 @@
 		"changeset": "changeset",
 		"compile:watch": "nx run-many --target=compile:watch --parallel=true --all=true",
 		"compile": "nx run-many --target=compile --parallel=true --all=true",
-		"docs:build": "pnpm sizes && nx build docs --verbose",
+		"docs:build": "pnpm compile && pnpm sizes && cd docs && pnpm build",
 		"ci:version": "changeset version",
 		"ci:release": "changeset publish",
 		"sizes": "tsx scripts/gather-sizes.ts"
