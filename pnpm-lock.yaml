@@ -52,6 +52,9 @@ importers:
       vitest: 0.26.2_jsdom@20.0.3+terser@5.16.1
       vue: 3.2.45
 
+  config:
+    specifiers: {}
+
   docs:
     specifiers:
       '@astrojs/mdx': ^0.14.0
@@ -138,13 +141,18 @@ importers:
       vite: 4.0.3_sass@1.57.1
 
   packages/core:
-    specifiers: {}
+    specifiers:
+      '@neodrag/tsup-config': workspace:*
+    devDependencies:
+      '@neodrag/tsup-config': link:../../config
 
   packages/react:
     specifiers:
       '@neodrag/core': workspace:*
+      '@neodrag/tsup-config': workspace:*
     devDependencies:
       '@neodrag/core': link:../core
+      '@neodrag/tsup-config': link:../../config
 
   packages/react/demo:
     specifiers:
@@ -162,8 +170,10 @@ importers:
   packages/solid:
     specifiers:
       '@neodrag/core': workspace:*
+      '@neodrag/tsup-config': workspace:*
     devDependencies:
       '@neodrag/core': link:../core
+      '@neodrag/tsup-config': link:../../config
 
   packages/solid/demo:
     specifiers:
@@ -183,8 +193,10 @@ importers:
   packages/svelte:
     specifiers:
       '@neodrag/core': workspace:*
+      '@neodrag/tsup-config': workspace:*
     devDependencies:
       '@neodrag/core': link:../core
+      '@neodrag/tsup-config': link:../../config
 
   packages/svelte/demo:
     specifiers:
@@ -206,8 +218,10 @@ importers:
   packages/vanilla:
     specifiers:
       '@neodrag/core': workspace:*
+      '@neodrag/tsup-config': workspace:*
     devDependencies:
       '@neodrag/core': link:../core
+      '@neodrag/tsup-config': link:../../config
 
   packages/vanilla/demo:
     specifiers:
@@ -223,8 +237,10 @@ importers:
   packages/vue:
     specifiers:
       '@neodrag/core': workspace:*
+      '@neodrag/tsup-config': workspace:*
     devDependencies:
       '@neodrag/core': link:../core
+      '@neodrag/tsup-config': link:../../config
 
   packages/vue/demo:
     specifiers:
@@ -9785,7 +9801,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 4.0.3_sass@1.57.1
+      vite: 4.0.3
     dev: true
 
   /vitefu/0.2.4_vite@3.2.5:
