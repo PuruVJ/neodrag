@@ -27,8 +27,8 @@ body.light {
 	--app-color-shell: hsl(200, 8%, 100%);
 	--app-color-shell-contrast: hsl(0, 0%, 10%);
 
-	--app-color-brand-svelte: hsl(15, 100%, 50%);
-	--app-color-brand-svelte-hsl: 15, 100%, 50%;
+	--app-color-brand-svelte: hsl(15, 100%, 45%);
+	--app-color-brand-svelte-hsl: 15, 100%, 45%;
 	--app-color-brand-svelte-body-gradient: radial-gradient(
 		ellipse farthest-corner at 95% 2%,
 		hsla(var(--app-color-brand-svelte-hsl), 0.2) 0%,
@@ -97,8 +97,8 @@ body.dark {
 	--app-color-shell: #101213;
 	--app-color-shell-contrast: var(--gray-1);
 
-	--app-color-brand-svelte: hsl(14, 100%, 55%);
-	--app-color-brand-svelte-hsl: 14, 100%, 55%;
+	--app-color-brand-svelte: hsl(14, 100%, 59%);
+	--app-color-brand-svelte-hsl: 14, 100%, 59%;
 	--app-color-brand-svelte-body-gradient: radial-gradient(
 		ellipse farthest-corner at 95% 2%,
 		hsla(var(--app-color-brand-svelte-hsl), 0.2) 0%,
