@@ -1,5 +1,11 @@
 # @neodrag/solid
 
+## 2.0.0-next.6
+
+### Patch Changes
+
+- [#99](https://github.com/PuruVJ/neodrag/pull/99) [`a1572bc`](https://github.com/PuruVJ/neodrag/commit/a1572bce5186051a5114dd580017a49fc2b3c7fc) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Add transform function
+
 ## 2.0.0-next.5
 
 ### Patch Changes
