@@ -149,8 +149,10 @@ importers:
   packages/react:
     specifiers:
       '@neodrag/core': workspace:*
+      '@neodrag/tsup-config': workspace:*
     devDependencies:
       '@neodrag/core': link:../core
+      '@neodrag/tsup-config': link:../../config
 
   packages/react/demo:
     specifiers:
@@ -168,8 +170,10 @@ importers:
   packages/solid:
     specifiers:
       '@neodrag/core': workspace:*
+      '@neodrag/tsup-config': workspace:*
     devDependencies:
       '@neodrag/core': link:../core
+      '@neodrag/tsup-config': link:../../config
 
   packages/solid/demo:
     specifiers:
@@ -214,8 +218,10 @@ importers:
   packages/vanilla:
     specifiers:
       '@neodrag/core': workspace:*
+      '@neodrag/tsup-config': workspace:*
     devDependencies:
       '@neodrag/core': link:../core
+      '@neodrag/tsup-config': link:../../config
 
   packages/vanilla/demo:
     specifiers:
@@ -231,8 +237,10 @@ importers:
   packages/vue:
     specifiers:
       '@neodrag/core': workspace:*
+      '@neodrag/tsup-config': workspace:*
     devDependencies:
       '@neodrag/core': link:../core
+      '@neodrag/tsup-config': link:../../config
 
   packages/vue/demo:
     specifiers:

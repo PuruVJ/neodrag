@@ -4,9 +4,9 @@ import { readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 async function main() {
-	const files = (await fg(new URL('../packages/*/dist/index.js', import.meta.url).pathname)).filter(
-		(path) => !path.includes('core')
-	);
+	const files = (
+		await fg(new URL('../packages/*/dist/min/index.js', import.meta.url).pathname)
+	).filter((path) => !path.includes('core'));
 
 	const versions = (await fg(new URL('../packages/*/package.json', import.meta.url).pathname))
 		.filter((path) => !path.includes('core'))

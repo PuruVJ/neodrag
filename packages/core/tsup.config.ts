@@ -1,1 +1,3 @@
-export { default } from '@neodrag/tsup-config';
+import { coreConfig } from '@neodrag/tsup-config';
+
+export default coreConfig;

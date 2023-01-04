@@ -1,10 +1,3 @@
-import { defineConfig } from 'ttsup';
+import { coreConfig } from '@neodrag/tsup-config';
 
-export default defineConfig({
-	entry: ['./src/index.ts'],
-	minify: 'terser',
-	format: 'esm',
-	dts: { resolve: true },
-	clean: true,
-	sourcemap: true,
-});
+export default coreConfig({});

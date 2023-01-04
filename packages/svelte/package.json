@@ -12,16 +12,12 @@
 	"sideEffects": false,
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
-			"production": "./dist/min/index.js",
-			"development": "./dist/index.js"
-		},
-		"./minified": {
-			"types": "./dist/min/index.d.ts",
-			"import": "./dist/min/index.js",
-			"module": "./dist/min/index.js",
-			"development": "./dist/min/index.js",
-			"production": "./dist/min/index.js"
+			"types": "./dist/index.d.ts",
+			"import": {
+				"production": "./dist/min/index.js",
+				"development": "./dist/index.js"
+			},
+			"default": "./dist/min/index.js"
 		},
 		"./package.json": "./package.json"
 	},
@@ -57,5 +53,5 @@
 		"@neodrag/core": "workspace:*",
 		"@neodrag/tsup-config": "workspace:*"
 	},
-	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/svelte#readme"
+	"homepage": "https://neodrag.dev/docs/svelte"
 }
