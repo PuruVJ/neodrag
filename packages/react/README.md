@@ -20,7 +20,7 @@ One draggable to rule em all
 
 # Features
 
-- 🤏 Tiny - Only 1.94KB min+brotli.
+- 🤏 Tiny - Only 1.95KB min+brotli.
 - 🐇 Simple - Quite simple to use, and effectively no-config required!
 - 🧙‍♀️ Elegant - React hook, to keep the usage simple, elegant and expressive.
 - 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.

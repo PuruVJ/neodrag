@@ -374,6 +374,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	function dragStart(e: PointerEvent) {
 		if (disabled) return;
 
+		if (e.button === 2) return;
+
 		if (ignoreMultitouch && !e.isPrimary) return;
 
 		// Compute bounds

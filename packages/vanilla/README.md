@@ -20,7 +20,7 @@ One draggable to rule em all
 
 # Features
 
-- 🤏 Tiny - Only 1.78KB min+brotli.
+- 🤏 Tiny - Only 1.79KB min+brotli.
 - 🐇 Simple - Quite simple to use, and effectively no-config required!
 - 🧙‍♀️ Elegant - Single class, very easy to use.
 - 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
