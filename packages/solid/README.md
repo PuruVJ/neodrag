@@ -93,7 +93,7 @@ const [options, setOptions] = createSignal({
 // You can update `options` with `setOptions` anytime and it'll change. Neodrag will automatically update to the new options 😉
 ```
 
-<a href="https://www.neodrag.dev/docs/solid"><h2>Read the docs</h2></a>
+<a href="https://www.neodrag.dev/docs/solid" style="font-size: 2rem">Read the docs</a>
 
 ## Credits
 

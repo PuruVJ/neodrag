@@ -82,7 +82,7 @@ Defining options elsewhere with typescript
 <div use:draggable={options}>Hello</div>
 ```
 
-<a href="https://www.neodrag.dev/docs/vue"><h2>Read the docs</h2></a>
+<a href="https://www.neodrag.dev/docs/svelte" style="font-size: 2rem">Read the docs</a>
 
 ## Credits
 

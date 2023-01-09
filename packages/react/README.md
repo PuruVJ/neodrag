@@ -118,7 +118,7 @@ function App() {
 }
 ```
 
-<a href="https://www.neodrag.dev/docs/react"><h2>Read the docs</h2></a>
+<a href="https://www.neodrag.dev/docs/react" style="font-size: 2rem">Read the docs</a>
 
 ## Credits
 
