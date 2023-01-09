@@ -446,7 +446,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		fireSvelteDragEndEvent();
 
 		if (canMoveInX) initialX = translateX;
-		if (canMoveInX) initialY = translateY;
+		if (canMoveInY) initialY = translateY;
 
 		active = false;
 	}
