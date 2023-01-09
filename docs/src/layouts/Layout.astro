@@ -1,5 +1,6 @@
 ---
 import PawCursor from '$components/PawCursor.svelte';
+import { SEO } from 'astro-seo';
 
 import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/500.css';
@@ -27,10 +28,7 @@ const bodyClass =
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.png" />
 		<meta name="generator" content={Astro.generator} />
-		<link
-			rel="canonical"
-			href={`https://www.neodrag.dev${Astro.url.pathname}`}
-		/>
+
 		<link
 			rel="sitemap"
 			type="application/xml"
@@ -39,6 +37,25 @@ const bodyClass =
 		/>
 		<title>{title}</title>
 	</head>
+
+	<SEO
+		canonical={`https://www.neodrag.dev${Astro.url.pathname}`}
+		description="Your one stop solution for anything draggable with JavaScript. Adapters for React, Svelte, Vue, SolidJS and JavaScript. Fully TypeScript compliant."
+		openGraph={{
+			basic: {
+				image: 'https://www.neodrag.dev/banner.png',
+				title,
+				type: 'website',
+				url: `https://www.neodrag.dev${Astro.url.pathname}`,
+			},
+		}}
+		twitter={{
+			card: 'summary_large_image',
+			creator: '@puruvjdev',
+			site: 'neodrag.dev',
+		}}
+	/>
+
 	<body class:list={[bodyClass, bodyClass && 'framework']}>
 		<slot />
 
