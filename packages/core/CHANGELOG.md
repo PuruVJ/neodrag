@@ -1,5 +1,11 @@
 # @neodrag/core
 
+## 2.0.1
+
+### Patch Changes
+
+- Fix canMoveInY bug in `dragEnd` function
+
 ## 2.0.0
 
 ### Patch Changes
