@@ -9808,7 +9808,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 4.0.4
+      vite: 4.0.4_sass@1.57.1
     dev: true
 
   /vitefu/0.2.4_vite@3.2.5:

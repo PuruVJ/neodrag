@@ -191,11 +191,13 @@
 		</div>
 
 		<div
-			class="box"
+			class="box single-handle"
 			style:z-index={zIndices[5]}
 			use:draggable={{ handle: '.handle', ...dragHandlers }}
 		>
-			<button class="handle" data-paw-cursor="true">Drag here</button>
+			<button class="handle" data-paw-cursor="true" data-paw-color="light">
+				Drag here
+			</button>
 
 			I can only be dragged by the handle 👆
 		</div>
@@ -221,12 +223,7 @@
 		>
 			I can be dragged anywhere
 
-			<button
-				class="cancel"
-				data-paw-cursor="false"
-				style:color="hsla(var(--app-color-primary-contrast-hsl), 0.6)"
-				style:font-size="0.8rem"
-			>
+			<button class="cancel" data-paw-cursor="false">
 				except for this box
 			</button>
 		</div>
@@ -411,6 +408,8 @@
 		width: var(--size);
 		height: var(--size);
 
+		padding: 0.5rem;
+
 		background-color: var(--app-color-light);
 
 		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035),
@@ -451,6 +450,22 @@
 		width: 80%;
 
 		text-align: start;
+	}
+
+	.box.single-handle .handle {
+		background: var(--app-color-dark);
+		color: var(--app-color-light);
+
+		border-radius: 24px;
+	}
+
+	.box .cancel {
+		background-color: hsla(var(--app-color-dark-hsl), 0.4);
+		color: var(--app-color-dark);
+
+		border-radius: 24px;
+
+		cursor: not-allowed;
 	}
 
 	.box.multiple-handles {

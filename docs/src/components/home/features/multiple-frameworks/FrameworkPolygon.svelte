@@ -123,6 +123,10 @@
 		display: grid;
 		place-items: center;
 
+		@include media('>tablet') {
+			padding: 0 6rem;
+		}
+
 		position: relative;
 	}
 
@@ -158,6 +162,7 @@
 		position: absolute;
 		right: 8px;
 		top: 8px;
+		z-index: 20;
 
 		font-size: 1.2rem;
 
