@@ -1,5 +1,21 @@
 # @neodrag/core
 
+## 2.0.0
+
+### Patch Changes
+
+- [#60](https://github.com/PuruVJ/neodrag/pull/60) [`bd831dcc`](https://github.com/PuruVJ/neodrag/commit/bd831dcc101d967b78505acd064cdfcde03b62ff) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Nothing
+
+- [#95](https://github.com/PuruVJ/neodrag/pull/95) [`3c10f6ae`](https://github.com/PuruVJ/neodrag/commit/3c10f6ae377c3e9fc9fea963ea99204a4649806c) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Add `legacyTranslate` option, remove memoization code, align to browser's RAF throttling
+
+- [#97](https://github.com/PuruVJ/neodrag/pull/97) [`9e5c4647`](https://github.com/PuruVJ/neodrag/commit/9e5c46477c7781bc75a57944983434a0c8ceff77) Thanks [@PuruVJ](https://github.com/PuruVJ)! - New output formats
+
+- [`da98e910`](https://github.com/PuruVJ/neodrag/commit/da98e910469d63e53e2462e74196bad3b90ea053) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Expose rootNode and currentNode from events. Remove node and domRect
+
+- [#99](https://github.com/PuruVJ/neodrag/pull/99) [`a1572bce`](https://github.com/PuruVJ/neodrag/commit/a1572bce5186051a5114dd580017a49fc2b3c7fc) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Add transform function
+
+- [`8dd0d88f`](https://github.com/PuruVJ/neodrag/commit/8dd0d88ff0458c0bd6d20e3649371fdf732c9ebb) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Add recomputeBounds option
+
 ## 2.0.0-next.6
 
 ### Patch Changes

@@ -1,7 +1,7 @@
 {
 	"name": "demo",
 	"private": true,
-	"version": "0.0.3-next.5",
+	"version": "0.0.3",
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
