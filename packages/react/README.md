@@ -69,7 +69,7 @@ function App() {
 Defining options elsewhere with typescript
 
 ```tsx
-import { useDraggable, DragOptions } from '@neodrag/react';
+import { useDraggable, type DragOptions } from '@neodrag/react';
 
 function App() {
 	const draggableRef = useRef(null);

@@ -70,8 +70,7 @@ Defining options elsewhere with typescript
 
 ```svelte
 <script lang="ts">
-  import { draggable } from '@neodrag/svelte';
-  import type { DragOptions } from '@neodrag/svelte';
+  import { draggable, type DragOptions } from '@neodrag/svelte';
 
   let options: DragOptions = {
     axis: 'y',

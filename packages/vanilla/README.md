@@ -62,7 +62,7 @@ const dragInstance = new Draggable(document.querySelector('#drag'), {
 Defining options elsewhere with typescript
 
 ```tsx
-import { Draggable } from '@neodrag/vanilla';
+import { type Draggable } from '@neodrag/vanilla';
 
 const options: DragOptions = {
 	axis: 'y',
