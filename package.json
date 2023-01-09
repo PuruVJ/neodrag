@@ -7,7 +7,7 @@
 		"changeset": "changeset",
 		"compile:watch": "nx run-many --target=compile:watch --parallel=true --all=true",
 		"compile": "nx run-many --target=compile --parallel=true --all=true",
-		"docs:build": "nx build docs --verbose",
+		"docs:build": "pnpm compile && pnpm sizes && cd docs && pnpm build",
 		"ci:version": "changeset version",
 		"ci:release": "changeset publish",
 		"sizes": "tsx scripts/gather-sizes.ts"
@@ -22,19 +22,19 @@
 		"@types/react-dom": "^18.0.10",
 		"brotli-size": "^4.0.0",
 		"fast-glob": "^3.2.12",
-		"jsdom": "^20.0.3",
-		"nx": "15.4.2",
+		"jsdom": "^21.0.0",
+		"nx": "15.4.5",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"solid-js": "^1.6.6",
+		"solid-js": "^1.6.8",
 		"svelte": "^3.55.0",
 		"svelte-preprocess": "^5.0.0",
 		"terser": "^5.16.1",
 		"tsx": "^3.12.1",
 		"ttsup": "0.0.0-semantic-release",
 		"typescript": "^4.9.4",
-		"vite": "^4.0.3",
-		"vitest": "^0.26.2",
+		"vite": "^4.0.4",
+		"vitest": "^0.26.3",
 		"vue": "^3.2.45"
 	}
 }

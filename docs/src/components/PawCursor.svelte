@@ -4,8 +4,10 @@
 	import PawIcon from '~icons/mdi/paw';
 
 	import { mounted } from '$stores/mounted.store';
+	import type { Theme } from '$stores/user-preferences.store';
 
 	let showCustomCursor = false;
+	let cursorColor: Theme | undefined = 'dark';
 
 	let coordsCursor: {
 		x: number;
@@ -45,7 +47,7 @@
 			childList: true,
 			subtree: true,
 			attributes: true,
-			attributeFilter: ['data-paw-cursor'],
+			attributeFilter: ['data-paw-cursor', 'data-paw-color'],
 		});
 
 		return result;
@@ -69,6 +71,11 @@
 				() => {
 					if (el.dataset.pawCursor === 'true') {
 						showCustomCursor = true;
+
+						if (el.dataset.pawColor) {
+							cursorColor = el.dataset.pawColor as Theme;
+						}
+
 						initialCursor = getComputedStyle(el).cursor;
 						el.style.cursor = 'none';
 					} else {
@@ -83,6 +90,8 @@
 				() => {
 					showCustomCursor = false;
 					initialCursor && (el.style.cursor = initialCursor);
+
+					cursorColor = undefined;
 				},
 				{ passive: true }
 			);
@@ -97,6 +106,7 @@
 	style:top="{coordsCursor?.y ?? 0}px"
 	style:left="{coordsCursor?.x ?? 0}px"
 	style:--opacity={showCustomCursor && coordsCursor ? 1 : 0}
+	style:--color="var(--app-color-{cursorColor ?? 'dark'})"
 	style:display={$mounted ? 'block' : 'none'}
 >
 	<PawIcon style="font-size: 2rem;" />
@@ -104,6 +114,8 @@
 
 <style lang="scss">
 	.cursor {
+		--color: var(--app-color-dark);
+
 		display: none;
 
 		position: fixed;
@@ -126,7 +138,7 @@
 		}
 
 		:global(svg path) {
-			fill: var(--app-color-dark);
+			fill: var(--color);
 		}
 
 		@media (hover: none) {

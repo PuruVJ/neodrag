@@ -23,7 +23,27 @@ This package exports these types you can use:
 
 `DragBoundsCoords` is when you're specifying the `bounds` field using an object, this is the type needed for that.
 
+`DragEventData` is the data provided during the [events](#events)
+
 ```ts
+export type DragAxis = 'both' | 'x' | 'y' | 'none';
+
+export type DragBounds = 'parent' | string | Partial<DragBoundsCoords>;
+
+export type DragEventData = {
+  /** How much element moved from its original position horizontally */
+  offsetX: number;
+
+  /** How much element moved from its original position vertically */
+  offsetY: number;
+
+  /** The node on which the draggable is applied */
+  rootNode: HTMLElement;
+
+  /** The element being dragged */
+  currentNode: HTMLElement;
+};
+
 export type DragBoundsCoords = {
   /** Number of pixels from left of the window */
   left: number;

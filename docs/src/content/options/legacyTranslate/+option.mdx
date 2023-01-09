@@ -1,0 +1,209 @@
+---
+title: legacyTranslate
+type: 'boolean'
+defaultValue: 'true'
+---
+
+import Code from '$components/options/OptionsCode.astro';
+import Example from '$components/options/OptionsExample.astro';
+import Examples from '$components/options/OptionsExamples.svelte';
+
+import LegacyTranslateGPUExample from './LegacyTranslateGPU.example.svelte';
+import LegacyTranslateNoGPUExample from './LegacyTranslateNoGPU.example.svelte';
+import TranslateGPUExample from './TranslateGPU.example.svelte';
+import TranslateNoGPUExample from './TranslateNoGPU.example.svelte';
+
+export const shortDescription = `Whether to use the new translate property or transform: translate().`;
+
+<p>{shortDescription}</p>
+
+At the time of writing, `translate` property has less than 90% browsers availability.
+So, for now, this library will use the `transform: translate()` property to move the element.
+In future, when `translate` property will be more widely available, this library will switch to it by default. `legacyTranslate`'s default value will become `false`
+
+<Examples client:load>
+  <Example>
+    <LegacyTranslateGPUExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ legacyTranslate: true, gpuAcceleration: true }}>
+          Legacy translate with GPU acceleration
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ legacyTranslate: true, gpuAcceleration: true }}">
+            Legacy translate with GPU acceleration
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ legacyTranslate: true, gpuAcceleration: true }}>
+          Legacy translate with GPU acceleration
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { legacyTranslate: true, gpuAcceleration: true });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { legacyTranslate: true, gpuAcceleration: true });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <TranslateGPUExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ legacyTranslate: false, gpuAcceleration: true }}>
+          Modern translate with GPU acceleration
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ legacyTranslate: false, gpuAcceleration: true }}">
+            Modern translate with GPU acceleration
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ legacyTranslate: false, gpuAcceleration: true }}>
+          Modern translate with GPU acceleration
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { legacyTranslate: false, gpuAcceleration: true });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { legacyTranslate: false, gpuAcceleration: true });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <LegacyTranslateNoGPUExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ legacyTranslate: true, gpuAcceleration: false }}>
+          Legacy translate with no GPU acceleration
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ legacyTranslate: true, gpuAcceleration: false }}">
+            Legacy translate with no GPU acceleration
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ legacyTranslate: true, gpuAcceleration: false }}>
+          Legacy translate with no GPU acceleration
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { legacyTranslate: true, gpuAcceleration: false });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { legacyTranslate: true, gpuAcceleration: false });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <TranslateNoGPUExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div use:draggable={{ legacyTranslate: false, gpuAcceleration: false }}>
+          Modern translate with no GPU acceleration
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ legacyTranslate: false, gpuAcceleration: false }}">
+            Modern translate with no GPU acceleration
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ legacyTranslate: false, gpuAcceleration: false }}>
+          Modern translate with no GPU acceleration
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, { legacyTranslate: false, gpuAcceleration: false });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, { legacyTranslate: false, gpuAcceleration: false });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+</Examples>

@@ -1,5 +1,3 @@
-import memoize from './memoize';
-
 export type DragBoundsCoords = {
 	/** Number of pixels from left of the document */
 	left: number;
@@ -24,10 +22,17 @@ export type DragBounds =
 	| (string & Record<never, never>);
 
 export type DragEventData = {
+	/** How much element moved from its original position horizontally */
 	offsetX: number;
+
+	/** How much element moved from its original position vertically */
 	offsetY: number;
-	domRect: DOMRect;
-	node: HTMLElement;
+
+	/** The node on which the draggable is applied */
+	rootNode: HTMLElement;
+
+	/** The element being dragged */
+	currentNode: HTMLElement;
 };
 
 export type DragOptions = {
@@ -48,6 +53,19 @@ export type DragOptions = {
 	bounds?: DragBounds;
 
 	/**
+	 * When to recalculate the dimensions of the `bounds` element.
+	 *
+	 * By default, bounds are recomputed only on dragStart. Use this options to change that behavior.
+	 *
+	 * @default '{ dragStart: true, drag: false, dragEnd: false }'
+	 */
+	recomputeBounds?: {
+		dragStart?: boolean;
+		drag?: boolean;
+		dragEnd?: boolean;
+	};
+
+	/**
 	 * Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
 	 *
 	 * - `both` - Element can move in any direction
@@ -60,6 +78,15 @@ export type DragOptions = {
 	axis?: DragAxis;
 
 	/**
+	 * If false, uses the new translate property instead of transform: translate(); to move the element around.
+	 *
+	 * At present this is true by default, but will be changed to false in a future major version.
+	 *
+	 * @default true
+	 */
+	legacyTranslate?: boolean;
+
+	/**
 	 * If true, uses `translate3d` instead of `translate` to move the element around, and the hardware acceleration kicks in.
 	 *
 	 * `true` by default, but can be set to `false` if [blurry text issue](https://developpaper.com/question/why-does-the-use-of-css3-translate3d-result-in-blurred-display/) occur
@@ -67,6 +94,24 @@ export type DragOptions = {
 	 * @default true
 	 */
 	gpuAcceleration?: boolean;
+
+	/**
+	 * Custom transform function. If provided, this function will be used to apply the DOM transformations to the root node to move it.
+	 * Existing transform logic, including `gpuAcceleration` and `legacyTranslate`, will be ignored.
+	 *
+	 * You can return a string to apply to a `transform` property, or not return anything and apply your transformations using `rootNode.style.transform = VALUE`
+	 *
+	 * @default undefined
+	 */
+	transform?: ({
+		offsetX,
+		offsetY,
+		rootNode,
+	}: {
+		offsetX: number;
+		offsetY: number;
+		rootNode: HTMLElement;
+	}) => string | undefined | void;
 
 	/**
 	 * Applies `user-select: none` on `<body />` element when dragging,
@@ -187,14 +232,24 @@ const enum DEFAULT_CLASS {
 	DRAGGED = 'neodrag-dragged',
 }
 
+const DEFAULT_RECOMPUTE_BOUNDS: DragOptions['recomputeBounds'] = {
+	dragStart: true,
+};
+
 export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let {
 		bounds,
 		axis = 'both',
+
 		gpuAcceleration = true,
+		legacyTranslate = true,
+		transform,
+
 		applyUserSelectHack = true,
 		disabled = false,
 		ignoreMultitouch = false,
+
+		recomputeBounds = DEFAULT_RECOMPUTE_BOUNDS,
 
 		grid,
 
@@ -214,8 +269,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		onDragEnd,
 	} = options;
 
-	const tick = new Promise(requestAnimationFrame);
-
 	let active = false;
 
 	let translateX = 0,
@@ -232,30 +285,56 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		? { x: position?.x ?? 0, y: position?.y ?? 0 }
 		: defaultPosition;
 
-	setTranslate(xOffset, yOffset, node, gpuAcceleration);
+	setTranslate(xOffset, yOffset);
 
 	let canMoveInX: boolean;
 	let canMoveInY: boolean;
 
 	let bodyOriginalUserSelectVal = '';
 
-	let computedBounds: DragBoundsCoords;
+	let computedBounds: DragBoundsCoords | undefined;
 	let nodeRect: DOMRect;
 
-	let dragEl: HTMLElement | HTMLElement[] | undefined;
-	let cancelEl: HTMLElement | HTMLElement[] | undefined;
+	let dragEls: HTMLElement[];
+	let cancelEls: HTMLElement[];
+
+	let currentlyDraggedEl: HTMLElement;
 
 	let isControlled = !!position;
+
+	// Set proper defaults for recomputeBounds
+	recomputeBounds = { ...DEFAULT_RECOMPUTE_BOUNDS, ...recomputeBounds };
 
 	// Arbitrary constants for better minification
 	const bodyStyle = document.body.style;
 	const nodeClassList = node.classList;
 
+	function setTranslate(xPos = translateX, yPos = translateY) {
+		if (!transform) {
+			if (legacyTranslate) {
+				let common = `${+xPos}px, ${+yPos}px`;
+				return setStyle(
+					node,
+					'transform',
+					gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common})`
+				);
+			}
+
+			return setStyle(node, 'translate', `${+xPos}px ${+yPos}px ${gpuAcceleration ? '1px' : ''}`);
+		}
+
+		// Call transform function if provided
+		const transformCalled = transform({ offsetX: xPos, offsetY: yPos, rootNode: node });
+		if (isString(transformCalled)) {
+			setStyle(node, 'transform', transformCalled);
+		}
+	}
+
 	const getEventData: () => DragEventData = () => ({
 		offsetX: translateX,
 		offsetY: translateY,
-		domRect: node.getBoundingClientRect(),
-		node,
+		rootNode: node,
+		currentNode: currentlyDraggedEl,
 	});
 
 	const callEvent = (eventName: 'neodrag:start' | 'neodrag' | 'neodrag:end', fn: typeof onDrag) => {
@@ -278,16 +357,12 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	const listen = addEventListener;
 
-	listen('touchstart', dragStart, false);
-	listen('touchend', dragEnd, false);
-	listen('touchmove', drag, false);
-
-	listen('mousedown', dragStart, false);
-	listen('mouseup', dragEnd, false);
-	listen('mousemove', drag, false);
+	listen('pointerdown', dragStart, false);
+	listen('pointerup', dragEnd, false);
+	listen('pointermove', drag, false);
 
 	// On mobile, touch can become extremely janky without it
-	node.style.touchAction = 'none';
+	setStyle(node, 'touch-action', 'none');
 
 	const calculateInverseScale = () => {
 		// Calculate the current scale of the node
@@ -296,43 +371,43 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		return inverseScale;
 	};
 
-	function dragStart(e: TouchEvent | MouseEvent) {
+	function dragStart(e: PointerEvent) {
 		if (disabled) return;
-		if (ignoreMultitouch && e.type === 'touchstart' && (e as TouchEvent).touches.length > 1) return;
 
-		nodeClassList.add(defaultClass);
+		if (e.button === 2) return;
 
-		dragEl = getHandleEl(handle, node);
-		cancelEl = getCancelElement(cancel, node);
-
-		canMoveInX = /(both|x)/.test(axis);
-		canMoveInY = /(both|y)/.test(axis);
+		if (ignoreMultitouch && !e.isPrimary) return;
 
 		// Compute bounds
-		if (typeof bounds !== 'undefined') {
-			computedBounds = computeBoundRect(bounds, node);
-		}
-
-		// Compute current node's bounding client Rectangle
-		nodeRect = node.getBoundingClientRect();
+		if (recomputeBounds.dragStart) computedBounds = computeBoundRect(bounds, node);
 
 		if (isString(handle) && isString(cancel) && handle === cancel)
 			throw new Error("`handle` selector can't be same as `cancel` selector");
 
-		if (cancelElementContains(cancelEl, dragEl))
+		nodeClassList.add(defaultClass);
+
+		dragEls = getHandleEls(handle, node);
+		cancelEls = getCancelElements(cancel, node);
+
+		canMoveInX = /(both|x)/.test(axis);
+		canMoveInY = /(both|y)/.test(axis);
+
+		if (cancelElementContains(cancelEls, dragEls))
 			throw new Error(
 				"Element being dragged can't be a child of the element on which `cancel` is applied"
 			);
 
 		if (
-			(dragEl instanceof HTMLElement
-				? dragEl.contains(<HTMLElement>e.target)
-				: dragEl.some((el) => el.contains(<HTMLElement>e.target))) &&
-			!cancelElementContains(cancelEl, <HTMLElement>e.target)
-		)
+			dragEls.some((el) => el.contains(<HTMLElement>e.target)) &&
+			!cancelElementContains(cancelEls, [<HTMLElement>e.target])
+		) {
+			currentlyDraggedEl =
+				dragEls.length === 1 ? node : dragEls.find((el) => el.contains(<HTMLElement>e.target))!;
 			active = true;
+		} else return;
 
-		if (!active) return;
+		// Compute current node's bounding client Rectangle
+		nodeRect = node.getBoundingClientRect();
 
 		if (applyUserSelectHack) {
 			// Apply user-select: none on body to prevent misbehavior
@@ -343,7 +418,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		// Dispatch custom event
 		fireSvelteDragStartEvent();
 
-		const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
+		const { clientX, clientY } = e;
 		const inverseScale = calculateInverseScale();
 
 		if (canMoveInX) initialX = clientX - xOffset / inverseScale;
@@ -360,6 +435,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	function dragEnd() {
 		if (!active) return;
 
+		if (recomputeBounds.dragEnd) computedBounds = computeBoundRect(bounds, node);
+
 		// Apply class defaultClassDragged
 		nodeClassList.remove(defaultClassDragging);
 		nodeClassList.add(defaultClassDragged);
@@ -374,8 +451,10 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		active = false;
 	}
 
-	function drag(e: TouchEvent | MouseEvent) {
+	function drag(e: PointerEvent) {
 		if (!active) return;
+
+		if (recomputeBounds.drag) computedBounds = computeBoundRect(bounds, node);
 
 		// Apply class defaultClassDragging
 		nodeClassList.add(defaultClassDragging);
@@ -384,11 +463,9 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		nodeRect = node.getBoundingClientRect();
 
-		const { clientX, clientY } = isTouchEvent(e) ? e.touches[0] : e;
-
 		// Get final values for clamping
-		let finalX = clientX,
-			finalY = clientY;
+		let finalX = e.clientX,
+			finalY = e.clientY;
 
 		const inverseScale = calculateInverseScale();
 
@@ -431,21 +508,16 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		fireSvelteDragEvent();
 
-		tick.then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
-		// Promise.resolve().then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
+		setTranslate();
 	}
 
 	return {
 		destroy: () => {
 			const unlisten = removeEventListener;
 
-			unlisten('touchstart', dragStart, false);
-			unlisten('touchend', dragEnd, false);
-			unlisten('touchmove', drag, false);
-
-			unlisten('mousedown', dragStart, false);
-			unlisten('mouseup', dragEnd, false);
-			unlisten('mousemove', drag, false);
+			unlisten('pointerdown', dragStart, false);
+			unlisten('pointerup', dragEnd, false);
+			unlisten('pointermove', drag, false);
 		},
 		update: (options: DragOptions) => {
 			// Update all the values that need to be changed
@@ -454,10 +526,13 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			ignoreMultitouch = options.ignoreMultitouch ?? false;
 			handle = options.handle;
 			bounds = options.bounds;
+			recomputeBounds = options.recomputeBounds ?? DEFAULT_RECOMPUTE_BOUNDS;
 			cancel = options.cancel;
 			applyUserSelectHack = options.applyUserSelectHack ?? true;
 			grid = options.grid;
 			gpuAcceleration = options.gpuAcceleration ?? true;
+			legacyTranslate = options.legacyTranslate ?? true;
+			transform = options.transform;
 
 			const dragged = nodeClassList.contains(defaultClassDragged);
 
@@ -475,34 +550,34 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 				xOffset = translateX = options.position?.x ?? translateX;
 				yOffset = translateY = options.position?.y ?? translateY;
 
-				tick.then(() => setTranslate(translateX, translateY, node, gpuAcceleration));
+				setTranslate();
 			}
 		},
 	};
 };
 
-const isTouchEvent = (event: MouseEvent | TouchEvent): event is TouchEvent =>
-	!!(event as TouchEvent).touches?.length;
-
 const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max);
 
 const isString = (val: unknown): val is string => typeof val === 'string';
 
-const snapToGrid = memoize(
-	([xSnap, ySnap]: [number, number], pendingX: number, pendingY: number): [number, number] => {
-		const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
+const snapToGrid = (
+	[xSnap, ySnap]: [number, number],
+	pendingX: number,
+	pendingY: number
+): [number, number] => {
+	const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
 
-		const x = calc(pendingX, xSnap);
-		const y = calc(pendingY, ySnap);
+	const x = calc(pendingX, xSnap);
+	const y = calc(pendingY, ySnap);
 
-		return [x, y];
-	}
-);
+	return [x, y];
+};
 
-function getHandleEl(handle: DragOptions['handle'], node: HTMLElement) {
-	if (!handle) return node;
+function getHandleEls(handle: DragOptions['handle'], node: HTMLElement): HTMLElement[] {
+	if (!handle) return [node];
 
-	if (handle instanceof HTMLElement || Array.isArray(handle)) return handle;
+	if (isHTMLElement(handle)) return [handle];
+	if (Array.isArray(handle)) return handle;
 
 	// Valid!! Let's check if this selector exists or not
 	const handleEls = node.querySelectorAll<HTMLElement>(handle);
@@ -514,10 +589,11 @@ function getHandleEl(handle: DragOptions['handle'], node: HTMLElement) {
 	return Array.from(handleEls.values());
 }
 
-function getCancelElement(cancel: DragOptions['cancel'], node: HTMLElement) {
-	if (!cancel) return;
+function getCancelElements(cancel: DragOptions['cancel'], node: HTMLElement): HTMLElement[] {
+	if (!cancel) return [];
 
-	if (cancel instanceof HTMLElement || Array.isArray(cancel)) return cancel;
+	if (isHTMLElement(cancel)) return [cancel];
+	if (Array.isArray(cancel)) return cancel;
 
 	const cancelEls = node.querySelectorAll<HTMLElement>(cancel);
 
@@ -529,25 +605,13 @@ function getCancelElement(cancel: DragOptions['cancel'], node: HTMLElement) {
 	return Array.from(cancelEls.values());
 }
 
-function cancelElementContains(
-	cancelElement: HTMLElement | HTMLElement[] | undefined,
-	element: HTMLElement | HTMLElement[]
-): boolean {
-	const dragElements = element instanceof HTMLElement ? [element] : element;
-
-	if (cancelElement instanceof HTMLElement) {
-		return dragElements.some((el) => cancelElement.contains(el));
-	}
-
-	if (Array.isArray(cancelElement)) {
-		return cancelElement.some((cancelEl) => dragElements.some((el) => cancelEl.contains(el)));
-	}
-
-	return false;
-}
+const cancelElementContains = (cancelElements: HTMLElement[], dragElements: HTMLElement[]) =>
+	cancelElements.some((cancelEl) => dragElements.some((el) => cancelEl.contains(el)));
 
 function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
-	if (bounds instanceof HTMLElement) return bounds.getBoundingClientRect();
+	if (bounds === undefined) return;
+
+	if (isHTMLElement(bounds)) return bounds.getBoundingClientRect();
 
 	if (typeof bounds === 'object') {
 		// we have the left right etc
@@ -567,12 +631,10 @@ function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) 
 	if (node === null)
 		throw new Error("The selector provided for bound doesn't exists in the document.");
 
-	const computedBounds = node.getBoundingClientRect();
-	return computedBounds;
+	return node.getBoundingClientRect();
 }
 
-function setTranslate(xPos: number, yPos: number, el: HTMLElement, gpuAcceleration: boolean) {
-	el.style.transform = gpuAcceleration
-		? `translate3d(${+xPos}px, ${+yPos}px, 0)`
-		: `translate(${+xPos}px, ${+yPos}px)`;
-}
+const setStyle = (el: HTMLElement, style: string, value: string) =>
+	el.style.setProperty(style, value);
+
+const isHTMLElement = (obj: unknown): obj is HTMLElement => obj instanceof HTMLElement;

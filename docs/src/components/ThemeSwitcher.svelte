@@ -12,13 +12,14 @@
 	import { theme } from '$stores/user-preferences.store';
 
 	let containerWidth = 0;
+	let themeSwitcherContainer: HTMLButtonElement;
 
 	let draggableEl: HTMLDivElement;
 
 	const positionX = tweened(0, { duration: 400, easing: expoOut });
 
 	function changeTheme() {
-		if ($positionX / containerWidth > 0.5) {
+		if ($positionX / containerWidth >= 0.5) {
 			$theme = 'dark';
 		} else {
 			$theme = 'light';
@@ -35,15 +36,39 @@
 </script>
 
 <button
-	on:click={() => {
-		$positionX = 0;
+	class="theme-switcher"
+	on:pointerdown={(e) => {
+		const { clientX } = e;
+
+		// Get difference
+		$positionX =
+			clientX -
+			themeSwitcherContainer.getBoundingClientRect().left -
+			draggableEl.getBoundingClientRect().width / 2;
+
+		if ($positionX / containerWidth >= 0.5) {
+			$positionX = containerWidth - draggableEl.getBoundingClientRect().width;
+		} else {
+			$positionX = 0;
+		}
+
 		changeTheme();
 	}}
+	bind:clientWidth={containerWidth}
+	bind:this={themeSwitcherContainer}
 >
-	<SunnyIcon />
-</button>
+	<button
+		class="theme-button light"
+		class:selected={$theme === 'light'}
+		data-paw-cursor="true"
+		on:click={() => {
+			$positionX = 0;
+			changeTheme();
+		}}
+	>
+		<SunnyIcon />
+	</button>
 
-<button class="theme-switcher" bind:clientWidth={containerWidth}>
 	<div
 		class="draggable"
 		data-paw-cursor="true"
@@ -54,10 +79,11 @@
 			position: { x: $positionX, y: 0 },
 			onDrag: ({ offsetX }) => {
 				positionX.set(offsetX, { duration: 0 });
+				changeTheme();
 			},
-			onDragEnd: ({ offsetX, node }) => {
+			onDragEnd: ({ offsetX, rootNode }) => {
 				if (offsetX / containerWidth > 0.3) {
-					$positionX = containerWidth - node.getBoundingClientRect().width;
+					$positionX = containerWidth - rootNode.getBoundingClientRect().width;
 				} else {
 					$positionX = 0;
 				}
@@ -66,20 +92,25 @@
 			},
 		}}
 	/>
-</button>
 
-<button
-	on:click={() => {
-		$positionX = containerWidth - draggableEl.getBoundingClientRect().width;
-		changeTheme();
-	}}
->
-	<MoonIcon />
+	<button
+		class="theme-button dark"
+		class:selected={$theme === 'dark'}
+		data-paw-cursor="true"
+		on:click={() => {
+			$positionX = containerWidth - draggableEl.getBoundingClientRect().width;
+			changeTheme();
+		}}
+	>
+		<MoonIcon />
+	</button>
 </button>
 
 <style lang="scss">
 	.theme-switcher {
-		width: 40%;
+		position: relative;
+
+		width: 50%;
 		height: 2rem;
 
 		padding: 0;
@@ -98,5 +129,33 @@
 		border-radius: 50%;
 
 		background-color: var(--secondary-color);
+	}
+
+	.theme-button {
+		position: absolute;
+		top: 50%;
+
+		transform: translateY(-50%);
+
+		z-index: 2;
+
+		pointer-events: none;
+
+		font-size: 0.8em;
+		color: var(--secondary-color-contrast);
+
+		padding: 0;
+
+		&.light {
+			left: 0.2em;
+
+			&.selected :global(svg) {
+				color: var(--app-color-light);
+			}
+		}
+
+		&.dark {
+			right: 0.2em;
+		}
 	}
 </style>

@@ -1,9 +1,26 @@
-# neodrag
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+<p align="center">
+<a href="https://www.neodrag.dev"><img src="https://www.neodrag.dev/logo.svg" height="150" /></a>
+</p>
 
-Lightweight multi-framework libraries for draggability on the web.
+<h1 align="center">
+Neodrag
+</h1>
+
+<h2 align="center">
+One draggable to rule em all
+</h2>
+
+<p align="center">Multi-framework libraries for dragging. Choose your framework, the dragging API behavior will stay the same 🔥</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@neodrag/svelte"><img src="https://img.shields.io/npm/v/@neodrag/svelte?color=e63900&label=svelte"></a>
+  <a href="https://www.npmjs.com/package/@neodrag/vue"><img src="https://img.shields.io/npm/v/@neodrag/vue?color=42b883&label=vue"></a>
+  <a href="https://www.npmjs.com/package/@neodrag/react"><img src="https://img.shields.io/npm/v/@neodrag/react?color=0098b3&label=react"></a>
+  <a href="https://www.npmjs.com/package/@neodrag/solid"><img src="https://img.shields.io/npm/v/@neodrag/solid?color=2c4f7d&label=solid"></a>
+  <a href="https://www.npmjs.com/package/@neodrag/vanilla"><img src="https://img.shields.io/npm/v/@neodrag/vanilla?color=fff&label=vanilla"></a>
+<p>
+
+<p align="center"><a href="https://www.neodrag.dev">Getting Started</a></p>
 
 This is a monorepo containing the following packages:
 

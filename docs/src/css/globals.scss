@@ -26,6 +26,7 @@ body {
 	background-color: var(--app-color-shell);
 
 	scroll-behavior: smooth;
+	overflow-x: hidden;
 
 	font-family: var(--app-font-main);
 }
@@ -153,9 +154,12 @@ $frameworks: svelte, react, vue, solid, vanilla;
 }
 
 ::selection {
-	background-color: var(--secondary-color, var(--app-color-primary));
-	color: var(--app-color-primary-contrast);
-	-webkit-text-fill-color: var(--app-color-primary-contrast);
+	background-color: hsla(
+		var(--secondary-color-hsl, var(--app-color-primary-hsl)),
+		0.3
+	);
+	// color: var(--app-color-primary-contrast);
+	// -webkit-text-fill-color: var(--app-color-primary-contrast);
 }
 
 p {

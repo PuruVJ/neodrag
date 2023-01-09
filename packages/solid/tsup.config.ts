@@ -1,11 +1,14 @@
-import { defineConfig } from 'ttsup';
+import { coreConfig } from '@neodrag/tsup-config';
 
-export default defineConfig({
-	entry: ['./src/index.ts'],
-	external: ['solid-js'],
-	minify: 'terser',
-	format: 'esm',
-	dts: { resolve: true },
-	clean: true,
-	sourcemap: true,
+export default coreConfig({
+	dtsBanner: `import 'solid-js';
+
+declare module 'solid-js' {
+    namespace JSX {
+        interface Directives {
+            draggable: DragOptions;
+        }
+    }
+}
+`,
 });

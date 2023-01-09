@@ -1,11 +1,21 @@
 import { file as brotliSize } from 'brotli-size';
 import fg from 'fast-glob';
-import { writeFile, mkdir } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
+import { mkdir, writeFile } from 'node:fs/promises';
 
 async function main() {
-	const files = (await fg(new URL('../packages/*/dist/index.js', import.meta.url).pathname)).filter(
-		(path) => !path.includes('core')
-	);
+	const files = (
+		await fg(new URL('../packages/*/dist/min/index.js', import.meta.url).pathname)
+	).filter((path) => !path.includes('core'));
+
+	const versions = (await fg(new URL('../packages/*/package.json', import.meta.url).pathname))
+		.filter((path) => !path.includes('core'))
+		.map((path) => {
+			const framework = /packages\/(?<framework>[^ $]*)\/package\.json/.exec(path)?.groups
+				?.framework!;
+
+			return { framework, version: JSON.parse(readFileSync(path, 'utf-8')).version };
+		});
 
 	const contents = (
 		await Promise.all(
@@ -16,7 +26,16 @@ async function main() {
 				return { framework, size };
 			})
 		)
-	).reduce((acc, { framework, size }) => ({ ...acc, [framework]: size }), {});
+	).reduce(
+		(acc, { framework, size }) => ({
+			...acc,
+			[framework]: {
+				size,
+				version: versions.find(({ framework: vFw }) => vFw === framework)?.version,
+			},
+		}),
+		{}
+	);
 
 	// Ensure folder if not exists
 	try {
