@@ -1,22 +1,22 @@
 {
   "react": {
     "size": "1.95",
-    "version": "2.0.0-next.6"
+    "version": "2.0.1"
   },
   "solid": {
     "size": "1.75",
-    "version": "2.0.0-next.6"
+    "version": "2.0.1"
   },
   "svelte": {
     "size": "1.68",
-    "version": "2.0.0-next.6"
-  },
-  "vue": {
-    "size": "1.77",
-    "version": "2.0.0-next.6"
+    "version": "2.0.1"
   },
   "vanilla": {
     "size": "1.79",
-    "version": "2.0.0-next.6"
+    "version": "2.0.1"
+  },
+  "vue": {
+    "size": "1.77",
+    "version": "2.0.1"
   }
 }
