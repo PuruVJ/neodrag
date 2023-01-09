@@ -20,7 +20,7 @@ One draggable to rule em all
 
 # Features
 
-- 🤏 Tiny - Only 1.67KB min+brotli.
+- 🤏 Tiny - Only 1.68KB min+brotli.
 - 🐇 Simple - Quite simple to use, and effectively no-config required!
 - 🧙‍♀️ Elegant - Svelte Action, to keep the usage simple, elegant and expressive.
 - 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
