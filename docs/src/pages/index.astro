@@ -56,6 +56,19 @@ import ExploreFrameworks from '$components/home/ExploreFrameworks.svelte';
 			<ExploreFrameworks client:visible />
 		</section>
 	</main>
+
+	<a
+		class="producthunt unstyled"
+		href="https://www.producthunt.com/posts/neodrag?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-neodrag"
+		target="_blank"
+		><img
+			src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=374248&theme=light"
+			alt="Neodrag - One draggable to rule them all | Product Hunt"
+			style="width: 250px; height: 54px;"
+			width="250"
+			height="54"
+		/></a
+	>
 </Layout>
 
 <style lang="scss">
@@ -190,5 +203,13 @@ import ExploreFrameworks from '$components/home/ExploreFrameworks.svelte';
 		gap: 4rem;
 
 		padding-bottom: clamp(3rem, 100vw, 10rem);
+	}
+
+	.producthunt {
+		position: fixed;
+		bottom: 1rem;
+		right: 1rem;
+
+		z-index: 5;
 	}
 </style>
