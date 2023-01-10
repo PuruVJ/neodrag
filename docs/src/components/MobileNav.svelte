@@ -5,13 +5,14 @@
 	import CloseIcon from '~icons/material-symbols/close-rounded';
 
 	import { inview } from 'svelte-inview';
+	import { expoOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 
 	import Nav from './docs/Nav.svelte';
 
 	import { portal } from '$actions/portal';
+	import { browser } from '$helpers/utils';
 	import { prefersReducedMotion, theme } from '$stores/user-preferences.store';
-	import { expoOut } from 'svelte/easing';
 
 	const isTablet = globalThis.matchMedia('(max-width: 768px)')?.matches;
 
@@ -20,17 +21,23 @@
 	let isNavOpen = false;
 
 	$: navTransition = !$prefersReducedMotion ? slide : fade;
+
+	$: themeColor = (() => {
+		$theme;
+		isTablet;
+
+		if (!browser) return;
+
+		const value = getComputedStyle(document.body).getPropertyValue(
+			'--app-color-scrolling-navbar'
+		);
+
+		return value;
+	})();
 </script>
 
 <svelte:head>
-	<meta
-		name="theme-color"
-		content={$theme === 'dark'
-			? shadow && isTablet
-				? '#1a2124'
-				: '#101213'
-			: '#f0f0f0'}
-	/>
+	<meta name="theme-color" content={themeColor?.trim()} />
 </svelte:head>
 
 <div
