@@ -32,12 +32,12 @@
 			'--app-color-scrolling-navbar'
 		);
 
-		return value;
+		return value?.trim();
 	})();
 </script>
 
 <svelte:head>
-	<meta name="theme-color" content={themeColor?.trim()} />
+	<meta name="theme-color" content={themeColor} />
 </svelte:head>
 
 <div
