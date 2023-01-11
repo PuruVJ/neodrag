@@ -9,3 +9,8 @@ export const prefersReducedMotion = writable<boolean>(
 		? true
 		: globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches
 );
+
+theme.subscribe((value) => {
+	globalThis?.document?.body.classList.remove('light', 'dark');
+	globalThis?.document?.body.classList.add(value);
+});
