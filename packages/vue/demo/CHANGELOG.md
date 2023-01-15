@@ -1,5 +1,12 @@
 # demo
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [[`0e6a36a`](https://github.com/PuruVJ/neodrag/commit/0e6a36a8ab1be01b97d8604dbc931c6e7ce4f16b)]:
+  - @neodrag/vue@2.0.2
+
 ## 0.0.4
 
 ### Patch Changes

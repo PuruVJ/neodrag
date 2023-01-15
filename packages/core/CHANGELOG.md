@@ -1,5 +1,11 @@
 # @neodrag/core
 
+## 2.0.2
+
+### Patch Changes
+
+- [#108](https://github.com/PuruVJ/neodrag/pull/108) [`0e6a36a`](https://github.com/PuruVJ/neodrag/commit/0e6a36a8ab1be01b97d8604dbc931c6e7ce4f16b) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Fix usage inside Shadow DOM
+
 ## 2.0.1
 
 ### Patch Changes
