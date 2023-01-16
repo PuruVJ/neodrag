@@ -1,22 +1,22 @@
 {
-  "react": {
-    "size": "1.97",
-    "version": "2.0.1"
+  "solid": {
+    "size": "1.77",
+    "version": "2.0.2"
   },
   "svelte": {
-    "size": "1.68",
-    "version": "2.0.1"
-  },
-  "solid": {
-    "size": "1.76",
-    "version": "2.0.1"
+    "size": "1.70",
+    "version": "2.0.2"
   },
   "vanilla": {
-    "size": "1.80",
-    "version": "2.0.1"
+    "size": "1.81",
+    "version": "2.0.2"
   },
   "vue": {
-    "size": "1.78",
-    "version": "2.0.1"
+    "size": "1.79",
+    "version": "2.0.2"
+  },
+  "react": {
+    "size": "1.98",
+    "version": "2.0.2"
   }
 }

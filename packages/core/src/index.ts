@@ -398,9 +398,13 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 				"Element being dragged can't be a child of the element on which `cancel` is applied"
 			);
 
-		const target = e.composedPath()[0] as HTMLElement;
-		if (dragEls.some((el) => el.contains(target)) && !cancelElementContains(cancelEls, [target])) {
-			currentlyDraggedEl = dragEls.length === 1 ? node : dragEls.find((el) => el.contains(target))!;
+		const eventTarget = e.composedPath()[0] as HTMLElement;
+		if (
+			dragEls.some((el) => el.contains(eventTarget) || el.shadowRoot?.contains(eventTarget)) &&
+			!cancelElementContains(cancelEls, [eventTarget])
+		) {
+			currentlyDraggedEl =
+				dragEls.length === 1 ? node : dragEls.find((el) => el.contains(eventTarget))!;
 			active = true;
 		} else return;
 
