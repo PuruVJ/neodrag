@@ -23,18 +23,18 @@
 		"brotli-size": "^4.0.0",
 		"fast-glob": "^3.2.12",
 		"jsdom": "^21.0.0",
-		"nx": "15.4.5",
+		"nx": "15.5.1",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"solid-js": "^1.6.8",
-		"svelte": "^3.55.0",
+		"solid-js": "^1.6.9",
+		"svelte": "^3.55.1",
 		"svelte-preprocess": "^5.0.0",
 		"terser": "^5.16.1",
-		"tsx": "^3.12.1",
+		"tsx": "^3.12.2",
 		"ttsup": "0.0.0-semantic-release",
 		"typescript": "^4.9.4",
 		"vite": "^4.0.4",
-		"vitest": "^0.26.3",
+		"vitest": "^0.27.1",
 		"vue": "^3.2.45"
 	}
 }
