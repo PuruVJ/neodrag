@@ -1,5 +1,11 @@
 # @neodrag/core
 
+## 2.0.3
+
+### Patch Changes
+
+- [#111](https://github.com/PuruVJ/neodrag/pull/111) [`b736fa6`](https://github.com/PuruVJ/neodrag/commit/b736fa689e06491e348638311900900e35342e6e) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Fix finding elements inside shadow DOM, not just the root
+
 ## 2.0.2
 
 ### Patch Changes
