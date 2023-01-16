@@ -389,7 +389,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		dragEls = getHandleEls(handle, node);
 		cancelEls = getCancelElements(cancel, node);
 
-		// Can move in X?
 		canMoveInX = /(both|x)/.test(axis);
 		canMoveInY = /(both|y)/.test(axis);
 
