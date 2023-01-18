@@ -11,34 +11,14 @@
 	import Nav from './docs/Nav.svelte';
 
 	import { portal } from '$actions/portal';
-	import { browser } from '$helpers/utils';
 	import { prefersReducedMotion, theme } from '$stores/user-preferences.store';
-
-	const isTablet = globalThis.matchMedia('(max-width: 768px)')?.matches;
 
 	let shadow = false;
 
 	let isNavOpen = false;
 
 	$: navTransition = !$prefersReducedMotion ? slide : fade;
-
-	$: themeColor = (() => {
-		$theme;
-		isTablet;
-
-		if (!browser) return;
-
-		const value = getComputedStyle(document.body).getPropertyValue(
-			'--app-color-scrolling-navbar'
-		);
-
-		return value?.trim();
-	})();
 </script>
-
-<svelte:head>
-	<meta name="theme-color" content={themeColor} />
-</svelte:head>
 
 <div
 	class="view-judge"

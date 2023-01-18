@@ -11,7 +11,6 @@
 	export let customClass = '';
 	export let size = '8rem';
 	export let draggableEl: HTMLDivElement | undefined = undefined;
-	export let renderParent = false;
 	export let styledCaption = true;
 	export let containerEl: HTMLElement | undefined = undefined;
 
@@ -97,17 +96,11 @@
 	bind:this={containerEl}
 >
 	{#key key}
-		{#if renderParent}
-			<div class="parent">
-				<div class="box" bind:this={draggableEl} use:draggable={finalOptions}>
-					<slot />
-				</div>
-			</div>
-		{:else}
+		<div class="parent">
 			<div class="box" bind:this={draggableEl} use:draggable={finalOptions}>
 				<slot />
 			</div>
-		{/if}
+		</div>
 
 		{#if $$slots.caption}
 			<div class="caption" class:styled={styledCaption}>
@@ -129,6 +122,8 @@
 
 <style lang="scss">
 	.container {
+		isolation: isolate;
+
 		position: relative;
 
 		display: grid;
@@ -225,5 +220,13 @@
 
 	.parent {
 		overflow: hidden;
+
+		display: grid;
+		place-items: center;
+
+		height: 100%;
+		width: 100%;
+
+		border-radius: inherit;
 	}
 </style>

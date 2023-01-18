@@ -3,19 +3,18 @@
 </script>
 
 <div>
-	<OptionsDemoBase options={{ bounds: 'parent' }} renderParent={true}>
+	<OptionsDemoBase options={{ bounds: 'parent' }}>
 		Can't go outside the parent element
 	</OptionsDemoBase>
 </div>
 
 <style lang="scss">
 	div :global(.parent) {
-		display: grid;
-		place-content: center;
-
 		width: 90%;
 		height: 70%;
 
 		border: var(--app-color-dark) solid 2px;
+
+		border-radius: 0;
 	}
 </style>

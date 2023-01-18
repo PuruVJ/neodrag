@@ -85,6 +85,9 @@
 
 	.container {
 		position: relative;
+
+		contain-intrinsic-size: 1000px;
+		content-visibility: auto;
 	}
 
 	.options-examples {
@@ -95,8 +98,6 @@
 		grid-auto-columns: minmax(auto, 600px);
 		gap: 2rem;
 		place-items: start;
-
-		will-change: height;
 
 		width: 100%;
 
