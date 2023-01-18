@@ -5,6 +5,7 @@ import Nav from '$components/docs/Nav.svelte';
 import MobileNav from '$components/MobileNav.svelte';
 import ToC from '$components/ToC.svelte';
 import Layout from './Layout.astro';
+import MetaThemeColor from '$components/MetaThemeColor.svelte';
 
 type Props =
 	| MarkdownLayoutProps<{
@@ -16,15 +17,17 @@ const { frontmatter, title } = Astro.props;
 const { title: frontmatterTitle } = frontmatter || {};
 ---
 
+<MetaThemeColor client:load />
+
 <Layout title={title ?? frontmatterTitle}>
 	<ToC client:only />
 	<div class="mobile-nav">
-		<MobileNav client:load />
+		<MobileNav client:media="(max-width: 968px)" />
 	</div>
 
 	<section class="docs-container" id="docs-container">
 		<aside>
-			<Nav client:load />
+			<Nav client:media="(min-width: 969px)" client:load />
 		</aside>
 
 		<main>
