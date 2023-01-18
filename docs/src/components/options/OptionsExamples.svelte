@@ -85,6 +85,8 @@
 
 	.container {
 		position: relative;
+
+		content-visibility: auto;
 	}
 
 	.options-examples {
