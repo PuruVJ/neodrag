@@ -68,7 +68,9 @@
 			let initialCursor = '';
 			el.addEventListener(
 				'mouseover',
-				() => {
+				(e) => {
+					e.stopPropagation();
+
 					if (el.dataset.pawCursor === 'true') {
 						showCustomCursor = true;
 
