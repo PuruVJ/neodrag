@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { browser, elementsOverlap } from '$helpers/utils';
+	import { browser, elementsOverlap, waitFor } from '$helpers/utils';
 	import { onDestroy, onMount } from 'svelte';
+	import { expoIn } from 'svelte/easing';
+	import { fade } from 'svelte/transition';
 	import { throttle } from 'throttle-debounce';
 
 	let headings: {
@@ -60,7 +62,9 @@
 
 	const throttledHandleScroll = throttle(100, handleScroll);
 
-	onMount(() => {
+	onMount(async () => {
+		await waitFor(500);
+
 		headingEls =
 			document.querySelectorAll<HTMLHeadingElement>('h2, h3, h4, h5, h5');
 		optionsExamplesContainers = document.querySelectorAll<HTMLElement>(
@@ -112,23 +116,26 @@
 	aria-label="Links to sections in this Page"
 >
 	<nav bind:this={navEl}>
-		<ul>
-			{#each headings as { id, level, text, length }}
-				<li
-					data-id={id}
-					class:highlighted={headingIDsHighlighted.includes(id)}
-					style:--level={level - 2}
-				>
-					<a href="#{id}" class="unstyled" bind:this={anchorEls[id]}>{text}</a>
-					<div
-						class="placeholder"
-						style:--width={browser
-							? anchorEls[id]?.getBoundingClientRect().width + 'px'
-							: length * 0.4 + 'em'}
-					/>
-				</li>
-			{/each}
-		</ul>
+		{#if headings}
+			<ul in:fade={{ easing: expoIn, duration: 300 }}>
+				{#each headings as { id, level, text, length }}
+					<li
+						data-id={id}
+						class:highlighted={headingIDsHighlighted.includes(id)}
+						style:--level={level - 2}
+					>
+						<a href="#{id}" class="unstyled" bind:this={anchorEls[id]}>{text}</a
+						>
+						<div
+							class="placeholder"
+							style:--width={browser
+								? anchorEls[id]?.getBoundingClientRect().width + 'px'
+								: length * 0.4 + 'em'}
+						/>
+					</li>
+				{/each}
+			</ul>
+		{/if}
 	</nav>
 </aside>
 
