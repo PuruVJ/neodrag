@@ -3,10 +3,10 @@ import {
 	DestroyRef,
 	Directive,
 	ElementRef,
-	EventEmitter,
+	inject,
 	Input,
 	Output,
-	inject,
+	EventEmitter,
 } from '@angular/core';
 import { Draggable, type DragEventData, type DragOptions } from '@neodrag/vanilla';
 

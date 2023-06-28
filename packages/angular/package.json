@@ -37,10 +37,14 @@
 		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public"
 	},
 	"dependencies": {
-		"@neodrag/vanilla": "workspace:*"
+		"@neodrag/vanilla": "latest",
+		"tslib": "^2.3.0"
 	},
 	"peerDependencies": {
-		"@angular/common": "^16.0.0",
-		"@angular/core": "^16.0.0"
+		"@angular/core": "^16.0.0",
+		"@angular/common": "^16.0.0"
+	},
+	"devDependencies": {
+		"@neodrag/vanilla": "workspace:*"
 	}
 }
