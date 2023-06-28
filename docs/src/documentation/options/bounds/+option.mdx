@@ -74,6 +74,14 @@ export type DragBoundsCoords = {
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ bounds: 'parent' }">
+          Can't go outside the parent element
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```ts
         useDraggable(draggableRef, { bounds: 'parent' });
@@ -115,6 +123,14 @@ export type DragBoundsCoords = {
       <div slot="solid">
         ```jsx
         <div use:draggable={{ bounds: 'body' }}>
+          Can't go outside body
+        </div>
+        ```
+      </div>
+
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ bounds: 'body' }">
           Can't go outside body
         </div>
         ```
@@ -176,6 +192,19 @@ export type DragBoundsCoords = {
       <div slot="solid">
         ```jsx
         <div use:draggable={{ bounds: { top: 60, left: 20, bottom: 35, right: 30 } }}>
+          Limited to:
+
+          top: 60
+          left: 20
+          bottom: 35
+          right: 30
+        </div>
+        ```
+      </div>
+
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ bounds: { top: 60, left: 20, bottom: 35, right: 30 } }">
           Limited to:
 
           top: 60

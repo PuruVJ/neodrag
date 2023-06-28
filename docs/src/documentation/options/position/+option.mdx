@@ -102,6 +102,50 @@ Read about [Controlled vs Uncontrolled](#controlled-vs-uncontrolled) components.
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div
+            [neoDraggable]="{ position: position() }"
+            (neoDrag)="position.set({ x: $event.offsetX, y: $event.offsetY })"
+        >
+            I can be moved with the slider too
+        </div>
+        X:
+        <input
+            type="range"
+            min="0"
+            max="300"
+            [value]="position().x"
+            (input)="onChange('x', $event.target)"
+        />
+        Y:
+        <input
+            type="range"
+            min="0"
+            max="300"
+            [value]="position().y"
+            (input)="onChange('y', $event.target)"
+        />
+        ```
+
+        ```ts
+        @Component({
+            templateUrl: 'app.html',
+            standalone: true,
+            imports: [NeoDraggable]
+        })
+        export class App {
+            readonly position = signal({ x: 0, y: 0 });
+
+            onChange(axis: 'x' | 'y', input: HTMLInputElement) {
+                this.position.mutate(p => {
+                    p[axis] = input.valueAsNumber;
+                })
+            }
+        }
+        ```
+      </div>
+
       <div slot="react">
         ```tsx
         const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -252,6 +296,47 @@ Read about [Controlled vs Uncontrolled](#controlled-vs-uncontrolled) components.
           value={position().y}
           onInput={(e) => setPosition({ x: position().x, y: +e.target.value })}
         />
+        ```
+      </div>
+
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ position: position(), disabled: true }">
+            I can be moved with the slider too
+        </div>
+        X:
+        <input
+            type="range"
+            min="0"
+            max="300"
+            [value]="position().x"
+            (input)="onChange('x', $event.target)"
+        />
+        Y:
+        <input
+            type="range"
+            min="0"
+            max="300"
+            [value]="position().y"
+            (input)="onChange('y', $event.target)"
+        />
+        ```
+
+        ```ts
+        @Component({
+            templateUrl: 'app.html',
+            standalone: true,
+            imports: [NeoDraggable]
+        })
+        export class App {
+            readonly position = signal({ x: 0, y: 0 });
+
+            onChange(axis: 'x' | 'y', input: HTMLInputElement) {
+                this.position.mutate(p => {
+                    p[axis] = input.valueAsNumber;
+                })
+            }
+        }
         ```
       </div>
 

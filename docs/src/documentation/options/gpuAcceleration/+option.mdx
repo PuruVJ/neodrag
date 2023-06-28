@@ -55,6 +55,14 @@ Depending on the device, you may not see much difference
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ gpuAcceleration: true }">
+          GPU acceleration on
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```ts
         useDraggable(draggableRef, { gpuAcceleration: true });
@@ -96,6 +104,14 @@ Depending on the device, you may not see much difference
       <div slot="solid">
         ```jsx
         <div use:draggable={{ gpuAcceleration: false }}>
+          GPU acceleration off
+        </div>
+        ```
+      </div>
+
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ gpuAcceleration: false }">
           GPU acceleration off
         </div>
         ```

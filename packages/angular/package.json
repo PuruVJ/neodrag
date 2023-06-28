@@ -1,0 +1,50 @@
+{
+	"name": "@neodrag/angular",
+	"version": "2.0.3",
+	"description": "Angular library to add dragging to your apps 😉",
+	"files": [
+		"dist/esm2022/*",
+		"dist/fesm2022/*",
+		"dist/index.d.ts",
+		"dist/README.md",
+		"dist/package.json"
+	],
+	"sideEffects": false,
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PuruVJ/neodrag.git"
+	},
+	"keywords": [
+		"draggable",
+		"angular",
+		"angular-draggable",
+		"drag",
+		"neodrag",
+		"small",
+		"tiny",
+		"performant",
+		"neodrag"
+	],
+	"author": "Puru Vijay",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/PuruVJ/neodrag/issues"
+	},
+	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/angular#readme",
+	"scripts": {
+		"compile": "ng-packagr -p ng-package.json -c tsconfig.json",
+		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
+		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public"
+	},
+	"dependencies": {
+		"@neodrag/vanilla": "latest",
+		"tslib": "^2.3.0"
+	},
+	"peerDependencies": {
+		"@angular/core": "^16.0.0",
+		"@angular/common": "^16.0.0"
+	},
+	"devDependencies": {
+		"@neodrag/vanilla": "workspace:*"
+	}
+}

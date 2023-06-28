@@ -63,6 +63,15 @@ body.light {
 	);
 	--app-color-brand-solid-navbar: #c0cad8;
 
+	--app-color-brand-angular: #c31c2e;
+	--app-color-brand-angular-hsl: 354, 75%, 44%;
+	--app-color-brand-angular-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-angular-hsl), 0.4) 0%,
+		var(--app-color-shell) 100%
+	);
+	--app-color-brand-angular-navbar: #c31c2e;
+
 	--app-color-brand-vanilla: var(--app-color-dark);
 	--app-color-brand-vanilla-hsl: var(--app-color-dark-hsl);
 	--app-color-brand-vanilla-body-gradient: radial-gradient(
@@ -132,6 +141,15 @@ body.dark {
 		var(--app-color-shell) 100%
 	);
 	--app-color-brand-solid-navbar: #2b3138;
+
+	--app-color-brand-angular: hsl(355, 75%, 49%);
+	--app-color-brand-angular-hsl: 355, 75%, 49%;
+	--app-color-brand-angular-body-gradient: radial-gradient(
+		ellipse farthest-corner at 95% 2%,
+		hsla(var(--app-color-brand-angular-hsl), 0.3) 0%,
+		var(--app-color-shell) 100%
+	);
+	--app-color-brand-angular-navbar: #dc2030;
 
 	--app-color-brand-vanilla: var(--app-color-dark);
 	--app-color-brand-vanilla-hsl: var(--app-color-dark-hsl);

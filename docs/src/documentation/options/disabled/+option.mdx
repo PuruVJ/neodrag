@@ -45,6 +45,14 @@ export const shortDescription = 'Disables dragging';
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ disabled: true }">
+          Disabled. Won't drag, won't trigger any events
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```ts
         useDraggable(draggableRef, { disabled: true });

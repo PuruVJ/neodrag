@@ -7,6 +7,8 @@ import LogosVueIcon from '~icons/logos/vue';
 // @ts-ignore
 import LogosSolidIcon from '~icons/logos/solidjs-icon';
 // @ts-ignore
+import LogosAngularIcon from '~icons/logos/angular';
+// @ts-ignore
 import LogosVanillaIcon from '~icons/logos/javascript';
 // @ts-ignore
 import IonReloadIcon from '~icons/ion/reload';
@@ -17,4 +19,5 @@ export const FRAMEWORK_ICONS = {
 	vue: LogosVueIcon,
 	solid: LogosSolidIcon,
 	vanilla: LogosVanillaIcon,
+	angular: LogosAngularIcon,
 };

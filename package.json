@@ -13,6 +13,8 @@
 		"sizes": "tsx scripts/gather-sizes.ts"
 	},
 	"devDependencies": {
+		"@angular/common": "^16.0.0",
+		"@angular/core": "^16.0.0",
 		"@changesets/changelog-github": "^0.4.8",
 		"@changesets/cli": "^2.26.0",
 		"@sveltejs/vite-plugin-svelte": "2.0.2",
@@ -23,6 +25,7 @@
 		"brotli-size": "^4.0.0",
 		"fast-glob": "^3.2.12",
 		"jsdom": "^21.1.0",
+		"ng-packagr": "^16.0.0",
 		"nx": "15.7.2",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",

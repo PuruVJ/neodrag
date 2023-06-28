@@ -56,6 +56,16 @@ If it is provided, Only clicking and dragging on this element will allow the par
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ handle: '.handle' }">
+          Won't drag ❌
+
+          <div class="handle">Drag me ✅</div>
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```tsx
         useDraggable(draggableRef, { handle: '.handle' });
@@ -132,6 +142,16 @@ If it is provided, Only clicking and dragging on this element will allow the par
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ handle: handleEl }">
+          Won't drag ❌
+
+          <div #handleEl>Drag me ✅</div>
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```tsx
         const handleRef = useRef<HTMLDivElement>();
@@ -196,6 +216,17 @@ If it is provided, Only clicking and dragging on this element will allow the par
       <div slot="solid">
         ```jsx
         <div use:draggable={{ handle: '.handle' }}>
+          Won't drag ❌
+
+          <div class="handle">Drag me ✅</div>
+          <div class="handle">Drag me ✅</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ handle: '.handle' }">
           Won't drag ❌
 
           <div class="handle">Drag me ✅</div>
@@ -284,6 +315,17 @@ If it is provided, Only clicking and dragging on this element will allow the par
 
           <div ref={handle1}>Drag me ✅</div>
           <div ref={handle2}>Drag me ✅</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ handle: [handle1, handle2] }">
+          Won't drag ❌
+
+          <div #handle1>Drag me ✅</div>
+          <div #handle2>Drag me ✅</div>
         </div>
         ```
       </div>
