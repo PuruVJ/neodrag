@@ -32,7 +32,6 @@
 		"@iconify/json": "^2.2.25",
 		"@types/throttle-debounce": "^5.0.0",
 		"astro": "^2.0.14",
-		"astro-critters": "^1.1.29",
 		"astrojs-service-worker": "^0.0.9",
 		"autoprefixer": "^10.4.13",
 		"hast-util-to-string": "^2.0.0",

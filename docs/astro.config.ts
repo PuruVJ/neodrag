@@ -3,7 +3,6 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import prefetch from '@astrojs/prefetch';
 import svelte from '@astrojs/svelte';
-import critters from 'astro-critters';
 import serviceWorker from 'astrojs-service-worker';
 import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 
@@ -45,7 +44,7 @@ export default defineConfig({
 		sitemap(),
 		prefetch(),
 		serviceWorker(),
-		critters(),
+		// critters(),
 		AutoImport({
 			dts: './src/auto-imports.d.ts',
 			imports: [
