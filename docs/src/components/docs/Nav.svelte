@@ -64,7 +64,7 @@
 		<ThemeSwitcher />
 	</div>
 
-	<span class="copyright"
+	<!-- <span class="copyright"
 		>&copy; 2021-{new Date().getUTCFullYear()}
 		<a
 			href="https://twitter.com/puruvjdev"
@@ -73,8 +73,8 @@
 			class:framework
 		>
 			Puru Vijay</a
-		></span
-	>
+		>
+	</span> -->
 </div>
 
 <style lang="scss">
