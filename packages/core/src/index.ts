@@ -381,10 +381,12 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	} else if (typeof touchAction === 'string') {
 		setStyle(node, 'touch-action', touchAction);
 	} else {
-		const thresholds = Object.keys(touchAction).map(threshold => Number(threshold)).sort();
+		const thresholds = Object.keys(touchAction)
+			.map(threshold => Number(threshold))
+			.sort((x, y) => y - x);
 
 		setTouchAction = (threshold: number) => {
-			const crossedThreshold = thresholds.findLast(value => threshold >= value);
+			const crossedThreshold = thresholds.find(value => threshold >= value);
 
 			if (
 				typeof touchAction !== 'object' ||
