@@ -1,3 +1,5 @@
+import type { Property } from 'csstype';
+
 export type DragBoundsCoords = {
 	/** Number of pixels from left of the document */
 	left: number;
@@ -183,6 +185,11 @@ export type DragOptions = {
 	handle?: string | HTMLElement | HTMLElement[];
 
 	/**
+	 * Choose to set the initial touch-action of an element to a different value than 'none'
+	 */
+	touchAction?: Property.TouchAction;
+
+	/**
 	 * Class to apply on the element on which `use:draggable` is applied.
 	 * Note that if `handle` is provided, it will still apply class on the element to which this action is applied, **NOT** the handle
 	 *
@@ -257,6 +264,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		cancel,
 		handle,
+
+		touchAction = 'none',
 
 		defaultClass = DEFAULT_CLASS.MAIN,
 		defaultClassDragging = DEFAULT_CLASS.DRAGGING,
@@ -359,10 +368,11 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	listen('pointerdown', dragStart, false);
 	listen('pointerup', dragEnd, false);
+	listen('touchend', dragEnd, false);
 	listen('pointermove', drag, false);
 
 	// On mobile, touch can become extremely janky without it
-	setStyle(node, 'touch-action', 'none');
+	setStyle(node, 'touch-action', touchAction);
 
 	const calculateInverseScale = () => {
 		// Calculate the current scale of the node
