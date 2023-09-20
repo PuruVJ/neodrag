@@ -1,0 +1,21 @@
+---
+title: touchAction
+type: 'Property.TouchAction | ((el: HTMLElement, setTouchAction: (action: Property.TouchAction) => void) => void)'
+defaultValue: 'none'
+---
+
+import Code from '$components/options/OptionsCode.astro';
+import Example from '$components/options/OptionsExample.astro';
+import Examples from '$components/options/OptionsExamples.svelte';
+
+export const shortDescription =
+  'Choose when and how to set "touch-action" style for mobile devices';
+
+<p>{shortDescription}</p>
+
+By default, the "touch-action" style is set to `none` upon initalizing the draggable on an element.
+
+This option allows to change the default to some other value in a number of ways:
+1. Simply set to another value for any draggable elements that use this draggable instance.
+2. Set to different values based on amount of pixels the element was dragged.
+3. Set a callback to assign the property to a different value for a specific element based on any arbitrary logic.

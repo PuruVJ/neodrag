@@ -1,3 +1,5 @@
+import type { Property } from 'csstype';
+
 export type DragBoundsCoords = {
 	/** Number of pixels from left of the document */
 	left: number;
@@ -183,6 +185,14 @@ export type DragOptions = {
 	handle?: string | HTMLElement | HTMLElement[];
 
 	/**
+	 * Choose when and how to set touch action for mobile devices
+	 */
+	touchAction?: 
+		| Property.TouchAction
+		| Partial<Record<number, Property.TouchAction>>
+		| ((el: HTMLElement, setTouchAction: (action: Property.TouchAction) => void) => void);
+
+	/**
 	 * Class to apply on the element on which `use:draggable` is applied.
 	 * Note that if `handle` is provided, it will still apply class on the element to which this action is applied, **NOT** the handle
 	 *
@@ -257,6 +267,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		cancel,
 		handle,
+
+		touchAction = 'none',
 
 		defaultClass = DEFAULT_CLASS.MAIN,
 		defaultClassDragging = DEFAULT_CLASS.DRAGGING,
@@ -361,8 +373,32 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	listen('pointerup', dragEnd, false);
 	listen('pointermove', drag, false);
 
+	let setTouchAction: undefined | ((threshold: number) => void) = undefined;
+
 	// On mobile, touch can become extremely janky without it
-	setStyle(node, 'touch-action', 'none');
+	if (typeof touchAction === 'function') {
+		touchAction(node, (action) => setStyle(node, 'touch-action', action))
+	} else if (typeof touchAction === 'string') {
+		setStyle(node, 'touch-action', touchAction);
+	} else {
+		const thresholds = Object.keys(touchAction).map(threshold => Number(threshold)).sort();
+
+		setTouchAction = (threshold: number) => {
+			const crossedThreshold = thresholds.find(value => threshold >= value);
+
+			if (
+				typeof touchAction !== 'object' ||
+				typeof crossedThreshold !== 'number' ||
+				(typeof touchAction === 'object' && !(crossedThreshold in touchAction))
+			) return;
+
+			const touchActionValue = touchAction[crossedThreshold];
+
+			if (typeof touchActionValue !== 'string') return;
+
+			setStyle(node, 'touch-action', touchActionValue);
+		};
+	}
 
 	const calculateInverseScale = () => {
 		// Calculate the current scale of the node
@@ -506,6 +542,13 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		xOffset = translateX;
 		yOffset = translateY;
+
+		if (setTouchAction) {
+			const initialVector = (initialX * initialX + initialY * initialY);
+			const finalVector = (finalX * finalX + finalY * finalY);
+
+			setTouchAction(finalVector - initialVector);
+		}
 
 		fireSvelteDragEvent();
 
