@@ -384,7 +384,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		const thresholds = Object.keys(touchAction).map(threshold => Number(threshold)).sort();
 
 		setTouchAction = (threshold: number) => {
-			const crossedThreshold = thresholds.find(value => threshold >= value);
+			const crossedThreshold = thresholds.findLast(value => threshold >= value);
 
 			if (
 				typeof touchAction !== 'object' ||
