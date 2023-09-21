@@ -124,6 +124,13 @@ export type DragOptions = {
 	}) => string | undefined | void;
 
 	/**
+	 * Custom render function. If provided, the caller will be responsible for applying
+	 * any and all desired DOM transformations. All other transform logic, including
+	 * `transform` and the options it replaces, will be ignored.
+	 */
+	render?: (data: DragEventData) => void;
+
+	/**
 	 * Applies `user-select: none` on `<body />` element when dragging,
 	 * to prevent the irritating effect where dragging doesn't happen and the text is selected.
 	 * Applied when dragging starts and removed when it stops.
@@ -254,6 +261,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		gpuAcceleration = true,
 		legacyTranslate = true,
 		transform,
+		render,
 
 		applyUserSelectHack = true,
 		disabled = false,
@@ -295,7 +303,12 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		? { x: position?.x ?? 0, y: position?.y ?? 0 }
 		: defaultPosition;
 
-	setTranslate(xOffset, yOffset);
+	setTranslate({
+		offsetX: xOffset,
+		offsetY: yOffset,
+		rootNode: node,
+		currentNode: node,
+	});
 
 	let canMoveInX: boolean;
 	let canMoveInY: boolean;
@@ -319,25 +332,32 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	const bodyStyle = document.body.style;
 	const nodeClassList = node.classList;
 
-	function setTranslate(xPos = translateX, yPos = translateY) {
-		if (!transform) {
-			if (legacyTranslate) {
-				let common = `${+xPos}px, ${+yPos}px`;
-				return setStyle(
-					node,
-					'transform',
-					gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common})`
-				);
+	function setTranslate(data: DragEventData) {
+		if (render) {
+			render(data);
+			return;
+		}
+
+		const { offsetX: xPos, offsetY: yPos } = data;
+
+		if (transform) {
+			const transformCalled = transform({ offsetX: xPos, offsetY: yPos, rootNode: node });
+			if (isString(transformCalled)) {
+				setStyle(node, 'transform', transformCalled);
 			}
-
-			return setStyle(node, 'translate', `${+xPos}px ${+yPos}px ${gpuAcceleration ? '1px' : ''}`);
+			return;
 		}
 
-		// Call transform function if provided
-		const transformCalled = transform({ offsetX: xPos, offsetY: yPos, rootNode: node });
-		if (isString(transformCalled)) {
-			setStyle(node, 'transform', transformCalled);
+		if (legacyTranslate) {
+			let common = `${+xPos}px, ${+yPos}px`;
+			return setStyle(
+				node,
+				'transform',
+				gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common})`
+			);
 		}
+
+		return setStyle(node, 'translate', `${+xPos}px ${+yPos}px ${gpuAcceleration ? '1px' : ''}`);
 	}
 
 	const getEventData: () => DragEventData = () => ({
@@ -519,7 +539,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		fireSvelteDragEvent();
 
-		setTranslate();
+		setTranslate(getEventData());
 	}
 
 	return {
@@ -561,7 +581,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 				xOffset = translateX = options.position?.x ?? translateX;
 				yOffset = translateY = options.position?.y ?? translateY;
 
-				setTranslate();
+				setTranslate(getEventData());
 			}
 		},
 	};
