@@ -76,6 +76,13 @@ export type DragOptions = {
 	};
 
 	/**
+	 * Ratio of node's logical width to its onscreen width. If undefined, will be
+	 * calculated according to offsetWidth and getBoundingClientRect. See
+	 * https://stackoverflow.com/a/45419412 for more information.
+	 */
+	inverseScale?: number;
+
+	/**
 	 * Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
 	 *
 	 * - `both` - Element can move in any direction
@@ -257,6 +264,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	let {
 		bounds,
 		axis = 'both',
+
+		inverseScale: inverseScaleOverride,
 
 		gpuAcceleration = true,
 		legacyTranslate = true,
@@ -450,7 +459,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		fireSvelteDragStartEvent();
 
 		const { clientX, clientY } = e;
-		const inverseScale = calculateInverseScale();
+		const inverseScale = inverseScaleOverride ?? calculateInverseScale();
 
 		if (canMoveInX) initialX = clientX - xOffset / inverseScale;
 		if (canMoveInY) initialY = clientY - yOffset / inverseScale;
@@ -498,7 +507,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		let finalX = e.clientX,
 			finalY = e.clientY;
 
-		const inverseScale = calculateInverseScale();
+		const inverseScale = inverseScaleOverride ?? calculateInverseScale();
 
 		if (computedBounds) {
 			// Client position is limited to this virtual boundary to prevent node going out of bounds
