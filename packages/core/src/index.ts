@@ -14,12 +14,16 @@ export type DragBoundsCoords = {
 
 export type DragAxis = 'both' | 'x' | 'y' | 'none';
 
-export type DragBounds =
+export type DragBoundsPrimitive =
 	| HTMLElement
 	| Partial<DragBoundsCoords>
 	| 'parent'
 	| 'body'
 	| (string & Record<never, never>);
+
+export type DragBounds =
+	| DragBoundsPrimitive
+	| (() => DragBoundsPrimitive);
 
 export type DragEventData = {
 	/** How much element moved from its original position horizontally */
@@ -46,9 +50,15 @@ export type DragOptions = {
 	 * **Note**: We don't check whether the selector is bigger than the node element.
 	 * You yourself will have to make sure of that, or it may lead to strange behavior
 	 *
-	 * Or, finally, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
+	 * Or, you can pass an HTMLElement.
+	 *
+	 * Or, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
 	 * These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right` from right of window.
 	 * If any of these properties are unspecified, they are assumed to be `0`.
+	 *
+	 * Or, finally, you can pass a function that returns any of the above. This is useful,
+	 * for example, when you are bounding the drag area to a component that is not yet
+	 * mounted, but will be by the time the drag starts.
 	 */
 	bounds?: DragBounds;
 
@@ -611,6 +621,10 @@ const cancelElementContains = (cancelElements: HTMLElement[], dragElements: HTML
 
 function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
 	if (bounds === undefined) return;
+
+	if (typeof bounds === 'function') {
+		bounds = bounds();
+	}
 
 	if (isHTMLElement(bounds)) return bounds.getBoundingClientRect();
 
