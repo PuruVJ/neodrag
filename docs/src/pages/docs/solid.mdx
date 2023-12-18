@@ -8,6 +8,18 @@ import Options from '$components/options/Options.astro';
 
 import ExportedTypesMDX from '../../documentation/exported-types.mdx';
 
+```sh
+pnpm add @neodrag/solid
+
+# or
+
+bun install @neodrag/solid
+
+# or
+
+npm install @neodrag/solid
+```
+
 ## Usage
 
 Basic usage
@@ -102,7 +114,7 @@ const { draggable: myCustomDraggable } = createDraggable();
 
 It will give an error
 
-```text
+```plaintext
 Property 'use:myCustomDraggable' does not exist on type 'HTMLAttributes<HTMLDivElement>'.
 ```
 

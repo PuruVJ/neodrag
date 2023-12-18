@@ -1,4 +1,4 @@
-import { defineConfig } from 'ttsup';
+import { defineConfig } from 'tsup';
 
 /**
  *

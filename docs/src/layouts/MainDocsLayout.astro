@@ -1,7 +1,6 @@
 ---
 import type { MarkdownLayoutProps } from 'astro';
 
-import InstallationMDX from '../documentation/installation.mdx';
 import DocsLayout from './DocsLayout.astro';
 
 import type { Framework } from '$helpers/constants';
@@ -38,8 +37,6 @@ const { size, version } = SIZES[framework];
 
 	<p>{tagline}</p>
 
-	<InstallationMDX framework={framework} />
-
 	<slot />
 
 	<h2>Credits</h2>
@@ -48,7 +45,7 @@ const { size, version } = SIZES[framework];
 		<a href="https://github.com/react-grid-layout/react-draggable">
 			react-draggable
 		</a>
-		library, and implements the same API.
+		 library, and implements the same API.
 	</p>
 </DocsLayout>
 

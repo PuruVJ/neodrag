@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { get, Writable, writable } from 'svelte/store';
+	import { get, type Writable, writable } from 'svelte/store';
 	// @ts-ignore
 	import PawIcon from '~icons/mdi/paw';
 
@@ -27,7 +27,7 @@
 
 	function querySelectorAllLive<T extends HTMLElement = HTMLElement>(
 		element: HTMLElement,
-		selector: string
+		selector: string,
 	): Writable<T[]> {
 		// Initialize results with current nodes.
 		const result = writable(Array.from<T>(element.querySelectorAll(selector)));
@@ -57,8 +57,8 @@
 		globalThis.document && !isTouchDevice
 			? querySelectorAllLive(
 					document.body,
-					'[data-paw-cursor="true"], [data-paw-cursor="false"]'
-			  )
+					'[data-paw-cursor="true"], [data-paw-cursor="false"]',
+				)
 			: writable([]);
 
 	$: {
@@ -85,7 +85,7 @@
 						initialCursor && (el.style.cursor = initialCursor);
 					}
 				},
-				{ capture: true, passive: true }
+				{ capture: true, passive: true },
 			);
 			el.addEventListener(
 				'mouseout',
@@ -95,7 +95,7 @@
 
 					cursorColor = undefined;
 				},
-				{ passive: true }
+				{ passive: true },
 			);
 		}
 	}

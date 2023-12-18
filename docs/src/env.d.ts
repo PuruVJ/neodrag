@@ -1,8 +1,7 @@
-/// <reference path="../.astro/types.d.ts" />
 /// <reference types="astro/client" />
 
 declare module 'virtual:icons/*' {
-	export { SvelteComponentDev as default } from 'svelte/internal';
+	export { SvelteComponent as default } from 'svelte';
 }
 
 declare module '~icons/*' {
@@ -16,15 +15,15 @@ declare module '~icons/*' {
 type ObjectKeys<Obj> = Obj extends object
 	? (keyof Obj)[]
 	: Obj extends number
-	? []
-	: Obj extends Array<any> | string
-	? string[]
-	: never;
+		? []
+		: Obj extends Array<any> | string
+			? string[]
+			: never;
 
 interface ObjectConstructor {
 	keys<ObjectType>(o: ObjectType): ObjectKeys<ObjectType>;
 	entries<ObjType>(
-		o: ObjType
+		o: ObjType,
 	): [Unpacked<ObjectKeys<ObjType>>, ObjType[keyof ObjType]][];
 }
 
@@ -44,6 +43,6 @@ interface Array<T> {
 	fill<T extends any>(
 		value: T,
 		start?: number | undefined,
-		end?: number | undefined
+		end?: number | undefined,
 	): T[];
 }

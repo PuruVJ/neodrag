@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { portal } from '$actions/portal';
-	import { DragEventData, draggable } from '@neodrag/svelte';
+	import { draggable, type DragEventData } from '@neodrag/svelte';
 	import type { Framework } from 'src/helpers/constants';
 	import { createEventDispatcher, onDestroy } from 'svelte';
 	import { expoOut } from 'svelte/easing';
@@ -38,7 +38,7 @@
 
 	let draggablePosition = tweened(
 		{ x: 0, y: 0 },
-		{ easing: expoOut, duration: 1200 }
+		{ easing: expoOut, duration: 1200 },
 	);
 
 	$: {
@@ -99,7 +99,7 @@
 			},
 			destroy: () => {
 				window.removeEventListener('resize', () =>
-					updateLinePosition(node, rootEl)
+					updateLinePosition(node, rootEl),
 				);
 			},
 		};
@@ -137,7 +137,7 @@
 			dispatch('drag', data);
 			draggablePosition.set(
 				{ x: data.offsetX, y: data.offsetY },
-				{ duration: 0 }
+				{ duration: 0 },
 			);
 		},
 		onDragEnd: (data) => {

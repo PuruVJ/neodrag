@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { draggable, DragOptions } from '@neodrag/svelte';
+	import { draggable, type DragOptions } from '@neodrag/svelte';
 	import { browser } from 'src/helpers/utils';
 	//@ts-ignore
 	import squircle from 'src/worklet/squircle?url';
@@ -60,7 +60,7 @@
 
 		if (zIndices[index] > zIndices.length) {
 			zIndices = zIndices.map((z) =>
-				z >= lowestZIndex ? z - lowestZIndex : z
+				z >= lowestZIndex ? z - lowestZIndex : z,
 			);
 		}
 	}
@@ -92,7 +92,7 @@
 			x: 0,
 			y: 0,
 		},
-		{ easing: expoOut, duration: 1200 }
+		{ easing: expoOut, duration: 1200 },
 	);
 
 	if (browser)
@@ -343,7 +343,7 @@
 					dragHandlers.onDrag?.(data);
 					returnToPositionTransitionVal.set(
 						{ x: data.offsetX, y: data.offsetY },
-						{ duration: 0 }
+						{ duration: 0 },
 					);
 				},
 				onDragEnd: (data) => {
@@ -412,7 +412,8 @@
 
 		background-color: var(--app-color-light);
 
-		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035),
+		box-shadow:
+			0px 12.5px 10px rgba(0, 0, 0, 0.035),
 			0px 100px 80px rgba(0, 0, 0, 0.07);
 		border-radius: 0.5rem;
 
