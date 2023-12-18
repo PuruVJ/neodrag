@@ -8,7 +8,7 @@
 		pathname.endsWith(path) ? 'page' : 'false';
 
 	const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(
-		pathname
+		pathname,
 	)?.[1];
 </script>
 
@@ -73,8 +73,8 @@
 			class:framework
 		>
 			Puru Vijay</a
-		></span
-	>
+		>
+	</span>
 </div>
 
 <style lang="scss">

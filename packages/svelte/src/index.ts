@@ -1,7 +1,6 @@
-import { DragEventData, draggable as coreDraggable, DragOptions } from '@neodrag/core';
-import type { Action } from 'svelte/action';
+import { draggable as coreDraggable, type DragEventData, type DragOptions } from '@neodrag/core';
 
-export const draggable = coreDraggable as Action<
+export const draggable = coreDraggable as import('svelte/action').Action<
 	HTMLElement,
 	DragOptions,
 	{

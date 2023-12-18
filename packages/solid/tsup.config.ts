@@ -1,4 +1,4 @@
-import { coreConfig } from '@neodrag/tsup-config';
+import { coreConfig } from '../config';
 
 export default coreConfig({
 	dtsBanner: `import 'solid-js';
