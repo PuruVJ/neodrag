@@ -14,12 +14,16 @@ export type DragBoundsCoords = {
 
 export type DragAxis = 'both' | 'x' | 'y' | 'none';
 
-export type DragBounds =
+export type DragBoundsPrimitive =
 	| HTMLElement
 	| Partial<DragBoundsCoords>
 	| 'parent'
 	| 'body'
 	| (string & Record<never, never>);
+
+export type DragBounds =
+	| DragBoundsPrimitive
+	| (() => DragBoundsPrimitive);
 
 export type DragEventData = {
 	/** How much element moved from its original position horizontally */
@@ -46,9 +50,15 @@ export type DragOptions = {
 	 * **Note**: We don't check whether the selector is bigger than the node element.
 	 * You yourself will have to make sure of that, or it may lead to strange behavior
 	 *
-	 * Or, finally, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
+	 * Or, you can pass an HTMLElement.
+	 *
+	 * Or, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
 	 * These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right` from right of window.
 	 * If any of these properties are unspecified, they are assumed to be `0`.
+	 *
+	 * Or, finally, you can pass a function that returns any of the above. This is useful,
+	 * for example, when you are bounding the drag area to a component that is not yet
+	 * mounted, but will be by the time the drag starts.
 	 */
 	bounds?: DragBounds;
 
@@ -64,6 +74,13 @@ export type DragOptions = {
 		drag?: boolean;
 		dragEnd?: boolean;
 	};
+
+	/**
+	 * Ratio of node's logical width to its onscreen width. If undefined, will be
+	 * calculated according to offsetWidth and getBoundingClientRect. See
+	 * https://stackoverflow.com/a/45419412 for more information.
+	 */
+	inverseScale?: number;
 
 	/**
 	 * Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
@@ -112,6 +129,13 @@ export type DragOptions = {
 		offsetY: number;
 		rootNode: HTMLElement;
 	}) => string | undefined | void;
+
+	/**
+	 * Custom render function. If provided, the caller will be responsible for applying
+	 * any and all desired DOM transformations. All other transform logic, including
+	 * `transform` and the options it replaces, will be ignored.
+	 */
+	render?: (data: DragEventData) => void;
 
 	/**
 	 * Applies `user-select: none` on `<body />` element when dragging,
@@ -241,9 +265,12 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		bounds,
 		axis = 'both',
 
+		inverseScale: inverseScaleOverride,
+
 		gpuAcceleration = true,
 		legacyTranslate = true,
 		transform,
+		render,
 
 		applyUserSelectHack = true,
 		disabled = false,
@@ -285,7 +312,12 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		? { x: position?.x ?? 0, y: position?.y ?? 0 }
 		: defaultPosition;
 
-	setTranslate(xOffset, yOffset);
+	setTranslate({
+		offsetX: xOffset,
+		offsetY: yOffset,
+		rootNode: node,
+		currentNode: node,
+	});
 
 	let canMoveInX: boolean;
 	let canMoveInY: boolean;
@@ -309,25 +341,32 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	const bodyStyle = document.body.style;
 	const nodeClassList = node.classList;
 
-	function setTranslate(xPos = translateX, yPos = translateY) {
-		if (!transform) {
-			if (legacyTranslate) {
-				let common = `${+xPos}px, ${+yPos}px`;
-				return setStyle(
-					node,
-					'transform',
-					gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common})`
-				);
+	function setTranslate(data: DragEventData) {
+		if (render) {
+			render(data);
+			return;
+		}
+
+		const { offsetX: xPos, offsetY: yPos } = data;
+
+		if (transform) {
+			const transformCalled = transform({ offsetX: xPos, offsetY: yPos, rootNode: node });
+			if (isString(transformCalled)) {
+				setStyle(node, 'transform', transformCalled);
 			}
-
-			return setStyle(node, 'translate', `${+xPos}px ${+yPos}px ${gpuAcceleration ? '1px' : ''}`);
+			return;
 		}
 
-		// Call transform function if provided
-		const transformCalled = transform({ offsetX: xPos, offsetY: yPos, rootNode: node });
-		if (isString(transformCalled)) {
-			setStyle(node, 'transform', transformCalled);
+		if (legacyTranslate) {
+			let common = `${+xPos}px, ${+yPos}px`;
+			return setStyle(
+				node,
+				'transform',
+				gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common})`
+			);
 		}
+
+		return setStyle(node, 'translate', `${+xPos}px ${+yPos}px ${gpuAcceleration ? '1px' : ''}`);
 	}
 
 	const getEventData: () => DragEventData = () => ({
@@ -420,7 +459,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		fireSvelteDragStartEvent();
 
 		const { clientX, clientY } = e;
-		const inverseScale = calculateInverseScale();
+		const inverseScale = inverseScaleOverride ?? calculateInverseScale();
 
 		if (canMoveInX) initialX = clientX - xOffset / inverseScale;
 		if (canMoveInY) initialY = clientY - yOffset / inverseScale;
@@ -468,7 +507,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		let finalX = e.clientX,
 			finalY = e.clientY;
 
-		const inverseScale = calculateInverseScale();
+		const inverseScale = inverseScaleOverride ?? calculateInverseScale();
 
 		if (computedBounds) {
 			// Client position is limited to this virtual boundary to prevent node going out of bounds
@@ -509,7 +548,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		fireSvelteDragEvent();
 
-		setTranslate();
+		setTranslate(getEventData());
 	}
 
 	return {
@@ -551,7 +590,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 				xOffset = translateX = options.position?.x ?? translateX;
 				yOffset = translateY = options.position?.y ?? translateY;
 
-				setTranslate();
+				setTranslate(getEventData());
 			}
 		},
 	};
@@ -611,6 +650,10 @@ const cancelElementContains = (cancelElements: HTMLElement[], dragElements: HTML
 
 function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
 	if (bounds === undefined) return;
+
+	if (typeof bounds === 'function') {
+		bounds = bounds();
+	}
 
 	if (isHTMLElement(bounds)) return bounds.getBoundingClientRect();
 
