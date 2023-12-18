@@ -50,9 +50,7 @@
 		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
 	"devDependencies": {
-		"@neodrag/core": "workspace:*",
-		"@neodrag/tsup-config": "workspace:*",
-		"svelte": "^4.2.8"
+		"@neodrag/core": "workspace:*"
 	},
 	"homepage": "https://neodrag.dev/docs/svelte"
 }

@@ -49,7 +49,6 @@
 		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public"
 	},
 	"devDependencies": {
-		"@neodrag/core": "workspace:*",
-		"@neodrag/tsup-config": "workspace:*"
+		"@neodrag/core": "workspace:*"
 	}
 }

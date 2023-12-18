@@ -75,8 +75,6 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(typescript@5.3.3)
 
-  config: {}
-
   docs:
     dependencies:
       '@fontsource/jetbrains-mono':
@@ -189,20 +187,13 @@ importers:
         specifier: ^5.0.10
         version: 5.0.10(sass@1.69.5)(terser@5.26.0)
 
-  packages/core:
-    devDependencies:
-      '@neodrag/tsup-config':
-        specifier: workspace:*
-        version: link:../../config
+  packages/core: {}
 
   packages/react:
     devDependencies:
       '@neodrag/core':
         specifier: workspace:*
         version: link:../core
-      '@neodrag/tsup-config':
-        specifier: workspace:*
-        version: link:../../config
 
   packages/react/demo:
     dependencies:
@@ -229,9 +220,6 @@ importers:
       '@neodrag/core':
         specifier: workspace:*
         version: link:../core
-      '@neodrag/tsup-config':
-        specifier: workspace:*
-        version: link:../../config
 
   packages/solid/demo:
     dependencies:
@@ -257,12 +245,6 @@ importers:
       '@neodrag/core':
         specifier: workspace:*
         version: link:../core
-      '@neodrag/tsup-config':
-        specifier: workspace:*
-        version: link:../../config
-      svelte:
-        specifier: ^4.2.8
-        version: 4.2.8
 
   packages/svelte/demo:
     dependencies:
@@ -291,9 +273,6 @@ importers:
       '@neodrag/core':
         specifier: workspace:*
         version: link:../core
-      '@neodrag/tsup-config':
-        specifier: workspace:*
-        version: link:../../config
 
   packages/vanilla/demo:
     dependencies:
@@ -313,9 +292,6 @@ importers:
       '@neodrag/core':
         specifier: workspace:*
         version: link:../core
-      '@neodrag/tsup-config':
-        specifier: workspace:*
-        version: link:../../config
 
   packages/vue/demo:
     dependencies:

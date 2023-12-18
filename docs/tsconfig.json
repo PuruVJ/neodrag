@@ -11,9 +11,5 @@
 			"$helpers/*": ["src/helpers/*"]
 		}
 	},
-	"include": [
-		"./markdown/*",
-		"./src/auto-imports.d.ts",
-		",./src/**/*.{ts,js,astro,svelte}"
-	]
+	"include": ["./markdown/*", "./src/auto-imports.d.ts", ",./src/**/*.{ts,js}"]
 }
