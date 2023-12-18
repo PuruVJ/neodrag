@@ -40,7 +40,6 @@
 		"prettier-plugin-astro": "^0.12.2",
 		"rehype-autolink-headings": "^7.1.0",
 		"remark-custom-container": "^1.2.0",
-		"rollup": "^4.9.1",
 		"sass": "^1.69.5",
 		"svelte": "^4.2.8",
 		"svelte-fast-dimension": "^1.1.0",

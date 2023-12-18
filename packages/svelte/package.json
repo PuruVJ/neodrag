@@ -51,7 +51,8 @@
 	},
 	"devDependencies": {
 		"@neodrag/core": "workspace:*",
-		"@neodrag/tsup-config": "workspace:*"
+		"@neodrag/tsup-config": "workspace:*",
+		"svelte": "^4.2.8"
 	},
 	"homepage": "https://neodrag.dev/docs/svelte"
 }

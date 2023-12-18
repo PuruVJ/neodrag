@@ -1,14 +1,14 @@
 {
 	"compilerOptions": {
-		"module": "ES2020",
+		"module": "ESNext",
 		"target": "ESNext",
 		"declaration": true,
 		"emitDeclarationOnly": true,
 		"declarationDir": "dist/",
 		"strict": true,
 		"esModuleInterop": true,
-		"moduleResolution": "Node",
-		"types": ["vitest/globals"]
+		"moduleResolution": "Bundler",
+		"types": ["vitest/globals", "svelte"]
 	},
 	"files": ["./src/index.ts"]
 }
