@@ -8,7 +8,7 @@
 		pathname.endsWith(path) ? 'page' : 'false';
 
 	const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(
-		pathname
+		pathname,
 	)?.[1];
 </script>
 
@@ -64,7 +64,7 @@
 		<ThemeSwitcher />
 	</div>
 
-	<!-- <span class="copyright"
+	<span class="copyright"
 		>&copy; 2021-{new Date().getUTCFullYear()}
 		<a
 			href="https://twitter.com/puruvjdev"
@@ -74,7 +74,7 @@
 		>
 			Puru Vijay</a
 		>
-	</span> -->
+	</span>
 </div>
 
 <style lang="scss">

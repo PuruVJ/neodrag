@@ -1,12 +1,6 @@
-import { defineConfig } from 'ttsup';
+import { defineConfig } from 'tsup';
 
-/**
- *
- * @param {Object} param0
- * @param {string} param0.dtsBanner
- * @returns
- */
-export const coreConfig = ({ dtsBanner } = { dtsBanner: '' }) =>
+export const coreConfig = ({ dtsBanner }: { dtsBanner?: string } = { dtsBanner: '' }) =>
 	defineConfig([
 		{
 			entry: ['./src/index.ts'],

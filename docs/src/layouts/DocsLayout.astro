@@ -118,6 +118,10 @@ const { title: frontmatterTitle } = frontmatter || {};
 			background-color: hsla(var(--app-color-dark-hsl), 0.1);
 		}
 
+		:global(pre.astro-code code) {
+			background-color: transparent;
+		}
+
 		:global(h1, h2, h3, h4, h5) {
 			--anchor-opacity: 1;
 

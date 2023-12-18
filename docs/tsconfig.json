@@ -1,6 +1,7 @@
 {
-	"extends": "astro/tsconfigs/strict",
+	"extends": "astro/tsconfigs/base",
 	"compilerOptions": {
+		"strictNullChecks": true,
 		"baseUrl": ".",
 		"paths": {
 			"$layouts/*": ["src/layouts/*"],
@@ -10,5 +11,5 @@
 			"$helpers/*": ["src/helpers/*"]
 		}
 	},
-	"include": ["./markdown/*", "./src/auto-imports.d.ts", ",./src/**/*.{ts, js}"]
+	"include": ["./markdown/*", "./src/auto-imports.d.ts", ",./src/**/*.{ts,js}"]
 }
