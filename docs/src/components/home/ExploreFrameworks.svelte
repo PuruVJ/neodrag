@@ -24,7 +24,7 @@
 
 	.frameworks {
 		display: flex;
-		gap: clamp(2rem, 10vw, 8rem);
+		gap: clamp(2rem, 5vw, 8rem);
 	}
 
 	a {

@@ -3,10 +3,10 @@ import {
 	DestroyRef,
 	Directive,
 	ElementRef,
-	inject,
+	EventEmitter,
 	Input,
 	Output,
-	EventEmitter,
+	inject,
 } from '@angular/core';
 import { Draggable, type DragEventData, type DragOptions } from '@neodrag/vanilla';
 
@@ -29,7 +29,7 @@ export class NeoDraggable {
 		} else {
 			this._draggable = new Draggable(
 				this._elRef.nativeElement,
-				this._patchDragEvents(options || {})
+				this._patchDragEvents(options || {}),
 			);
 		}
 	}
