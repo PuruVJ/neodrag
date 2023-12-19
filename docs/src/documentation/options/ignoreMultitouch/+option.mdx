@@ -47,6 +47,14 @@ This helps when you have multiple elements on a canvas where you want to impleme
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ ignoreMultitouch: true }">
+          Multi touch ignored
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```ts
         useDraggable(draggableRef, { ignoreMultitouch: true });
@@ -88,6 +96,14 @@ This helps when you have multiple elements on a canvas where you want to impleme
       <div slot="solid">
         ```jsx
         <div use:draggable={{ ignoreMultitouch: false }}>
+          Multi touch allowed
+        </div>
+        ```
+      </div>
+
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ ignoreMultitouch: false }">
           Multi touch allowed
         </div>
         ```

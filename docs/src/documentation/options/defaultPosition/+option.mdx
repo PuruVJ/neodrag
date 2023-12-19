@@ -46,6 +46,14 @@ export const shortDescription =
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ defaultPosition: { x: 100, y: 40 } }">
+          Shifted by (100, 40)
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```ts
         useDraggable(draggableRef, { defaultPosition: { x: 100, y: 40 } });

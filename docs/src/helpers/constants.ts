@@ -3,7 +3,8 @@ export const FRAMEWORKS = [
 	{ name: 'react' },
 	{ name: 'vue' },
 	{ name: 'solid' },
+	{ name: 'angular' },
 	{ name: 'vanilla' },
 ] as const;
 
-export type Framework = typeof FRAMEWORKS[number]['name'];
+export type Framework = (typeof FRAMEWORKS)[number]['name'];

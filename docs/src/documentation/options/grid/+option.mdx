@@ -55,6 +55,14 @@ If you're programmatically creating the grid, do not set it to \[0, 0\] ever, th
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ grid: [50, 50] }">
+          Snaps to 50x50 grid
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```ts
         useDraggable(draggableRef, { grid: [50, 50] });
@@ -101,6 +109,14 @@ If you're programmatically creating the grid, do not set it to \[0, 0\] ever, th
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ grid: [72, 91] }">
+          Snaps to 50x50 grid
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```ts
         useDraggable(draggableRef, { grid: [72, 91] });
@@ -142,6 +158,14 @@ If you're programmatically creating the grid, do not set it to \[0, 0\] ever, th
       <div slot="solid">
         ```jsx
         <div use:draggable={{ grid: [0, 0] }}>
+          Snaps to 0x0 grid - Won't drag at all
+        </div>
+        ```
+      </div>
+
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ grid: [0, 0] }">
           Snaps to 0x0 grid - Won't drag at all
         </div>
         ```

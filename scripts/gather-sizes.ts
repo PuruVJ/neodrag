@@ -8,6 +8,9 @@ async function main() {
 		await fg(new URL('../packages/*/dist/min/index.js', import.meta.url).pathname)
 	).filter((path) => !path.includes('core'));
 
+	// Angular
+	files.push(new URL('../packages/angular/dist/esm2022/index.mjs', import.meta.url).pathname);
+
 	const versions = (await fg(new URL('../packages/*/package.json', import.meta.url).pathname))
 		.filter((path) => !path.includes('core'))
 		.map((path) => {
@@ -24,7 +27,7 @@ async function main() {
 				const size = ((await brotliSize(file)) / 1024).toFixed(2);
 
 				return { framework, size };
-			})
+			}),
 		)
 	).reduce(
 		(acc, { framework, size }) => ({
@@ -34,8 +37,10 @@ async function main() {
 				version: versions.find(({ framework: vFw }) => vFw === framework)?.version,
 			},
 		}),
-		{}
+		{},
 	);
+
+	console.log(contents);
 
 	// Ensure folder if not exists
 	try {
@@ -46,7 +51,7 @@ async function main() {
 
 	writeFile(
 		new URL('../docs/src/data/sizes.json', import.meta.url),
-		JSON.stringify(contents, null, 2)
+		JSON.stringify(contents, null, 2),
 	);
 }
 

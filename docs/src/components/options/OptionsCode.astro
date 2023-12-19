@@ -1,7 +1,10 @@
 ---
 import type { Framework } from 'src/helpers/constants';
 
-const framework = Astro.url.pathname.split('/').filter(Boolean).at(-1) as Framework;
+const framework = Astro.url.pathname
+    .split('/')
+    .filter(Boolean)
+    .at(-1) as Framework;
 ---
 
 {framework === 'react' && <slot name="react" />}
@@ -9,3 +12,4 @@ const framework = Astro.url.pathname.split('/').filter(Boolean).at(-1) as Framew
 {framework === 'vue' && <slot name="vue" />}
 {framework === 'vanilla' && <slot name="vanilla" />}
 {framework === 'solid' && <slot name="solid" />}
+{framework === 'angular' && <slot name="angular" />}

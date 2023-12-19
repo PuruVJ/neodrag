@@ -52,6 +52,14 @@ In future, when `translate` property will be more widely available, this library
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ legacyTranslate: true, gpuAcceleration: true }">
+          Legacy translate with GPU acceleration
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```ts
         useDraggable(draggableRef, { legacyTranslate: true, gpuAcceleration: true });
@@ -98,6 +106,14 @@ In future, when `translate` property will be more widely available, this library
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ legacyTranslate: false, gpuAcceleration: true }">
+          Modern translate with GPU acceleration
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```ts
         useDraggable(draggableRef, { legacyTranslate: false, gpuAcceleration: true });
@@ -139,6 +155,14 @@ In future, when `translate` property will be more widely available, this library
       <div slot="solid">
         ```jsx
         <div use:draggable={{ legacyTranslate: true, gpuAcceleration: false }}>
+          Legacy translate with no GPU acceleration
+        </div>
+        ```
+      </div>
+
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ legacyTranslate: false, gpuAcceleration: false }">
           Legacy translate with no GPU acceleration
         </div>
         ```

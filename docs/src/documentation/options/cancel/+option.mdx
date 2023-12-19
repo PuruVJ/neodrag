@@ -55,6 +55,16 @@ Can be an element or elements too. If it is provided, Trying to drag inside the 
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ cancel: '.cancel' }">
+          This will drag!
+
+          <div class="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```tsx
         useDraggable(draggableRef, { cancel: '.cancel' });
@@ -130,6 +140,16 @@ Can be an element or elements too. If it is provided, Trying to drag inside the 
         ```
       </div>
 
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ cancel: cancelEl }">
+          This will drag!
+
+          <div #cancelEl>This won't drag</div>
+        </div>
+        ```
+      </div>
+
       <div slot="react">
         ```tsx
         const cancelEl = useRef<HTMLDivElement>();
@@ -194,6 +214,17 @@ Can be an element or elements too. If it is provided, Trying to drag inside the 
       <div slot="solid">
         ```jsx
         <div use:draggable={{ cancel: '.cancel' }}>
+          This will drag!
+
+          <div class="cancel">This won't drag</div>
+          <div class="cancel">This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ cancel: '.cancel' }">
           This will drag!
 
           <div class="cancel">This won't drag</div>
@@ -282,6 +313,17 @@ Can be an element or elements too. If it is provided, Trying to drag inside the 
 
           <div ref={cancel1}>This won't drag</div>
           <div ref={cancel2}>This won't drag</div>
+        </div>
+        ```
+      </div>
+
+      <div slot="angular">
+        ```html
+        <div [neoDraggable]="{ cancel: [cancel1, cancel2] }">
+          This will drag!
+
+          <div #cancel1>This won't drag</div>
+          <div #cancel2>This won't drag</div>
         </div>
         ```
       </div>

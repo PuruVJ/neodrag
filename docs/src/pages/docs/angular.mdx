@@ -1,0 +1,103 @@
+---
+layout: '$layouts/MainDocsLayout.astro'
+title: '@neodrag/angular'
+tagline: 'A lightweight directive to make your elements draggable.'
+---
+
+import Options from '$components/options/Options.astro';
+
+import ExportedTypesMDX from '../../documentation/exported-types.mdx';
+
+## Usage
+
+Basic usage
+
+```ts
+import { NeoDraggable } from '@neodrag/angular';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [NeoDraggable],
+  template: `<div neoDraggable>You can drag me</div>`,
+})
+export class App {}
+```
+
+With options
+
+```ts
+import { NeoDraggable } from '@neodrag/angular';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [NeoDraggable],
+  template: `
+    <div [neoDraggable]="{ axis: 'x', grid: [10, 10] }">You can drag me</div>
+  `,
+})
+export class App {}
+```
+
+Defining options elsewhere with typescript
+
+```ts
+import { NeoDraggable, type DragOptions } from '@neodrag/angular';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [NeoDraggable],
+  template: ` <div [neoDraggable]="options">You can drag me</div> `,
+})
+export class App {
+  options: DragOptions = {
+    axis: 'x',
+    grid: [10, 10],
+  };
+}
+```
+
+Reactive options:
+
+```ts
+import { NeoDraggable, type DragOptions } from '@neodrag/angular';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [NeoDraggable],
+  template: ` <div [neoDraggable]="options()">You can drag me</div> `,
+})
+export class App {
+  options = signal<DragOptions>({
+    axis: 'x',
+    grid: [10, 10],
+  });
+}
+```
+
+## Options
+
+<Options />
+
+## Events
+
+`@neodrag/angular` emits 3 events, `neoDrag`, `neoDragStart` & `neoDragEnd`.
+Example:
+
+```html
+<div
+  neoDraggable
+  (neoDrag)="onDrag($event)"
+  (neoDragStart)="onDragStart($event)"
+  (neoDragEnd)="onDragEnd($event)"
+>
+  Hello
+</div>
+```
+
+## TypeScript
+
+<ExportedTypesMDX framework="angular" />
