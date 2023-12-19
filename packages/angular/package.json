@@ -41,8 +41,8 @@
 		"tslib": "^2.3.0"
 	},
 	"peerDependencies": {
-		"@angular/core": "^16.0.0",
-		"@angular/common": "^16.0.0"
+		"@angular/common": "^16.0.0 || ^17.0.0",
+		"@angular/core": "^16.0.0 || ^17.0.0"
 	},
 	"devDependencies": {
 		"@neodrag/vanilla": "workspace:*"

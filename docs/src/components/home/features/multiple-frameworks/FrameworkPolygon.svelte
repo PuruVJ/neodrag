@@ -14,12 +14,13 @@
 		vue: () => {},
 		solid: () => {},
 		vanilla: () => {},
+		angular: () => {},
 	};
 
 	let zIndices = [0, 0, 0, 0, 0];
 
-	// let frameworks = ['vanilla', 'svelte', 'react', 'vue', 'solid'];
-	const frameworks = ['solid', 'vanilla', 'react', 'vue', 'svelte']
+	// let frameworks = ['vanilla', 'svelte', 'react', 'vue', 'solid', 'angular'];
+	const frameworks = ['solid', 'vanilla', 'react', 'vue', 'svelte', 'angular']
 		.map((name) => FRAMEWORKS.find((f) => f.name === name)!)!
 		.map(({ name }) => ({
 			name,
@@ -42,7 +43,7 @@
 
 		if (zIndices[index] > zIndices.length) {
 			zIndices = zIndices.map((z) =>
-				z >= lowestZIndex ? z - lowestZIndex : z
+				z >= lowestZIndex ? z - lowestZIndex : z,
 			);
 		}
 	}
