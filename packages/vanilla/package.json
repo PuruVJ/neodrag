@@ -47,8 +47,8 @@
 	"scripts": {
 		"compile": "tsup",
 		"compile:watch": "tsup --watch",
-		"pub": "pnpm build && pnpm publish --no-git-checks --access public",
-		"pub:dry": "pnpm build && pnpm publish --dry-run --no-git-checks --access public"
+		"pub": "pnpm compile && pnpm publish --no-git-checks --access public",
+		"pub:dry": "pnpm compile && pnpm publish --dry-run --no-git-checks --access public"
 	},
 	"devDependencies": {
 		"@neodrag/core": "workspace:*"
