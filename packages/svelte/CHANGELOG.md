@@ -1,5 +1,11 @@
 # @neodrag/svelte
 
+## 2.0.4
+
+### Patch Changes
+
+- [#145](https://github.com/PuruVJ/neodrag/pull/145) [`e19ce73`](https://github.com/PuruVJ/neodrag/commit/e19ce732a9494dc3eb05e0c8702cd802abc0af9a) Thanks [@PuruVJ](https://github.com/PuruVJ)! - fix: ignoreMultitouch now behaves correctly
+
 ## 2.0.3
 
 ### Patch Changes
@@ -44,9 +50,9 @@ If you have this in your `tsconfig.json`:
 
 ```json
 {
-	"compilerOptions": {
-		"types": ["@neodrag/svelte/globals"]
-	}
+  "compilerOptions": {
+    "types": ["@neodrag/svelte/globals"]
+  }
 }
 ```
 
