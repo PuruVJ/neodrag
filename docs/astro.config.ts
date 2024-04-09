@@ -1,22 +1,17 @@
 // @ts-check
+import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import svelte from '@astrojs/svelte';
-import serviceWorker from 'astrojs-service-worker';
-import { rehypeHeadingIds } from '@astrojs/markdown-remark';
-
 import { defineConfig } from 'astro/config';
-
-import { fastDimension } from 'svelte-fast-dimension';
-import autoPreprocess from 'svelte-preprocess';
-import sequential from 'svelte-sequential-preprocessor';
-
-import AutoImport from 'unplugin-auto-import/astro';
-import UnpluginIcons from 'unplugin-icons/vite';
-
 import { h } from 'hastscript';
 import rehypeAutolinkHeadings, { type Options } from 'rehype-autolink-headings';
 import container from 'remark-custom-container';
+import { fastDimension } from 'svelte-fast-dimension';
+import autoPreprocess from 'svelte-preprocess';
+import sequential from 'svelte-sequential-preprocessor';
+import AutoImport from 'unplugin-auto-import/astro';
+import UnpluginIcons from 'unplugin-icons/vite';
 
 const AnchorLinkIcon = h(
 	'svg',
@@ -41,7 +36,6 @@ export default defineConfig({
 		svelte({ preprocess: sequential([autoPreprocess(), fastDimension()]) }),
 		mdx(),
 		sitemap(),
-		serviceWorker(),
 		// critters(),
 		AutoImport({
 			dts: './src/auto-imports.d.ts',
@@ -67,7 +61,7 @@ export default defineConfig({
 	markdown: {
 		extendDefaultPlugins: true,
 		shikiConfig: {
-			experimentalThemes: {
+			themes: {
 				light: 'github-light',
 				dark: 'github-dark',
 			},
