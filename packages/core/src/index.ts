@@ -305,6 +305,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	// Set proper defaults for recomputeBounds
 	recomputeBounds = { ...DEFAULT_RECOMPUTE_BOUNDS, ...recomputeBounds };
 
+	let activePointers = new Set<number>();
+
 	// Arbitrary constants for better minification
 	const bodyStyle = document.body.style;
 	const nodeClassList = node.classList;
@@ -316,7 +318,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 				return setStyle(
 					node,
 					'transform',
-					gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common})`
+					gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common})`,
 				);
 			}
 
@@ -376,7 +378,9 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		if (e.button === 2) return;
 
-		if (ignoreMultitouch && !e.isPrimary) return;
+		activePointers.add(e.pointerId);
+
+		if (ignoreMultitouch && activePointers.size > 1) return e.preventDefault();
 
 		// Compute bounds
 		if (recomputeBounds.dragStart) computedBounds = computeBoundRect(bounds, node);
@@ -394,7 +398,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		if (cancelElementContains(cancelEls, dragEls))
 			throw new Error(
-				"Element being dragged can't be a child of the element on which `cancel` is applied"
+				"Element being dragged can't be a child of the element on which `cancel` is applied",
 			);
 
 		const eventTarget = e.composedPath()[0] as HTMLElement;
@@ -433,7 +437,9 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		}
 	}
 
-	function dragEnd() {
+	function dragEnd(e: PointerEvent) {
+		activePointers.delete(e.pointerId);
+
 		if (!active) return;
 
 		if (recomputeBounds.dragEnd) computedBounds = computeBoundRect(bounds, node);
@@ -453,7 +459,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	}
 
 	function drag(e: PointerEvent) {
-		if (!active) return;
+		if (!active || (ignoreMultitouch && activePointers.size > 1)) return;
 
 		if (recomputeBounds.drag) computedBounds = computeBoundRect(bounds, node);
 
@@ -564,7 +570,7 @@ const isString = (val: unknown): val is string => typeof val === 'string';
 const snapToGrid = (
 	[xSnap, ySnap]: [number, number],
 	pendingX: number,
-	pendingY: number
+	pendingY: number,
 ): [number, number] => {
 	const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
 
@@ -584,7 +590,7 @@ function getHandleEls(handle: DragOptions['handle'], node: HTMLElement): HTMLEle
 	const handleEls = node.querySelectorAll<HTMLElement>(handle);
 	if (handleEls === null)
 		throw new Error(
-			'Selector passed for `handle` option should be child of the element on which the action is applied'
+			'Selector passed for `handle` option should be child of the element on which the action is applied',
 		);
 
 	return Array.from(handleEls.values());
@@ -600,7 +606,7 @@ function getCancelElements(cancel: DragOptions['cancel'], node: HTMLElement): HT
 
 	if (cancelEls === null)
 		throw new Error(
-			'Selector passed for `cancel` option should be child of the element on which the action is applied'
+			'Selector passed for `cancel` option should be child of the element on which the action is applied',
 		);
 
 	return Array.from(cancelEls.values());
