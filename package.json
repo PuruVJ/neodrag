@@ -6,7 +6,7 @@
 	"scripts": {
 		"changeset": "changeset",
 		"compile": "pnpm -r compile",
-		"docs:build": "pnpm compile && pnpm sizes && cd docs && pnpm compile",
+		"docs:build": "pnpm compile && pnpm sizes && cd docs && pnpm build",
 		"ci:version": "changeset version",
 		"ci:release": "changeset publish",
 		"sizes": "tsx scripts/gather-sizes.ts"
