@@ -1,5 +1,11 @@
 # @neodrag/svelte
 
+## 2.0.5
+
+### Patch Changes
+
+- [#149](https://github.com/PuruVJ/neodrag/pull/149) [`6dc8891`](https://github.com/PuruVJ/neodrag/commit/6dc8891ae23741c38acd3e32824907213067718a) Thanks [@PuruVJ](https://github.com/PuruVJ)! - fix: Types
+
 ## 2.0.4
 
 ### Patch Changes
