@@ -2,5 +2,5 @@ import { coreConfig } from '../config';
 
 export default coreConfig({
   includeUMD: true,
-  globalName: 'NeoDragVanilla',
+  globalName: 'NeoDrag',
 });
