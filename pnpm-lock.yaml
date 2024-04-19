@@ -290,6 +290,12 @@ importers:
         specifier: ^5.0.10
         version: 5.2.8(sass@1.74.1)(terser@5.30.3)
 
+  packages/vanilla/demo-umd:
+    dependencies:
+      '@neodrag/vanilla':
+        specifier: workspace:*
+        version: link:..
+
   packages/vue:
     devDependencies:
       '@neodrag/core':

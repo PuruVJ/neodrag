@@ -1,3 +1,6 @@
 import { coreConfig } from '../config';
 
-export default coreConfig({});
+export default coreConfig({
+  includeUMD: true,
+  globalName: 'NeoDragVanilla',
+});
