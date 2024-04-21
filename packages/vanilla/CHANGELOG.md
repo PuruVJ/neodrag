@@ -1,5 +1,11 @@
 # @neodrag/vanilla
 
+## 2.0.5
+
+### Patch Changes
+
+- [#152](https://github.com/PuruVJ/neodrag/pull/152) [`7f11a0b`](https://github.com/PuruVJ/neodrag/commit/7f11a0bf56aff652f40e47a1ac96f41e886b73ec) Thanks [@houtan-rocky](https://github.com/houtan-rocky)! - feat: Provide UMD
+
 ## 2.0.4
 
 ### Patch Changes
