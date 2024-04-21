@@ -1,6 +1,7 @@
+import { Format } from "tsup"
 import { defineConfig } from 'tsup';
 
-export const coreConfig = ({ dtsBanner }: { dtsBanner?: string } = { dtsBanner: '' }) =>
+export const coreConfig = ({ dtsBanner = '', includeUMD = false, globalName = 'neodrag' } = {}) =>
 	defineConfig([
 		{
 			entry: ['./src/index.ts'],
@@ -19,4 +20,18 @@ export const coreConfig = ({ dtsBanner }: { dtsBanner?: string } = { dtsBanner: 
 			outDir: 'dist/min',
 			treeshake: 'smallest',
 		},
+		// UMD configuration
+		...(includeUMD
+			? [
+					{
+						entry: ['./src/index.ts'],
+						format: 'umd' as Format,
+						globalName,
+						dts: { resolve: true, banner: dtsBanner },
+						clean: true,
+						outDir: 'dist/umd',
+						treeshake: true,
+					},
+				]
+			: []),
 	]);

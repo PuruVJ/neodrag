@@ -1,0 +1,10 @@
+{
+	"name": "demo",
+	"private": true,
+	"version": "0.0.0",
+	"scripts": {},
+	"devDependencies": {},
+	"dependencies": {
+		"@neodrag/vanilla": "workspace:*"
+	}
+}
