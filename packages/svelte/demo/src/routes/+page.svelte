@@ -170,6 +170,7 @@
 					progressX.set(offsetX);
 					progressY.set(offsetY);
 				},
+				holdDelay: 200
 			}}
 			class="box"
 		>
