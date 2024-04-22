@@ -224,6 +224,14 @@ export type DragOptions = {
 	 * Fires when dragging ends
 	 */
 	onDragEnd?: (data: DragEventData) => void;
+
+	/**
+	 * Time in milliseconds a user must hold before dragging starts.
+	 * This can help prevent accidental drags.
+	 *
+	 * @default 0ms 
+	 */
+	holdDelay?: number;
 };
 
 const enum DEFAULT_CLASS {
@@ -267,6 +275,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		onDragStart,
 		onDrag,
 		onDragEnd,
+		holdDelay = 0,
 	} = options;
 
 	let active = false;
@@ -373,10 +382,25 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		return inverseScale;
 	};
 
+	let holdTimeout: number | undefined;
+	let draggingAllowed = false;
+
 	function dragStart(e: PointerEvent) {
 		if (disabled) return;
 
 		if (e.button === 2) return;
+
+		// Start the hold delay timer
+		if (holdDelay > 0) {
+			holdTimeout = window.setTimeout(() => {
+				draggingAllowed = true;
+				fireSvelteDragStartEvent();
+			}, holdDelay);
+		} else {
+			draggingAllowed = true;
+			fireSvelteDragStartEvent();
+		}
+
 
 		activePointers.add(e.pointerId);
 
@@ -438,6 +462,14 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	}
 
 	function dragEnd(e: PointerEvent) {
+		if (holdTimeout) {
+			clearTimeout(holdTimeout);
+		}
+
+		draggingAllowed = false;
+
+		if (!draggingAllowed) return;
+
 		activePointers.delete(e.pointerId);
 
 		if (!active) return;
@@ -459,6 +491,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	}
 
 	function drag(e: PointerEvent) {
+		if (!draggingAllowed) return;
+
 		if (!active || (ignoreMultitouch && activePointers.size > 1)) return;
 
 		if (recomputeBounds.drag) computedBounds = computeBoundRect(bounds, node);
