@@ -74,7 +74,7 @@ export interface Action<
 
 export const draggable = coreDraggable as Action<
 	HTMLElement,
-	DragOptions,
+	DragOptions | undefined,
 	{
 		'on:neodrag:start': (e: CustomEvent<DragEventData>) => void;
 		'on:neodrag': (e: CustomEvent<DragEventData>) => void;
