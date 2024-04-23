@@ -269,6 +269,11 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		onDragEnd,
 	} = options;
 
+	/**
+	 * Whether the element was dragged at least once ( to prevent mouse click event after drag )
+	 */
+	let wasDragged = false;
+
 	let active = false;
 
 	let translateX = 0,
@@ -378,6 +383,8 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 		if (e.button === 2) return;
 
+		wasDragged = false;
+
 		activePointers.add(e.pointerId);
 
 		if (ignoreMultitouch && activePointers.size > 1) return e.preventDefault();
@@ -440,12 +447,14 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 	function dragEnd(e: PointerEvent) {
 		activePointers.delete(e.pointerId);
 
-		const preventClick = (e: MouseEvent) => {
-			e.stopPropagation();
-			e.preventDefault();
+		const preventClickAfterDragEnd = (e: MouseEvent) => {
+			if (wasDragged) {
+				e.preventDefault(); // Prevent click if it was dragged
+				e.stopPropagation();
+			}
 		};
 
-		node.addEventListener('click', preventClick, { once: true, capture: true });
+		listen('click', preventClickAfterDragEnd, { once: true, capture: true });
 
 		if (!active) return;
 
@@ -523,6 +532,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		fireSvelteDragEvent();
 
 		setTranslate();
+		wasDragged = true;
 	}
 
 	return {
