@@ -419,7 +419,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			bodyOriginalUserSelectVal = bodyStyle.userSelect;
 			bodyStyle.userSelect = 'none';
 		}
-		
+
 		// Dispatch custom event
 		fireSvelteDragStartEvent();
 
@@ -439,7 +439,6 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	function dragEnd(e: PointerEvent) {
 		activePointers.delete(e.pointerId);
-
 
 		const preventClick = (e: MouseEvent) => {
 			e.stopPropagation();
