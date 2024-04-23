@@ -229,7 +229,7 @@ export type DragOptions = {
 	 * Time in milliseconds a user must hold before dragging starts.
 	 * This can help prevent accidental drags.
 	 *
-	 * @default 0ms 
+	 * @default 100ms 
 	 */
 	holdDelay?: number;
 };
@@ -275,7 +275,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 		onDragStart,
 		onDrag,
 		onDragEnd,
-		holdDelay = 0,
+		holdDelay = 100,
 	} = options;
 
 	let active = false;
