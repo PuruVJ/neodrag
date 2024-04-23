@@ -1,5 +1,11 @@
 # @neodrag/svelte
 
+## 2.0.6
+
+### Patch Changes
+
+- [#160](https://github.com/PuruVJ/neodrag/pull/160) [`236efae`](https://github.com/PuruVJ/neodrag/commit/236efaeee1b11275857913944a7b85664dc7cd8c) Thanks [@PuruVJ](https://github.com/PuruVJ)! - fix: options are no longer required. Regression from before
+
 ## 2.0.5
 
 ### Patch Changes
