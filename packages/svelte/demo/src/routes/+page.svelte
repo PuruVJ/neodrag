@@ -163,6 +163,7 @@
 
 	<div class="canvas" style="transform: scale({scale});">
 		<div
+
 			use:draggable={{
 				cancel: '.cancel',
 				bounds: document.body,
@@ -187,6 +188,10 @@
 		<input type="number" bind:value={$progressX} />
 		<input type="number" bind:value={$progressY} />
 		<div
+					on:click={() => {
+						console.log('clicked')
+				// throw new Error('Should not be clickable');
+			}}
 			use:draggable={{
 				position: { y: $progressY, x: $progressX },
 				onDrag: ({ offsetX, offsetY }) => {
@@ -201,7 +206,11 @@
 				},
 			}}
 			class="box"
-		/>
+		>
+		<div on:click={() => console.log("MEME")}>
+			click me
+		</div>
+		</div>
 	</div>
 </main>
 
