@@ -1,7 +1,7 @@
-import { Format } from "tsup"
+import { Format } from 'tsup';
 import { defineConfig } from 'tsup';
 
-export const coreConfig = ({ dtsBanner = '', includeUMD = false, globalName = 'neodrag' } = {}) =>
+export const core_config = ({ dtsBanner = '', includeUMD = false, globalName = 'neodrag' } = {}) =>
 	defineConfig([
 		{
 			entry: ['./src/index.ts'],

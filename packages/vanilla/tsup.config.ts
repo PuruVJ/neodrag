@@ -1,6 +1,6 @@
-import { coreConfig } from '../config';
+import { core_config } from '../config';
 
-export default coreConfig({
-  includeUMD: true,
-  globalName: 'NeoDrag',
+export default core_config({
+	includeUMD: true,
+	globalName: 'NeoDrag',
 });

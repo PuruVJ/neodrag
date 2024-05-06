@@ -1,6 +1,6 @@
-import { coreConfig } from '../config';
+import { core_config } from '../config';
 
-export default coreConfig({
+export default core_config({
 	dtsBanner: `import 'solid-js';
 
 declare module 'solid-js' {

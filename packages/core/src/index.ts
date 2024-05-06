@@ -271,259 +271,270 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	let active = false;
 
-	let translateX = 0,
-		translateY = 0;
+	let translate_x = 0,
+		translate_y = 0;
 
-	let initialX = 0,
-		initialY = 0;
+	let initial_x = 0,
+		initial_y = 0;
 
 	// The offset of the client position relative to the node's top-left corner
-	let clientToNodeOffsetX = 0,
-		clientToNodeOffsetY = 0;
+	let client_to_node_offsetX = 0,
+		client_to_node_offsetY = 0;
 
-	let { x: xOffset, y: yOffset } = position
+	let { x: x_offset, y: y_offset } = position
 		? { x: position?.x ?? 0, y: position?.y ?? 0 }
 		: defaultPosition;
 
-	setTranslate(xOffset, yOffset);
+	set_translate(x_offset, y_offset);
 
-	let canMoveInX: boolean;
-	let canMoveInY: boolean;
+	let can_move_in_x: boolean;
+	let can_move_in_y: boolean;
 
-	let bodyOriginalUserSelectVal = '';
+	let body_original_user_select_val = '';
 
-	let computedBounds: DragBoundsCoords | undefined;
-	let nodeRect: DOMRect;
+	let computed_bounds: DragBoundsCoords | undefined;
+	let node_rect: DOMRect;
 
-	let dragEls: HTMLElement[];
-	let cancelEls: HTMLElement[];
+	let drag_els: HTMLElement[];
+	let cancel_els: HTMLElement[];
 
-	let currentlyDraggedEl: HTMLElement;
+	let currently_dragged_el: HTMLElement;
 
-	let isControlled = !!position;
+	let is_controlled = !!position;
 
 	// Set proper defaults for recomputeBounds
 	recomputeBounds = { ...DEFAULT_RECOMPUTE_BOUNDS, ...recomputeBounds };
 
-	let activePointers = new Set<number>();
+	let active_pointers = new Set<number>();
 
 	// Arbitrary constants for better minification
-	const bodyStyle = document.body.style;
-	const nodeClassList = node.classList;
+	const body_style = document.body.style;
+	const node_class_list = node.classList;
 
-	function setTranslate(xPos = translateX, yPos = translateY) {
+	function set_translate(x_pos = translate_x, y_pos = translate_y) {
 		if (!transform) {
 			if (legacyTranslate) {
-				let common = `${+xPos}px, ${+yPos}px`;
-				return setStyle(
+				let common = `${+x_pos}px, ${+y_pos}px`;
+				return set_style(
 					node,
 					'transform',
 					gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common})`,
 				);
 			}
 
-			return setStyle(node, 'translate', `${+xPos}px ${+yPos}px ${gpuAcceleration ? '1px' : ''}`);
+			return set_style(
+				node,
+				'translate',
+				`${+x_pos}px ${+y_pos}px ${gpuAcceleration ? '1px' : ''}`,
+			);
 		}
 
 		// Call transform function if provided
-		const transformCalled = transform({ offsetX: xPos, offsetY: yPos, rootNode: node });
-		if (isString(transformCalled)) {
-			setStyle(node, 'transform', transformCalled);
+		const transform_called = transform({ offsetX: x_pos, offsetY: y_pos, rootNode: node });
+		if (is_string(transform_called)) {
+			set_style(node, 'transform', transform_called);
 		}
 	}
 
-	const getEventData: () => DragEventData = () => ({
-		offsetX: translateX,
-		offsetY: translateY,
+	const get_event_data: () => DragEventData = () => ({
+		offsetX: translate_x,
+		offsetY: translate_y,
 		rootNode: node,
-		currentNode: currentlyDraggedEl,
+		currentNode: currently_dragged_el,
 	});
 
-	const callEvent = (eventName: 'neodrag:start' | 'neodrag' | 'neodrag:end', fn: typeof onDrag) => {
-		const data = getEventData();
+	const call_event = (
+		eventName: 'neodrag:start' | 'neodrag' | 'neodrag:end',
+		fn: typeof onDrag,
+	) => {
+		const data = get_event_data();
 		node.dispatchEvent(new CustomEvent(eventName, { detail: data }));
 		fn?.(data);
 	};
 
-	function fireSvelteDragStartEvent() {
-		callEvent('neodrag:start', onDragStart);
+	function fire_svelte_drag_start_event() {
+		call_event('neodrag:start', onDragStart);
 	}
 
-	function fireSvelteDragEndEvent() {
-		callEvent('neodrag:end', onDragEnd);
+	function fire_svelte_drag_end_event() {
+		call_event('neodrag:end', onDragEnd);
 	}
 
-	function fireSvelteDragEvent() {
-		callEvent('neodrag', onDrag);
+	function fire_svelte_drag_event() {
+		call_event('neodrag', onDrag);
 	}
 
 	const listen = addEventListener;
 
-	listen('pointerdown', dragStart, false);
-	listen('pointerup', dragEnd, false);
+	listen('pointerdown', drag_start, false);
+	listen('pointerup', drag_end, false);
 	listen('pointermove', drag, false);
 
 	// On mobile, touch can become extremely janky without it
-	setStyle(node, 'touch-action', 'none');
+	set_style(node, 'touch-action', 'none');
 
-	const calculateInverseScale = () => {
+	const calculate_inverse_scale = () => {
 		// Calculate the current scale of the node
-		let inverseScale = node.offsetWidth / nodeRect.width;
-		if (isNaN(inverseScale)) inverseScale = 1;
-		return inverseScale;
+		let inverse_scale = node.offsetWidth / node_rect.width;
+		if (isNaN(inverse_scale)) inverse_scale = 1;
+		return inverse_scale;
 	};
 
-	function dragStart(e: PointerEvent) {
+	function drag_start(e: PointerEvent) {
 		if (disabled) return;
 
 		if (e.button === 2) return;
 
-		activePointers.add(e.pointerId);
+		active_pointers.add(e.pointerId);
 
-		if (ignoreMultitouch && activePointers.size > 1) return e.preventDefault();
+		if (ignoreMultitouch && active_pointers.size > 1) return e.preventDefault();
 
 		// Compute bounds
-		if (recomputeBounds.dragStart) computedBounds = computeBoundRect(bounds, node);
+		if (recomputeBounds.dragStart) computed_bounds = compute_bound_rect(bounds, node);
 
-		if (isString(handle) && isString(cancel) && handle === cancel)
+		if (is_string(handle) && is_string(cancel) && handle === cancel)
 			throw new Error("`handle` selector can't be same as `cancel` selector");
 
-		nodeClassList.add(defaultClass);
+		node_class_list.add(defaultClass);
 
-		dragEls = getHandleEls(handle, node);
-		cancelEls = getCancelElements(cancel, node);
+		drag_els = get_handle_els(handle, node);
+		cancel_els = get_cancel_elements(cancel, node);
 
-		canMoveInX = /(both|x)/.test(axis);
-		canMoveInY = /(both|y)/.test(axis);
+		can_move_in_x = /(both|x)/.test(axis);
+		can_move_in_y = /(both|y)/.test(axis);
 
-		if (cancelElementContains(cancelEls, dragEls))
+		if (cancel_element_contains(cancel_els, drag_els))
 			throw new Error(
 				"Element being dragged can't be a child of the element on which `cancel` is applied",
 			);
 
-		const eventTarget = e.composedPath()[0] as HTMLElement;
+		const event_target = e.composedPath()[0] as HTMLElement;
 		if (
-			dragEls.some((el) => el.contains(eventTarget) || el.shadowRoot?.contains(eventTarget)) &&
-			!cancelElementContains(cancelEls, [eventTarget])
+			drag_els.some((el) => el.contains(event_target) || el.shadowRoot?.contains(event_target)) &&
+			!cancel_element_contains(cancel_els, [event_target])
 		) {
-			currentlyDraggedEl =
-				dragEls.length === 1 ? node : dragEls.find((el) => el.contains(eventTarget))!;
+			currently_dragged_el =
+				drag_els.length === 1 ? node : drag_els.find((el) => el.contains(event_target))!;
 			active = true;
 		} else return;
 
 		// Compute current node's bounding client Rectangle
-		nodeRect = node.getBoundingClientRect();
+		node_rect = node.getBoundingClientRect();
 
 		if (applyUserSelectHack) {
 			// Apply user-select: none on body to prevent misbehavior
-			bodyOriginalUserSelectVal = bodyStyle.userSelect;
-			bodyStyle.userSelect = 'none';
+			body_original_user_select_val = body_style.userSelect;
+			body_style.userSelect = 'none';
 		}
 
 		// Dispatch custom event
-		fireSvelteDragStartEvent();
+		fire_svelte_drag_start_event();
 
 		const { clientX, clientY } = e;
-		const inverseScale = calculateInverseScale();
+		const inverse_scale = calculate_inverse_scale();
 
-		if (canMoveInX) initialX = clientX - xOffset / inverseScale;
-		if (canMoveInY) initialY = clientY - yOffset / inverseScale;
+		if (can_move_in_x) initial_x = clientX - x_offset / inverse_scale;
+		if (can_move_in_y) initial_y = clientY - y_offset / inverse_scale;
 
 		// Only the bounds uses these properties at the moment,
 		// may open up in the future if others need it
-		if (computedBounds) {
-			clientToNodeOffsetX = clientX - nodeRect.left;
-			clientToNodeOffsetY = clientY - nodeRect.top;
+		if (computed_bounds) {
+			client_to_node_offsetX = clientX - node_rect.left;
+			client_to_node_offsetY = clientY - node_rect.top;
 		}
 	}
 
-	function dragEnd(e: PointerEvent) {
-		activePointers.delete(e.pointerId);
+	function drag_end(e: PointerEvent) {
+		active_pointers.delete(e.pointerId);
 
 		if (!active) return;
 
-		if (recomputeBounds.dragEnd) computedBounds = computeBoundRect(bounds, node);
+		if (recomputeBounds.dragEnd) computed_bounds = compute_bound_rect(bounds, node);
 
 		// Apply class defaultClassDragged
-		nodeClassList.remove(defaultClassDragging);
-		nodeClassList.add(defaultClassDragged);
+		node_class_list.remove(defaultClassDragging);
+		node_class_list.add(defaultClassDragged);
 
-		if (applyUserSelectHack) bodyStyle.userSelect = bodyOriginalUserSelectVal;
+		if (applyUserSelectHack) body_style.userSelect = body_original_user_select_val;
 
-		fireSvelteDragEndEvent();
+		fire_svelte_drag_end_event();
 
-		if (canMoveInX) initialX = translateX;
-		if (canMoveInY) initialY = translateY;
+		if (can_move_in_x) initial_x = translate_x;
+		if (can_move_in_y) initial_y = translate_y;
 
 		active = false;
 	}
 
 	function drag(e: PointerEvent) {
-		if (!active || (ignoreMultitouch && activePointers.size > 1)) return;
+		if (!active || (ignoreMultitouch && active_pointers.size > 1)) return;
 
-		if (recomputeBounds.drag) computedBounds = computeBoundRect(bounds, node);
+		if (recomputeBounds.drag) computed_bounds = compute_bound_rect(bounds, node);
 
 		// Apply class defaultClassDragging
-		nodeClassList.add(defaultClassDragging);
+		node_class_list.add(defaultClassDragging);
 
 		e.preventDefault();
 
-		nodeRect = node.getBoundingClientRect();
+		node_rect = node.getBoundingClientRect();
 
 		// Get final values for clamping
-		let finalX = e.clientX,
-			finalY = e.clientY;
+		let final_x = e.clientX,
+			final_y = e.clientY;
 
-		const inverseScale = calculateInverseScale();
+		const inverse_scale = calculate_inverse_scale();
 
-		if (computedBounds) {
+		if (computed_bounds) {
 			// Client position is limited to this virtual boundary to prevent node going out of bounds
-			const virtualClientBounds: DragBoundsCoords = {
-				left: computedBounds.left + clientToNodeOffsetX,
-				top: computedBounds.top + clientToNodeOffsetY,
-				right: computedBounds.right + clientToNodeOffsetX - nodeRect.width,
-				bottom: computedBounds.bottom + clientToNodeOffsetY - nodeRect.height,
+			const virtual_client_bounds: DragBoundsCoords = {
+				left: computed_bounds.left + client_to_node_offsetX,
+				top: computed_bounds.top + client_to_node_offsetY,
+				right: computed_bounds.right + client_to_node_offsetX - node_rect.width,
+				bottom: computed_bounds.bottom + client_to_node_offsetY - node_rect.height,
 			};
 
-			finalX = clamp(finalX, virtualClientBounds.left, virtualClientBounds.right);
-			finalY = clamp(finalY, virtualClientBounds.top, virtualClientBounds.bottom);
+			final_x = clamp(final_x, virtual_client_bounds.left, virtual_client_bounds.right);
+			final_y = clamp(final_y, virtual_client_bounds.top, virtual_client_bounds.bottom);
 		}
 
 		if (Array.isArray(grid)) {
-			let [xSnap, ySnap] = grid;
+			let [x_snap, y_snap] = grid;
 
-			if (isNaN(+xSnap) || xSnap < 0)
+			if (isNaN(+x_snap) || x_snap < 0)
 				throw new Error('1st argument of `grid` must be a valid positive number');
 
-			if (isNaN(+ySnap) || ySnap < 0)
+			if (isNaN(+y_snap) || y_snap < 0)
 				throw new Error('2nd argument of `grid` must be a valid positive number');
 
-			let deltaX = finalX - initialX,
-				deltaY = finalY - initialY;
+			let delta_x = final_x - initial_x,
+				delta_y = final_y - initial_y;
 
-			[deltaX, deltaY] = snapToGrid([xSnap / inverseScale, ySnap / inverseScale], deltaX, deltaY);
+			[delta_x, delta_y] = snap_to_grid(
+				[x_snap / inverse_scale, y_snap / inverse_scale],
+				delta_x,
+				delta_y,
+			);
 
-			finalX = initialX + deltaX;
-			finalY = initialY + deltaY;
+			final_x = initial_x + delta_x;
+			final_y = initial_y + delta_y;
 		}
 
-		if (canMoveInX) translateX = Math.round((finalX - initialX) * inverseScale);
-		if (canMoveInY) translateY = Math.round((finalY - initialY) * inverseScale);
+		if (can_move_in_x) translate_x = Math.round((final_x - initial_x) * inverse_scale);
+		if (can_move_in_y) translate_y = Math.round((final_y - initial_y) * inverse_scale);
 
-		xOffset = translateX;
-		yOffset = translateY;
+		x_offset = translate_x;
+		y_offset = translate_y;
 
-		fireSvelteDragEvent();
+		fire_svelte_drag_event();
 
-		setTranslate();
+		set_translate();
 	}
 
 	return {
 		destroy: () => {
 			const unlisten = removeEventListener;
 
-			unlisten('pointerdown', dragStart, false);
-			unlisten('pointerup', dragEnd, false);
+			unlisten('pointerdown', drag_start, false);
+			unlisten('pointerup', drag_end, false);
 			unlisten('pointermove', drag, false);
 		},
 		update: (options: DragOptions) => {
@@ -541,23 +552,23 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			legacyTranslate = options.legacyTranslate ?? true;
 			transform = options.transform;
 
-			const dragged = nodeClassList.contains(defaultClassDragged);
+			const dragged = node_class_list.contains(defaultClassDragged);
 
-			nodeClassList.remove(defaultClass, defaultClassDragged);
+			node_class_list.remove(defaultClass, defaultClassDragged);
 
 			defaultClass = options.defaultClass ?? DEFAULT_CLASS.MAIN;
 			defaultClassDragging = options.defaultClassDragging ?? DEFAULT_CLASS.DRAGGING;
 			defaultClassDragged = options.defaultClassDragged ?? DEFAULT_CLASS.DRAGGED;
 
-			nodeClassList.add(defaultClass);
+			node_class_list.add(defaultClass);
 
-			if (dragged) nodeClassList.add(defaultClassDragged);
+			if (dragged) node_class_list.add(defaultClassDragged);
 
-			if (isControlled) {
-				xOffset = translateX = options.position?.x ?? translateX;
-				yOffset = translateY = options.position?.y ?? translateY;
+			if (is_controlled) {
+				x_offset = translate_x = options.position?.x ?? translate_x;
+				y_offset = translate_y = options.position?.y ?? translate_y;
 
-				setTranslate();
+				set_translate();
 			}
 		},
 	};
@@ -565,70 +576,70 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max);
 
-const isString = (val: unknown): val is string => typeof val === 'string';
+const is_string = (val: unknown): val is string => typeof val === 'string';
 
-const snapToGrid = (
-	[xSnap, ySnap]: [number, number],
-	pendingX: number,
-	pendingY: number,
+const snap_to_grid = (
+	[x_snap, y_snap]: [number, number],
+	pending_x: number,
+	pending_y: number,
 ): [number, number] => {
 	const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
 
-	const x = calc(pendingX, xSnap);
-	const y = calc(pendingY, ySnap);
+	const x = calc(pending_x, x_snap);
+	const y = calc(pending_y, y_snap);
 
 	return [x, y];
 };
 
-function getHandleEls(handle: DragOptions['handle'], node: HTMLElement): HTMLElement[] {
+function get_handle_els(handle: DragOptions['handle'], node: HTMLElement): HTMLElement[] {
 	if (!handle) return [node];
 
-	if (isHTMLElement(handle)) return [handle];
+	if (is_HTMLElement(handle)) return [handle];
 	if (Array.isArray(handle)) return handle;
 
 	// Valid!! Let's check if this selector exists or not
-	const handleEls = node.querySelectorAll<HTMLElement>(handle);
-	if (handleEls === null)
+	const handle_els = node.querySelectorAll<HTMLElement>(handle);
+	if (handle_els === null)
 		throw new Error(
 			'Selector passed for `handle` option should be child of the element on which the action is applied',
 		);
 
-	return Array.from(handleEls.values());
+	return Array.from(handle_els.values());
 }
 
-function getCancelElements(cancel: DragOptions['cancel'], node: HTMLElement): HTMLElement[] {
+function get_cancel_elements(cancel: DragOptions['cancel'], node: HTMLElement): HTMLElement[] {
 	if (!cancel) return [];
 
-	if (isHTMLElement(cancel)) return [cancel];
+	if (is_HTMLElement(cancel)) return [cancel];
 	if (Array.isArray(cancel)) return cancel;
 
-	const cancelEls = node.querySelectorAll<HTMLElement>(cancel);
+	const cancel_els = node.querySelectorAll<HTMLElement>(cancel);
 
-	if (cancelEls === null)
+	if (cancel_els === null)
 		throw new Error(
 			'Selector passed for `cancel` option should be child of the element on which the action is applied',
 		);
 
-	return Array.from(cancelEls.values());
+	return Array.from(cancel_els.values());
 }
 
-const cancelElementContains = (cancelElements: HTMLElement[], dragElements: HTMLElement[]) =>
-	cancelElements.some((cancelEl) => dragElements.some((el) => cancelEl.contains(el)));
+const cancel_element_contains = (cancel_elements: HTMLElement[], drag_elements: HTMLElement[]) =>
+	cancel_elements.some((cancelEl) => drag_elements.some((el) => cancelEl.contains(el)));
 
-function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
+function compute_bound_rect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
 	if (bounds === undefined) return;
 
-	if (isHTMLElement(bounds)) return bounds.getBoundingClientRect();
+	if (is_HTMLElement(bounds)) return bounds.getBoundingClientRect();
 
 	if (typeof bounds === 'object') {
 		// we have the left right etc
 
 		const { top = 0, left = 0, right = 0, bottom = 0 } = bounds;
 
-		const computedRight = window.innerWidth - right;
-		const computedBottom = window.innerHeight - bottom;
+		const computed_right = window.innerWidth - right;
+		const computed_bottom = window.innerHeight - bottom;
 
-		return { top, right: computedRight, bottom: computedBottom, left };
+		return { top, right: computed_right, bottom: computed_bottom, left };
 	}
 
 	// It's a string
@@ -641,7 +652,7 @@ function computeBoundRect(bounds: DragOptions['bounds'], rootNode: HTMLElement) 
 	return node.getBoundingClientRect();
 }
 
-const setStyle = (el: HTMLElement, style: string, value: string) =>
+const set_style = (el: HTMLElement, style: string, value: string) =>
 	el.style.setProperty(style, value);
 
-const isHTMLElement = (obj: unknown): obj is HTMLElement => obj instanceof HTMLElement;
+const is_HTMLElement = (obj: unknown): obj is HTMLElement => obj instanceof HTMLElement;

@@ -10,8 +10,8 @@ type HandleCancelType =
 	| (React.RefObject<HTMLElement> | HTMLElement)[]
 	| undefined;
 
-function unwrapHandleCancel(
-	val: HandleCancelType
+function unwrap_handle_cancel(
+	val: HandleCancelType,
 ): string | HTMLElement | HTMLElement[] | undefined {
 	if (val == undefined || typeof val === 'string' || val instanceof HTMLElement) return val;
 	if ('current' in val) return val.current!;
@@ -29,35 +29,35 @@ type ReactDragOptions = Omit<DragOptions, 'handle' | 'cancel'> & {
 
 export function useDraggable<RefType extends HTMLElement = HTMLDivElement>(
 	nodeRef: React.RefObject<RefType>,
-	options: ReactDragOptions = {}
+	options: ReactDragOptions = {},
 ) {
-	const updateRef = useRef<(options: DragOptions) => void>();
+	const update_ref = useRef<(options: DragOptions) => void>();
 
-	const [isDragging, setIsDragging] = useState(false);
-	const [dragState, setDragState] = useState<DragState>();
+	const [isDragging, set_is_dragging] = useState(false);
+	const [dragState, set_drag_state] = useState<DragState>();
 
 	let { onDragStart, onDrag, onDragEnd, handle, cancel } = options;
 
-	let newHandle = unwrapHandleCancel(handle);
-	let newCancel = unwrapHandleCancel(cancel);
+	let new_handle = unwrap_handle_cancel(handle);
+	let new_cancel = unwrap_handle_cancel(cancel);
 
-	function callEvent(arg: DragState, cb: DragOptions['onDrag']) {
-		setDragState(arg);
+	function call_event(arg: DragState, cb: DragOptions['onDrag']) {
+		set_drag_state(arg);
 		cb?.(arg);
 	}
 
-	function customOnDragStart(arg: DragState) {
-		setIsDragging(true);
-		callEvent(arg, onDragStart);
+	function custom_on_drag_start(arg: DragState) {
+		set_is_dragging(true);
+		call_event(arg, onDragStart);
 	}
 
-	function customOnDrag(arg: DragState) {
-		callEvent(arg, onDrag);
+	function custom_on_drag(arg: DragState) {
+		call_event(arg, onDrag);
 	}
 
-	function customOnDragEnd(arg: DragState) {
-		setIsDragging(false);
-		callEvent(arg, onDragEnd);
+	function custom_on_drag_end(arg: DragState) {
+		set_is_dragging(false);
+		call_event(arg, onDragEnd);
 	}
 
 	useEffect(() => {
@@ -70,26 +70,26 @@ export function useDraggable<RefType extends HTMLElement = HTMLDivElement>(
 
 		const { update, destroy } = draggable(node, {
 			...options,
-			handle: newHandle,
-			cancel: newCancel,
-			onDragStart: customOnDragStart,
-			onDrag: customOnDrag,
-			onDragEnd: customOnDragEnd,
+			handle: new_handle,
+			cancel: new_cancel,
+			onDragStart: custom_on_drag_start,
+			onDrag: custom_on_drag,
+			onDragEnd: custom_on_drag_end,
 		});
 
-		updateRef.current = update;
+		update_ref.current = update;
 
 		return destroy;
 	}, []);
 
 	useEffect(() => {
-		updateRef.current?.({
+		update_ref.current?.({
 			...options,
-			handle: unwrapHandleCancel(handle),
-			cancel: unwrapHandleCancel(cancel),
-			onDragStart: customOnDragStart,
-			onDrag: customOnDrag,
-			onDragEnd: customOnDragEnd,
+			handle: unwrap_handle_cancel(handle),
+			cancel: unwrap_handle_cancel(cancel),
+			onDragStart: custom_on_drag_start,
+			onDrag: custom_on_drag,
+			onDragEnd: custom_on_drag_end,
 		});
 	}, [options]);
 

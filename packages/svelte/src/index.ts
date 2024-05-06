@@ -1,4 +1,4 @@
-import { draggable as coreDraggable, type DragEventData, type DragOptions } from '@neodrag/core';
+import { draggable as core_draggable, type DragEventData, type DragOptions } from '@neodrag/core';
 
 //!THIS IS HACK, WE WANNA IMPORT THE TYPE WHEN THE ISSUE IS FIXED LATER
 /**
@@ -72,7 +72,7 @@ export interface Action<
 	): void | ActionReturn<Parameter, Attributes>;
 }
 
-export const draggable = coreDraggable as Action<
+export const draggable = core_draggable as Action<
 	HTMLElement,
 	DragOptions | undefined,
 	{
