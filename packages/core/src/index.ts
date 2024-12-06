@@ -161,14 +161,14 @@ export type DragOptions = {
 		 *
 		 * @default 0
 		 */
-		delay: number;
+		delay?: number;
 
 		/**
 		 * Threshold in pixels for movement to be considered a drag
 		 *
 		 * @default 3
 		 */
-		distance: number;
+		distance?: number;
 	};
 
 	/**
@@ -335,6 +335,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 	// Set proper defaults for recomputeBounds
 	recomputeBounds = { ...DEFAULT_RECOMPUTE_BOUNDS, ...recomputeBounds };
 
+	console.log(threshold);
 	// Proper defaults for threshold
 	threshold = { ...DEFAULT_DRAG_THRESHOLD, ...(threshold ?? {}) };
 
@@ -502,7 +503,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 				// Time threshold
 				if (!meets_time_threshold) {
 					const elapsed = Date.now() - start_time;
-					if (elapsed >= threshold.delay) {
+					if (elapsed >= threshold.delay!) {
 						meets_time_threshold = true;
 						try_start_drag();
 					}
@@ -514,7 +515,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 					const delta_y = e.clientY - initial_y;
 					const distance = Math.sqrt(delta_x ** 2 + delta_y ** 2);
 
-					if (distance >= threshold.distance) {
+					if (distance >= threshold.distance!) {
 						meets_distance_threshold = true;
 						try_start_drag();
 					}
@@ -592,7 +593,11 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 
 			if (is_dragging) {
 				// Listen for click handler and cancel it
-				listen('click', (e) => e.stopPropagation(), { once: true, signal: controller.signal });
+				listen('click', (e) => e.stopPropagation(), {
+					once: true,
+					signal: controller.signal,
+					capture: true,
+				});
 
 				if (recomputeBounds.dragEnd) computed_bounds = compute_bound_rect(bounds, node);
 

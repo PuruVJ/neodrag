@@ -16,14 +16,15 @@
 		defaultPosition: { x: 0, y: 0 },
 		disabled: false,
 		gpuAcceleration: true,
-		dragThreshold: {
-			delay: 500,
+		threshold: {
+			delay: 5,
 		},
+		defaultClass: 'neodrag',
 		// grid: [100, 100],
 		// bounds: boundToBody ? 'body' : undefined,
 		// bounds: { top: 100, left: 100, right: 100, bottom: 40 },
 		// bounds: 'body',
-	} as DragOptions;
+	} satisfies DragOptions;
 
 	// $: console.log(options);
 
