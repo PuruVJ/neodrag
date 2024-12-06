@@ -433,7 +433,6 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 		'pointerdown',
 		(e) => {
 			if (disabled) return;
-
 			if (e.button === 2) return;
 
 			active_pointers.add(e.pointerId);
