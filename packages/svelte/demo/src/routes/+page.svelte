@@ -16,11 +16,15 @@
 		defaultPosition: { x: 0, y: 0 },
 		disabled: false,
 		gpuAcceleration: true,
+		threshold: {
+			delay: 5,
+		},
+		defaultClass: 'neodrag',
 		// grid: [100, 100],
 		// bounds: boundToBody ? 'body' : undefined,
 		// bounds: { top: 100, left: 100, right: 100, bottom: 40 },
 		// bounds: 'body',
-	} as DragOptions;
+	} satisfies DragOptions;
 
 	// $: console.log(options);
 
@@ -32,6 +36,8 @@
 	const scaleStep = 0.05;
 	let scale = 1;
 </script>
+
+<br /><br /><br /><br /><br />
 
 <main>
 	<div class="panel">
@@ -150,7 +156,16 @@
 	</div>
 
 	<div class="canvas" style="transform: scale({scale});">
-		<div use:draggable={options} on:neodrag:start={(e) => console.log(e.detail)} class="box">
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<div
+			use:draggable={options}
+			on:neodrag:start={(e) => console.log(e.detail)}
+			class="box"
+			on:click={() => {
+				console.log('Should only trigger on click, and not after dragging');
+			}}
+		>
 			hello
 
 			<div class="handle" bind:this={handleEl}>Le handel</div>
