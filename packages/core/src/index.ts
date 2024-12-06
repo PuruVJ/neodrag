@@ -151,6 +151,27 @@ export type DragOptions = {
 	grid?: [number, number];
 
 	/**
+	 * Threshold for dragging to start. If the user moves the mouse/finger less than this distance, the dragging won't start.
+	 *
+	 * @default { delay: 0, distance: 3 }
+	 */
+	threshold?: {
+		/**
+		 * Threshold in milliseconds for a pointer movement to be considered a drag
+		 *
+		 * @default 0
+		 */
+		delay: number;
+
+		/**
+		 * Threshold in pixels for movement to be considered a drag
+		 *
+		 * @default 3
+		 */
+		distance: number;
+	};
+
+	/**
 	 * Control the position manually with your own state
 	 *
 	 * By default, the element will be draggable by mouse/finger, and all options will work as default while dragging.
@@ -236,6 +257,16 @@ const DEFAULT_RECOMPUTE_BOUNDS: Exclude<DragOptions['recomputeBounds'], undefine
 	dragStart: true,
 };
 
+const enum DEFAULT_DRAG_THRESHOLD_VALUES {
+	DELAY = 0,
+	DISTANCE = 3,
+}
+
+const DEFAULT_DRAG_THRESHOLD: Exclude<DragOptions['threshold'], undefined> = {
+	delay: DEFAULT_DRAG_THRESHOLD_VALUES.DELAY,
+	distance: DEFAULT_DRAG_THRESHOLD_VALUES.DISTANCE,
+};
+
 export function draggable(node: HTMLElement, options: DragOptions = {}) {
 	let {
 		bounds,
@@ -248,6 +279,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 		ignoreMultitouch = false,
 		recomputeBounds = DEFAULT_RECOMPUTE_BOUNDS,
 		grid,
+		threshold = DEFAULT_DRAG_THRESHOLD,
 		position,
 		cancel,
 		handle,
@@ -260,7 +292,14 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 		onDragEnd,
 	} = options;
 
-	let active = false;
+	/** Make sure user is interacting(clicking, tapping, trying to move) the `node` */
+	let is_interacting = false;
+	/** Whether we should allow for dragging */
+	let is_dragging = false;
+
+	let start_time = 0;
+	let meets_time_threshold = false;
+	let meets_distance_threshold = false;
 
 	let translate_x = 0,
 		translate_y = 0;
@@ -296,7 +335,36 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 	// Set proper defaults for recomputeBounds
 	recomputeBounds = { ...DEFAULT_RECOMPUTE_BOUNDS, ...recomputeBounds };
 
+	// Proper defaults for threshold
+	threshold = { ...DEFAULT_DRAG_THRESHOLD, ...(threshold ?? {}) };
+
 	let active_pointers = new Set<number>();
+
+	function try_start_drag() {
+		if (
+			is_interacting &&
+			!is_dragging &&
+			meets_distance_threshold &&
+			meets_time_threshold &&
+			currently_dragged_el
+		) {
+			is_dragging = true;
+			fire_svelte_drag_start_event();
+			node_class_list.add(defaultClassDragging);
+
+			if (applyUserSelectHack) {
+				// Apply user-select: none on body to prevent misbehavior
+				body_original_user_select_val = body_style.userSelect;
+				body_style.userSelect = 'none';
+			}
+		}
+	}
+
+	function reset_state() {
+		is_dragging = false;
+		meets_time_threshold = false;
+		meets_distance_threshold = false;
+	}
 
 	// Arbitrary constants for better minification
 	const body_style = document.body.style;
@@ -327,21 +395,20 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 		}
 	}
 
-	const get_event_data: () => DragEventData = () => ({
-		offsetX: translate_x,
-		offsetY: translate_y,
-		rootNode: node,
-		currentNode: currently_dragged_el,
-	});
+	function get_event_data() {
+		return {
+			offsetX: translate_x,
+			offsetY: translate_y,
+			rootNode: node,
+			currentNode: currently_dragged_el,
+		};
+	}
 
-	const call_event = (
-		eventName: 'neodrag:start' | 'neodrag' | 'neodrag:end',
-		fn: typeof onDrag,
-	) => {
+	function call_event(eventName: 'neodrag:start' | 'neodrag' | 'neodrag:end', fn: typeof onDrag) {
 		const data = get_event_data();
 		node.dispatchEvent(new CustomEvent(eventName, { detail: data }));
 		fn?.(data);
-	};
+	}
 
 	function fire_svelte_drag_start_event() {
 		call_event('neodrag:start', onDragStart);
@@ -356,10 +423,11 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 	}
 
 	const listen = addEventListener;
-
 	const controller = new AbortController();
-
 	const event_options = { signal: controller.signal, capture: false };
+
+	// On mobile, touch can become extremely janky without it
+	set_style(node, 'touch-action', 'none');
 
 	listen(
 		'pointerdown',
@@ -398,20 +466,17 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 			) {
 				currently_dragged_el =
 					drag_els.length === 1 ? node : drag_els.find((el) => el.contains(event_target))!;
-				active = true;
+				is_interacting = true;
+				start_time = Date.now();
+
+				// If no delay, immediately set time threshold
+				if (!threshold.delay) {
+					meets_time_threshold = true;
+				}
 			} else return;
 
 			// Compute current node's bounding client Rectangle
 			node_rect = node.getBoundingClientRect();
-
-			if (applyUserSelectHack) {
-				// Apply user-select: none on body to prevent misbehavior
-				body_original_user_select_val = body_style.userSelect;
-				body_style.userSelect = 'none';
-			}
-
-			// Dispatch custom event
-			fire_svelte_drag_start_event();
 
 			const { clientX, clientY } = e;
 			const inverse_scale = calculate_inverse_scale();
@@ -430,39 +495,36 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 	);
 
 	listen(
-		'pointerup',
-		(e) => {
-			active_pointers.delete(e.pointerId);
-
-			if (!active) return;
-
-			if (recomputeBounds.dragEnd) computed_bounds = compute_bound_rect(bounds, node);
-
-			// Apply class defaultClassDragged
-			node_class_list.remove(defaultClassDragging);
-			node_class_list.add(defaultClassDragged);
-
-			if (applyUserSelectHack) body_style.userSelect = body_original_user_select_val;
-
-			fire_svelte_drag_end_event();
-
-			if (can_move_in_x) initial_x = translate_x;
-			if (can_move_in_y) initial_y = translate_y;
-
-			active = false;
-		},
-		event_options,
-	);
-
-	listen(
 		'pointermove',
 		(e) => {
-			if (!active || (ignoreMultitouch && active_pointers.size > 1)) return;
+			if (!is_interacting || (ignoreMultitouch && active_pointers.size > 1)) return;
+
+			if (!is_dragging) {
+				// Time threshold
+				if (!meets_time_threshold) {
+					const elapsed = Date.now() - start_time;
+					if (elapsed >= threshold.delay) {
+						meets_time_threshold = true;
+						try_start_drag();
+					}
+				}
+
+				// Distance threshold
+				if (!meets_distance_threshold) {
+					const delta_x = e.clientX - initial_x;
+					const delta_y = e.clientY - initial_y;
+					const distance = Math.sqrt(delta_x ** 2 + delta_y ** 2);
+
+					if (distance >= threshold.distance) {
+						meets_distance_threshold = true;
+						try_start_drag();
+					}
+				}
+
+				if (!is_dragging) return;
+			}
 
 			if (recomputeBounds.drag) computed_bounds = compute_bound_rect(bounds, node);
-
-			// Apply class defaultClassDragging
-			node_class_list.add(defaultClassDragging);
 
 			e.preventDefault();
 
@@ -522,8 +584,36 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 		event_options,
 	);
 
-	// On mobile, touch can become extremely janky without it
-	set_style(node, 'touch-action', 'none');
+	listen(
+		'pointerup',
+		(e) => {
+			active_pointers.delete(e.pointerId);
+
+			if (!is_interacting) return;
+
+			if (is_dragging) {
+				// Listen for click handler and cancel it
+				listen('click', (e) => e.stopPropagation(), { once: true, signal: controller.signal });
+
+				if (recomputeBounds.dragEnd) computed_bounds = compute_bound_rect(bounds, node);
+
+				// Apply class defaultClassDragged
+				node_class_list.remove(defaultClassDragging);
+				node_class_list.add(defaultClassDragged);
+
+				if (applyUserSelectHack) body_style.userSelect = body_original_user_select_val;
+
+				fire_svelte_drag_end_event();
+
+				if (can_move_in_x) initial_x = translate_x;
+				if (can_move_in_y) initial_y = translate_y;
+			}
+
+			is_interacting = false;
+			reset_state();
+		},
+		event_options,
+	);
 
 	function calculate_inverse_scale() {
 		// Calculate the current scale of the node
@@ -533,8 +623,8 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 	}
 
 	return {
-		destroy: () => controller.abort(),
-		update: (options: DragOptions) => {
+		destroy: (): void => controller.abort(),
+		update: (options: DragOptions): void => {
 			// Update all the values that need to be changed
 			axis = options.axis || 'both';
 			disabled = options.disabled ?? false;
@@ -548,6 +638,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 			gpuAcceleration = options.gpuAcceleration ?? true;
 			legacyTranslate = options.legacyTranslate ?? true;
 			transform = options.transform;
+			threshold = { ...DEFAULT_DRAG_THRESHOLD, ...(options.threshold ?? {}) };
 
 			const dragged = node_class_list.contains(defaultClassDragged);
 
