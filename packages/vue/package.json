@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/vue",
-	"version": "2.0.4",
+	"version": "2.1.0",
 	"description": "Vue library to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",

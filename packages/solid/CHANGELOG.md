@@ -1,5 +1,17 @@
 # @neodrag/solid
 
+## 2.1.0
+
+### Minor Changes
+
+- [#174](https://github.com/PuruVJ/neodrag/pull/174) [`45d9eeb`](https://github.com/PuruVJ/neodrag/commit/45d9eeb375b18eb0530cc079613dcdc21cce81d4) Thanks [@PuruVJ](https://github.com/PuruVJ)! - feat: threshold option
+
+- [#172](https://github.com/PuruVJ/neodrag/pull/172) [`ac0e10b`](https://github.com/PuruVJ/neodrag/commit/ac0e10bf287b3577fb926d6ba585e906abeaab72) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Use AbortSignal for unregistering event listeners
+
+### Patch Changes
+
+- [#174](https://github.com/PuruVJ/neodrag/pull/174) [`45d9eeb`](https://github.com/PuruVJ/neodrag/commit/45d9eeb375b18eb0530cc079613dcdc21cce81d4) Thanks [@PuruVJ](https://github.com/PuruVJ)! - fix: drag end no longer causes onclick to trigger.
+
 ## 2.0.4
 
 ### Patch Changes
