@@ -232,38 +232,29 @@ const enum DEFAULT_CLASS {
 	DRAGGED = 'neodrag-dragged',
 }
 
-const DEFAULT_RECOMPUTE_BOUNDS: DragOptions['recomputeBounds'] = {
+const DEFAULT_RECOMPUTE_BOUNDS: Exclude<DragOptions['recomputeBounds'], undefined> = {
 	dragStart: true,
 };
 
-export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
+export function draggable(node: HTMLElement, options: DragOptions = {}) {
 	let {
 		bounds,
 		axis = 'both',
-
 		gpuAcceleration = true,
 		legacyTranslate = true,
 		transform,
-
 		applyUserSelectHack = true,
 		disabled = false,
 		ignoreMultitouch = false,
-
 		recomputeBounds = DEFAULT_RECOMPUTE_BOUNDS,
-
 		grid,
-
 		position,
-
 		cancel,
 		handle,
-
 		defaultClass = DEFAULT_CLASS.MAIN,
 		defaultClassDragging = DEFAULT_CLASS.DRAGGING,
 		defaultClassDragged = DEFAULT_CLASS.DRAGGED,
-
 		defaultPosition = { x: 0, y: 0 },
-
 		onDragStart,
 		onDrag,
 		onDragEnd,
@@ -366,177 +357,183 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 
 	const listen = addEventListener;
 
-	listen('pointerdown', drag_start, false);
-	listen('pointerup', drag_end, false);
-	listen('pointermove', drag, false);
+	const controller = new AbortController();
+
+	const event_options = { signal: controller.signal, capture: false };
+
+	listen(
+		'pointerdown',
+		(e) => {
+			if (disabled) return;
+
+			if (e.button === 2) return;
+
+			active_pointers.add(e.pointerId);
+
+			if (ignoreMultitouch && active_pointers.size > 1) return e.preventDefault();
+
+			// Compute bounds
+			if (recomputeBounds.dragStart) computed_bounds = compute_bound_rect(bounds, node);
+
+			if (is_string(handle) && is_string(cancel) && handle === cancel)
+				throw new Error("`handle` selector can't be same as `cancel` selector");
+
+			node_class_list.add(defaultClass);
+
+			drag_els = get_handle_els(handle, node);
+			cancel_els = get_cancel_elements(cancel, node);
+
+			can_move_in_x = /(both|x)/.test(axis);
+			can_move_in_y = /(both|y)/.test(axis);
+
+			if (cancel_element_contains(cancel_els, drag_els))
+				throw new Error(
+					"Element being dragged can't be a child of the element on which `cancel` is applied",
+				);
+
+			const event_target = e.composedPath()[0] as HTMLElement;
+			if (
+				drag_els.some((el) => el.contains(event_target) || el.shadowRoot?.contains(event_target)) &&
+				!cancel_element_contains(cancel_els, [event_target])
+			) {
+				currently_dragged_el =
+					drag_els.length === 1 ? node : drag_els.find((el) => el.contains(event_target))!;
+				active = true;
+			} else return;
+
+			// Compute current node's bounding client Rectangle
+			node_rect = node.getBoundingClientRect();
+
+			if (applyUserSelectHack) {
+				// Apply user-select: none on body to prevent misbehavior
+				body_original_user_select_val = body_style.userSelect;
+				body_style.userSelect = 'none';
+			}
+
+			// Dispatch custom event
+			fire_svelte_drag_start_event();
+
+			const { clientX, clientY } = e;
+			const inverse_scale = calculate_inverse_scale();
+
+			if (can_move_in_x) initial_x = clientX - x_offset / inverse_scale;
+			if (can_move_in_y) initial_y = clientY - y_offset / inverse_scale;
+
+			// Only the bounds uses these properties at the moment,
+			// may open up in the future if others need it
+			if (computed_bounds) {
+				client_to_node_offsetX = clientX - node_rect.left;
+				client_to_node_offsetY = clientY - node_rect.top;
+			}
+		},
+		event_options,
+	);
+
+	listen(
+		'pointerup',
+		(e) => {
+			active_pointers.delete(e.pointerId);
+
+			if (!active) return;
+
+			if (recomputeBounds.dragEnd) computed_bounds = compute_bound_rect(bounds, node);
+
+			// Apply class defaultClassDragged
+			node_class_list.remove(defaultClassDragging);
+			node_class_list.add(defaultClassDragged);
+
+			if (applyUserSelectHack) body_style.userSelect = body_original_user_select_val;
+
+			fire_svelte_drag_end_event();
+
+			if (can_move_in_x) initial_x = translate_x;
+			if (can_move_in_y) initial_y = translate_y;
+
+			active = false;
+		},
+		event_options,
+	);
+
+	listen(
+		'pointermove',
+		(e) => {
+			if (!active || (ignoreMultitouch && active_pointers.size > 1)) return;
+
+			if (recomputeBounds.drag) computed_bounds = compute_bound_rect(bounds, node);
+
+			// Apply class defaultClassDragging
+			node_class_list.add(defaultClassDragging);
+
+			e.preventDefault();
+
+			node_rect = node.getBoundingClientRect();
+
+			// Get final values for clamping
+			let final_x = e.clientX,
+				final_y = e.clientY;
+
+			const inverse_scale = calculate_inverse_scale();
+
+			if (computed_bounds) {
+				// Client position is limited to this virtual boundary to prevent node going out of bounds
+				const virtual_client_bounds: DragBoundsCoords = {
+					left: computed_bounds.left + client_to_node_offsetX,
+					top: computed_bounds.top + client_to_node_offsetY,
+					right: computed_bounds.right + client_to_node_offsetX - node_rect.width,
+					bottom: computed_bounds.bottom + client_to_node_offsetY - node_rect.height,
+				};
+
+				final_x = clamp(final_x, virtual_client_bounds.left, virtual_client_bounds.right);
+				final_y = clamp(final_y, virtual_client_bounds.top, virtual_client_bounds.bottom);
+			}
+
+			if (Array.isArray(grid)) {
+				let [x_snap, y_snap] = grid;
+
+				if (isNaN(+x_snap) || x_snap < 0)
+					throw new Error('1st argument of `grid` must be a valid positive number');
+
+				if (isNaN(+y_snap) || y_snap < 0)
+					throw new Error('2nd argument of `grid` must be a valid positive number');
+
+				let delta_x = final_x - initial_x,
+					delta_y = final_y - initial_y;
+
+				[delta_x, delta_y] = snap_to_grid(
+					[x_snap / inverse_scale, y_snap / inverse_scale],
+					delta_x,
+					delta_y,
+				);
+
+				final_x = initial_x + delta_x;
+				final_y = initial_y + delta_y;
+			}
+
+			if (can_move_in_x) translate_x = Math.round((final_x - initial_x) * inverse_scale);
+			if (can_move_in_y) translate_y = Math.round((final_y - initial_y) * inverse_scale);
+
+			x_offset = translate_x;
+			y_offset = translate_y;
+
+			fire_svelte_drag_event();
+
+			set_translate();
+		},
+		event_options,
+	);
 
 	// On mobile, touch can become extremely janky without it
 	set_style(node, 'touch-action', 'none');
 
-	const calculate_inverse_scale = () => {
+	function calculate_inverse_scale() {
 		// Calculate the current scale of the node
 		let inverse_scale = node.offsetWidth / node_rect.width;
 		if (isNaN(inverse_scale)) inverse_scale = 1;
 		return inverse_scale;
-	};
-
-	function drag_start(e: PointerEvent) {
-		if (disabled) return;
-
-		if (e.button === 2) return;
-
-		active_pointers.add(e.pointerId);
-
-		if (ignoreMultitouch && active_pointers.size > 1) return e.preventDefault();
-
-		// Compute bounds
-		if (recomputeBounds.dragStart) computed_bounds = compute_bound_rect(bounds, node);
-
-		if (is_string(handle) && is_string(cancel) && handle === cancel)
-			throw new Error("`handle` selector can't be same as `cancel` selector");
-
-		node_class_list.add(defaultClass);
-
-		drag_els = get_handle_els(handle, node);
-		cancel_els = get_cancel_elements(cancel, node);
-
-		can_move_in_x = /(both|x)/.test(axis);
-		can_move_in_y = /(both|y)/.test(axis);
-
-		if (cancel_element_contains(cancel_els, drag_els))
-			throw new Error(
-				"Element being dragged can't be a child of the element on which `cancel` is applied",
-			);
-
-		const event_target = e.composedPath()[0] as HTMLElement;
-		if (
-			drag_els.some((el) => el.contains(event_target) || el.shadowRoot?.contains(event_target)) &&
-			!cancel_element_contains(cancel_els, [event_target])
-		) {
-			currently_dragged_el =
-				drag_els.length === 1 ? node : drag_els.find((el) => el.contains(event_target))!;
-			active = true;
-		} else return;
-
-		// Compute current node's bounding client Rectangle
-		node_rect = node.getBoundingClientRect();
-
-		if (applyUserSelectHack) {
-			// Apply user-select: none on body to prevent misbehavior
-			body_original_user_select_val = body_style.userSelect;
-			body_style.userSelect = 'none';
-		}
-
-		// Dispatch custom event
-		fire_svelte_drag_start_event();
-
-		const { clientX, clientY } = e;
-		const inverse_scale = calculate_inverse_scale();
-
-		if (can_move_in_x) initial_x = clientX - x_offset / inverse_scale;
-		if (can_move_in_y) initial_y = clientY - y_offset / inverse_scale;
-
-		// Only the bounds uses these properties at the moment,
-		// may open up in the future if others need it
-		if (computed_bounds) {
-			client_to_node_offsetX = clientX - node_rect.left;
-			client_to_node_offsetY = clientY - node_rect.top;
-		}
-	}
-
-	function drag_end(e: PointerEvent) {
-		active_pointers.delete(e.pointerId);
-
-		if (!active) return;
-
-		if (recomputeBounds.dragEnd) computed_bounds = compute_bound_rect(bounds, node);
-
-		// Apply class defaultClassDragged
-		node_class_list.remove(defaultClassDragging);
-		node_class_list.add(defaultClassDragged);
-
-		if (applyUserSelectHack) body_style.userSelect = body_original_user_select_val;
-
-		fire_svelte_drag_end_event();
-
-		if (can_move_in_x) initial_x = translate_x;
-		if (can_move_in_y) initial_y = translate_y;
-
-		active = false;
-	}
-
-	function drag(e: PointerEvent) {
-		if (!active || (ignoreMultitouch && active_pointers.size > 1)) return;
-
-		if (recomputeBounds.drag) computed_bounds = compute_bound_rect(bounds, node);
-
-		// Apply class defaultClassDragging
-		node_class_list.add(defaultClassDragging);
-
-		e.preventDefault();
-
-		node_rect = node.getBoundingClientRect();
-
-		// Get final values for clamping
-		let final_x = e.clientX,
-			final_y = e.clientY;
-
-		const inverse_scale = calculate_inverse_scale();
-
-		if (computed_bounds) {
-			// Client position is limited to this virtual boundary to prevent node going out of bounds
-			const virtual_client_bounds: DragBoundsCoords = {
-				left: computed_bounds.left + client_to_node_offsetX,
-				top: computed_bounds.top + client_to_node_offsetY,
-				right: computed_bounds.right + client_to_node_offsetX - node_rect.width,
-				bottom: computed_bounds.bottom + client_to_node_offsetY - node_rect.height,
-			};
-
-			final_x = clamp(final_x, virtual_client_bounds.left, virtual_client_bounds.right);
-			final_y = clamp(final_y, virtual_client_bounds.top, virtual_client_bounds.bottom);
-		}
-
-		if (Array.isArray(grid)) {
-			let [x_snap, y_snap] = grid;
-
-			if (isNaN(+x_snap) || x_snap < 0)
-				throw new Error('1st argument of `grid` must be a valid positive number');
-
-			if (isNaN(+y_snap) || y_snap < 0)
-				throw new Error('2nd argument of `grid` must be a valid positive number');
-
-			let delta_x = final_x - initial_x,
-				delta_y = final_y - initial_y;
-
-			[delta_x, delta_y] = snap_to_grid(
-				[x_snap / inverse_scale, y_snap / inverse_scale],
-				delta_x,
-				delta_y,
-			);
-
-			final_x = initial_x + delta_x;
-			final_y = initial_y + delta_y;
-		}
-
-		if (can_move_in_x) translate_x = Math.round((final_x - initial_x) * inverse_scale);
-		if (can_move_in_y) translate_y = Math.round((final_y - initial_y) * inverse_scale);
-
-		x_offset = translate_x;
-		y_offset = translate_y;
-
-		fire_svelte_drag_event();
-
-		set_translate();
 	}
 
 	return {
-		destroy: () => {
-			const unlisten = removeEventListener;
-
-			unlisten('pointerdown', drag_start, false);
-			unlisten('pointerup', drag_end, false);
-			unlisten('pointermove', drag, false);
-		},
+		destroy: () => controller.abort(),
 		update: (options: DragOptions) => {
 			// Update all the values that need to be changed
 			axis = options.axis || 'both';
@@ -572,7 +569,7 @@ export const draggable = (node: HTMLElement, options: DragOptions = {}) => {
 			}
 		},
 	};
-};
+}
 
 const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max);
 
