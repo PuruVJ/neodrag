@@ -82,7 +82,8 @@ export type DragOptions = {
 	 *
 	 * At present this is true by default, but will be changed to false in a future major version.
 	 *
-	 * @default true
+	 * @default false
+	 * @deprecated Use `transform` option instead for transform: translate() or any other custom transform. Will be removed in v3.
 	 */
 	legacyTranslate?: boolean;
 
@@ -92,6 +93,7 @@ export type DragOptions = {
 	 * `true` by default, but can be set to `false` if [blurry text issue](https://developpaper.com/question/why-does-the-use-of-css3-translate3d-result-in-blurred-display/) occur
 	 *
 	 * @default true
+	 * @deprecated Use `transform` option instead with translate(x, y, 1px). 1px forces some browsers to use GPU acceleration. Will be removed in v3
 	 */
 	gpuAcceleration?: boolean;
 
@@ -272,7 +274,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 		bounds,
 		axis = 'both',
 		gpuAcceleration = true,
-		legacyTranslate = true,
+		legacyTranslate = false,
 		transform,
 		applyUserSelectHack = true,
 		disabled = false,
@@ -335,7 +337,6 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 	// Set proper defaults for recomputeBounds
 	recomputeBounds = { ...DEFAULT_RECOMPUTE_BOUNDS, ...recomputeBounds };
 
-	console.log(threshold);
 	// Proper defaults for threshold
 	threshold = { ...DEFAULT_DRAG_THRESHOLD, ...(threshold ?? {}) };
 
@@ -382,11 +383,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 				);
 			}
 
-			return set_style(
-				node,
-				'translate',
-				`${+x_pos}px ${+y_pos}px ${gpuAcceleration ? '1px' : ''}`,
-			);
+			return set_style(node, 'translate', `${+x_pos}px ${+y_pos}px`);
 		}
 
 		// Call transform function if provided
