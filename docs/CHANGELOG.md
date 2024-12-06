@@ -1,5 +1,12 @@
 # docs
 
+## 0.0.11
+
+### Patch Changes
+
+- Updated dependencies [[`0cead87`](https://github.com/PuruVJ/neodrag/commit/0cead8701f132670bd5618ceeb8fdee8e9a3ad27)]:
+  - @neodrag/svelte@2.2.0
+
 ## 0.0.10
 
 ### Patch Changes

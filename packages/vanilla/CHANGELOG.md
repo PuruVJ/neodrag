@@ -1,5 +1,11 @@
 # @neodrag/vanilla
 
+## 2.2.0
+
+### Minor Changes
+
+- [#176](https://github.com/PuruVJ/neodrag/pull/176) [`0cead87`](https://github.com/PuruVJ/neodrag/commit/0cead8701f132670bd5618ceeb8fdee8e9a3ad27) Thanks [@PuruVJ](https://github.com/PuruVJ)! - deprecate: legacyTranslate and gpuAcceleration
+
 ## 2.1.0
 
 ### Minor Changes
