@@ -15,6 +15,7 @@ const ORDER = [
 	'bounds',
 	'recomputeBounds',
 	'grid',
+	'threshold',
 	'defaultPosition',
 	'position',
 	'gpuAcceleration',
@@ -66,7 +67,7 @@ const orderedOptionsMD = ORDER.map(
 ) as typeof optionsMD & { shortDescription: string }[];
 ---
 
-<section class="options-examples container">
+<section class='options-examples container'>
 	{
 		orderedOptionsMD.map(
 			({ Content, frontmatter: { defaultValue, title, type } }) => (
@@ -75,27 +76,27 @@ const orderedOptionsMD = ORDER.map(
 						{title}
 
 						<a
-							aria-hidden="true"
-							tabindex="-1"
-							class="unstyled heading-anchor"
+							aria-hidden='true'
+							tabindex='-1'
+							class='unstyled heading-anchor'
 							href={`#${slugify(title)}`}
 						>
 							<PhLinkThin
 								{
 								/* @ts-ignore */ }
-								style="color: var(--app-color-dark)"
-								width="1em"
-								height="1em"
+								style='color: var(--app-color-dark)'
+								width='1em'
+								height='1em'
 							/>
 						</a>
 					</h3>
 					<p>
 						Type:
-						<span class="code-like" style="font-family: var(--app-font-mono)">
+						<span class='code-like' style='font-family: var(--app-font-mono)'>
 							{type}
 						</span>
 						<br />
-						Default Value: <span class="code-like">{defaultValue}</span>
+						Default Value: <span class='code-like'>{defaultValue}</span>
 					</p>
 
 					<Content />
@@ -105,7 +106,7 @@ const orderedOptionsMD = ORDER.map(
 	}
 </section>
 
-<style lang="scss">
+<style lang='scss'>
 	.code-like {
 		font-family: var(--app-font-mono);
 		font-size: 0.8em;
