@@ -1,4 +1,5 @@
 ---
+import type { MDXInstance } from 'astro';
 import slugify from 'slugify';
 import PhLinkThin from '~icons/ph/link-thin';
 
@@ -35,8 +36,11 @@ const ORDER = [
 	'onDragEnd',
 ];
 
-const optionsMD = await Astro.glob<OptionsFrontMatter>(
-	'../../documentation/options/*/+option.mdx'
+const optionsMD = Object.values(
+	import.meta.glob<MDXInstance<OptionsFrontMatter>>(
+		'../../documentation/options/*/+option.mdx',
+		{ eager: true }
+	)
 );
 
 function validate() {
