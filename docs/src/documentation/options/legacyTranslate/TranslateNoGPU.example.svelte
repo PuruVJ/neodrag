@@ -5,7 +5,7 @@
 <OptionsDemoBase options={{ legacyTranslate: false, gpuAcceleration: false }}>
 	Modern translate with no GPU acceleration
 
-	<svelte:fragment slot="position" let:x let:y>
+	{#snippet pos(x, y)}
 		<code>translate: {x}px {y}px</code>
-	</svelte:fragment>
+	{/snippet}
 </OptionsDemoBase>

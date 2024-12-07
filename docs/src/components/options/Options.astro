@@ -1,6 +1,5 @@
 ---
 import slugify from 'slugify';
-
 import PhLinkThin from '~icons/ph/link-thin';
 
 type OptionsFrontMatter = {
@@ -8,6 +7,8 @@ type OptionsFrontMatter = {
 	type: string;
 	defaultValue: string;
 	shortDescription: string;
+	deprecated?: boolean;
+	deprecatedText?: string;
 };
 
 const ORDER = [

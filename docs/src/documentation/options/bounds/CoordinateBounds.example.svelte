@@ -2,25 +2,24 @@
 	import OptionsDemoBase from '$components/options/OptionsDemoBase.svelte';
 	import { browser } from '$helpers/utils';
 	import type { DragBoundsCoords } from '@neodrag/svelte';
-	import { onDestroy } from 'svelte';
 	import { throttle } from 'throttle-debounce';
 
-	let containerEl: HTMLElement | undefined;
-	let firstScrollableParent: Node | null;
-	let mainScrollableAncestor: Node | null;
+	let container_el: HTMLElement | undefined = $state();
+	let first_scrollable_parent = $state<Node>();
+	let main_scrollable_ancestor = $state<Node>();
 
-	let supposedBounds: DragBoundsCoords = {
+	let supposed_bounds: DragBoundsCoords = {
 		top: 60,
 		left: 20,
 		bottom: 35,
 		right: 30,
 	};
 
-	let computedBounds: Partial<DragBoundsCoords>;
+	let computedBounds = $state<Partial<DragBoundsCoords>>();
 
-	function getScrollParent(node: HTMLElement): Node | null {
+	function getScrollParent(node: HTMLElement): Node | undefined {
 		if (node == null) {
-			return null;
+			return undefined;
 		}
 
 		if (
@@ -34,73 +33,75 @@
 	}
 
 	function setComputedBounds() {
-		if (!containerEl || !firstScrollableParent || !mainScrollableAncestor)
+		if (!container_el || !first_scrollable_parent || !main_scrollable_ancestor)
 			return;
 
-		const { top, left, bottom, right } = containerEl.getBoundingClientRect();
+		const { top, left, bottom, right } = container_el.getBoundingClientRect();
 
 		const computedRight = globalThis.innerWidth - right;
 		const computedBottom = globalThis.innerHeight - bottom;
 
 		computedBounds = {
-			top: top + supposedBounds.top,
-			left: left + supposedBounds.left,
-			bottom: computedBottom + supposedBounds.bottom,
-			right: computedRight + supposedBounds.right,
+			top: top + supposed_bounds.top,
+			left: left + supposed_bounds.left,
+			bottom: computedBottom + supposed_bounds.bottom,
+			right: computedRight + supposed_bounds.right,
 		};
 	}
 
-	$: {
-		containerEl;
+	$effect(() => {
+		container_el;
 
 		if (browser) setComputedBounds();
-	}
+	});
 
 	const debouncedFn = throttle(100, setComputedBounds);
 
-	$: if (browser && containerEl) {
-		firstScrollableParent = getScrollParent(containerEl!);
-		mainScrollableAncestor = getScrollParent(
-			firstScrollableParent?.parentNode as HTMLElement
-		);
+	$effect(() => {
+		if (browser && container_el) {
+			first_scrollable_parent = getScrollParent(container_el!);
+			main_scrollable_ancestor = getScrollParent(
+				first_scrollable_parent?.parentNode as HTMLElement,
+			);
 
-		firstScrollableParent?.addEventListener('scroll', debouncedFn, {
-			passive: true,
-		});
-		mainScrollableAncestor?.addEventListener('scroll', debouncedFn, {
-			passive: true,
-		});
+			first_scrollable_parent?.addEventListener('scroll', debouncedFn, {
+				passive: true,
+			});
+			main_scrollable_ancestor?.addEventListener('scroll', debouncedFn, {
+				passive: true,
+			});
 
-		globalThis?.addEventListener('resize', debouncedFn, {
-			passive: true,
-		});
-	}
+			globalThis?.addEventListener('resize', debouncedFn, {
+				passive: true,
+			});
+		}
+	});
 
-	onDestroy(() => {
-		firstScrollableParent?.removeEventListener('scroll', debouncedFn);
-		mainScrollableAncestor?.removeEventListener('scroll', debouncedFn);
+	$effect(() => () => {
+		first_scrollable_parent?.removeEventListener('scroll', debouncedFn);
+		main_scrollable_ancestor?.removeEventListener('scroll', debouncedFn);
 
 		if (browser) window?.removeEventListener('resize', debouncedFn);
 	});
 </script>
 
 <OptionsDemoBase
-	bind:containerEl
+	bind:containerEl={container_el}
 	options={{ bounds: computedBounds }}
 	size="10rem"
 >
 	Limited to:
 	<code>
-		top: {supposedBounds.top}
+		top: {supposed_bounds.top}
 		<br />
-		left: {supposedBounds.left}
+		left: {supposed_bounds.left}
 		<br />
-		bottom: {supposedBounds.bottom}
+		bottom: {supposed_bounds.bottom}
 		<br />
-		right: {supposedBounds.right}
+		right: {supposed_bounds.right}
 	</code>
 
-	<svelte:fragment slot="caption">
+	{#snippet caption()}
 		Bounded by these coordinates from the window's edges.
-	</svelte:fragment>
+	{/snippet}
 </OptionsDemoBase>

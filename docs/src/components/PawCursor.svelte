@@ -1,20 +1,18 @@
 <script lang="ts">
+	import type { Theme } from '$state/user-preferences.svelte.ts';
+	import { IsMounted } from 'runed';
+	import { on } from 'svelte/events';
 	import { get, type Writable, writable } from 'svelte/store';
-	// @ts-ignore
 	import PawIcon from '~icons/mdi/paw';
 
-	import { mounted } from '$stores/mounted.store';
-	import type { Theme } from '$stores/user-preferences.store';
+	let showCustomCursor = $state(false);
+	let cursorColor: Theme | undefined = $state('dark');
 
-	let showCustomCursor = false;
-	let cursorColor: Theme | undefined = 'dark';
-
-	let coordsCursor: {
-		x: number;
-		y: number;
-	};
+	let coordsCursor = $state({ x: 0, y: 0 });
 
 	let isTouchDevice = globalThis.matchMedia('(hover: none)').matches;
+
+	const mounted = new IsMounted();
 
 	function handleMouseMove(e: MouseEvent) {
 		if (isTouchDevice) return;
@@ -53,16 +51,17 @@
 		return result;
 	}
 
-	$: pawCursorEls =
+	let pawCursorEls = $derived(
 		globalThis.document && !isTouchDevice
 			? querySelectorAllLive(
 					document.body,
 					'[data-paw-cursor="true"], [data-paw-cursor="false"]',
 				)
-			: writable([]);
+			: writable([]),
+	);
 
-	$: {
-		if (isTouchDevice) break $;
+	$effect(() => {
+		if (isTouchDevice) return;
 
 		for (const el of $pawCursorEls) {
 			let initialCursor = '';
@@ -98,10 +97,12 @@
 				{ passive: true },
 			);
 		}
-	}
-</script>
+	});
 
-<svelte:window on:mousemove|passive={handleMouseMove} />
+	$effect(() => {
+		return on(window, 'mousemove', handleMouseMove, { passive: true });
+	});
+</script>
 
 <div
 	class="cursor"
@@ -109,7 +110,7 @@
 	style:left="{coordsCursor?.x ?? 0}px"
 	style:--opacity={showCustomCursor && coordsCursor ? 1 : 0}
 	style:--color="var(--app-color-{cursorColor ?? 'dark'})"
-	style:display={$mounted ? 'block' : 'none'}
+	style:display={mounted.current ? 'block' : 'none'}
 >
 	<PawIcon style="font-size: 2rem;" />
 </div>

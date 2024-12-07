@@ -2,4 +2,6 @@
 	import OptionsDemoBase from '$components/options/OptionsDemoBase.svelte';
 </script>
 
-<OptionsDemoBase options={{ ignoreMultitouch: true }}>Multi touch ignored</OptionsDemoBase>
+<OptionsDemoBase options={{ ignoreMultitouch: true }}
+	>Multi touch ignored</OptionsDemoBase
+>

@@ -13,6 +13,7 @@ type Props =
 	  }>
 	| { title: string };
 
+// @ts-ignore
 const { frontmatter, title } = Astro.props;
 const { title: frontmatterTitle } = frontmatter || {};
 ---

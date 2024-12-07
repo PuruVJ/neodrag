@@ -6,11 +6,7 @@ import svelte from '@astrojs/svelte';
 import { defineConfig } from 'astro/config';
 import { h } from 'hastscript';
 import rehypeAutolinkHeadings, { type Options } from 'rehype-autolink-headings';
-import container from 'remark-custom-container';
-import { fastDimension } from 'svelte-fast-dimension';
-import autoPreprocess from 'svelte-preprocess';
-import sequential from 'svelte-sequential-preprocessor';
-import AutoImport from 'unplugin-auto-import/astro';
+import container from 'remark-custom-container/dist/esm/index.js';
 import UnpluginIcons from 'unplugin-icons/vite';
 
 const AnchorLinkIcon = h(
@@ -32,31 +28,7 @@ const AnchorLinkIcon = h(
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://neodrag.dev',
-	integrations: [
-		svelte({ preprocess: sequential([autoPreprocess(), fastDimension()]) }),
-		mdx(),
-		sitemap(),
-		// critters(),
-		AutoImport({
-			dts: './src/auto-imports.d.ts',
-			imports: [
-				{
-					'$components/options/OptionsCode.astro': [['default', 'Code']],
-				},
-				{
-					'$components/options/OptionsExamples.svelte': [
-						['default', 'Examples'],
-					],
-				},
-				{
-					'$components/options/OptionsExample.astro': [['default', 'Example']],
-				},
-			],
-			include: [/\.astro$/, /\.svelte$/, /\.mdx$/, /\.md$/],
-		}),
-	],
-
-	prefetch: true,
+	integrations: [svelte(), mdx(), sitemap()],
 
 	markdown: {
 		extendDefaultPlugins: true,

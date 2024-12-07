@@ -58,7 +58,7 @@
 		</ul>
 	</nav>
 
-	<span class="spacer" />
+	<span class="spacer"></span>
 
 	<div class="theme-switcher">
 		<ThemeSwitcher />

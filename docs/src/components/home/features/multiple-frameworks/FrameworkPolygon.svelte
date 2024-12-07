@@ -1,22 +1,27 @@
 <script lang="ts">
+	import { FRAMEWORKS } from '$helpers/constants';
 	import { FRAMEWORK_ICONS } from '$helpers/framework-icons';
-	import { FRAMEWORKS } from 'src/helpers/constants';
-	// @ts-ignore
 	import IonReloadIcon from '~icons/ion/reload';
-
 	import FrameworkVertex from './FrameworkVertex.svelte';
+	import type { Framework } from '$helpers/constants';
 
-	let logoEl: HTMLImageElement;
+	type Props = {
+		onselect: (data: { framework: Framework }) => void;
+	};
 
-	let resetFns = {
+	const { onselect }: Props = $props();
+
+	let logo_el = $state<HTMLImageElement>();
+
+	let reset_fns = $state({
 		svelte: () => {},
 		react: () => {},
 		vue: () => {},
 		solid: () => {},
 		vanilla: () => {},
-	};
+	});
 
-	let zIndices = [0, 0, 0, 0, 0];
+	let z_indices = $state([0, 0, 0, 0, 0]);
 
 	// let frameworks = ['vanilla', 'svelte', 'react', 'vue', 'solid'];
 	const frameworks = ['solid', 'vanilla', 'react', 'vue', 'svelte']
@@ -31,18 +36,18 @@
 	 * it reduces z index of all of them by the minimum z index of all elements.
 	 * @param node
 	 */
-	function updateZIndex(index: number) {
-		zIndices[index] = Math.max(...zIndices) + 1;
+	function update_z_index(index: number) {
+		z_indices[index] = Math.max(...z_indices) + 1;
 
 		// get the lowest non zero index from the z index array
-		const lowestZIndex = zIndices.reduce((acc, curr) => {
+		const lowest_z_index = z_indices.reduce((acc, curr) => {
 			if (curr === 0) return acc;
 			return Math.min(acc, curr);
 		}, Infinity);
 
-		if (zIndices[index] > zIndices.length) {
-			zIndices = zIndices.map((z) =>
-				z >= lowestZIndex ? z - lowestZIndex : z
+		if (z_indices[index] > z_indices.length) {
+			z_indices = z_indices.map((z) =>
+				z >= lowest_z_index ? z - lowest_z_index : z,
 			);
 		}
 	}
@@ -51,23 +56,22 @@
 <section class="container framework-polygon">
 	<button
 		class="reset"
-		on:click={() => Object.values(resetFns).forEach((fn) => fn())}
+		onclick={() => Object.values(reset_fns).forEach((fn) => fn())}
 	>
 		<IonReloadIcon />
 	</button>
 
 	<section class="animation-frameworks">
 		{#each frameworks as { name, icon: Icon }, idx}
-			<div style:z-index={zIndices[idx]}>
+			<div style:z-index={z_indices[idx]}>
 				<FrameworkVertex
-					on:select
-					on:drag-start={() => {
-						// zIndices[idx] = zIndices.length;
-						updateZIndex(idx);
+					{onselect}
+					on_drag_start={() => {
+						update_z_index(idx);
 					}}
-					bind:resetFns
+					bind:resetFns={reset_fns}
 					framework={name}
-					{logoEl}
+					logoEl={logo_el!}
 				>
 					<Icon />
 				</FrameworkVertex>
@@ -76,7 +80,7 @@
 	</section>
 
 	<img
-		bind:this={logoEl}
+		bind:this={logo_el}
 		src="/logo.svg"
 		draggable="false"
 		class="logo"

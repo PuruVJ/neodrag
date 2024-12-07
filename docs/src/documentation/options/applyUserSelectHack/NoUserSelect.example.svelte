@@ -1,13 +1,13 @@
 <script lang="ts">
 	import OptionsDemoBase from '$components/options/OptionsDemoBase.svelte';
-	import { isDesktop, isMac } from 'src/helpers/utils';
+	import { isDesktop, isMac } from '$helpers/utils';
 	import CommandIcon from '~icons/bi/command';
 </script>
 
 <OptionsDemoBase options={{ applyUserSelectHack: true }}>
 	User Select disabled
 
-	<svelte:fragment slot="caption">
+	{#snippet caption()}
 		{#if isDesktop}
 			Hit <kbd>
 				{#if isMac}
@@ -19,7 +19,7 @@
 
 			while dragging - Nothing will be selected
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </OptionsDemoBase>
 
 <style lang="scss">

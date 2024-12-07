@@ -1,9 +1,14 @@
 <script lang="ts">
-	export let link: string;
+	import type { HTMLAnchorAttributes } from 'svelte/elements';
+	type Props = HTMLAnchorAttributes & {
+		link: string;
+	};
+
+	let { link, ...props }: Props = $props();
 </script>
 
-<a href={link} class="scroll-down unstyled" on:click|preventDefault>
-	<div class="dot" />
+<a href={link} class="scroll-down unstyled" aria-label="Scroll down" {...props}>
+	<div class="dot"></div>
 </a>
 
 <style lang="scss">

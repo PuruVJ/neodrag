@@ -11,18 +11,18 @@
 		level: number;
 		el: HTMLHeadingElement;
 		length: number;
-	}[] = [];
+	}[] = $state([]);
 
-	let navEl: HTMLElement;
+	let navEl: HTMLElement = $state();
 
 	let optionsExamplesContainers: NodeListOf<HTMLElement>;
 	let headingEls: NodeListOf<HTMLHeadingElement>;
 	let scrollableMainEl: HTMLElement;
 
-	let isNavOverlapping = false;
+	let isNavOverlapping = $state(false);
 	let headingIDsHighlighted: string[] = [];
 
-	let anchorEls: Record<string, HTMLAnchorElement> = {};
+	let anchorEls: Record<string, HTMLAnchorElement> = $state({});
 
 	function getHeadings() {
 		return Array.from(headingEls)
@@ -131,7 +131,7 @@
 							style:--width={browser
 								? anchorEls[id]?.getBoundingClientRect().width + 'px'
 								: length * 0.4 + 'em'}
-						/>
+						></div>
 					</li>
 				{/each}
 			</ul>

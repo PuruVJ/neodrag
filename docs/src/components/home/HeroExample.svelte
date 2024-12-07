@@ -1,31 +1,27 @@
 <script lang="ts">
+	import squircle from '$/worklet/squircle.js?url';
+	import { typingEffect } from '$actions/typingEffect';
+	import { browser } from '$helpers/utils';
 	import { draggable } from '@neodrag/svelte';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { tweened } from 'svelte/motion';
-	import { typingEffect } from '$actions/typingEffect';
-
-	// @ts-ignore
-	import squircle from '../../worklet/squircle.js?url';
-	// @ts-ignore
 	import PawIcon from '~icons/mdi/paw';
-
-	import { browser } from 'src/helpers/utils';
 
 	let headingText = 'Try dragging the box below';
 
-	let boxWiggles = true;
+	let boxWiggles = $state(true);
 
 	let showCustomCursor = true;
 
-	let coordsCursor: {
-		x: number;
-		y: number;
-	};
+	let coordsCursor = $state({
+		x: 0,
+		y: 0,
+	});
 
 	let dragPosition = tweened(
 		{ x: 0, y: 0 },
-		{ easing: expoOut, duration: 1200 }
+		{ easing: expoOut, duration: 1200 },
 	);
 
 	function handleMouseMove(e: MouseEvent) {
@@ -43,7 +39,7 @@
 	});
 </script>
 
-<svelte:window on:mousemove={handleMouseMove} />
+<svelte:window onmousemove={handleMouseMove} />
 
 <div class="container">
 	{#key headingText}
@@ -162,7 +158,8 @@
 		background-image: var(--app-color-primary-gradient);
 
 		border-radius: 1rem;
-		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035),
+		box-shadow:
+			0px 12.5px 10px rgba(0, 0, 0, 0.035),
 			0px 100px 80px rgba(0, 0, 0, 0.07);
 
 		mask-image: paint(squircle);

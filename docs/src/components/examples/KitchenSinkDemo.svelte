@@ -1,32 +1,32 @@
 <script lang="ts">
 	import { draggable, type DragOptions } from '@neodrag/svelte';
-	import { browser } from 'src/helpers/utils';
+	import { browser } from '$helpers/utils';
 	//@ts-ignore
-	import squircle from 'src/worklet/squircle?url';
+	import squircle from '$/worklet/squircle?url';
 	import { style } from 'svelte-body';
 	import { expoOut, sineIn } from 'svelte/easing';
 	import { tweened } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
 
-	let reset = 0;
+	let reset = $state(0);
 
-	$: {
+	$effect(() => {
 		reset;
 
 		trackMyPosition = {
 			x: 0,
 			y: 0,
 		};
-	}
+	});
 
-	let trackMyPosition = {
+	let trackMyPosition = $state({
 		x: 0,
 		y: 0,
-	};
+	});
 
-	let highlightParent = false;
-	let hightlightBody = false;
-	let showMarkers = false;
+	let highlightParent = $state(false);
+	let hightlightBody = $state(false);
+	let showMarkers = $state(false);
 
 	let coordBounds = {
 		top: 100,
@@ -35,9 +35,9 @@
 		right: 100,
 	};
 
-	let isBackdropVisible = false;
+	let isBackdropVisible = $state(false);
 
-	let zIndices = Array.from<number>({ length: 15 }).fill(0);
+	let zIndices = $state(Array.from<number>({ length: 15 }).fill(0));
 
 	function getNodeIndex(node: HTMLElement) {
 		return Array.from(node.parentNode?.children!).indexOf(node);
@@ -82,10 +82,10 @@
 		},
 	};
 
-	let returnToPositionVal = {
+	let returnToPositionVal = $state({
 		x: 0,
 		y: 0,
-	};
+	});
 
 	let returnToPositionTransitionVal = tweened(
 		{
@@ -109,7 +109,10 @@
 />
 
 {#if isBackdropVisible || showMarkers}
-	<div class="backdrop" transition:fade={{ duration: 200, easing: sineIn }} />
+	<div
+		class="backdrop"
+		transition:fade={{ duration: 200, easing: sineIn }}
+	></div>
 {/if}
 
 <div
@@ -209,10 +212,10 @@
 		>
 			I can be dragged with all the handles
 
-			<div class="handle" data-paw-cursor="true" />
-			<div class="handle" data-paw-cursor="true" />
-			<div class="handle" data-paw-cursor="true" />
-			<div class="handle" data-paw-cursor="true" />
+			<div class="handle" data-paw-cursor="true"></div>
+			<div class="handle" data-paw-cursor="true"></div>
+			<div class="handle" data-paw-cursor="true"></div>
+			<div class="handle" data-paw-cursor="true"></div>
 		</div>
 
 		<div
@@ -368,7 +371,7 @@
 	</div>
 {/key}
 
-<button on:click={() => reset++}>Reset examples</button>
+<button onclick={() => reset++}>Reset examples</button>
 
 <style lang="scss">
 	.examples-container {

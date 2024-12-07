@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { theme } from '$stores/user-preferences.store';
+	import { theme } from '$state/user-preferences.svelte.ts';
 </script>
 
 <div class="intro">
@@ -12,7 +12,7 @@
 
 <div class="frameworks-list">
 	<img
-		src="/home/metaframeworks-{$theme}.webp"
+		src="/home/metaframeworks-{theme.current}.webp"
 		loading="lazy"
 		alt="Metaframeworks"
 	/>

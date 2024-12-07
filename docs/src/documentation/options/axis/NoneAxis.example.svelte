@@ -2,4 +2,6 @@
 	import OptionsDemoBase from '$components/options/OptionsDemoBase.svelte';
 </script>
 
-<OptionsDemoBase options={{ axis: 'none' }}>None axis: Won't drag</OptionsDemoBase>
+<OptionsDemoBase options={{ axis: 'none' }}
+	>None axis: Won't drag</OptionsDemoBase
+>

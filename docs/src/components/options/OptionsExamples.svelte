@@ -6,11 +6,16 @@
 	import PrevArrowIcon from '~icons/material-symbols/arrow-back-rounded';
 	//@ts-ignore
 	import NextArrowIcon from '~icons/material-symbols/arrow-forward-rounded';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
 
-	let prevNavButtonVisible = false;
-	let nextNavButtonVisible = false;
+	let { children }: Props = $props();
 
-	let optionsExamplesContainerEl: HTMLElement;
+	let prevNavButtonVisible = $state(false);
+	let nextNavButtonVisible = $state(false);
+
+	let optionsExamplesContainerEl: HTMLElement = $state();
 
 	// let expanded = !browser;
 
@@ -54,7 +59,7 @@
 	<button
 		class="nav-button prev"
 		class:visible={prevNavButtonVisible}
-		on:click={() => scroll('prev')}
+		onclick={() => scroll('prev')}
 	>
 		<PrevArrowIcon />
 	</button>
@@ -63,17 +68,17 @@
 		class="container options-examples"
 		transition:slide={{ duration: 500 }}
 		bind:this={optionsExamplesContainerEl}
-		on:scroll={handleScroll}
+		onscroll={handleScroll}
 	>
 		<!-- Element needed for astro bug, astro puts this at the end of `.container` rather than at the right place -->
 
-		<slot />
+		{@render children?.()}
 	</section>
 
 	<button
 		class="nav-button next"
 		class:visible={nextNavButtonVisible}
-		on:click={() => scroll('next')}
+		onclick={() => scroll('next')}
 	>
 		<NextArrowIcon />
 	</button>

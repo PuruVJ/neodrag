@@ -1,7 +1,7 @@
 <script lang="ts">
 	import OptionsDemoBase from '$components/options/OptionsDemoBase.svelte';
 
-	let handleEl: HTMLDivElement;
+	let handleEl = $state<HTMLDivElement>();
 </script>
 
 <div>
@@ -12,9 +12,9 @@
 
 		<div class="handle" bind:this={handleEl}>Drag me ✅</div>
 
-		<svelte:fragment slot="caption">
+		{#snippet caption()}
 			Single <code>handle</code> with element
-		</svelte:fragment>
+		{/snippet}
 	</OptionsDemoBase>
 </div>
 

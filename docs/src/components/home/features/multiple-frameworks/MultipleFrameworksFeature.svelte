@@ -1,29 +1,23 @@
 <script lang="ts">
+	import type { Framework } from '$helpers/constants';
 	import { copy } from 'svelte-copy';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
-
-	import type { Framework } from '$helpers/constants';
-
+	import IconCopyToClipboard from '~icons/material-symbols/content-copy-outline-rounded';
+	import IconCopyToClipboardFilled from '~icons/material-symbols/content-copy-rounded';
 	import FrameworkPolygon from './FrameworkPolygon.svelte';
 
-	// @ts-ignore
-	import IconCopyToClipboardFilled from '~icons/material-symbols/content-copy-rounded';
-	// @ts-ignore
+	let selected_framework: Framework = $state('svelte');
 
-	import IconCopyToClipboard from '~icons/material-symbols/content-copy-outline-rounded';
+	let copied = $state(false);
 
-	let selectedFramework: Framework = 'svelte';
-
-	let copied = false;
-
-	$: {
+	$effect(() => {
 		if (copied === true) {
 			setTimeout(() => {
 				copied = false;
 			}, 1000);
 		}
-	}
+	});
 </script>
 
 <div class="intro">
@@ -42,12 +36,12 @@
 	<code>
 		npm install @neodrag/
 		<span style="position: relative;">
-			{#key selectedFramework}
+			{#key selected_framework}
 				<span
 					style="position: absolute"
-					style:color="var(--app-color-brand-{selectedFramework})"
+					style:color="var(--app-color-brand-{selected_framework})"
 					in:fly={{ duration: 300, delay: 150, y: -20 }}
-					out:fly={{ duration: 300, y: 20 }}>{@html selectedFramework}</span
+					out:fly={{ duration: 300, y: 20 }}>{@html selected_framework}</span
 				>
 			{/key}
 		</span>
@@ -56,8 +50,10 @@
 			class="copy-button"
 			class:copied
 			disabled={copied}
-			use:copy={`npm install @neodrag/${selectedFramework}`}
-			on:svelte-copy={() => (copied = true)}
+			use:copy={{
+				text: `npm install @neodrag/${selected_framework}`,
+				onCopy: () => (copied = true),
+			}}
 		>
 			<!-- {#key copied} -->
 			<div>
@@ -78,7 +74,7 @@
 
 <div>
 	<FrameworkPolygon
-		on:select={({ detail }) => (selectedFramework = detail.framework)}
+		onselect={({ framework }) => (selected_framework = framework)}
 	/>
 </div>
 

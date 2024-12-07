@@ -3,11 +3,11 @@
 	import { FRAMEWORK_ICONS } from '$helpers/framework-icons';
 	import SIZES from '../../../../data/sizes.json';
 
-	const sortedFrameworks = Object.entries(SIZES).sort(
-		([, { size: aSize }], [, { size: bSize }]) => +aSize - +bSize
-	) as unknown as [Framework, typeof SIZES[keyof typeof SIZES]][];
+	const sorted_frameworks = Object.entries(SIZES).sort(
+		([, { size: aSize }], [, { size: bSize }]) => +aSize - +bSize,
+	);
 
-	const minSize = +sortedFrameworks[0][1].size;
+	const min_size = +sorted_frameworks[0][1].size;
 </script>
 
 <div class="intro">
@@ -36,15 +36,15 @@
 </div>
 
 <div class="demo">
-	{#each sortedFrameworks.map( ([framework, { size }]) => [framework, size, FRAMEWORK_ICONS[framework]] ) as [framework, size, Icon]}
+	{#each sorted_frameworks.map(([framework, { size }]) => [framework, size, FRAMEWORK_ICONS[framework]] as const) as [framework, size, Icon]}
 		<div class="framework-container">
-			<div class="icon" style:font-size={(size / minSize) ** 7 * 2 + 'rem'}>
+			<div class="icon" style:font-size={(size / min_size) ** 7 * 2 + 'rem'}>
 				<Icon />
 			</div>
 			<div
 				class="size"
-				style:font-size={(size / minSize) ** 4 + 'rem'}
-				style:left="calc(1rem + {(size / minSize) ** 8 * 2}rem)"
+				style:font-size={(size / min_size) ** 4 + 'rem'}
+				style:left="calc(1rem + {(size / min_size) ** 8 * 2}rem)"
 			>
 				{size} <span class="kb">KB</span>
 			</div>

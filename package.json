@@ -26,7 +26,6 @@
 		"react-dom": "^18.2.0",
 		"solid-js": "^1.8.7",
 		"svelte": "^4.2.14",
-		"svelte-preprocess": "^5.1.4",
 		"terser": "^5.26.0",
 		"tsup": "^8.0.1",
 		"tsx": "^4.6.2",

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { FRAMEWORKS } from '$helpers/constants';
 
-	export let pathname: string;
+	interface Props {
+		pathname: string;
+	}
+
+	let { pathname }: Props = $props();
 
 	const ariaCurrentVal = (path: string) =>
 		pathname.endsWith(path) ? 'page' : 'false';
@@ -22,7 +26,7 @@
 		</ul>
 	</nav>
 
-	<span class="spacer" />
+	<span class="spacer"></span>
 
 	<div class="copyright">
 		&copy; 2021-{new Date().getUTCFullYear()} Puru Vijay

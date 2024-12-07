@@ -11,9 +11,9 @@
 		<div class="handle">Drag me ✅</div>
 		<div class="handle">Drag me ✅</div>
 
-		<svelte:fragment slot="caption">
+		{#snippet caption()}
 			Multiple <code>handle</code> with selector
-		</svelte:fragment>
+		{/snippet}
 	</OptionsDemoBase>
 </div>
 
