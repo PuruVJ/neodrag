@@ -46,18 +46,13 @@
 		}, Infinity);
 
 		if (z_indices[index] > z_indices.length) {
-			z_indices = z_indices.map((z) =>
-				z >= lowest_z_index ? z - lowest_z_index : z,
-			);
+			z_indices = z_indices.map((z) => (z >= lowest_z_index ? z - lowest_z_index : z));
 		}
 	}
 </script>
 
 <section class="container framework-polygon">
-	<button
-		class="reset"
-		onclick={() => Object.values(reset_fns).forEach((fn) => fn())}
-	>
+	<button class="reset" onclick={() => Object.values(reset_fns).forEach((fn) => fn())}>
 		<IonReloadIcon />
 	</button>
 
@@ -79,13 +74,7 @@
 		{/each}
 	</section>
 
-	<img
-		bind:this={logo_el}
-		src="/logo.svg"
-		draggable="false"
-		class="logo"
-		alt="Neodrag logo"
-	/>
+	<img bind:this={logo_el} src="/logo.svg" draggable="false" class="logo" alt="Neodrag logo" />
 </section>
 
 <style lang="scss">

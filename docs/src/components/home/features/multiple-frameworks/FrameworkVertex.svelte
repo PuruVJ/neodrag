@@ -46,10 +46,7 @@
 		angle: 0,
 	});
 
-	let draggable_position = new Tween(
-		{ x: 0, y: 0 },
-		{ easing: expoOut, duration: 1200 },
-	);
+	let draggable_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
 
 	function get_offset(el: HTMLElement) {
 		const rect = el.getBoundingClientRect();
@@ -94,9 +91,7 @@
 
 	function connect(node: HTMLElement, root_el: HTMLElement) {
 		// TODO: Investigate replacing with resizeobserver
-		window.addEventListener('resize', () =>
-			update_line_position(node, root_el),
-		);
+		window.addEventListener('resize', () => update_line_position(node, root_el));
 
 		return {
 			update(newRootEl: HTMLElement) {
@@ -104,9 +99,7 @@
 				update_line_position(node, root_el);
 			},
 			destroy: () => {
-				window.removeEventListener('resize', () =>
-					update_line_position(node, root_el),
-				);
+				window.removeEventListener('resize', () => update_line_position(node, root_el));
 			},
 		};
 	}
@@ -137,8 +130,7 @@
 	$effect(() => {
 		draggable_position.current;
 
-		if (button_el && logoEl)
-			untrack(() => update_line_position(button_el!, logoEl));
+		if (button_el && logoEl) untrack(() => update_line_position(button_el!, logoEl));
 	});
 </script>
 
@@ -152,10 +144,7 @@
 		},
 		onDrag: (data) => {
 			on_drag?.(data);
-			draggable_position.set(
-				{ x: data.offsetX, y: data.offsetY },
-				{ duration: 0 },
-			);
+			draggable_position.set({ x: data.offsetX, y: data.offsetY }, { duration: 0 });
 		},
 		onDragEnd: (data) => {
 			on_drag_end?.(data);

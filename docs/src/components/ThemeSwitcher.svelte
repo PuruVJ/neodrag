@@ -27,9 +27,7 @@
 	$effect(() => {
 		if (mounted.current && draggable_el)
 			position_x.target =
-				theme.current === 'dark'
-					? container_width - draggable_el.getBoundingClientRect().width
-					: 0;
+				theme.current === 'dark' ? container_width - draggable_el.getBoundingClientRect().width : 0;
 	});
 </script>
 
@@ -45,8 +43,7 @@
 			draggable_el!.getBoundingClientRect().width / 2;
 
 		if (position_x.current / container_width >= 0.5) {
-			position_x.target =
-				container_width - draggable_el!.getBoundingClientRect().width;
+			position_x.target = container_width - draggable_el!.getBoundingClientRect().width;
 		} else {
 			position_x.target = 0;
 		}
@@ -82,8 +79,7 @@
 			},
 			onDragEnd: ({ offsetX, rootNode }) => {
 				if (offsetX / container_width > 0.3) {
-					position_x.target =
-						container_width - rootNode.getBoundingClientRect().width;
+					position_x.target = container_width - rootNode.getBoundingClientRect().width;
 				} else {
 					position_x.target = 0;
 				}
@@ -98,8 +94,7 @@
 		class:selected={theme.current === 'dark'}
 		data-paw-cursor="true"
 		onclick={() => {
-			position_x.target =
-				container_width - draggable_el!.getBoundingClientRect().width;
+			position_x.target = container_width - draggable_el!.getBoundingClientRect().width;
 			change_theme();
 		}}
 	>

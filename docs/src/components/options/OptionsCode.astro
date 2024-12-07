@@ -1,14 +1,11 @@
 ---
 import type { Framework } from '$helpers/constants';
 
-const framework = Astro.url.pathname
-	.split('/')
-	.filter(Boolean)
-	.at(-1) as Framework;
+const framework = Astro.url.pathname.split('/').filter(Boolean).at(-1) as Framework;
 ---
 
-{framework === 'react' && <slot name='react' />}
-{framework === 'svelte' && <slot name='svelte' />}
-{framework === 'vue' && <slot name='vue' />}
-{framework === 'vanilla' && <slot name='vanilla' />}
-{framework === 'solid' && <slot name='solid' />}
+{framework === 'react' && <slot name="react" />}
+{framework === 'svelte' && <slot name="svelte" />}
+{framework === 'vue' && <slot name="vue" />}
+{framework === 'vanilla' && <slot name="vanilla" />}
+{framework === 'solid' && <slot name="solid" />}

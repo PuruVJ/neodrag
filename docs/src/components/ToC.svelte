@@ -30,9 +30,7 @@
 				const id = heading.id;
 
 				// Regex to replace \n and \t characters
-				const text =
-					heading.textContent?.replaceAll(/\t/gi, '')?.replaceAll(/\n/gi, '') ??
-					'';
+				const text = heading.textContent?.replaceAll(/\t/gi, '')?.replaceAll(/\n/gi, '') ?? '';
 
 				const level = +heading.tagName[1];
 
@@ -65,8 +63,7 @@
 	onMount(async () => {
 		await wait_for(500);
 
-		heading_els =
-			document.querySelectorAll<HTMLHeadingElement>('h2, h3, h4, h5, h5');
+		heading_els = document.querySelectorAll<HTMLHeadingElement>('h2, h3, h4, h5, h5');
 		options_examples_containers = document.querySelectorAll<HTMLElement>(
 			'#options-examples-container',
 		);
@@ -111,10 +108,7 @@
 	});
 </script>
 
-<aside
-	class:hidden={is_nav_overlapping}
-	aria-label="Links to sections in this Page"
->
+<aside class:hidden={is_nav_overlapping} aria-label="Links to sections in this Page">
 	<nav bind:this={nav_el}>
 		{#if headings}
 			<ul in:fade={{ easing: expoIn, duration: 300 }}>
@@ -124,9 +118,7 @@
 						class:highlighted={heading_ids_highlighted.includes(id)}
 						style:--level={level - 2}
 					>
-						<a href="#{id}" class="unstyled" bind:this={anchor_els[id]}
-							>{text}</a
-						>
+						<a href="#{id}" class="unstyled" bind:this={anchor_els[id]}>{text}</a>
 						<div
 							class="placeholder"
 							style:--width={browser

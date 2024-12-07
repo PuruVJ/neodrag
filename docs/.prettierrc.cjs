@@ -1,10 +1,10 @@
 module.exports = {
 	useTabs: true,
 	semi: true,
-	printWidth: 80,
+	printWidth: 100,
 	singleQuote: true,
 
-	plugins: [require.resolve('prettier-plugin-astro')],
+	plugins: [require.resolve('prettier-plugin-astro'), require.resolve('prettier-plugin-svelte')],
 	overrides: [
 		{
 			files: '*.astro',

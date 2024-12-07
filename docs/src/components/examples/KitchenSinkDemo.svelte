@@ -59,16 +59,11 @@
 		}, Infinity);
 
 		if (z_indices[index] > z_indices.length) {
-			z_indices = z_indices.map((z) =>
-				z >= lowest_z_index ? z - lowest_z_index : z,
-			);
+			z_indices = z_indices.map((z) => (z >= lowest_z_index ? z - lowest_z_index : z));
 		}
 	}
 
-	const drag_handlers: Pick<
-		DragOptions,
-		'onDrag' | 'onDragStart' | 'onDragEnd'
-	> = {
+	const drag_handlers: Pick<DragOptions, 'onDrag' | 'onDragStart' | 'onDragEnd'> = {
 		onDrag: ({ rootNode }) => {
 			is_backdrop_visible = true;
 			rootNode.style.zIndex = '20';
@@ -104,17 +99,12 @@
 
 <svelte:body
 	use:style={{
-		boxShadow: hightlight_body
-			? 'inset 0 0 0 2px var(--app-color-primary)'
-			: '',
+		boxShadow: hightlight_body ? 'inset 0 0 0 2px var(--app-color-primary)' : '',
 	}}
 />
 
 {#if is_backdrop_visible || show_markers}
-	<div
-		class="backdrop"
-		transition:fade={{ duration: 200, easing: sineIn }}
-	></div>
+	<div class="backdrop" transition:fade={{ duration: 200, easing: sineIn }}></div>
 {/if}
 
 <div
@@ -200,9 +190,7 @@
 			style:z-index={z_indices[5]}
 			use:draggable={{ handle: '.handle', ...drag_handlers }}
 		>
-			<button class="handle" data-paw-cursor="true" data-paw-color="light">
-				Drag here
-			</button>
+			<button class="handle" data-paw-cursor="true" data-paw-color="light"> Drag here </button>
 
 			I can only be dragged by the handle 👆
 		</div>
@@ -228,9 +216,7 @@
 		>
 			I can be dragged anywhere
 
-			<button class="cancel" data-paw-cursor="false">
-				except for this box
-			</button>
+			<button class="cancel" data-paw-cursor="false"> except for this box </button>
 		</div>
 
 		<div
@@ -696,14 +682,12 @@
 
 				content: '';
 
-				box-shadow: inset var(--marker-size) var(--marker-size) 0px 1px
-					var(--app-color-primary);
+				box-shadow: inset var(--marker-size) var(--marker-size) 0px 1px var(--app-color-primary);
 
 				height: calc(var(--marker-size) * 8);
 				width: calc(var(--marker-size) * 8);
 
-				transform: translate(var(--translate)) rotate(var(--rotate))
-					scale(var(--scale));
+				transform: translate(var(--translate)) rotate(var(--rotate)) scale(var(--scale));
 			}
 		}
 	}

@@ -10,8 +10,7 @@
 }
 
 *:focus-visible {
-	box-shadow: 0 0 0 4px
-		hsla(var(--secondary-color-hsl, --app-color-primary-hsl), 0.25);
+	box-shadow: 0 0 0 4px hsla(var(--secondary-color-hsl, --app-color-primary-hsl), 0.25);
 }
 
 html {
@@ -109,8 +108,7 @@ kbd {
 	background-position: 0 0;
 
 	transition: var(--duration) var(--easing);
-	transition-property: color, background-position, background-image,
-		border-radius;
+	transition-property: color, background-position, background-image, border-radius;
 
 	&:hover,
 	&:focus-visible {
@@ -154,10 +152,7 @@ $frameworks: svelte, react, vue, solid, vanilla;
 }
 
 ::selection {
-	background-color: hsla(
-		var(--secondary-color-hsl, var(--app-color-primary-hsl)),
-		0.3
-	);
+	background-color: hsla(var(--secondary-color-hsl, var(--app-color-primary-hsl)), 0.3);
 	// color: var(--app-color-primary-contrast);
 	// -webkit-text-fill-color: var(--app-color-primary-contrast);
 }

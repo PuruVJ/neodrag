@@ -42,10 +42,7 @@
 		}
 
 	type IncludeExclude = (HTMLElement | undefined)[] | undefined;
-	function getPawableElements(): [
-		include: IncludeExclude,
-		exclude: IncludeExclude,
-	] {
+	function getPawableElements(): [include: IncludeExclude, exclude: IncludeExclude] {
 		const arr: [IncludeExclude, IncludeExclude] = [, undefined];
 
 		for (const option of ['handle', 'cancel'] as const) {
@@ -56,9 +53,7 @@
 			if (optionVal) {
 				// Get all the handle elements inside the draggableEl based on `options.handle`
 				if (typeof optionVal === 'string')
-					arr[idx] = Array.from<HTMLElement>(
-						draggableEl!.querySelectorAll(optionVal),
-					);
+					arr[idx] = Array.from<HTMLElement>(draggableEl!.querySelectorAll(optionVal));
 				else if (optionVal instanceof HTMLElement) arr[idx] = [optionVal];
 				else {
 					arr[idx] = optionVal;

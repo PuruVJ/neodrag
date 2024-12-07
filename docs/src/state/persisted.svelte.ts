@@ -18,10 +18,7 @@ function get_value_from_storage(key: string) {
 			value: JSON.parse(value),
 		};
 	} catch (e) {
-		console.error(
-			`Error when parsing ${value} from persisted store "${key}"`,
-			e,
-		);
+		console.error(`Error when parsing ${value} from persisted store "${key}"`, e);
 		return {
 			found: false,
 			value: null,
@@ -30,9 +27,7 @@ function get_value_from_storage(key: string) {
 }
 
 export function persisted<T>(key: string, initial: T) {
-	const existing = browser
-		? localStorage.getItem(key)
-		: JSON.stringify(initial);
+	const existing = browser ? localStorage.getItem(key) : JSON.stringify(initial);
 
 	const primitive = is_primitive(initial);
 	const parsed_value = existing ? JSON.parse(existing) : initial;

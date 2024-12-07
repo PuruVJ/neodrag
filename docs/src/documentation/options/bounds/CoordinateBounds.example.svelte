@@ -22,10 +22,7 @@
 			return undefined;
 		}
 
-		if (
-			node.scrollHeight > node.clientHeight ||
-			node.scrollWidth > node.clientWidth
-		) {
+		if (node.scrollHeight > node.clientHeight || node.scrollWidth > node.clientWidth) {
 			return node;
 		} else {
 			return getScrollParent(node.parentNode as HTMLElement);
@@ -33,8 +30,7 @@
 	}
 
 	function setComputedBounds() {
-		if (!container_el || !first_scrollable_parent || !main_scrollable_ancestor)
-			return;
+		if (!container_el || !first_scrollable_parent || !main_scrollable_ancestor) return;
 
 		const { top, left, bottom, right } = container_el.getBoundingClientRect();
 
@@ -85,11 +81,7 @@
 	});
 </script>
 
-<OptionsDemoBase
-	bind:containerEl={container_el}
-	options={{ bounds: computedBounds }}
-	size="10rem"
->
+<OptionsDemoBase bind:containerEl={container_el} options={{ bounds: computedBounds }} size="10rem">
 	Limited to:
 	<code>
 		top: {supposed_bounds.top}

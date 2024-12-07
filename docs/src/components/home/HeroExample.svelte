@@ -19,10 +19,7 @@
 		y: 0,
 	});
 
-	let drag_position = new Tween(
-		{ x: 0, y: 0 },
-		{ easing: expoOut, duration: 1200 },
-	);
+	let drag_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
 
 	function handle_mouse_move(e: MouseEvent) {
 		coords_cursor ??= { x: 0, y: 0 };
@@ -228,11 +225,7 @@
 			bottom: calc(0.03 * var(--size));
 
 			// width: 61%;
-			min-width: clamp(
-				calc(0.61 * 4rem),
-				calc(0.61 * 20vw),
-				calc(0.61 * 12rem)
-			);
+			min-width: clamp(calc(0.61 * 4rem), calc(0.61 * 20vw), calc(0.61 * 12rem));
 			// height: auto;
 		}
 

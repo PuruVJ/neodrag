@@ -12,7 +12,7 @@ const drawSquircle = (ctx, geom, radius, smooth, lineWidth, color) => {
 		geom.width - lineWidthOffset,
 		radius / smooth, // second bezier point
 		geom.width - lineWidthOffset,
-		radius // last connect point
+		radius, // last connect point
 	);
 	// BOTTOM-RIGHT CORNER
 	ctx.lineTo(geom.width - lineWidthOffset, geom.height - radius);
@@ -22,7 +22,7 @@ const drawSquircle = (ctx, geom, radius, smooth, lineWidth, color) => {
 		geom.width - radius / smooth,
 		geom.height - lineWidthOffset, // second bezier point
 		geom.width - radius,
-		geom.height - lineWidthOffset // last connect point
+		geom.height - lineWidthOffset, // last connect point
 	);
 	// BOTTOM-LEFT CORNER
 	ctx.lineTo(radius, geom.height - lineWidthOffset);
@@ -32,7 +32,7 @@ const drawSquircle = (ctx, geom, radius, smooth, lineWidth, color) => {
 		lineWidthOffset,
 		geom.height - radius / smooth, // second bezier point
 		lineWidthOffset,
-		geom.height - radius // last connect point
+		geom.height - radius, // last connect point
 	);
 	// CLOSE LEFT-TOP CORNER
 	ctx.lineTo(lineWidthOffset, radius);
@@ -42,7 +42,7 @@ const drawSquircle = (ctx, geom, radius, smooth, lineWidth, color) => {
 		radius / smooth,
 		lineWidthOffset, // second bezier point
 		radius,
-		lineWidthOffset // last connect point
+		lineWidthOffset, // last connect point
 	);
 	ctx.closePath();
 
@@ -75,22 +75,11 @@ if (typeof registerPaint !== 'undefined') {
 		paint(ctx, geom, properties) {
 			const customRatio = properties.get('--squircle-ratio');
 			const smoothRatio = 10;
-			const distanceRatio = parseFloat(customRatio)
-				? parseFloat(customRatio)
-				: 1.8;
-			const squircleSmooth = parseFloat(
-				properties.get('--squircle-smooth') * smoothRatio
-			);
-			const squircleRadius =
-				parseInt(properties.get('--squircle-radius'), 10) * distanceRatio;
-			const squrcleOutline = parseFloat(
-				properties.get('--squircle-outline'),
-				10
-			);
-			const squrcleColor = properties
-				.get('--squircle-fill')
-				.toString()
-				.replace(/\s/g, '');
+			const distanceRatio = parseFloat(customRatio) ? parseFloat(customRatio) : 1.8;
+			const squircleSmooth = parseFloat(properties.get('--squircle-smooth') * smoothRatio);
+			const squircleRadius = parseInt(properties.get('--squircle-radius'), 10) * distanceRatio;
+			const squrcleOutline = parseFloat(properties.get('--squircle-outline'), 10);
+			const squrcleColor = properties.get('--squircle-fill').toString().replace(/\s/g, '');
 
 			const isSmooth = () => {
 				if (typeof properties.get('--squircle-smooth')[0] !== 'undefined') {
@@ -120,14 +109,7 @@ if (typeof registerPaint !== 'undefined') {
 			};
 
 			if (squircleRadius < geom.width / 2 && squircleRadius < geom.height / 2) {
-				drawSquircle(
-					ctx,
-					geom,
-					squircleRadius,
-					isSmooth(),
-					isOutline(),
-					isColor()
-				);
+				drawSquircle(ctx, geom, squircleRadius, isSmooth(), isOutline(), isColor());
 			} else {
 				drawSquircle(
 					ctx,
@@ -135,7 +117,7 @@ if (typeof registerPaint !== 'undefined') {
 					Math.min(geom.width / 2, geom.height / 2),
 					isSmooth(),
 					isOutline(),
-					isColor()
+					isColor(),
 				);
 			}
 		}

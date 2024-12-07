@@ -9,55 +9,55 @@ import Layout from '$layouts/Layout.astro';
 import LogosGithubIcon from '~icons/logos/github-icon';
 ---
 
-<Layout title='Neodrag: One draggable to rule them all'>
-	<main id='main-content'>
-		<section class='tagline'>
-			<div class='intro'>
+<Layout title="Neodrag: One draggable to rule them all">
+	<main id="main-content">
+		<section class="tagline">
+			<div class="intro">
 				<h1>Neodrag</h1>
-				<p class='h4'>One draggable to rule them all</p>
+				<p class="h4">One draggable to rule them all</p>
 
 				<br /><br /><br />
 
-				<div class='group'>
-					<a href='/docs/svelte'>Getting Started</a>
-					<a href='https://github.com/puruvj/neodrag'>
+				<div class="group">
+					<a href="/docs/svelte">Getting Started</a>
+					<a href="https://github.com/puruvj/neodrag">
 						<LogosGithubIcon /> Github
 					</a>
 				</div>
 			</div>
 
-			<div class='demo'>
+			<div class="demo">
 				<HeroExample client:load />
 			</div>
 		</section>
 
-		<h2 class='h1' style='text-align: center; width: 100%'>Features</h2>
+		<h2 class="h1" style="text-align: center; width: 100%">Features</h2>
 
 		<br /><br /><br />
 
-		<section class='feature-multi-frameworks two-col'>
+		<section class="feature-multi-frameworks two-col">
 			<MultipleFrameworksFeature client:visible />
 		</section>
 
-		<section class='feature-bundle-sizes two-col'>
+		<section class="feature-bundle-sizes two-col">
 			<BundleSizeFeature client:visible />
 		</section>
 
-		<section class='feature-ssr-friendly two-col'>
+		<section class="feature-ssr-friendly two-col">
 			<SSRFriendlyFeature client:visible />
 		</section>
 
-		<section class='feature-feature-rich'>
+		<section class="feature-feature-rich">
 			<FeatureRichFeature client:visible />
 		</section>
 
-		<section class='explore-frameworks'>
+		<section class="explore-frameworks">
 			<ExploreFrameworks client:visible />
 		</section>
 	</main>
 </Layout>
 
-<style lang='scss'>
+<style lang="scss">
 	@import '../css/breakpoints';
 
 	.tagline {

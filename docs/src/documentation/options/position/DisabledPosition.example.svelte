@@ -4,11 +4,7 @@
 	let position = $state({ x: 0, y: 0 });
 </script>
 
-<OptionsDemoBase
-	bind:position
-	styledCaption={true}
-	options={{ disabled: true }}
->
+<OptionsDemoBase bind:position styledCaption={true} options={{ disabled: true }}>
 	I can be moved <i>only</i> with the slider
 
 	{#snippet caption()}

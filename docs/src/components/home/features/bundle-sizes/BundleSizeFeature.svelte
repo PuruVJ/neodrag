@@ -13,8 +13,8 @@
 <div class="intro">
 	<h2>Small bundle size</h2>
 	<p>
-		Neodrag will never be heavy on your app. It's designed to be as small as
-		possible, so you can use it without worrying about your bundle size.
+		Neodrag will never be heavy on your app. It's designed to be as small as possible, so you can
+		use it without worrying about your bundle size.
 	</p>
 
 	<br />
@@ -27,9 +27,7 @@
 
 		<br /><br />
 
-		<sub style="color: inherit;">
-			*Sizes in brotli after terser minification
-		</sub>
+		<sub style="color: inherit;"> *Sizes in brotli after terser minification </sub>
 	</p>
 
 	<br /><br />

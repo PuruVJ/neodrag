@@ -23,11 +23,11 @@
 <div class="intro">
 	<h2>Multi-framework</h2>
 	<p>
-		One tool, endless possibilities: integrate with Svelte, Vue, React, Solid,
-		and more. <br /><br />
+		One tool, endless possibilities: integrate with Svelte, Vue, React, Solid, and more. <br /><br
+		/>
 		<span style="color: hsla(var(--app-color-dark-hsl), 0.8)"
-			>Core logic is implemented only once, so you can use Neodrag in different
-			frameworks, and get the same predictible behavior</span
+			>Core logic is implemented only once, so you can use Neodrag in different frameworks, and get
+			the same predictible behavior</span
 		>
 	</p>
 
@@ -73,9 +73,7 @@
 </div>
 
 <div>
-	<FrameworkPolygon
-		onselect={({ framework }) => (selected_framework = framework)}
-	/>
+	<FrameworkPolygon onselect={({ framework }) => (selected_framework = framework)} />
 </div>
 
 <style lang="scss">

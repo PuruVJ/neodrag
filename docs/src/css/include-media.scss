@@ -532,10 +532,7 @@ $im-no-media-expressions: ('screen', 'portrait', 'landscape') !default;
 
 	// Update global configuration
 	$breakpoints: map-merge($breakpoints, $tweakpoints) !global;
-	$media-expressions: map-merge(
-		$media-expressions,
-		$tweak-media-expressions
-	) !global;
+	$media-expressions: map-merge($media-expressions, $tweak-media-expressions) !global;
 
 	@content;
 

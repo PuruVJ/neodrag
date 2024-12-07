@@ -1,8 +1,4 @@
-<svg
-	xmlns="http://www.w3.org/2000/svg"
-	xml:space="preserve"
-	viewBox="0 0 490 490"
->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 490 490">
 	<path
 		fill="var(--app-color-dark)"
 		d="m316 115 25-35c7-14 0-22 0-22l-19-45c-3-8-10-13-19-13H187c-9 0-16 5-19 13l-20 45c-4 6-3 15 1 21l25 35a195 195 0 0 0 71 376 195 195 0 0 0 71-375zM189 66l10-24h90l10 24-26 37a187 187 0 0 0-57 0l-27-37zm56 383c-84 0-153-68-153-154a153 153 0 1 1 306 0c0 86-69 154-153 154z"

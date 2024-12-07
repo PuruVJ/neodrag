@@ -7,9 +7,7 @@
 
 		if (!browser) return '';
 
-		const value = getComputedStyle(document.body).getPropertyValue(
-			'--app-color-scrolling-navbar',
-		);
+		const value = getComputedStyle(document.body).getPropertyValue('--app-color-scrolling-navbar');
 
 		return value?.trim();
 	});

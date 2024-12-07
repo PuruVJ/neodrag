@@ -17,19 +17,17 @@ export interface Props {
 
 const { title } = Astro.props;
 
-const body_class = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(
-	Astro.url.pathname
-)?.[1];
+const body_class = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pathname)?.[1];
 ---
 
 <!doctype html>
-<html lang='en'>
+<html lang="en">
 	<head>
-		<meta charset='UTF-8' />
-		<meta name='viewport' content='width=device-width' />
-		<link rel='icon' type='image/svg+xml' href='/favicon.png' />
-		<meta name='generator' content={Astro.generator} />
-		<meta name='apple-mobile-web-app-capable' content='yes' />
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.png" />
+		<meta name="generator" content={Astro.generator} />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
 
 		<ClientRouter />
 
@@ -54,22 +52,14 @@ const body_class = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(
 			});
 		</script> -->
 
-		<meta
-			name='apple-mobile-web-app-status-bar-style'
-			content='black-translucent'
-		/>
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-		<link
-			rel='sitemap'
-			type='application/xml'
-			title='Sitemap'
-			href='/sitemap-index.xml'
-		/>
+		<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap-index.xml" />
 		<title>{title}</title>
 
 		<SEO
 			canonical={`https://www.neodrag.dev${Astro.url.pathname}`}
-			description='Your one stop solution for anything draggable with JavaScript. Adapters for React, Svelte, Vue, SolidJS and JavaScript. Fully TypeScript compliant.'
+			description="Your one stop solution for anything draggable with JavaScript. Adapters for React, Svelte, Vue, SolidJS and JavaScript. Fully TypeScript compliant."
 			openGraph={{
 				basic: {
 					image: 'https://www.neodrag.dev/banner.png',
@@ -87,12 +77,9 @@ const body_class = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(
 
 		<script is:inline>
 			// Get localstorage value
-			const localTheme =
-				JSON.parse(localStorage.getItem('neodrag:theme')) || 'light';
+			const localTheme = JSON.parse(localStorage.getItem('neodrag:theme')) || 'light';
 
-			const prefersTheme = window.matchMedia(
-				'(prefers-color-scheme: dark)'
-			).matches;
+			const prefersTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 			const theme = localTheme || (prefersTheme ? 'dark' : 'light');
 
@@ -108,9 +95,9 @@ const body_class = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(
 
 		<slot />
 
-		<PawCursor client:only='svelte' />
+		<PawCursor client:only="svelte" />
 
-		<script type='text/javascript'>
+		<script type="text/javascript">
 			(function (c, l, a, r, i, t, y) {
 				c[a] =
 					c[a] ||

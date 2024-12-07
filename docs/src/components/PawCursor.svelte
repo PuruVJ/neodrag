@@ -53,10 +53,7 @@
 
 	let pawCursorEls = $derived(
 		globalThis.document && !isTouchDevice
-			? querySelectorAllLive(
-					document.body,
-					'[data-paw-cursor="true"], [data-paw-cursor="false"]',
-				)
+			? querySelectorAllLive(document.body, '[data-paw-cursor="true"], [data-paw-cursor="false"]')
 			: writable([]),
 	);
 

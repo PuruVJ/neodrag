@@ -7,8 +7,7 @@
 
 	let { pathname }: Props = $props();
 
-	const ariaCurrentVal = (path: string) =>
-		pathname.endsWith(path) ? 'page' : 'false';
+	const ariaCurrentVal = (path: string) => (pathname.endsWith(path) ? 'page' : 'false');
 </script>
 
 <section class="footer container">
