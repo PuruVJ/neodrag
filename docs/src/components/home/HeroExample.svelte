@@ -5,30 +5,30 @@
 	import { draggable } from '@neodrag/svelte';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
-	import { tweened } from 'svelte/motion';
+	import { Tween } from 'svelte/motion';
 	import PawIcon from '~icons/mdi/paw';
 
-	let headingText = 'Try dragging the box below';
+	let heading_text = 'Try dragging the box below';
 
-	let boxWiggles = $state(true);
+	let box_wiggles = $state(true);
 
-	let showCustomCursor = true;
+	let show_custom_cursor = true;
 
-	let coordsCursor = $state({
+	let coords_cursor = $state({
 		x: 0,
 		y: 0,
 	});
 
-	let dragPosition = tweened(
+	let drag_position = new Tween(
 		{ x: 0, y: 0 },
 		{ easing: expoOut, duration: 1200 },
 	);
 
-	function handleMouseMove(e: MouseEvent) {
-		coordsCursor ??= { x: 0, y: 0 };
+	function handle_mouse_move(e: MouseEvent) {
+		coords_cursor ??= { x: 0, y: 0 };
 
-		coordsCursor.x = e.clientX;
-		coordsCursor.y = e.clientY;
+		coords_cursor.x = e.clientX;
+		coords_cursor.y = e.clientY;
 	}
 
 	onMount(() => {
@@ -39,28 +39,28 @@
 	});
 </script>
 
-<svelte:window onmousemove={handleMouseMove} />
+<svelte:window onmousemove={handle_mouse_move} />
 
 <div class="container">
-	{#key headingText}
+	{#key heading_text}
 		<p class="h3" class:hidden={false} use:typingEffect={60}>
-			{browser ? headingText : ''}
+			{browser ? heading_text : ''}
 		</p>
 	{/key}
 
 	<div
 		class="box"
-		class:wiggles={boxWiggles}
+		class:wiggles={box_wiggles}
 		use:draggable={{
 			bounds: 'parent',
-			position: $dragPosition,
+			position: drag_position.current,
 			onDragStart: () => {
-				boxWiggles = false;
+				box_wiggles = false;
 			},
 			onDrag: ({ offsetX, offsetY }) =>
-				dragPosition.set({ x: offsetX, y: offsetY }, { duration: 0 }),
+				drag_position.set({ x: offsetX, y: offsetY }, { duration: 0 }),
 			onDragEnd: () => {
-				$dragPosition = { x: 0, y: 0 };
+				drag_position.target = { x: 0, y: 0 };
 			},
 		}}
 	>
@@ -71,9 +71,9 @@
 
 	<div
 		class="cursor"
-		style:transform="translate3d(calc({coordsCursor?.x ?? 0}px - 50%), calc({coordsCursor?.y ??
+		style:transform="translate3d(calc({coords_cursor?.x ?? 0}px - 50%), calc({coords_cursor?.y ??
 			0}px - 50%), 0)"
-		style:--opacity={showCustomCursor && coordsCursor ? 1 : 0}
+		style:--opacity={show_custom_cursor && coords_cursor ? 1 : 0}
 	>
 		<PawIcon style="font-size: 2rem;" />
 	</div>
