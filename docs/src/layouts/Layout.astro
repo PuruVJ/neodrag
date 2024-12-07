@@ -103,7 +103,7 @@ const bodyClass =
 		</script>
 	</head>
 
-	<body class:list={[bodyClass, bodyClass && 'framework']}>
+	<body data-framework={bodyClass}>
 		<ThemeWatcher client:load />
 
 		<slot />
