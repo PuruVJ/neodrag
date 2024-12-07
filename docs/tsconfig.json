@@ -1,15 +1,17 @@
 {
-	"extends": "astro/tsconfigs/base",
+	"extends": "astro/tsconfigs/strict",
 	"compilerOptions": {
 		"strictNullChecks": true,
 		"baseUrl": ".",
 		"paths": {
 			"$layouts/*": ["src/layouts/*"],
 			"$components/*": ["src/components/*"],
-			"$stores/*": ["src/stores/*"],
+			"$state/*": ["src/state/*"],
 			"$actions/*": ["src/actions/*"],
-			"$helpers/*": ["src/helpers/*"]
+			"$helpers/*": ["src/helpers/*"],
+			"$/*": ["src/*"]
 		}
 	},
-	"include": ["./markdown/*", "./src/auto-imports.d.ts", ",./src/**/*.{ts,js}"]
+	"include": [".astro/types.d.ts", "**/*"],
+	"exclude": ["dist"]
 }

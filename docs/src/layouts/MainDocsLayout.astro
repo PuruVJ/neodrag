@@ -20,17 +20,15 @@ const { size, version } = SIZES[framework];
 
 <DocsLayout title={title}>
 	<h1>
-		@neodrag/<span style={`color: var(--app-color-brand-${framework})`}
-			>{framework}</span
-		>
+		@neodrag/<span style={`color: var(--app-color-brand-${framework})`}>{framework}</span>
 	</h1>
 
-	<div class='tags'>
-		<span class='tag'>
+	<div class="tags">
+		<span class="tag">
 			{version}
 		</span>
 
-		<span class='tag'>
+		<span class="tag">
 			{size}KB
 		</span>
 	</div>
@@ -42,14 +40,12 @@ const { size, version } = SIZES[framework];
 	<h2>Credits</h2>
 	<p>
 		Inspired from the amazing
-		<a href='https://github.com/react-grid-layout/react-draggable'>
-			react-draggable
-		</a>
+		<a href="https://github.com/react-grid-layout/react-draggable"> react-draggable </a>
 		library, and implements the same API.
 	</p>
 </DocsLayout>
 
-<style lang='scss'>
+<style lang="scss">
 	.tags {
 		display: flex;
 		flex-wrap: wrap;

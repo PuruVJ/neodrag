@@ -1,35 +1,39 @@
 <script lang="ts">
+	import squircle from '$/worklet/squircle?url';
+	import { browser } from '$helpers/utils';
 	import { draggable, type DragOptions } from '@neodrag/svelte';
-	import { browser } from 'src/helpers/utils';
-	// @ts-ignore
+	import { untrack, type Snippet } from 'svelte';
 	import IonReloadIcon from '~icons/ion/reload';
-	// @ts-ignore
-	import squircle from '../../worklet/squircle?url';
 
-	export let options: DragOptions = {};
-	export let position = getDefaultPosition();
-	export let customClass = '';
-	export let size = '8rem';
-	export let draggableEl: HTMLDivElement | undefined = undefined;
-	export let styledCaption = true;
-	export let containerEl: HTMLElement | undefined = undefined;
+	interface Props {
+		options?: DragOptions;
+		position?: any;
+		customClass?: string;
+		size?: string;
+		draggableEl?: HTMLDivElement | undefined;
+		styledCaption?: boolean;
+		containerEl?: HTMLElement | undefined;
 
-	$: finalOptions = {
-		...options,
-		position,
-		onDrag: (data) => {
-			options.onDrag?.(data);
-			position = { x: data.offsetX, y: data.offsetY };
-		},
-	} as DragOptions;
-
-	let key = 0;
-
-	$: {
-		key;
-
-		finalOptions.position = position = getDefaultPosition();
+		children?: Snippet;
+		caption?: Snippet;
+		pos?: Snippet<[x: number, y: number]>;
 	}
+
+	let {
+		options = {},
+		position = $bindable(getDefaultPosition()),
+		customClass = '',
+		size = '8rem',
+		draggableEl = $bindable(undefined),
+		styledCaption = true,
+		containerEl = $bindable(undefined),
+
+		children,
+		caption,
+		pos: positionSnippet,
+	}: Props = $props();
+
+	let key = $state(0);
 
 	if (browser)
 		if ('paintWorklet' in CSS) {
@@ -37,19 +41,8 @@
 			CSS.paintWorklet.addModule(squircle);
 		}
 
-	$: {
-		options; // watch
-
-		if (draggableEl) {
-			setPawCursor();
-		}
-	}
-
 	type IncludeExclude = (HTMLElement | undefined)[] | undefined;
-	function getPawableElements(): [
-		include: IncludeExclude,
-		exclude: IncludeExclude
-	] {
+	function getPawableElements(): [include: IncludeExclude, exclude: IncludeExclude] {
 		const arr: [IncludeExclude, IncludeExclude] = [, undefined];
 
 		for (const option of ['handle', 'cancel'] as const) {
@@ -60,9 +53,7 @@
 			if (optionVal) {
 				// Get all the handle elements inside the draggableEl based on `options.handle`
 				if (typeof optionVal === 'string')
-					arr[idx] = Array.from<HTMLElement>(
-						draggableEl!.querySelectorAll(optionVal)
-					);
+					arr[idx] = Array.from<HTMLElement>(draggableEl!.querySelectorAll(optionVal));
 				else if (optionVal instanceof HTMLElement) arr[idx] = [optionVal];
 				else {
 					arr[idx] = optionVal;
@@ -88,6 +79,28 @@
 	function getDefaultPosition() {
 		return options.position ?? options.defaultPosition ?? { x: 0, y: 0 };
 	}
+	let finalOptions = $derived({
+		...options,
+		position,
+		onDrag: (data) => {
+			options.onDrag?.(data);
+			position = { x: data.offsetX, y: data.offsetY };
+		},
+	} as DragOptions);
+
+	$effect(() => {
+		key;
+
+		untrack(() => (finalOptions.position = position = getDefaultPosition()));
+	});
+
+	$effect(() => {
+		options; // watch
+
+		if (draggableEl) {
+			setPawCursor();
+		}
+	});
 </script>
 
 <section
@@ -98,24 +111,25 @@
 	{#key key}
 		<div class="parent">
 			<div class="box" bind:this={draggableEl} use:draggable={finalOptions}>
-				<slot />
+				{@render children?.()}
 			</div>
 		</div>
 
-		{#if $$slots.caption}
+		{#if caption}
 			<div class="caption" class:styled={styledCaption}>
-				<slot name="caption" />
+				{@render caption?.()}
 			</div>
 		{/if}
-
 		<div class="offset">
-			<slot name="position" x={position.x} y={position.y}>
+			{#if positionSnippet}
+				{@render positionSnippet(position.x, position.y)}
+			{:else}
 				{position.x}, {position.y}
-			</slot>
+			{/if}
 		</div>
 	{/key}
 
-	<button class="reset" on:click={() => key++} title="Reset">
+	<button class="reset" onclick={() => key++} title="Reset">
 		<IonReloadIcon />
 	</button>
 </section>
@@ -181,7 +195,8 @@
 		background-image: var(--app-color-primary-gradient);
 
 		border-radius: 1.5rem;
-		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035),
+		box-shadow:
+			0px 12.5px 10px rgba(0, 0, 0, 0.035),
 			0px 100px 80px rgba(0, 0, 0, 0.07);
 
 		mask-image: paint(squircle);

@@ -1,38 +1,31 @@
 <script lang="ts">
+	import squircle from '$/worklet/squircle.js?url';
+	import { typingEffect } from '$actions/typingEffect';
+	import { browser } from '$helpers/utils';
 	import { draggable } from '@neodrag/svelte';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
-	import { tweened } from 'svelte/motion';
-	import { typingEffect } from '$actions/typingEffect';
-
-	// @ts-ignore
-	import squircle from '../../worklet/squircle.js?url';
-	// @ts-ignore
+	import { Tween } from 'svelte/motion';
 	import PawIcon from '~icons/mdi/paw';
 
-	import { browser } from 'src/helpers/utils';
+	let heading_text = 'Try dragging the box below';
 
-	let headingText = 'Try dragging the box below';
+	let box_wiggles = $state(true);
 
-	let boxWiggles = true;
+	let show_custom_cursor = true;
 
-	let showCustomCursor = true;
+	let coords_cursor = $state({
+		x: 0,
+		y: 0,
+	});
 
-	let coordsCursor: {
-		x: number;
-		y: number;
-	};
+	let drag_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
 
-	let dragPosition = tweened(
-		{ x: 0, y: 0 },
-		{ easing: expoOut, duration: 1200 }
-	);
+	function handle_mouse_move(e: MouseEvent) {
+		coords_cursor ??= { x: 0, y: 0 };
 
-	function handleMouseMove(e: MouseEvent) {
-		coordsCursor ??= { x: 0, y: 0 };
-
-		coordsCursor.x = e.clientX;
-		coordsCursor.y = e.clientY;
+		coords_cursor.x = e.clientX;
+		coords_cursor.y = e.clientY;
 	}
 
 	onMount(() => {
@@ -43,28 +36,28 @@
 	});
 </script>
 
-<svelte:window on:mousemove={handleMouseMove} />
+<svelte:window onmousemove={handle_mouse_move} />
 
 <div class="container">
-	{#key headingText}
+	{#key heading_text}
 		<p class="h3" class:hidden={false} use:typingEffect={60}>
-			{browser ? headingText : ''}
+			{browser ? heading_text : ''}
 		</p>
 	{/key}
 
 	<div
 		class="box"
-		class:wiggles={boxWiggles}
+		class:wiggles={box_wiggles}
 		use:draggable={{
 			bounds: 'parent',
-			position: $dragPosition,
+			position: drag_position.current,
 			onDragStart: () => {
-				boxWiggles = false;
+				box_wiggles = false;
 			},
 			onDrag: ({ offsetX, offsetY }) =>
-				dragPosition.set({ x: offsetX, y: offsetY }, { duration: 0 }),
+				drag_position.set({ x: offsetX, y: offsetY }, { duration: 0 }),
 			onDragEnd: () => {
-				$dragPosition = { x: 0, y: 0 };
+				drag_position.target = { x: 0, y: 0 };
 			},
 		}}
 	>
@@ -75,9 +68,9 @@
 
 	<div
 		class="cursor"
-		style:transform="translate3d(calc({coordsCursor?.x ?? 0}px - 50%), calc({coordsCursor?.y ??
+		style:transform="translate3d(calc({coords_cursor?.x ?? 0}px - 50%), calc({coords_cursor?.y ??
 			0}px - 50%), 0)"
-		style:--opacity={showCustomCursor && coordsCursor ? 1 : 0}
+		style:--opacity={show_custom_cursor && coords_cursor ? 1 : 0}
 	>
 		<PawIcon style="font-size: 2rem;" />
 	</div>
@@ -162,7 +155,8 @@
 		background-image: var(--app-color-primary-gradient);
 
 		border-radius: 1rem;
-		box-shadow: 0px 12.5px 10px rgba(0, 0, 0, 0.035),
+		box-shadow:
+			0px 12.5px 10px rgba(0, 0, 0, 0.035),
 			0px 100px 80px rgba(0, 0, 0, 0.07);
 
 		mask-image: paint(squircle);
@@ -231,11 +225,7 @@
 			bottom: calc(0.03 * var(--size));
 
 			// width: 61%;
-			min-width: clamp(
-				calc(0.61 * 4rem),
-				calc(0.61 * 20vw),
-				calc(0.61 * 12rem)
-			);
+			min-width: clamp(calc(0.61 * 4rem), calc(0.61 * 20vw), calc(0.61 * 12rem));
 			// height: auto;
 		}
 

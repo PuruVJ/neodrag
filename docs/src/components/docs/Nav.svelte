@@ -4,21 +4,16 @@
 
 	const pathname = globalThis?.location?.pathname ?? '';
 
-	const ariaCurrentVal = (path: string) =>
-		pathname.endsWith(path) ? 'page' : 'false';
+	const aria_current_val = (path: string) => (pathname.endsWith(path) ? 'page' : 'false');
 
-	const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(
-		pathname,
-	)?.[1];
+	const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(pathname)?.[1];
 </script>
 
 <!-- Component should be wrapped in an <aside> or <header> -->
 <div
 	class="nav container"
 	style:--primary={framework ? `var(--app-color-brand-${framework})` : null}
-	style:--primary-hsl={framework
-		? `var(--app-color-brand-${framework}-hsl)`
-		: null}
+	style:--primary-hsl={framework ? `var(--app-color-brand-${framework}-hsl)` : null}
 >
 	<a href="/" class="h3 logo unstyled">
 		<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" />
@@ -31,11 +26,7 @@
 
 			{#each FRAMEWORKS as { name }}
 				<li style="text-transform: capitalize;">
-					<a
-						href={`/docs/${name}`}
-						aria-current={ariaCurrentVal(name)}
-						class="unstyled"
-					>
+					<a href={`/docs/${name}`} aria-current={aria_current_val(name)} class="unstyled">
 						{name}
 					</a>
 				</li>
@@ -49,7 +40,7 @@
 			<li>
 				<a
 					href="/docs/migrating/svelte-drag"
-					aria-current={ariaCurrentVal('/docs/migrating/svelte-drag')}
+					aria-current={aria_current_val('/docs/migrating/svelte-drag')}
 					class="unstyled"
 				>
 					Svelte Drag to Neodrag</a
@@ -58,7 +49,7 @@
 		</ul>
 	</nav>
 
-	<span class="spacer" />
+	<span class="spacer"></span>
 
 	<div class="theme-switcher">
 		<ThemeSwitcher />
@@ -144,10 +135,7 @@
 		}
 
 		&:hover {
-			background-color: hsla(
-				var(--secondary-color-hsl, var(--app-color-primary-hsl)),
-				0.1
-			);
+			background-color: hsla(var(--secondary-color-hsl, var(--app-color-primary-hsl)), 0.1);
 		}
 	}
 
@@ -170,10 +158,7 @@
 
 	.group a {
 		&[aria-current='page'] {
-			background-color: hsla(
-				var(--secondary-color-hsl, var(--app-color-primary-hsl)),
-				0.2
-			);
+			background-color: hsla(var(--secondary-color-hsl, var(--app-color-primary-hsl)), 0.2);
 		}
 	}
 

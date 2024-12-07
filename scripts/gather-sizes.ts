@@ -24,17 +24,17 @@ async function main() {
 				const size = ((await brotliSize(file)) / 1024).toFixed(2);
 
 				return { framework, size };
-			})
+			}),
 		)
 	).reduce(
 		(acc, { framework, size }) => ({
 			...acc,
 			[framework]: {
-				size,
+				size: +size,
 				version: versions.find(({ framework: vFw }) => vFw === framework)?.version,
 			},
 		}),
-		{}
+		{},
 	);
 
 	// Ensure folder if not exists
@@ -46,7 +46,7 @@ async function main() {
 
 	writeFile(
 		new URL('../docs/src/data/sizes.json', import.meta.url),
-		JSON.stringify(contents, null, 2)
+		JSON.stringify(contents, null, 2),
 	);
 }
 

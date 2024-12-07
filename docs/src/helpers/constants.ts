@@ -6,4 +6,4 @@ export const FRAMEWORKS = [
 	{ name: 'vanilla' },
 ] as const;
 
-export type Framework = typeof FRAMEWORKS[number]['name'];
+export type Framework = (typeof FRAMEWORKS)[number]['name'];

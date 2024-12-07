@@ -1,5 +1,5 @@
 ---
-import type { Framework } from 'src/helpers/constants';
+import type { Framework } from '$helpers/constants';
 
 const framework = Astro.url.pathname.split('/').filter(Boolean).at(-1) as Framework;
 ---

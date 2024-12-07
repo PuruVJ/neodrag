@@ -1,6 +1,4 @@
 ---
-import LogosGithubIcon from '~icons/logos/github-icon';
-
 import ExploreFrameworks from '$components/home/ExploreFrameworks.svelte';
 import BundleSizeFeature from '$components/home/features/bundle-sizes/BundleSizeFeature.svelte';
 import FeatureRichFeature from '$components/home/features/feature-rich/FeatureRichFeature.svelte';
@@ -8,6 +6,7 @@ import MultipleFrameworksFeature from '$components/home/features/multiple-framew
 import SSRFriendlyFeature from '$components/home/features/ssr-friendly/SSRFriendlyFeature.svelte';
 import HeroExample from '$components/home/HeroExample.svelte';
 import Layout from '$layouts/Layout.astro';
+import LogosGithubIcon from '~icons/logos/github-icon';
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
@@ -20,8 +19,7 @@ import Layout from '$layouts/Layout.astro';
 				<br /><br /><br />
 
 				<div class="group">
-					<a href="/docs">Getting Started</a>
-					<!-- TODO -->
+					<a href="/docs/svelte">Getting Started</a>
 					<a href="https://github.com/puruvj/neodrag">
 						<LogosGithubIcon /> Github
 					</a>
@@ -73,6 +71,7 @@ import Layout from '$layouts/Layout.astro';
 		padding: 1rem 0;
 
 		min-height: 100vh;
+		width: 100% !important;
 
 		.demo {
 			height: 100%;
@@ -146,6 +145,9 @@ import Layout from '$layouts/Layout.astro';
 
 	main {
 		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 
 		z-index: 2;
 
@@ -158,7 +160,7 @@ import Layout from '$layouts/Layout.astro';
 		display: flex;
 		flex: 1 1 auto;
 
-		width: 100%;
+		width: 80%;
 
 		margin-bottom: clamp(3rem, 100vw, 10rem);
 

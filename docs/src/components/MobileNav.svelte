@@ -1,54 +1,49 @@
 <script lang="ts">
-	// @ts-ignore
-	import MenuIcon from '~icons/ri/menu-3-fill';
-	//@ts-ignore
-	import CloseIcon from '~icons/material-symbols/close-rounded';
-
+	import { portal } from '$actions/portal';
+	import { theme } from '$state/user-preferences.svelte.ts';
 	import { inview } from 'svelte-inview';
 	import { expoOut } from 'svelte/easing';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import { fade, slide } from 'svelte/transition';
-
+	import CloseIcon from '~icons/material-symbols/close-rounded';
+	import MenuIcon from '~icons/ri/menu-3-fill';
 	import Nav from './docs/Nav.svelte';
 
-	import { portal } from '$actions/portal';
-	import { prefersReducedMotion, theme } from '$stores/user-preferences.store';
+	let shadow = $state(false);
+	let is_nav_open = $state(false);
 
-	let shadow = false;
-
-	let isNavOpen = false;
-
-	$: navTransition = !$prefersReducedMotion ? slide : fade;
+	let nav_transition = $derived(!prefersReducedMotion.current ? slide : fade);
 </script>
 
 <div
 	class="view-judge"
 	use:portal={'#docs-container main'}
 	use:inview={{ threshold: 0.1 }}
-	on:change={() => (shadow = false)}
-	on:leave={() => (shadow = true)}
-/>
+	oninview_change={() => (shadow = false)}
+	oninview_leave={() => (shadow = true)}
+></div>
 
-<header class:shadow class:dark={$theme === 'dark'}>
+<header class:shadow class:dark={theme.current === 'dark'}>
 	<a href="/" class="logo unstyled">
 		<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" />
 		<p class="h3">Neodrag</p>
 	</a>
 
-	<span class="spacer" />
+	<span class="spacer"></span>
 
-	<button on:click={() => (isNavOpen = true)}>
+	<button onclick={() => (is_nav_open = true)}>
 		<MenuIcon />
 	</button>
 </header>
 
-{#if isNavOpen}
-	<!-- svelte-ignore a11y-autofocus -->
+{#if is_nav_open}
+	<!-- svelte-ignore a11y_autofocus -->
 	<nav
-		class:dark={$theme === 'dark' && shadow}
+		class:dark={theme.current === 'dark' && shadow}
 		autofocus
-		transition:navTransition={{ easing: expoOut, duration: 800 }}
+		transition:nav_transition={{ easing: expoOut, duration: 800 }}
 	>
-		<button class="close-button" on:click={() => (isNavOpen = false)}>
+		<button class="close-button" onclick={() => (is_nav_open = false)}>
 			<CloseIcon />
 		</button>
 		<Nav />
@@ -87,7 +82,9 @@
 		transition-property: background-color, box-shadow;
 
 		&.shadow {
-			box-shadow: 0 3.4px 6.3px #00000019, 0 27px 50px #0000001a;
+			box-shadow:
+				0 3.4px 6.3px #00000019,
+				0 27px 50px #0000001a;
 			background-color: var(--app-color-scrolling-navbar);
 		}
 	}

@@ -10,9 +10,9 @@
 	<div class="cancel">This won't drag</div>
 	<div class="cancel">This won't drag</div>
 
-	<svelte:fragment slot="caption">
+	{#snippet caption()}
 		Multiple <code>cancel</code> passed as element.
-	</svelte:fragment>
+	{/snippet}
 </OptionsDemoBase>
 
 <style lang="scss">

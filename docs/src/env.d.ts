@@ -1,16 +1,6 @@
 /// <reference types="astro/client" />
-
-declare module 'virtual:icons/*' {
-	export { SvelteComponent as default } from 'svelte';
-}
-
-declare module '~icons/*' {
-	import { SvelteComponentTyped } from 'svelte';
-
-	export default class extends SvelteComponentTyped<
-		import('svelte/elements').SVGAttributes<SVGSVGElement>
-	> {}
-}
+/// <reference types="svelte" />
+/// <reference types="unplugin-icons/types/svelte" />
 
 type ObjectKeys<Obj> = Obj extends object
 	? (keyof Obj)[]
@@ -22,27 +12,18 @@ type ObjectKeys<Obj> = Obj extends object
 
 interface ObjectConstructor {
 	keys<ObjectType>(o: ObjectType): ObjectKeys<ObjectType>;
-	entries<ObjType>(
-		o: ObjType,
-	): [Unpacked<ObjectKeys<ObjType>>, ObjType[keyof ObjType]][];
+	entries<ObjType>(o: ObjType): [Unpacked<ObjectKeys<ObjType>>, ObjType[keyof ObjType]][];
 }
 
 interface Storage {
 	getItem<T extends string>(key: string): T | null;
 }
 
-type Unpacked<ArrayLike> = ArrayLike extends (infer RootType)[]
-	? RootType
-	: ArrayLike;
+type Unpacked<ArrayLike> = ArrayLike extends (infer RootType)[] ? RootType : ArrayLike;
 
-type Unpromisify<PromiseLike> = PromiseLike extends Promise<infer RootType>
-	? RootType
-	: PromiseLike;
+type Unpromisify<PromiseLike> =
+	PromiseLike extends Promise<infer RootType> ? RootType : PromiseLike;
 
 interface Array<T> {
-	fill<T extends any>(
-		value: T,
-		start?: number | undefined,
-		end?: number | undefined,
-	): T[];
+	fill<T extends any>(value: T, start?: number | undefined, end?: number | undefined): T[];
 }

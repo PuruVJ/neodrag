@@ -6,11 +6,16 @@
 	import PrevArrowIcon from '~icons/material-symbols/arrow-back-rounded';
 	//@ts-ignore
 	import NextArrowIcon from '~icons/material-symbols/arrow-forward-rounded';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
 
-	let prevNavButtonVisible = false;
-	let nextNavButtonVisible = false;
+	let { children }: Props = $props();
 
-	let optionsExamplesContainerEl: HTMLElement;
+	let prevNavButtonVisible = $state(false);
+	let nextNavButtonVisible = $state(false);
+
+	let optionsExamplesContainerEl: HTMLElement = $state();
 
 	// let expanded = !browser;
 
@@ -32,8 +37,7 @@
 	}
 
 	function scroll(direction: 'prev' | 'next') {
-		const numChildren =
-			optionsExamplesContainerEl.children.item(0)!.children.length;
+		const numChildren = optionsExamplesContainerEl.children.item(0)!.children.length;
 		const scrollWidth = optionsExamplesContainerEl.scrollWidth;
 
 		const distanceToScroll = scrollWidth / numChildren;
@@ -54,7 +58,7 @@
 	<button
 		class="nav-button prev"
 		class:visible={prevNavButtonVisible}
-		on:click={() => scroll('prev')}
+		onclick={() => scroll('prev')}
 	>
 		<PrevArrowIcon />
 	</button>
@@ -63,17 +67,17 @@
 		class="container options-examples"
 		transition:slide={{ duration: 500 }}
 		bind:this={optionsExamplesContainerEl}
-		on:scroll={handleScroll}
+		onscroll={handleScroll}
 	>
 		<!-- Element needed for astro bug, astro puts this at the end of `.container` rather than at the right place -->
 
-		<slot />
+		{@render children?.()}
 	</section>
 
 	<button
 		class="nav-button next"
 		class:visible={nextNavButtonVisible}
-		on:click={() => scroll('next')}
+		onclick={() => scroll('next')}
 	>
 		<NextArrowIcon />
 	</button>
@@ -133,8 +137,10 @@
 		width: clamp(2rem, 10vw, 4rem);
 
 		border-radius: 50%;
-		box-shadow: 0px 3px 5px -1px rgb(0 0 0 / 20%),
-			0px 6px 10px 0px rgb(0 0 0 / 14%), 0px 1px 18px 0px rgb(0 0 0 / 12%);
+		box-shadow:
+			0px 3px 5px -1px rgb(0 0 0 / 20%),
+			0px 6px 10px 0px rgb(0 0 0 / 14%),
+			0px 1px 18px 0px rgb(0 0 0 / 12%);
 
 		transform: translateY(-50%) scale3d(var(--scale), var(--scale), 1);
 
@@ -142,15 +148,19 @@
 		transition-property: transform, box-shadow, background-color;
 
 		&:hover {
-			box-shadow: 0px 5px 5px -3px rgb(0 0 0 / 20%),
-				0px 8px 10px 1px rgb(0 0 0 / 14%), 0px 3px 14px 2px rgb(0 0 0 / 12%);
+			box-shadow:
+				0px 5px 5px -3px rgb(0 0 0 / 20%),
+				0px 8px 10px 1px rgb(0 0 0 / 14%),
+				0px 3px 14px 2px rgb(0 0 0 / 12%);
 
 			background-color: hsla(var(--app-color-dark-hsl), 0.8);
 		}
 
 		&:active {
-			box-shadow: 0px 7px 8px -4px rgb(0 0 0 / 20%),
-				0px 12px 17px 2px rgb(0 0 0 / 14%), 0px 5px 22px 4px rgb(0 0 0 / 12%);
+			box-shadow:
+				0px 7px 8px -4px rgb(0 0 0 / 20%),
+				0px 12px 17px 2px rgb(0 0 0 / 14%),
+				0px 5px 22px 4px rgb(0 0 0 / 12%);
 
 			background-color: hsla(var(--app-color-dark-hsl), 1);
 		}

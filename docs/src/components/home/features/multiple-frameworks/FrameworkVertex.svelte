@@ -1,53 +1,54 @@
 <script lang="ts">
 	import { portal } from '$actions/portal';
 	import { draggable, type DragEventData } from '@neodrag/svelte';
-	import type { Framework } from 'src/helpers/constants';
-	import { createEventDispatcher, onDestroy } from 'svelte';
+	import type { Framework } from '$helpers/constants';
 	import { expoOut } from 'svelte/easing';
-	import { tweened } from 'svelte/motion';
+	import { Tween } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
+	import { untrack } from 'svelte';
 
-	export let logoEl: HTMLImageElement;
-	export let framework: Framework;
-	export let resetFns: Record<Framework, () => void>;
+	type Props = {
+		logoEl: HTMLImageElement;
+		framework: Framework;
+		resetFns: Record<Framework, () => void>;
+		children?: import('svelte').Snippet;
 
-	const dispatch = createEventDispatcher<{
-		select: { framework: Framework };
-		'drag-start': DragEventData;
-		drag: DragEventData;
-		'drag-end': DragEventData;
-	}>();
-
-	$: if (framework) {
-		resetFns[framework] = reset;
-	}
-
-	const reset = () => {
-		$draggablePosition = { x: 0, y: 0 };
+		// Events
+		onselect?: (data: { framework: Framework }) => void;
+		on_drag_start?: (data: DragEventData) => void;
+		on_drag?: (data: DragEventData) => void;
+		on_drag_end?: (data: DragEventData) => void;
 	};
 
-	let buttonEl: HTMLButtonElement;
+	let {
+		logoEl,
+		framework,
+		resetFns = $bindable(),
+		children,
 
-	let lineProperties = {
+		on_drag,
+		on_drag_end,
+		on_drag_start,
+		onselect,
+	}: Props = $props();
+
+	const reset = () => {
+		draggable_position.target = { x: 0, y: 0 };
+	};
+
+	let button_el = $state<HTMLButtonElement>();
+
+	let line_properties = $state({
 		thickness: 2,
 		left: 0,
 		top: 0,
 		width: 0,
 		angle: 0,
-	};
+	});
 
-	let draggablePosition = tweened(
-		{ x: 0, y: 0 },
-		{ easing: expoOut, duration: 1200 },
-	);
+	let draggable_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
 
-	$: {
-		$draggablePosition;
-
-		if (buttonEl && logoEl) updateLinePosition(buttonEl, logoEl);
-	}
-
-	function getOffset(el: HTMLElement) {
+	function get_offset(el: HTMLElement) {
 		const rect = el.getBoundingClientRect();
 
 		return {
@@ -60,17 +61,17 @@
 
 	const THICKNESS = 2;
 
-	function updateLinePosition(node: HTMLElement, rootEl: HTMLElement) {
+	function update_line_position(node: HTMLElement, rootEl: HTMLElement) {
 		if (!rootEl) return;
 
-		const rootRect = getOffset(rootEl);
-		const nodeRect = getOffset(node);
+		const root_rect = get_offset(rootEl);
+		const node_rect = get_offset(node);
 
-		const x1 = rootRect.left + rootRect.width / 2;
-		const y1 = rootRect.top + rootRect.height / 2;
+		const x1 = root_rect.left + root_rect.width / 2;
+		const y1 = root_rect.top + root_rect.height / 2;
 		// top right
-		const x2 = nodeRect.left + nodeRect.width / 2;
-		const y2 = nodeRect.top + nodeRect.height / 2;
+		const x2 = node_rect.left + node_rect.width / 2;
+		const y2 = node_rect.top + node_rect.height / 2;
 		// distance
 		const length = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 
@@ -79,7 +80,7 @@
 		// angle
 		const angle = Math.atan2(y1 - y2, x1 - x2) * (180 / Math.PI);
 
-		lineProperties = {
+		line_properties = {
 			thickness: THICKNESS,
 			left: cx,
 			top: cy,
@@ -88,25 +89,23 @@
 		};
 	}
 
-	function connect(node: HTMLElement, rootEl: HTMLElement) {
+	function connect(node: HTMLElement, root_el: HTMLElement) {
 		// TODO: Investigate replacing with resizeobserver
-		window.addEventListener('resize', () => updateLinePosition(node, rootEl));
+		window.addEventListener('resize', () => update_line_position(node, root_el));
 
 		return {
 			update(newRootEl: HTMLElement) {
-				rootEl = newRootEl;
-				updateLinePosition(node, rootEl);
+				root_el = newRootEl;
+				update_line_position(node, root_el);
 			},
 			destroy: () => {
-				window.removeEventListener('resize', () =>
-					updateLinePosition(node, rootEl),
-				);
+				window.removeEventListener('resize', () => update_line_position(node, root_el));
 			},
 		};
 	}
 
 	function selectFramework() {
-		const fn = () => dispatch('select', { framework });
+		const fn = () => onselect?.({ framework });
 
 		// TODO
 		// if (lastDraggingTime === null) return fn();
@@ -118,38 +117,45 @@
 		fn();
 	}
 
-	onDestroy(() => {
+	$effect(() => {
 		if (framework) {
-			resetFns[framework] = () => {};
+			resetFns[framework] = reset;
 		}
+
+		return () => {
+			resetFns[framework] = () => {};
+		};
+	});
+
+	$effect(() => {
+		draggable_position.current;
+
+		if (button_el && logoEl) untrack(() => update_line_position(button_el!, logoEl));
 	});
 </script>
 
 <button
 	data-paw-cursor="true"
-	bind:this={buttonEl}
+	bind:this={button_el}
 	use:draggable={{
-		position: $draggablePosition,
+		position: draggable_position.current,
 		onDragStart: (data) => {
-			dispatch('drag-start', data);
+			on_drag_start?.(data);
 		},
 		onDrag: (data) => {
-			dispatch('drag', data);
-			draggablePosition.set(
-				{ x: data.offsetX, y: data.offsetY },
-				{ duration: 0 },
-			);
+			on_drag?.(data);
+			draggable_position.set({ x: data.offsetX, y: data.offsetY }, { duration: 0 });
 		},
 		onDragEnd: (data) => {
-			dispatch('drag-end', data);
-			updateLinePosition(buttonEl, logoEl);
+			on_drag_end?.(data);
+			update_line_position(button_el!, logoEl);
 		},
 	}}
 	use:connect={logoEl}
-	on:click={selectFramework}
+	onclick={selectFramework}
 >
 	<span>
-		<slot />
+		{@render children?.()}
 	</span>
 </button>
 
@@ -158,14 +164,14 @@
 		class="line"
 		data-logo-framework-connector
 		data-framework={framework}
-		style:--top="{lineProperties.top}px"
-		style:--left="{lineProperties.left}px"
-		style:--length="{lineProperties.width}px"
-		style:--thickness="{lineProperties.thickness}px"
-		style:--angle="{lineProperties.angle}deg"
+		style:--top="{line_properties.top}px"
+		style:--left="{line_properties.left}px"
+		style:--length="{line_properties.width}px"
+		style:--thickness="{line_properties.thickness}px"
+		style:--angle="{line_properties.angle}deg"
 		use:portal={'body'}
 		in:fade={{ delay: 1000 }}
-	/>
+	></div>
 {/if}
 
 <style lang="scss">

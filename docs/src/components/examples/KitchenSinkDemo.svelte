@@ -1,45 +1,45 @@
 <script lang="ts">
 	import { draggable, type DragOptions } from '@neodrag/svelte';
-	import { browser } from 'src/helpers/utils';
+	import { browser } from '$helpers/utils';
 	//@ts-ignore
-	import squircle from 'src/worklet/squircle?url';
+	import squircle from '$/worklet/squircle?url';
 	import { style } from 'svelte-body';
 	import { expoOut, sineIn } from 'svelte/easing';
-	import { tweened } from 'svelte/motion';
+	import { Tween } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
 
-	let reset = 0;
+	let reset = $state(0);
 
-	$: {
+	$effect(() => {
 		reset;
 
-		trackMyPosition = {
+		track_my_position = {
 			x: 0,
 			y: 0,
 		};
-	}
+	});
 
-	let trackMyPosition = {
+	let track_my_position = $state({
 		x: 0,
 		y: 0,
-	};
+	});
 
-	let highlightParent = false;
-	let hightlightBody = false;
-	let showMarkers = false;
+	let highlight_parent = $state(false);
+	let hightlight_body = $state(false);
+	let show_markers = $state(false);
 
-	let coordBounds = {
+	let coord_bounds = {
 		top: 100,
 		left: 200,
 		bottom: 200,
 		right: 100,
 	};
 
-	let isBackdropVisible = false;
+	let is_backdrop_visible = $state(false);
 
-	let zIndices = Array.from<number>({ length: 15 }).fill(0);
+	let z_indices = $state(Array.from<number>({ length: 15 }).fill(0));
 
-	function getNodeIndex(node: HTMLElement) {
+	function get_node_index(node: HTMLElement) {
 		return Array.from(node.parentNode?.children!).indexOf(node);
 	}
 
@@ -48,46 +48,41 @@
 	 * it reduces z index of all of them by the minimum z index of all elements.
 	 * @param node
 	 */
-	function updateZIndex(node: HTMLElement) {
-		const index = getNodeIndex(node);
-		zIndices[index] = Math.max(...zIndices) + 1;
+	function update_z_index(node: HTMLElement) {
+		const index = get_node_index(node);
+		z_indices[index] = Math.max(...z_indices) + 1;
 
 		// get the lowest non zero index from the z index array
-		const lowestZIndex = zIndices.reduce((acc, curr) => {
+		const lowest_z_index = z_indices.reduce((acc, curr) => {
 			if (curr === 0) return acc;
 			return Math.min(acc, curr);
 		}, Infinity);
 
-		if (zIndices[index] > zIndices.length) {
-			zIndices = zIndices.map((z) =>
-				z >= lowestZIndex ? z - lowestZIndex : z,
-			);
+		if (z_indices[index] > z_indices.length) {
+			z_indices = z_indices.map((z) => (z >= lowest_z_index ? z - lowest_z_index : z));
 		}
 	}
 
-	const dragHandlers: Pick<
-		DragOptions,
-		'onDrag' | 'onDragStart' | 'onDragEnd'
-	> = {
+	const drag_handlers: Pick<DragOptions, 'onDrag' | 'onDragStart' | 'onDragEnd'> = {
 		onDrag: ({ rootNode }) => {
-			isBackdropVisible = true;
+			is_backdrop_visible = true;
 			rootNode.style.zIndex = '20';
 		},
 		onDragEnd: ({ rootNode }) => {
-			isBackdropVisible = false;
+			is_backdrop_visible = false;
 
 			setTimeout(() => {
-				updateZIndex(rootNode);
+				update_z_index(rootNode);
 			}, 200);
 		},
 	};
 
-	let returnToPositionVal = {
+	let return_to_position_val = $state({
 		x: 0,
 		y: 0,
-	};
+	});
 
-	let returnToPositionTransitionVal = tweened(
+	let return_to_position_transition_val = new Tween(
 		{
 			x: 0,
 			y: 0,
@@ -104,45 +99,45 @@
 
 <svelte:body
 	use:style={{
-		boxShadow: hightlightBody ? 'inset 0 0 0 2px var(--app-color-primary)' : '',
+		boxShadow: hightlight_body ? 'inset 0 0 0 2px var(--app-color-primary)' : '',
 	}}
 />
 
-{#if isBackdropVisible || showMarkers}
-	<div class="backdrop" transition:fade={{ duration: 200, easing: sineIn }} />
+{#if is_backdrop_visible || show_markers}
+	<div class="backdrop" transition:fade={{ duration: 200, easing: sineIn }}></div>
 {/if}
 
 <div
 	class="markers"
-	class:visible={showMarkers}
-	style:--top="{coordBounds.top}px"
-	style:--right="{coordBounds.right}px"
-	style:--bottom="{coordBounds.bottom}px"
-	style:--left="{coordBounds.left}px"
+	class:visible={show_markers}
+	style:--top="{coord_bounds.top}px"
+	style:--right="{coord_bounds.right}px"
+	style:--bottom="{coord_bounds.bottom}px"
+	style:--left="{coord_bounds.left}px"
 >
 	<div class="hider">You can only drag it within these constraints</div>
 
 	<div class="top">
-		<span>{coordBounds.top}</span>
+		<span>{coord_bounds.top}</span>
 	</div>
 	<div class="right">
-		<span>{coordBounds.right}</span>
+		<span>{coord_bounds.right}</span>
 	</div>
 	<div class="bottom">
-		<span>{coordBounds.bottom}</span>
+		<span>{coord_bounds.bottom}</span>
 	</div>
 	<div class="left">
-		<span>{coordBounds.left}</span>
+		<span>{coord_bounds.left}</span>
 	</div>
 </div>
 
 {#key reset}
-	<div class="examples-container" class:highlight={highlightParent}>
+	<div class="examples-container" class:highlight={highlight_parent}>
 		<div
 			class="box"
 			data-paw-cursor="true"
-			style:z-index={zIndices[0]}
-			use:draggable={{ ...dragHandlers }}
+			style:z-index={z_indices[0]}
+			use:draggable={{ ...drag_handlers }}
 		>
 			I will drag in all directions
 		</div>
@@ -150,89 +145,85 @@
 		<div
 			class="box"
 			data-paw-cursor="true"
-			style:z-index={zIndices[1]}
-			use:draggable={{ axis: 'x', ...dragHandlers }}
+			style:z-index={z_indices[1]}
+			use:draggable={{ axis: 'x', ...drag_handlers }}
 		>
 			I will drag horizontally
 		</div>
 
 		<div
 			class="box"
-			style:z-index={zIndices[2]}
+			style:z-index={z_indices[2]}
 			data-paw-cursor="true"
-			use:draggable={{ axis: 'y', ...dragHandlers }}
+			use:draggable={{ axis: 'y', ...drag_handlers }}
 		>
 			I will drag vertically
 		</div>
 
 		<div
 			class="box"
-			style:z-index={zIndices[3]}
+			style:z-index={z_indices[3]}
 			data-paw-cursor="true"
-			use:draggable={{ axis: 'none', ...dragHandlers }}
+			use:draggable={{ axis: 'none', ...drag_handlers }}
 		>
 			<span><code>axis: none</code> disables dragging</span>
 		</div>
 
 		<div
 			class="box track-position"
-			style:z-index={zIndices[4]}
+			style:z-index={z_indices[4]}
 			data-paw-cursor="true"
 			use:draggable={{
-				...dragHandlers,
+				...drag_handlers,
 				onDrag: ({ offsetX, offsetY, rootNode, currentNode }) => {
-					dragHandlers.onDrag?.({ offsetX, offsetY, rootNode, currentNode });
-					trackMyPosition = { x: offsetX, y: offsetY };
+					drag_handlers.onDrag?.({ offsetX, offsetY, rootNode, currentNode });
+					track_my_position = { x: offsetX, y: offsetY };
 				},
 			}}
 		>
 			I track my position:
-			<code>x: {trackMyPosition.x} <br /> y: {trackMyPosition.y}</code>
+			<code>x: {track_my_position.x} <br /> y: {track_my_position.y}</code>
 		</div>
 
 		<div
 			class="box single-handle"
-			style:z-index={zIndices[5]}
-			use:draggable={{ handle: '.handle', ...dragHandlers }}
+			style:z-index={z_indices[5]}
+			use:draggable={{ handle: '.handle', ...drag_handlers }}
 		>
-			<button class="handle" data-paw-cursor="true" data-paw-color="light">
-				Drag here
-			</button>
+			<button class="handle" data-paw-cursor="true" data-paw-color="light"> Drag here </button>
 
 			I can only be dragged by the handle 👆
 		</div>
 
 		<div
 			class="box multiple-handles"
-			style:z-index={zIndices[6]}
-			use:draggable={{ handle: '.handle', ...dragHandlers }}
+			style:z-index={z_indices[6]}
+			use:draggable={{ handle: '.handle', ...drag_handlers }}
 		>
 			I can be dragged with all the handles
 
-			<div class="handle" data-paw-cursor="true" />
-			<div class="handle" data-paw-cursor="true" />
-			<div class="handle" data-paw-cursor="true" />
-			<div class="handle" data-paw-cursor="true" />
+			<div class="handle" data-paw-cursor="true"></div>
+			<div class="handle" data-paw-cursor="true"></div>
+			<div class="handle" data-paw-cursor="true"></div>
+			<div class="handle" data-paw-cursor="true"></div>
 		</div>
 
 		<div
 			class="box"
-			style:z-index={zIndices[7]}
+			style:z-index={z_indices[7]}
 			data-paw-cursor="true"
-			use:draggable={{ cancel: '.cancel', ...dragHandlers }}
+			use:draggable={{ cancel: '.cancel', ...drag_handlers }}
 		>
 			I can be dragged anywhere
 
-			<button class="cancel" data-paw-cursor="false">
-				except for this box
-			</button>
+			<button class="cancel" data-paw-cursor="false"> except for this box </button>
 		</div>
 
 		<div
 			class="box"
 			data-paw-cursor="true"
-			style:z-index={zIndices[8]}
-			use:draggable={{ grid: [25, 25], ...dragHandlers }}
+			style:z-index={z_indices[8]}
+			use:draggable={{ grid: [25, 25], ...drag_handlers }}
 		>
 			I snap to 25x25 grid
 		</div>
@@ -240,8 +231,8 @@
 		<div
 			class="box"
 			data-paw-cursor="true"
-			style:z-index={zIndices[9]}
-			use:draggable={{ grid: [100, 25], ...dragHandlers }}
+			style:z-index={z_indices[9]}
+			use:draggable={{ grid: [100, 25], ...drag_handlers }}
 		>
 			I snap to 100x25 grid
 		</div>
@@ -249,19 +240,19 @@
 		<div
 			class="box"
 			data-paw-cursor="true"
-			style:z-index={zIndices[10]}
+			style:z-index={z_indices[10]}
 			use:draggable={{
 				bounds: 'parent',
 				onDrag: ({ rootNode }) => {
-					highlightParent = true;
+					highlight_parent = true;
 					rootNode.style.zIndex = '20';
 				},
 
 				onDragEnd: ({ rootNode }) => {
-					highlightParent = false;
+					highlight_parent = false;
 
 					setTimeout(() => {
-						updateZIndex(rootNode);
+						update_z_index(rootNode);
 					}, 200);
 				},
 			}}
@@ -272,18 +263,18 @@
 		<div
 			class="box"
 			data-paw-cursor="true"
-			style:z-index={zIndices[11]}
+			style:z-index={z_indices[11]}
 			use:draggable={{
 				bounds: 'body',
 				onDrag: ({ rootNode }) => {
-					hightlightBody = true;
+					hightlight_body = true;
 					rootNode.style.zIndex = '20';
 				},
 				onDragEnd: ({ rootNode }) => {
-					hightlightBody = false;
+					hightlight_body = false;
 
 					setTimeout(() => {
-						updateZIndex(rootNode);
+						update_z_index(rootNode);
 					}, 200);
 				},
 			}}
@@ -294,18 +285,18 @@
 		<div
 			class="box"
 			data-paw-cursor="true"
-			style:z-index={zIndices[12]}
+			style:z-index={z_indices[12]}
 			use:draggable={{
-				bounds: coordBounds,
+				bounds: coord_bounds,
 				onDrag: ({ rootNode }) => {
-					showMarkers = true;
+					show_markers = true;
 					rootNode.style.zIndex = '20';
 				},
 				onDragEnd: ({ rootNode }) => {
-					showMarkers = false;
+					show_markers = false;
 
 					setTimeout(() => {
-						updateZIndex(rootNode);
+						update_z_index(rootNode);
 					}, 200);
 				},
 			}}
@@ -317,16 +308,16 @@
 		<div
 			class="box"
 			data-paw-cursor="true"
-			style:z-index={zIndices[13]}
+			style:z-index={z_indices[13]}
 			use:draggable={{
-				position: returnToPositionVal,
+				position: return_to_position_val,
 				onDrag: (data) => {
-					dragHandlers.onDrag?.(data);
-					returnToPositionVal = { x: data.offsetX, y: data.offsetY };
+					drag_handlers.onDrag?.(data);
+					return_to_position_val = { x: data.offsetX, y: data.offsetY };
 				},
 				onDragEnd: (data) => {
-					dragHandlers.onDragEnd?.(data);
-					returnToPositionVal = { x: 0, y: 0 };
+					drag_handlers.onDragEnd?.(data);
+					return_to_position_val = { x: 0, y: 0 };
 				},
 			}}
 		>
@@ -336,19 +327,19 @@
 		<div
 			class="box"
 			data-paw-cursor="true"
-			style:z-index={zIndices[14]}
+			style:z-index={z_indices[14]}
 			use:draggable={{
-				position: $returnToPositionTransitionVal,
+				position: return_to_position_transition_val.current,
 				onDrag: (data) => {
-					dragHandlers.onDrag?.(data);
-					returnToPositionTransitionVal.set(
+					drag_handlers.onDrag?.(data);
+					return_to_position_transition_val.set(
 						{ x: data.offsetX, y: data.offsetY },
 						{ duration: 0 },
 					);
 				},
 				onDragEnd: (data) => {
-					dragHandlers.onDragEnd?.(data);
-					$returnToPositionTransitionVal = { x: 0, y: 0 };
+					drag_handlers.onDragEnd?.(data);
+					return_to_position_transition_val.target = { x: 0, y: 0 };
 				},
 			}}
 		>
@@ -358,8 +349,8 @@
 		<div
 			class="box"
 			data-paw-cursor="true"
-			style:z-index={zIndices[15]}
-			use:draggable={{ disabled: true, ...dragHandlers }}
+			style:z-index={z_indices[15]}
+			use:draggable={{ disabled: true, ...drag_handlers }}
 		>
 			<code>disabled: true</code>
 
@@ -368,7 +359,7 @@
 	</div>
 {/key}
 
-<button on:click={() => reset++}>Reset examples</button>
+<button onclick={() => reset++}>Reset examples</button>
 
 <style lang="scss">
 	.examples-container {
@@ -691,14 +682,12 @@
 
 				content: '';
 
-				box-shadow: inset var(--marker-size) var(--marker-size) 0px 1px
-					var(--app-color-primary);
+				box-shadow: inset var(--marker-size) var(--marker-size) 0px 1px var(--app-color-primary);
 
 				height: calc(var(--marker-size) * 8);
 				width: calc(var(--marker-size) * 8);
 
-				transform: translate(var(--translate)) rotate(var(--rotate))
-					scale(var(--scale));
+				transform: translate(var(--translate)) rotate(var(--rotate)) scale(var(--scale));
 			}
 		}
 	}

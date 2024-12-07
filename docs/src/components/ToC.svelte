@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { browser, elementsOverlap, waitFor } from '$helpers/utils';
+	import { browser, elements_overlap, wait_for } from '$helpers/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import { expoIn } from 'svelte/easing';
 	import { fade } from 'svelte/transition';
@@ -11,28 +11,26 @@
 		level: number;
 		el: HTMLHeadingElement;
 		length: number;
-	}[] = [];
+	}[] = $state([]);
 
-	let navEl: HTMLElement;
+	let nav_el = $state<HTMLElement>();
 
-	let optionsExamplesContainers: NodeListOf<HTMLElement>;
-	let headingEls: NodeListOf<HTMLHeadingElement>;
-	let scrollableMainEl: HTMLElement;
+	let options_examples_containers: NodeListOf<HTMLElement>;
+	let heading_els: NodeListOf<HTMLHeadingElement>;
+	let scrollable_main_el: HTMLElement;
 
-	let isNavOverlapping = false;
-	let headingIDsHighlighted: string[] = [];
+	let is_nav_overlapping = $state(false);
+	let heading_ids_highlighted: string[] = [];
 
-	let anchorEls: Record<string, HTMLAnchorElement> = {};
+	let anchor_els: Record<string, HTMLAnchorElement> = $state({});
 
 	function getHeadings() {
-		return Array.from(headingEls)
+		return Array.from(heading_els)
 			.map((heading) => {
 				const id = heading.id;
 
 				// Regex to replace \n and \t characters
-				const text =
-					heading.textContent?.replaceAll(/\t/gi, '')?.replaceAll(/\n/gi, '') ??
-					'';
+				const text = heading.textContent?.replaceAll(/\t/gi, '')?.replaceAll(/\n/gi, '') ?? '';
 
 				const level = +heading.tagName[1];
 
@@ -47,32 +45,31 @@
 			.filter((heading) => heading.id !== '');
 	}
 
-	function handleScroll() {
-		for (const el of optionsExamplesContainers) {
-			const isIntersecting = elementsOverlap(el, navEl);
+	function handle_scroll() {
+		for (const el of options_examples_containers) {
+			const is_intersecting = elements_overlap(el, nav_el!);
 
-			if (isIntersecting) {
-				isNavOverlapping = true;
+			if (is_intersecting) {
+				is_nav_overlapping = true;
 				return;
 			}
 		}
 
-		isNavOverlapping = false;
+		is_nav_overlapping = false;
 	}
 
-	const throttledHandleScroll = throttle(100, handleScroll);
+	const throttled_handle_scroll = throttle(100, handle_scroll);
 
 	onMount(async () => {
-		await waitFor(500);
+		await wait_for(500);
 
-		headingEls =
-			document.querySelectorAll<HTMLHeadingElement>('h2, h3, h4, h5, h5');
-		optionsExamplesContainers = document.querySelectorAll<HTMLElement>(
-			'#options-examples-container'
+		heading_els = document.querySelectorAll<HTMLHeadingElement>('h2, h3, h4, h5, h5');
+		options_examples_containers = document.querySelectorAll<HTMLElement>(
+			'#options-examples-container',
 		);
 
-		scrollableMainEl = document.querySelector('main')!;
-		scrollableMainEl?.addEventListener('scroll', throttledHandleScroll);
+		scrollable_main_el = document.querySelector('main')!;
+		scrollable_main_el?.addEventListener('scroll', throttled_handle_scroll);
 
 		headings = getHeadings();
 
@@ -107,31 +104,27 @@
 	});
 
 	onDestroy(() => {
-		scrollableMainEl?.removeEventListener('scroll', throttledHandleScroll);
+		scrollable_main_el?.removeEventListener('scroll', throttled_handle_scroll);
 	});
 </script>
 
-<aside
-	class:hidden={isNavOverlapping}
-	aria-label="Links to sections in this Page"
->
-	<nav bind:this={navEl}>
+<aside class:hidden={is_nav_overlapping} aria-label="Links to sections in this Page">
+	<nav bind:this={nav_el}>
 		{#if headings}
 			<ul in:fade={{ easing: expoIn, duration: 300 }}>
 				{#each headings as { id, level, text, length }}
 					<li
 						data-id={id}
-						class:highlighted={headingIDsHighlighted.includes(id)}
+						class:highlighted={heading_ids_highlighted.includes(id)}
 						style:--level={level - 2}
 					>
-						<a href="#{id}" class="unstyled" bind:this={anchorEls[id]}>{text}</a
-						>
+						<a href="#{id}" class="unstyled" bind:this={anchor_els[id]}>{text}</a>
 						<div
 							class="placeholder"
 							style:--width={browser
-								? anchorEls[id]?.getBoundingClientRect().width + 'px'
+								? anchor_els[id]?.getBoundingClientRect().width + 'px'
 								: length * 0.4 + 'em'}
-						/>
+						></div>
 					</li>
 				{/each}
 			</ul>

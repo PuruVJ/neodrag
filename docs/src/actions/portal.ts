@@ -29,7 +29,7 @@ export function portal(el: HTMLElement, target: HTMLElement | string = 'body') {
 			throw new TypeError(
 				`Unknown portal target type: ${
 					target === null ? 'null' : typeof target
-				}. Allowed types: string (CSS selector) or HTMLElement.`
+				}. Allowed types: string (CSS selector) or HTMLElement.`,
 			);
 		}
 		targetEl.appendChild(el);

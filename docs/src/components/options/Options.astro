@@ -1,6 +1,6 @@
 ---
+import type { MDXInstance } from 'astro';
 import slugify from 'slugify';
-
 import PhLinkThin from '~icons/ph/link-thin';
 
 type OptionsFrontMatter = {
@@ -8,6 +8,8 @@ type OptionsFrontMatter = {
 	type: string;
 	defaultValue: string;
 	shortDescription: string;
+	deprecated?: boolean;
+	deprecatedText?: string;
 };
 
 const ORDER = [
@@ -34,8 +36,10 @@ const ORDER = [
 	'onDragEnd',
 ];
 
-const optionsMD = await Astro.glob<OptionsFrontMatter>(
-	'../../documentation/options/*/+option.mdx'
+const optionsMD = Object.values(
+	import.meta.glob<MDXInstance<OptionsFrontMatter>>('../../documentation/options/*/+option.mdx', {
+		eager: true,
+	}),
 );
 
 function validate() {
@@ -44,17 +48,13 @@ function validate() {
 			.map((o) => o.frontmatter.title)
 			.filter((o) => !ORDER.includes(o));
 
-		throw new Error(
-			`Add \`${excludedOptions.join(', ')}\` properties to ORDER array`
-		);
+		throw new Error(`Add \`${excludedOptions.join(', ')}\` properties to ORDER array`);
 	}
 
 	for (const option of optionsMD) {
 		// @ts-ignore
 		if (!option.shortDescription) {
-			throw new Error(
-				`Add \`shortDescription\` to ${option.frontmatter.title}`
-			);
+			throw new Error(`Add \`shortDescription\` to ${option.frontmatter.title}`);
 		}
 	}
 }
@@ -62,54 +62,46 @@ function validate() {
 validate();
 
 const orderedOptionsMD = ORDER.map(
-	(property) =>
-		optionsMD.find((option) => option.frontmatter.title === property)!
+	(property) => optionsMD.find((option) => option.frontmatter.title === property)!,
 ) as typeof optionsMD & { shortDescription: string }[];
 ---
 
-<section class='options-examples container'>
+<section class="options-examples container">
 	{
 		orderedOptionsMD.map(
-			({
-				Content,
-				frontmatter: { defaultValue, title, type, deprecated, deprecatedText },
-			}) => (
+			({ Content, frontmatter: { defaultValue, title, type, deprecated, deprecatedText } }) => (
 				<>
 					<h3 id={slugify(title)}>
 						{title}
 
 						<a
-							aria-hidden='true'
-							tabindex='-1'
-							class='unstyled heading-anchor'
+							aria-hidden="true"
+							tabindex="-1"
+							class="unstyled heading-anchor"
 							href={`#${slugify(title)}`}
 						>
-							<PhLinkThin
-								style='color: var(--app-color-dark)'
-								width='1em'
-								height='1em'
-							/>
+							<PhLinkThin style="color: var(--app-color-dark)" width="1em" height="1em" />
 						</a>
 					</h3>
 					<p>
 						{deprecated === true ? `⚠️ Deprecated: ${deprecatedText}` : ''}
 						<br />
 						Type:
-						<span class='code-like' style='font-family: var(--app-font-mono)'>
+						<span class="code-like" style="font-family: var(--app-font-mono)">
 							{type}
 						</span>
 						<br />
-						Default Value: <span class='code-like'>{defaultValue}</span>
+						Default Value: <span class="code-like">{defaultValue}</span>
 					</p>
 
 					<Content />
 				</>
-			)
+			),
 		)
 	}
 </section>
 
-<style lang='scss'>
+<style lang="scss">
 	.code-like {
 		font-family: var(--app-font-mono);
 		font-size: 0.8em;

@@ -73,11 +73,10 @@ body.light {
 	--app-color-brand-vanilla-navbar: #fdf5bb;
 
 	--app-font-mono: 'Jetbrains mono', var(--font-mono);
-	--app-font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+	--app-font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+		Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	--app-font-heading: 'Plus Jakarta sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
 		Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-	--app-font-heading: 'Plus Jakarta sans', system-ui, -apple-system,
-		BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-		'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 body.dark {
@@ -148,7 +147,7 @@ body.dark .astro-code span {
 	color: var(--shiki-dark) !important;
 	background-color: var(--shiki-dark-bg) !important;
 	/* Optional, if you also want font styles */
-	font-style: var(--shiki-dark-font-style) ;
-	font-weight: var(--shiki-dark-font-weight) ;
+	font-style: var(--shiki-dark-font-style);
+	font-weight: var(--shiki-dark-font-weight);
 	text-decoration: var(--shiki-dark-text-decoration);
 }

@@ -1,14 +1,15 @@
 ---
-import PawCursor from '$components/PawCursor.svelte';
-import { SEO } from 'astro-seo';
-
 import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/500.css';
 import '@fontsource/jetbrains-mono/600.css';
 import '@fontsource/plus-jakarta-sans/400.css';
 import '@fontsource/plus-jakarta-sans/500.css';
-
 import '../css/globals.scss';
+
+import PawCursor from '$components/PawCursor.svelte';
+import { SEO } from 'astro-seo';
+import { ClientRouter } from 'astro:transitions';
+import ThemeWatcher from './ThemeWatcher.svelte';
 
 export interface Props {
 	title: string;
@@ -16,12 +17,10 @@ export interface Props {
 
 const { title } = Astro.props;
 
-const bodyClass =
-	/\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pathname)?.[1] ??
-	'';
+const body_class = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pathname)?.[1];
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -30,8 +29,10 @@ const bodyClass =
 		<meta name="generator" content={Astro.generator} />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 
+		<ClientRouter />
+
 		<!-- <script>
-			import { theme } from '$stores/user-preferences.store';
+			import { theme } from '$state/user-preferences.store';
 
 			const themeLocal = JSON.parse(localStorage.getItem('neodrag:theme')!);
 
@@ -51,46 +52,34 @@ const bodyClass =
 			});
 		</script> -->
 
-		<meta
-			name="apple-mobile-web-app-status-bar-style"
-			content="black-translucent"
-		/>
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-		<link
-			rel="sitemap"
-			type="application/xml"
-			title="Sitemap"
-			href="/sitemap-index.xml"
-		/>
+		<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap-index.xml" />
 		<title>{title}</title>
-	</head>
 
-	<SEO
-		canonical={`https://www.neodrag.dev${Astro.url.pathname}`}
-		description="Your one stop solution for anything draggable with JavaScript. Adapters for React, Svelte, Vue, SolidJS and JavaScript. Fully TypeScript compliant."
-		openGraph={{
-			basic: {
-				image: 'https://www.neodrag.dev/banner.png',
-				title,
-				type: 'website',
-				url: `https://www.neodrag.dev${Astro.url.pathname}`,
-			},
-		}}
-		twitter={{
-			card: 'summary_large_image',
-			creator: '@puruvjdev',
-			site: 'neodrag.dev',
-		}}
-	/>
+		<SEO
+			canonical={`https://www.neodrag.dev${Astro.url.pathname}`}
+			description="Your one stop solution for anything draggable with JavaScript. Adapters for React, Svelte, Vue, SolidJS and JavaScript. Fully TypeScript compliant."
+			openGraph={{
+				basic: {
+					image: 'https://www.neodrag.dev/banner.png',
+					title,
+					type: 'website',
+					url: `https://www.neodrag.dev${Astro.url.pathname}`,
+				},
+			}}
+			twitter={{
+				card: 'summary_large_image',
+				creator: '@puruvjdev',
+				site: 'neodrag.dev',
+			}}
+		/>
 
-	<body class:list={[bodyClass, bodyClass && 'framework']}>
 		<script is:inline>
 			// Get localstorage value
-			const localTheme =
-				JSON.parse(localStorage.getItem('neodrag:theme')) || 'light';
-			const prefersTheme = window.matchMedia(
-				'(prefers-color-scheme: dark)'
-			).matches;
+			const localTheme = JSON.parse(localStorage.getItem('neodrag:theme')) || 'light';
+
+			const prefersTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 			const theme = localTheme || (prefersTheme ? 'dark' : 'light');
 
@@ -99,10 +88,14 @@ const bodyClass =
 
 			localStorage.setItem('neodrag:theme', JSON.stringify(theme));
 		</script>
+	</head>
+
+	<body data-framework={body_class}>
+		<ThemeWatcher client:load />
 
 		<slot />
 
-		<PawCursor client:only />
+		<PawCursor client:only="svelte" />
 
 		<script type="text/javascript">
 			(function (c, l, a, r, i, t, y) {

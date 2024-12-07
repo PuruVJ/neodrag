@@ -5,7 +5,7 @@
 <OptionsDemoBase options={{ gpuAcceleration: true }}>
 	GPU acceleration on
 
-	<svelte:fragment slot="position" let:x let:y>
+	{#snippet pos(x, y)}
 		<code>transform: translate3d({x}px, {y}px, 0)</code>
-	</svelte:fragment>
+	{/snippet}
 </OptionsDemoBase>
