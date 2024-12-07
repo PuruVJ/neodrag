@@ -2,7 +2,7 @@
 	import squircle from '$/worklet/squircle?url';
 	import { browser } from '$helpers/utils';
 	import { draggable, type DragOptions } from '@neodrag/svelte';
-	import type { Snippet } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import IonReloadIcon from '~icons/ion/reload';
 
 	interface Props {
@@ -96,7 +96,7 @@
 	$effect(() => {
 		key;
 
-		finalOptions.position = position = getDefaultPosition();
+		untrack(() => (finalOptions.position = position = getDefaultPosition()));
 	});
 
 	$effect(() => {
