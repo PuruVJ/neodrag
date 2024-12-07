@@ -17,9 +17,9 @@ export interface Props {
 
 const { title } = Astro.props;
 
-const bodyClass =
-	/\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pathname)?.[1] ??
-	'';
+const body_class = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(
+	Astro.url.pathname
+)?.[1];
 ---
 
 <!doctype html>
@@ -103,7 +103,7 @@ const bodyClass =
 		</script>
 	</head>
 
-	<body data-framework={bodyClass}>
+	<body data-framework={body_class}>
 		<ThemeWatcher client:load />
 
 		<slot />
