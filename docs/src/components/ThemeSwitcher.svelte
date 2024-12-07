@@ -7,17 +7,17 @@
 	import SunnyIcon from '~icons/ion/sunny-outline';
 	import MoonIcon from '~icons/ph/moon-fill';
 
-	let containerWidth = $state(0);
-	let themeSwitcherContainer = $state<HTMLDivElement>();
+	let container_width = $state(0);
+	let theme_switcher_container = $state<HTMLDivElement>();
 
-	let draggableEl = $state<HTMLDivElement>();
+	let draggable_el = $state<HTMLDivElement>();
 
-	const positionX = new Tween(0, { duration: 400, easing: expoOut });
+	const position_x = new Tween(0, { duration: 400, easing: expoOut });
 
 	const mounted = new IsMounted();
 
-	function changeTheme() {
-		if (positionX.current / containerWidth >= 0.5) {
+	function change_theme() {
+		if (position_x.current / container_width >= 0.5) {
 			theme.current = 'dark';
 		} else {
 			theme.current = 'light';
@@ -25,10 +25,10 @@
 	}
 
 	$effect(() => {
-		if (mounted.current && draggableEl)
-			positionX.target =
+		if (mounted.current && draggable_el)
+			position_x.target =
 				theme.current === 'dark'
-					? containerWidth - draggableEl.getBoundingClientRect().width
+					? container_width - draggable_el.getBoundingClientRect().width
 					: 0;
 	});
 </script>
@@ -39,30 +39,30 @@
 		const { clientX } = e;
 
 		// Get difference
-		positionX.target =
+		position_x.target =
 			clientX -
-			themeSwitcherContainer!.getBoundingClientRect().left -
-			draggableEl!.getBoundingClientRect().width / 2;
+			theme_switcher_container!.getBoundingClientRect().left -
+			draggable_el!.getBoundingClientRect().width / 2;
 
-		if (positionX.current / containerWidth >= 0.5) {
-			positionX.target =
-				containerWidth - draggableEl!.getBoundingClientRect().width;
+		if (position_x.current / container_width >= 0.5) {
+			position_x.target =
+				container_width - draggable_el!.getBoundingClientRect().width;
 		} else {
-			positionX.target = 0;
+			position_x.target = 0;
 		}
 
-		changeTheme();
+		change_theme();
 	}}
-	bind:clientWidth={containerWidth}
-	bind:this={themeSwitcherContainer}
+	bind:clientWidth={container_width}
+	bind:this={theme_switcher_container}
 >
 	<button
 		class="theme-button light"
 		class:selected={theme.current === 'light'}
 		data-paw-cursor="true"
 		onclick={() => {
-			positionX.target = 0;
-			changeTheme();
+			position_x.target = 0;
+			change_theme();
 		}}
 	>
 		<SunnyIcon />
@@ -71,24 +71,24 @@
 	<div
 		class="draggable"
 		data-paw-cursor="true"
-		bind:this={draggableEl}
+		bind:this={draggable_el}
 		use:draggable={{
 			axis: 'x',
 			bounds: 'parent',
-			position: { x: positionX.current, y: 0 },
+			position: { x: position_x.current, y: 0 },
 			onDrag: ({ offsetX }) => {
-				positionX.set(offsetX, { duration: 0 });
-				changeTheme();
+				position_x.set(offsetX, { duration: 0 });
+				change_theme();
 			},
 			onDragEnd: ({ offsetX, rootNode }) => {
-				if (offsetX / containerWidth > 0.3) {
-					positionX.target =
-						containerWidth - rootNode.getBoundingClientRect().width;
+				if (offsetX / container_width > 0.3) {
+					position_x.target =
+						container_width - rootNode.getBoundingClientRect().width;
 				} else {
-					positionX.target = 0;
+					position_x.target = 0;
 				}
 
-				changeTheme();
+				change_theme();
 			},
 		}}
 	></div>
@@ -98,9 +98,9 @@
 		class:selected={theme.current === 'dark'}
 		data-paw-cursor="true"
 		onclick={() => {
-			positionX.target =
-				containerWidth - draggableEl!.getBoundingClientRect().width;
-			changeTheme();
+			position_x.target =
+				container_width - draggable_el!.getBoundingClientRect().width;
+			change_theme();
 		}}
 	>
 		<MoonIcon />

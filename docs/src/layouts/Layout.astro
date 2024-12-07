@@ -84,14 +84,12 @@ const bodyClass =
 				site: 'neodrag.dev',
 			}}
 		/>
-	</head>
 
-	<body class:list={[bodyClass, bodyClass && 'framework']}>
-		<ThemeWatcher client:load />
 		<script is:inline>
 			// Get localstorage value
 			const localTheme =
 				JSON.parse(localStorage.getItem('neodrag:theme')) || 'light';
+
 			const prefersTheme = window.matchMedia(
 				'(prefers-color-scheme: dark)'
 			).matches;
@@ -103,6 +101,10 @@ const bodyClass =
 
 			localStorage.setItem('neodrag:theme', JSON.stringify(theme));
 		</script>
+	</head>
+
+	<body class:list={[bodyClass, bodyClass && 'framework']}>
+		<ThemeWatcher client:load />
 
 		<slot />
 
