@@ -372,6 +372,8 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 	const body_style = document.body.style;
 	const node_class_list = node.classList;
 
+	node_class_list.add(defaultClass);
+
 	function set_translate(x_pos = translate_x, y_pos = translate_y) {
 		if (!transform) {
 			if (legacyTranslate) {
@@ -442,8 +444,6 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 
 			if (is_string(handle) && is_string(cancel) && handle === cancel)
 				throw new Error("`handle` selector can't be same as `cancel` selector");
-
-			node_class_list.add(defaultClass);
 
 			drag_els = get_handle_els(handle, node);
 			cancel_els = get_cancel_elements(cancel, node);
