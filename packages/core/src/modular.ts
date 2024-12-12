@@ -31,17 +31,6 @@ export type BaseDragOptions = {
 	}) => undefined | void;
 
 	/**
-	 * Applies `user-select: none` on `<body />` element when dragging,
-	 * to prevent the irritating effect where dragging doesn't happen and the text is selected.
-	 * Applied when dragging starts and removed when it stops.
-	 *
-	 * Can be disabled using this option
-	 *
-	 * @default true
-	 */
-	applyUserSelectHack?: boolean;
-
-	/**
 	 * Disables dragging altogether.
 	 *
 	 * @default false
@@ -155,7 +144,6 @@ type Plugin<PrivateState = any> = {
 
 export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 	let {
-		applyUserSelectHack = true,
 		disabled = false,
 		onDrag,
 		onDragEnd,
@@ -165,7 +153,7 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 		transform,
 	} = options;
 
-	const default_plugins: Plugin[] = [ignoreMultitouch(), classes()];
+	const default_plugins: Plugin[] = [ignoreMultitouch(), classes(), axis(), applyUserSelectHack()];
 
 	let is_interacting = false;
 	let is_dragging = false;
@@ -589,10 +577,51 @@ function classes(
 	};
 }
 
-function axis(value: 'both' | 'x' | 'y' | 'none' = 'both'): Plugin {
+const AXIS_SYMBOL = Symbol('axis');
+// Degree of Freedom X and Y
+function axis(value: 'both' | 'x' | 'y' | 'none' = 'both'): Plugin<{ dfx: boolean; dfy: boolean }> {
 	return {
 		name: 'neodrag:axis',
 
-		setup(ctx) {},
+		setup(ctx) {
+			ctx._[AXIS_SYMBOL] = {
+				dfx: value === 'both' || value === 'x',
+				dfy: value === 'both' || value === 'y',
+			};
+		},
+
+		drag(ctx) {
+			ctx.propose({
+				x: ctx._[AXIS_SYMBOL].dfx ? ctx.proposed.x : null,
+				y: ctx._[AXIS_SYMBOL].dfy ? ctx.proposed.y : null,
+			});
+		},
+	};
+}
+
+const APPLY_USER_SELECT_HACK_SYMBOL = Symbol('apply_user_select_hack');
+function applyUserSelectHack(value: boolean = true): Plugin<{ body_user_select_val: string }> {
+	return {
+		name: 'neodrag:applyUserSelectHack',
+
+		setup(ctx) {
+			ctx._[APPLY_USER_SELECT_HACK_SYMBOL] = { body_user_select_val: '' };
+		},
+
+		dragStart(ctx) {
+			ctx.effect(() => {
+				if (value) {
+					ctx._[APPLY_USER_SELECT_HACK_SYMBOL].body_user_select_val =
+						document.body.style.userSelect;
+					document.body.style.userSelect = 'none';
+				}
+			});
+		},
+
+		dragEnd(ctx) {
+			if (value) {
+				document.body.style.userSelect = ctx._[APPLY_USER_SELECT_HACK_SYMBOL].body_user_select_val;
+			}
+		},
 	};
 }
