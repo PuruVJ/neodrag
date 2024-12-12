@@ -494,6 +494,8 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 			proposals.x = 0;
 			proposals.y = 0;
 
+			fire_svelte_drag_end_event(initial_x, initial_y);
+
 			is_interacting = false;
 
 			reset_state();
