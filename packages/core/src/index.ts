@@ -310,8 +310,8 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 		initial_y = 0;
 
 	// The offset of the client position relative to the node's top-left corner
-	let client_to_node_offsetX = 0,
-		client_to_node_offsetY = 0;
+	let pointer_to_node_offsetX = 0,
+		pointer_to_node_offsetY = 0;
 
 	let { x: x_offset, y: y_offset } = position
 		? { x: position?.x ?? 0, y: position?.y ?? 0 }
@@ -484,8 +484,8 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 			// Only the bounds uses these properties at the moment,
 			// may open up in the future if others need it
 			if (computed_bounds) {
-				client_to_node_offsetX = clientX - node_rect.left;
-				client_to_node_offsetY = clientY - node_rect.top;
+				pointer_to_node_offsetX = clientX - node_rect.left;
+				pointer_to_node_offsetY = clientY - node_rect.top;
 			}
 		},
 		event_options,
@@ -536,10 +536,10 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 			if (computed_bounds) {
 				// Client position is limited to this virtual boundary to prevent node going out of bounds
 				const virtual_client_bounds: DragBoundsCoords = {
-					left: computed_bounds.left + client_to_node_offsetX,
-					top: computed_bounds.top + client_to_node_offsetY,
-					right: computed_bounds.right + client_to_node_offsetX - node_rect.width,
-					bottom: computed_bounds.bottom + client_to_node_offsetY - node_rect.height,
+					left: computed_bounds.left + pointer_to_node_offsetX,
+					top: computed_bounds.top + pointer_to_node_offsetY,
+					right: computed_bounds.right + pointer_to_node_offsetX - node_rect.width,
+					bottom: computed_bounds.bottom + pointer_to_node_offsetY - node_rect.height,
 				};
 
 				final_x = clamp(final_x, virtual_client_bounds.left, virtual_client_bounds.right);
@@ -693,6 +693,7 @@ function get_handle_els(handle: DragOptions['handle'], node: HTMLElement): HTMLE
 			'Selector passed for `handle` option should be child of the element on which the action is applied',
 		);
 
+	// @ts-ignore
 	return Array.from(handle_els.values());
 }
 
@@ -709,6 +710,7 @@ function get_cancel_elements(cancel: DragOptions['cancel'], node: HTMLElement): 
 			'Selector passed for `cancel` option should be child of the element on which the action is applied',
 		);
 
+	// @ts-ignore
 	return Array.from(cancel_els.values());
 }
 

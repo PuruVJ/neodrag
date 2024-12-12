@@ -14,7 +14,7 @@
 	"devDependencies": {
 		"@changesets/changelog-github": "^0.5.0",
 		"@changesets/cli": "^2.27.1",
-		"@sveltejs/vite-plugin-svelte": "3.1.0",
+		"@sveltejs/vite-plugin-svelte": "5.0.2",
 		"@testing-library/jest-dom": "^6.1.5",
 		"@testing-library/svelte": "^4.0.5",
 		"@types/react": "^18.2.79",

@@ -1,4 +1,8 @@
-import { draggable as core_draggable, type DragEventData, type DragOptions } from '@neodrag/core';
+import {
+	draggable as core_draggable,
+	type DragEventData,
+	type BaseDragOptions,
+} from '@neodrag/core';
 
 //!THIS IS HACK, WE WANNA IMPORT THE TYPE WHEN THE ISSUE IS FIXED LATER
 /**
@@ -74,18 +78,18 @@ export interface Action<
 
 export const draggable = core_draggable as Action<
 	HTMLElement,
-	DragOptions | undefined,
+	BaseDragOptions | undefined,
 	{
-		'on:neodrag:start': (e: CustomEvent<DragEventData>) => void;
-		'on:neodrag': (e: CustomEvent<DragEventData>) => void;
-		'on:neodrag:end': (e: CustomEvent<DragEventData>) => void;
+		onneodrag_start: (e: CustomEvent<DragEventData>) => void;
+		onneodrag: (e: CustomEvent<DragEventData>) => void;
+		onneodrag_end: (e: CustomEvent<DragEventData>) => void;
 	}
 >;
 
 export type {
-	DragAxis,
-	DragBounds,
-	DragBoundsCoords,
+	// DragAxis,
+	// DragBounds,
+	// DragBoundsCoords,
 	DragEventData,
-	DragOptions,
+	BaseDragOptions as DragOptions,
 } from '@neodrag/core';
