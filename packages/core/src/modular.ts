@@ -16,28 +16,6 @@ export type BaseDragOptions = {
 	plugins?: Plugin<any>[];
 
 	/**
-	 * Custom transform function. If provided, this function will be used to apply the DOM transformations to the root node to move it.
-	 *
-	 * @default undefined
-	 */
-	transform?: ({
-		offsetX,
-		offsetY,
-		rootNode,
-	}: {
-		offsetX: number;
-		offsetY: number;
-		rootNode: HTMLElement;
-	}) => undefined | void;
-
-	/**
-	 * Disables dragging altogether.
-	 *
-	 * @default false
-	 */
-	disabled?: boolean;
-
-	/**
 	 * Threshold for dragging to start. If the user moves the mouse/finger less than this distance, the dragging won't start.
 	 *
 	 * @default { delay: 0, distance: 3 }
@@ -79,6 +57,8 @@ type PluginContext<PrivateStates = any> = {
 
 	// Current position (mutable). Only of this drag cycle
 	readonly proposed: { x: number | null; y: number | null };
+
+	readonly offset: { x: number; y: number };
 
 	// Drag status
 	readonly isDragging: boolean;
@@ -144,16 +124,23 @@ type Plugin<PrivateState = any> = {
 
 export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 	let {
-		disabled = false,
 		onDrag,
 		onDragEnd,
 		onDragStart,
 		plugins: user_plugins = [],
 		threshold = { delay: 0, distance: 3 },
-		transform,
 	} = options;
 
-	const default_plugins: Plugin[] = [ignoreMultitouch(), classes(), axis(), applyUserSelectHack()];
+	const default_plugins: Plugin[] = [
+		ignoreMultitouch(),
+		classes(),
+		// axis(),
+		applyUserSelectHack(),
+		transform(),
+		// bounds(BoundsFrom.box({ top: 10, left: 0, right: 600, bottom: 200 }, document.body)),
+		// grid(40, 20),
+		// disabled(),
+	];
 
 	let is_interacting = false;
 	let is_dragging = false;
@@ -183,6 +170,9 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 		},
 		get delta() {
 			return { x: delta.x, y: delta.y };
+		},
+		get offset() {
+			return { x: x_offset, y: y_offset };
 		},
 		get isDragging() {
 			return is_dragging;
@@ -230,18 +220,6 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 	// Run own setup
 	// On mobile, touch can become extremely janky without it
 	set_style(node, 'touch-action', 'none');
-
-	function apply_transform(transfom_x: number, transform_y: number) {
-		if (transform) {
-			return transform({ offsetX: transfom_x, offsetY: transform_y, rootNode: node });
-		}
-
-		set_style(node, 'translate', `${transfom_x}px ${transform_y}px`);
-	}
-
-	function update_state(updates: Partial<PluginContext>) {
-		object_assign(ctx, updates);
-	}
 
 	function flush_effects() {
 		for (const effect of effects_to_run) {
@@ -367,7 +345,6 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 	listen(
 		'pointerdown',
 		(e: PointerEvent) => {
-			if (disabled) return;
 			if (e.button === 2) return;
 
 			// Run the plugins
@@ -461,10 +438,6 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 
 			fire_svelte_drag_event(final.x, final.y);
 
-			console.log(x_offset);
-			// Apply the transform
-			apply_transform(final.x, final.y);
-
 			x_offset = final.x;
 			y_offset = final.y;
 		},
@@ -504,20 +477,15 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 	);
 }
 
-function object_assign<T extends {}>(target: T, new_val: Partial<T>) {
-	Object.assign(target, new_val);
-	return target;
-}
 const set_style = (el: HTMLElement, style: string, value: string) =>
 	el.style.setProperty(style, value);
 
 const IGNORE_MULTITOUCH_SYMBOL = Symbol('ignore_multitouch');
-function ignoreMultitouch(value = true): Plugin<{ active_pointers: Set<number> }> {
+export function ignoreMultitouch(value = true): Plugin<{ active_pointers: Set<number> }> {
 	return {
 		name: 'neodrag:ignoreMultitouch',
 
 		setup(ctx) {
-			console.log(ctx);
 			ctx._[IGNORE_MULTITOUCH_SYMBOL] = { active_pointers: new Set() };
 		},
 
@@ -548,7 +516,7 @@ const enum DEFAULT_CLASS {
 	DRAGGING = 'neodrag-dragging',
 	DRAGGED = 'neodrag-dragged',
 }
-function classes(
+export function classes(
 	classes: { default: string; dragging: string; dragged: string } = {
 		default: DEFAULT_CLASS.DEFAULT,
 		dragging: DEFAULT_CLASS.DRAGGING,
@@ -581,9 +549,15 @@ function classes(
 
 const AXIS_SYMBOL = Symbol('axis');
 // Degree of Freedom X and Y
-function axis(value: 'both' | 'x' | 'y' | 'none' = 'both'): Plugin<{ dfx: boolean; dfy: boolean }> {
+export function axis(
+	value: 'both' | 'x' | 'y' | 'none' = 'both',
+): Plugin<{ dfx: boolean; dfy: boolean }> {
 	return {
 		name: 'neodrag:axis',
+
+		shouldDrag() {
+			return value !== 'none';
+		},
 
 		setup(ctx) {
 			ctx._[AXIS_SYMBOL] = {
@@ -602,7 +576,9 @@ function axis(value: 'both' | 'x' | 'y' | 'none' = 'both'): Plugin<{ dfx: boolea
 }
 
 const APPLY_USER_SELECT_HACK_SYMBOL = Symbol('apply_user_select_hack');
-function applyUserSelectHack(value: boolean = true): Plugin<{ body_user_select_val: string }> {
+export function applyUserSelectHack(
+	value: boolean = true,
+): Plugin<{ body_user_select_val: string }> {
 	return {
 		name: 'neodrag:applyUserSelectHack',
 
@@ -623,6 +599,193 @@ function applyUserSelectHack(value: boolean = true): Plugin<{ body_user_select_v
 		dragEnd(ctx) {
 			if (value) {
 				document.body.style.userSelect = ctx._[APPLY_USER_SELECT_HACK_SYMBOL].body_user_select_val;
+			}
+		},
+	};
+}
+
+function snap_to_grid(
+	[x_snap, y_snap]: [number, number],
+	pending_x: number | null,
+	pending_y: number | null,
+) {
+	const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
+
+	const x = pending_x ? calc(pending_x, x_snap) : pending_x;
+	const y = pending_y ? calc(pending_y, y_snap) : pending_y;
+
+	return { x, y };
+}
+export function grid(x: number, y: number): Plugin {
+	return {
+		name: 'neodrag:grid',
+
+		drag(ctx) {
+			ctx.propose(snap_to_grid([x, y], ctx.proposed.x!, ctx.proposed.y!));
+		},
+	};
+}
+
+export function disabled(): Plugin {
+	return {
+		name: 'neodrag:disabled',
+		shouldDrag() {
+			return false;
+		},
+	};
+}
+
+export function transform(
+	func?: (args: { offsetX: number; offsetY: number; rootNode: HTMLElement }) => void,
+): Plugin {
+	return {
+		name: 'neodrag:transform',
+
+		drag(ctx) {
+			// Apply the transform
+			ctx.effect(() => {
+				if (func) {
+					return func({
+						offsetX: ctx.offset.x!,
+						offsetY: ctx.offset.y!,
+						rootNode: ctx.rootNode,
+					});
+				}
+
+				ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
+			});
+		},
+	};
+}
+
+type BoundFromFunction = (data: {
+	root_node: HTMLElement;
+}) => [[x1: number, y1: number], [x2: number, y2: number]];
+
+export const BoundsFrom = {
+	box(
+		box: { top?: number; left?: number; right?: number; bottom?: number },
+		element?: HTMLElement,
+	): BoundFromFunction {
+		return () => {
+			if (element) {
+				const rect = element.getBoundingClientRect();
+				// The second array is the other set of coordinates. It should also follow cartesian coordinates, as in start from top left
+				// Because we have element, use the box as padding of sort
+				// Remember the format: [[x1: number, y1: number], [x2: number, y2: number]]
+				return [
+					[rect.left + (box.left ?? 0), rect.top + (box.top ?? 0)],
+					[rect.right - (box.right ?? 0), rect.bottom - (box.bottom ?? 0)],
+				];
+			}
+
+			// Return relative to window. Remmeber that right is calculated from the right side, so should be resolved to cartesian coordinates
+			// So right should resolve to actually window.inner width - right
+			return [
+				[box.left ?? 0, box.top ?? 0],
+				[window.innerWidth - (box.right ?? 0), window.innerHeight - (box.bottom ?? 0)],
+			];
+		};
+	},
+
+	element(element: HTMLElement): BoundFromFunction {
+		return () => {
+			const rect = element.getBoundingClientRect();
+			return [
+				[rect.left, rect.top],
+				[rect.right, rect.bottom],
+			];
+		};
+	},
+
+	parent(): BoundFromFunction {
+		return ({ root_node }) => {
+			const parent_node = root_node.parentNode as HTMLElement;
+
+			// Make sure its left right top bottom all aren't 0
+			const rect = parent_node.getBoundingClientRect();
+
+			if (rect.left === 0 && rect.right === 0 && rect.top === 0 && rect.bottom === 0) {
+				throw new Error(
+					'Parent node has no dimensions. Make sure it has some dimensions. This may happen due to display:contents',
+				);
+			}
+
+			return [
+				[rect.left, rect.top],
+				[rect.right, rect.bottom],
+			];
+		};
+	},
+};
+
+const clamp = (val: number, min: number, max: number) => Math.min(max, Math.max(min, val));
+const BOUNDS_SYMBOL = Symbol('bounds');
+export function bounds(
+	value: BoundFromFunction,
+	shouldRecompute: (ctx: { readonly hook: 'dragStart' | 'drag' | 'dragEnd' }) => boolean = (ctx) =>
+		ctx.hook === 'dragStart',
+): Plugin<{
+	bounds: [[number, number], [number, number]];
+}> {
+	return {
+		name: 'neodrag:bounds',
+
+		setup(ctx) {
+			ctx._[BOUNDS_SYMBOL] = {
+				bounds: value({ root_node: ctx.rootNode }),
+			};
+		},
+
+		dragStart(state) {
+			if (shouldRecompute({ hook: 'dragStart' })) {
+				state._[BOUNDS_SYMBOL].bounds = value({ root_node: state.rootNode });
+			}
+
+			console.log(state._[BOUNDS_SYMBOL]);
+		},
+
+		drag(ctx) {
+			if (shouldRecompute({ hook: 'drag' })) {
+				ctx._[BOUNDS_SYMBOL].bounds = value({ root_node: ctx.rootNode });
+			}
+
+			const bound_coords = ctx._[BOUNDS_SYMBOL].bounds;
+			const element_width = ctx.cachedRootNodeRect.width;
+			const element_height = ctx.cachedRootNodeRect.height;
+
+			// Convert absolute bounds to allowed movement bounds
+			// Need to consider:
+			// 1. Current accumulated offset (ctx.offset)
+			// 2. Where user grabbed the element (pointer_offset)
+			// 3. Element dimensions
+			const allowed_movement: [[number, number], [number, number]] = [
+				[
+					bound_coords[0][0] - ctx.offset.x, // max left
+					bound_coords[0][1] - ctx.offset.y, // max top
+				],
+				[
+					bound_coords[1][0] - element_width - ctx.offset.x, // max right
+					bound_coords[1][1] - element_height - ctx.offset.y, // max bottom
+				],
+			];
+
+			// Now clamp the proposed delta movement to our allowed movement bounds
+			ctx.propose({
+				x:
+					ctx.proposed.x != null
+						? clamp(ctx.proposed.x, allowed_movement[0][0], allowed_movement[1][0])
+						: ctx.proposed.x,
+				y:
+					ctx.proposed.y != null
+						? clamp(ctx.proposed.y, allowed_movement[0][1], allowed_movement[1][1])
+						: ctx.proposed.y,
+			});
+		},
+
+		dragEnd(context) {
+			if (shouldRecompute({ hook: 'dragEnd' })) {
+				context._[BOUNDS_SYMBOL].bounds = value({ root_node: context.rootNode });
 			}
 		},
 	};

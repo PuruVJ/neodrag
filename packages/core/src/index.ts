@@ -12,14 +12,14 @@ export type DragBoundsCoords = {
 	bottom: number;
 };
 
-export type DragAxis = 'both' | 'x' | 'y' | 'none';
-
 export type DragBounds =
 	| HTMLElement
 	| Partial<DragBoundsCoords>
 	| 'parent'
 	| 'body'
 	| (string & Record<never, never>);
+
+export type DragAxis = 'both' | 'x' | 'y' | 'none';
 
 export type DragEventData = {
 	/** How much element moved from its original position horizontally */
