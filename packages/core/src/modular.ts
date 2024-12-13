@@ -663,59 +663,33 @@ type BoundFromFunction = (data: {
 }) => [[x1: number, y1: number], [x2: number, y2: number]];
 
 export const BoundsFrom = {
-	box(
-		box: { top?: number; left?: number; right?: number; bottom?: number },
-		element?: HTMLElement,
+	element(
+		element: HTMLElement,
+		padding?: { top?: number; left?: number; right?: number; bottom?: number },
 	): BoundFromFunction {
 		return () => {
-			if (element) {
-				const rect = element.getBoundingClientRect();
-				// The second array is the other set of coordinates. It should also follow cartesian coordinates, as in start from top left
-				// Because we have element, use the box as padding of sort
-				// Remember the format: [[x1: number, y1: number], [x2: number, y2: number]]
-				return [
-					[rect.left + (box.left ?? 0), rect.top + (box.top ?? 0)],
-					[rect.right - (box.right ?? 0), rect.bottom - (box.bottom ?? 0)],
-				];
-			}
-
-			// Return relative to window. Remmeber that right is calculated from the right side, so should be resolved to cartesian coordinates
-			// So right should resolve to actually window.inner width - right
-			return [
-				[box.left ?? 0, box.top ?? 0],
-				[window.innerWidth - (box.right ?? 0), window.innerHeight - (box.bottom ?? 0)],
-			];
-		};
-	},
-
-	element(element: HTMLElement): BoundFromFunction {
-		return () => {
 			const rect = element.getBoundingClientRect();
-			return [
-				[rect.left, rect.top],
-				[rect.right, rect.bottom],
-			];
-		};
-	},
-
-	parent(): BoundFromFunction {
-		return ({ root_node }) => {
-			const parent_node = root_node.parentNode as HTMLElement;
-
-			// Make sure its left right top bottom all aren't 0
-			const rect = parent_node.getBoundingClientRect();
 
 			if (rect.left === 0 && rect.right === 0 && rect.top === 0 && rect.bottom === 0) {
 				throw new Error(
-					'Parent node has no dimensions. Make sure it has some dimensions. This may happen due to display:contents',
+					'bounds element has no dimensions. This may happen due to display:contents',
 				);
 			}
 
 			return [
-				[rect.left, rect.top],
-				[rect.right, rect.bottom],
+				[rect.left + (padding?.left ?? 0), rect.top + (padding?.top ?? 0)],
+				[rect.right - (padding?.right ?? 0), rect.bottom - (padding?.bottom ?? 0)],
 			];
 		};
+	},
+
+	parent(padding?: {
+		top?: number;
+		left?: number;
+		right?: number;
+		bottom?: number;
+	}): BoundFromFunction {
+		return (ctx) => BoundsFrom.element(ctx.root_node.parentNode as HTMLElement, padding)(ctx);
 	},
 };
 
