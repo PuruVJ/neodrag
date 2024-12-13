@@ -9,7 +9,7 @@
 		"lib": ["ES2023.Array", "DOM"],
 		"esModuleInterop": true,
 		"moduleResolution": "bundler",
-		"isolatedDeclarations": true,
+		"isolatedDeclarations": false,
 		"types": ["vitest/globals"]
 	},
 	"include": ["./src/*.ts"]

@@ -1,8 +1,13 @@
 <script lang="ts">
-	import { draggable } from '@neodrag/core';
+	import { axis, disabled, draggable } from '@neodrag/core';
 </script>
 
-<div use:draggable={{}} style="width: 100px; height: 100px; background: cyan">
+<div
+	use:draggable={{
+		plugins: [axis('x')],
+	}}
+	style="width: 100px; height: 100px; background: cyan"
+>
 	Hello
 
 	<br />

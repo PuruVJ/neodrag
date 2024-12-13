@@ -52,7 +52,7 @@ export type BaseDragOptions = {
 	onDragEnd?: (data: DragEventData) => void;
 };
 
-type PluginContext<PrivateStates = any> = {
+type PluginContext = {
 	readonly delta: { x: number; y: number };
 
 	// Current position (mutable). Only of this drag cycle
@@ -74,9 +74,6 @@ type PluginContext<PrivateStates = any> = {
 
 	// This will be overriden by controls plugin for eg
 	currentlyDraggedNode: HTMLElement;
-
-	// Private state for the plugin
-	_: Record<symbol, PrivateStates>;
 
 	// any side-effects within plugins(DOM manipulation etc) must go here. THis is run only after making sure
 	// no plugin returned false. Other doesn't run
@@ -105,24 +102,24 @@ type Plugin<PrivateState = any> = {
 	priority?: number;
 
 	// Called when plugin is initialized
-	setup?: (context: PluginContext<PrivateState>) => void;
+	setup?: (context: PluginContext) => PrivateState | void;
 
-	shouldDrag?: (context: PluginContext<PrivateState>) => boolean;
+	shouldDrag?: (context: PluginContext, state: PrivateState) => boolean;
 
 	// Start of drag - return false to prevent drag
-	dragStart?: (state: PluginContext<PrivateState>, event: PointerEvent) => void;
+	dragStart?: (context: PluginContext, state: PrivateState, event: PointerEvent) => void;
 
 	// During drag - return state modifications
-	drag?: (context: PluginContext<PrivateState>, event: PointerEvent) => void;
+	drag?: (context: PluginContext, state: PrivateState, event: PointerEvent) => void;
 
 	// End of drag
-	dragEnd?: (context: PluginContext<PrivateState>, event: PointerEvent) => void;
+	dragEnd?: (context: PluginContext, state: PrivateState, event: PointerEvent) => void;
 
 	// Cleanup when draggable is destroyed
 	cleanup?: () => void;
 };
 
-export function draggable(node: HTMLElement, options: BaseDragOptions): void {
+export function draggable(node: HTMLElement, options: BaseDragOptions): { destroy: () => void } {
 	let {
 		onDrag,
 		onDragEnd,
@@ -164,7 +161,7 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 
 	const effects_to_run = new Set<() => void>();
 
-	const ctx: PluginContext<any> = {
+	const ctx: PluginContext = {
 		get proposed() {
 			return { x: proposals.x, y: proposals.y };
 		},
@@ -195,7 +192,6 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 		set currentlyDraggedNode(val) {
 			currently_dragged_element = val;
 		},
-		_: {},
 		effect: (func) => {
 			effects_to_run.add(func);
 		},
@@ -208,13 +204,24 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 		},
 	};
 
-	const ordered_plugins: Plugin<any>[] = default_plugins
-		.concat(user_plugins)
-		.toSorted((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
+	// For finding duplicates
+	const plugin_map = new Map<string, Plugin<any>>();
+	for (const plugin of [...default_plugins, ...user_plugins]) {
+		const existing_plugin = plugin_map.get(plugin.name);
+		if (!existing_plugin || (plugin.priority ?? 0) > (existing_plugin.priority ?? 0)) {
+			plugin_map.set(plugin.name, plugin);
+		}
+	}
 
+	const ordered_plugins = [...plugin_map.values()].sort(
+		(a, b) => (a.priority ?? 0) - (b.priority ?? 0),
+	);
+
+	const private_states = new Map<string, any>();
 	for (const plugin of default_plugins.concat(user_plugins)) {
 		// Initialize private state
-		plugin.setup?.(ctx);
+		const maybe_state = plugin.setup?.(ctx);
+		if (maybe_state) private_states.set(plugin.name, maybe_state);
 	}
 
 	// Run own setup
@@ -239,7 +246,7 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 			const handler = plugin[hook];
 			if (!handler) continue;
 
-			const result = handler(ctx, event);
+			const result = handler(ctx, private_states.get(plugin.name), event);
 
 			if (result === false) {
 				should_run = false;
@@ -475,58 +482,68 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): void {
 		},
 		event_options,
 	);
+
+	return {
+		destroy() {
+			for (const plugin of ordered_plugins) {
+				plugin.cleanup?.();
+			}
+
+			private_states.clear();
+
+			controller.abort();
+		},
+	};
 }
+
+const definePlugin = <T>(plugin: (...args: any[]) => Plugin<T>) => plugin;
 
 const set_style = (el: HTMLElement, style: string, value: string) =>
 	el.style.setProperty(style, value);
 
-const IGNORE_MULTITOUCH_SYMBOL = Symbol('ignore_multitouch');
-export function ignoreMultitouch(value = true): Plugin<{ active_pointers: Set<number> }> {
+export const ignoreMultitouch = definePlugin((value = true) => {
 	return {
 		name: 'neodrag:ignoreMultitouch',
 
-		setup(ctx) {
-			ctx._[IGNORE_MULTITOUCH_SYMBOL] = { active_pointers: new Set() };
+		setup() {
+			return {
+				active_pointers: new Set<number>(),
+			};
 		},
 
-		dragStart(ctx, event) {
+		dragStart(ctx, state, event) {
 			ctx.effect(() => {
-				ctx._[IGNORE_MULTITOUCH_SYMBOL].active_pointers.add(event.pointerId);
+				state.active_pointers.add(event.pointerId);
 
-				if (value && ctx._[IGNORE_MULTITOUCH_SYMBOL].active_pointers.size > 1) {
+				if (value && state.active_pointers.size > 1) {
 					event.preventDefault();
 				}
 			});
 		},
 
-		drag(ctx) {
-			if (value && ctx._[IGNORE_MULTITOUCH_SYMBOL].active_pointers.size > 1) {
+		drag(ctx, state) {
+			if (value && state.active_pointers.size > 1) {
 				ctx.cancel();
 			}
 		},
 
-		dragEnd(ctx, event) {
-			ctx._[IGNORE_MULTITOUCH_SYMBOL].active_pointers.delete(event.pointerId);
+		dragEnd(_, state, event) {
+			state.active_pointers.delete(event.pointerId);
 		},
 	};
-}
+});
 
 const enum DEFAULT_CLASS {
 	DEFAULT = 'neodrag',
 	DRAGGING = 'neodrag-dragging',
 	DRAGGED = 'neodrag-dragged',
 }
-export function classes(
-	classes: { default: string; dragging: string; dragged: string } = {
-		default: DEFAULT_CLASS.DEFAULT,
-		dragging: DEFAULT_CLASS.DRAGGING,
-		dragged: DEFAULT_CLASS.DRAGGED,
-	},
-): Plugin {
+export const classes = definePlugin((classes) => {
 	return {
 		name: 'neodrag:classes',
 
 		setup(ctx) {
+			classes = classes ?? {};
 			classes.default ??= DEFAULT_CLASS.DEFAULT;
 			classes.dragging ??= DEFAULT_CLASS.DRAGGING;
 			classes.dragged ??= DEFAULT_CLASS.DRAGGED;
@@ -545,13 +562,10 @@ export function classes(
 			ctx.rootNode.classList.add(classes.dragged);
 		},
 	};
-}
+});
 
-const AXIS_SYMBOL = Symbol('axis');
 // Degree of Freedom X and Y
-export function axis(
-	value: 'both' | 'x' | 'y' | 'none' = 'both',
-): Plugin<{ dfx: boolean; dfy: boolean }> {
+export const axis = definePlugin((value: 'both' | 'x' | 'y' | 'none' = 'both') => {
 	return {
 		name: 'neodrag:axis',
 
@@ -559,50 +573,50 @@ export function axis(
 			return value !== 'none';
 		},
 
-		setup(ctx) {
-			ctx._[AXIS_SYMBOL] = {
-				dfx: value === 'both' || value === 'x',
-				dfy: value === 'both' || value === 'y',
+		setup() {
+			return {
+				df: {
+					x: value === 'both' || value === 'x',
+					y: value === 'both' || value === 'y',
+				},
 			};
 		},
 
-		drag(ctx) {
+		drag(ctx, state) {
 			ctx.propose({
-				x: ctx._[AXIS_SYMBOL].dfx ? ctx.proposed.x : null,
-				y: ctx._[AXIS_SYMBOL].dfy ? ctx.proposed.y : null,
+				x: state.df.x ? ctx.proposed.x : null,
+				y: state.df.y ? ctx.proposed.y : null,
 			});
 		},
 	};
-}
+});
 
-const APPLY_USER_SELECT_HACK_SYMBOL = Symbol('apply_user_select_hack');
-export function applyUserSelectHack(
-	value: boolean = true,
-): Plugin<{ body_user_select_val: string }> {
+export const applyUserSelectHack = definePlugin((value: boolean = true) => {
 	return {
 		name: 'neodrag:applyUserSelectHack',
 
-		setup(ctx) {
-			ctx._[APPLY_USER_SELECT_HACK_SYMBOL] = { body_user_select_val: '' };
+		setup() {
+			return {
+				body_user_select_val: '',
+			};
 		},
 
-		dragStart(ctx) {
+		dragStart(ctx, state) {
 			ctx.effect(() => {
 				if (value) {
-					ctx._[APPLY_USER_SELECT_HACK_SYMBOL].body_user_select_val =
-						document.body.style.userSelect;
+					state.body_user_select_val = document.body.style.userSelect;
 					document.body.style.userSelect = 'none';
 				}
 			});
 		},
 
-		dragEnd(ctx) {
+		dragEnd(_, state) {
 			if (value) {
-				document.body.style.userSelect = ctx._[APPLY_USER_SELECT_HACK_SYMBOL].body_user_select_val;
+				document.body.style.userSelect = state.body_user_select_val;
 			}
 		},
 	};
-}
+});
 
 function snap_to_grid(
 	[x_snap, y_snap]: [number, number],
@@ -616,7 +630,7 @@ function snap_to_grid(
 
 	return { x, y };
 }
-export function grid(x: number, y: number): Plugin {
+export const grid = definePlugin((x: number, y: number) => {
 	return {
 		name: 'neodrag:grid',
 
@@ -624,39 +638,39 @@ export function grid(x: number, y: number): Plugin {
 			ctx.propose(snap_to_grid([x, y], ctx.proposed.x!, ctx.proposed.y!));
 		},
 	};
-}
+});
 
-export function disabled(): Plugin {
+export const disabled = definePlugin(() => {
 	return {
 		name: 'neodrag:disabled',
 		shouldDrag() {
 			return false;
 		},
 	};
-}
+});
 
-export function transform(
-	func?: (args: { offsetX: number; offsetY: number; rootNode: HTMLElement }) => void,
-): Plugin {
-	return {
-		name: 'neodrag:transform',
+export const transform = definePlugin(
+	(func?: (args: { offsetX: number; offsetY: number; rootNode: HTMLElement }) => void) => {
+		return {
+			name: 'neodrag:transform',
 
-		drag(ctx) {
-			// Apply the transform
-			ctx.effect(() => {
-				if (func) {
-					return func({
-						offsetX: ctx.offset.x!,
-						offsetY: ctx.offset.y!,
-						rootNode: ctx.rootNode,
-					});
-				}
+			drag(ctx) {
+				// Apply the transform
+				ctx.effect(() => {
+					if (func) {
+						return func({
+							offsetX: ctx.offset.x!,
+							offsetY: ctx.offset.y!,
+							rootNode: ctx.rootNode,
+						});
+					}
 
-				ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
-			});
-		},
-	};
-}
+					ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
+				});
+			},
+		};
+	},
+);
 
 type BoundFromFunction = (data: {
 	root_node: HTMLElement;
@@ -694,73 +708,71 @@ export const BoundsFrom = {
 };
 
 const clamp = (val: number, min: number, max: number) => Math.min(max, Math.max(min, val));
-const BOUNDS_SYMBOL = Symbol('bounds');
-export function bounds(
-	value: BoundFromFunction,
-	shouldRecompute: (ctx: { readonly hook: 'dragStart' | 'drag' | 'dragEnd' }) => boolean = (ctx) =>
-		ctx.hook === 'dragStart',
-): Plugin<{
-	bounds: [[number, number], [number, number]];
-}> {
-	return {
-		name: 'neodrag:bounds',
+export const bounds = definePlugin(
+	(
+		value: BoundFromFunction,
+		shouldRecompute: (ctx: { readonly hook: 'dragStart' | 'drag' | 'dragEnd' }) => boolean = (
+			ctx,
+		) => ctx.hook === 'dragStart',
+	) => {
+		return {
+			name: 'neodrag:bounds',
 
-		setup(ctx) {
-			ctx._[BOUNDS_SYMBOL] = {
-				bounds: value({ root_node: ctx.rootNode }),
-			};
-		},
+			setup(ctx) {
+				return {
+					bounds: value({ root_node: ctx.rootNode }),
+				};
+			},
 
-		dragStart(state) {
-			if (shouldRecompute({ hook: 'dragStart' })) {
-				state._[BOUNDS_SYMBOL].bounds = value({ root_node: state.rootNode });
-			}
+			dragStart(ctx, state) {
+				if (shouldRecompute({ hook: 'dragStart' })) {
+					state.bounds = value({ root_node: ctx.rootNode });
+				}
+			},
 
-			console.log(state._[BOUNDS_SYMBOL]);
-		},
+			drag(ctx, state) {
+				if (shouldRecompute({ hook: 'drag' })) {
+					state.bounds = value({ root_node: ctx.rootNode });
+				}
 
-		drag(ctx) {
-			if (shouldRecompute({ hook: 'drag' })) {
-				ctx._[BOUNDS_SYMBOL].bounds = value({ root_node: ctx.rootNode });
-			}
+				const bound_coords = state.bounds;
+				const element_width = ctx.cachedRootNodeRect.width;
+				const element_height = ctx.cachedRootNodeRect.height;
 
-			const bound_coords = ctx._[BOUNDS_SYMBOL].bounds;
-			const element_width = ctx.cachedRootNodeRect.width;
-			const element_height = ctx.cachedRootNodeRect.height;
+				// Convert absolute bounds to allowed movement bounds
+				// Need to consider:
+				// 1. Current accumulated offset (ctx.offset)
+				// 2. Where user grabbed the element (pointer_offset)
+				// 3. Element dimensions
+				const allowed_movement: [[number, number], [number, number]] = [
+					[
+						bound_coords[0][0] - ctx.offset.x, // max left
+						bound_coords[0][1] - ctx.offset.y, // max top
+					],
+					[
+						bound_coords[1][0] - element_width - ctx.offset.x, // max right
+						bound_coords[1][1] - element_height - ctx.offset.y, // max bottom
+					],
+				];
 
-			// Convert absolute bounds to allowed movement bounds
-			// Need to consider:
-			// 1. Current accumulated offset (ctx.offset)
-			// 2. Where user grabbed the element (pointer_offset)
-			// 3. Element dimensions
-			const allowed_movement: [[number, number], [number, number]] = [
-				[
-					bound_coords[0][0] - ctx.offset.x, // max left
-					bound_coords[0][1] - ctx.offset.y, // max top
-				],
-				[
-					bound_coords[1][0] - element_width - ctx.offset.x, // max right
-					bound_coords[1][1] - element_height - ctx.offset.y, // max bottom
-				],
-			];
+				// Now clamp the proposed delta movement to our allowed movement bounds
+				ctx.propose({
+					x:
+						ctx.proposed.x != null
+							? clamp(ctx.proposed.x, allowed_movement[0][0], allowed_movement[1][0])
+							: ctx.proposed.x,
+					y:
+						ctx.proposed.y != null
+							? clamp(ctx.proposed.y, allowed_movement[0][1], allowed_movement[1][1])
+							: ctx.proposed.y,
+				});
+			},
 
-			// Now clamp the proposed delta movement to our allowed movement bounds
-			ctx.propose({
-				x:
-					ctx.proposed.x != null
-						? clamp(ctx.proposed.x, allowed_movement[0][0], allowed_movement[1][0])
-						: ctx.proposed.x,
-				y:
-					ctx.proposed.y != null
-						? clamp(ctx.proposed.y, allowed_movement[0][1], allowed_movement[1][1])
-						: ctx.proposed.y,
-			});
-		},
-
-		dragEnd(context) {
-			if (shouldRecompute({ hook: 'dragEnd' })) {
-				context._[BOUNDS_SYMBOL].bounds = value({ root_node: context.rootNode });
-			}
-		},
-	};
-}
+			dragEnd(context, state) {
+				if (shouldRecompute({ hook: 'dragEnd' })) {
+					state.bounds = value({ root_node: context.rootNode });
+				}
+			},
+		};
+	},
+);
