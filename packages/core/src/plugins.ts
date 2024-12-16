@@ -81,6 +81,10 @@ export interface Plugin<PrivateState = any> {
 	cleanup?: () => void;
 }
 
+/**
+ * !This is an unstable API and may change until next major
+ * @unstable
+ */
 export const unstable_definePlugin = <State, Arguments extends any[]>(
 	plugin: (...args: Arguments) => Plugin<State>,
 ) => plugin;
@@ -140,17 +144,21 @@ export const classes = unstable_definePlugin(
 				classes.dragged ??= DEFAULT_CLASS.DRAGGED;
 
 				if (classes.default) ctx.rootNode.classList.add(classes.default);
+
+				return {
+					class_list: ctx.rootNode.classList,
+				};
 			},
 
-			dragStart(ctx) {
+			dragStart(ctx, state) {
 				ctx.effect(() => {
-					ctx.rootNode.classList.add(classes.dragging!);
+					state.class_list.add(classes.dragging!);
 				});
 			},
 
-			dragEnd(ctx) {
-				ctx.rootNode.classList.remove(classes.dragging!);
-				ctx.rootNode.classList.add(classes.dragged!);
+			dragEnd(_, state) {
+				state.class_list.remove(classes.dragging!);
+				state.class_list.add(classes.dragged!);
 			},
 		};
 	},
