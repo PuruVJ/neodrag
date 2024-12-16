@@ -1,17 +1,3 @@
-export type DragEventData = {
-	/** How much element moved from its original position horizontally */
-	offsetX: number;
-
-	/** How much element moved from its original position vertically */
-	offsetY: number;
-
-	/** The node on which the draggable is applied */
-	rootNode: HTMLElement;
-
-	/** The element being dragged */
-	currentNode: HTMLElement;
-};
-
 export type BaseDragOptions = {
 	plugins?: Plugin<any>[];
 
@@ -110,7 +96,7 @@ type Plugin<PrivateState = any> = {
 };
 
 export function draggable(node: HTMLElement, options: BaseDragOptions): { destroy: () => void } {
-	let { onDrag, onDragEnd, onDragStart, plugins: user_plugins = [] } = options;
+	let { plugins: user_plugins = [] } = options;
 
 	const default_plugins: Plugin[] = [
 		ignoreMultitouch(),
@@ -118,7 +104,7 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 		// axis(),
 		applyUserSelectHack(),
 		transform(),
-		threshold({ delay: 300 }),
+		threshold(),
 		// bounds(BoundsFrom.box({ top: 10, left: 0, right: 600, bottom: 200 }, document.body)),
 		// grid(40, 20),
 		// disabled(),
@@ -267,29 +253,6 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 		};
 	}
 
-	function call_event(
-		eventName: 'neodrag_start' | 'neodrag' | 'neodrag_end',
-		fn: typeof onDrag,
-		transform_x: number,
-		transform_y: number,
-	) {
-		const data = get_event_data(transform_x, transform_y);
-		node.dispatchEvent(new CustomEvent(eventName, { detail: data }));
-		fn?.(data);
-	}
-
-	function fire_svelte_drag_start_event(transform_x: number, transform_y: number) {
-		call_event('neodrag_start', onDragStart, transform_x, transform_y);
-	}
-
-	function fire_svelte_drag_end_event(transform_x: number, transform_y: number) {
-		call_event('neodrag_end', onDragEnd, transform_x, transform_y);
-	}
-
-	function fire_svelte_drag_event(transform_x: number, transform_y: number) {
-		call_event('neodrag', onDrag, transform_x, transform_y);
-	}
-
 	const listen = window.addEventListener;
 	const controller = new AbortController();
 	const event_options = { signal: controller.signal, capture: false };
@@ -367,8 +330,6 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 			const final_x = offset.x + (proposals.x ?? 0);
 			const final_y = offset.y + (proposals.y ?? 0);
 
-			fire_svelte_drag_event(final_x, final_y);
-
 			offset.x = final_x;
 			offset.y = final_y;
 		},
@@ -397,8 +358,6 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 
 			proposals.x = 0;
 			proposals.y = 0;
-
-			fire_svelte_drag_end_event(initial_x, initial_y);
 
 			is_interacting = false;
 			is_dragging = false;
@@ -762,3 +721,65 @@ export const threshold = definePlugin((options: { delay?: number; distance?: num
 		},
 	};
 });
+
+export type DragEventData = Readonly<{
+	/** How much element moved from its original position horizontally */
+	offset: Readonly<{ x: number; y: number }>;
+
+	/** The node on which the draggable is applied */
+	rootNode: HTMLElement;
+
+	/** The element being dragged */
+	currentNode: HTMLElement;
+}>;
+
+function fire_custom_event(node: HTMLElement, name: string, data: any) {
+	return node.dispatchEvent(new CustomEvent(name, { detail: data }));
+}
+export const events = definePlugin(
+	(
+		options: {
+			onDragStart?: (data: DragEventData) => void;
+			onDrag?: (data: DragEventData) => void;
+			onDragEnd?: (data: DragEventData) => void;
+		} = {},
+	) => {
+		const data = {
+			offset: { x: 0, y: 0 },
+			rootNode: null! as HTMLElement,
+			currentNode: null! as HTMLElement,
+		} satisfies DragEventData;
+
+		return {
+			name: 'neodrag:events',
+
+			setup(ctx) {
+				data.rootNode = ctx.rootNode;
+			},
+
+			dragStart(ctx) {
+				data.offset = ctx.offset;
+				data.currentNode = ctx.currentlyDraggedNode;
+
+				fire_custom_event(ctx.rootNode, 'neodrag_start', data);
+				options.onDragStart?.(data);
+			},
+
+			drag(ctx) {
+				data.offset = ctx.offset;
+				data.currentNode = ctx.currentlyDraggedNode;
+
+				fire_custom_event(ctx.rootNode, 'neodrag', data);
+				options.onDrag?.(data);
+			},
+
+			dragEnd(ctx) {
+				data.offset = ctx.offset;
+				data.currentNode = ctx.currentlyDraggedNode;
+
+				fire_custom_event(ctx.rootNode, 'neodrag_end', data);
+				options.onDragEnd?.(data);
+			},
+		};
+	},
+);
