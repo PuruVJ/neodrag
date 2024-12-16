@@ -16,27 +16,6 @@ export type BaseDragOptions = {
 	plugins?: Plugin<any>[];
 
 	/**
-	 * Threshold for dragging to start. If the user moves the mouse/finger less than this distance, the dragging won't start.
-	 *
-	 * @default { delay: 0, distance: 3 }
-	 */
-	threshold?: {
-		/**
-		 * Threshold in milliseconds for a pointer movement to be considered a drag
-		 *
-		 * @default 0
-		 */
-		delay?: number;
-
-		/**
-		 * Threshold in pixels for movement to be considered a drag
-		 *
-		 * @default 3
-		 */
-		distance?: number;
-	};
-
-	/**
 	 * Fires when dragging start
 	 */
 	onDragStart?: (data: DragEventData) => void;
@@ -53,12 +32,21 @@ export type BaseDragOptions = {
 };
 
 type PluginContext = {
-	readonly delta: { x: number; y: number };
+	readonly delta: Readonly<{
+		x: number;
+		y: number;
+	}>;
 
 	// Current position (mutable). Only of this drag cycle
-	readonly proposed: { x: number | null; y: number | null };
+	readonly proposed: Readonly<{
+		x: number | null;
+		y: number | null;
+	}>;
 
-	readonly offset: { x: number; y: number };
+	readonly offset: Readonly<{
+		x: number;
+		y: number;
+	}>;
 
 	// Drag status
 	readonly isDragging: boolean;
@@ -89,6 +77,8 @@ type PluginContext = {
 	 * Cancels the drag operation. This applies to all the hooks, any hook cancenling will stop the drag operation.
 	 */
 	cancel: () => void;
+
+	preventStart: () => void;
 };
 
 type Plugin<PrivateState = any> = {
@@ -104,7 +94,7 @@ type Plugin<PrivateState = any> = {
 	// Called when plugin is initialized
 	setup?: (context: PluginContext) => PrivateState | void;
 
-	shouldDrag?: (context: PluginContext, state: PrivateState) => boolean;
+	shouldDrag?: (context: PluginContext, state: PrivateState, event: PointerEvent) => boolean;
 
 	// Start of drag - return false to prevent drag
 	dragStart?: (context: PluginContext, state: PrivateState, event: PointerEvent) => void;
@@ -120,13 +110,7 @@ type Plugin<PrivateState = any> = {
 };
 
 export function draggable(node: HTMLElement, options: BaseDragOptions): { destroy: () => void } {
-	let {
-		onDrag,
-		onDragEnd,
-		onDragStart,
-		plugins: user_plugins = [],
-		threshold = { delay: 0, distance: 3 },
-	} = options;
+	let { onDrag, onDragEnd, onDragStart, plugins: user_plugins = [] } = options;
 
 	const default_plugins: Plugin[] = [
 		ignoreMultitouch(),
@@ -134,6 +118,7 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 		// axis(),
 		applyUserSelectHack(),
 		transform(),
+		threshold({ delay: 300 }),
 		// bounds(BoundsFrom.box({ top: 10, left: 0, right: 600, bottom: 200 }, document.body)),
 		// grid(40, 20),
 		// disabled(),
@@ -142,12 +127,7 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 	let is_interacting = false;
 	let is_dragging = false;
 
-	let start_time = 0;
-	let meets_time_threshold = false;
-	let meets_distance_threshold = false;
-
-	let x_offset = 0,
-		y_offset = 0;
+	let offset = { x: 0, y: 0 };
 
 	let initial_x = 0,
 		initial_y = 0;
@@ -155,21 +135,21 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 	const proposals: { x: number | null; y: number | null } = { x: 0, y: 0 };
 	let current_drag_hook_cancelled = false;
 	let delta: { x: number; y: number } = { x: 0, y: 0 };
-
-	let cached_root_node_rect = node.getBoundingClientRect();
+	let dragstart_prevented = false;
+	let cached_root_node_rect: DOMRect;
 	let currently_dragged_element = node;
 
 	const effects_to_run = new Set<() => void>();
 
 	const ctx: PluginContext = {
 		get proposed() {
-			return { x: proposals.x, y: proposals.y };
+			return proposals;
 		},
 		get delta() {
-			return { x: delta.x, y: delta.y };
+			return delta;
 		},
 		get offset() {
-			return { x: x_offset, y: y_offset };
+			return offset;
 		},
 		get isDragging() {
 			return is_dragging;
@@ -201,6 +181,9 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 		},
 		cancel() {
 			current_drag_hook_cancelled = true;
+		},
+		preventStart() {
+			dragstart_prevented = true;
 		},
 	};
 
@@ -241,6 +224,7 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 
 	function run_plugins(hook: 'dragStart' | 'drag' | 'dragEnd' | 'shouldDrag', event: PointerEvent) {
 		let should_run = true;
+		dragstart_prevented = false;
 
 		for (const plugin of ordered_plugins) {
 			const handler = plugin[hook];
@@ -272,13 +256,6 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 		let inverse_scale = node.offsetWidth / ctx.cachedRootNodeRect.width;
 		if (isNaN(inverse_scale)) inverse_scale = 1;
 		return inverse_scale;
-	}
-
-	function reset_state() {
-		is_dragging = false;
-		meets_time_threshold = false;
-		meets_distance_threshold = false;
-		clear_effects();
 	}
 
 	function get_event_data(transform_x: number, transform_y: number) {
@@ -313,36 +290,6 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 		call_event('neodrag', onDrag, transform_x, transform_y);
 	}
 
-	function try_start_drag(e: PointerEvent) {
-		// We now meet all the threshold conditions
-		if (
-			is_interacting &&
-			!is_dragging &&
-			meets_distance_threshold &&
-			meets_time_threshold &&
-			currently_dragged_element
-		) {
-			delta = { x: 0, y: 0 };
-
-			const should_start_drag = run_plugins('dragStart', e);
-
-			if (!should_start_drag) return clear_effects();
-
-			// Everything worked well. Flush the effects
-			flush_effects();
-
-			is_dragging = true;
-
-			fire_svelte_drag_start_event(initial_x, initial_y);
-
-			// if (applyUserSelectHack) {
-			// 	// Apply user-select: none on body to prevent misbehavior
-			// 	body_original_user_select_val = body_style.userSelect;
-			// 	body_style.userSelect = 'none';
-			// }
-		}
-	}
-
 	const listen = window.addEventListener;
 	const controller = new AbortController();
 	const event_options = { signal: controller.signal, capture: false };
@@ -364,12 +311,6 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 			if (!ctx.currentlyDraggedNode.contains(e.target as Node)) return;
 
 			is_interacting = true;
-			start_time = Date.now();
-
-			// TODO: Investigate whether this can be turned into a plugin or not
-			if (!threshold.delay) {
-				meets_time_threshold = true;
-			}
 
 			// We will run this by default in the drag_start plugin. But not in any other, the user will have to
 			// run it in their own plugin
@@ -378,12 +319,8 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 			const inverse_scale = calculate_inverse_scale();
 
 			// Some plugin like axis might not allow dragging in one direction
-			if (proposals.x != null) initial_x = e.clientX - x_offset / inverse_scale;
-			if (proposals.y != null) initial_y = e.clientY - y_offset / inverse_scale;
-
-			// This should be in the axis plugin, included by default
-			// state.initial.x = e.clientX - state.x / inverse_scale;
-			// state.initial.y = e.clientY - state.y / inverse_scale;
+			if (proposals.x != null) initial_x = e.clientX - offset.x / inverse_scale;
+			if (proposals.y != null) initial_y = e.clientY - offset.y / inverse_scale;
 		},
 		event_options,
 	);
@@ -394,26 +331,15 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 			if (!is_interacting) return;
 
 			if (!is_dragging) {
-				// Time threshold
-				if (!meets_time_threshold) {
-					const elapsed = Date.now() - start_time;
-					if (elapsed >= threshold.delay!) {
-						meets_time_threshold = true;
-						try_start_drag(e);
-					}
-				}
+				dragstart_prevented = false;
+				run_plugins('drag', e);
 
-				// Distance threshold
-				if (!meets_distance_threshold) {
-					const delta_x = e.clientX - initial_x;
-					const delta_y = e.clientY - initial_y;
-					const distance = delta_x ** 2 + delta_y ** 2;
+				if (!dragstart_prevented && !current_drag_hook_cancelled) {
+					const start_drag = run_plugins('dragStart', e);
+					if (!start_drag) return clear_effects();
+					else flush_effects();
 
-					// We were doing Math.sqrt here but that is slower than just comparing the square of the distance
-					if (distance >= threshold.distance! ** 2) {
-						meets_distance_threshold = true;
-						try_start_drag(e);
-					}
+					is_dragging = true;
 				}
 
 				if (!is_dragging) return;
@@ -423,8 +349,8 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 			e.preventDefault();
 
 			delta = {
-				x: e.clientX - initial_x - x_offset,
-				y: e.clientY - initial_y - y_offset,
+				x: e.clientX - initial_x - offset.x,
+				y: e.clientY - initial_y - offset.y,
 			};
 
 			// Core proposes delta
@@ -438,15 +364,13 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 			else return clear_effects();
 
 			// Whatever offset we have had till now since the draggable() was mounted, add proposals to it, as long as they're not null
-			const final = {
-				x: x_offset + (proposals.x ?? 0),
-				y: y_offset + (proposals.y ?? 0),
-			};
+			const final_x = offset.x + (proposals.x ?? 0);
+			const final_y = offset.y + (proposals.y ?? 0);
 
-			fire_svelte_drag_event(final.x, final.y);
+			fire_svelte_drag_event(final_x, final_y);
 
-			x_offset = final.x;
-			y_offset = final.y;
+			offset.x = final_x;
+			offset.y = final_y;
 		},
 		event_options,
 	);
@@ -468,8 +392,8 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 			// Call the dragEnd hooks
 			run_plugins('dragEnd', e);
 
-			if (proposals.x) initial_x = x_offset;
-			if (proposals.y) initial_y = y_offset;
+			if (proposals.x) initial_x = offset.x;
+			if (proposals.y) initial_y = offset.y;
 
 			proposals.x = 0;
 			proposals.y = 0;
@@ -477,8 +401,9 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 			fire_svelte_drag_end_event(initial_x, initial_y);
 
 			is_interacting = false;
-
-			reset_state();
+			is_dragging = false;
+			dragstart_prevented = false;
+			clear_effects();
 		},
 		event_options,
 	);
@@ -490,13 +415,14 @@ export function draggable(node: HTMLElement, options: BaseDragOptions): { destro
 			}
 
 			private_states.clear();
-
 			controller.abort();
 		},
 	};
 }
 
-const definePlugin = <T>(plugin: (...args: any[]) => Plugin<T>) => plugin;
+const definePlugin = <State, Arguments extends any[]>(
+	plugin: (...args: Arguments) => Plugin<State>,
+) => plugin;
 
 const set_style = (el: HTMLElement, style: string, value: string) =>
 	el.style.setProperty(style, value);
@@ -538,31 +464,39 @@ const enum DEFAULT_CLASS {
 	DRAGGING = 'neodrag-dragging',
 	DRAGGED = 'neodrag-dragged',
 }
-export const classes = definePlugin((classes) => {
-	return {
-		name: 'neodrag:classes',
+export const classes = definePlugin(
+	(
+		classes: {
+			default?: string;
+			dragging?: string;
+			dragged?: string;
+		} = {},
+	) => {
+		return {
+			name: 'neodrag:classes',
 
-		setup(ctx) {
-			classes = classes ?? {};
-			classes.default ??= DEFAULT_CLASS.DEFAULT;
-			classes.dragging ??= DEFAULT_CLASS.DRAGGING;
-			classes.dragged ??= DEFAULT_CLASS.DRAGGED;
+			setup(ctx) {
+				classes = classes ?? {};
+				classes.default ??= DEFAULT_CLASS.DEFAULT;
+				classes.dragging ??= DEFAULT_CLASS.DRAGGING;
+				classes.dragged ??= DEFAULT_CLASS.DRAGGED;
 
-			if (classes.default) ctx.rootNode.classList.add(classes.default);
-		},
+				if (classes.default) ctx.rootNode.classList.add(classes.default);
+			},
 
-		dragStart(ctx) {
-			ctx.effect(() => {
-				ctx.rootNode.classList.add(classes.dragging);
-			});
-		},
+			dragStart(ctx) {
+				ctx.effect(() => {
+					ctx.rootNode.classList.add(classes.dragging!);
+				});
+			},
 
-		dragEnd(ctx) {
-			ctx.rootNode.classList.remove(classes.dragging);
-			ctx.rootNode.classList.add(classes.dragged);
-		},
-	};
-});
+			dragEnd(ctx) {
+				ctx.rootNode.classList.remove(classes.dragging!);
+				ctx.rootNode.classList.add(classes.dragged!);
+			},
+		};
+	},
+);
 
 // Degree of Freedom X and Y
 export const axis = definePlugin((value: 'both' | 'x' | 'y' | 'none' = 'both') => {
@@ -776,3 +710,55 @@ export const bounds = definePlugin(
 		};
 	},
 );
+
+export const threshold = definePlugin((options: { delay?: number; distance?: number } = {}) => {
+	return {
+		name: 'neodrag:threshold',
+
+		setup() {
+			options.delay ??= 0;
+			options.distance ??= 3;
+
+			return {
+				start_time: 0,
+				initial_x: 0,
+				initial_y: 0,
+			};
+		},
+
+		shouldDrag(_, state, event) {
+			state.start_time = Date.now();
+			state.initial_x = event.clientX;
+			state.initial_y = event.clientY;
+			return true;
+		},
+
+		drag(ctx, state, event) {
+			if (ctx.isDragging) return;
+
+			// First check if we're still on the draggable element
+			if (!ctx.currentlyDraggedNode.contains(event.target as Node)) {
+				ctx.preventStart();
+				return;
+			}
+
+			if (options.delay) {
+				const elapsed = Date.now() - state.start_time;
+				if (elapsed < options.delay) {
+					ctx.preventStart();
+					return;
+				}
+			}
+
+			if (options.distance) {
+				const delta_x = event.clientX - state.initial_x;
+				const delta_y = event.clientY - state.initial_y;
+				const distance = delta_x ** 2 + delta_y ** 2;
+				if (distance < options.distance ** 2) {
+					ctx.preventStart();
+					return;
+				}
+			}
+		},
+	};
+});

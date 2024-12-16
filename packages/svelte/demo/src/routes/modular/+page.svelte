@@ -4,7 +4,7 @@
 
 <div
 	use:draggable={{
-		plugins: [axis('x')],
+		plugins: [],
 	}}
 	style="width: 100px; height: 100px; background: cyan"
 >
