@@ -75,9 +75,11 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 
 		// For finding duplicates
 		const plugin_map = new Map<string, Plugin<any>>();
-		for (const plugin of [...default_plugins, ...user_plugins]) {
+		for (const plugin of [...user_plugins, ...default_plugins]) {
+			// User plugins first
 			const existing_plugin = plugin_map.get(plugin.name);
-			if (!existing_plugin || (plugin.priority ?? 0) > (existing_plugin.priority ?? 0)) {
+			if (!existing_plugin || (plugin.priority ?? 0) >= (existing_plugin.priority ?? 0)) {
+				// >= instead of >
 				plugin_map.set(plugin.name, plugin);
 			}
 		}

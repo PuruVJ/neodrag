@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { axis, disabled, draggable, events } from '@neodrag/core';
+	import { axis, disabled, draggable, events, threshold } from '@neodrag/core';
 	import { onMount } from 'svelte';
 
 	let element = $state<HTMLElement>();
-
-	onMount(() => {
-		element?.addEventListener('neodrag_start', (event) => {
-			console.log('Hua shurur');
-		});
-	});
 </script>
 
 <div
-	use:draggable={[axis(), events()]}
+	use:draggable={[
+		axis('x'),
+		events(),
+		threshold({
+			delay: 300,
+		}),
+	]}
 	bind:this={element}
 	style="width: 100px; height: 100px; background: cyan"
 >

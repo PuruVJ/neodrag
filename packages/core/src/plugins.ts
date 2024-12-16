@@ -375,20 +375,18 @@ export const threshold = unstable_definePlugin(
 			name: 'neodrag:threshold',
 
 			setup() {
-				options.delay ??= 0;
-				options.distance ??= 3;
+				const _options = { ...options } as Required<typeof options>;
+				_options.delay ??= 0;
+				_options.distance ??= 0;
 
 				return {
 					start_time: 0,
-					initial_x: 0,
-					initial_y: 0,
+					_options,
 				};
 			},
 
-			shouldDrag(_, state, event) {
+			shouldDrag(_, state) {
 				state.start_time = Date.now();
-				state.initial_x = event.clientX;
-				state.initial_y = event.clientY;
 				return true;
 			},
 
@@ -401,19 +399,20 @@ export const threshold = unstable_definePlugin(
 					return;
 				}
 
-				if (options.delay) {
+				if (state._options.delay) {
 					const elapsed = Date.now() - state.start_time;
-					if (elapsed < options.delay) {
+					if (elapsed < state._options.delay) {
+						console.log('Prevent start');
 						ctx.preventStart();
 						return;
 					}
 				}
 
-				if (options.distance) {
-					const delta_x = event.clientX - state.initial_x;
-					const delta_y = event.clientY - state.initial_y;
+				if (state._options.distance) {
+					const delta_x = event.clientX - ctx.initial.x;
+					const delta_y = event.clientY - ctx.initial.y;
 					const distance = delta_x ** 2 + delta_y ** 2;
-					if (distance < options.distance ** 2) {
+					if (distance < state._options.distance ** 2) {
 						ctx.preventStart();
 						return;
 					}
