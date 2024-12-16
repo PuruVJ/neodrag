@@ -459,27 +459,33 @@ export const events = unstable_definePlugin(
 			},
 
 			dragStart(ctx) {
-				data.offset = ctx.offset;
-				data.currentNode = ctx.currentlyDraggedNode;
+				ctx.effect(() => {
+					data.offset = ctx.offset;
+					data.currentNode = ctx.currentlyDraggedNode;
 
-				fire_custom_event(ctx.rootNode, 'neodrag_start', data);
-				options.onDragStart?.(data);
+					fire_custom_event(ctx.rootNode, 'neodrag_start', data);
+					options.onDragStart?.(data);
+				});
 			},
 
 			drag(ctx) {
-				data.offset = ctx.offset;
-				data.currentNode = ctx.currentlyDraggedNode;
+				ctx.effect(() => {
+					data.offset = ctx.offset;
+					data.currentNode = ctx.currentlyDraggedNode;
 
-				fire_custom_event(ctx.rootNode, 'neodrag', data);
-				options.onDrag?.(data);
+					fire_custom_event(ctx.rootNode, 'neodrag', data);
+					options.onDrag?.(data);
+				});
 			},
 
 			dragEnd(ctx) {
-				data.offset = ctx.offset;
-				data.currentNode = ctx.currentlyDraggedNode;
+				ctx.effect(() => {
+					data.offset = ctx.offset;
+					data.currentNode = ctx.currentlyDraggedNode;
 
-				fire_custom_event(ctx.rootNode, 'neodrag_end', data);
-				options.onDragEnd?.(data);
+					fire_custom_event(ctx.rootNode, 'neodrag_end', data);
+					options.onDragEnd?.(data);
+				});
 			},
 		};
 	},
