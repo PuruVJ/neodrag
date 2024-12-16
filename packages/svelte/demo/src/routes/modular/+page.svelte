@@ -12,15 +12,7 @@
 </script>
 
 <div
-	use:draggable={{
-		plugins: [
-			events({
-				onDrag(data) {
-					console.log('Drag', data);
-				},
-			}),
-		],
-	}}
+	use:draggable={[axis(), events()]}
 	bind:this={element}
 	style="width: 100px; height: 100px; background: cyan"
 >

@@ -10,6 +10,7 @@
 		"esModuleInterop": true,
 		"moduleResolution": "bundler",
 		"isolatedDeclarations": false,
+		"allowImportingTsExtensions": true,
 		"types": ["vitest/globals"]
 	},
 	"include": ["./src/*.ts"]
