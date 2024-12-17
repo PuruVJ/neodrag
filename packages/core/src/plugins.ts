@@ -20,6 +20,8 @@ export interface PluginContext {
 		y: number;
 	}>;
 
+	forcedPosition: { x: number; y: number } | null;
+
 	// Drag status
 	readonly isDragging: boolean;
 
@@ -250,17 +252,29 @@ export const disabled = unstable_definePlugin(() => {
 });
 
 export const transform = unstable_definePlugin(
-	(func?: (args: { offsetX: number; offsetY: number; rootNode: HTMLElement }) => void) => {
+	(func?: (args: { offset: { x: number; y: number }; rootNode: HTMLElement }) => void) => {
 		return {
 			name: 'neodrag:transform',
 
+			setup(ctx) {
+				// If there's a forced position, apply it immediately
+				if (ctx.forcedPosition) {
+					if (func) {
+						func({
+							offset: ctx.forcedPosition,
+							rootNode: ctx.rootNode,
+						});
+					} else {
+						ctx.rootNode.style.translate = `${ctx.forcedPosition.x}px ${ctx.forcedPosition.y}px`;
+					}
+				}
+			},
+
 			drag(ctx) {
-				// Apply the transform
 				ctx.effect(() => {
 					if (func) {
 						return func({
-							offsetX: ctx.offset.x!,
-							offsetY: ctx.offset.y!,
+							offset: ctx.offset,
 							rootNode: ctx.rootNode,
 						});
 					}
@@ -589,3 +603,24 @@ export const controls = unstable_definePlugin(
 		};
 	},
 );
+
+export const defaultPosition = unstable_definePlugin((x: number, y: number) => {
+	return { name: 'neodrag:defaultPosition' };
+});
+
+// Then position plugin:
+export const position = unstable_definePlugin((options: { x: number; y: number }) => {
+	return {
+		name: 'neodrag:position',
+		priority: 1000,
+
+		setup(ctx) {
+			// Set initial position immediately
+			ctx.forcedPosition = options;
+		},
+
+		drag(ctx) {
+			ctx.forcedPosition = options;
+		},
+	};
+});

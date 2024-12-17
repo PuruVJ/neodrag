@@ -1,11 +1,15 @@
 <script lang="ts">
-	import { ControlFrom, controls, draggable, events, threshold } from '@neodrag/core';
+	import { ControlFrom, controls, draggable, events, threshold, position } from '@neodrag/core';
 
 	let element = $state<HTMLElement>();
 </script>
 
 <div
 	use:draggable={[
+		position({
+			x: 200,
+			y: 100,
+		}),
 		controls({
 			allow: ControlFrom.element('.handle'),
 		}),

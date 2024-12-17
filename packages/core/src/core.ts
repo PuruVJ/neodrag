@@ -11,7 +11,7 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 
 		let offset = { x: 0, y: 0 };
 		let initial = { x: 0, y: 0 };
-
+		let forced_position = null as { x: number; y: number } | null;
 		const proposals: {
 			x: number | null;
 			y: number | null;
@@ -36,6 +36,12 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 			},
 			get initial() {
 				return initial;
+			},
+			get forcedPosition() {
+				return forced_position;
+			},
+			set forcedPosition(val) {
+				forced_position = val;
 			},
 			get isDragging() {
 				return is_dragging;
@@ -85,13 +91,14 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 		}
 
 		const ordered_plugins = [...plugin_map.values()].sort(
-			(a, b) => (a.priority ?? 0) - (b.priority ?? 0),
+			(a, b) => (b.priority ?? 0) - (a.priority ?? 0),
 		);
 
 		const private_states = new Map<string, any>();
-		for (const plugin of default_plugins.concat(user_plugins)) {
+		for (const plugin of ordered_plugins) {
 			// Initialize private state
 			const maybe_state = plugin.setup?.(ctx);
+			flush_effects();
 			if (maybe_state) private_states.set(plugin.name, maybe_state);
 		}
 
@@ -103,7 +110,7 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 			for (const effect of effects_to_run) {
 				effect();
 			}
-			effects_to_run.clear();
+			clear_effects();
 		}
 
 		function clear_effects() {
@@ -154,7 +161,7 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 		const event_options = { signal: controller.signal, capture: false };
 
 		// Contrary to what you might believe, this doesn't actually start dragging. This sets up the premise for drag
-		// Actual dragging is begun by the `try_start_drag` function
+		// Actual dragging is begun in the pointerdown once all the conditions are met.
 		listen(
 			'pointerdown',
 			(e: PointerEvent) => {
@@ -174,6 +181,7 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 				if (!ctx.currentlyDraggedNode.contains(e.target as Node)) return;
 
 				is_interacting = true;
+				forced_position = null;
 
 				const inverse_scale = calculate_inverse_scale();
 
@@ -204,13 +212,18 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 					if (!is_dragging) return;
 				}
 
-				//if (recomputeBounds.drag) computed_bounds = compute_bound_rect(bounds, node);
 				e.preventDefault();
 
-				delta = {
-					x: e.clientX - initial.x - offset.x,
-					y: e.clientY - initial.y - offset.y,
-				};
+				if (forced_position) {
+					offset.x = forced_position.x;
+					offset.y = forced_position.y;
+					flush_effects();
+					forced_position = null;
+					return;
+				}
+
+				delta.x = e.clientX - initial.x - offset.x;
+				delta.y = e.clientY - initial.y - offset.y;
 
 				// Core proposes delta
 				proposals.x = delta.x;
@@ -248,13 +261,14 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 
 				// Call the dragEnd hooks
 				run_plugins('dragEnd', e);
+				flush_effects();
 
 				if (proposals.x) initial.x = offset.x;
 				if (proposals.y) initial.y = offset.y;
 
 				proposals.x = 0;
 				proposals.y = 0;
-
+				forced_position = null;
 				is_interacting = false;
 				is_dragging = false;
 				dragstart_prevented = false;
