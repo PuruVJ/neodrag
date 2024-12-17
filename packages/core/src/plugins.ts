@@ -27,6 +27,8 @@ export interface PluginContext {
 
 	readonly rootNode: HTMLElement;
 
+	readonly lastEvent: PointerEvent | null;
+
 	/**
 	 * Here for performance reasons. Must be calculated only during dragStart by the core instance, not by any plugin within.
 	 */
@@ -67,6 +69,12 @@ export interface Plugin<PrivateState = any> {
 	 * Whether calling context.cancel() should cancel this plugin as well
 	 */
 	cancelable?: boolean;
+
+	/**
+	 * Whether the plugin should be updated live. If false, the plugin will be updated only when the dragging stops
+	 * and recreated
+	 */
+	liveUpdate?: boolean;
 
 	// Called when plugin is initialized
 	setup?: (context: PluginContext) => PrivateState | void;
@@ -255,6 +263,7 @@ export const transform = unstable_definePlugin(
 		return {
 			name: 'neodrag:transform',
 			cancelable: false,
+			liveUpdate: true,
 
 			setup(ctx) {
 				// If initial offset is non-zero, apply it
@@ -617,9 +626,9 @@ export const position = unstable_definePlugin(
 		return {
 			name: 'neodrag:position',
 			priority: 1000,
+			liveUpdate: true,
 
 			setup(ctx) {
-				// Set default position if provided
 				if (options.default) {
 					ctx.offset.x = options.default.x ?? ctx.offset.x;
 					ctx.offset.y = options.default.y ?? ctx.offset.y;
@@ -627,7 +636,6 @@ export const position = unstable_definePlugin(
 					ctx.initial.y = options.default.y ?? ctx.initial.y;
 				}
 
-				// If controlled, set position immediately
 				if (options.current) {
 					ctx.offset.x = options.current.x ?? ctx.offset.x;
 					ctx.offset.y = options.current.y ?? ctx.offset.y;
@@ -635,9 +643,7 @@ export const position = unstable_definePlugin(
 			},
 
 			drag(ctx) {
-				// Always force to current position if controlled
 				if (options.current) {
-					// Force the position and prevent any other movement
 					ctx.propose({
 						x: options.current.x - ctx.offset.x,
 						y: options.current.y - ctx.offset.y,

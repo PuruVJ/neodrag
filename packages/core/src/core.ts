@@ -86,6 +86,8 @@ export function createDraggable({
 		const instance = instances.get(active_node)!;
 		if (!instance.ctx.isInteracting) return;
 
+		instance.ctx.lastEvent = e;
+
 		if (!instance.ctx.isDragging) {
 			instance.dragstart_prevented = false;
 			run_plugins(instance, 'drag', e);
@@ -232,6 +234,7 @@ export function createDraggable({
 			isInteracting: false,
 			rootNode: node,
 			cachedRootNodeRect: node.getBoundingClientRect(),
+			lastEvent: null,
 			get currentlyDraggedNode() {
 				return currently_dragged_element;
 			},
@@ -266,22 +269,98 @@ export function createDraggable({
 			},
 		};
 
-		// Initialize plugins
-		const plugin_map = new Map<string, Plugin<any>>();
-		for (const plugin of [...plugins, ...initial_plugins]) {
-			const existing_plugin = plugin_map.get(plugin.name);
-			if (!existing_plugin || (plugin.priority ?? 0) >= (existing_plugin.priority ?? 0)) {
-				plugin_map.set(plugin.name, plugin);
+		function initialize_plugins(new_plugins: Plugin[]) {
+			// Initialize plugins
+			const plugin_map = new Map<string, Plugin<any>>();
+			for (const plugin of [...new_plugins, ...initial_plugins]) {
+				const existing_plugin = plugin_map.get(plugin.name);
+				if (!existing_plugin || (plugin.priority ?? 0) >= (existing_plugin.priority ?? 0)) {
+					plugin_map.set(plugin.name, plugin);
+				}
 			}
-		}
 
-		instance.plugins = [...plugin_map.values()].sort(
-			(a, b) => (b.priority ?? 0) - (a.priority ?? 0),
-		);
+			return [...plugin_map.values()].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+		}
 
 		for (const plugin of instance.plugins) {
 			const state = plugin.setup?.(instance.ctx);
 			flush_effects(instance);
+			if (state) instance.states.set(plugin.name, state);
+		}
+
+		function update_plugin(old_plugin: Plugin | undefined, new_plugin: Plugin) {
+			// Skip if same instance and not live-updateable
+			if (old_plugin === new_plugin && !new_plugin.liveUpdate) {
+				return false;
+			}
+
+			// Clean up old instance if different
+			if (old_plugin && old_plugin !== new_plugin) {
+				old_plugin.cleanup?.();
+				instance.states.delete(old_plugin.name);
+			}
+
+			// Setup new plugin
+			const state = new_plugin.setup?.(instance.ctx);
+			flush_effects(instance);
+			if (state) instance.states.set(new_plugin.name, state);
+
+			return true;
+		}
+
+		function update(new_plugins: Plugin[] = []) {
+			const old_plugin_map = new Map(instance.plugins.map((p) => [p.name, p]));
+			const new_plugin_list = initialize_plugins(new_plugins);
+			let has_changes = false;
+
+			// During drag, only update plugins that opted into live updates
+			if (instance.ctx.isDragging || instance.ctx.isInteracting) {
+				const updated_plugins = new_plugin_list.filter((plugin) => plugin.liveUpdate);
+
+				for (const plugin of updated_plugins) {
+					const old_plugin = old_plugin_map.get(plugin.name);
+					if (update_plugin(old_plugin, plugin)) {
+						has_changes = true;
+					}
+				}
+
+				// If we made changes and we're the active node, re-run drag
+				if (has_changes && active_node === node && instance.ctx.lastEvent) {
+					handle_pointer_move(instance.ctx.lastEvent);
+				}
+
+				return;
+			}
+
+			// Clean up removed plugins
+			const removed_plugins = instance.plugins.filter(
+				(p) => !new_plugin_list.some((np) => np.name === p.name),
+			);
+
+			for (const plugin of removed_plugins) {
+				plugin.cleanup?.();
+				instance.states.delete(plugin.name);
+				has_changes = true;
+			}
+
+			// Update or setup new plugins
+			for (const plugin of new_plugin_list) {
+				const old_plugin = old_plugin_map.get(plugin.name);
+				if (update_plugin(old_plugin, plugin)) {
+					has_changes = true;
+				}
+			}
+
+			// Update instance plugins list if there were changes
+			if (has_changes) {
+				instance.plugins = new_plugin_list;
+			}
+		}
+
+		// Initial setup
+		instance.plugins = initialize_plugins(plugins);
+		for (const plugin of instance.plugins) {
+			const state = plugin.setup?.(instance.ctx);
 			if (state) instance.states.set(plugin.name, state);
 		}
 
@@ -292,6 +371,7 @@ export function createDraggable({
 		node.style.touchAction = 'none';
 
 		return {
+			update,
 			destroy() {
 				if (active_node === node) {
 					active_node = null;

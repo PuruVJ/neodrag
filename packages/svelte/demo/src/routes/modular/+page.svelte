@@ -1,16 +1,13 @@
 <script lang="ts">
-	import { ControlFrom, controls, draggable, events, threshold, position } from '@neodrag/core';
+	import { ControlFrom, controls, draggable, events, position, threshold } from '@neodrag/core';
 
 	let element = $state<HTMLElement>();
-</script>
 
-<div
-	use:draggable={[
+	let current_position = $state({ x: 0, y: 0 });
+
+	const options = $derived([
 		position({
-			// current: {
-			// 	x: 200,
-			// 	y: 100,
-			// },
+			current: $state.snapshot(current_position),
 			default: {
 				x: 50,
 				y: 65,
@@ -23,7 +20,23 @@
 		threshold({
 			// delay: 300,
 		}),
-	]}
+	]);
+</script>
+
+<br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+
+<label>
+	X
+	<input type="range" bind:value={current_position.x} />
+</label>
+
+<label>
+	Y
+	<input type="range" bind:value={current_position.y} />
+</label>
+
+<div
+	use:draggable={options}
 	bind:this={element}
 	style="width: 100px; height: 100px; background: cyan;"
 >
