@@ -1,8 +1,8 @@
 import type { Plugin, PluginContext } from './plugins.ts';
 
-export function createDraggable(initialPlugins: Plugin[] = []) {
+export function createDraggable({ plugins: initial_plugins = [] }: { plugins?: Plugin[] } = {}) {
 	return (node: HTMLElement, plugins: Plugin[] = []) => {
-		const default_plugins: Plugin[] = initialPlugins;
+		const default_plugins: Plugin[] = initial_plugins;
 
 		let is_interacting = false;
 		let is_dragging = false;
@@ -215,11 +215,8 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 				else return clear_effects();
 
 				// Whatever offset we have had till now since the draggable() was mounted, add proposals to it, as long as they're not null
-				const final_x = offset.x + (proposals.x ?? 0);
-				const final_y = offset.y + (proposals.y ?? 0);
-
-				offset.x = final_x;
-				offset.y = final_y;
+				offset.x += proposals.x ?? 0;
+				offset.y += proposals.y ?? 0;
 			},
 			event_options,
 		);
