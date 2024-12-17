@@ -7,8 +7,14 @@
 <div
 	use:draggable={[
 		position({
-			x: 200,
-			y: 100,
+			// current: {
+			// 	x: 200,
+			// 	y: 100,
+			// },
+			default: {
+				x: 50,
+				y: 65,
+			},
 		}),
 		controls({
 			allow: ControlFrom.element('.handle'),

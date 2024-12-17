@@ -1,26 +1,24 @@
 export interface PluginContext {
-	readonly delta: Readonly<{
+	delta: {
 		x: number;
 		y: number;
-	}>;
+	};
 
 	// Current position (mutable). Only of this drag cycle
-	readonly proposed: Readonly<{
+	proposed: {
 		x: number | null;
 		y: number | null;
-	}>;
+	};
 
-	readonly offset: Readonly<{
+	offset: {
 		x: number;
 		y: number;
-	}>;
+	};
 
-	readonly initial: Readonly<{
+	initial: {
 		x: number;
 		y: number;
-	}>;
-
-	forcedPosition: { x: number; y: number } | null;
+	};
 
 	// Drag status
 	readonly isDragging: boolean;
@@ -64,6 +62,11 @@ export interface Plugin<PrivateState = any> {
 	 * then they run in the order specified in the plugins array
 	 */
 	priority?: number;
+
+	/**
+	 * Whether calling context.cancel() should cancel this plugin as well
+	 */
+	cancelable?: boolean;
 
 	// Called when plugin is initialized
 	setup?: (context: PluginContext) => PrivateState | void;
@@ -252,20 +255,22 @@ export const disabled = unstable_definePlugin(() => {
 });
 
 export const transform = unstable_definePlugin(
-	(func?: (args: { offset: { x: number; y: number }; rootNode: HTMLElement }) => void) => {
+	(func?: (args: { offsetX: number; offsetY: number; rootNode: HTMLElement }) => void) => {
 		return {
 			name: 'neodrag:transform',
+			cancelable: false,
 
 			setup(ctx) {
-				// If there's a forced position, apply it immediately
-				if (ctx.forcedPosition) {
+				// If initial offset is non-zero, apply it
+				if (ctx.offset.x !== 0 || ctx.offset.y !== 0) {
 					if (func) {
 						func({
-							offset: ctx.forcedPosition,
+							offsetX: ctx.offset.x,
+							offsetY: ctx.offset.y,
 							rootNode: ctx.rootNode,
 						});
 					} else {
-						ctx.rootNode.style.translate = `${ctx.forcedPosition.x}px ${ctx.forcedPosition.y}px`;
+						ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
 					}
 				}
 			},
@@ -274,7 +279,8 @@ export const transform = unstable_definePlugin(
 				ctx.effect(() => {
 					if (func) {
 						return func({
-							offset: ctx.offset,
+							offsetX: ctx.offset.x,
+							offsetY: ctx.offset.y,
 							rootNode: ctx.rootNode,
 						});
 					}
@@ -474,6 +480,7 @@ export const events = unstable_definePlugin(
 
 		return {
 			name: 'neodrag:events',
+			cancelable: false,
 
 			setup(ctx) {
 				data.rootNode = ctx.rootNode;
@@ -604,23 +611,44 @@ export const controls = unstable_definePlugin(
 	},
 );
 
-export const defaultPosition = unstable_definePlugin((x: number, y: number) => {
-	return { name: 'neodrag:defaultPosition' };
-});
+export const position = unstable_definePlugin(
+	(
+		options: {
+			current?: { x: number; y: number };
+			default?: { x: number; y: number };
+		} = {},
+	) => {
+		return {
+			name: 'neodrag:position',
+			priority: 1000,
 
-// Then position plugin:
-export const position = unstable_definePlugin((options: { x: number; y: number }) => {
-	return {
-		name: 'neodrag:position',
-		priority: 1000,
+			setup(ctx) {
+				// Set default position if provided
+				if (options.default) {
+					ctx.offset.x = options.default.x ?? ctx.offset.x;
+					ctx.offset.y = options.default.y ?? ctx.offset.y;
+					ctx.initial.x = options.default.x ?? ctx.initial.x;
+					ctx.initial.y = options.default.y ?? ctx.initial.y;
+				}
 
-		setup(ctx) {
-			// Set initial position immediately
-			ctx.forcedPosition = options;
-		},
+				// If controlled, set position immediately
+				if (options.current) {
+					ctx.offset.x = options.current.x ?? ctx.offset.x;
+					ctx.offset.y = options.current.y ?? ctx.offset.y;
+				}
+			},
 
-		drag(ctx) {
-			ctx.forcedPosition = options;
-		},
-	};
-});
+			drag(ctx) {
+				// Always force to current position if controlled
+				if (options.current) {
+					// Force the position and prevent any other movement
+					ctx.propose({
+						x: options.current.x - ctx.offset.x,
+						y: options.current.y - ctx.offset.y,
+					});
+					ctx.cancel();
+				}
+			},
+		};
+	},
+);

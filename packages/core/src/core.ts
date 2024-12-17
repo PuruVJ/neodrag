@@ -1,23 +1,20 @@
 import type { Plugin, PluginContext } from './plugins.ts';
 
 export function createDraggable(initialPlugins: Plugin[] = []) {
-	return (node: HTMLElement, options: Plugin[] = []) => {
-		let user_plugins = options;
-
+	return (node: HTMLElement, plugins: Plugin[] = []) => {
 		const default_plugins: Plugin[] = initialPlugins;
 
 		let is_interacting = false;
 		let is_dragging = false;
 
-		let offset = { x: 0, y: 0 };
-		let initial = { x: 0, y: 0 };
-		let forced_position = null as { x: number; y: number } | null;
+		const offset = { x: 0, y: 0 };
+		const initial = { x: 0, y: 0 };
 		const proposals: {
 			x: number | null;
 			y: number | null;
 		} = { x: 0, y: 0 };
+		const delta: { x: number; y: number } = { x: 0, y: 0 };
 		let current_drag_hook_cancelled = false;
-		let delta: { x: number; y: number } = { x: 0, y: 0 };
 		let dragstart_prevented = false;
 		let cached_root_node_rect: DOMRect;
 		let currently_dragged_element = node;
@@ -25,24 +22,10 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 		const effects_to_run = new Set<() => void>();
 
 		const ctx: PluginContext = {
-			get proposed() {
-				return proposals;
-			},
-			get delta() {
-				return delta;
-			},
-			get offset() {
-				return offset;
-			},
-			get initial() {
-				return initial;
-			},
-			get forcedPosition() {
-				return forced_position;
-			},
-			set forcedPosition(val) {
-				forced_position = val;
-			},
+			proposed: proposals,
+			delta,
+			offset,
+			initial,
 			get isDragging() {
 				return is_dragging;
 			},
@@ -81,7 +64,7 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 
 		// For finding duplicates
 		const plugin_map = new Map<string, Plugin<any>>();
-		for (const plugin of [...user_plugins, ...default_plugins]) {
+		for (const plugin of [...plugins, ...default_plugins]) {
 			// User plugins first
 			const existing_plugin = plugin_map.get(plugin.name);
 			if (!existing_plugin || (plugin.priority ?? 0) >= (existing_plugin.priority ?? 0)) {
@@ -128,24 +111,16 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 				const handler = plugin[hook];
 				if (!handler) continue;
 
+				if (current_drag_hook_cancelled && plugin.cancelable !== false) continue;
+
 				const result = handler(ctx, private_states.get(plugin.name), event);
 
 				if (result === false) {
 					should_run = false;
 					break;
 				}
-
-				// Check if it was cancelled
-				if (current_drag_hook_cancelled) {
-					should_run = false;
-
-					// Reset it back to what false
-					current_drag_hook_cancelled = false;
-					break;
-				}
 			}
 
-			// TODO: This creates memory again and again in the loop. Hoist these to top-level variables
 			return should_run;
 		}
 
@@ -178,10 +153,9 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 				// Also, should_drag doesn't take any effect callbacks, so no need to flush to clear
 				if (should_drag === false) return;
 
-				if (!ctx.currentlyDraggedNode.contains(e.target as Node)) return;
+				if (!currently_dragged_element.contains(e.target as Node)) return;
 
 				is_interacting = true;
-				forced_position = null;
 
 				const inverse_scale = calculate_inverse_scale();
 
@@ -213,14 +187,6 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 				}
 
 				e.preventDefault();
-
-				if (forced_position) {
-					offset.x = forced_position.x;
-					offset.y = forced_position.y;
-					flush_effects();
-					forced_position = null;
-					return;
-				}
 
 				delta.x = e.clientX - initial.x - offset.x;
 				delta.y = e.clientY - initial.y - offset.y;
@@ -268,7 +234,6 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 
 				proposals.x = 0;
 				proposals.y = 0;
-				forced_position = null;
 				is_interacting = false;
 				is_dragging = false;
 				dragstart_prevented = false;
