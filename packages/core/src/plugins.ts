@@ -170,13 +170,9 @@ export const classes = unstable_definePlugin(
 );
 
 // Degree of Freedom X and Y
-export const axis = unstable_definePlugin((value: 'both' | 'x' | 'y' | 'none' = 'both') => {
+export const axis = unstable_definePlugin((value: 'both' | 'x' | 'y' = 'both') => {
 	return {
 		name: 'neodrag:axis',
-
-		shouldDrag() {
-			return value !== 'none';
-		},
 
 		setup() {
 			return {
