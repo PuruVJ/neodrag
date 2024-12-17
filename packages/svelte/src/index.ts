@@ -1,7 +1,7 @@
 import {
 	draggable as core_draggable,
+	Plugin,
 	type DragEventData,
-	type BaseDragOptions,
 } from '@neodrag/core';
 
 //!THIS IS HACK, WE WANNA IMPORT THE TYPE WHEN THE ISSUE IS FIXED LATER
@@ -78,7 +78,7 @@ export interface Action<
 
 export const draggable = core_draggable as Action<
 	HTMLElement,
-	BaseDragOptions | undefined,
+	Plugin[] | undefined,
 	{
 		onneodrag_start: (e: CustomEvent<DragEventData>) => void;
 		onneodrag: (e: CustomEvent<DragEventData>) => void;
@@ -86,10 +86,4 @@ export const draggable = core_draggable as Action<
 	}
 >;
 
-export type {
-	// DragAxis,
-	// DragBounds,
-	// DragBoundsCoords,
-	DragEventData,
-	BaseDragOptions as DragOptions,
-} from '@neodrag/core';
+export * from '@neodrag/core';
