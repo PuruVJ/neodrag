@@ -25,14 +25,16 @@ interface DraggableInstance {
 
 export function createDraggable({
 	plugins: initial_plugins = [],
-	delegateTarget = document.body,
-}: { plugins?: Plugin[]; delegateTarget?: HTMLElement } = {}) {
+	delegateTargetFn = () => document.body,
+}: { plugins?: Plugin[]; delegateTargetFn?: () => HTMLElement } = {}) {
 	const instances = new WeakMap<HTMLElement, DraggableInstance>();
 	let listeners_initialized = false;
 	let active_node: HTMLElement | null = null;
 
 	function initialize_listeners() {
 		if (listeners_initialized) return;
+
+		const delegateTarget = delegateTargetFn();
 
 		delegateTarget.addEventListener('pointerdown', handle_pointer_down, {
 			passive: true,
@@ -366,9 +368,6 @@ export function createDraggable({
 
 		// Register instance
 		instances.set(node, instance);
-
-		// Set touch-action
-		node.style.touchAction = 'none';
 
 		return {
 			update,

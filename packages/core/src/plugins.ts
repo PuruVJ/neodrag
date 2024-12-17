@@ -651,3 +651,42 @@ export const position = unstable_definePlugin(
 		};
 	},
 );
+
+type TouchActionMode =
+	// Keyword values
+	| 'auto'
+	| 'none'
+	| 'pan-x'
+	| 'pan-left'
+	| 'pan-right'
+	| 'pan-y'
+	| 'pan-up'
+	| 'pan-down'
+	| 'pinch-zoom'
+	| 'manipulation'
+	// Global values
+	| 'inherit'
+	| 'initial'
+	| 'revert'
+	| 'revert-layer'
+	| 'unset';
+
+export const touchAction = unstable_definePlugin((mode: TouchActionMode = 'manipulation') => {
+	return {
+		name: 'neodrag:touch-action',
+		cancelable: false,
+		liveUpdate: true,
+
+		setup(ctx) {
+			const original_touch_action = ctx.rootNode.style.touchAction;
+			ctx.rootNode.style.touchAction = mode;
+
+			return { original_touch_action };
+		},
+
+		dragEnd(ctx, state) {
+			// Restore original touch-action
+			ctx.rootNode.style.touchAction = state.original_touch_action || 'auto';
+		},
+	};
+});
