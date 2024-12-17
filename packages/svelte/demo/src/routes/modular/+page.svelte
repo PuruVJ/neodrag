@@ -7,14 +7,17 @@
 
 	const options = $derived([
 		position({
-			current: $state.snapshot(current_position),
+			current: {
+				x: current_position.x * 2,
+				y: current_position.y * 2,
+			},
 			default: {
 				x: 50,
 				y: 65,
 			},
 		}),
 		controls({
-			allow: ControlFrom.element('.handle'),
+			allow: ControlFrom.selector('.handle'),
 		}),
 		events(),
 		threshold({

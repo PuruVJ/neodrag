@@ -1,6 +1,14 @@
 {
+  "react": {
+    "size": 2.15,
+    "version": "2.2.0"
+  },
+  "svelte": {
+    "size": 1.92,
+    "version": "2.2.0"
+  },
   "solid": {
-    "size": 1.98,
+    "size": 1.94,
     "version": "2.2.0"
   },
   "vue": {
@@ -8,15 +16,7 @@
     "version": "2.2.0"
   },
   "vanilla": {
-    "size": 2,
-    "version": "2.2.0"
-  },
-  "react": {
-    "size": 2.18,
-    "version": "2.2.0"
-  },
-  "svelte": {
-    "size": 1.33,
+    "size": 1.95,
     "version": "2.2.0"
   }
 }

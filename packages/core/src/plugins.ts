@@ -534,25 +534,37 @@ type ControlZone = {
 };
 
 export const ControlFrom = {
-	element:
-		(element: Element | string) =>
-		(root: Element): ControlZone[] => {
-			const elements =
-				typeof element === 'string' ? Array.from(root.querySelectorAll(element)) : [element];
+	selector(selector: string): (root: Element) => ControlZone[] {
+		return (root: Element) => ControlFrom.elements(root.querySelectorAll(selector))(root);
+	},
 
+	elements:
+		(elements: NodeListOf<Element> | Element[]) =>
+		(root: Element): ControlZone[] => {
 			const root_rect = root.getBoundingClientRect();
 
-			return elements.map((el) => {
+			const data: {
+				element: Element;
+				top: number;
+				right: number;
+				bottom: number;
+				left: number;
+				area: number;
+			}[] = [];
+			elements.forEach((el) => {
 				const rect = el.getBoundingClientRect();
-				return {
+
+				data.push({
 					element: el,
 					top: rect.top - root_rect.top,
 					right: rect.right - root_rect.left,
 					bottom: rect.bottom - root_rect.top,
 					left: rect.left - root_rect.left,
 					area: rect.width * rect.height,
-				};
+				});
 			});
+
+			return data;
 		},
 };
 
