@@ -163,23 +163,14 @@ export const stateMarker = unstable_definePlugin(() => {
 });
 
 // Degree of Freedom X and Y
-export const axis = unstable_definePlugin((value: 'both' | 'x' | 'y' = 'both') => {
+export const axis = unstable_definePlugin((value: 'x' | 'y') => {
 	return {
 		name: 'neodrag:axis',
 
-		setup() {
-			return {
-				df: {
-					x: value === 'both' || value === 'x',
-					y: value === 'both' || value === 'y',
-				},
-			};
-		},
-
-		drag(ctx, state) {
+		drag(ctx) {
 			ctx.propose({
-				x: state.df.x ? ctx.proposed.x : null,
-				y: state.df.y ? ctx.proposed.y : null,
+				x: value === 'x' ? ctx.proposed.x : null,
+				y: value === 'y' ? ctx.proposed.y : null,
 			});
 		},
 	};
