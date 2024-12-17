@@ -7,10 +7,10 @@
 
 	const options = $derived([
 		position({
-			current: {
-				x: current_position.x * 2,
-				y: current_position.y * 2,
-			},
+			// current: {
+			// 	x: current_position.x * 2,
+			// 	y: current_position.y * 2,
+			// },
 			default: {
 				x: 50,
 				y: 65,

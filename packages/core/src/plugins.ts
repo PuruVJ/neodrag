@@ -134,48 +134,33 @@ export const ignoreMultitouch = unstable_definePlugin((value = true) => {
 	};
 });
 
-const enum DEFAULT_CLASS {
-	DEFAULT = 'neodrag',
-	DRAGGING = 'neodrag-dragging',
-	DRAGGED = 'neodrag-dragged',
-}
-export const classes = unstable_definePlugin(
-	(
-		classes: {
-			default?: string;
-			dragging?: string;
-			dragged?: string;
-		} = {},
-	) => {
-		return {
-			name: 'neodrag:classes',
+export const stateMarker = unstable_definePlugin(() => {
+	return {
+		name: 'neodrag:stateMarker',
+		cancelable: false,
 
-			setup(ctx) {
-				classes = classes ?? {};
-				classes.default ??= DEFAULT_CLASS.DEFAULT;
-				classes.dragging ??= DEFAULT_CLASS.DRAGGING;
-				classes.dragged ??= DEFAULT_CLASS.DRAGGED;
+		setup(ctx) {
+			ctx.rootNode.dataset.neodrag = '';
+			ctx.rootNode.dataset.neodragState = 'idle';
+			ctx.rootNode.dataset.neodragCount = '0';
 
-				if (classes.default) ctx.rootNode.classList.add(classes.default);
+			return {
+				count: 0,
+			};
+		},
 
-				return {
-					class_list: ctx.rootNode.classList,
-				};
-			},
+		dragStart(ctx) {
+			ctx.effect(() => {
+				ctx.rootNode.dataset.neodragState = 'dragging';
+			});
+		},
 
-			dragStart(ctx, state) {
-				ctx.effect(() => {
-					state.class_list.add(classes.dragging!);
-				});
-			},
-
-			dragEnd(_, state) {
-				state.class_list.remove(classes.dragging!);
-				state.class_list.add(classes.dragged!);
-			},
-		};
-	},
-);
+		dragEnd(ctx, state) {
+			ctx.rootNode.dataset.neodragState = 'idle';
+			ctx.rootNode.dataset.neodragCount = (++state.count).toString();
+		},
+	};
+});
 
 // Degree of Freedom X and Y
 export const axis = unstable_definePlugin((value: 'both' | 'x' | 'y' = 'both') => {
