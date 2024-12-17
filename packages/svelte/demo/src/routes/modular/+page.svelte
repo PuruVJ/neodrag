@@ -25,7 +25,7 @@
 		}),
 	]}
 	bind:this={element}
-	style="width: 100px; height: 100px; background: cyan;position: fixed;z-index: 100; top: 100; left: 100"
+	style="width: 100px; height: 100px; background: cyan;"
 >
 	Hello
 
@@ -35,11 +35,25 @@
 	<div class="handle">Handle 2</div>
 </div>
 
+<br />
+
+<div class="container">
+	<!-- {#each Array(100), i}
+		<div use:draggable style="width: 100px; height: 100px; background: green;">{i}</div>
+	{/each} -->
+</div>
+
 <style>
 	:global {
 		body {
 			margin: 0;
 			height: 50vh;
 		}
+	}
+
+	.container {
+		display: grid;
+		grid-template-columns: repeat(10, 1fr);
+		grid-gap: 10px;
 	}
 </style>
