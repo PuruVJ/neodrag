@@ -16,6 +16,7 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 		const delta: { x: number; y: number } = { x: 0, y: 0 };
 		let current_drag_hook_cancelled = false;
 		let dragstart_prevented = false;
+		let pointer_captured_id: number | null = null;
 		let cached_root_node_rect: DOMRect;
 		let currently_dragged_element = node;
 
@@ -45,6 +46,15 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 				return currently_dragged_element;
 			},
 			set currentlyDraggedNode(val) {
+				//  In case a plugin switches currentDraggedElement through the pointermove
+				if (
+					pointer_captured_id &&
+					currently_dragged_element.hasPointerCapture(pointer_captured_id)
+				) {
+					currently_dragged_element.releasePointerCapture(pointer_captured_id);
+					val.setPointerCapture(pointer_captured_id);
+				}
+
 				currently_dragged_element = val;
 			},
 			effect: (func) => {
@@ -157,6 +167,9 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 
 				is_interacting = true;
 
+				pointer_captured_id = e.pointerId;
+				currently_dragged_element.setPointerCapture(pointer_captured_id);
+
 				const inverse_scale = calculate_inverse_scale();
 
 				// Some plugin like axis might not allow dragging in one direction
@@ -225,6 +238,13 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 					});
 				}
 
+				if (
+					pointer_captured_id &&
+					currently_dragged_element.hasPointerCapture(pointer_captured_id)
+				) {
+					currently_dragged_element.releasePointerCapture(pointer_captured_id);
+				}
+
 				// Call the dragEnd hooks
 				run_plugins('dragEnd', e);
 				flush_effects();
@@ -237,6 +257,7 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 				is_interacting = false;
 				is_dragging = false;
 				dragstart_prevented = false;
+				pointer_captured_id = null;
 				clear_effects();
 			},
 			event_options,

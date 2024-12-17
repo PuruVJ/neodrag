@@ -4,6 +4,7 @@
 	let element = $state<HTMLElement>();
 </script>
 
+<iframe src="https://neodrag.dev" title="iframe" style="height: 90vh; width: 90vw" />
 <div
 	use:draggable={[
 		position({
@@ -25,7 +26,7 @@
 		}),
 	]}
 	bind:this={element}
-	style="width: 100px; height: 100px; background: cyan"
+	style="width: 100px; height: 100px; background: cyan;position: fixed;z-index: 100; top: 100; left: 100"
 >
 	Hello
 
