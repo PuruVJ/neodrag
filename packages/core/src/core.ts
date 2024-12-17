@@ -149,15 +149,6 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 			return inverse_scale;
 		}
 
-		function get_event_data(transform_x: number, transform_y: number) {
-			return {
-				offsetX: transform_x,
-				offsetY: transform_y,
-				rootNode: node,
-				currentNode: node,
-			};
-		}
-
 		const listen = window.addEventListener;
 		const controller = new AbortController();
 		const event_options = { signal: controller.signal, capture: false };
@@ -169,6 +160,10 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 			(e: PointerEvent) => {
 				if (e.button === 2) return;
 
+				// We will run this by default in the drag_start plugin. But not in any other, the user will have to
+				// run it in their own plugin
+				cached_root_node_rect = node.getBoundingClientRect();
+
 				// Run the plugins
 				const should_drag = run_plugins('shouldDrag', e);
 
@@ -179,10 +174,6 @@ export function createDraggable(initialPlugins: Plugin[] = []) {
 				if (!ctx.currentlyDraggedNode.contains(e.target as Node)) return;
 
 				is_interacting = true;
-
-				// We will run this by default in the drag_start plugin. But not in any other, the user will have to
-				// run it in their own plugin
-				ctx.cachedRootNodeRect = node.getBoundingClientRect();
 
 				const inverse_scale = calculate_inverse_scale();
 

@@ -1,16 +1,17 @@
 <script lang="ts">
-	import { axis, disabled, draggable, events, threshold } from '@neodrag/core';
-	import { onMount } from 'svelte';
+	import { ControlFrom, controls, draggable, events, threshold } from '@neodrag/core';
 
 	let element = $state<HTMLElement>();
 </script>
 
 <div
 	use:draggable={[
-		axis('x'),
+		controls({
+			allow: ControlFrom.element('.handle'),
+		}),
 		events(),
 		threshold({
-			delay: 300,
+			// delay: 300,
 		}),
 	]}
 	bind:this={element}

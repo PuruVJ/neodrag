@@ -497,3 +497,95 @@ export const events = unstable_definePlugin(
 		};
 	},
 );
+
+type ControlZone = {
+	element: Element;
+	top: number;
+	right: number;
+	bottom: number;
+	left: number;
+	area: number;
+};
+
+export const ControlFrom = {
+	element:
+		(element: Element | string) =>
+		(root: Element): ControlZone[] => {
+			const elements =
+				typeof element === 'string' ? Array.from(root.querySelectorAll(element)) : [element];
+
+			const root_rect = root.getBoundingClientRect();
+
+			return elements.map((el) => {
+				const rect = el.getBoundingClientRect();
+				return {
+					element: el,
+					top: rect.top - root_rect.top,
+					right: rect.right - root_rect.left,
+					bottom: rect.bottom - root_rect.top,
+					left: rect.left - root_rect.left,
+					area: rect.width * rect.height,
+				};
+			});
+		},
+};
+
+const is_point_in_zone = (x: number, y: number, zone: ControlZone, root_rect: DOMRect) => {
+	const relative_x = x - root_rect.left;
+	const relative_y = y - root_rect.top;
+
+	return (
+		relative_x >= zone.left &&
+		relative_x <= zone.right &&
+		relative_y >= zone.top &&
+		relative_y <= zone.bottom
+	);
+};
+export const controls = unstable_definePlugin(
+	(options: {
+		allow?: ReturnType<(typeof ControlFrom)[keyof typeof ControlFrom]>;
+		block?: ReturnType<(typeof ControlFrom)[keyof typeof ControlFrom]>;
+		priority?: 'allow' | 'block';
+	}) => {
+		return {
+			name: 'neodrag:controls',
+
+			setup(ctx) {
+				return {
+					allow_zones: (options.allow?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area),
+					block_zones: options.block?.(ctx.rootNode) ?? [],
+				};
+			},
+
+			shouldDrag(ctx, state, event) {
+				const { clientX, clientY } = event;
+				const root_rect = ctx.rootNode.getBoundingClientRect();
+				const priority = options.priority ?? 'block';
+
+				if (state.allow_zones.length > 0) {
+					const active_zone = state.allow_zones.find((zone) =>
+						is_point_in_zone(clientX, clientY, zone, root_rect),
+					);
+
+					if (!active_zone) return false;
+
+					const in_block_zone = state.block_zones.some((zone) =>
+						is_point_in_zone(clientX, clientY, zone, root_rect),
+					);
+
+					// If in both, priority decides
+					if (in_block_zone) {
+						if (priority === 'block') return false;
+					}
+
+					ctx.currentlyDraggedNode = active_zone.element as HTMLElement;
+					return true;
+				}
+
+				return !state.block_zones.some((zone) =>
+					is_point_in_zone(clientX, clientY, zone, root_rect),
+				);
+			},
+		};
+	},
+);
