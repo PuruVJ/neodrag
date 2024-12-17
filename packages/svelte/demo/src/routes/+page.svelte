@@ -2,7 +2,7 @@
 	import { sineIn } from 'svelte/easing';
 	import { tweened } from 'svelte/motion';
 
-	import { draggable, type DragOptions } from '@neodrag/svelte';
+	import { draggable, type BaseDragOptions as DragOptions } from '@neodrag/core';
 
 	let boundToBody = false;
 	let handleEl: HTMLElement;

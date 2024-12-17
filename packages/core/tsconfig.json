@@ -1,15 +1,17 @@
 {
 	"compilerOptions": {
-		"module": "ES2020",
+		"module": "ES2022",
 		"target": "ESNext",
 		"declaration": true,
 		"emitDeclarationOnly": true,
 		"declarationDir": "dist/",
 		"strict": true,
+		"lib": ["ES2023.Array", "DOM"],
 		"esModuleInterop": true,
 		"moduleResolution": "bundler",
-		"isolatedDeclarations": true,
+		"isolatedDeclarations": false,
+		"allowImportingTsExtensions": true,
 		"types": ["vitest/globals"]
 	},
-	"files": ["./src/index.ts"]
+	"include": ["./src/*.ts"]
 }
