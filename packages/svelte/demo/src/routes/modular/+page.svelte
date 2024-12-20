@@ -1,5 +1,13 @@
 <script lang="ts">
-	import { ControlFrom, controls, draggable, events, position, threshold } from '@neodrag/core';
+	import {
+		ControlFrom,
+		controls,
+		draggable,
+		events,
+		position,
+		threshold,
+		scrollLock,
+	} from '@neodrag/core';
 
 	let element = $state<HTMLElement>();
 
@@ -23,6 +31,7 @@
 		threshold({
 			// delay: 300,
 		}),
+		scrollLock(),
 	]);
 </script>
 
@@ -63,7 +72,7 @@
 	:global {
 		body {
 			margin: 0;
-			height: 50vh;
+			height: 200vh;
 		}
 	}
 

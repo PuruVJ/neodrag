@@ -1,3 +1,5 @@
+import { get_node_style, set_node_dataset, set_node_key_style } from './utils.ts';
+
 export interface PluginContext {
 	delta: {
 		x: number;
@@ -91,7 +93,7 @@ export interface Plugin<PrivateState = any> {
 	dragEnd?: (context: PluginContext, state: PrivateState, event: PointerEvent) => void;
 
 	// Cleanup when draggable is destroyed
-	cleanup?: () => void;
+	cleanup?: (context: PluginContext, state: PrivateState) => void;
 }
 
 /**
@@ -140,9 +142,9 @@ export const stateMarker = unstable_definePlugin(() => {
 		cancelable: false,
 
 		setup(ctx) {
-			ctx.rootNode.dataset.neodrag = '';
-			ctx.rootNode.dataset.neodragState = 'idle';
-			ctx.rootNode.dataset.neodragCount = '0';
+			set_node_dataset(ctx.rootNode, 'neodrag', '');
+			set_node_dataset(ctx.rootNode, 'neodragState', 'idle');
+			set_node_dataset(ctx.rootNode, 'neodragCount', '0');
 
 			return {
 				count: 0,
@@ -151,13 +153,13 @@ export const stateMarker = unstable_definePlugin(() => {
 
 		dragStart(ctx) {
 			ctx.effect(() => {
-				ctx.rootNode.dataset.neodragState = 'dragging';
+				set_node_dataset(ctx.rootNode, 'neodragState', 'dragging');
 			});
 		},
 
 		dragEnd(ctx, state) {
-			ctx.rootNode.dataset.neodragState = 'idle';
-			ctx.rootNode.dataset.neodragCount = (++state.count).toString();
+			set_node_dataset(ctx.rootNode, 'neodragState', 'idle');
+			set_node_dataset(ctx.rootNode, 'neodragCount', ++state.count);
 		},
 	};
 });
@@ -189,15 +191,15 @@ export const applyUserSelectHack = unstable_definePlugin((value: boolean = true)
 		dragStart(ctx, state) {
 			ctx.effect(() => {
 				if (value) {
-					state.body_user_select_val = document.body.style.userSelect;
-					document.body.style.userSelect = 'none';
+					state.body_user_select_val = get_node_style(document.body, 'userSelect');
+					set_node_key_style(document.body, 'userSelect', 'none');
 				}
 			});
 		},
 
 		dragEnd(_, state) {
 			if (value) {
-				document.body.style.userSelect = state.body_user_select_val;
+				set_node_key_style(document.body, 'userSelect', state.body_user_select_val);
 			}
 		},
 	};
@@ -251,7 +253,11 @@ export const transform = unstable_definePlugin(
 							rootNode: ctx.rootNode,
 						});
 					} else {
-						ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
+						set_node_key_style(
+							ctx.rootNode,
+							'transform',
+							`translate(${ctx.offset.x}px, ${ctx.offset.y}px)`,
+						);
 					}
 				}
 			},
@@ -266,7 +272,11 @@ export const transform = unstable_definePlugin(
 						});
 					}
 
-					ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
+					set_node_key_style(
+						ctx.rootNode,
+						'transform',
+						`translate(${ctx.offset.x}px, ${ctx.offset.y}px)`,
+					);
 				});
 			},
 		};
@@ -297,6 +307,8 @@ export const BoundsFrom = {
 			];
 		};
 	},
+
+	// selector,
 
 	parent(padding?: {
 		top?: number;
@@ -669,15 +681,143 @@ export const touchAction = unstable_definePlugin((mode: TouchActionMode = 'manip
 		liveUpdate: true,
 
 		setup(ctx) {
-			const original_touch_action = ctx.rootNode.style.touchAction;
-			ctx.rootNode.style.touchAction = mode;
+			const original_touch_action = get_node_style(ctx.rootNode, 'touchAction');
+			set_node_key_style(ctx.rootNode, 'touchAction', mode);
 
 			return { original_touch_action };
 		},
 
 		dragEnd(ctx, state) {
 			// Restore original touch-action
-			ctx.rootNode.style.touchAction = state.original_touch_action || 'auto';
+			set_node_key_style(ctx.rootNode, 'touchAction', state.original_touch_action || 'auto');
 		},
 	};
 });
+
+// Scroll-lock plugin that prevents scrolling while dragging
+export const scrollLock = unstable_definePlugin(
+	(
+		options: {
+			lockAxis?: 'x' | 'y' | 'both'; // Which axes to lock scrolling on
+			container?: HTMLElement | (() => HTMLElement); // Custom container to lock
+			allowScrollbar?: boolean; // Whether to allow scrollbar interaction
+		} = {},
+	) => {
+		return {
+			name: 'neodrag:scrollLock',
+
+			setup() {
+				const defaults = {
+					lockAxis: 'both',
+					container: window,
+					allowScrollbar: false,
+				};
+
+				const config = { ...defaults, ...options };
+
+				return {
+					config,
+					originalStyles: new Map<
+						HTMLElement,
+						{
+							userSelect: string;
+							touchAction: string;
+							overflow: string;
+						}
+					>(),
+					containerRect: null as DOMRect | null,
+					lastContainerCheck: 0,
+				};
+			},
+
+			dragStart(ctx, state) {
+				const container =
+					typeof state.config.container === 'function'
+						? state.config.container()
+						: state.config.container;
+
+				// Reset cache
+				state.containerRect = null;
+				state.lastContainerCheck = 0;
+
+				ctx.effect(() => {
+					// Store original styles
+					if (container instanceof HTMLElement) {
+						state.originalStyles.set(container, {
+							userSelect: get_node_style(container, 'userSelect'),
+							touchAction: get_node_style(container, 'touchAction'),
+							overflow: get_node_style(container, 'overflow'),
+						});
+
+						// Apply scroll locking styles
+						set_node_key_style(container, 'userSelect', 'none');
+
+						if (!state.config.allowScrollbar) {
+							set_node_key_style(container, 'overflow', 'hidden');
+						}
+
+						if (state.config.lockAxis === 'x' || state.config.lockAxis === 'both') {
+							set_node_key_style(container, 'touchAction', 'pan-y');
+						} else if (state.config.lockAxis === 'y') {
+							set_node_key_style(container, 'touchAction', 'pan-x');
+						}
+					} else {
+						// For window, we need to lock the body
+						const body = document.body;
+						state.originalStyles.set(body, {
+							userSelect: get_node_style(body, 'userSelect'),
+							touchAction: get_node_style(body, 'touchAction'),
+							overflow: get_node_style(body, 'overflow'),
+						});
+
+						set_node_key_style(body, 'userSelect', 'none');
+
+						if (!state.config.allowScrollbar) {
+							set_node_key_style(body, 'overflow', 'hidden');
+						}
+
+						if (state.config.lockAxis === 'x' || state.config.lockAxis === 'both') {
+							set_node_key_style(body, 'touchAction', 'pan-y');
+						} else if (state.config.lockAxis === 'y') {
+							set_node_key_style(body, 'touchAction', 'pan-x');
+						}
+					}
+				});
+			},
+
+			dragEnd(ctx, state) {
+				const container =
+					typeof state.config.container === 'function'
+						? state.config.container()
+						: state.config.container;
+
+				ctx.effect(() => {
+					const target = container instanceof HTMLElement ? container : document.body;
+					const originalStyles = state.originalStyles.get(target);
+
+					if (originalStyles) {
+						set_node_key_style(target, 'userSelect', originalStyles.userSelect);
+						set_node_key_style(target, 'touchAction', originalStyles.touchAction);
+						set_node_key_style(target, 'overflow', originalStyles.overflow);
+					}
+
+					state.originalStyles.delete(target);
+				});
+
+				// Clear cache
+				state.containerRect = null;
+				state.lastContainerCheck = 0;
+			},
+
+			cleanup(_, state) {
+				// Restore any remaining original styles
+				for (const [element, styles] of state.originalStyles) {
+					set_node_key_style(element, 'userSelect', styles.userSelect);
+					set_node_key_style(element, 'touchAction', styles.touchAction);
+					set_node_key_style(element, 'overflow', styles.overflow);
+				}
+				state.originalStyles.clear();
+			},
+		};
+	},
+);

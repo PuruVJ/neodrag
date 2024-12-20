@@ -1,15 +1,16 @@
 import type { Plugin, PluginContext } from './plugins.ts';
+import { listen } from './utils.ts';
 
 type DeepMutable<T> = T extends object
 	? {
 			-readonly [P in keyof T]: T[P] extends readonly any[]
 				? DeepMutable<T[P]>
 				: T[P] extends object
-					? keyof T[P] extends never
-						? T[P]
-						: DeepMutable<T[P]>
-					: T[P];
-		}
+				? keyof T[P] extends never
+					? T[P]
+					: DeepMutable<T[P]>
+				: T[P];
+	  }
 	: T;
 
 interface DraggableInstance {
@@ -25,8 +26,8 @@ interface DraggableInstance {
 
 export function createDraggable({
 	plugins: initial_plugins = [],
-	delegateTargetFn = () => document.body,
-}: { plugins?: Plugin[]; delegateTargetFn?: () => HTMLElement } = {}) {
+	delegate: delegateTargetFn = () => document.body,
+}: { plugins?: Plugin[]; delegate?: () => HTMLElement } = {}) {
 	const instances = new WeakMap<HTMLElement, DraggableInstance>();
 	let listeners_initialized = false;
 	let active_node: HTMLElement | null = null;
@@ -36,16 +37,16 @@ export function createDraggable({
 
 		const delegateTarget = delegateTargetFn();
 
-		delegateTarget.addEventListener('pointerdown', handle_pointer_down, {
+		listen(delegateTarget, 'pointerdown', handle_pointer_down, {
 			passive: true,
 			capture: false,
 		});
-		delegateTarget.addEventListener('pointermove', handle_pointer_move, {
+		listen(delegateTarget, 'pointermove', handle_pointer_move, {
 			passive: false,
 			capture: false,
 		});
-		delegateTarget.addEventListener('pointerup', handle_pointer_up, {
-			passive: false,
+		listen(delegateTarget, 'pointerup', handle_pointer_up, {
+			passive: true,
 			capture: false,
 		});
 
@@ -132,8 +133,7 @@ export function createDraggable({
 		if (!instance.ctx.isInteracting) return;
 
 		if (instance.ctx.isDragging) {
-			// Listen for click handler and cancel it
-			active_node.addEventListener('click', (e) => e.stopPropagation(), {
+			listen(active_node, 'click', (e) => e.stopPropagation(), {
 				once: true,
 				signal: instance.controller.signal,
 				capture: true,
@@ -298,7 +298,7 @@ export function createDraggable({
 
 			// Clean up old instance if different
 			if (old_plugin && old_plugin !== new_plugin) {
-				old_plugin.cleanup?.();
+				old_plugin.cleanup?.(instance.ctx, instance.states.get(old_plugin.name));
 				instance.states.delete(old_plugin.name);
 			}
 
@@ -340,7 +340,7 @@ export function createDraggable({
 			);
 
 			for (const plugin of removed_plugins) {
-				plugin.cleanup?.();
+				plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
 				instance.states.delete(plugin.name);
 				has_changes = true;
 			}
@@ -377,7 +377,7 @@ export function createDraggable({
 				}
 
 				for (const plugin of instance.plugins) {
-					plugin.cleanup?.();
+					plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
 				}
 
 				instances.delete(node);
