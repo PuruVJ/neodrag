@@ -11,8 +11,8 @@
 const PAGES = {
   "/": `/`,
   "/defaults": `/defaults`,
-  "/options/axis": `/options/axis`,
-  "/options/bounds/coords": `/options/bounds/coords`
+  "/plugins/axis": `/plugins/axis`,
+  "/plugins/bounds/coords": `/plugins/bounds/coords`
 }
 
 /**
@@ -133,7 +133,7 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 * ```
 */
 export type KIT_ROUTES = {
-  PAGES: { '/': never, '/defaults': never, '/options/axis': never, '/options/bounds/coords': never }
+  PAGES: { '/': never, '/defaults': never, '/plugins/axis': never, '/plugins/bounds/coords': never }
   SERVERS: Record<string, never>
   ACTIONS: Record<string, never>
   LINKS: Record<string, never>

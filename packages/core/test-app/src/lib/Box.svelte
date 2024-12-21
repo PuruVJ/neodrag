@@ -1,15 +1,12 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { draggable, type DragOptions } from '../../../src';
+	import { draggable, type Plugin } from '../../../src';
 
-	const {
-		testid,
-		children,
-		...draggble_options
-	}: DragOptions & { testid: string; children?: Snippet } = $props();
+	const { testid, children, plugins }: { plugins?: Plugin[]; testid: string; children?: Snippet } =
+		$props();
 </script>
 
-<div class="box" use:draggable={draggble_options} data-testid={testid}>
+<div class="box" use:draggable={plugins} data-testid={testid}>
 	{@render children?.()}
 </div>
 

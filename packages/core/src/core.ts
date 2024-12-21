@@ -13,8 +13,19 @@ type DeepMutable<T> = T extends object
 	  }
 	: T;
 
+export interface ErrorInfo {
+	phase: 'setup' | 'dragStart' | 'drag' | 'dragEnd' | 'shouldDrag';
+	plugin?: {
+		name: string;
+		hook: string;
+	};
+	node: HTMLElement;
+	error: unknown;
+}
+
 interface DraggableInstance {
 	ctx: DeepMutable<PluginContext>;
+	root_node: HTMLElement;
 	plugins: Plugin[];
 	states: Map<string, any>;
 	dragstart_prevented: boolean;
@@ -24,13 +35,35 @@ interface DraggableInstance {
 	controller: AbortController;
 }
 
+type Result<T> = { ok: true; value: T } | { ok: false; error: unknown };
+
 export function createDraggable({
 	plugins: initial_plugins = [],
 	delegate: delegateTargetFn = () => document.body,
-}: { plugins?: Plugin[]; delegate?: () => HTMLElement } = {}) {
+	onError,
+}: {
+	plugins?: Plugin[];
+	delegate?: () => HTMLElement;
+	onError?: (error: ErrorInfo) => void;
+} = {}) {
 	const instances = new WeakMap<HTMLElement, DraggableInstance>();
 	let listeners_initialized = false;
 	let active_node: HTMLElement | null = null;
+
+	function resultify<T>(fn: () => T, errorInfo: Omit<ErrorInfo, 'error'>): Result<T> {
+		try {
+			return { ok: true, value: fn() };
+		} catch (error) {
+			report_error(errorInfo, error);
+			return { ok: false, error };
+		}
+	}
+
+	function report_error(info: Omit<ErrorInfo, 'error'>, error: unknown) {
+		if (onError) {
+			onError({ ...info, error });
+		}
+	}
 
 	function initialize_listeners() {
 		if (listeners_initialized) return;
@@ -53,6 +86,79 @@ export function createDraggable({
 		listeners_initialized = true;
 	}
 
+	function run_plugins(instance: DraggableInstance, hook: ErrorInfo['phase'], event: PointerEvent) {
+		let should_run = true;
+		instance.dragstart_prevented = false;
+
+		for (const plugin of instance.plugins) {
+			const handler = plugin[hook];
+			if (!handler) continue;
+
+			if (instance.current_drag_hook_cancelled && plugin.cancelable !== false) continue;
+
+			const result = resultify(
+				() => handler(instance.ctx, instance.states.get(plugin.name), event),
+				{
+					phase: hook,
+					plugin: { name: plugin.name, hook },
+					node: instance.ctx.rootNode,
+				},
+			);
+
+			if (!result.ok || result.value === false) {
+				should_run = false;
+				break;
+			}
+		}
+
+		return should_run;
+	}
+
+	function flush_effects(instance: DraggableInstance) {
+		for (const effect of instance.effects) {
+			effect();
+		}
+		clear_effects(instance);
+	}
+
+	function clear_effects(instance: DraggableInstance) {
+		instance.effects.clear();
+	}
+
+	function cleanup_active_node() {
+		// If no node is currently being dragged, nothing to clean up
+		if (!active_node) return;
+
+		// Get the instance associated with the active node
+		const instance = instances.get(active_node);
+		if (!instance) return;
+
+		// If we have captured pointer events, release them
+		if (
+			instance.pointer_captured_id &&
+			instance.ctx.currentlyDraggedNode.hasPointerCapture(instance.pointer_captured_id)
+		) {
+			resultify(
+				() => {
+					// Release the pointer capture we set earlier
+					instance.ctx.currentlyDraggedNode.releasePointerCapture(instance.pointer_captured_id!);
+				},
+				{
+					phase: 'dragEnd',
+					node: active_node,
+				},
+			);
+		}
+
+		// Reset all the drag state
+		instance.ctx.isInteracting = false; // No longer interacting with element
+		instance.ctx.isDragging = false; // No longer dragging
+		instance.dragstart_prevented = false; // Reset prevention flag
+		instance.pointer_captured_id = null; // Clear pointer ID
+		active_node = null; // Clear active node reference
+		clear_effects(instance); // Clear any pending effects
+	}
+
 	function handle_pointer_down(e: PointerEvent) {
 		if (e.button === 2) return;
 
@@ -70,8 +176,21 @@ export function createDraggable({
 		instance.ctx.isInteracting = true;
 		active_node = draggable_node;
 
-		instance.pointer_captured_id = e.pointerId;
-		instance.ctx.currentlyDraggedNode.setPointerCapture(instance.pointer_captured_id);
+		const capture_result = resultify(
+			() => {
+				instance.pointer_captured_id = e.pointerId;
+				instance.ctx.currentlyDraggedNode.setPointerCapture(instance.pointer_captured_id);
+			},
+			{
+				phase: 'dragStart',
+				node: instance.ctx.currentlyDraggedNode,
+			},
+		);
+
+		if (!capture_result.ok) {
+			cleanup_active_node();
+			return;
+		}
 
 		const inverse_scale = draggable_node.offsetWidth / instance.ctx.cachedRootNodeRect.width;
 
@@ -163,42 +282,6 @@ export function createDraggable({
 		clear_effects(instance);
 	}
 
-	function run_plugins(
-		instance: any,
-		hook: 'dragStart' | 'drag' | 'dragEnd' | 'shouldDrag',
-		event: PointerEvent,
-	) {
-		let should_run = true;
-		instance.dragstart_prevented = false;
-
-		for (const plugin of instance.plugins) {
-			const handler = plugin[hook];
-			if (!handler) continue;
-
-			if (instance.current_drag_hook_cancelled && plugin.cancelable !== false) continue;
-
-			const result = handler(instance.ctx, instance.states.get(plugin.name), event);
-
-			if (result === false) {
-				should_run = false;
-				break;
-			}
-		}
-
-		return should_run;
-	}
-
-	function flush_effects(instance: DraggableInstance) {
-		for (const effect of instance.effects) {
-			effect();
-		}
-		clear_effects(instance);
-	}
-
-	function clear_effects(instance: DraggableInstance) {
-		instance.effects.clear();
-	}
-
 	function find_draggable_node(e: PointerEvent): HTMLElement | null {
 		// composedPath() gives us the event path in the DOM from target up to window
 		const path = e.composedPath();
@@ -211,11 +294,98 @@ export function createDraggable({
 		return null;
 	}
 
+	function initialize_plugins(new_plugins: Plugin[]) {
+		// Initialize plugins
+		const plugin_map = new Map<string, Plugin<any>>();
+		for (const plugin of [...new_plugins, ...initial_plugins]) {
+			const existing_plugin = plugin_map.get(plugin.name);
+			if (!existing_plugin || (plugin.priority ?? 0) >= (existing_plugin.priority ?? 0)) {
+				plugin_map.set(plugin.name, plugin);
+			}
+		}
+
+		return [...plugin_map.values()].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+	}
+
+	function update_plugin(
+		instance: DraggableInstance,
+		old_plugin: Plugin | undefined,
+		new_plugin: Plugin,
+	) {
+		// Skip if same instance and not live-updateable
+		if (old_plugin === new_plugin && !new_plugin.liveUpdate) {
+			return false;
+		}
+
+		// Clean up old instance if different
+		if (old_plugin && old_plugin !== new_plugin) {
+			old_plugin.cleanup?.(instance.ctx, instance.states.get(old_plugin.name));
+			instance.states.delete(old_plugin.name);
+		}
+
+		// Setup new plugin
+		const state = new_plugin.setup?.(instance.ctx);
+		flush_effects(instance);
+		if (state) instance.states.set(new_plugin.name, state);
+
+		return true;
+	}
+
+	function update(instance: DraggableInstance, new_plugins: Plugin[] = []) {
+		const old_plugin_map = new Map(instance.plugins.map((p) => [p.name, p]));
+		const new_plugin_list = initialize_plugins(new_plugins);
+		let has_changes = false;
+
+		// During drag, only update plugins that opted into live updates
+		if (instance.ctx.isDragging || instance.ctx.isInteracting) {
+			const updated_plugins = new_plugin_list.filter((plugin) => plugin.liveUpdate);
+
+			for (const plugin of updated_plugins) {
+				const old_plugin = old_plugin_map.get(plugin.name);
+				if (update_plugin(instance, old_plugin, plugin)) {
+					has_changes = true;
+				}
+			}
+
+			// If we made changes and we're the active node, re-run drag
+			if (has_changes && active_node === instance.root_node && instance.ctx.lastEvent) {
+				handle_pointer_move(instance.ctx.lastEvent);
+			}
+
+			return;
+		}
+
+		// Clean up removed plugins
+		const removed_plugins = instance.plugins.filter(
+			(p) => !new_plugin_list.some((np) => np.name === p.name),
+		);
+
+		for (const plugin of removed_plugins) {
+			plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
+			instance.states.delete(plugin.name);
+			has_changes = true;
+		}
+
+		// Update or setup new plugins
+		for (const plugin of new_plugin_list) {
+			const old_plugin = old_plugin_map.get(plugin.name);
+			if (update_plugin(instance, old_plugin, plugin)) {
+				has_changes = true;
+			}
+		}
+
+		// Update instance plugins list if there were changes
+		if (has_changes) {
+			instance.plugins = new_plugin_list;
+		}
+	}
+
 	return function mount(node: HTMLElement, plugins: Plugin[] = []) {
 		initialize_listeners();
 
 		const instance: DraggableInstance = {
 			ctx: {} as DeepMutable<PluginContext>,
+			root_node: node,
 			plugins: [],
 			states: new Map<string, any>(),
 			controller: new AbortController(),
@@ -271,106 +441,31 @@ export function createDraggable({
 			},
 		};
 
-		function initialize_plugins(new_plugins: Plugin[]) {
-			// Initialize plugins
-			const plugin_map = new Map<string, Plugin<any>>();
-			for (const plugin of [...new_plugins, ...initial_plugins]) {
-				const existing_plugin = plugin_map.get(plugin.name);
-				if (!existing_plugin || (plugin.priority ?? 0) >= (existing_plugin.priority ?? 0)) {
-					plugin_map.set(plugin.name, plugin);
-				}
-			}
-
-			return [...plugin_map.values()].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-		}
-
-		for (const plugin of instance.plugins) {
-			const state = plugin.setup?.(instance.ctx);
-			flush_effects(instance);
-			if (state) instance.states.set(plugin.name, state);
-		}
-
-		function update_plugin(old_plugin: Plugin | undefined, new_plugin: Plugin) {
-			// Skip if same instance and not live-updateable
-			if (old_plugin === new_plugin && !new_plugin.liveUpdate) {
-				return false;
-			}
-
-			// Clean up old instance if different
-			if (old_plugin && old_plugin !== new_plugin) {
-				old_plugin.cleanup?.(instance.ctx, instance.states.get(old_plugin.name));
-				instance.states.delete(old_plugin.name);
-			}
-
-			// Setup new plugin
-			const state = new_plugin.setup?.(instance.ctx);
-			flush_effects(instance);
-			if (state) instance.states.set(new_plugin.name, state);
-
-			return true;
-		}
-
-		function update(new_plugins: Plugin[] = []) {
-			const old_plugin_map = new Map(instance.plugins.map((p) => [p.name, p]));
-			const new_plugin_list = initialize_plugins(new_plugins);
-			let has_changes = false;
-
-			// During drag, only update plugins that opted into live updates
-			if (instance.ctx.isDragging || instance.ctx.isInteracting) {
-				const updated_plugins = new_plugin_list.filter((plugin) => plugin.liveUpdate);
-
-				for (const plugin of updated_plugins) {
-					const old_plugin = old_plugin_map.get(plugin.name);
-					if (update_plugin(old_plugin, plugin)) {
-						has_changes = true;
-					}
-				}
-
-				// If we made changes and we're the active node, re-run drag
-				if (has_changes && active_node === node && instance.ctx.lastEvent) {
-					handle_pointer_move(instance.ctx.lastEvent);
-				}
-
-				return;
-			}
-
-			// Clean up removed plugins
-			const removed_plugins = instance.plugins.filter(
-				(p) => !new_plugin_list.some((np) => np.name === p.name),
-			);
-
-			for (const plugin of removed_plugins) {
-				plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
-				instance.states.delete(plugin.name);
-				has_changes = true;
-			}
-
-			// Update or setup new plugins
-			for (const plugin of new_plugin_list) {
-				const old_plugin = old_plugin_map.get(plugin.name);
-				if (update_plugin(old_plugin, plugin)) {
-					has_changes = true;
-				}
-			}
-
-			// Update instance plugins list if there were changes
-			if (has_changes) {
-				instance.plugins = new_plugin_list;
-			}
-		}
-
 		// Initial setup
 		instance.plugins = initialize_plugins(plugins);
 		for (const plugin of instance.plugins) {
-			const state = plugin.setup?.(instance.ctx);
-			if (state) instance.states.set(plugin.name, state);
+			const plugin_result = resultify(
+				() => {
+					plugin.setup?.(instance.ctx);
+					flush_effects(instance);
+				},
+				{
+					phase: 'setup',
+					plugin: { name: plugin.name, hook: 'setup' },
+					node: instance.root_node,
+				},
+			);
+
+			if (plugin_result.ok && plugin_result.value) {
+				instance.states.set(plugin.name, plugin_result.value);
+			}
 		}
 
 		// Register instance
 		instances.set(node, instance);
 
 		return {
-			update,
+			update: () => update(instance),
 			destroy() {
 				if (active_node === node) {
 					active_node = null;

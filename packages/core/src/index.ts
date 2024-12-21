@@ -15,8 +15,11 @@ export const draggable = createDraggable({
 		applyUserSelectHack(),
 		transform(),
 		threshold(),
-		touchAction('none'),
+		touchAction(),
 	],
+	onError(error) {
+		console.error(error);
+	},
 });
 
 export * from './plugins.ts';
