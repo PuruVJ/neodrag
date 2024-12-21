@@ -272,16 +272,16 @@ importers:
         version: 2.11.0(@testing-library/jest-dom@6.6.3)(solid-js@1.9.3)(vite@6.0.3(@types/node@20.12.7)(sass@1.82.0)(terser@5.37.0)(tsx@4.19.2))
 
   packages/svelte:
-    devDependencies:
+    dependencies:
       '@neodrag/core':
         specifier: workspace:*
         version: link:../core
 
   packages/svelte/demo:
     dependencies:
-      '@neodrag/core':
+      '@neodrag/svelte':
         specifier: workspace:*
-        version: link:../../core
+        version: link:..
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^3.0.0

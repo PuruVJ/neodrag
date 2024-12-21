@@ -1,4 +1,13 @@
-import type { Plugin, PluginContext } from './plugins.ts';
+import {
+	applyUserSelectHack,
+	ignoreMultitouch,
+	stateMarker,
+	threshold,
+	touchAction,
+	transform,
+	type Plugin,
+	type PluginContext,
+} from './plugins.ts';
 import { is_svg_element, is_svg_svg_element, listen } from './utils.ts';
 
 type DeepMutable<T> = T extends object
@@ -48,7 +57,9 @@ export function createDraggable({
 } = {}) {
 	const instances = new WeakMap<HTMLElement | SVGElement, DraggableInstance>();
 	let listeners_initialized = false;
-	let active_node: HTMLElement | SVGElement | null = null;
+
+	/** track multiple active nodes by pointerId */
+	const active_nodes = new Map<number, HTMLElement | SVGElement>();
 
 	function resultify<T>(fn: () => T, errorInfo: Omit<ErrorInfo, 'error'>): Result<T> {
 		try {
@@ -125,12 +136,13 @@ export function createDraggable({
 		instance.effects.clear();
 	}
 
-	function cleanup_active_node() {
+	function cleanup_active_node(pointer_id: number) {
 		// If no node is currently being dragged, nothing to clean up
-		if (!active_node) return;
+		const node = active_nodes.get(pointer_id);
+		if (!node) return;
 
 		// Get the instance associated with the active node
-		const instance = instances.get(active_node);
+		const instance = instances.get(node);
 		if (!instance) return;
 
 		// If we have captured pointer events, release them
@@ -145,7 +157,7 @@ export function createDraggable({
 				},
 				{
 					phase: 'dragEnd',
-					node: active_node,
+					node,
 				},
 			);
 		}
@@ -155,7 +167,7 @@ export function createDraggable({
 		instance.ctx.isDragging = false; // No longer dragging
 		instance.dragstart_prevented = false; // Reset prevention flag
 		instance.pointer_captured_id = null; // Clear pointer ID
-		active_node = null; // Clear active node reference
+		active_nodes.delete(pointer_id); // Clear active node reference
 		clear_effects(instance); // Clear any pending effects
 	}
 
@@ -174,7 +186,7 @@ export function createDraggable({
 		if (!should_drag) return;
 
 		instance.ctx.isInteracting = true;
-		active_node = draggable_node;
+		active_nodes.set(e.pointerId, draggable_node);
 
 		const capture_result = resultify(
 			() => {
@@ -188,7 +200,7 @@ export function createDraggable({
 		);
 
 		if (!capture_result.ok) {
-			cleanup_active_node();
+			cleanup_active_node(e.pointerId);
 			return;
 		}
 
@@ -217,9 +229,10 @@ export function createDraggable({
 	}
 
 	function handle_pointer_move(e: PointerEvent) {
-		if (!active_node) return;
+		const draggable_node = active_nodes.get(e.pointerId);
+		if (!draggable_node) return;
 
-		const instance = instances.get(active_node)!;
+		const instance = instances.get(draggable_node)!;
 		if (!instance.ctx.isInteracting) return;
 
 		instance.ctx.lastEvent = e;
@@ -260,13 +273,14 @@ export function createDraggable({
 	}
 
 	function handle_pointer_up(e: PointerEvent) {
-		if (!active_node) return;
+		const draggable_node = active_nodes.get(e.pointerId);
+		if (!draggable_node) return;
 
-		const instance = instances.get(active_node)!;
+		const instance = instances.get(draggable_node)!;
 		if (!instance.ctx.isInteracting) return;
 
 		if (instance.ctx.isDragging) {
-			listen(active_node as HTMLElement, 'click', (e) => e.stopPropagation(), {
+			listen(draggable_node as HTMLElement, 'click', (e) => e.stopPropagation(), {
 				once: true,
 				signal: instance.controller.signal,
 				capture: true,
@@ -353,8 +367,11 @@ export function createDraggable({
 		const new_plugin_list = initialize_plugins(new_plugins);
 		let has_changes = false;
 
+		// Check if this instance is currently involved in any drag operation
+		const is_active = Array.from(active_nodes.values()).includes(instance.root_node);
+
 		// During drag, only update plugins that opted into live updates
-		if (instance.ctx.isDragging || instance.ctx.isInteracting) {
+		if (is_active && (instance.ctx.isDragging || instance.ctx.isInteracting)) {
 			const updated_plugins = new_plugin_list.filter((plugin) => plugin.liveUpdate);
 
 			for (const plugin of updated_plugins) {
@@ -365,8 +382,13 @@ export function createDraggable({
 			}
 
 			// If we made changes and we're the active node, re-run drag
-			if (has_changes && active_node === instance.root_node && instance.ctx.lastEvent) {
-				handle_pointer_move(instance.ctx.lastEvent);
+			if (has_changes) {
+				for (const node of active_nodes.values()) {
+					if (node === instance.root_node && instance.ctx.lastEvent) {
+						handle_pointer_move(instance.ctx.lastEvent);
+						break;
+					}
+				}
 			}
 
 			return;
@@ -481,10 +503,12 @@ export function createDraggable({
 			instances.set(node, instance);
 
 			return {
-				update: () => update(instance),
+				update: (new_opts: Plugin[]) => update(instance, new_opts),
 				destroy() {
-					if (active_node === node) {
-						active_node = null;
+					for (const [pointer_id, active_node] of active_nodes) {
+						if (active_node === node) {
+							cleanup_active_node(pointer_id);
+						}
 					}
 
 					for (const plugin of instance.plugins) {
@@ -497,3 +521,18 @@ export function createDraggable({
 		},
 	};
 }
+
+export const DEFAULT_plugins = [
+	ignoreMultitouch(),
+	stateMarker(),
+	applyUserSelectHack(),
+	transform(),
+	threshold(),
+	touchAction(),
+];
+
+export const DEFAULT_onError = (error: ErrorInfo) => {
+	console.error(error);
+};
+
+export const DEFAULT_delegate = () => document.body;

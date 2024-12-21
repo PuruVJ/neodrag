@@ -7,7 +7,7 @@
 		position,
 		threshold,
 		scrollLock,
-	} from '@neodrag/core';
+	} from '@neodrag/svelte';
 
 	let element = $state<HTMLElement>();
 
