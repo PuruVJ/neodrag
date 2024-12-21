@@ -41,10 +41,10 @@ export function set_node_dataset(node: HTMLElement | SVGElement, key: string, va
 	node.setAttribute(`data-${key}`, value + '');
 }
 
-export function is_svg_element(element: Element): boolean {
+export function is_svg_element(element: Element | EventTarget): element is SVGElement {
 	return element instanceof SVGElement;
 }
 
-export function is_svg_svg_element(element: Element): boolean {
+export function is_svg_svg_element(element: Element | EventTarget): element is SVGSVGElement {
 	return element instanceof SVGSVGElement;
 }

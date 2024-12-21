@@ -1,5 +1,5 @@
 import type { Plugin, PluginContext } from './plugins.ts';
-import { listen } from './utils.ts';
+import { is_svg_element, is_svg_svg_element, listen } from './utils.ts';
 
 type DeepMutable<T> = T extends object
 	? {
@@ -301,7 +301,10 @@ export function createDraggable({
 		const path = e.composedPath();
 		// Find first element in path that's a draggable
 		for (const el of path) {
-			if (el instanceof HTMLElement || (el instanceof SVGElement && instances.has(el))) {
+			if (
+				(el instanceof HTMLElement || (is_svg_element(el) && !is_svg_svg_element(el))) &&
+				instances.has(el)
+			) {
 				return el;
 			}
 		}
