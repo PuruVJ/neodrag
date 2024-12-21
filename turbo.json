@@ -1,0 +1,19 @@
+{
+	"$schema": "https://turbo.build/schema.json",
+	"tasks": {
+		"compile": {
+			"outputs": ["dist"],
+			"inputs": ["./src/**/*.ts"],
+			"dependsOn": ["^compile"]
+		},
+		"docs#build": {
+			"outputs": ["dist"],
+			"dependsOn": ["^compile", "sizes"]
+		},
+		"sizes": {
+			"outputs": ["dist"],
+			"dependsOn": ["^compile", "^sizes"]
+		}
+	},
+	"ui": "tui"
+}

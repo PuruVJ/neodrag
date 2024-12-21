@@ -46,10 +46,27 @@ export interface DraggableInstance {
 
 type Result<T> = { ok: true; value: T } | { ok: false; error: unknown };
 
+export const DEFAULTS = {
+	plugins: [
+		ignoreMultitouch(),
+		stateMarker(),
+		applyUserSelectHack(),
+		transform(),
+		threshold(),
+		touchAction(),
+	],
+
+	onError: (error: ErrorInfo) => {
+		console.error(error);
+	},
+
+	delegate: () => document.body,
+};
+
 export function createDraggable({
-	plugins: initial_plugins = [],
-	delegate: delegateTargetFn = () => document.body,
-	onError,
+	plugins: initial_plugins = DEFAULTS.plugins,
+	delegate: delegateTargetFn = DEFAULTS.delegate,
+	onError = DEFAULTS.onError,
 }: {
 	plugins?: Plugin[];
 	delegate?: () => HTMLElement;
@@ -368,7 +385,13 @@ export function createDraggable({
 		let has_changes = false;
 
 		// Check if this instance is currently involved in any drag operation
-		const is_active = Array.from(active_nodes.values()).includes(instance.root_node);
+		let is_active = false;
+		for (const node of active_nodes.values()) {
+			if (node === instance.root_node) {
+				is_active = true;
+				break;
+			}
+		}
 
 		// During drag, only update plugins that opted into live updates
 		if (is_active && (instance.ctx.isDragging || instance.ctx.isInteracting)) {
@@ -503,7 +526,8 @@ export function createDraggable({
 			instances.set(node, instance);
 
 			return {
-				update: (new_opts: Plugin[]) => update(instance, new_opts),
+				update: (newOptions: Plugin[]) => update(instance, newOptions),
+
 				destroy() {
 					for (const [pointer_id, active_node] of active_nodes) {
 						if (active_node === node) {
@@ -521,18 +545,3 @@ export function createDraggable({
 		},
 	};
 }
-
-export const DEFAULT_plugins = [
-	ignoreMultitouch(),
-	stateMarker(),
-	applyUserSelectHack(),
-	transform(),
-	threshold(),
-	touchAction(),
-];
-
-export const DEFAULT_onError = (error: ErrorInfo) => {
-	console.error(error);
-};
-
-export const DEFAULT_delegate = () => document.body;
