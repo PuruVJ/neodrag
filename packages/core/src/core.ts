@@ -19,13 +19,13 @@ export interface ErrorInfo {
 		name: string;
 		hook: string;
 	};
-	node: HTMLElement;
+	node: HTMLElement | SVGElement;
 	error: unknown;
 }
 
 interface DraggableInstance {
 	ctx: DeepMutable<PluginContext>;
-	root_node: HTMLElement;
+	root_node: HTMLElement | SVGElement;
 	plugins: Plugin[];
 	states: Map<string, any>;
 	dragstart_prevented: boolean;
@@ -46,9 +46,9 @@ export function createDraggable({
 	delegate?: () => HTMLElement;
 	onError?: (error: ErrorInfo) => void;
 } = {}) {
-	const instances = new WeakMap<HTMLElement, DraggableInstance>();
+	const instances = new WeakMap<HTMLElement | SVGElement, DraggableInstance>();
 	let listeners_initialized = false;
-	let active_node: HTMLElement | null = null;
+	let active_node: HTMLElement | SVGElement | null = null;
 
 	function resultify<T>(fn: () => T, errorInfo: Omit<ErrorInfo, 'error'>): Result<T> {
 		try {
@@ -192,7 +192,21 @@ export function createDraggable({
 			return;
 		}
 
-		const inverse_scale = draggable_node.offsetWidth / instance.ctx.cachedRootNodeRect.width;
+		// Modify this if draggable_node is SVG
+		// Calculate scale differently for SVG vs HTML
+		let inverse_scale = 1;
+		if (draggable_node instanceof SVGElement) {
+			// For SVG elements, use the bounding box for scale
+			const bbox = (draggable_node as SVGGraphicsElement).getBBox();
+			const rect = instance.ctx.cachedRootNodeRect;
+			// Only calculate scale if we have valid dimensions
+			if (bbox.width && rect.width) {
+				inverse_scale = bbox.width / rect.width;
+			}
+		} else {
+			// For HTML elements, use the original calculation
+			inverse_scale = draggable_node.offsetWidth / instance.ctx.cachedRootNodeRect.width;
+		}
 
 		if (instance.ctx.proposed.x != null) {
 			instance.ctx.initial.x = e.clientX - instance.ctx.offset.x / inverse_scale;
@@ -252,7 +266,7 @@ export function createDraggable({
 		if (!instance.ctx.isInteracting) return;
 
 		if (instance.ctx.isDragging) {
-			listen(active_node, 'click', (e) => e.stopPropagation(), {
+			listen(active_node as HTMLElement, 'click', (e) => e.stopPropagation(), {
 				once: true,
 				signal: instance.controller.signal,
 				capture: true,
@@ -282,12 +296,12 @@ export function createDraggable({
 		clear_effects(instance);
 	}
 
-	function find_draggable_node(e: PointerEvent): HTMLElement | null {
+	function find_draggable_node(e: PointerEvent): HTMLElement | SVGElement | null {
 		// composedPath() gives us the event path in the DOM from target up to window
 		const path = e.composedPath();
 		// Find first element in path that's a draggable
 		for (const el of path) {
-			if (el instanceof HTMLElement && instances.has(el)) {
+			if (el instanceof HTMLElement || (el instanceof SVGElement && instances.has(el))) {
 				return el;
 			}
 		}
@@ -380,7 +394,7 @@ export function createDraggable({
 		}
 	}
 
-	return function mount(node: HTMLElement, plugins: Plugin[] = []) {
+	return function mount(node: HTMLElement | SVGElement, plugins: Plugin[] = []) {
 		initialize_listeners();
 
 		const instance: DraggableInstance = {
@@ -444,9 +458,10 @@ export function createDraggable({
 		// Initial setup
 		instance.plugins = initialize_plugins(plugins);
 		for (const plugin of instance.plugins) {
-			const plugin_result = resultify(
+			resultify(
 				() => {
-					plugin.setup?.(instance.ctx);
+					const value = plugin.setup?.(instance.ctx);
+					if (value) instance.states.set(plugin.name, value);
 					flush_effects(instance);
 				},
 				{
@@ -455,10 +470,6 @@ export function createDraggable({
 					node: instance.root_node,
 				},
 			);
-
-			if (plugin_result.ok && plugin_result.value) {
-				instance.states.set(plugin.name, plugin_result.value);
-			}
 		}
 
 		// Register instance

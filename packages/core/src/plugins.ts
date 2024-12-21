@@ -27,7 +27,7 @@ export interface PluginContext {
 
 	readonly isInteracting: boolean;
 
-	readonly rootNode: HTMLElement;
+	readonly rootNode: HTMLElement | SVGElement;
 
 	readonly lastEvent: PointerEvent | null;
 
@@ -37,7 +37,7 @@ export interface PluginContext {
 	cachedRootNodeRect: DOMRect;
 
 	// This will be overriden by controls plugin for eg
-	currentlyDraggedNode: HTMLElement;
+	currentlyDraggedNode: HTMLElement | SVGElement;
 
 	// any side-effects within plugins(DOM manipulation etc) must go here. THis is run only after making sure
 	// no plugin returned false. Other doesn't run
@@ -143,8 +143,8 @@ export const stateMarker = unstable_definePlugin(() => {
 
 		setup(ctx) {
 			set_node_dataset(ctx.rootNode, 'neodrag', '');
-			set_node_dataset(ctx.rootNode, 'neodragState', 'idle');
-			set_node_dataset(ctx.rootNode, 'neodragCount', '0');
+			set_node_dataset(ctx.rootNode, 'neodrag-state', 'idle');
+			set_node_dataset(ctx.rootNode, 'neodrag-count', '0');
 
 			return {
 				count: 0,
@@ -153,13 +153,13 @@ export const stateMarker = unstable_definePlugin(() => {
 
 		dragStart(ctx) {
 			ctx.effect(() => {
-				set_node_dataset(ctx.rootNode, 'neodragState', 'dragging');
+				set_node_dataset(ctx.rootNode, 'neodrag-state', 'dragging');
 			});
 		},
 
 		dragEnd(ctx, state) {
-			set_node_dataset(ctx.rootNode, 'neodragState', 'idle');
-			set_node_dataset(ctx.rootNode, 'neodragCount', ++state.count);
+			set_node_dataset(ctx.rootNode, 'neodrag-state', 'idle');
+			set_node_dataset(ctx.rootNode, 'neodrag-count', ++state.count);
 		},
 	};
 });
@@ -236,15 +236,52 @@ export const disabled = unstable_definePlugin(() => {
 	};
 });
 
+function get_current_transform(element: SVGGraphicsElement) {
+	const transform = element.transform.baseVal;
+	if (transform.numberOfItems === 0) {
+		const svg = element.ownerSVGElement;
+		if (!svg) return { x: 0, y: 0 };
+
+		const matrix = svg.createSVGTransform().matrix;
+		transform.insertItemBefore(svg.createSVGTransformFromMatrix(matrix), 0);
+	}
+
+	const matrix = transform.consolidate()?.matrix;
+	return matrix ? { x: matrix.e, y: matrix.f } : { x: 0, y: 0 };
+}
+
 export const transform = unstable_definePlugin(
-	(func?: (args: { offsetX: number; offsetY: number; rootNode: HTMLElement }) => void) => {
+	(
+		func?: (args: { offsetX: number; offsetY: number; rootNode: HTMLElement | SVGElement }) => void,
+	) => {
 		return {
 			name: 'neodrag:transform',
 			cancelable: false,
 			liveUpdate: true,
 
 			setup(ctx) {
-				// If initial offset is non-zero, apply it
+				// Special handling for root SVG elements
+				if (ctx.rootNode instanceof SVGSVGElement) {
+					throw new Error(
+						'Dragging the root SVG element directly is not recommended. ' +
+							'Instead, either:\n' +
+							'1. Wrap your SVG in a div and make the div draggable\n' +
+							'2. Use viewBox manipulation if you want to pan the SVG canvas\n' +
+							'3. Or if you really need to transform the SVG element, use CSS transforms',
+					);
+				}
+
+				const is_svg = ctx.rootNode instanceof SVGElement;
+
+				if (is_svg) {
+					// For SVG elements, get initial transform
+					const element = ctx.rootNode as SVGGraphicsElement;
+					const current_transform = get_current_transform(element);
+					ctx.offset.x = current_transform.x;
+					ctx.offset.y = current_transform.y;
+				}
+
+				// Apply initial transform if needed
 				if (ctx.offset.x !== 0 || ctx.offset.y !== 0) {
 					if (func) {
 						func({
@@ -252,17 +289,26 @@ export const transform = unstable_definePlugin(
 							offsetY: ctx.offset.y,
 							rootNode: ctx.rootNode,
 						});
+					} else if (is_svg) {
+						const element = ctx.rootNode as SVGGraphicsElement;
+						const svg = element.ownerSVGElement;
+						if (!svg) return;
+
+						const translation = svg.createSVGTransform();
+						translation.setTranslate(ctx.offset.x, ctx.offset.y);
+
+						const transform = element.transform.baseVal;
+						transform.clear();
+						transform.appendItem(translation);
 					} else {
-						set_node_key_style(
-							ctx.rootNode,
-							'transform',
-							`translate(${ctx.offset.x}px, ${ctx.offset.y}px)`,
-						);
+						ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
 					}
 				}
+
+				return { is_svg: is_svg };
 			},
 
-			drag(ctx) {
+			drag(ctx, state) {
 				ctx.effect(() => {
 					if (func) {
 						return func({
@@ -272,11 +318,22 @@ export const transform = unstable_definePlugin(
 						});
 					}
 
-					set_node_key_style(
-						ctx.rootNode,
-						'transform',
-						`translate(${ctx.offset.x}px, ${ctx.offset.y}px)`,
-					);
+					if (state?.is_svg) {
+						const element = ctx.rootNode as SVGGraphicsElement;
+						const svg = element.ownerSVGElement;
+						if (!svg) return;
+
+						const translation = svg.createSVGTransform();
+
+						translation.setTranslate(ctx.offset.x, ctx.offset.y);
+
+						const transform = element.transform.baseVal;
+						transform.clear();
+						transform.appendItem(translation);
+						// debugger;
+					} else {
+						ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
+					}
 				});
 			},
 		};
@@ -284,7 +341,7 @@ export const transform = unstable_definePlugin(
 );
 
 type BoundFromFunction = (data: {
-	root_node: HTMLElement;
+	root_node: HTMLElement | SVGElement;
 }) => [[x1: number, y1: number], [x2: number, y2: number]];
 
 export const BoundsFrom = {
@@ -423,7 +480,6 @@ export const threshold = unstable_definePlugin(
 				if (state._options.delay) {
 					const elapsed = Date.now() - state.start_time;
 					if (elapsed < state._options.delay) {
-						console.log('Prevent start');
 						ctx.preventStart();
 						return;
 					}
@@ -448,13 +504,13 @@ export type DragEventData = Readonly<{
 	offset: Readonly<{ x: number; y: number }>;
 
 	/** The node on which the draggable is applied */
-	rootNode: HTMLElement;
+	rootNode: HTMLElement | SVGElement;
 
 	/** The element being dragged */
-	currentNode: HTMLElement;
+	currentNode: HTMLElement | SVGElement;
 }>;
 
-function fire_custom_event(node: HTMLElement, name: string, data: any) {
+function fire_custom_event(node: HTMLElement | SVGElement, name: string, data: any) {
 	return node.dispatchEvent(new CustomEvent(name, { detail: data }));
 }
 export const events = unstable_definePlugin(
@@ -467,8 +523,8 @@ export const events = unstable_definePlugin(
 	) => {
 		const data = {
 			offset: { x: 0, y: 0 },
-			rootNode: null! as HTMLElement,
-			currentNode: null! as HTMLElement,
+			rootNode: null! as HTMLElement | SVGElement,
+			currentNode: null! as HTMLElement | SVGElement,
 		} satisfies DragEventData;
 
 		return {
