@@ -15,11 +15,11 @@ type DeepMutable<T> = T extends object
 			-readonly [P in keyof T]: T[P] extends readonly any[]
 				? DeepMutable<T[P]>
 				: T[P] extends object
-				? keyof T[P] extends never
-					? T[P]
-					: DeepMutable<T[P]>
-				: T[P];
-	  }
+					? keyof T[P] extends never
+						? T[P]
+						: DeepMutable<T[P]>
+					: T[P];
+		}
 	: T;
 
 export interface ErrorInfo {
@@ -258,7 +258,8 @@ export function createDraggable({
 			instance.dragstart_prevented = false;
 			run_plugins(instance, 'drag', e);
 
-			if (!instance.dragstart_prevented && !instance.current_drag_hook_cancelled) {
+			// Bottom: Even if its cancelled, it should still run the plugins that have cancellable: false
+			if (!instance.dragstart_prevented) {
 				const start_drag = run_plugins(instance, 'dragStart', e);
 				if (!start_drag) return clear_effects(instance);
 				else flush_effects(instance);
