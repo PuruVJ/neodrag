@@ -23,7 +23,7 @@ export interface ErrorInfo {
 	error: unknown;
 }
 
-interface DraggableInstance {
+export interface DraggableInstance {
 	ctx: DeepMutable<PluginContext>;
 	root_node: HTMLElement | SVGElement;
 	plugins: Plugin[];
@@ -397,100 +397,103 @@ export function createDraggable({
 		}
 	}
 
-	return function mount(node: HTMLElement | SVGElement, plugins: Plugin[] = []) {
-		initialize_listeners();
+	return {
+		instances,
+		draggable: (node: HTMLElement | SVGElement, plugins: Plugin[] = []) => {
+			initialize_listeners();
 
-		const instance: DraggableInstance = {
-			ctx: {} as DeepMutable<PluginContext>,
-			root_node: node,
-			plugins: [],
-			states: new Map<string, any>(),
-			controller: new AbortController(),
-			dragstart_prevented: false,
-			current_drag_hook_cancelled: false,
-			pointer_captured_id: null,
-			effects: new Set<() => void>(),
-		};
+			const instance: DraggableInstance = {
+				ctx: {} as DeepMutable<PluginContext>,
+				root_node: node,
+				plugins: [],
+				states: new Map<string, any>(),
+				controller: new AbortController(),
+				dragstart_prevented: false,
+				current_drag_hook_cancelled: false,
+				pointer_captured_id: null,
+				effects: new Set<() => void>(),
+			};
 
-		let currently_dragged_element = node;
+			let currently_dragged_element = node;
 
-		instance.ctx = {
-			proposed: { x: 0, y: 0 },
-			delta: { x: 0, y: 0 },
-			offset: { x: 0, y: 0 },
-			initial: { x: 0, y: 0 },
-			isDragging: false,
-			isInteracting: false,
-			rootNode: node,
-			cachedRootNodeRect: node.getBoundingClientRect(),
-			lastEvent: null,
-			get currentlyDraggedNode() {
-				return currently_dragged_element;
-			},
-			set currentlyDraggedNode(val) {
-				//  In case a plugin switches currentDraggedElement through the pointermove
-				if (
-					instance.pointer_captured_id &&
-					currently_dragged_element.hasPointerCapture(instance.pointer_captured_id)
-				) {
-					currently_dragged_element.releasePointerCapture(instance.pointer_captured_id);
-					val.setPointerCapture(instance.pointer_captured_id);
-				}
-
-				currently_dragged_element = val;
-			},
-
-			effect: (func) => {
-				instance.effects.add(func);
-			},
-
-			propose: (proposed) => {
-				instance.ctx.proposed.x = proposed.x;
-				instance.ctx.proposed.y = proposed.y;
-			},
-
-			cancel() {
-				instance.current_drag_hook_cancelled = true;
-			},
-
-			preventStart() {
-				instance.dragstart_prevented = true;
-			},
-		};
-
-		// Initial setup
-		instance.plugins = initialize_plugins(plugins);
-		for (const plugin of instance.plugins) {
-			resultify(
-				() => {
-					const value = plugin.setup?.(instance.ctx);
-					if (value) instance.states.set(plugin.name, value);
-					flush_effects(instance);
+			instance.ctx = {
+				proposed: { x: 0, y: 0 },
+				delta: { x: 0, y: 0 },
+				offset: { x: 0, y: 0 },
+				initial: { x: 0, y: 0 },
+				isDragging: false,
+				isInteracting: false,
+				rootNode: node,
+				cachedRootNodeRect: node.getBoundingClientRect(),
+				lastEvent: null,
+				get currentlyDraggedNode() {
+					return currently_dragged_element;
 				},
-				{
-					phase: 'setup',
-					plugin: { name: plugin.name, hook: 'setup' },
-					node: instance.root_node,
+				set currentlyDraggedNode(val) {
+					//  In case a plugin switches currentDraggedElement through the pointermove
+					if (
+						instance.pointer_captured_id &&
+						currently_dragged_element.hasPointerCapture(instance.pointer_captured_id)
+					) {
+						currently_dragged_element.releasePointerCapture(instance.pointer_captured_id);
+						val.setPointerCapture(instance.pointer_captured_id);
+					}
+
+					currently_dragged_element = val;
 				},
-			);
-		}
 
-		// Register instance
-		instances.set(node, instance);
+				effect: (func) => {
+					instance.effects.add(func);
+				},
 
-		return {
-			update: () => update(instance),
-			destroy() {
-				if (active_node === node) {
-					active_node = null;
-				}
+				propose: (proposed) => {
+					instance.ctx.proposed.x = proposed.x;
+					instance.ctx.proposed.y = proposed.y;
+				},
 
-				for (const plugin of instance.plugins) {
-					plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
-				}
+				cancel() {
+					instance.current_drag_hook_cancelled = true;
+				},
 
-				instances.delete(node);
-			},
-		};
+				preventStart() {
+					instance.dragstart_prevented = true;
+				},
+			};
+
+			// Initial setup
+			instance.plugins = initialize_plugins(plugins);
+			for (const plugin of instance.plugins) {
+				resultify(
+					() => {
+						const value = plugin.setup?.(instance.ctx);
+						if (value) instance.states.set(plugin.name, value);
+						flush_effects(instance);
+					},
+					{
+						phase: 'setup',
+						plugin: { name: plugin.name, hook: 'setup' },
+						node: instance.root_node,
+					},
+				);
+			}
+
+			// Register instance
+			instances.set(node, instance);
+
+			return {
+				update: () => update(instance),
+				destroy() {
+					if (active_node === node) {
+						active_node = null;
+					}
+
+					for (const plugin of instance.plugins) {
+						plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
+					}
+
+					instances.delete(node);
+				},
+			};
+		},
 	};
 }

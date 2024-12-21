@@ -1,6 +1,6 @@
 <!-- DragTest.svelte -->
 <script lang="ts">
-	import { draggable, events } from '@neodrag/core';
+	import { bounds, BoundsFrom, draggable, events } from '@neodrag/core';
 </script>
 
 <div class="container">
@@ -18,7 +18,14 @@
 
 	<!-- SVG Elements -->
 	<svg width="400" height="400" viewBox="0 0 400 400">
-		<circle use:draggable cx="100" cy="100" r="50" fill="blue" opacity="0.5" />
+		<circle
+			use:draggable={[bounds(BoundsFrom.parent())]}
+			cx="100"
+			cy="100"
+			r="50"
+			fill="blue"
+			opacity="0.5"
+		/>
 		<rect
 			use:draggable={[
 				events({

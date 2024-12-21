@@ -8,7 +8,7 @@ import {
 	transform,
 } from './plugins.ts';
 
-export const draggable = createDraggable({
+export const { instances, draggable } = createDraggable({
 	plugins: [
 		ignoreMultitouch(),
 		stateMarker(),
