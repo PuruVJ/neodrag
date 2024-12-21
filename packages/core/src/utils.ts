@@ -25,16 +25,22 @@ export function listen(
 	el.addEventListener(type, listener, options);
 }
 
+function camel_to_kebab(str: string): string {
+	return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+}
+
 export function set_node_key_style<T extends keyof CSSStyleDeclaration>(
 	node: HTMLElement | SVGElement,
 	key: T,
 	value: CSSStyleDeclaration[T],
 ) {
-	node.style.setProperty(key.toString(), value?.toString() ?? '');
+	const kebabKey = camel_to_kebab(key.toString());
+	node.style.setProperty(kebabKey, value?.toString() ?? '');
 }
 
 export function get_node_style(node: HTMLElement | SVGElement, key: keyof CSSStyleDeclaration) {
-	return node.style.getPropertyValue(key.toString());
+	const kebabKey = camel_to_kebab(key.toString());
+	return node.style.getPropertyValue(kebabKey);
 }
 
 export function set_node_dataset(node: HTMLElement | SVGElement, key: string, value: unknown) {

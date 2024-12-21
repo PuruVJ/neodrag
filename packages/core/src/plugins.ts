@@ -181,6 +181,7 @@ export const axis = unstable_definePlugin((value: 'x' | 'y') => {
 export const applyUserSelectHack = unstable_definePlugin((value: boolean = true) => {
 	return {
 		name: 'neodrag:applyUserSelectHack',
+		cancelable: false,
 
 		setup() {
 			return {
