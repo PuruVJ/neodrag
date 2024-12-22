@@ -13,9 +13,8 @@ function App() {
 	]);
 
 	useEffect(() => {
-		position.x = drag_state.offset.x;
-		position.y = drag_state.offset.y;
-	});
+		setPosition(drag_state.offset);
+	}, [drag_state.offset]);
 
 	return (
 		<>
