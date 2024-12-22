@@ -1,36 +1,25 @@
-import { events, position as position_plugin, useDraggable } from '@neodrag/react';
-import { startTransition, useCallback, useMemo, useRef, useState } from 'react';
+import { position as position_plugin, useDraggable } from '@neodrag/react';
+import { useEffect, useRef, useState } from 'react';
 
 function App() {
 	const [position, setPosition] = useState({ x: 0, y: 0 });
 
-	const draggableRef = useRef<HTMLDivElement>(null);
+	const draggable_ref = useRef<HTMLDivElement>(null);
 
-	// Memoize the event handler to prevent unnecessary plugin recreation
-	const onDrag = useCallback(({ offset }: any) => {
-		startTransition(() => {
-			setPosition({ ...offset });
-		});
-	}, []);
+	const drag_state = useDraggable(draggable_ref, [
+		position_plugin({
+			current: position,
+		}),
+	]);
 
-	// Memoize plugins array to prevent unnecessary updates
-	const plugins = useMemo(
-		() => [
-			events({
-				onDrag,
-			}),
-			position_plugin({
-				current: position,
-			}),
-		],
-		[onDrag, position],
-	);
-
-	useDraggable(draggableRef, plugins);
+	useEffect(() => {
+		position.x = drag_state.offset.x;
+		position.y = drag_state.offset.y;
+	});
 
 	return (
 		<>
-			<div ref={draggableRef}>I can be moved with the slider too</div>
+			<div ref={draggable_ref}>I can be moved with the slider too</div>
 			X:
 			<input
 				type="range"

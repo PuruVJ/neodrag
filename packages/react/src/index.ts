@@ -1,37 +1,95 @@
 import { createDraggable } from '@neodrag/core';
-import { type Plugin } from '@neodrag/core/plugins';
-import { useEffect, useRef } from 'react';
+import { DragEventData, unstable_definePlugin, type Plugin } from '@neodrag/core/plugins';
+import { useEffect, useRef, useState } from 'react';
 
 const { draggable, instances } = createDraggable();
 
+interface DragState extends DragEventData {
+	isDragging: boolean;
+}
+
+const defaultDragState: DragState = {
+	offset: { x: 0, y: 0 },
+	rootNode: null as unknown as HTMLElement,
+	currentNode: null as unknown as HTMLElement,
+	isDragging: false,
+};
+
+// Create the state sync plugin with the provided setState function
+const state_sync = unstable_definePlugin(
+	(setDragState: React.Dispatch<React.SetStateAction<DragState>>) => ({
+		name: 'react-state-sync',
+		priority: -1000, // Run last to ensure we get final values
+		cancelable: false,
+
+		dragStart: (ctx) => {
+			ctx.effect(() => {
+				setDragState((prev) => ({
+					...prev,
+					isDragging: true,
+					offset: { ...ctx.offset },
+					rootNode: ctx.rootNode,
+					currentNode: ctx.currentlyDraggedNode,
+				}));
+			});
+		},
+		drag: (ctx) => {
+			ctx.effect(() => {
+				setDragState((prev) => ({
+					...prev,
+					offset: { ...ctx.offset },
+					rootNode: ctx.rootNode,
+					currentNode: ctx.currentlyDraggedNode,
+				}));
+			});
+		},
+		dragEnd: (ctx) => {
+			ctx.effect(() => {
+				setDragState((prev) => ({
+					...prev,
+					isDragging: false,
+					offset: { ...ctx.offset },
+					rootNode: ctx.rootNode,
+					currentNode: ctx.currentlyDraggedNode,
+				}));
+			});
+		},
+	}),
+);
+
 export function useDraggable(
-	ref: React.RefObject<HTMLElement | SVGElement>,
+	ref: React.RefObject<HTMLElement | SVGElement | null>,
 	plugins: Plugin[] = [],
 ) {
+	const [dragState, setDragState] = useState<DragState>(defaultDragState);
 	const instance = useRef<ReturnType<typeof draggable>>();
 	const pluginsRef = useRef(plugins);
+	const syncPluginRef = useRef(state_sync(setDragState));
 
-	// Use a separate effect for initialization and cleanup
+	// Initialize draggable instance
 	useEffect(() => {
-		if (!ref.current) return;
+		const node = ref.current;
+		if (!node) return;
 
-		instance.current = draggable(ref.current, plugins);
+		// Combine user plugins with sync plugin
 		pluginsRef.current = plugins;
+		instance.current = draggable(node, [...plugins, syncPluginRef.current]);
 
 		return () => {
 			instance.current?.destroy();
 			instance.current = undefined;
 		};
-	}, []); // Empty deps - only run on mount/unmount
+	}, []); // Only run on mount/unmount
 
-	// Use a separate effect for plugin updates
+	// Handle plugin updates
 	useEffect(() => {
-		// Skip the initial mount since that's handled above
 		if (!instance.current || plugins === pluginsRef.current) return;
 
-		instance.current.update(plugins);
 		pluginsRef.current = plugins;
+		instance.current.update([...plugins, syncPluginRef.current]);
 	}, [plugins]); // Only run when plugins change
+
+	return dragState;
 }
 
 export * from '@neodrag/core/plugins';

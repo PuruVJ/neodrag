@@ -15,11 +15,11 @@ type DeepMutable<T> = T extends object
 			-readonly [P in keyof T]: T[P] extends readonly any[]
 				? DeepMutable<T[P]>
 				: T[P] extends object
-					? keyof T[P] extends never
-						? T[P]
-						: DeepMutable<T[P]>
-					: T[P];
-		}
+				? keyof T[P] extends never
+					? T[P]
+					: DeepMutable<T[P]>
+				: T[P];
+	  }
 	: T;
 
 export interface ErrorInfo {
@@ -344,16 +344,9 @@ export function createDraggable({
 	}
 
 	function initialize_plugins(new_plugins: Plugin[]) {
-		// Initialize plugins
-		const plugin_map = new Map<string, Plugin<any>>();
-		for (const plugin of [...new_plugins, ...initial_plugins]) {
-			const existing_plugin = plugin_map.get(plugin.name);
-			if (!existing_plugin || (plugin.priority ?? 0) >= (existing_plugin.priority ?? 0)) {
-				plugin_map.set(plugin.name, plugin);
-			}
-		}
-
-		return [...plugin_map.values()].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+		return [...new_plugins, ...initial_plugins].sort(
+			(a, b) => (b.priority ?? 0) - (a.priority ?? 0),
+		);
 	}
 
 	function update_plugin(
@@ -525,6 +518,10 @@ export function createDraggable({
 
 			// Register instance
 			instances.set(node, instance);
+
+			for (const plugin of instance.plugins) {
+				console.log(plugin.name);
+			}
 
 			return {
 				update: (newOptions: Plugin[]) => update(instance, newOptions),
