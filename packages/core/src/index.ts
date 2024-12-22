@@ -131,10 +131,19 @@ export function createDraggable({
 	}
 
 	function flush_effects(instance: DraggableInstance) {
-		for (const effect of instance.effects) {
-			effect();
-		}
+		if (instance.effects.size === 0) return;
+
+		// Store effects locally and clear the instance effects immediately
+		// This prevents new effects added during execution from being lost
+		const effects = Array.from(instance.effects);
 		clear_effects(instance);
+
+		// Schedule effects to run before next paint
+		requestAnimationFrame(() => {
+			for (const effect of effects) {
+				effect();
+			}
+		});
 	}
 
 	function clear_effects(instance: DraggableInstance) {
