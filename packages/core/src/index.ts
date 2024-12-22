@@ -519,10 +519,6 @@ export function createDraggable({
 			// Register instance
 			instances.set(node, instance);
 
-			for (const plugin of instance.plugins) {
-				console.log(plugin.name);
-			}
-
 			return {
 				update: (newOptions: Plugin[]) => update(instance, newOptions),
 
