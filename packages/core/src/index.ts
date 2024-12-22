@@ -8,19 +8,7 @@ import {
 	type Plugin,
 	type PluginContext,
 } from './plugins.ts';
-import { is_svg_element, is_svg_svg_element, listen } from './utils.ts';
-
-type DeepMutable<T> = T extends object
-	? {
-			-readonly [P in keyof T]: T[P] extends readonly any[]
-				? DeepMutable<T[P]>
-				: T[P] extends object
-				? keyof T[P] extends never
-					? T[P]
-					: DeepMutable<T[P]>
-				: T[P];
-	  }
-	: T;
+import { is_svg_element, is_svg_svg_element, listen, type DeepMutable } from './utils.ts';
 
 export interface ErrorInfo {
 	phase: 'setup' | 'dragStart' | 'drag' | 'dragEnd' | 'shouldDrag';
@@ -125,7 +113,7 @@ export function createDraggable({
 			if (instance.current_drag_hook_cancelled && plugin.cancelable !== false) continue;
 
 			const result = resultify(
-				() => handler(instance.ctx, instance.states.get(plugin.name), event),
+				() => handler.call(plugin, instance.ctx, instance.states.get(plugin.name), event),
 				{
 					phase: hook,
 					plugin: { name: plugin.name, hook },

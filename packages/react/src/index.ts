@@ -16,46 +16,48 @@ const defaultDragState: DragState = {
 };
 
 // Create the state sync plugin with the provided setState function
-const state_sync = unstable_definePlugin(
-	(setDragState: React.Dispatch<React.SetStateAction<DragState>>) => ({
-		name: 'react-state-sync',
-		priority: -1000, // Run last to ensure we get final values
-		cancelable: false,
+const state_sync = unstable_definePlugin<
+	[setDragState: React.Dispatch<React.SetStateAction<DragState>>]
+>({
+	name: 'react-state-sync',
+	priority: -1000, // Run last to ensure we get final values
+	cancelable: false,
 
-		dragStart: (ctx) => {
-			ctx.effect(() => {
-				setDragState((prev) => ({
-					...prev,
-					isDragging: true,
-					offset: { ...ctx.offset },
-					rootNode: ctx.rootNode,
-					currentNode: ctx.currentlyDraggedNode,
-				}));
-			});
-		},
-		drag: (ctx) => {
-			ctx.effect(() => {
-				setDragState((prev) => ({
-					...prev,
-					offset: { ...ctx.offset },
-					rootNode: ctx.rootNode,
-					currentNode: ctx.currentlyDraggedNode,
-				}));
-			});
-		},
-		dragEnd: (ctx) => {
-			ctx.effect(() => {
-				setDragState((prev) => ({
-					...prev,
-					isDragging: false,
-					offset: { ...ctx.offset },
-					rootNode: ctx.rootNode,
-					currentNode: ctx.currentlyDraggedNode,
-				}));
-			});
-		},
-	}),
-);
+	dragStart: ([setDragState], ctx) => {
+		ctx.effect(() => {
+			setDragState((prev) => ({
+				...prev,
+				isDragging: true,
+				offset: { ...ctx.offset },
+				rootNode: ctx.rootNode,
+				currentNode: ctx.currentlyDraggedNode,
+			}));
+		});
+	},
+
+	drag: ([setDragState], ctx) => {
+		ctx.effect(() => {
+			setDragState((prev) => ({
+				...prev,
+				offset: { ...ctx.offset },
+				rootNode: ctx.rootNode,
+				currentNode: ctx.currentlyDraggedNode,
+			}));
+		});
+	},
+
+	dragEnd: ([setDragState], ctx) => {
+		ctx.effect(() => {
+			setDragState((prev) => ({
+				...prev,
+				isDragging: false,
+				offset: { ...ctx.offset },
+				rootNode: ctx.rootNode,
+				currentNode: ctx.currentlyDraggedNode,
+			}));
+		});
+	},
+});
 
 export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 	return (ref: React.RefObject<HTMLElement | SVGElement | null>, plugins: Plugin[] = []) => {
@@ -72,10 +74,7 @@ export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 
 			instance.current = draggableFactory.draggable(node, pluginsRef.current);
 
-			return () => {
-				instance.current?.destroy();
-				instance.current = undefined;
-			};
+			return () => instance.current?.destroy();
 		}, []); // Changed dependency
 
 		// Handle plugin updates

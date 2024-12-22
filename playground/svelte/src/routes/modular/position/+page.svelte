@@ -11,10 +11,10 @@
 			},
 		}),
 		position({
-			// current: {
-			// 	x: pos.x,
-			// 	y: pos.y,
-			// },
+			current: {
+				x: pos.x,
+				y: pos.y,
+			},
 		}),
 	]);
 </script>

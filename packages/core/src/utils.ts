@@ -54,3 +54,21 @@ export function is_svg_element(element: Element | EventTarget): element is SVGEl
 export function is_svg_svg_element(element: Element | EventTarget): element is SVGSVGElement {
 	return element instanceof SVGSVGElement;
 }
+
+export type DeepMutable<T> = T extends object
+	? {
+			-readonly [P in keyof T]: T[P] extends readonly any[]
+				? DeepMutable<T[P]>
+				: T[P] extends object
+					? keyof T[P] extends never
+						? T[P]
+						: DeepMutable<T[P]>
+					: T[P];
+		}
+	: T;
+
+export type ReadonlyToShallowMutable<T> = T extends object
+	? {
+			-readonly [P in keyof T]: T[P];
+		}
+	: T;

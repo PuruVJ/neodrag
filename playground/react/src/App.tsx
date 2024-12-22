@@ -8,13 +8,17 @@ function App() {
 
 	const drag_state = useDraggable(draggable_ref, [
 		position_plugin({
-			current: position,
+			current: { ...position },
 		}),
 	]);
 
 	useEffect(() => {
 		setPosition(drag_state.offset);
 	}, [drag_state.offset]);
+
+	useEffect(() => {
+		console.log(position);
+	}, [position]);
 
 	return (
 		<>
@@ -26,7 +30,7 @@ function App() {
 				max="300"
 				value={position.x}
 				// @ts-ignore
-				onInput={(e) => setPosition({ x: +e.target.value, y: position.y })}
+				onInput={(e) => setPosition((prev) => ({ ...prev, x: +e.target.value }))}
 			/>
 			Y:
 			<input
@@ -35,7 +39,7 @@ function App() {
 				max="300"
 				value={position.y}
 				// @ts-ignore
-				onInput={(e) => setPosition({ x: position.x, y: +e.target.value })}
+				onInput={(e) => setPosition((prev) => ({ ...prev, y: +e.target.value }))}
 			/>
 		</>
 	);
