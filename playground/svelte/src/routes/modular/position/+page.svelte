@@ -25,7 +25,7 @@ X:
 Y:
 <input type="range" min="0" max="300" bind:value={pos.y} />
 
-<style>
+<!-- <style>
 	:global {
 		body {
 			margin: 0;
@@ -37,4 +37,4 @@ Y:
 			height: 100vh;
 		}
 	}
-</style>
+</style> -->

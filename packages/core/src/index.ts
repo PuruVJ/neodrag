@@ -98,6 +98,10 @@ export function createDraggable({
 			passive: true,
 			capture: false,
 		});
+		listen(delegateTarget, 'pointercancel', handle_pointer_up, {
+			passive: true,
+			capture: false,
+		});
 
 		listeners_initialized = true;
 	}
