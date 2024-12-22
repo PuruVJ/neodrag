@@ -344,9 +344,20 @@ export function createDraggable({
 	}
 
 	function initialize_plugins(new_plugins: Plugin[]) {
-		return [...new_plugins, ...initial_plugins].sort(
-			(a, b) => (b.priority ?? 0) - (a.priority ?? 0),
-		);
+		// Avoid creating new array unnecessarily
+		if (initial_plugins.length === 0) {
+			return new_plugins.slice().sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+		}
+
+		// Only create new array if we actually need to combine
+		const combined = new Array(new_plugins.length + initial_plugins.length);
+		for (let i = 0; i < new_plugins.length; i++) {
+			combined[i] = new_plugins[i];
+		}
+		for (let i = 0; i < initial_plugins.length; i++) {
+			combined[new_plugins.length + i] = initial_plugins[i];
+		}
+		return combined.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 	}
 
 	function update_plugin(

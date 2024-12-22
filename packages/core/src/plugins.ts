@@ -96,13 +96,49 @@ export interface Plugin<PrivateState = any> {
 	cleanup?: (context: PluginContext, state: PrivateState) => void;
 }
 
-/**
- * !This is an unstable API and may change until next major
- * @unstable
- */
-export const unstable_definePlugin = <State, Arguments extends any[]>(
-	plugin: (...args: Arguments) => Plugin<State>,
-) => plugin;
+interface DefinePluginOptions {
+	dangerousStructureWillChange?: boolean;
+}
+
+const PLUGIN_CACHE = new WeakMap();
+
+export function unstable_definePlugin<State, Arguments extends any[]>(
+	pluginFn: (...args: Arguments) => Plugin<State>,
+	{ dangerousStructureWillChange = false }: DefinePluginOptions = {},
+) {
+	if (dangerousStructureWillChange) {
+		return pluginFn;
+	}
+
+	let latestArgs: Arguments; // Store latest args
+
+	return (...args: Arguments): Plugin<State> => {
+		latestArgs = args; // Update latest args
+
+		let plugin = PLUGIN_CACHE.get(pluginFn);
+
+		if (!plugin) {
+			const initialPlugin = pluginFn(...args);
+
+			plugin = new Proxy(initialPlugin, {
+				get(target, prop: keyof Plugin) {
+					if (typeof target[prop] === 'function' && prop !== 'name') {
+						return function (this: any, ...hookArgs: any[]) {
+							// Use the stored latest args without recreating plugin
+							// @ts-ignore
+							return pluginFn(...latestArgs)[prop].apply(this, hookArgs);
+						};
+					}
+					return target[prop];
+				},
+			});
+
+			PLUGIN_CACHE.set(pluginFn, plugin);
+		}
+
+		return plugin;
+	};
+}
 
 export const ignoreMultitouch = unstable_definePlugin((value = true) => {
 	return {
@@ -680,12 +716,15 @@ export const position = unstable_definePlugin(
 			default?: { x: number; y: number };
 		} = {},
 	) => {
+		console.log('I have been created');
+
 		return {
 			name: 'neodrag:position',
 			priority: 1000,
 			liveUpdate: true,
 
 			setup(ctx) {
+				console.log('I have been setup');
 				if (options.default) {
 					ctx.offset.x = options.default.x ?? ctx.offset.x;
 					ctx.offset.y = options.default.y ?? ctx.offset.y;
@@ -700,7 +739,11 @@ export const position = unstable_definePlugin(
 			},
 
 			drag(ctx) {
-				if (options.current) {
+				// Only intervene if position has changed externally
+				if (
+					options.current &&
+					(options.current.x !== ctx.offset.x || options.current.y !== ctx.offset.y)
+				) {
 					ctx.propose({
 						x: options.current.x - ctx.offset.x,
 						y: options.current.y - ctx.offset.y,

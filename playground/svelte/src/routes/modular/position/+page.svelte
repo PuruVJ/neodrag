@@ -2,10 +2,8 @@
 	import { draggable, events, position } from '@neodrag/svelte';
 
 	let pos = $state({ x: 0, y: 0 });
-</script>
 
-<div
-	use:draggable={[
+	const options = $derived([
 		events({
 			onDrag: ({ offset }) => {
 				pos.x = offset.x;
@@ -13,13 +11,30 @@
 			},
 		}),
 		position({
-			current: $state.snapshot(pos),
+			// current: {
+			// 	x: pos.x,
+			// 	y: pos.y,
+			// },
 		}),
-	]}
->
-	I can be moved with the slider too
-</div>
+	]);
+</script>
+
+<div use:draggable={options}>I can be moved with the slider too</div>
 X:
 <input type="range" min="0" max="300" bind:value={pos.x} />
 Y:
 <input type="range" min="0" max="300" bind:value={pos.y} />
+
+<style>
+	:global {
+		body {
+			margin: 0;
+			padding: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+
+			height: 100vh;
+		}
+	}
+</style>
