@@ -2,7 +2,7 @@ import { createDraggable } from '@neodrag/core';
 import { DragEventData, unstable_definePlugin, type Plugin } from '@neodrag/core/plugins';
 import { useEffect, useRef, useState } from 'react';
 
-const { draggable, instances } = createDraggable();
+const draggable_factory = createDraggable();
 
 interface DragState extends DragEventData {
 	isDragging: boolean;
@@ -57,40 +57,44 @@ const state_sync = unstable_definePlugin(
 	}),
 );
 
-export function useDraggable(
-	ref: React.RefObject<HTMLElement | SVGElement | null>,
-	plugins: Plugin[] = [],
-) {
-	const [dragState, setDragState] = useState<DragState>(defaultDragState);
-	const instance = useRef<ReturnType<typeof draggable>>();
-	const pluginsRef = useRef(plugins);
-	const syncPluginRef = useRef(state_sync(setDragState));
+export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
+	return function useDraggable(
+		ref: React.RefObject<HTMLElement | SVGElement | null>,
+		plugins: Plugin[] = [],
+	) {
+		const [dragState, setDragState] = useState<DragState>(defaultDragState);
+		const instance = useRef<ReturnType<typeof draggableFactory.draggable>>();
+		const pluginsRef = useRef(plugins);
+		const syncPluginRef = useRef(state_sync(setDragState));
 
-	// Initialize draggable instance
-	useEffect(() => {
-		const node = ref.current;
-		if (!node) return;
+		// Initialize draggable instance
+		useEffect(() => {
+			const node = ref.current;
+			if (!node) return;
 
-		// Combine user plugins with sync plugin
-		pluginsRef.current = plugins;
-		instance.current = draggable(node, [...plugins, syncPluginRef.current]);
+			// Combine user plugins with sync plugin
+			pluginsRef.current = plugins;
+			instance.current = draggableFactory.draggable(node, [...plugins, syncPluginRef.current]);
 
-		return () => {
-			instance.current?.destroy();
-			instance.current = undefined;
-		};
-	}, []); // Only run on mount/unmount
+			return () => {
+				instance.current?.destroy();
+				instance.current = undefined;
+			};
+		}, []); // Only run on mount/unmount
 
-	// Handle plugin updates
-	useEffect(() => {
-		if (!instance.current || plugins === pluginsRef.current) return;
+		// Handle plugin updates
+		useEffect(() => {
+			if (!instance.current || plugins === pluginsRef.current) return;
 
-		pluginsRef.current = plugins;
-		instance.current.update([...plugins, syncPluginRef.current]);
-	}, [plugins]); // Only run when plugins change
+			pluginsRef.current = plugins;
+			instance.current.update([...plugins, syncPluginRef.current]);
+		}, [plugins]); // Only run when plugins change
 
-	return dragState;
+		return dragState;
+	};
 }
 
+export const useDraggable = wrapper(draggable_factory);
+
 export * from '@neodrag/core/plugins';
-export { instances };
+export const instances = draggable_factory.instances;
