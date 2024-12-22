@@ -558,10 +558,6 @@ export type DragEventData = Readonly<{
 	currentNode: HTMLElement | SVGElement;
 }>;
 
-function fire_custom_event(node: HTMLElement | SVGElement, name: string, data: any) {
-	return node.dispatchEvent(new CustomEvent(name, { detail: data }));
-}
-
 export const events = unstable_definePlugin<
 	[
 		events: {
@@ -587,8 +583,6 @@ export const events = unstable_definePlugin<
 		ctx.effect(() => {
 			state.offset = ctx.offset;
 			state.currentNode = ctx.currentlyDraggedNode;
-
-			fire_custom_event(ctx.rootNode, 'neodrag_start', state);
 			options.onDragStart?.(state);
 		});
 	},
@@ -598,7 +592,6 @@ export const events = unstable_definePlugin<
 			state.offset = ctx.offset;
 			state.currentNode = ctx.currentlyDraggedNode;
 
-			fire_custom_event(ctx.rootNode, 'neodrag', state);
 			options.onDrag?.(state);
 		});
 	},
@@ -608,7 +601,6 @@ export const events = unstable_definePlugin<
 			state.offset = ctx.offset;
 			state.currentNode = ctx.currentlyDraggedNode;
 
-			fire_custom_event(ctx.rootNode, 'neodrag_end', state);
 			options.onDragEnd?.(state);
 		});
 	},
