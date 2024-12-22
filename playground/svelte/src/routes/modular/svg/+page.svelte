@@ -1,6 +1,6 @@
 <!-- DragTest.svelte -->
 <script lang="ts">
-	import { bounds, BoundsFrom, draggable, events } from '@neodrag/core';
+	import { bounds, BoundsFrom, draggable, events } from '@neodrag/svelte';
 </script>
 
 <div class="container">

@@ -133,10 +133,6 @@ export function unstable_definePlugin<ArgsTuple extends any[], State = void>(
 			return memoized_plugin;
 		}
 
-		if (memoized_plugin?.name === 'neodrag:position') {
-			console.log('POSITION');
-		}
-
 		last_args = final_args;
 		// ATTENTION: YOu may want to avoid using spread and just mutate the memoized_plugin
 		// Past Puru has already done it, creates weird issues.
@@ -230,15 +226,15 @@ export const applyUserSelectHack = unstable_definePlugin(
 		dragStart([value], ctx, state) {
 			ctx.effect(() => {
 				if (value) {
-					state.body_user_select_val = get_node_style(document.body, 'userSelect');
-					set_node_key_style(document.body, 'userSelect', 'none');
+					state.body_user_select_val = get_node_style(document.body, 'user-select');
+					set_node_key_style(document.body, 'user-select', 'none');
 				}
 			});
 		},
 
 		dragEnd([value], _, state) {
 			if (value) {
-				set_node_key_style(document.body, 'userSelect', state.body_user_select_val);
+				set_node_key_style(document.body, 'user-select', state.body_user_select_val);
 			}
 		},
 	},
@@ -743,13 +739,12 @@ export const position = unstable_definePlugin(
 				ctx.offset.x = options.current.x ?? ctx.offset.x;
 				ctx.offset.y = options.current.y ?? ctx.offset.y;
 			}
-
-			console.log('RUN');
 		},
 
 		drag([options], ctx) {
 			// Only intervene if position has changed externally
 			if (
+				ctx.isDragging &&
 				options.current &&
 				(options.current.x !== ctx.offset.x || options.current.y !== ctx.offset.y)
 			) {
@@ -795,15 +790,15 @@ export const touchAction = unstable_definePlugin(
 		liveUpdate: true,
 
 		setup([mode], ctx) {
-			const original_touch_action = get_node_style(ctx.rootNode, 'touchAction');
-			set_node_key_style(ctx.rootNode, 'touchAction', mode!);
+			const original_touch_action = get_node_style(ctx.rootNode, 'touch-action');
+			set_node_key_style(ctx.rootNode, 'touch-action', mode!);
 
 			return { original_touch_action };
 		},
 
 		dragEnd(_args, ctx, state) {
 			// Restore original touch-action
-			set_node_key_style(ctx.rootNode, 'touchAction', state.original_touch_action || 'auto');
+			set_node_key_style(ctx.rootNode, 'touch-action', state.original_touch_action || 'auto');
 		},
 	},
 	['manipulation'] as [mode?: TouchActionMode],
@@ -852,42 +847,42 @@ export const scrollLock = unstable_definePlugin(
 				// Store original styles
 				if (container instanceof HTMLElement) {
 					state.originalStyles.set(container, {
-						userSelect: get_node_style(container, 'userSelect'),
-						touchAction: get_node_style(container, 'touchAction'),
+						userSelect: get_node_style(container, 'user-select'),
+						touchAction: get_node_style(container, 'touch-action'),
 						overflow: get_node_style(container, 'overflow'),
 					});
 
 					// Apply scroll locking styles
-					set_node_key_style(container, 'userSelect', 'none');
+					set_node_key_style(container, 'user-select', 'none');
 
 					if (!state.config.allowScrollbar) {
 						set_node_key_style(container, 'overflow', 'hidden');
 					}
 
 					if (state.config.lockAxis === 'x' || state.config.lockAxis === 'both') {
-						set_node_key_style(container, 'touchAction', 'pan-y');
+						set_node_key_style(container, 'touch-action', 'pan-y');
 					} else if (state.config.lockAxis === 'y') {
-						set_node_key_style(container, 'touchAction', 'pan-x');
+						set_node_key_style(container, 'touch-action', 'pan-x');
 					}
 				} else {
 					// For window, we need to lock the body
 					const body = document.body;
 					state.originalStyles.set(body, {
-						userSelect: get_node_style(body, 'userSelect'),
-						touchAction: get_node_style(body, 'touchAction'),
+						userSelect: get_node_style(body, 'user-select'),
+						touchAction: get_node_style(body, 'touch-action'),
 						overflow: get_node_style(body, 'overflow'),
 					});
 
-					set_node_key_style(body, 'userSelect', 'none');
+					set_node_key_style(body, 'user-select', 'none');
 
 					if (!state.config.allowScrollbar) {
 						set_node_key_style(body, 'overflow', 'hidden');
 					}
 
 					if (state.config.lockAxis === 'x' || state.config.lockAxis === 'both') {
-						set_node_key_style(body, 'touchAction', 'pan-y');
+						set_node_key_style(body, 'touch-action', 'pan-y');
 					} else if (state.config.lockAxis === 'y') {
-						set_node_key_style(body, 'touchAction', 'pan-x');
+						set_node_key_style(body, 'touch-action', 'pan-x');
 					}
 				}
 			});
@@ -904,8 +899,8 @@ export const scrollLock = unstable_definePlugin(
 				const originalStyles = state.originalStyles.get(target);
 
 				if (originalStyles) {
-					set_node_key_style(target, 'userSelect', originalStyles.userSelect);
-					set_node_key_style(target, 'touchAction', originalStyles.touchAction);
+					set_node_key_style(target, 'user-select', originalStyles.userSelect);
+					set_node_key_style(target, 'touch-action', originalStyles.touchAction);
 					set_node_key_style(target, 'overflow', originalStyles.overflow);
 				}
 
@@ -920,8 +915,8 @@ export const scrollLock = unstable_definePlugin(
 		cleanup(_args, _ctx, state) {
 			// Restore any remaining original styles
 			for (const [element, styles] of state.originalStyles) {
-				set_node_key_style(element, 'userSelect', styles.userSelect);
-				set_node_key_style(element, 'touchAction', styles.touchAction);
+				set_node_key_style(element, 'user-select', styles.userSelect);
+				set_node_key_style(element, 'touch-action', styles.touchAction);
 				set_node_key_style(element, 'overflow', styles.overflow);
 			}
 			state.originalStyles.clear();

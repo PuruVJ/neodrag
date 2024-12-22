@@ -25,22 +25,27 @@ export function listen(
 	el.addEventListener(type, listener, options);
 }
 
-function camel_to_kebab(str: string): string {
-	return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
-}
+type KebabCase<S extends string> = S extends `${infer C}${infer T}`
+	? T extends Uncapitalize<T>
+		? `${Lowercase<C>}${KebabCase<T>}`
+		: `${Lowercase<C>}-${KebabCase<Uncapitalize<T>>}`
+	: S;
 
-export function set_node_key_style<T extends keyof CSSStyleDeclaration>(
+// Take all CSS properties and convert them to kebab
+type CSSKebabProperties = {
+	[K in keyof CSSStyleDeclaration as K extends string ? KebabCase<K> : K]: CSSStyleDeclaration[K];
+};
+
+export function set_node_key_style<T extends keyof CSSKebabProperties>(
 	node: HTMLElement | SVGElement,
 	key: T,
-	value: CSSStyleDeclaration[T],
+	value: CSSKebabProperties[T],
 ) {
-	const kebabKey = camel_to_kebab(key.toString());
-	node.style.setProperty(kebabKey, value?.toString() ?? '');
+	node.style.setProperty(key.toString(), value?.toString() ?? '');
 }
 
-export function get_node_style(node: HTMLElement | SVGElement, key: keyof CSSStyleDeclaration) {
-	const kebabKey = camel_to_kebab(key.toString());
-	return node.style.getPropertyValue(kebabKey);
+export function get_node_style(node: HTMLElement | SVGElement, key: keyof CSSKebabProperties) {
+	return node.style.getPropertyValue(key.toString());
 }
 
 export function set_node_dataset(node: HTMLElement | SVGElement, key: string, value: unknown) {
