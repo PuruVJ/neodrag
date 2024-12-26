@@ -1,14 +1,29 @@
 import {
+	computed,
+	effect,
+	endBatch,
+	signal,
+	startBatch,
+	untrack,
+	untrackScope,
+} from 'alien-signals/esm';
+import {
 	applyUserSelectHack,
 	ignoreMultitouch,
 	stateMarker,
 	threshold,
 	touchAction,
 	transform,
-	type Plugin,
 	type PluginContext,
-} from './plugins.ts';
-import { is_svg_element, is_svg_svg_element, listen, type DeepMutable } from './utils.ts';
+	type Unstable_Plugin,
+} from './plugins_signals.ts';
+import {
+	is_svg_element,
+	is_svg_svg_element,
+	listen,
+	microtask,
+	type DeepMutable,
+} from './utils.ts';
 
 export interface ErrorInfo {
 	phase: 'setup' | 'dragStart' | 'drag' | 'dragEnd' | 'shouldDrag';
@@ -23,13 +38,12 @@ export interface ErrorInfo {
 export interface DraggableInstance {
 	ctx: DeepMutable<PluginContext>;
 	root_node: HTMLElement | SVGElement;
-	plugins: Plugin[];
-	states: Map<string, any>;
+	plugins: Unstable_Plugin[];
 	dragstart_prevented: boolean;
 	current_drag_hook_cancelled: boolean;
 	pointer_captured_id: number | null;
-	effects: Set<() => void>;
 	controller: AbortController;
+	paint_queue: Set<() => void>;
 }
 
 type Result<T> = { ok: true; value: T } | { ok: false; error: unknown };
@@ -40,7 +54,7 @@ export const DEFAULTS = {
 		stateMarker(),
 		applyUserSelectHack(),
 		transform(),
-		threshold(),
+		threshold(signal({ delay: 1, distance: 30 })),
 		touchAction(),
 	],
 
@@ -48,16 +62,16 @@ export const DEFAULTS = {
 		console.error(error);
 	},
 
-	delegate: () => document.body,
+	delegatetarget: () => document.body,
 };
 
 export function createDraggable({
 	plugins: initial_plugins = DEFAULTS.plugins,
-	delegate: delegateTargetFn = DEFAULTS.delegate,
+	delegateTarget: delegateTargetFn = DEFAULTS.delegatetarget,
 	onError = DEFAULTS.onError,
 }: {
-	plugins?: Plugin[];
-	delegate?: () => HTMLElement;
+	plugins?: Unstable_Plugin[];
+	delegateTarget?: () => HTMLElement;
 	onError?: (error: ErrorInfo) => void;
 } = {}) {
 	const instances = new WeakMap<HTMLElement | SVGElement, DraggableInstance>();
@@ -106,54 +120,6 @@ export function createDraggable({
 		listeners_initialized = true;
 	}
 
-	function run_plugins(instance: DraggableInstance, hook: ErrorInfo['phase'], event: PointerEvent) {
-		let should_run = true;
-		instance.dragstart_prevented = false;
-
-		for (const plugin of instance.plugins) {
-			const handler = plugin[hook];
-			if (!handler) continue;
-
-			if (instance.current_drag_hook_cancelled && plugin.cancelable !== false) continue;
-
-			const result = resultify(
-				() => handler.call(plugin, instance.ctx, instance.states.get(plugin.name), event),
-				{
-					phase: hook,
-					plugin: { name: plugin.name, hook },
-					node: instance.ctx.rootNode,
-				},
-			);
-
-			if (!result.ok || result.value === false) {
-				should_run = false;
-				break;
-			}
-		}
-
-		return should_run;
-	}
-
-	function flush_effects(instance: DraggableInstance) {
-		if (instance.effects.size === 0) return;
-
-		// Store effects locally and clear the instance effects immediately
-		// This prevents new effects added during execution from being lost
-		const effects = Array.from(instance.effects);
-		clear_effects(instance);
-
-		// Schedule effects to run before next paint
-		requestAnimationFrame(() => {
-			for (const effect of effects) {
-				effect();
-			}
-		});
-	}
-
-	function clear_effects(instance: DraggableInstance) {
-		instance.effects.clear();
-	}
-
 	function cleanup_active_node(pointer_id: number) {
 		// If no node is currently being dragged, nothing to clean up
 		const node = active_nodes.get(pointer_id);
@@ -166,12 +132,12 @@ export function createDraggable({
 		// If we have captured pointer events, release them
 		if (
 			instance.pointer_captured_id &&
-			instance.ctx.currentlyDraggedNode.hasPointerCapture(instance.pointer_captured_id)
+			instance.ctx.target.hasPointerCapture(instance.pointer_captured_id)
 		) {
 			resultify(
 				() => {
 					// Release the pointer capture we set earlier
-					instance.ctx.currentlyDraggedNode.releasePointerCapture(instance.pointer_captured_id!);
+					instance.ctx.currentTarget.releasePointerCapture(instance.pointer_captured_id!);
 				},
 				{
 					phase: 'dragEnd',
@@ -181,15 +147,16 @@ export function createDraggable({
 		}
 
 		// Reset all the drag state
-		instance.ctx.isInteracting = false; // No longer interacting with element
-		instance.ctx.isDragging = false; // No longer dragging
-		instance.dragstart_prevented = false; // Reset prevention flag
-		instance.pointer_captured_id = null; // Clear pointer ID
-		active_nodes.delete(pointer_id); // Clear active node reference
-		clear_effects(instance); // Clear any pending effects
+		untrack(() => {
+			instance.ctx.isInteracting.set(false); // No longer interacting with element
+			instance.ctx.isDragging.set(false); // No longer dragging
+			instance.dragstart_prevented = false; // Reset prevention flag
+			instance.pointer_captured_id = null; // Clear pointer ID
+			active_nodes.delete(pointer_id); // Clear active node reference
+		});
 	}
 
-	function handle_pointer_down(e: PointerEvent) {
+	async function handle_pointer_down(e: PointerEvent) {
 		if (e.button === 2) return;
 
 		// Find the draggable node that contains the target
@@ -198,22 +165,19 @@ export function createDraggable({
 		if (!draggable_node) return;
 
 		const instance = instances.get(draggable_node)!;
-		instance.ctx.cachedRootNodeRect = draggable_node.getBoundingClientRect();
+		const target_rect = await get_element_rect_in_raf(draggable_node);
 
-		const should_drag = run_plugins(instance, 'shouldDrag', e);
-		if (!should_drag) return;
-
-		instance.ctx.isInteracting = true;
+		instance.ctx.isInteracting.set(true);
 		active_nodes.set(e.pointerId, draggable_node);
 
 		const capture_result = resultify(
 			() => {
 				instance.pointer_captured_id = e.pointerId;
-				instance.ctx.currentlyDraggedNode.setPointerCapture(instance.pointer_captured_id);
+				instance.ctx.target.setPointerCapture(instance.pointer_captured_id);
 			},
 			{
 				phase: 'dragStart',
-				node: instance.ctx.currentlyDraggedNode,
+				node: instance.ctx.target,
 			},
 		);
 
@@ -225,80 +189,85 @@ export function createDraggable({
 		// Modify this if draggable_node is SVG
 		// Calculate scale differently for SVG vs HTML
 		let inverse_scale = 1;
-		if (draggable_node instanceof SVGElement) {
-			// For SVG elements, use the bounding box for scale
-			const bbox = (draggable_node as SVGGraphicsElement).getBBox();
-			const rect = instance.ctx.cachedRootNodeRect;
-			// Only calculate scale if we have valid dimensions
-			if (bbox.width && rect.width) {
-				inverse_scale = bbox.width / rect.width;
-			}
-		} else {
-			// For HTML elements, use the original calculation
-			inverse_scale = draggable_node.offsetWidth / instance.ctx.cachedRootNodeRect.width;
+		if (target_rect.width && target_rect.height) {
+			inverse_scale = target_rect.width / target_rect.height;
 		}
 
-		if (instance.ctx.proposed.x != null) {
-			instance.ctx.initial.x = e.clientX - instance.ctx.offset.x / inverse_scale;
-		}
-		if (instance.ctx.proposed.y != null) {
-			instance.ctx.initial.y = e.clientY - instance.ctx.offset.y / inverse_scale;
-		}
+		startBatch();
+		// Get current offset
+		const current_offset = instance.ctx.offset.get();
+
+		// Set initial position based on current mouse position and offset
+		instance.ctx.initial.set({
+			x: e.clientX - current_offset.x / inverse_scale,
+			y: e.clientY - current_offset.y / inverse_scale,
+		});
+		endBatch();
 	}
 
-	function handle_pointer_move(e: PointerEvent) {
+	async function handle_pointer_move(e: PointerEvent) {
 		const draggable_node = active_nodes.get(e.pointerId);
 		if (!draggable_node) return;
 
 		const instance = instances.get(draggable_node)!;
-		if (!instance.ctx.isInteracting) return;
+		if (!instance.ctx.isInteracting.get()) return;
 
 		instance.ctx.lastEvent = e;
 
-		if (!instance.ctx.isDragging) {
+		if (!instance.ctx.isDragging.get()) {
+			startBatch();
 			instance.dragstart_prevented = false;
-			run_plugins(instance, 'drag', e);
+			instance.ctx.phase.set('shouldDrag');
+			instance.ctx.event.set(e);
+			endBatch();
 
-			// Bottom: Even if its cancelled, it should still run the plugins that have cancellable: false
 			if (!instance.dragstart_prevented) {
-				const start_drag = run_plugins(instance, 'dragStart', e);
-				if (!start_drag) return clear_effects(instance);
-				else flush_effects(instance);
-
-				instance.ctx.isDragging = true;
+				instance.ctx.phase.set('dragStart');
+				instance.ctx.isDragging.set(true);
 			}
 
-			if (!instance.ctx.isDragging) return;
+			if (!instance.ctx.isDragging.get()) {
+				return;
+			}
 		}
 
 		e.preventDefault();
 
-		instance.ctx.delta.x = e.clientX - instance.ctx.initial.x - instance.ctx.offset.x;
-		instance.ctx.delta.y = e.clientY - instance.ctx.initial.y - instance.ctx.offset.y;
+		instance.ctx.phase.set('drag');
+
+		startBatch();
+		const initial = instance.ctx.initial.get();
+		const offset = instance.ctx.offset.get();
+		const proposal = {
+			x: e.clientX - initial.x - offset.x,
+			y: e.clientY - initial.y - offset.y,
+		};
+		instance.ctx.delta.set(proposal);
 
 		// Core proposes delta
-		instance.ctx.proposed.x = instance.ctx.delta.x;
-		instance.ctx.proposed.y = instance.ctx.delta.y;
-
-		// Run the plugins
-		const run_result = run_plugins(instance, 'drag', e);
-
-		if (run_result) flush_effects(instance);
-		else return clear_effects(instance);
+		instance.ctx.proposed.set(proposal);
+		endBatch();
 
 		// Whatever offset we have had till now since the draggable() was mounted, add proposals to it, as long as they're not null
-		instance.ctx.offset.x += instance.ctx.proposed.x ?? 0;
-		instance.ctx.offset.y += instance.ctx.proposed.y ?? 0;
+		untrackScope(() => {
+			const offset = instance.ctx.offset.get();
+			const proposed = instance.ctx.proposed.get();
+			const proposed_offset = {
+				x: offset.x + (proposed.x ?? 0),
+				y: offset.y + (proposed.y ?? 0),
+			};
+			instance.ctx.offset.set(proposed_offset);
+		});
 	}
 
-	function handle_pointer_up(e: PointerEvent) {
+	async function handle_pointer_up(e: PointerEvent) {
 		const draggable_node = active_nodes.get(e.pointerId);
 		if (!draggable_node) return;
 
 		const instance = instances.get(draggable_node)!;
-		if (!instance.ctx.isInteracting) return;
+		if (!instance.ctx.isInteracting.get()) return;
 
-		if (instance.ctx.isDragging) {
+		if (instance.ctx.isDragging.get()) {
 			listen(draggable_node as HTMLElement, 'click', (e) => e.stopPropagation(), {
 				once: true,
 				signal: instance.controller.signal,
@@ -308,25 +277,29 @@ export function createDraggable({
 
 		if (
 			instance.pointer_captured_id &&
-			instance.ctx.currentlyDraggedNode.hasPointerCapture(instance.pointer_captured_id)
+			instance.ctx.target.hasPointerCapture(instance.pointer_captured_id)
 		) {
-			instance.ctx.currentlyDraggedNode.releasePointerCapture(instance.pointer_captured_id);
+			instance.ctx.target.releasePointerCapture(instance.pointer_captured_id);
 		}
 
-		// Call the dragEnd hooks
-		run_plugins(instance, 'dragEnd', e);
-		flush_effects(instance);
+		startBatch();
+		instance.ctx.phase.set('dragEnd');
 
-		if (instance.ctx.proposed.x) instance.ctx.initial.x = instance.ctx.offset.x;
-		if (instance.ctx.proposed.y) instance.ctx.initial.y = instance.ctx.offset.y;
+		const proposed = instance.ctx.proposed.get();
+		const offset = instance.ctx.offset.get();
+		const initial = instance.ctx.initial.get();
+		if (proposed.x) instance.ctx.initial.set({ ...initial, x: offset.x });
+		if (proposed.y) instance.ctx.initial.set({ ...initial, y: offset.y });
 
-		instance.ctx.proposed.x = 0;
-		instance.ctx.proposed.y = 0;
-		instance.ctx.isInteracting = false;
-		instance.ctx.isDragging = false;
+		instance.ctx.proposed.set({ x: 0, y: 0 });
+		instance.ctx.isInteracting.set(false);
+		instance.ctx.isDragging.set(false);
+		instance.ctx.event.set(e);
 		instance.dragstart_prevented = false;
 		instance.pointer_captured_id = null;
-		clear_effects(instance);
+		endBatch();
+
+		instance.ctx.phase.set('idle');
 	}
 
 	function find_draggable_node(e: PointerEvent): HTMLElement | SVGElement | null {
@@ -344,143 +317,76 @@ export function createDraggable({
 		return null;
 	}
 
-	function initialize_plugins(new_plugins: Plugin[]) {
-		// Avoid creating new array unnecessarily
-		if (initial_plugins.length === 0) {
-			return new_plugins.slice().sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-		}
+	function initialize_plugins(plugins: Unstable_Plugin[]) {
+		// Create new array if combining
+		const combined = initial_plugins.concat(plugins);
 
-		// Only create new array if we actually need to combine
-		const combined = new Array(new_plugins.length + initial_plugins.length);
-		for (let i = 0; i < new_plugins.length; i++) {
-			combined[i] = new_plugins[i];
-		}
-		for (let i = 0; i < initial_plugins.length; i++) {
-			combined[new_plugins.length + i] = initial_plugins[i];
-		}
-		return combined.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+		return combined.sort((a, b) => {
+			const priority_a = a.priority ?? 0;
+			const priority_b = b.priority ?? 0;
+			if (priority_a !== priority_b) {
+				return priority_b - priority_a;
+			}
+			return combined.indexOf(a) - combined.indexOf(b);
+		});
 	}
+	function flush_paint_queue(instance: DraggableInstance) {
+		if (instance.paint_queue.size === 0) return;
 
-	function update_plugin(
-		instance: DraggableInstance,
-		old_plugin: Plugin | undefined,
-		new_plugin: Plugin,
-	) {
-		// Skip if same instance and not live-updateable
-		if (old_plugin === new_plugin && !new_plugin.liveUpdate) {
-			return false;
-		}
+		const effects = Array.from(instance.paint_queue);
+		instance.paint_queue.clear();
 
-		// Clean up old instance if different
-		if (old_plugin && old_plugin !== new_plugin) {
-			old_plugin.cleanup?.(instance.ctx, instance.states.get(old_plugin.name));
-			instance.states.delete(old_plugin.name);
-		}
-
-		// Setup new plugin
-		const state = new_plugin.setup?.(instance.ctx);
-		flush_effects(instance);
-		if (state) instance.states.set(new_plugin.name, state);
-
-		return true;
-	}
-
-	function update(instance: DraggableInstance, new_plugins: Plugin[] = []) {
-		const old_plugin_map = new Map(instance.plugins.map((p) => [p.name, p]));
-		const new_plugin_list = initialize_plugins(new_plugins);
-		let has_changes = false;
-
-		// Check if this instance is currently involved in any drag operation
-		let is_active = false;
-		for (const node of active_nodes.values()) {
-			if (node === instance.root_node) {
-				is_active = true;
-				break;
+		requestAnimationFrame(() => {
+			for (const effect of effects) {
+				effect();
 			}
-		}
-
-		// During drag, only update plugins that opted into live updates
-		if (is_active && (instance.ctx.isDragging || instance.ctx.isInteracting)) {
-			const updated_plugins = new_plugin_list.filter((plugin) => plugin.liveUpdate);
-
-			for (const plugin of updated_plugins) {
-				const old_plugin = old_plugin_map.get(plugin.name);
-				if (update_plugin(instance, old_plugin, plugin)) {
-					has_changes = true;
-				}
-			}
-
-			// If we made changes and we're the active node, re-run drag
-			if (has_changes) {
-				for (const node of active_nodes.values()) {
-					if (node === instance.root_node && instance.ctx.lastEvent) {
-						handle_pointer_move(instance.ctx.lastEvent);
-						break;
-					}
-				}
-			}
-
-			return;
-		}
-
-		// Clean up removed plugins
-		const removed_plugins = instance.plugins.filter(
-			(p) => !new_plugin_list.some((np) => np.name === p.name),
-		);
-
-		for (const plugin of removed_plugins) {
-			plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
-			instance.states.delete(plugin.name);
-			has_changes = true;
-		}
-
-		// Update or setup new plugins
-		for (const plugin of new_plugin_list) {
-			const old_plugin = old_plugin_map.get(plugin.name);
-			if (update_plugin(instance, old_plugin, plugin)) {
-				has_changes = true;
-			}
-		}
-
-		// Update instance plugins list if there were changes
-		if (has_changes) {
-			instance.plugins = new_plugin_list;
-		}
+		});
 	}
 
 	return {
 		instances,
-		draggable: (node: HTMLElement | SVGElement, plugins: Plugin[] = []) => {
+		draggable: (node: HTMLElement | SVGElement, plugins: Unstable_Plugin[] = []) => {
 			initialize_listeners();
 
 			const instance: DraggableInstance = {
 				ctx: {} as DeepMutable<PluginContext>,
 				root_node: node,
 				plugins: [],
-				states: new Map<string, any>(),
 				controller: new AbortController(),
 				dragstart_prevented: false,
 				current_drag_hook_cancelled: false,
 				pointer_captured_id: null,
-				effects: new Set<() => void>(),
+				paint_queue: new Set<() => void>(),
 			};
 
 			let currently_dragged_element = node;
 
+			const phase = signal<'dragStart' | 'drag' | 'dragEnd' | 'idle'>('idle');
+			const proposal = signal<{
+				x: number | null;
+				y: number | null;
+			}>({ x: 0, y: 0 });
+			const delta = signal({ x: 0, y: 0 });
+			const offset = signal({ x: 0, y: 0 });
+			const initial = signal({ x: 0, y: 0 });
+			const isDragging = signal(false);
+			const isInteracting = signal(false);
+
 			instance.ctx = {
-				proposed: { x: 0, y: 0 },
-				delta: { x: 0, y: 0 },
-				offset: { x: 0, y: 0 },
-				initial: { x: 0, y: 0 },
-				isDragging: false,
-				isInteracting: false,
-				rootNode: node,
-				cachedRootNodeRect: node.getBoundingClientRect(),
+				phase,
+				proposed: proposal,
+				delta,
+				offset,
+				initial,
+				isDragging,
+				isInteracting,
+				target: node,
+				event: signal(null!),
 				lastEvent: null,
-				get currentlyDraggedNode() {
+				get currentTarget() {
 					return currently_dragged_element;
 				},
-				set currentlyDraggedNode(val) {
+				set currentTarget(val) {
 					//  In case a plugin switches currentDraggedElement through the pointermove
 					if (
 						instance.pointer_captured_id &&
@@ -492,48 +398,52 @@ export function createDraggable({
 
 					currently_dragged_element = val;
 				},
-
-				effect: (func) => {
-					instance.effects.add(func);
-				},
-
-				propose: (proposed) => {
-					instance.ctx.proposed.x = proposed.x;
-					instance.ctx.proposed.y = proposed.y;
-				},
-
-				cancel() {
-					instance.current_drag_hook_cancelled = true;
-				},
-
-				preventStart() {
-					instance.dragstart_prevented = true;
-				},
 			};
+
+			function propose(x: number | null, y: number | null) {
+				proposal.set({ x, y });
+			}
+
+			function cancel() {
+				instance.current_drag_hook_cancelled = true;
+			}
+
+			function prevent() {
+				instance.dragstart_prevented = true;
+			}
+
+			function requestPaint(fn: () => void) {
+				instance.paint_queue.add(fn);
+
+				queueMicrotask(() => {
+					flush_paint_queue(instance);
+				});
+			}
 
 			// Initial setup
 			instance.plugins = initialize_plugins(plugins);
+			// Call the plugins's setup with what they need
 			for (const plugin of instance.plugins) {
-				resultify(
-					() => {
-						const value = plugin.setup?.(instance.ctx);
-						if (value) instance.states.set(plugin.name, value);
-						flush_effects(instance);
+				plugin.setup({
+					cancel,
+					ctx: instance.ctx,
+					prevent,
+					propose,
+					requestRect: get_element_rect_in_raf,
+					requestPaint,
+					$: {
+						computed,
+						effect,
+						signal,
+						untrack,
 					},
-					{
-						phase: 'setup',
-						plugin: { name: plugin.name, hook: 'setup' },
-						node: instance.root_node,
-					},
-				);
+				});
 			}
 
 			// Register instance
 			instances.set(node, instance);
 
 			return {
-				update: (newOptions: Plugin[]) => update(instance, newOptions),
-
 				destroy() {
 					for (const [pointer_id, active_node] of active_nodes) {
 						if (active_node === node) {
@@ -541,13 +451,44 @@ export function createDraggable({
 						}
 					}
 
-					for (const plugin of instance.plugins) {
-						plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
-					}
+					// for (const plugin of instance.plugins) {
+					// 	plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
+					// }
 
 					instances.delete(node);
 				},
 			};
 		},
 	};
+}
+
+const rect_cache = new WeakMap<
+	HTMLElement | SVGElement,
+	{
+		rect: DOMRect;
+		timestamp: number;
+	}
+>();
+
+let last_frame_time = 0;
+
+function get_element_rect_in_raf(element: HTMLElement | SVGElement, force = false) {
+	return new Promise<DOMRect>((resolve) => {
+		requestAnimationFrame((timestamp) => {
+			const frame_time = last_frame_time ? timestamp - last_frame_time : 16.7;
+			const cache_time = frame_time * 0.9;
+
+			const cached = rect_cache.get(element);
+			if (!force && cached && timestamp - cached.timestamp < cache_time) {
+				return resolve(cached.rect);
+			}
+
+			last_frame_time = timestamp;
+			const rect =
+				element instanceof SVGGraphicsElement ? element.getBBox() : element.getBoundingClientRect();
+
+			rect_cache.set(element, { rect, timestamp });
+			resolve(rect);
+		});
+	});
 }

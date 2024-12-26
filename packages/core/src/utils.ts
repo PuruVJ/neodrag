@@ -65,15 +65,19 @@ export type DeepMutable<T> = T extends object
 			-readonly [P in keyof T]: T[P] extends readonly any[]
 				? DeepMutable<T[P]>
 				: T[P] extends object
-					? keyof T[P] extends never
-						? T[P]
-						: DeepMutable<T[P]>
-					: T[P];
-		}
+				? keyof T[P] extends never
+					? T[P]
+					: DeepMutable<T[P]>
+				: T[P];
+	  }
 	: T;
 
 export type ReadonlyToShallowMutable<T> = T extends object
 	? {
 			-readonly [P in keyof T]: T[P];
-		}
+	  }
 	: T;
+
+export function microtask() {
+	return new Promise<void>((resolve) => queueMicrotask(resolve));
+}

@@ -30,5 +30,8 @@
 		"url": "git+https://github.com/PuruVJ/neodrag.git"
 	},
 	"author": "Puru Vijay",
-	"license": "MIT"
+	"license": "MIT",
+	"dependencies": {
+		"alien-signals": "^0.4.11"
+	}
 }

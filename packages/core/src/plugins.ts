@@ -127,7 +127,7 @@ export function unstable_definePlugin<ArgsTuple extends any[], State = void>(
 	let memoized_plugin: Plugin<State> & { args: ArgsTuple };
 
 	return (...args: ArgsTuple): Plugin<State> & { args: ArgsTuple } => {
-		const final_args = args.length ? args : (defaultArgs ?? ([] as unknown as ArgsTuple));
+		const final_args = args.length ? args : defaultArgs ?? ([] as unknown as ArgsTuple);
 
 		if (memoized_plugin && last_args === final_args) {
 			return memoized_plugin;
