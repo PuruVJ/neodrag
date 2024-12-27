@@ -17,7 +17,7 @@ export interface PluginContext {
 	cachedRootNodeRect: DOMRect;
 	currentlyDraggedNode: HTMLElement | SVGElement;
 	effect: (fn: () => void) => void;
-	propose: (coords: { x: number | null; y: number | null }) => void;
+	propose: (x: number | null, y: number | null) => void;
 	cancel: () => void;
 	preventStart: () => void;
 }
@@ -127,7 +127,7 @@ export function unstable_definePlugin<ArgsTuple extends any[], State = void>(
 	let memoized_plugin: Plugin<State> & { args: ArgsTuple };
 
 	return (...args: ArgsTuple): Plugin<State> & { args: ArgsTuple } => {
-		const final_args = args.length ? args : (defaultArgs ?? ([] as unknown as ArgsTuple));
+		const final_args = args.length ? args : defaultArgs ?? ([] as unknown as ArgsTuple);
 
 		if (memoized_plugin && last_args === final_args) {
 			return memoized_plugin;
@@ -205,10 +205,7 @@ export const axis = unstable_definePlugin<[value: 'x' | 'y']>({
 	name: 'neodrag:axis',
 
 	drag([value], ctx) {
-		ctx.propose({
-			x: value === 'x' ? ctx.proposed.x : null,
-			y: value === 'y' ? ctx.proposed.y : null,
-		});
+		ctx.propose(value === 'x' ? ctx.proposed.x : null, value === 'y' ? ctx.proposed.y : null);
 	},
 });
 
@@ -251,13 +248,13 @@ function snap_to_grid(
 	const x = pending_x ? calc(pending_x, x_snap) : pending_x;
 	const y = pending_y ? calc(pending_y, y_snap) : pending_y;
 
-	return { x, y };
+	return [x, y] as const;
 }
 export const grid = unstable_definePlugin<[x: number, y: number]>({
 	name: 'neodrag:grid',
 
 	drag([x, y], ctx) {
-		ctx.propose(snap_to_grid([x, y], ctx.proposed.x!, ctx.proposed.y!));
+		ctx.propose(...snap_to_grid([x, y], ctx.proposed.x!, ctx.proposed.y!));
 	},
 });
 
@@ -445,28 +442,20 @@ export const bounds = unstable_definePlugin<
 			// 1. Current accumulated offset (ctx.offset)
 			// 2. Where user grabbed the element (pointer_offset)
 			// 3. Element dimensions
-			const allowed_movement: [[number, number], [number, number]] = [
-				[
-					bound_coords[0][0] - ctx.offset.x, // max left
-					bound_coords[0][1] - ctx.offset.y, // max top
-				],
-				[
-					bound_coords[1][0] - element_width - ctx.offset.x, // max right
-					bound_coords[1][1] - element_height - ctx.offset.y, // max bottom
-				],
-			];
+			const allowed_movement_x1 = bound_coords[0][0] - ctx.offset.x; // max left
+			const allowed_movement_y1 = bound_coords[0][1] - ctx.offset.y; // max top
+			const allowed_movement_x2 = bound_coords[1][0] - element_width - ctx.offset.x; // max right
+			const allowed_movement_y2 = bound_coords[1][1] - element_height - ctx.offset.y; // max bottom
 
 			// Now clamp the proposed delta movement to our allowed movement bounds
-			ctx.propose({
-				x:
-					ctx.proposed.x != null
-						? clamp(ctx.proposed.x, allowed_movement[0][0], allowed_movement[1][0])
-						: ctx.proposed.x,
-				y:
-					ctx.proposed.y != null
-						? clamp(ctx.proposed.y, allowed_movement[0][1], allowed_movement[1][1])
-						: ctx.proposed.y,
-			});
+			ctx.propose(
+				ctx.proposed.x != null
+					? clamp(ctx.proposed.x, allowed_movement_x1, allowed_movement_x2)
+					: ctx.proposed.x,
+				ctx.proposed.y != null
+					? clamp(ctx.proposed.y, allowed_movement_y1, allowed_movement_y2)
+					: ctx.proposed.y,
+			);
 		},
 
 		dragEnd([value, shouldRecompute], context, state) {
@@ -567,44 +556,47 @@ export const events = unstable_definePlugin<
 		},
 	],
 	ReadonlyToShallowMutable<DragEventData>
->({
-	name: 'neodrag:events',
-	cancelable: false,
+>(
+	{
+		name: 'neodrag:events',
+		cancelable: false,
 
-	setup(_args, ctx) {
-		return {
-			offset: ctx.offset,
-			rootNode: ctx.rootNode,
-			currentNode: ctx.currentlyDraggedNode,
-		} as DragEventData;
+		setup(_args, ctx) {
+			return {
+				offset: ctx.offset,
+				rootNode: ctx.rootNode,
+				currentNode: ctx.currentlyDraggedNode,
+			} as DragEventData;
+		},
+
+		dragStart([options], ctx, state) {
+			ctx.effect(() => {
+				state.offset = ctx.offset;
+				state.currentNode = ctx.currentlyDraggedNode;
+				options.onDragStart?.(state);
+			});
+		},
+
+		drag([options], ctx, state) {
+			ctx.effect(() => {
+				state.offset = ctx.offset;
+				state.currentNode = ctx.currentlyDraggedNode;
+
+				options.onDrag?.(state);
+			});
+		},
+
+		dragEnd([options], ctx, state) {
+			ctx.effect(() => {
+				state.offset = ctx.offset;
+				state.currentNode = ctx.currentlyDraggedNode;
+
+				options.onDragEnd?.(state);
+			});
+		},
 	},
-
-	dragStart([options], ctx, state) {
-		ctx.effect(() => {
-			state.offset = ctx.offset;
-			state.currentNode = ctx.currentlyDraggedNode;
-			options.onDragStart?.(state);
-		});
-	},
-
-	drag([options], ctx, state) {
-		ctx.effect(() => {
-			state.offset = ctx.offset;
-			state.currentNode = ctx.currentlyDraggedNode;
-
-			options.onDrag?.(state);
-		});
-	},
-
-	dragEnd([options], ctx, state) {
-		ctx.effect(() => {
-			state.offset = ctx.offset;
-			state.currentNode = ctx.currentlyDraggedNode;
-
-			options.onDragEnd?.(state);
-		});
-	},
-});
+	[{}],
+);
 
 type ControlZone = {
 	element: Element;
@@ -740,10 +732,7 @@ export const position = unstable_definePlugin(
 				options.current &&
 				(options.current.x !== ctx.offset.x || options.current.y !== ctx.offset.y)
 			) {
-				ctx.propose({
-					x: options.current.x - ctx.offset.x,
-					y: options.current.y - ctx.offset.y,
-				});
+				ctx.propose(options.current.x - ctx.offset.x, options.current.y - ctx.offset.y);
 				ctx.cancel();
 			}
 		},

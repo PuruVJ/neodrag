@@ -497,9 +497,9 @@ export function createDraggable({
 					instance.effects.add(func);
 				},
 
-				propose: (proposed) => {
-					instance.ctx.proposed.x = proposed.x;
-					instance.ctx.proposed.y = proposed.y;
+				propose: (x: number | null, y: number | null) => {
+					instance.ctx.proposed.x = x;
+					instance.ctx.proposed.y = y;
 				},
 
 				cancel() {
