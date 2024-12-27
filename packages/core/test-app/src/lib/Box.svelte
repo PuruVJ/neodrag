@@ -1,6 +1,9 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { draggable, type Plugin } from '../../../src';
+	import { createDraggable } from '../../../src';
+	import type { Plugin } from '../../../src/plugins';
+
+	const { draggable } = createDraggable();
 
 	const { testid, children, plugins }: { plugins?: Plugin[]; testid: string; children?: Snippet } =
 		$props();

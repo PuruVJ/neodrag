@@ -7,10 +7,9 @@ test.describe('defaults', () => {
 
 		const div = page.getByTestId('draggable');
 
-		await expect(div).toHaveClass(/neodrag/);
-		await expect(div).not.toHaveClass('neodrag-dragging');
-		await expect(div).not.toHaveClass('neodrag-dragged');
-		await expect(div).toHaveCSS('translate', '0px');
+		await expect(div).toHaveAttribute('data-neodrag-state', 'idle');
+		await expect(div).toHaveAttribute('data-neodrag', '');
+		await expect(div).toHaveCSS('translate', 'none');
 	});
 
 	test('should be dragged by mouse', async ({ page, isMobile }) => {
@@ -24,14 +23,12 @@ test.describe('defaults', () => {
 		const { x, y } = await get_mouse_position(page);
 		await page.mouse.down();
 		await page.mouse.move(x + 100, y + 100);
-		await expect(div).toHaveClass(/neodrag neodrag-dragging/);
+		await expect(div).toHaveAttribute('data-neodrag-state', 'dragging');
 		await page.mouse.up();
 
-		// Make sure neodrag-dragging isn't there anymore
-		await expect(div).not.toHaveClass('neodrag-dragging');
+		await expect(div).toHaveAttribute('data-neodrag-state', 'idle');
 
 		expect(div).toHaveCSS('translate', '100px 100px');
-		expect(div).toHaveClass(/neodrag neodrag-dragged/);
 	});
 
 	test('should be dragged by touch', async ({ page, isMobile }) => {
@@ -45,13 +42,12 @@ test.describe('defaults', () => {
 		const { x, y } = await get_mouse_position(page);
 		await page.mouse.down();
 		await page.mouse.move(x + 100, y + 100);
-		await expect(div).toHaveClass(/neodrag neodrag-dragging/);
+		await expect(div).toHaveAttribute('data-neodrag-state', 'dragging');
 		await page.mouse.up();
 
 		// Make sure neodrag-dragging isn't there anymore
-		await expect(div).not.toHaveClass('neodrag-dragging');
+		await expect(div).toHaveAttribute('data-neodrag-state', 'idle');
 
 		expect(div).toHaveCSS('translate', '100px 100px');
-		expect(div).toHaveClass(/neodrag neodrag-dragged/);
 	});
 });

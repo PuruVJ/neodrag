@@ -127,7 +127,7 @@ export function unstable_definePlugin<ArgsTuple extends any[], State = void>(
 	let memoized_plugin: Plugin<State> & { args: ArgsTuple };
 
 	return (...args: ArgsTuple): Plugin<State> & { args: ArgsTuple } => {
-		const final_args = args.length ? args : defaultArgs ?? ([] as unknown as ArgsTuple);
+		const final_args = args.length ? args : (defaultArgs ?? ([] as unknown as ArgsTuple));
 
 		if (memoized_plugin && last_args === final_args) {
 			return memoized_plugin;
@@ -201,10 +201,13 @@ export const stateMarker = unstable_definePlugin({
 });
 
 // Degree of Freedom X and Y
-export const axis = unstable_definePlugin<[value: 'x' | 'y']>({
+export const axis = unstable_definePlugin<[value?: 'x' | 'y']>({
 	name: 'neodrag:axis',
 
 	drag([value], ctx) {
+		// Let dragging go on if axis is undefined
+		if (!value) return;
+
 		ctx.propose(value === 'x' ? ctx.proposed.x : null, value === 'y' ? ctx.proposed.y : null);
 	},
 });

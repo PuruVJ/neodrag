@@ -122,7 +122,7 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 *
 * Full example:
 * ```ts
-* import type { KIT_ROUTES } from './ROUTES'
+* import type { KIT_ROUTES } from '$lib/ROUTES'
 * import { kitRoutes } from 'vite-plugin-kit-routes'
 *
 * kitRoutes<KIT_ROUTES>({

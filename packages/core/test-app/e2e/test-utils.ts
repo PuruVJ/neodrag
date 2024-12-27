@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 import { stringify } from 'devalue';
-import { DragOptions } from '../../src';
+import { ZodSchema, infer } from 'zod';
 
 export function get_mouse_position(page: Page) {
 	return page.evaluate(() => {
@@ -24,7 +24,14 @@ async function shake_mouse(page: Page) {
 	await page.mouse.move(1000, 1000);
 }
 
-export async function setup(page: Page, path = 'defaults', options: DragOptions = {}) {
+export async function setup<T>(
+	page: Page,
+	path = 'defaults',
+	schema: ZodSchema<T>,
+	options: ZodSchema<T>['_output'] | undefined = undefined,
+) {
+	const validated = schema.parse(options);
+	console.log('GOING TO: ', `/${path}?options=${stringify(validated)}`);
 	await page.goto(`/${path}?options=${stringify(options)}`);
 	await page.waitForLoadState('domcontentloaded');
 	await shake_mouse(page);

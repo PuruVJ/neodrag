@@ -60,7 +60,7 @@ export function createDraggable({
 	delegate?: () => HTMLElement;
 	onError?: (error: ErrorInfo) => void;
 } = {}) {
-	const instances = new WeakMap<HTMLElement | SVGElement, DraggableInstance>();
+	const instances = new Map<HTMLElement | SVGElement, DraggableInstance>();
 	let listeners_initialized = false;
 
 	/** track multiple active nodes by pointerId */
@@ -361,11 +361,88 @@ export function createDraggable({
 		return combined.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 	}
 
-	function update_plugin(
+	function update(instance: DraggableInstance, new_plugins: Plugin[] = []): void {
+		// Early return if no plugins and instance has no plugins
+		if (!new_plugins.length && !instance.plugins.length) {
+			return;
+		}
+
+		// Check if instance is currently dragging or interacting
+		const is_active = instance.ctx.isDragging || instance.ctx.isInteracting;
+
+		// Initialize plugins only if needed
+		const new_plugin_list = is_active
+			? new_plugins.filter((p) => p.liveUpdate)
+			: initialize_plugins(new_plugins);
+
+		if (is_active) {
+			// Fast path for active instances
+			let has_changes = false;
+			const len = new_plugin_list.length;
+
+			// Use for loop for better performance
+			for (let i = 0; i < len; i++) {
+				const plugin = new_plugin_list[i];
+				const old_plugin = find_plugin_by_name(instance.plugins, plugin.name);
+
+				if (update_plugin_if_needed(instance, old_plugin, plugin)) {
+					has_changes = true;
+				}
+			}
+
+			// Only rerun drag if changes occurred and we have a last event
+			if (has_changes && instance.ctx.lastEvent && is_node_active(instance.root_node)) {
+				handle_pointer_move(instance.ctx.lastEvent);
+			}
+
+			return;
+		}
+
+		// Inactive instance path
+		let has_changes = false;
+
+		// Process removals first
+		if (instance.plugins.length > 0) {
+			const removed = find_removed_plugins(instance.plugins, new_plugin_list);
+			if (removed.length > 0) {
+				cleanup_plugins(instance, removed);
+				has_changes = true;
+			}
+		}
+
+		// Process updates and additions
+		const len = new_plugin_list.length;
+		for (let i = 0; i < len; i++) {
+			const plugin = new_plugin_list[i];
+			const old_plugin = find_plugin_by_name(instance.plugins, plugin.name);
+
+			if (update_plugin_if_needed(instance, old_plugin, plugin)) {
+				has_changes = true;
+			}
+		}
+
+		// Update instance plugins only if needed
+		if (has_changes) {
+			instance.plugins = new_plugin_list;
+		}
+	}
+
+	// Helper functions to improve readability and reusability
+	function find_plugin_by_name(plugins: Plugin[], name: string): Plugin | undefined {
+		const len = plugins.length;
+		for (let i = 0; i < len; i++) {
+			if (plugins[i].name === name) {
+				return plugins[i];
+			}
+		}
+		return undefined;
+	}
+
+	function update_plugin_if_needed(
 		instance: DraggableInstance,
 		old_plugin: Plugin | undefined,
 		new_plugin: Plugin,
-	) {
+	): boolean {
 		// Skip if same instance and not live-updateable
 		if (old_plugin === new_plugin && !new_plugin.liveUpdate) {
 			return false;
@@ -379,72 +456,51 @@ export function createDraggable({
 
 		// Setup new plugin
 		const state = new_plugin.setup?.(instance.ctx);
-		flush_effects(instance);
-		if (state) instance.states.set(new_plugin.name, state);
+		if (state) {
+			instance.states.set(new_plugin.name, state);
+		}
 
 		return true;
 	}
 
-	function update(instance: DraggableInstance, new_plugins: Plugin[] = []) {
-		const old_plugin_map = new Map(instance.plugins.map((p) => [p.name, p]));
-		const new_plugin_list = initialize_plugins(new_plugins);
-		let has_changes = false;
+	function find_removed_plugins(old_plugins: Plugin[], new_plugins: Plugin[]): Plugin[] {
+		return old_plugins.filter((p) => !new_plugins.some((np) => np.name === p.name));
+	}
 
-		// Check if this instance is currently involved in any drag operation
-		let is_active = false;
-		for (const node of active_nodes.values()) {
-			if (node === instance.root_node) {
-				is_active = true;
-				break;
-			}
-		}
-
-		// During drag, only update plugins that opted into live updates
-		if (is_active && (instance.ctx.isDragging || instance.ctx.isInteracting)) {
-			const updated_plugins = new_plugin_list.filter((plugin) => plugin.liveUpdate);
-
-			for (const plugin of updated_plugins) {
-				const old_plugin = old_plugin_map.get(plugin.name);
-				if (update_plugin(instance, old_plugin, plugin)) {
-					has_changes = true;
-				}
-			}
-
-			// If we made changes and we're the active node, re-run drag
-			if (has_changes) {
-				for (const node of active_nodes.values()) {
-					if (node === instance.root_node && instance.ctx.lastEvent) {
-						handle_pointer_move(instance.ctx.lastEvent);
-						break;
-					}
-				}
-			}
-
-			return;
-		}
-
-		// Clean up removed plugins
-		const removed_plugins = instance.plugins.filter(
-			(p) => !new_plugin_list.some((np) => np.name === p.name),
-		);
-
-		for (const plugin of removed_plugins) {
+	function cleanup_plugins(instance: DraggableInstance, plugins: Plugin[]): void {
+		const len = plugins.length;
+		for (let i = 0; i < len; i++) {
+			const plugin = plugins[i];
 			plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
 			instance.states.delete(plugin.name);
-			has_changes = true;
 		}
+	}
 
-		// Update or setup new plugins
-		for (const plugin of new_plugin_list) {
-			const old_plugin = old_plugin_map.get(plugin.name);
-			if (update_plugin(instance, old_plugin, plugin)) {
-				has_changes = true;
+	function is_node_active(node: HTMLElement | SVGElement): boolean {
+		for (const activeNode of active_nodes.values()) {
+			if (activeNode === node) return true;
+		}
+		return false;
+	}
+
+	function destroy(instance: DraggableInstance) {
+		for (const [pointer_id, active_node] of active_nodes) {
+			if (active_node === instance.root_node) {
+				cleanup_active_node(pointer_id);
 			}
 		}
 
-		// Update instance plugins list if there were changes
-		if (has_changes) {
-			instance.plugins = new_plugin_list;
+		for (const plugin of instance.plugins) {
+			plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
+		}
+
+		instances.delete(instance.root_node);
+	}
+
+	// Dispose all draggable instances. Can't be recreated again
+	function dispose() {
+		for (const instance of instances.values()) {
+			destroy(instance);
 		}
 	}
 
@@ -535,19 +591,13 @@ export function createDraggable({
 				update: (newOptions: Plugin[]) => update(instance, newOptions),
 
 				destroy() {
-					for (const [pointer_id, active_node] of active_nodes) {
-						if (active_node === node) {
-							cleanup_active_node(pointer_id);
-						}
-					}
-
-					for (const plugin of instance.plugins) {
-						plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
-					}
-
-					instances.delete(node);
+					destroy(instance);
 				},
 			};
 		},
+
+		dispose,
+
+		[Symbol.dispose]: dispose,
 	};
 }
