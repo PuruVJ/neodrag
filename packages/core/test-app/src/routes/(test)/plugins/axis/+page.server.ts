@@ -1,8 +1,8 @@
 import { extract_options_from_url } from '$lib/helpers.js';
-import { z } from 'zod';
+import { SCHEMAS } from '$lib/schemas.js';
 
 export function load({ request }) {
-	const axis = extract_options_from_url(request, z.enum(['x', 'y']).optional());
+	const axis = extract_options_from_url(request, SCHEMAS.PLUGINS.AXIS);
 	console.log({ axis });
 
 	return { axis };

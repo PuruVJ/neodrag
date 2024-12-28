@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 import { stringify } from 'devalue';
-import { ZodSchema, infer } from 'zod';
+import { ZodSchema, z } from 'zod';
 
 export function get_mouse_position(page: Page) {
 	return page.evaluate(() => {
@@ -27,7 +27,7 @@ async function shake_mouse(page: Page) {
 export async function setup<T>(
 	page: Page,
 	path = 'defaults',
-	schema: ZodSchema<T>,
+	schema: ZodSchema<T> = z.any(),
 	options: ZodSchema<T>['_output'] | undefined = undefined,
 ) {
 	const validated = schema.parse(options);

@@ -1,13 +1,10 @@
 import test, { expect } from '@playwright/test';
 import { get_mouse_position, setup } from '../test-utils';
-import { stringify } from 'devalue';
-import { z } from 'zod';
-
-const schema = z.enum(['x', 'y']).optional();
+import { SCHEMAS } from '../../src/lib/schemas';
 
 test.describe('options.axis', () => {
 	test('move only on x-axis', async ({ page }) => {
-		await setup(page, 'plugins/axis', schema, 'x');
+		await setup(page, 'plugins/axis', SCHEMAS.PLUGINS.AXIS, 'x');
 
 		const div = page.getByTestId('draggable');
 
@@ -22,7 +19,7 @@ test.describe('options.axis', () => {
 	});
 
 	test('move only on y-axis', async ({ page }) => {
-		await setup(page, 'plugins/axis', schema, 'y');
+		await setup(page, 'plugins/axis', SCHEMAS.PLUGINS.AXIS, 'y');
 
 		const div = page.getByTestId('draggable');
 
@@ -37,7 +34,7 @@ test.describe('options.axis', () => {
 	});
 
 	test('undefined disables the plugin', async ({ page }) => {
-		await setup(page, 'plugins/axis', schema, undefined);
+		await setup(page, 'plugins/axis', SCHEMAS.PLUGINS.AXIS, undefined);
 
 		const div = page.getByTestId('draggable');
 
