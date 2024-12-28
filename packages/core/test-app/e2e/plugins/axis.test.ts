@@ -2,7 +2,7 @@ import test, { expect } from '@playwright/test';
 import { get_mouse_position, setup } from '../test-utils';
 import { SCHEMAS } from '../../src/lib/schemas';
 
-test.describe('options.axis', () => {
+test.describe('axis()', () => {
 	test('move only on x-axis', async ({ page }) => {
 		await setup(page, 'plugins/axis', SCHEMAS.PLUGINS.AXIS, 'x');
 

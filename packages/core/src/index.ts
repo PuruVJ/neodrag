@@ -27,6 +27,7 @@ export interface DraggableInstance {
 	states: Map<string, any>;
 	dragstart_prevented: boolean;
 	current_drag_hook_cancelled: boolean;
+	failed_plugins: Set<string>;
 	pointer_captured_id: number | null;
 	effects: Set<() => void>;
 	controller: AbortController;
@@ -111,6 +112,11 @@ export function createDraggable({
 		instance.dragstart_prevented = false;
 
 		for (const plugin of instance.plugins) {
+			// Skip failed plugins
+			if (instance.failed_plugins.has(plugin.name)) {
+				continue;
+			}
+
 			const handler = plugin[hook];
 			if (!handler) continue;
 
@@ -125,7 +131,14 @@ export function createDraggable({
 				},
 			);
 
-			if (!result.ok || result.value === false) {
+			if (!result.ok) {
+				// If a plugin fails during any hook execution, mark it as failed
+				instance.failed_plugins.add(plugin.name);
+				should_run = false;
+				break;
+			}
+
+			if (result.value === false) {
 				should_run = false;
 				break;
 			}
@@ -385,7 +398,28 @@ export function createDraggable({
 				const plugin = new_plugin_list[i];
 				const old_plugin = find_plugin_by_name(instance.plugins, plugin.name);
 
-				if (update_plugin_if_needed(instance, old_plugin, plugin)) {
+				// Allow failed plugins to try setup again during update
+				if (instance.failed_plugins.has(plugin.name)) {
+					const result = resultify(
+						() => {
+							if (plugin.setup) {
+								const value = plugin.setup(instance.ctx);
+								if (value) instance.states.set(plugin.name, value);
+							}
+						},
+						{
+							phase: 'setup',
+							plugin: { name: plugin.name, hook: 'setup' },
+							node: instance.root_node,
+						},
+					);
+
+					if (result.ok) {
+						// If setup succeeds this time, remove from failed plugins
+						instance.failed_plugins.delete(plugin.name);
+						has_changes = true;
+					}
+				} else if (update_plugin_if_needed(instance, old_plugin, plugin)) {
 					has_changes = true;
 				}
 			}
@@ -398,7 +432,7 @@ export function createDraggable({
 			return;
 		}
 
-		// Inactive instance path
+		// Inactive instance path - handle cleanup and setup
 		let has_changes = false;
 
 		// Process removals first
@@ -406,6 +440,10 @@ export function createDraggable({
 			const removed = find_removed_plugins(instance.plugins, new_plugin_list);
 			if (removed.length > 0) {
 				cleanup_plugins(instance, removed);
+				// Remove any failed plugins that were removed
+				for (const plugin of removed) {
+					instance.failed_plugins.delete(plugin.name);
+				}
 				has_changes = true;
 			}
 		}
@@ -416,7 +454,27 @@ export function createDraggable({
 			const plugin = new_plugin_list[i];
 			const old_plugin = find_plugin_by_name(instance.plugins, plugin.name);
 
-			if (update_plugin_if_needed(instance, old_plugin, plugin)) {
+			// Always try to setup new plugins, even if they failed before
+			if (instance.failed_plugins.has(plugin.name)) {
+				const result = resultify(
+					() => {
+						if (plugin.setup) {
+							const value = plugin.setup(instance.ctx);
+							if (value) instance.states.set(plugin.name, value);
+						}
+					},
+					{
+						phase: 'setup',
+						plugin: { name: plugin.name, hook: 'setup' },
+						node: instance.root_node,
+					},
+				);
+
+				if (result.ok) {
+					instance.failed_plugins.delete(plugin.name);
+					has_changes = true;
+				}
+			} else if (update_plugin_if_needed(instance, old_plugin, plugin)) {
 				has_changes = true;
 			}
 		}
@@ -515,6 +573,7 @@ export function createDraggable({
 				plugins: [],
 				states: new Map<string, any>(),
 				controller: new AbortController(),
+				failed_plugins: new Set<string>(),
 				dragstart_prevented: false,
 				current_drag_hook_cancelled: false,
 				pointer_captured_id: null,
@@ -570,7 +629,7 @@ export function createDraggable({
 			// Initial setup
 			instance.plugins = initialize_plugins(plugins);
 			for (const plugin of instance.plugins) {
-				resultify(
+				const result = resultify(
 					() => {
 						const value = plugin.setup?.(instance.ctx);
 						if (value) instance.states.set(plugin.name, value);
@@ -582,6 +641,10 @@ export function createDraggable({
 						node: instance.root_node,
 					},
 				);
+
+				if (!result.ok) {
+					instance.failed_plugins.add(plugin.name);
+				}
 			}
 
 			// Register instance
@@ -589,10 +652,7 @@ export function createDraggable({
 
 			return {
 				update: (newOptions: Plugin[]) => update(instance, newOptions),
-
-				destroy() {
-					destroy(instance);
-				},
+				destroy: () => destroy(instance),
 			};
 		},
 

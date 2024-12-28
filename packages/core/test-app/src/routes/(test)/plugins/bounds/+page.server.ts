@@ -2,7 +2,7 @@ import { extract_options_from_url } from '$lib/helpers.js';
 import { SCHEMAS } from '$lib/schemas.js';
 
 export function load({ request }) {
-	const axis = extract_options_from_url(request, SCHEMAS.PLUGINS.AXIS);
+	const bounds = extract_options_from_url(request, SCHEMAS.PLUGINS.BOUNDS);
 
-	return { axis };
+	return { bounds };
 }

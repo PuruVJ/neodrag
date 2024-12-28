@@ -127,7 +127,7 @@ export function unstable_definePlugin<ArgsTuple extends any[], State = void>(
 	let memoized_plugin: Plugin<State> & { args: ArgsTuple };
 
 	return (...args: ArgsTuple): Plugin<State> & { args: ArgsTuple } => {
-		const final_args = args.length ? args : (defaultArgs ?? ([] as unknown as ArgsTuple));
+		const final_args = args.length ? args : defaultArgs ?? ([] as unknown as ArgsTuple);
 
 		if (memoized_plugin && last_args === final_args) {
 			return memoized_plugin;
@@ -287,6 +287,7 @@ export const transform = unstable_definePlugin<
 	{ is_svg: boolean }
 >({
 	name: 'neodrag:transform',
+	priority: -1000,
 	cancelable: false,
 	liveUpdate: true,
 
@@ -394,7 +395,33 @@ export const BoundsFrom = {
 		};
 	},
 
-	// selector,
+	selector(
+		selector: string,
+		padding?: {
+			top?: number;
+			left?: number;
+			right?: number;
+			bottom?: number;
+		},
+		root?: HTMLElement,
+	): BoundFromFunction {
+		return (ctx) => {
+			const element = (root ?? document).querySelector<HTMLElement>(selector);
+			if (!element)
+				throw new Error(`bounds selector ${selector} did not match any elements in the DOM`);
+
+			return BoundsFrom.element(element, padding)(ctx);
+		};
+	},
+
+	viewport(padding?: {
+		top?: number;
+		left?: number;
+		right?: number;
+		bottom?: number;
+	}): BoundFromFunction {
+		return (ctx) => BoundsFrom.element(document.documentElement, padding)(ctx);
+	},
 
 	parent(padding?: {
 		top?: number;
@@ -420,8 +447,21 @@ export const bounds = unstable_definePlugin<
 		name: 'neodrag:bounds',
 
 		setup([value], ctx) {
+			const bounds = value({ root_node: ctx.rootNode });
+			const element_width = ctx.cachedRootNodeRect.width;
+			const element_height = ctx.cachedRootNodeRect.height;
+
+			if (
+				bounds[1][0] - bounds[0][0] < element_width ||
+				bounds[1][1] - bounds[0][1] < element_height
+			) {
+				throw new Error(
+					'Bounds dimensions cannot be smaller than the draggable element dimensions',
+				);
+			}
+
 			return {
-				bounds: value({ root_node: ctx.rootNode }),
+				bounds,
 			};
 		},
 
@@ -432,6 +472,7 @@ export const bounds = unstable_definePlugin<
 		},
 
 		drag([value, shouldRecompute], ctx, state) {
+			if (!ctx.isDragging) return;
 			if (shouldRecompute?.({ hook: 'drag' })) {
 				state.bounds = value({ root_node: ctx.rootNode });
 			}
