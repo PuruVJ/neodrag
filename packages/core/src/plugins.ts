@@ -249,23 +249,26 @@ export const applyUserSelectHack = unstable_definePlugin(
 	[true] as [value?: boolean],
 );
 
+const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
+
 function snap_to_grid(
-	[x_snap, y_snap]: [number, number],
+	snaps: [number | null | undefined, number | null | undefined] | undefined,
 	pending_x: number | null,
 	pending_y: number | null,
 ) {
-	const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
-
-	const x = pending_x ? calc(pending_x, x_snap) : pending_x;
-	const y = pending_y ? calc(pending_y, y_snap) : pending_y;
+	const x = pending_x && snaps?.[0] ? calc(pending_x, snaps?.[0]) : pending_x;
+	const y = pending_y && snaps?.[1] ? calc(pending_y, snaps?.[1]) : pending_y;
 
 	return [x, y] as const;
 }
-export const grid = unstable_definePlugin<[x: number, y: number]>({
+
+export const grid = unstable_definePlugin<
+	[[x: number | null | undefined, y: number | null | undefined]?]
+>({
 	name: 'neodrag:grid',
 
-	drag([x, y], ctx) {
-		ctx.propose(...snap_to_grid([x, y], ctx.proposed.x!, ctx.proposed.y!));
+	drag([values], ctx) {
+		ctx.propose(...snap_to_grid(values, ctx.proposed.x, ctx.proposed.y));
 	},
 });
 
