@@ -226,8 +226,15 @@ export const applyUserSelectHack = unstable_definePlugin(
 		start([value], ctx, state) {
 			ctx.effect(() => {
 				if (value) {
-					state.body_user_select_val = get_node_style(document.body, 'user-select');
+					state.body_user_select_val =
+						get_node_style(document.body, 'user-select') ??
+						// Safari sucks. It doesn't work with getPropertyValue or setProperty if it has prefix,
+						// And safari never implemened unvendored user-select
+						document.body.style.webkitUserSelect ??
+						'';
+
 					set_node_key_style(document.body, 'user-select', 'none');
+					document.body.style.webkitUserSelect = 'none';
 				}
 			});
 		},
@@ -235,6 +242,7 @@ export const applyUserSelectHack = unstable_definePlugin(
 		end([value], _, state) {
 			if (value) {
 				set_node_key_style(document.body, 'user-select', state.body_user_select_val);
+				document.body.style.webkitUserSelect = state.body_user_select_val;
 			}
 		},
 	},

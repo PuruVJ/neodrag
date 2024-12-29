@@ -16,5 +16,6 @@ export const SCHEMAS = {
 				.optional(),
 			is_smaller_than_element: z.boolean().optional(),
 		}),
+		APPLY_USER_SELECT_HACK: z.boolean(),
 	},
 };

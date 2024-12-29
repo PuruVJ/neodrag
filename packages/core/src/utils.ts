@@ -31,9 +31,14 @@ type KebabCase<S extends string> = S extends `${infer C}${infer T}`
 		: `${Lowercase<C>}-${KebabCase<Uncapitalize<T>>}`
 	: S;
 
-// Take all CSS properties and convert them to kebab
+// Create a type for vendor prefixed properties
+type VendorPrefix = '-webkit-' | '-moz-' | '-ms-' | '-o-';
+
+// Take all CSS properties and convert them to kebab, including vendor prefixes
 type CSSKebabProperties = {
-	[K in keyof CSSStyleDeclaration as K extends string ? KebabCase<K> : K]: CSSStyleDeclaration[K];
+	[K in keyof CSSStyleDeclaration as K extends string
+		? KebabCase<K> | `${VendorPrefix}${KebabCase<K>}`
+		: K]: CSSStyleDeclaration[K];
 };
 
 export function set_node_key_style<T extends keyof CSSKebabProperties>(
@@ -65,15 +70,15 @@ export type DeepMutable<T> = T extends object
 			-readonly [P in keyof T]: T[P] extends readonly any[]
 				? DeepMutable<T[P]>
 				: T[P] extends object
-					? keyof T[P] extends never
-						? T[P]
-						: DeepMutable<T[P]>
-					: T[P];
-		}
+				? keyof T[P] extends never
+					? T[P]
+					: DeepMutable<T[P]>
+				: T[P];
+	  }
 	: T;
 
 export type ReadonlyToShallowMutable<T> = T extends object
 	? {
 			-readonly [P in keyof T]: T[P];
-		}
+	  }
 	: T;
