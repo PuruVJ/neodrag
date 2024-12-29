@@ -11,7 +11,7 @@ import {
 import { is_svg_element, is_svg_svg_element, listen, type DeepMutable } from './utils.ts';
 
 export interface ErrorInfo {
-	phase: 'setup' | 'dragStart' | 'drag' | 'dragEnd' | 'shouldDrag';
+	phase: 'setup' | 'start' | 'drag' | 'end' | 'shouldStart';
 	plugin?: {
 		name: string;
 		hook: string;
@@ -187,7 +187,7 @@ export function createDraggable({
 					instance.ctx.currentlyDraggedNode.releasePointerCapture(instance.pointer_captured_id!);
 				},
 				{
-					phase: 'dragEnd',
+					phase: 'end',
 					node,
 				},
 			);
@@ -213,7 +213,7 @@ export function createDraggable({
 		const instance = instances.get(draggable_node)!;
 		instance.ctx.cachedRootNodeRect = draggable_node.getBoundingClientRect();
 
-		const should_drag = run_plugins(instance, 'shouldDrag', e);
+		const should_drag = run_plugins(instance, 'shouldStart', e);
 		if (!should_drag) return;
 
 		instance.ctx.isInteracting = true;
@@ -225,7 +225,7 @@ export function createDraggable({
 				instance.ctx.currentlyDraggedNode.setPointerCapture(instance.pointer_captured_id);
 			},
 			{
-				phase: 'dragStart',
+				phase: 'start',
 				node: instance.ctx.currentlyDraggedNode,
 			},
 		);
@@ -274,7 +274,7 @@ export function createDraggable({
 
 			// Bottom: Even if its cancelled, it should still run the plugins that have cancellable: false
 			if (!instance.dragstart_prevented) {
-				const start_drag = run_plugins(instance, 'dragStart', e);
+				const start_drag = run_plugins(instance, 'start', e);
 				if (!start_drag) return clear_effects(instance);
 				else flush_effects(instance);
 
@@ -327,7 +327,7 @@ export function createDraggable({
 		}
 
 		// Call the dragEnd hooks
-		run_plugins(instance, 'dragEnd', e);
+		run_plugins(instance, 'end', e);
 		flush_effects(instance);
 
 		if (instance.ctx.proposed.x) instance.ctx.initial.x = instance.ctx.offset.x;

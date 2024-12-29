@@ -28,10 +28,10 @@ export interface Plugin<State = any> {
 	liveUpdate?: boolean;
 	cancelable?: boolean;
 	setup?: (ctx: PluginContext) => State;
-	shouldDrag?: (ctx: PluginContext, state: State, event: PointerEvent) => boolean;
-	dragStart?: (ctx: PluginContext, state: State, event: PointerEvent) => void;
+	shouldStart?: (ctx: PluginContext, state: State, event: PointerEvent) => boolean;
+	start?: (ctx: PluginContext, state: State, event: PointerEvent) => void;
 	drag?: (ctx: PluginContext, state: State, event: PointerEvent) => void;
-	dragEnd?: (ctx: PluginContext, state: State, event: PointerEvent) => void;
+	end?: (ctx: PluginContext, state: State, event: PointerEvent) => void;
 	cleanup?: (ctx: PluginContext, state: State) => void;
 	args?: any;
 }
@@ -45,10 +45,10 @@ interface BasePluginStructure {
 
 interface PluginStructure<ArgsTuple extends any[], State> extends BasePluginStructure {
 	setup?: (args: ArgsTuple, ctx: PluginContext) => State;
-	shouldDrag?: (args: ArgsTuple, ctx: PluginContext, state: State, event: PointerEvent) => boolean;
-	dragStart?: (args: ArgsTuple, ctx: PluginContext, state: State, event: PointerEvent) => void;
+	shouldStart?: (args: ArgsTuple, ctx: PluginContext, state: State, event: PointerEvent) => boolean;
+	start?: (args: ArgsTuple, ctx: PluginContext, state: State, event: PointerEvent) => void;
 	drag?: (args: ArgsTuple, ctx: PluginContext, state: State, event: PointerEvent) => void;
-	dragEnd?: (args: ArgsTuple, ctx: PluginContext, state: State, event: PointerEvent) => void;
+	end?: (args: ArgsTuple, ctx: PluginContext, state: State, event: PointerEvent) => void;
 	cleanup?: (args: ArgsTuple, ctx: PluginContext, state: State) => void;
 }
 
@@ -69,25 +69,25 @@ export function unstable_definePlugin<ArgsTuple extends any[], State = void>(
 		};
 	}
 
-	if (structure.shouldDrag) {
-		base_plugin.shouldDrag = function (
+	if (structure.shouldStart) {
+		base_plugin.shouldStart = function (
 			this: Plugin<State> & { args: ArgsTuple },
 			ctx: PluginContext,
 			state: State,
 			event: PointerEvent,
 		) {
-			return structure.shouldDrag?.(this.args, ctx, state, event) ?? true;
+			return structure.shouldStart?.(this.args, ctx, state, event) ?? true;
 		};
 	}
 
-	if (structure.dragStart) {
-		base_plugin.dragStart = function (
+	if (structure.start) {
+		base_plugin.start = function (
 			this: Plugin<State> & { args: ArgsTuple },
 			ctx: PluginContext,
 			state: State,
 			event: PointerEvent,
 		) {
-			structure.dragStart?.(this.args, ctx, state, event);
+			structure.start?.(this.args, ctx, state, event);
 		};
 	}
 
@@ -102,14 +102,14 @@ export function unstable_definePlugin<ArgsTuple extends any[], State = void>(
 		};
 	}
 
-	if (structure.dragEnd) {
-		base_plugin.dragEnd = function (
+	if (structure.end) {
+		base_plugin.end = function (
 			this: Plugin<State> & { args: ArgsTuple },
 			ctx: PluginContext,
 			state: State,
 			event: PointerEvent,
 		) {
-			structure.dragEnd?.(this.args, ctx, state, event);
+			structure.end?.(this.args, ctx, state, event);
 		};
 	}
 
@@ -151,7 +151,7 @@ export const ignoreMultitouch = unstable_definePlugin(
 			};
 		},
 
-		dragStart(args, ctx, state, event) {
+		start(args, ctx, state, event) {
 			ctx.effect(() => {
 				state.active_pointers.add(event.pointerId);
 
@@ -167,7 +167,7 @@ export const ignoreMultitouch = unstable_definePlugin(
 			}
 		},
 
-		dragEnd(_args, _ctx, state, event) {
+		end(_args, _ctx, state, event) {
 			state.active_pointers.delete(event.pointerId);
 		},
 	},
@@ -188,13 +188,13 @@ export const stateMarker = unstable_definePlugin({
 		};
 	},
 
-	dragStart(_args, ctx) {
+	start(_args, ctx) {
 		ctx.effect(() => {
 			set_node_dataset(ctx.rootNode, 'neodrag-state', 'dragging');
 		});
 	},
 
-	dragEnd(_args, ctx, state) {
+	end(_args, ctx, state) {
 		set_node_dataset(ctx.rootNode, 'neodrag-state', 'idle');
 		set_node_dataset(ctx.rootNode, 'neodrag-count', ++state.count);
 	},
@@ -223,7 +223,7 @@ export const applyUserSelectHack = unstable_definePlugin(
 			};
 		},
 
-		dragStart([value], ctx, state) {
+		start([value], ctx, state) {
 			ctx.effect(() => {
 				if (value) {
 					state.body_user_select_val = get_node_style(document.body, 'user-select');
@@ -232,7 +232,7 @@ export const applyUserSelectHack = unstable_definePlugin(
 			});
 		},
 
-		dragEnd([value], _, state) {
+		end([value], _, state) {
 			if (value) {
 				set_node_key_style(document.body, 'user-select', state.body_user_select_val);
 			}
@@ -263,7 +263,7 @@ export const grid = unstable_definePlugin<[x: number, y: number]>({
 
 export const disabled = unstable_definePlugin({
 	name: 'neodrag:disabled',
-	shouldDrag() {
+	shouldStart() {
 		return false;
 	},
 });
@@ -465,7 +465,7 @@ export const bounds = unstable_definePlugin<
 			};
 		},
 
-		dragStart([value, shouldRecompute], ctx, state) {
+		start([value, shouldRecompute], ctx, state) {
 			if (shouldRecompute?.({ hook: 'dragStart' })) {
 				state.bounds = value({ root_node: ctx.rootNode });
 			}
@@ -502,7 +502,7 @@ export const bounds = unstable_definePlugin<
 			);
 		},
 
-		dragEnd([value, shouldRecompute], context, state) {
+		end([value, shouldRecompute], context, state) {
 			if (shouldRecompute?.({ hook: 'dragEnd' })) {
 				state.bounds = value({ root_node: context.rootNode });
 			}
@@ -544,7 +544,7 @@ export const threshold = unstable_definePlugin<
 			};
 		},
 
-		shouldDrag(_args, _ctx, state) {
+		shouldStart(_args, _ctx, state) {
 			state.start_time = Date.now();
 			return true;
 		},
@@ -613,7 +613,7 @@ export const events = unstable_definePlugin<
 			} as DragEventData;
 		},
 
-		dragStart([options], ctx, state) {
+		start([options], ctx, state) {
 			ctx.effect(() => {
 				state.offset = ctx.offset;
 				state.currentNode = ctx.currentlyDraggedNode;
@@ -630,7 +630,7 @@ export const events = unstable_definePlugin<
 			});
 		},
 
-		dragEnd([options], ctx, state) {
+		end([options], ctx, state) {
 			ctx.effect(() => {
 				state.offset = ctx.offset;
 				state.currentNode = ctx.currentlyDraggedNode;
@@ -720,7 +720,7 @@ export const controls = unstable_definePlugin<
 		};
 	},
 
-	shouldDrag([options], ctx, state, event) {
+	shouldStart([options], ctx, state, event) {
 		const { clientX, clientY } = event;
 		const root_rect = ctx.rootNode.getBoundingClientRect();
 		const priority = options.priority ?? 'block';
@@ -821,7 +821,7 @@ export const touchAction = unstable_definePlugin(
 			return { original_touch_action };
 		},
 
-		dragEnd(_args, ctx, state) {
+		end(_args, ctx, state) {
 			// Restore original touch-action
 			set_node_key_style(ctx.rootNode, 'touch-action', state.original_touch_action || 'auto');
 		},
@@ -858,7 +858,7 @@ export const scrollLock = unstable_definePlugin(
 			};
 		},
 
-		dragStart(_args, ctx, state) {
+		start(_args, ctx, state) {
 			const container =
 				typeof state.config.container === 'function'
 					? state.config.container()
@@ -913,7 +913,7 @@ export const scrollLock = unstable_definePlugin(
 			});
 		},
 
-		dragEnd(_args, ctx, state) {
+		end(_args, ctx, state) {
 			const container =
 				typeof state.config.container === 'function'
 					? state.config.container()
