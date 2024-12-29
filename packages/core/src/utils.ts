@@ -82,3 +82,5 @@ export type ReadonlyToShallowMutable<T> = T extends object
 			-readonly [P in keyof T]: T[P];
 	  }
 	: T;
+
+export const is_null = (v: unknown): v is null => Object.is(v, null);

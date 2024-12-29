@@ -26,5 +26,13 @@ export const SCHEMAS = {
 			is_func: z.boolean(),
 			is_svg: z.boolean(),
 		}),
+
+		THRESHOLD: z
+			.object({
+				delay: z.number().optional(),
+				distance: z.number().optional(),
+			})
+			.nullable()
+			.optional(),
 	},
 };

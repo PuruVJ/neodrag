@@ -1,5 +1,6 @@
 import {
 	get_node_style,
+	is_null,
 	ReadonlyToShallowMutable,
 	set_node_dataset,
 	set_node_key_style,
@@ -518,67 +519,88 @@ export const bounds = unstable_definePlugin<
 );
 
 export const threshold = unstable_definePlugin<
-	[{ delay?: number; distance?: number }?],
-	{
-		start_time: number;
-		_options: {
-			delay: number;
-			distance: number;
-		};
-	}
->(
-	{
-		name: 'neodrag:threshold',
-
-		setup([options]) {
-			const _options = { ...(options ?? {}) } as {
+	[options?: { delay?: number; distance?: number } | null],
+	| {
+			enabled: true;
+			start_time: number;
+			start_position: { x: number; y: number };
+			options: {
 				delay: number;
 				distance: number;
 			};
-			_options.delay ??= 0;
-			_options.distance ??= 0;
+	  }
+	| {
+			enabled: false;
+	  }
+>({
+	name: 'neodrag:threshold',
 
-			return {
-				start_time: 0,
-				_options,
-			};
-		},
+	setup([options]) {
+		// Behavior: If options is null, then threshold plugin does nothing
+		// If options is undefined, then threshold plugin uses default options
+		// If options is {}, then threshold plugin uses default options
+		// If options is { delay: 10, distance: 5 }, then threshold plugin uses the provided options
+		const enabled = !is_null(options);
 
-		shouldStart(_args, _ctx, state) {
+		if (!enabled) return { enabled };
+
+		const _options = { ...(options ?? {}) } as {
+			delay: number;
+			distance: number;
+		};
+		_options.delay ??= 0;
+		_options.distance ??= 3;
+
+		if (_options.delay < 0) throw new Error('delay must be >= 0');
+		if (_options.distance < 0) throw new Error('distance must be >= 0');
+
+		return {
+			enabled,
+			start_time: 0,
+			start_position: { x: 0, y: 0 },
+			options: _options,
+		};
+	},
+
+	shouldStart(_args, _ctx, state, event) {
+		if (state.enabled) {
 			state.start_time = Date.now();
-			return true;
-		},
+			state.start_position.x = event.clientX;
+			state.start_position.y = event.clientY;
+		}
 
-		drag(_args, ctx, state, event) {
-			if (ctx.isDragging) return;
+		return true;
+	},
 
-			// First check if we're still on the draggable element
-			if (!ctx.currentlyDraggedNode.contains(event.target as Node)) {
+	drag(_args, ctx, state, event) {
+		if (!state.enabled) return;
+		if (ctx.isDragging) return;
+
+		// First check if we're still on the draggable element
+		if (!ctx.currentlyDraggedNode.contains(event.target as Node)) {
+			ctx.preventStart();
+			return;
+		}
+
+		if (state.options.delay) {
+			const elapsed = Date.now() - state.start_time;
+			if (elapsed < state.options.delay) {
 				ctx.preventStart();
 				return;
 			}
+		}
 
-			if (state._options.delay) {
-				const elapsed = Date.now() - state.start_time;
-				if (elapsed < state._options.delay) {
-					ctx.preventStart();
-					return;
-				}
+		if (state.options.distance) {
+			const delta_x = event.clientX - state.start_position.x;
+			const delta_y = event.clientY - state.start_position.y;
+			const distance = delta_x ** 2 + delta_y ** 2;
+			if (distance <= state.options.distance ** 2) {
+				ctx.preventStart();
+				return;
 			}
-
-			if (state._options.distance) {
-				const delta_x = event.clientX - ctx.initial.x;
-				const delta_y = event.clientY - ctx.initial.y;
-				const distance = delta_x ** 2 + delta_y ** 2;
-				if (distance < state._options.distance ** 2) {
-					ctx.preventStart();
-					return;
-				}
-			}
-		},
+		}
 	},
-	[{}],
-);
+});
 
 export type DragEventData = Readonly<{
 	/** How much element moved from its original position horizontally */

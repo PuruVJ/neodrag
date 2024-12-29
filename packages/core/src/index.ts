@@ -213,6 +213,25 @@ export function createDraggable({
 		const instance = instances.get(draggable_node)!;
 		instance.ctx.cachedRootNodeRect = draggable_node.getBoundingClientRect();
 
+		// Modify this if draggable_node is SVG
+		// Calculate scale differently for SVG vs HTML
+		let inverse_scale = 1;
+		if (draggable_node instanceof SVGElement) {
+			// For SVG elements, use the bounding box for scale
+			const bbox = (draggable_node as SVGGraphicsElement).getBBox();
+			const rect = instance.ctx.cachedRootNodeRect;
+			// Only calculate scale if we have valid dimensions
+			if (bbox.width && rect.width) {
+				inverse_scale = bbox.width / rect.width;
+			}
+		} else {
+			// For HTML elements, use the original calculation
+			inverse_scale = draggable_node.offsetWidth / instance.ctx.cachedRootNodeRect.width;
+		}
+
+		instance.ctx.initial.x = e.clientX - instance.ctx.offset.x / inverse_scale;
+		instance.ctx.initial.y = e.clientY - instance.ctx.offset.y / inverse_scale;
+
 		const should_drag = run_plugins(instance, 'shouldStart', e);
 		if (!should_drag) return;
 
@@ -233,29 +252,6 @@ export function createDraggable({
 		if (!capture_result.ok) {
 			cleanup_active_node(e.pointerId);
 			return;
-		}
-
-		// Modify this if draggable_node is SVG
-		// Calculate scale differently for SVG vs HTML
-		let inverse_scale = 1;
-		if (draggable_node instanceof SVGElement) {
-			// For SVG elements, use the bounding box for scale
-			const bbox = (draggable_node as SVGGraphicsElement).getBBox();
-			const rect = instance.ctx.cachedRootNodeRect;
-			// Only calculate scale if we have valid dimensions
-			if (bbox.width && rect.width) {
-				inverse_scale = bbox.width / rect.width;
-			}
-		} else {
-			// For HTML elements, use the original calculation
-			inverse_scale = draggable_node.offsetWidth / instance.ctx.cachedRootNodeRect.width;
-		}
-
-		if (instance.ctx.proposed.x != null) {
-			instance.ctx.initial.x = e.clientX - instance.ctx.offset.x / inverse_scale;
-		}
-		if (instance.ctx.proposed.y != null) {
-			instance.ctx.initial.y = e.clientY - instance.ctx.offset.y / inverse_scale;
 		}
 	}
 
@@ -358,12 +354,7 @@ export function createDraggable({
 	}
 
 	function initialize_plugins(new_plugins: Plugin[]) {
-		// Avoid creating new array unnecessarily
-		if (initial_plugins.length === 0) {
-			return new_plugins.slice().sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-		}
-
-		// Only create new array if we actually need to combine
+		// Create combined array
 		const combined = new Array(new_plugins.length + initial_plugins.length);
 		for (let i = 0; i < new_plugins.length; i++) {
 			combined[i] = new_plugins[i];
@@ -371,7 +362,19 @@ export function createDraggable({
 		for (let i = 0; i < initial_plugins.length; i++) {
 			combined[new_plugins.length + i] = initial_plugins[i];
 		}
-		return combined.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+		// Sort by priority and deduplicate in one pass
+		return Array.from(
+			combined
+				.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+				.reduce((map, plugin) => {
+					if (!map.has(plugin.name)) {
+						map.set(plugin.name, plugin);
+					}
+					return map;
+				}, new Map<string, Plugin>())
+				.values(),
+		) as Plugin[];
 	}
 
 	function update(instance: DraggableInstance, new_plugins: Plugin[] = []): void {

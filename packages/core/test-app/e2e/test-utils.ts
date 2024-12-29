@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { ConsoleMessage, Page } from '@playwright/test';
 import { stringify } from 'devalue';
 import { ZodSchema, z } from 'zod';
 
@@ -35,4 +35,20 @@ export async function setup<T>(
 	await page.goto(`/${path}?options=${stringify(options)}`);
 	await page.waitForLoadState('domcontentloaded');
 	await shake_mouse(page);
+}
+
+export async function stringify_console_message(message: ConsoleMessage) {
+	if (!message.text().includes('JSHandle@error')) {
+		return `${message.type().substring(0, 3).toUpperCase()} ${message.text()}`;
+	}
+
+	const messages = await Promise.all(
+		message.args().map((arg) => {
+			return arg.getProperty('message');
+		}),
+	);
+
+	console.log({ messages });
+
+	return `${message.type().substring(0, 3).toUpperCase()} ${messages.filter(Boolean)}`;
 }
