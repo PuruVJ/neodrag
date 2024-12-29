@@ -303,17 +303,6 @@ export const transform = unstable_definePlugin<
 	liveUpdate: true,
 
 	setup([func], ctx) {
-		// Special handling for root SVG elements
-		if (ctx.rootNode instanceof SVGSVGElement) {
-			throw new Error(
-				'Dragging the root SVG element directly is not recommended. ' +
-					'Instead, either:\n' +
-					'1. Wrap your SVG in a div and make the div draggable\n' +
-					'2. Use viewBox manipulation if you want to pan the SVG canvas\n' +
-					'3. Or if you really need to transform the SVG element, use CSS transforms',
-			);
-		}
-
 		const is_svg = ctx.rootNode instanceof SVGElement;
 
 		if (is_svg) {

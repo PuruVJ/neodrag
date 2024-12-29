@@ -565,6 +565,16 @@ export function createDraggable({
 	return {
 		instances,
 		draggable: (node: HTMLElement | SVGElement, plugins: Plugin[] = []) => {
+			if (is_svg_svg_element(node)) {
+				throw new Error(
+					'Dragging the root SVG element directly is not recommended. ' +
+						'Instead, either:\n' +
+						'1. Wrap your SVG in a div and make the div draggable\n' +
+						'2. Use viewBox manipulation if you want to pan the SVG canvas\n' +
+						'3. Or if you really need to transform the SVG element, use CSS transforms',
+				);
+			}
+
 			initialize_listeners();
 
 			const instance: DraggableInstance = {
