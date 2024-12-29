@@ -21,5 +21,10 @@ export const SCHEMAS = {
 		APPLY_USER_SELECT_HACK: z.boolean(),
 
 		GRID: z.tuple([z.number().nullable().optional(), z.number().nullable().optional()]).optional(),
+
+		TRANSFORM: z.object({
+			is_func: z.boolean(),
+			is_svg: z.boolean(),
+		}),
 	},
 };
