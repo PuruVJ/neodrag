@@ -1,6 +1,6 @@
 import test, { expect } from '@playwright/test';
-import { get_mouse_position, setup } from '../test-utils';
 import { SCHEMAS } from '../../src/lib/schemas';
+import { get_mouse_position, setup } from '../test-utils';
 
 test.describe('bounds()', () => {
 	test.describe('BoundsFrom.element()', () => {
