@@ -2,9 +2,7 @@ import test, { expect } from '@playwright/test';
 import { get_mouse_position, setup } from '../test-utils';
 
 test.describe('stateMarker', () => {
-	test('should be dragged by mouse', async ({ page, isMobile }) => {
-		test.skip(isMobile);
-
+	test('should be dragged by mouse', async ({ page }) => {
 		await setup(page);
 
 		const div = page.getByTestId('draggable');
