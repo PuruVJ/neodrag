@@ -691,6 +691,7 @@ export const ControlFrom = {
 				left: number;
 				area: number;
 			}[] = [];
+
 			elements.forEach((el) => {
 				const rect = el.getBoundingClientRect();
 
@@ -708,6 +709,24 @@ export const ControlFrom = {
 		},
 };
 
+// Helper to check if a zone is nested within another zone
+function is_nested(inner: ControlZone, outer: ControlZone) {
+	return (
+		inner.area < outer.area &&
+		inner.left >= outer.left &&
+		inner.right <= outer.right &&
+		inner.top >= outer.top &&
+		inner.bottom <= outer.bottom
+	);
+}
+
+// Helper function to find all zones containing a point, sorted by area (smallest first)
+const find_containing_zones = (ctx: PluginContext, event: PointerEvent, zones: ControlZone[]) => {
+	return zones
+		.filter((zone) => is_point_in_zone(event.clientX, event.clientY, zone, ctx.cachedRootNodeRect))
+		.sort((a, b) => a.area - b.area);
+};
+
 const is_point_in_zone = (x: number, y: number, zone: ControlZone, root_rect: DOMRect) => {
 	const relative_x = x - root_rect.left;
 	const relative_y = y - root_rect.top;
@@ -722,52 +741,104 @@ const is_point_in_zone = (x: number, y: number, zone: ControlZone, root_rect: DO
 
 export const controls = unstable_definePlugin<
 	[
-		options: {
+		options?: {
 			allow?: ReturnType<(typeof ControlFrom)[keyof typeof ControlFrom]>;
 			block?: ReturnType<(typeof ControlFrom)[keyof typeof ControlFrom]>;
 			priority?: 'allow' | 'block';
-		},
+		} | null,
 	],
 	{
 		allow_zones: ControlZone[];
 		block_zones: ControlZone[];
+		priority: 'allow' | 'block';
 	}
 >({
 	name: 'neodrag:controls',
 
 	setup([options], ctx) {
+		// Sort zones by area (smallest to largest) to handle nesting properly
 		return {
-			allow_zones: (options.allow?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area),
-			block_zones: options.block?.(ctx.rootNode) ?? [],
+			allow_zones: (options?.allow?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area),
+			block_zones: (options?.block?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area),
+			priority: options?.priority ?? 'block',
 		};
 	},
 
-	shouldStart([options], ctx, state, event) {
-		const { clientX, clientY } = event;
-		const root_rect = ctx.rootNode.getBoundingClientRect();
-		const priority = options.priority ?? 'block';
+	shouldStart(_args, ctx, state, event) {
+		// Find all containing zones for the click point
+		const containing_allow_zones = find_containing_zones(ctx, event, state.allow_zones);
+		const containing_block_zones = find_containing_zones(ctx, event, state.block_zones);
 
-		if (state.allow_zones.length > 0) {
-			const active_zone = state.allow_zones.find((zone) =>
-				is_point_in_zone(clientX, clientY, zone, root_rect),
-			);
-
-			if (!active_zone) return false;
-
-			const in_block_zone = state.block_zones.some((zone) =>
-				is_point_in_zone(clientX, clientY, zone, root_rect),
-			);
-
-			// If in both, priority decides
-			if (in_block_zone) {
-				if (priority === 'block') return false;
-			}
-
-			ctx.currentlyDraggedNode = active_zone.element as HTMLElement;
-			return true;
+		// If there are any allow zones defined, only allow dragging within them
+		if (state.allow_zones.length > 0 && containing_allow_zones.length === 0) {
+			return false;
 		}
 
-		return !state.block_zones.some((zone) => is_point_in_zone(clientX, clientY, zone, root_rect));
+		// If no zones contain the point and no allow zones are defined,
+		// default behavior based on priority
+		if (containing_allow_zones.length === 0 && containing_block_zones.length === 0) {
+			return state.allow_zones.length === 0 && state.priority === 'allow';
+		}
+
+		// Find the most specific (smallest) zone that should determine the behavior
+		let final_zone: ControlZone | null = null;
+		let is_allow = false;
+
+		// Interleave allow and block zones based on nesting
+		let i = 0,
+			j = 0;
+		while (i < containing_allow_zones.length || j < containing_block_zones.length) {
+			const allow_zone = containing_allow_zones[i];
+			const block_zone = containing_block_zones[j];
+
+			if (!allow_zone) {
+				final_zone = block_zone;
+				is_allow = false;
+				break;
+			}
+
+			if (!block_zone) {
+				final_zone = allow_zone;
+				is_allow = true;
+				break;
+			}
+
+			// Compare zones based on nesting
+			if (is_nested(allow_zone, block_zone)) {
+				final_zone = allow_zone;
+				is_allow = true;
+				break;
+			}
+
+			if (is_nested(block_zone, allow_zone)) {
+				final_zone = block_zone;
+				is_allow = false;
+				break;
+			}
+
+			// If not nested, use the smaller area
+			if (allow_zone.area <= block_zone.area) {
+				final_zone = allow_zone;
+				is_allow = true;
+				i++;
+			} else {
+				final_zone = block_zone;
+				is_allow = false;
+				j++;
+			}
+		}
+
+		// If we found a final determining zone
+		if (final_zone) {
+			if (is_allow) {
+				ctx.currentlyDraggedNode = final_zone.element as HTMLElement;
+				return true;
+			}
+			return false;
+		}
+
+		// Default to priority if no zones were found, but only if no allow zones are defined
+		return state.allow_zones.length === 0 && state.priority === 'allow';
 	},
 });
 

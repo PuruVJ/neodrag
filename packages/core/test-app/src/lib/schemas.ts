@@ -34,5 +34,17 @@ export const SCHEMAS = {
 			})
 			.nullable()
 			.optional(),
+
+		CONTROLS: z.object({
+			type: z.enum([
+				'undefined,null',
+				'allow-only',
+				'block-only',
+				'allow-block',
+				'allow-block-allow',
+				'block-allow',
+				'block-allow-block',
+			]),
+		}),
 	},
 };
