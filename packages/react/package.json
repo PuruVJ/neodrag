@@ -9,7 +9,7 @@
 	"files": [
 		"dist/*"
 	],
-	"sideEffects": true,
+	"sideEffects": false,
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
@@ -42,6 +42,7 @@
 	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/react#readme",
 	"scripts": {
 		"compile": "tsup",
+		"turbo:compile": "turbo run compile",
 		"compile:watch": "turbo watch compile",
 		"pub": "pnpm compile && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm compile && pnpm publish --dry-run --no-git-checks --access public"

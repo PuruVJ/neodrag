@@ -849,14 +849,14 @@ export const position = unstable_definePlugin(
 		liveUpdate: true,
 
 		setup([options], ctx) {
-			if (options.default) {
+			if (options?.default) {
 				ctx.offset.x = options.default.x ?? ctx.offset.x;
 				ctx.offset.y = options.default.y ?? ctx.offset.y;
 				ctx.initial.x = options.default.x ?? ctx.initial.x;
 				ctx.initial.y = options.default.y ?? ctx.initial.y;
 			}
 
-			if (options.current) {
+			if (options?.current) {
 				ctx.offset.x = options.current.x ?? ctx.offset.x;
 				ctx.offset.y = options.current.y ?? ctx.offset.y;
 			}
@@ -866,7 +866,7 @@ export const position = unstable_definePlugin(
 			// Only intervene if position has changed externally
 			if (
 				ctx.isDragging &&
-				options.current &&
+				options?.current &&
 				(options.current.x !== ctx.offset.x || options.current.y !== ctx.offset.y)
 			) {
 				ctx.propose(options.current.x - ctx.offset.x, options.current.y - ctx.offset.y);
@@ -875,10 +875,10 @@ export const position = unstable_definePlugin(
 		},
 	},
 	[{}] as [
-		options: {
+		options?: {
 			current?: { x: number; y: number };
 			default?: { x: number; y: number };
-		},
+		} | null,
 	],
 );
 

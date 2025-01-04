@@ -23,7 +23,7 @@ const state_sync = unstable_definePlugin<
 	priority: -1000, // Run last to ensure we get final values
 	cancelable: false,
 
-	dragStart: ([setDragState], ctx) => {
+	start: ([setDragState], ctx) => {
 		ctx.effect(() => {
 			setDragState((prev) => ({
 				...prev,
@@ -46,7 +46,7 @@ const state_sync = unstable_definePlugin<
 		});
 	},
 
-	dragEnd: ([setDragState], ctx) => {
+	end: ([setDragState], ctx) => {
 		ctx.effect(() => {
 			setDragState((prev) => ({
 				...prev,
