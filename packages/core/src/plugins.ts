@@ -17,7 +17,10 @@ export interface PluginContext {
 	lastEvent: PointerEvent | null;
 	cachedRootNodeRect: DOMRect;
 	currentlyDraggedNode: HTMLElement | SVGElement;
-	effect: (fn: () => void) => void;
+	effect: {
+		immediate: (fn: () => void) => void;
+		paint: (fn: () => void) => void;
+	};
 	propose: (x: number | null, y: number | null) => void;
 	cancel: () => void;
 	preventStart: () => void;
@@ -154,7 +157,7 @@ export const ignoreMultitouch = unstable_definePlugin(
 		},
 
 		start(args, ctx, state, event) {
-			ctx.effect(() => {
+			ctx.effect.paint(() => {
 				state.active_pointers.add(event.pointerId);
 
 				if (args && state.active_pointers.size > 1) {
@@ -191,7 +194,7 @@ export const stateMarker = unstable_definePlugin({
 	},
 
 	start(_args, ctx) {
-		ctx.effect(() => {
+		ctx.effect.paint(() => {
 			set_node_dataset(ctx.rootNode, 'neodrag-state', 'dragging');
 		});
 	},
@@ -226,7 +229,7 @@ export const applyUserSelectHack = unstable_definePlugin(
 		},
 
 		start([value], ctx, state) {
-			ctx.effect(() => {
+			ctx.effect.paint(() => {
 				if (value) {
 					state.body_user_select_val =
 						get_node_style(document.body, 'user-select') ??
@@ -343,7 +346,7 @@ export const transform = unstable_definePlugin<
 	},
 
 	drag([func], ctx, state) {
-		ctx.effect(() => {
+		ctx.effect.paint(() => {
 			if (func) {
 				return func({
 					offsetX: ctx.offset.x,
@@ -637,7 +640,7 @@ export const events = unstable_definePlugin<
 		},
 
 		start([options], ctx, state) {
-			ctx.effect(() => {
+			ctx.effect.immediate(() => {
 				state.offset = ctx.offset;
 				state.currentNode = ctx.currentlyDraggedNode;
 				options.onDragStart?.(state);
@@ -645,7 +648,7 @@ export const events = unstable_definePlugin<
 		},
 
 		drag([options], ctx, state) {
-			ctx.effect(() => {
+			ctx.effect.immediate(() => {
 				state.offset = ctx.offset;
 				state.currentNode = ctx.currentlyDraggedNode;
 
@@ -654,7 +657,7 @@ export const events = unstable_definePlugin<
 		},
 
 		end([options], ctx, state) {
-			ctx.effect(() => {
+			ctx.effect.immediate(() => {
 				state.offset = ctx.offset;
 				state.currentNode = ctx.currentlyDraggedNode;
 
@@ -761,7 +764,7 @@ export const controls = unstable_definePlugin<
 		return {
 			allow_zones: (options?.allow?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area),
 			block_zones: (options?.block?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area),
-			priority: options?.priority ?? 'block',
+			priority: options?.priority ?? 'allow',
 		};
 	},
 
@@ -857,13 +860,10 @@ export const position = unstable_definePlugin<
 		liveUpdate: true,
 
 		setup([options], ctx) {
-			if (options?.default && !options.current) {
-				ctx.setForcedPosition(options.default.x ?? ctx.offset.x, options.default.y ?? ctx.offset.y);
-			}
+			const x = options?.current?.x ?? options?.default?.x ?? ctx.offset.x;
+			const y = options?.current?.y ?? options?.default?.y ?? ctx.offset.y;
 
-			if (options?.current) {
-				ctx.setForcedPosition(options.current.x, options.current.y);
-			}
+			ctx.setForcedPosition(x, y);
 		},
 	},
 	[null],
@@ -948,7 +948,7 @@ export const scrollLock = unstable_definePlugin(
 			state.containerRect = null;
 			state.lastContainerCheck = 0;
 
-			ctx.effect(() => {
+			ctx.effect.paint(() => {
 				// Store original styles
 				if (container instanceof HTMLElement) {
 					state.originalStyles.set(container, {
@@ -999,7 +999,7 @@ export const scrollLock = unstable_definePlugin(
 					? state.config.container()
 					: state.config.container;
 
-			ctx.effect(() => {
+			ctx.effect.paint(() => {
 				const target = container instanceof HTMLElement ? container : document.body;
 				const originalStyles = state.originalStyles.get(target);
 

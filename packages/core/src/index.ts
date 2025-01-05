@@ -29,7 +29,10 @@ export interface DraggableInstance {
 	current_drag_hook_cancelled: boolean;
 	failed_plugins: Set<string>;
 	pointer_captured_id: number | null;
-	effects: Set<() => void>;
+	effects: {
+		paint: Set<() => void>;
+		immediate: Set<() => void>;
+	};
 	controller: AbortController;
 }
 
@@ -148,23 +151,33 @@ export function createDraggable({
 	}
 
 	function flush_effects(instance: DraggableInstance) {
-		if (instance.effects.size === 0) return;
+		const paint_effects = new Set(instance.effects.paint);
+		const immediate_effects = new Set(instance.effects.immediate);
 
 		// Store effects locally and clear the instance effects immediately
 		// This prevents new effects added during execution from being lost
-		const effects = Array.from(instance.effects);
 		clear_effects(instance);
 
-		// Schedule effects to run before next paint
-		requestAnimationFrame(() => {
-			for (const effect of effects) {
-				effect();
-			}
-		});
+		if (immediate_effects.size > 0) {
+			queueMicrotask(() => {
+				for (const effect of immediate_effects) {
+					effect();
+				}
+			});
+		}
+
+		if (paint_effects.size > 0) {
+			requestAnimationFrame(() => {
+				for (const effect of paint_effects) {
+					effect();
+				}
+			});
+		}
 	}
 
 	function clear_effects(instance: DraggableInstance) {
-		instance.effects.clear();
+		instance.effects.immediate.clear();
+		instance.effects.paint.clear();
 	}
 
 	function cleanup_active_node(pointer_id: number) {
@@ -590,7 +603,10 @@ export function createDraggable({
 				dragstart_prevented: false,
 				current_drag_hook_cancelled: false,
 				pointer_captured_id: null,
-				effects: new Set<() => void>(),
+				effects: {
+					immediate: new Set<() => void>(),
+					paint: new Set<() => void>(),
+				},
 			};
 
 			let currently_dragged_element = node;
@@ -621,8 +637,14 @@ export function createDraggable({
 					currently_dragged_element = val;
 				},
 
-				effect: (func) => {
-					instance.effects.add(func);
+				effect: {
+					immediate: (func) => {
+						instance.effects.immediate.add(func);
+					},
+
+					paint: (func) => {
+						instance.effects.paint.add(func);
+					},
 				},
 
 				propose(x: number | null, y: number | null) {
