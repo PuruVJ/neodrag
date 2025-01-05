@@ -67,6 +67,7 @@ export const SCHEMAS = {
 					.optional()
 					.nullable(),
 			})
-			.optional(),
+			.optional()
+			.nullable(),
 	},
 };

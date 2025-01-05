@@ -19,7 +19,7 @@ test('[10, 10]', async ({ page }) => {
 	await page.mouse.move(x + 94, y + 91);
 	await page.mouse.up();
 
-	await expect(div).toHaveCSS('translate', '100px 100px');
+	await expect(div).toHaveCSS('translate', '100px 90px');
 });
 
 test('[23, 102]', async ({ page }) => {

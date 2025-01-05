@@ -4,19 +4,21 @@
 
 	const { data } = $props();
 
-	let pos = $state(data?.current ?? { x: 0, y: 0 });
+	let pos = $state(data.options?.current ?? { x: 0, y: 0 });
 
 	const plugins = $derived.by(() => {
-		if (data.two_way_binding) {
+		if (data.options?.two_way_binding) {
 			return [
 				position({
 					current: $state.snapshot(pos),
-					default: data.current,
+					default: data.options.current,
 				}),
 				events({
 					onDrag: ({ offset }) => {
-						pos.x = offset.x;
-						pos.y = offset.y;
+						if (pos) {
+							pos.x = offset.x;
+							pos.y = offset.y;
+						}
 					},
 				}),
 			];
@@ -24,8 +26,8 @@
 
 		return [
 			position({
-				default: data.default,
-				current: $state.snapshot(pos),
+				default: data.options?.default,
+				current: data.options?.current,
 			}),
 		];
 	});

@@ -8,7 +8,7 @@ interface DragState extends DragEventData {
 	isDragging: boolean;
 }
 
-const defaultDragState: DragState = {
+const default_drag_state: DragState = {
 	offset: { x: 0, y: 0 },
 	rootNode: null as unknown as HTMLElement,
 	currentNode: null as unknown as HTMLElement,
@@ -24,7 +24,7 @@ const state_sync = unstable_definePlugin<
 	cancelable: false,
 
 	start: ([setDragState], ctx) => {
-		ctx.effect(() => {
+		ctx.effect.immediate(() => {
 			setDragState((prev) => ({
 				...prev,
 				isDragging: true,
@@ -36,7 +36,7 @@ const state_sync = unstable_definePlugin<
 	},
 
 	drag: ([setDragState], ctx) => {
-		ctx.effect(() => {
+		ctx.effect.immediate(() => {
 			setDragState((prev) => ({
 				...prev,
 				offset: { ...ctx.offset },
@@ -47,7 +47,7 @@ const state_sync = unstable_definePlugin<
 	},
 
 	end: ([setDragState], ctx) => {
-		ctx.effect(() => {
+		ctx.effect.immediate(() => {
 			setDragState((prev) => ({
 				...prev,
 				isDragging: false,
@@ -61,7 +61,7 @@ const state_sync = unstable_definePlugin<
 
 export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 	return (ref: React.RefObject<HTMLElement | SVGElement | null>, plugins: Plugin[] = []) => {
-		const [drag_state, set_drag_state] = useState<DragState>(defaultDragState);
+		const [drag_state, set_drag_state] = useState<DragState>(default_drag_state);
 		const instance = useRef<ReturnType<typeof draggableFactory.draggable>>();
 		const state_sync_ref = useRef(state_sync(set_drag_state));
 		const pluginsRef = useRef(plugins.concat(state_sync_ref.current));
