@@ -21,6 +21,7 @@ export interface PluginContext {
 	propose: (x: number | null, y: number | null) => void;
 	cancel: () => void;
 	preventStart: () => void;
+	setForcedPosition: (x: number, y: number) => void;
 }
 
 export interface Plugin<State = any> {
@@ -842,44 +843,30 @@ export const controls = unstable_definePlugin<
 	},
 });
 
-export const position = unstable_definePlugin(
+export const position = unstable_definePlugin<
+	[
+		options?: {
+			current?: { x: number; y: number } | null;
+			default?: { x: number; y: number } | null;
+		} | null,
+	]
+>(
 	{
 		name: 'neodrag:position',
 		priority: 1000,
 		liveUpdate: true,
 
 		setup([options], ctx) {
-			if (options?.default) {
-				ctx.offset.x = options.default.x ?? ctx.offset.x;
-				ctx.offset.y = options.default.y ?? ctx.offset.y;
-				ctx.initial.x = options.default.x ?? ctx.initial.x;
-				ctx.initial.y = options.default.y ?? ctx.initial.y;
+			if (options?.default && !options.current) {
+				ctx.setForcedPosition(options.default.x ?? ctx.offset.x, options.default.y ?? ctx.offset.y);
 			}
 
 			if (options?.current) {
-				ctx.offset.x = options.current.x ?? ctx.offset.x;
-				ctx.offset.y = options.current.y ?? ctx.offset.y;
-			}
-		},
-
-		drag([options], ctx) {
-			// Only intervene if position has changed externally
-			if (
-				ctx.isDragging &&
-				options?.current &&
-				(options.current.x !== ctx.offset.x || options.current.y !== ctx.offset.y)
-			) {
-				ctx.propose(options.current.x - ctx.offset.x, options.current.y - ctx.offset.y);
-				ctx.cancel();
+				ctx.setForcedPosition(options.current.x, options.current.y);
 			}
 		},
 	},
-	[{}] as [
-		options?: {
-			current?: { x: number; y: number };
-			default?: { x: number; y: number };
-		} | null,
-	],
+	[null],
 );
 
 type TouchActionMode =

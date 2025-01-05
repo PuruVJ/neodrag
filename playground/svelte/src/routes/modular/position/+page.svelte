@@ -1,5 +1,5 @@
 <script>
-	import { draggable, events, position } from '@neodrag/svelte';
+	import { disabled, draggable, events, position } from '@neodrag/svelte';
 
 	let pos = $state({ x: 0, y: 0 });
 
@@ -16,6 +16,7 @@
 				y: pos.y,
 			},
 		}),
+		disabled(),
 	]);
 </script>
 

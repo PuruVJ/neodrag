@@ -46,5 +46,27 @@ export const SCHEMAS = {
 				'block-allow-block',
 			]),
 		}),
+
+		POSITION: z
+			.object({
+				two_way_binding: z.boolean().optional(),
+
+				default: z
+					.object({
+						x: z.number(),
+						y: z.number(),
+					})
+					.optional()
+					.nullable(),
+
+				current: z
+					.object({
+						x: z.number(),
+						y: z.number(),
+					})
+					.optional()
+					.nullable(),
+			})
+			.optional(),
 	},
 };

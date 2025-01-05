@@ -625,9 +625,9 @@ export function createDraggable({
 					instance.effects.add(func);
 				},
 
-				propose: (x: number | null, y: number | null) => {
-					instance.ctx.proposed.x = x;
-					instance.ctx.proposed.y = y;
+				propose(x: number | null, y: number | null) {
+					this.proposed.x = x;
+					this.proposed.y = y;
 				},
 
 				cancel() {
@@ -636,6 +636,17 @@ export function createDraggable({
 
 				preventStart() {
 					instance.dragstart_prevented = true;
+				},
+
+				setForcedPosition(x, y) {
+					this.offset.x = x;
+					this.offset.y = y;
+					// Only sync initial with offset when not dragging
+					// This maintains the drag calculations during active drags
+					if (!this.isDragging) {
+						this.initial.x = x;
+						this.initial.y = y;
+					}
 				},
 			};
 

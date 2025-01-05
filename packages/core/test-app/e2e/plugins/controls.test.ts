@@ -104,48 +104,6 @@ test('block-only', async ({ page }) => {
 	await expect(div).toHaveCSS('translate', '20px 20px');
 });
 
-test('block-only', async ({ page }) => {
-	await setup(page, 'plugins/controls', SCHEMAS.PLUGINS.CONTROLS, {
-		type: 'allow-block',
-	});
-
-	const div = page.getByTestId('draggable');
-	const handle = div.locator('.handle');
-	const cancel = div.locator('.cancel');
-
-	await handle.hover();
-	let { x, y } = await get_mouse_position(page);
-
-	await page.mouse.down();
-	await page.mouse.move(x + 10, y + 10);
-	await page.mouse.up();
-
-	// This should have moved.
-	await expect(div).toHaveCSS('translate', '10px 10px');
-
-	// Now move to some point within the box, near bottom right and attempt to drag
-	await page.mouse.move(100, 100); // 10x10px from the corner
-
-	({ x, y } = await get_mouse_position(page));
-
-	await page.mouse.down();
-	await page.mouse.move(x + 10, y + 10);
-	await page.mouse.up();
-
-	// Should have moved
-	await expect(div).toHaveCSS('translate', '20px 20px');
-
-	await cancel.hover();
-	({ x, y } = await get_mouse_position(page));
-
-	await page.mouse.down();
-	await page.mouse.move(x + 10, y + 10);
-	await page.mouse.up();
-
-	// Should not have moved
-	await expect(div).toHaveCSS('translate', '20px 20px');
-});
-
 test('allow-block', async ({ page }) => {
 	await setup(page, 'plugins/controls', SCHEMAS.PLUGINS.CONTROLS, {
 		type: 'allow-block',
