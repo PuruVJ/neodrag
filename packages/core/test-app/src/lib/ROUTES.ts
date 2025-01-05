@@ -18,6 +18,7 @@ const PAGES = {
   "/plugins/grid": `/plugins/grid`,
   "/plugins/position": `/plugins/position`,
   "/plugins/threshold": `/plugins/threshold`,
+  "/plugins/touchAction": `/plugins/touchAction`,
   "/plugins/transform": `/plugins/transform`
 }
 
@@ -139,7 +140,7 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 * ```
 */
 export type KIT_ROUTES = {
-  PAGES: { '/': never, '/defaults': never, '/plugins/applyUserSelectHack': never, '/plugins/axis': never, '/plugins/bounds': never, '/plugins/controls': never, '/plugins/grid': never, '/plugins/position': never, '/plugins/threshold': never, '/plugins/transform': never }
+  PAGES: { '/': never, '/defaults': never, '/plugins/applyUserSelectHack': never, '/plugins/axis': never, '/plugins/bounds': never, '/plugins/controls': never, '/plugins/grid': never, '/plugins/position': never, '/plugins/threshold': never, '/plugins/touchAction': never, '/plugins/transform': never }
   SERVERS: Record<string, never>
   ACTIONS: Record<string, never>
   LINKS: Record<string, never>

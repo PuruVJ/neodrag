@@ -889,81 +889,47 @@ type TouchActionMode =
 	| 'revert-layer'
 	| 'unset';
 
-export const touchAction = unstable_definePlugin<
-	[mode?: TouchActionMode],
-	{ original_touch_action: string }
->(
+export const touchAction = unstable_definePlugin<[mode?: TouchActionMode | false | null]>(
 	{
 		name: 'neodrag:touch-action',
 		cancelable: false,
 		liveUpdate: true,
 
 		setup([mode], ctx) {
-			const original_touch_action = get_node_style(ctx.rootNode, 'touch-action');
-			set_node_key_style(ctx.rootNode, 'touch-action', mode!);
-
-			return { original_touch_action };
-		},
-
-		end(_args, ctx, state) {
-			// Restore original touch-action
-			set_node_key_style(ctx.rootNode, 'touch-action', state.original_touch_action || 'auto');
+			if (mode !== false && mode !== null) {
+				set_node_key_style(ctx.rootNode, 'touch-action', mode ?? 'manipulation');
+			}
 		},
 	},
 	['manipulation'],
 );
 
 // Scroll-lock plugin that prevents scrolling while dragging
-export const scrollLock = unstable_definePlugin<
-	[
-		options?: {
-			lockAxis?: 'x' | 'y' | 'both'; // Which axes to lock scrolling on
-			container?: HTMLElement | (() => HTMLElement); // Custom container to lock
-			allowScrollbar?: boolean; // Whether to allow scrollbar interaction
-		} | null,
-	],
-	{
-		config: {
-			lockAxis: 'both' | 'x' | 'y';
-			container: HTMLElement | (() => HTMLElement);
-			allowScrollbar: boolean;
-		};
-		originalStyles: Map<
-			HTMLElement,
-			{
-				userSelect: string;
-				touchAction: string;
-				overflow: string;
-			}
-		>;
-		containerRect: DOMRect | null;
-		lastContainerCheck: number;
-	}
->(
+export const scrollLock = unstable_definePlugin(
 	{
 		name: 'neodrag:scrollLock',
 
 		setup([options]) {
 			const defaults = {
-				lockAxis: 'both' as 'both' | 'x' | 'y',
+				lock_axis: 'both',
 				container: document.documentElement,
-				allowScrollbar: false,
+				allow_scrollbar: false,
 			};
 
 			const config = { ...defaults, ...options };
 
 			return {
 				config,
-				originalStyles: new Map<
+				original_styles: new Map<
 					HTMLElement,
 					{
-						userSelect: string;
-						touchAction: string;
+						user_select: string;
+						touch_action: string;
 						overflow: string;
 					}
 				>(),
-				containerRect: null as DOMRect | null,
-				lastContainerCheck: 0,
+				container_rect: null as DOMRect | null,
+				last_container_check: 0,
 			};
 		},
 
@@ -974,48 +940,48 @@ export const scrollLock = unstable_definePlugin<
 					: state.config.container;
 
 			// Reset cache
-			state.containerRect = null;
-			state.lastContainerCheck = 0;
+			state.container_rect = null;
+			state.last_container_check = 0;
 
 			ctx.effect.paint(() => {
 				// Store original styles
 				if (container instanceof HTMLElement) {
-					state.originalStyles.set(container, {
-						userSelect: get_node_style(container, 'user-select'),
-						touchAction: get_node_style(container, 'touch-action'),
+					state.original_styles.set(container, {
+						user_select: get_node_style(container, 'user-select'),
+						touch_action: get_node_style(container, 'touch-action'),
 						overflow: get_node_style(container, 'overflow'),
 					});
 
 					// Apply scroll locking styles
 					set_node_key_style(container, 'user-select', 'none');
 
-					if (!state.config.allowScrollbar) {
+					if (!state.config.allow_scrollbar) {
 						set_node_key_style(container, 'overflow', 'hidden');
 					}
 
-					if (state.config.lockAxis === 'x' || state.config.lockAxis === 'both') {
+					if (state.config.lock_axis === 'x' || state.config.lock_axis === 'both') {
 						set_node_key_style(container, 'touch-action', 'pan-y');
-					} else if (state.config.lockAxis === 'y') {
+					} else if (state.config.lock_axis === 'y') {
 						set_node_key_style(container, 'touch-action', 'pan-x');
 					}
 				} else {
 					// For window, we need to lock the body
 					const body = document.body;
-					state.originalStyles.set(body, {
-						userSelect: get_node_style(body, 'user-select'),
-						touchAction: get_node_style(body, 'touch-action'),
+					state.original_styles.set(body, {
+						user_select: get_node_style(body, 'user-select'),
+						touch_action: get_node_style(body, 'touch-action'),
 						overflow: get_node_style(body, 'overflow'),
 					});
 
 					set_node_key_style(body, 'user-select', 'none');
 
-					if (!state.config.allowScrollbar) {
+					if (!state.config.allow_scrollbar) {
 						set_node_key_style(body, 'overflow', 'hidden');
 					}
 
-					if (state.config.lockAxis === 'x' || state.config.lockAxis === 'both') {
+					if (state.config.lock_axis === 'x' || state.config.lock_axis === 'both') {
 						set_node_key_style(body, 'touch-action', 'pan-y');
-					} else if (state.config.lockAxis === 'y') {
+					} else if (state.config.lock_axis === 'y') {
 						set_node_key_style(body, 'touch-action', 'pan-x');
 					}
 				}
@@ -1030,31 +996,37 @@ export const scrollLock = unstable_definePlugin<
 
 			ctx.effect.paint(() => {
 				const target = container instanceof HTMLElement ? container : document.body;
-				const originalStyles = state.originalStyles.get(target);
+				const originalStyles = state.original_styles.get(target);
 
 				if (originalStyles) {
-					set_node_key_style(target, 'user-select', originalStyles.userSelect);
-					set_node_key_style(target, 'touch-action', originalStyles.touchAction);
+					set_node_key_style(target, 'user-select', originalStyles.user_select);
+					set_node_key_style(target, 'touch-action', originalStyles.touch_action);
 					set_node_key_style(target, 'overflow', originalStyles.overflow);
 				}
 
-				state.originalStyles.delete(target);
+				state.original_styles.delete(target);
 			});
 
 			// Clear cache
-			state.containerRect = null;
-			state.lastContainerCheck = 0;
+			state.container_rect = null;
+			state.last_container_check = 0;
 		},
 
 		cleanup(_args, _ctx, state) {
 			// Restore any remaining original styles
-			for (const [element, styles] of state.originalStyles) {
-				set_node_key_style(element, 'user-select', styles.userSelect);
-				set_node_key_style(element, 'touch-action', styles.touchAction);
+			for (const [element, styles] of state.original_styles) {
+				set_node_key_style(element, 'user-select', styles.user_select);
+				set_node_key_style(element, 'touch-action', styles.touch_action);
 				set_node_key_style(element, 'overflow', styles.overflow);
 			}
-			state.originalStyles.clear();
+			state.original_styles.clear();
 		},
 	},
-	[{}],
+	[{}] as [
+		options?: {
+			lockAxis?: 'x' | 'y' | 'both'; // Which axes to lock scrolling on
+			container?: HTMLElement | (() => HTMLElement); // Custom container to lock
+			allowScrollbar?: boolean; // Whether to allow scrollbar interaction
+		} | null,
+	],
 );

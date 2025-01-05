@@ -69,5 +69,7 @@ export const SCHEMAS = {
 			})
 			.optional()
 			.nullable(),
+
+		TOUCH_ACTION: z.enum(['undefined', 'null', 'auto', 'false']),
 	},
 };
