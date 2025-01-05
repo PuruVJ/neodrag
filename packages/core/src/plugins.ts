@@ -881,6 +881,7 @@ type TouchActionMode =
 	| 'pan-down'
 	| 'pinch-zoom'
 	| 'manipulation'
+
 	// Global values
 	| 'inherit'
 	| 'initial'
@@ -888,7 +889,10 @@ type TouchActionMode =
 	| 'revert-layer'
 	| 'unset';
 
-export const touchAction = unstable_definePlugin(
+export const touchAction = unstable_definePlugin<
+	[mode?: TouchActionMode],
+	{ original_touch_action: string }
+>(
 	{
 		name: 'neodrag:touch-action',
 		cancelable: false,
@@ -906,18 +910,43 @@ export const touchAction = unstable_definePlugin(
 			set_node_key_style(ctx.rootNode, 'touch-action', state.original_touch_action || 'auto');
 		},
 	},
-	['manipulation'] as [mode?: TouchActionMode],
+	['manipulation'],
 );
 
 // Scroll-lock plugin that prevents scrolling while dragging
-export const scrollLock = unstable_definePlugin(
+export const scrollLock = unstable_definePlugin<
+	[
+		options?: {
+			lockAxis?: 'x' | 'y' | 'both'; // Which axes to lock scrolling on
+			container?: HTMLElement | (() => HTMLElement); // Custom container to lock
+			allowScrollbar?: boolean; // Whether to allow scrollbar interaction
+		} | null,
+	],
+	{
+		config: {
+			lockAxis: 'both' | 'x' | 'y';
+			container: HTMLElement | (() => HTMLElement);
+			allowScrollbar: boolean;
+		};
+		originalStyles: Map<
+			HTMLElement,
+			{
+				userSelect: string;
+				touchAction: string;
+				overflow: string;
+			}
+		>;
+		containerRect: DOMRect | null;
+		lastContainerCheck: number;
+	}
+>(
 	{
 		name: 'neodrag:scrollLock',
 
 		setup([options]) {
 			const defaults = {
-				lockAxis: 'both',
-				container: window,
+				lockAxis: 'both' as 'both' | 'x' | 'y',
+				container: document.documentElement,
 				allowScrollbar: false,
 			};
 
@@ -1027,11 +1056,5 @@ export const scrollLock = unstable_definePlugin(
 			state.originalStyles.clear();
 		},
 	},
-	[{}] as [
-		options: {
-			lockAxis?: 'x' | 'y' | 'both'; // Which axes to lock scrolling on
-			container?: HTMLElement | (() => HTMLElement); // Custom container to lock
-			allowScrollbar?: boolean; // Whether to allow scrollbar interaction
-		},
-	],
+	[{}],
 );
