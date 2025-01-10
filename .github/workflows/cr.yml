@@ -21,4 +21,4 @@ jobs:
         run: pnpm compile
 
       - name: Release
-        run: pnpm dlx pkg-pr-new publish
+        run: pnpm dlx pkg-pr-new publish './packages/*'
