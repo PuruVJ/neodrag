@@ -33,6 +33,9 @@ export type DragEventData = {
 
 	/** The element being dragged */
 	currentNode: HTMLElement;
+
+	/** The pointer event that triggered the drag */
+	event: PointerEvent;
 };
 
 export type DragOptions = {
