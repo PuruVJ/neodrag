@@ -234,13 +234,12 @@ importers:
 
   packages/solid:
     dependencies:
-      solid-js:
-        specifier: ^1.0.0
-        version: 1.9.3
-    devDependencies:
       '@neodrag/core':
         specifier: workspace:*
         version: link:../core
+      solid-js:
+        specifier: ^1.0.0
+        version: 1.9.3
 
   packages/svelte:
     dependencies:
