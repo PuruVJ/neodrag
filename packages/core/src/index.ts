@@ -33,6 +33,9 @@ export type DragEventData = {
 
 	/** The element being dragged */
 	currentNode: HTMLElement;
+
+	/** The pointer event that triggered the drag */
+	event: PointerEvent;
 };
 
 export type DragOptions = {
@@ -342,7 +345,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 
 	let active_pointers = new Set<number>();
 
-	function try_start_drag() {
+	function try_start_drag(event: PointerEvent) {
 		if (
 			is_interacting &&
 			!is_dragging &&
@@ -351,7 +354,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 			currently_dragged_el
 		) {
 			is_dragging = true;
-			fire_svelte_drag_start_event();
+			fire_svelte_drag_start_event(event);
 			node_class_list.add(defaultClassDragging);
 
 			if (applyUserSelectHack) {
@@ -393,31 +396,32 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 		}
 	}
 
-	function get_event_data() {
+	function get_event_data(event: PointerEvent) {
 		return {
 			offsetX: translate_x,
 			offsetY: translate_y,
 			rootNode: node,
 			currentNode: currently_dragged_el,
+			event
 		};
 	}
 
-	function call_event(eventName: 'neodrag:start' | 'neodrag' | 'neodrag:end', fn: typeof onDrag) {
-		const data = get_event_data();
+	function call_event(eventName: 'neodrag:start' | 'neodrag' | 'neodrag:end', fn: typeof onDrag, event: PointerEvent) {
+		const data = get_event_data(event);
 		node.dispatchEvent(new CustomEvent(eventName, { detail: data }));
 		fn?.(data);
 	}
 
-	function fire_svelte_drag_start_event() {
-		call_event('neodrag:start', onDragStart);
+	function fire_svelte_drag_start_event(event: PointerEvent) {
+		call_event('neodrag:start', onDragStart, event);
 	}
 
-	function fire_svelte_drag_end_event() {
-		call_event('neodrag:end', onDragEnd);
+	function fire_svelte_drag_end_event(event: PointerEvent) {
+		call_event('neodrag:end', onDragEnd, event);
 	}
 
-	function fire_svelte_drag_event() {
-		call_event('neodrag', onDrag);
+	function fire_svelte_drag_event(event: PointerEvent) {
+		call_event('neodrag', onDrag, event);
 	}
 
 	const listen = addEventListener;
@@ -502,7 +506,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 					const elapsed = Date.now() - start_time;
 					if (elapsed >= threshold.delay!) {
 						meets_time_threshold = true;
-						try_start_drag();
+						try_start_drag(e);
 					}
 				}
 
@@ -514,7 +518,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 
 					if (distance >= threshold.distance!) {
 						meets_distance_threshold = true;
-						try_start_drag();
+						try_start_drag(e);
 					}
 				}
 
@@ -574,7 +578,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 			x_offset = translate_x;
 			y_offset = translate_y;
 
-			fire_svelte_drag_event();
+			fire_svelte_drag_event(e);
 
 			set_translate();
 		},
@@ -604,7 +608,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 
 				if (applyUserSelectHack) body_style.userSelect = body_original_user_select_val;
 
-				fire_svelte_drag_end_event();
+				fire_svelte_drag_end_event(e);
 
 				if (can_move_in_x) initial_x = translate_x;
 				if (can_move_in_y) initial_y = translate_y;
