@@ -3,7 +3,7 @@
 
 	let pos = $state({ x: 0, y: 0 });
 
-	const positionCompartment = new Compartment(position({ current: pos }));
+	const positionCompartment = new Compartment(() => position({ current: pos }));
 
 	$effect(() => {
 		console.log(23);

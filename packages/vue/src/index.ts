@@ -1,6 +1,6 @@
-import { type Directive } from 'vue';
 import { createDraggable } from '@neodrag/core';
 import { Plugin } from '@neodrag/core/plugins';
+import { type Directive } from 'vue';
 
 const factory = createDraggable();
 
@@ -24,4 +24,5 @@ export const wrapper = (
 
 export const vDraggable = wrapper(factory);
 export const instances = factory.instances;
+export { Compartment } from '@neodrag/core';
 export * from '@neodrag/core/plugins';

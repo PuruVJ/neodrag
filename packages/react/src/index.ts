@@ -1,6 +1,6 @@
 import { createDraggable } from '@neodrag/core';
 import { DragEventData, unstable_definePlugin, type Plugin } from '@neodrag/core/plugins';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const draggable_factory = createDraggable();
 
@@ -95,5 +95,6 @@ export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 }
 
 export const useDraggable = wrapper(draggable_factory);
+export { Compartment } from '@neodrag/core';
 export * from '@neodrag/core/plugins';
 export const instances = draggable_factory.instances;

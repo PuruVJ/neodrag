@@ -1,4 +1,4 @@
-import { Compartment, createDraggable, type PluginResolver } from '@neodrag/core';
+import { createDraggable, type PluginResolver } from '@neodrag/core';
 import type { Plugin } from '@neodrag/core/plugins';
 import type { Action } from 'svelte/action';
 
@@ -8,5 +8,6 @@ export const draggable = core as Action<
 	HTMLElement | SVGElement,
 	Plugin[] | PluginResolver | undefined
 >;
+export { Compartment } from '@neodrag/core';
 export * from '@neodrag/core/plugins';
-export { Compartment, instances };
+export { instances };
