@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/svelte",
-	"version": "2.3.0",
+	"version": "2.3.1",
 	"description": "Svelte Action to add dragging to your apps 😉",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
@@ -18,7 +18,7 @@
 				"development": "./dist/index.js"
 			},
 			"default": "./dist/min/index.js",
-      		"svelte": "./dist/min/index.js"
+			"svelte": "./dist/min/index.js"
 		},
 		"./package.json": "./package.json"
 	},
