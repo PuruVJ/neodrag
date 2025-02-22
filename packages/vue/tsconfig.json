@@ -1,21 +1,14 @@
 {
 	"compilerOptions": {
+		"module": "ESNext",
 		"target": "ESNext",
-		"useDefineForClassFields": true,
-		"declarationDir": "./dist",
 		"declaration": true,
 		"emitDeclarationOnly": true,
-		"lib": ["DOM", "ESNext"],
-		"allowJs": false,
-		"skipLibCheck": false,
-		"esModuleInterop": false,
-		"allowSyntheticDefaultImports": true,
+		"declarationDir": "dist",
 		"strict": true,
-		"forceConsistentCasingInFileNames": true,
-		"module": "ESNext",
-		"moduleResolution": "Node",
-		"resolveJsonModule": true,
-		"preserveSymlinks": false
+		"esModuleInterop": true,
+		"moduleResolution": "Bundler",
+		"types": ["vitest/globals", "vue"]
 	},
-	"include": ["./src"]
+	"files": ["./src/index.ts"]
 }

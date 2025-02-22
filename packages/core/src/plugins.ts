@@ -688,7 +688,7 @@ export const ControlFrom = {
 	},
 
 	elements:
-		(elements: NodeListOf<Element> | Element[]) =>
+		(elements: NodeListOf<Element> | (Element | null | undefined)[]) =>
 		(root: Element): ControlZone[] => {
 			const root_rect = root.getBoundingClientRect();
 
@@ -701,7 +701,9 @@ export const ControlFrom = {
 				area: number;
 			}[] = [];
 
-			elements.forEach((el) => {
+			for (const el of Array.from(elements)) {
+				if (!el) continue;
+
 				const rect = el.getBoundingClientRect();
 
 				data.push({
@@ -712,7 +714,7 @@ export const ControlFrom = {
 					left: rect.left - root_rect.left,
 					area: rect.width * rect.height,
 				});
-			});
+			}
 
 			return data;
 		},
