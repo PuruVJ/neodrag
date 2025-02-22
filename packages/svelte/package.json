@@ -17,7 +17,8 @@
 				"production": "./dist/min/index.js",
 				"development": "./dist/index.js"
 			},
-			"default": "./dist/min/index.js"
+			"default": "./dist/min/index.js",
+      		"svelte": "./dist/min/index.js"
 		},
 		"./package.json": "./package.json"
 	},
