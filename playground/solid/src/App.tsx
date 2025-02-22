@@ -1,21 +1,24 @@
-import { createDraggable } from '@neodrag/solid';
+import { events, position as positionPlugin, useDraggable } from '@neodrag/solid';
 import { Component, createSignal } from 'solid-js';
 
 const App: Component = () => {
-	const { draggable } = createDraggable();
+	const [draggableRef, setDraggableRef] = createSignal<HTMLElement>();
 
 	const [position, setPosition] = createSignal({ x: 0, y: 0 });
 
+	const dragState = useDraggable(draggableRef, () => [
+		positionPlugin({ current: position() }),
+		events({
+			onDrag({ offset }) {
+				console.log(1);
+				setPosition({ x: offset.x, y: offset.y });
+			},
+		}),
+	]);
+
 	return (
 		<>
-			<div
-				use:draggable={{
-					position: position(),
-					onDrag: ({ offsetX, offsetY }) => setPosition({ x: offsetX, y: offsetY }),
-				}}
-			>
-				I can be moved with the slider too
-			</div>
+			<div ref={setDraggableRef}>I can be moved with the slider too</div>
 			X:
 			<input
 				type="range"

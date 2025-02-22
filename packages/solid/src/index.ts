@@ -1,115 +1,90 @@
 import { createDraggable } from '@neodrag/core';
-import { unstable_definePlugin, type Plugin } from '@neodrag/core/plugins';
-import { createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
+import { DragEventData, unstable_definePlugin, type Plugin } from '@neodrag/core/plugins';
+import { createSignal, onCleanup, onMount, createEffect, untrack } from 'solid-js';
+import type { Accessor, Setter } from 'solid-js';
 
 const draggable_factory = createDraggable();
 
-interface Offset {
-	x: number;
-	y: number;
+interface DragState extends DragEventData {
+	isDragging: boolean;
 }
 
-interface DraggableSignals {
-	offset: () => Offset;
-	rootNode: () => HTMLElement | SVGElement;
-	currentNode: () => HTMLElement | SVGElement;
-	isDragging: () => boolean;
-}
+const default_drag_state: DragState = {
+	offset: { x: 0, y: 0 },
+	rootNode: null as unknown as HTMLElement,
+	currentNode: null as unknown as HTMLElement,
+	isDragging: false,
+};
 
-// State sync plugin factory
-const state_sync = unstable_definePlugin<
-	[
-		{
-			setOffset: (offset: Offset) => void;
-			setRootNode: (node: HTMLElement | SVGElement) => void;
-			setCurrentNode: (node: HTMLElement | SVGElement) => void;
-			setIsDragging: (dragging: boolean) => void;
-		},
-	]
->({
+// Create the state sync plugin with the provided setter function
+const state_sync = unstable_definePlugin<[Setter<DragState>]>({
 	name: 'solid-state-sync',
-	priority: -1000,
+	priority: -1000, // Run last to ensure we get final values
 	cancelable: false,
 
-	start: ([setters], ctx) => {
+	start: ([setState], ctx) => {
 		ctx.effect.immediate(() => {
-			setters.setIsDragging(true);
-			setters.setOffset({ x: ctx.offset.x, y: ctx.offset.y });
-			setters.setRootNode(ctx.rootNode);
-			setters.setCurrentNode(ctx.currentlyDraggedNode);
+			setState((prev) => ({
+				...prev,
+				isDragging: true,
+				offset: { ...ctx.offset },
+				rootNode: ctx.rootNode,
+				currentNode: ctx.currentlyDraggedNode,
+			}));
 		});
 	},
 
-	drag: ([setters], ctx) => {
+	drag: ([setState], ctx) => {
 		ctx.effect.immediate(() => {
-			setters.setOffset({ x: ctx.offset.x, y: ctx.offset.y });
-			setters.setRootNode(ctx.rootNode);
-			setters.setCurrentNode(ctx.currentlyDraggedNode);
+			setState((prev) => ({
+				...prev,
+				offset: { ...ctx.offset },
+				rootNode: ctx.rootNode,
+				currentNode: ctx.currentlyDraggedNode,
+			}));
 		});
 	},
 
-	end: ([setters], ctx) => {
+	end: ([setState], ctx) => {
 		ctx.effect.immediate(() => {
-			setters.setIsDragging(false);
-			setters.setOffset({ x: ctx.offset.x, y: ctx.offset.y });
-			setters.setRootNode(ctx.rootNode);
-			setters.setCurrentNode(ctx.currentlyDraggedNode);
+			setState((prev) => ({
+				...prev,
+				isDragging: false,
+				offset: { ...ctx.offset },
+				rootNode: ctx.rootNode,
+				currentNode: ctx.currentlyDraggedNode,
+			}));
 		});
 	},
 });
 
 export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 	return (
-		ref: () => HTMLElement | SVGElement | null,
-		pluginFactories: (() => Plugin)[],
-	): DraggableSignals => {
-		const [offset, setOffset] = createSignal<Offset>({ x: 0, y: 0 });
-		const [rootNode, setRootNode] = createSignal<HTMLElement | SVGElement>(
-			null as unknown as HTMLElement,
-		);
-		const [currentNode, setCurrentNode] = createSignal<HTMLElement | SVGElement>(
-			null as unknown as HTMLElement,
-		);
-		const [isDragging, setIsDragging] = createSignal(false);
-
+		element: Accessor<HTMLElement | SVGElement | null | undefined>,
+		plugins: Accessor<Plugin[]> = () => [],
+	) => {
+		const [drag_state, set_drag_state] = createSignal<DragState>(default_drag_state);
 		let instance: ReturnType<typeof draggableFactory.draggable> | undefined;
+		const state_sync_plugin = state_sync(set_drag_state);
 
-		const setters = {
-			setOffset,
-			setRootNode,
-			setCurrentNode,
-			setIsDragging,
-		};
-
-		const statePlugin = state_sync(setters);
-
-		// Create plugins array - each factory function is wrapped in a memo
-		const plugins = createMemo(() => pluginFactories.map((factory) => factory()));
-
-		// Initialize draggable instance and handle updates
-		createEffect(() => {
-			const node = ref();
+		onMount(() => {
+			const node = element();
 			if (!node) return;
-
-			const allPlugins = [...plugins(), statePlugin];
-
-			if (!instance) {
-				instance = draggableFactory.draggable(node, allPlugins);
-				onCleanup(() => instance?.destroy());
-			} else {
-				instance.update(allPlugins);
-			}
+			instance = draggableFactory.draggable(node, plugins().concat(state_sync_plugin));
+			onCleanup(() => instance?.destroy());
 		});
 
-		return {
-			offset,
-			rootNode,
-			currentNode,
-			isDragging,
-		};
+		createEffect(() => {
+			if (!instance) return;
+			instance.update(plugins().concat(state_sync_plugin));
+		});
+
+		return drag_state;
 	};
 }
 
 export const useDraggable = wrapper(draggable_factory);
+
+// Export necessary types and utilities
 export * from '@neodrag/core/plugins';
 export const instances = draggable_factory.instances;

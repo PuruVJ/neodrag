@@ -1,7 +1,14 @@
 {
 	"compilerOptions": {
-		"moduleResolution": "bundler",
-		"module": "ESNext"
+		"module": "ESNext",
+		"target": "ESNext",
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"declarationDir": "dist",
+		"strict": true,
+		"esModuleInterop": true,
+		"moduleResolution": "Bundler",
+		"composite": true
 	},
-	"include": ["./src"]
+	"files": ["./src/index.ts"]
 }
