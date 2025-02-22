@@ -20,6 +20,10 @@ export interface ErrorInfo {
 	error: unknown;
 }
 
+// Type definitions for the new plugin system
+export type PluginOrCompartment = Plugin | Compartment<any>;
+export type PluginResolver = () => (Plugin | Compartment<any>)[];
+
 export interface DraggableInstance {
 	ctx: DeepMutable<PluginContext>;
 	root_node: HTMLElement | SVGElement;
@@ -34,6 +38,8 @@ export interface DraggableInstance {
 		immediate: Set<() => void>;
 	};
 	controller: AbortController;
+	compartments: Map<Compartment, Plugin>;
+	resolver?: PluginResolver;
 }
 
 type Result<T> = { ok: true; value: T } | { ok: false; error: unknown };
@@ -60,7 +66,7 @@ export function createDraggable({
 	delegate: delegateTargetFn = DEFAULTS.delegate,
 	onError = DEFAULTS.onError,
 }: {
-	plugins?: Plugin[];
+	plugins?: Plugin[] | PluginResolver;
 	delegate?: () => HTMLElement;
 	onError?: (error: ErrorInfo) => void;
 } = {}) {
@@ -368,13 +374,7 @@ export function createDraggable({
 
 	function initialize_plugins(new_plugins: Plugin[]) {
 		// Create combined array
-		const combined = new Array(new_plugins.length + initial_plugins.length);
-		for (let i = 0; i < new_plugins.length; i++) {
-			combined[i] = new_plugins[i];
-		}
-		for (let i = 0; i < initial_plugins.length; i++) {
-			combined[new_plugins.length + i] = initial_plugins[i];
-		}
+		const combined = new_plugins.concat(initial_plugins);
 
 		// Sort by priority and deduplicate in one pass
 		return Array.from(
@@ -580,7 +580,7 @@ export function createDraggable({
 
 	return {
 		instances,
-		draggable: (node: HTMLElement | SVGElement, plugins: Plugin[] = []) => {
+		draggable: (node: HTMLElement | SVGElement, plugins: Plugin[] | PluginResolver = []) => {
 			if (is_svg_svg_element(node)) {
 				throw new Error(
 					'Dragging the root SVG element directly is not recommended. ' +
@@ -607,7 +607,11 @@ export function createDraggable({
 					immediate: new Set<() => void>(),
 					paint: new Set<() => void>(),
 				},
+				compartments: new Map(),
+				resolver: typeof plugins === 'function' ? plugins : undefined,
 			};
+
+			console.log(instance.resolver, plugins);
 
 			let currently_dragged_element = node;
 
@@ -672,8 +676,55 @@ export function createDraggable({
 				},
 			};
 
-			// Initial setup
-			instance.plugins = initialize_plugins(plugins);
+			if (typeof plugins === 'function') {
+				// Manual mode
+				const resolved = plugins();
+				// First resolve compartments into their current plugins
+				const resolvedPlugins = resolve_plugins(resolved, instance.compartments);
+				// Then initialize plugins properly, including sorting and defaults
+				instance.plugins = initialize_plugins(resolvedPlugins);
+
+				// Set up compartment subscriptions
+				resolved.forEach((item) => {
+					if (item instanceof Compartment) {
+						item.subscribe((newPlugin) => {
+							const oldPlugin = instance.plugins.find((p) => instance.compartments.get(item) === p);
+							if (oldPlugin) {
+								// We update the plugin reference
+								instance.plugins[instance.plugins.indexOf(oldPlugin)] = newPlugin;
+								instance.compartments.set(item, newPlugin);
+
+								// But we're not properly handling the position update
+								// We need to:
+								// 1. Clean up the old plugin state
+								oldPlugin.cleanup?.(instance.ctx, instance.states.get(oldPlugin.name));
+								instance.states.delete(oldPlugin.name);
+
+								// 2. Set up the new plugin state
+								const state = newPlugin.setup?.(instance.ctx);
+								if (state) {
+									instance.states.set(newPlugin.name, state);
+								}
+
+								// 3. Make sure to run plugins even if we're not dragging
+								// This is key - position updates need to work even when not dragging
+								if (instance.ctx.lastEvent) {
+									run_plugins(
+										instance,
+										instance.ctx.isDragging ? 'drag' : 'setup',
+										instance.ctx.lastEvent,
+									);
+									flush_effects(instance);
+								}
+							}
+						});
+					}
+				});
+			} else {
+				// Automatic mode (existing behavior)
+				instance.plugins = initialize_plugins(plugins);
+			}
+
 			for (const plugin of instance.plugins) {
 				const result = resultify(
 					() => {
@@ -697,7 +748,14 @@ export function createDraggable({
 			instances.set(node, instance);
 
 			return {
-				update: (newOptions: Plugin[]) => update(instance, newOptions),
+				update: (newOptions: Plugin[] | PluginResolver) => {
+					if (instance.resolver) {
+						// Manual mode - updates should come through compartments
+						return;
+					}
+
+					update(instance, newOptions as Plugin[]);
+				},
 				destroy: () => destroy(instance),
 			};
 		},
@@ -706,4 +764,45 @@ export function createDraggable({
 
 		[Symbol.dispose]: dispose,
 	};
+}
+
+// First, let's create the Compartment class that will handle manual plugin updates
+export class Compartment<T extends Plugin = Plugin> {
+	#current: T;
+	#subscribers: Set<(plugin: T) => void>;
+
+	// Note: We accept a getter instead of actual value since in svelte u get the warning of state accessed outside closure
+	// This just takes the warning away
+	constructor(initial: () => T) {
+		this.#current = initial();
+		this.#subscribers = new Set();
+	}
+
+	get current(): T {
+		return this.#current;
+	}
+
+	set current(plugin: T) {
+		if (plugin === this.#current) return;
+		this.#current = plugin;
+		this.#subscribers.forEach((callback) => callback(plugin));
+	}
+
+	subscribe(callback: (plugin: T) => void) {
+		this.#subscribers.add(callback);
+		return () => this.#subscribers.delete(callback);
+	}
+}
+
+function resolve_plugins(
+	items: (Plugin | Compartment)[],
+	compartments: Map<Compartment, Plugin>,
+): Plugin[] {
+	return items.map((item) => {
+		if (item instanceof Compartment) {
+			compartments.set(item, item.current);
+			return item.current;
+		}
+		return item;
+	});
 }

@@ -1,26 +1,29 @@
 <script>
-	import { draggable, events, position } from '@neodrag/svelte';
+	import { draggable, events, position, Compartment } from '@neodrag/svelte';
 
 	let pos = $state({ x: 0, y: 0 });
 
-	const options = $derived([
+	const positionCompartment = new Compartment(position({ current: pos }));
+
+	$effect(() => {
+		console.log(23);
+		positionCompartment.current = position({ current: $state.snapshot(pos) });
+	});
+</script>
+
+<div
+	use:draggable={() => [
 		events({
 			onDrag: ({ offset }) => {
 				pos.x = offset.x;
 				pos.y = offset.y;
 			},
 		}),
-		position({
-			current: {
-				x: pos.x,
-				y: pos.y,
-			},
-		}),
-		// disabled(),
-	]);
-</script>
-
-<div use:draggable={options}>I can be moved with the slider too</div>
+		positionCompartment,
+	]}
+>
+	I can be moved with the slider too
+</div>
 X:
 <input type="range" min="0" max="300" bind:value={pos.x} />
 Y:

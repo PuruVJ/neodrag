@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { createDraggable, DEFAULTS } from '../../../src';
+	import { createDraggable, DEFAULTS, type PluginResolver } from '../../../src';
 	import type { Plugin } from '../../../src/plugins';
 
 	const {
@@ -9,7 +9,7 @@
 		plugins,
 		default_plugins = DEFAULTS.plugins,
 	}: {
-		plugins?: Plugin[];
+		plugins?: Plugin[] | PluginResolver;
 		testid: string;
 		children?: Snippet;
 		default_plugins?: Plugin[];

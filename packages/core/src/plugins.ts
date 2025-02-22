@@ -28,7 +28,7 @@ export interface PluginContext {
 	setForcedPosition: (x: number, y: number) => void;
 }
 
-export interface Plugin<State = any> {
+export interface Plugin<State = any, Args extends any[] = any[]> {
 	name: string;
 	priority?: number;
 	liveUpdate?: boolean;
@@ -39,7 +39,7 @@ export interface Plugin<State = any> {
 	drag?: (ctx: PluginContext, state: State, event: PointerEvent) => void;
 	end?: (ctx: PluginContext, state: State, event: PointerEvent) => void;
 	cleanup?: (ctx: PluginContext, state: State) => void;
-	args?: any;
+	args?: Args;
 }
 
 interface BasePluginStructure {
