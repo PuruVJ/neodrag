@@ -680,25 +680,27 @@ export function createDraggable({
 				// Manual mode
 				const resolved = plugins();
 				// First resolve compartments into their current plugins
-				const resolvedPlugins = resolve_plugins(resolved, instance.compartments);
+				const resolved_plugins = resolve_plugins(resolved, instance.compartments);
 				// Then initialize plugins properly, including sorting and defaults
-				instance.plugins = initialize_plugins(resolvedPlugins);
+				instance.plugins = initialize_plugins(resolved_plugins);
 
 				// Set up compartment subscriptions
 				resolved.forEach((item) => {
 					if (item instanceof Compartment) {
 						item.subscribe((newPlugin) => {
-							const oldPlugin = instance.plugins.find((p) => instance.compartments.get(item) === p);
-							if (oldPlugin) {
+							const old_plugin = instance.plugins.find(
+								(p) => instance.compartments.get(item) === p,
+							);
+							if (old_plugin) {
 								// We update the plugin reference
-								instance.plugins[instance.plugins.indexOf(oldPlugin)] = newPlugin;
+								instance.plugins[instance.plugins.indexOf(old_plugin)] = newPlugin;
 								instance.compartments.set(item, newPlugin);
 
 								// But we're not properly handling the position update
 								// We need to:
 								// 1. Clean up the old plugin state
-								oldPlugin.cleanup?.(instance.ctx, instance.states.get(oldPlugin.name));
-								instance.states.delete(oldPlugin.name);
+								old_plugin.cleanup?.(instance.ctx, instance.states.get(old_plugin.name));
+								instance.states.delete(old_plugin.name);
 
 								// 2. Set up the new plugin state
 								const state = newPlugin.setup?.(instance.ctx);
