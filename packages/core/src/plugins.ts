@@ -4,6 +4,7 @@ import {
 	ReadonlyToShallowMutable,
 	set_node_dataset,
 	set_node_key_style,
+	set_timeout_if_firefox,
 } from './utils.ts';
 
 export interface PluginContext {
@@ -335,10 +336,14 @@ export const transform = unstable_definePlugin<
 				translation.setTranslate(ctx.offset.x, ctx.offset.y);
 
 				const transform = element.transform.baseVal;
-				transform.clear();
-				transform.appendItem(translation);
+				set_timeout_if_firefox(() => {
+					transform.clear();
+					transform.appendItem(translation);
+				}, 0);
 			} else {
-				ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
+				set_timeout_if_firefox(() => {
+					ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
+				}, 0);
 			}
 		}
 
@@ -889,20 +894,17 @@ type TouchActionMode =
 	| 'revert-layer'
 	| 'unset';
 
-export const touchAction = unstable_definePlugin<[mode?: TouchActionMode | false | null]>(
-	{
-		name: 'neodrag:touch-action',
-		cancelable: false,
-		liveUpdate: true,
+export const touchAction = unstable_definePlugin<[mode?: TouchActionMode | false | null]>({
+	name: 'neodrag:touch-action',
+	cancelable: false,
+	liveUpdate: true,
 
-		setup([mode], ctx) {
-			if (mode !== false && mode !== null) {
-				set_node_key_style(ctx.rootNode, 'touch-action', mode ?? 'manipulation');
-			}
-		},
+	setup([mode], ctx) {
+		if (mode !== false && mode !== null) {
+			set_node_key_style(ctx.rootNode, 'touch-action', mode ?? 'manipulation');
+		}
 	},
-	['manipulation'],
-);
+});
 
 // Scroll-lock plugin that prevents scrolling while dragging
 export const scrollLock = unstable_definePlugin(
