@@ -1,5 +1,11 @@
 # @neodrag/svelte
 
+## 2.3.1
+
+### Patch Changes
+
+- [#188](https://github.com/PuruVJ/neodrag/pull/188) [`01e3510`](https://github.com/PuruVJ/neodrag/commit/01e35105c0f532481fb2e31091d052b8622e5c83) Thanks [@vincjo](https://github.com/vincjo)! - fix: Add "svelte" field to @neodrag/svelte exports
+
 ## 2.3.0
 
 ### Minor Changes
