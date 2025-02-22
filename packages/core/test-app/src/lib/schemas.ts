@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
 export const SCHEMAS = {
+	MODE: z.object({
+		type: z.enum(['manual', 'auto']).default('auto'),
+		works_in_manual: z.boolean().default(false),
+	}),
+
 	PLUGINS: {
 		AXIS: z.enum(['x', 'y']).optional(),
 

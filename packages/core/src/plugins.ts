@@ -28,7 +28,7 @@ export interface PluginContext {
 	setForcedPosition: (x: number, y: number) => void;
 }
 
-export interface Plugin<State = any> {
+export interface Plugin<State = any, Args extends any[] = any[]> {
 	name: string;
 	priority?: number;
 	liveUpdate?: boolean;
@@ -39,8 +39,12 @@ export interface Plugin<State = any> {
 	drag?: (ctx: PluginContext, state: State, event: PointerEvent) => void;
 	end?: (ctx: PluginContext, state: State, event: PointerEvent) => void;
 	cleanup?: (ctx: PluginContext, state: State) => void;
-	args?: any;
+	args?: Args;
 }
+
+// Type definitions for the new plugin system
+export type PluginResolver = () => (Plugin | Compartment<any>)[];
+export type PluginInput = Plugin[] | PluginResolver;
 
 interface BasePluginStructure {
 	name: string;
@@ -56,6 +60,46 @@ interface PluginStructure<ArgsTuple extends any[], State> extends BasePluginStru
 	drag?: (args: ArgsTuple, ctx: PluginContext, state: State, event: PointerEvent) => void;
 	end?: (args: ArgsTuple, ctx: PluginContext, state: State, event: PointerEvent) => void;
 	cleanup?: (args: ArgsTuple, ctx: PluginContext, state: State) => void;
+}
+
+export class Compartment<T extends Plugin = Plugin> {
+	#current: T;
+	#subscribers: Set<(plugin: T) => void>;
+
+	// Note: We accept a getter instead of actual value since in svelte u get the warning of state accessed outside closure
+	// This just takes the warning away
+	constructor(initial: () => T) {
+		this.#current = initial();
+		this.#subscribers = new Set();
+	}
+
+	get current(): T {
+		return this.#current;
+	}
+
+	set current(plugin: T) {
+		if (plugin === this.#current) return;
+		this.#current = plugin;
+		this.#subscribers.forEach((callback) => callback(plugin));
+	}
+
+	subscribe(callback: (plugin: T) => void) {
+		this.#subscribers.add(callback);
+		return () => this.#subscribers.delete(callback);
+	}
+}
+
+export function resolve_plugins(
+	items: (Plugin | Compartment)[],
+	compartments: Map<Compartment, Plugin>,
+): Plugin[] {
+	return items.map((item) => {
+		if (item instanceof Compartment) {
+			compartments.set(item, item.current);
+			return item.current;
+		}
+		return item;
+	});
 }
 
 export function unstable_definePlugin<ArgsTuple extends any[], State = void>(

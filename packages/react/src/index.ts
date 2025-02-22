@@ -1,6 +1,6 @@
 import { createDraggable } from '@neodrag/core';
 import { DragEventData, unstable_definePlugin, type Plugin } from '@neodrag/core/plugins';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const draggable_factory = createDraggable();
 

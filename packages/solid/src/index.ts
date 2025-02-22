@@ -1,7 +1,7 @@
 import { createDraggable } from '@neodrag/core';
 import { DragEventData, unstable_definePlugin, type Plugin } from '@neodrag/core/plugins';
-import { createSignal, onCleanup, onMount, createEffect, untrack } from 'solid-js';
 import type { Accessor, Setter } from 'solid-js';
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 
 const draggable_factory = createDraggable();
 
