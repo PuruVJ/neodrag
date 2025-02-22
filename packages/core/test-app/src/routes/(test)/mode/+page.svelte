@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Box from '$lib/Box.svelte';
-	import { Compartment } from '../../../../../src/index.js';
-	import { axis, grid } from '../../../../../src/plugins.js';
+	import { axis, Compartment, grid } from '../../../../../src/plugins.js';
 
 	const { data } = $props();
 

@@ -1,13 +1,10 @@
-import { createDraggable, type PluginResolver } from '@neodrag/core';
-import type { Plugin } from '@neodrag/core/plugins';
+import { createDraggable } from '@neodrag/core';
+import type { PluginInput } from '@neodrag/core/plugins';
 import type { Action } from 'svelte/action';
 
 const { draggable: core, instances } = createDraggable();
 
-export const draggable = core as Action<
-	HTMLElement | SVGElement,
-	Plugin[] | PluginResolver | undefined
->;
-export { Compartment } from '@neodrag/core';
+export const draggable = core as Action<HTMLElement | SVGElement, PluginInput | undefined>;
+
 export * from '@neodrag/core/plugins';
 export { instances };

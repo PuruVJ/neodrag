@@ -1,6 +1,10 @@
 import {
 	applyUserSelectHack,
+	Compartment,
 	ignoreMultitouch,
+	PluginInput,
+	PluginResolver,
+	resolve_plugins,
 	stateMarker,
 	threshold,
 	touchAction,
@@ -19,10 +23,6 @@ export interface ErrorInfo {
 	node: HTMLElement | SVGElement;
 	error: unknown;
 }
-
-// Type definitions for the new plugin system
-export type PluginOrCompartment = Plugin | Compartment<any>;
-export type PluginResolver = () => (Plugin | Compartment<any>)[];
 
 export interface DraggableInstance {
 	ctx: DeepMutable<PluginContext>;
@@ -66,7 +66,7 @@ export function createDraggable({
 	delegate: delegateTargetFn = DEFAULTS.delegate,
 	onError = DEFAULTS.onError,
 }: {
-	plugins?: Plugin[] | PluginResolver;
+	plugins?: PluginInput;
 	delegate?: () => HTMLElement;
 	onError?: (error: ErrorInfo) => void;
 } = {}) {
@@ -580,7 +580,7 @@ export function createDraggable({
 
 	return {
 		instances,
-		draggable: (node: HTMLElement | SVGElement, plugins: Plugin[] | PluginResolver = []) => {
+		draggable: (node: HTMLElement | SVGElement, plugins: PluginInput = []) => {
 			if (is_svg_svg_element(node)) {
 				throw new Error(
 					'Dragging the root SVG element directly is not recommended. ' +
@@ -748,7 +748,7 @@ export function createDraggable({
 			instances.set(node, instance);
 
 			return {
-				update: (newOptions: Plugin[] | PluginResolver) => {
+				update: (newOptions: PluginInput) => {
 					if (instance.resolver) {
 						// Manual mode - updates should come through compartments
 						return;
@@ -764,45 +764,4 @@ export function createDraggable({
 
 		[Symbol.dispose]: dispose,
 	};
-}
-
-// First, let's create the Compartment class that will handle manual plugin updates
-export class Compartment<T extends Plugin = Plugin> {
-	#current: T;
-	#subscribers: Set<(plugin: T) => void>;
-
-	// Note: We accept a getter instead of actual value since in svelte u get the warning of state accessed outside closure
-	// This just takes the warning away
-	constructor(initial: () => T) {
-		this.#current = initial();
-		this.#subscribers = new Set();
-	}
-
-	get current(): T {
-		return this.#current;
-	}
-
-	set current(plugin: T) {
-		if (plugin === this.#current) return;
-		this.#current = plugin;
-		this.#subscribers.forEach((callback) => callback(plugin));
-	}
-
-	subscribe(callback: (plugin: T) => void) {
-		this.#subscribers.add(callback);
-		return () => this.#subscribers.delete(callback);
-	}
-}
-
-function resolve_plugins(
-	items: (Plugin | Compartment)[],
-	compartments: Map<Compartment, Plugin>,
-): Plugin[] {
-	return items.map((item) => {
-		if (item instanceof Compartment) {
-			compartments.set(item, item.current);
-			return item.current;
-		}
-		return item;
-	});
 }

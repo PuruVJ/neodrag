@@ -1,5 +1,5 @@
 import { createDraggable } from '@neodrag/core';
-import { Plugin } from '@neodrag/core/plugins';
+import type { PluginInput } from '@neodrag/core/plugins';
 import { type Directive } from 'vue';
 
 const factory = createDraggable();
@@ -8,7 +8,7 @@ const draggable_map = new WeakMap<HTMLElement | SVGElement, ReturnType<typeof fa
 
 export const wrapper = (
 	factory: ReturnType<typeof createDraggable>,
-): Directive<HTMLElement | SVGElement, Plugin[] | undefined> => {
+): Directive<HTMLElement | SVGElement, PluginInput | undefined> => {
 	return {
 		mounted: (el, { value = [] }) =>
 			!draggable_map.has(el) && draggable_map.set(el, factory.draggable(el, value)),
@@ -24,5 +24,4 @@ export const wrapper = (
 
 export const vDraggable = wrapper(factory);
 export const instances = factory.instances;
-export { Compartment } from '@neodrag/core';
 export * from '@neodrag/core/plugins';

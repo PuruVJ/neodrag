@@ -86,6 +86,5 @@ export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 export const useDraggable = wrapper(draggable_factory);
 
 // Export necessary types and utilities
-export { Compartment } from '@neodrag/core';
 export * from '@neodrag/core/plugins';
 export const instances = draggable_factory.instances;

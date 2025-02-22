@@ -1,11 +1,11 @@
-import { createDraggable, PluginResolver } from '@neodrag/core';
-import type { Plugin } from '@neodrag/core/plugins';
+import { createDraggable } from '@neodrag/core';
+import type { PluginInput } from '@neodrag/core/plugins';
 
 const core = createDraggable();
 
 export class Wrapper {
 	#drag_instance: ReturnType<ReturnType<typeof createDraggable>['draggable']>;
-	#plugins: Plugin[] | PluginResolver = [];
+	#plugins: PluginInput = [];
 
 	get plugins() {
 		return this.#plugins;
@@ -14,7 +14,7 @@ export class Wrapper {
 	constructor(
 		factory: ReturnType<typeof createDraggable>,
 		node: HTMLElement,
-		plugins: Plugin[] | PluginResolver = [],
+		plugins: PluginInput = [],
 	) {
 		this.#drag_instance = factory.draggable(node, (this.#plugins = plugins));
 	}
@@ -25,11 +25,10 @@ export class Wrapper {
 }
 
 export class Draggable extends Wrapper {
-	constructor(node: HTMLElement, plugins: Plugin[] | PluginResolver = []) {
+	constructor(node: HTMLElement, plugins: PluginInput = []) {
 		super(core, node, plugins);
 	}
 }
 
-export { Compartment } from '@neodrag/core';
 export * from '@neodrag/core/plugins';
 export const instances = core.instances;
