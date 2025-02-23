@@ -664,6 +664,9 @@ export type DragEventData = Readonly<{
 
 	/** The element being dragged */
 	currentNode: HTMLElement | SVGElement;
+
+	/** The pointer event that triggered the drag */
+	event: PointerEvent;
 }>;
 
 export const events = unstable_definePlugin<
@@ -685,30 +688,34 @@ export const events = unstable_definePlugin<
 				offset: ctx.offset,
 				rootNode: ctx.rootNode,
 				currentNode: ctx.currentlyDraggedNode,
+				event: ctx.lastEvent,
 			} as DragEventData;
 		},
 
-		start([options], ctx, state) {
+		start([options], ctx, state, event) {
 			ctx.effect.immediate(() => {
 				state.offset = ctx.offset;
 				state.currentNode = ctx.currentlyDraggedNode;
+				state.event = event;
 				options.onDragStart?.(state);
 			});
 		},
 
-		drag([options], ctx, state) {
+		drag([options], ctx, state, event) {
 			ctx.effect.immediate(() => {
 				state.offset = ctx.offset;
 				state.currentNode = ctx.currentlyDraggedNode;
+				state.event = event;
 
 				options.onDrag?.(state);
 			});
 		},
 
-		end([options], ctx, state) {
+		end([options], ctx, state, event) {
 			ctx.effect.immediate(() => {
 				state.offset = ctx.offset;
 				state.currentNode = ctx.currentlyDraggedNode;
+				state.event = event;
 
 				options.onDragEnd?.(state);
 			});
