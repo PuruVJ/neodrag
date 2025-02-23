@@ -1,5 +1,17 @@
 # @neodrag/svelte
 
+## 2.3.1
+
+### Patch Changes
+
+- [#188](https://github.com/PuruVJ/neodrag/pull/188) [`01e3510`](https://github.com/PuruVJ/neodrag/commit/01e35105c0f532481fb2e31091d052b8622e5c83) Thanks [@vincjo](https://github.com/vincjo)! - fix: Add "svelte" field to @neodrag/svelte exports
+
+## 2.3.0
+
+### Minor Changes
+
+- [#186](https://github.com/PuruVJ/neodrag/pull/186) [`a917373`](https://github.com/PuruVJ/neodrag/commit/a917373e56378ae9443f3162e428abc8c058b191) Thanks [@PuruVJ](https://github.com/PuruVJ)! - feat: Expose event: PointerEvent
+
 ## 2.2.0
 
 ### Minor Changes
@@ -80,9 +92,9 @@ If you have this in your `tsconfig.json`:
 
 ```json
 {
-  "compilerOptions": {
-    "types": ["@neodrag/svelte/globals"]
-  }
+	"compilerOptions": {
+		"types": ["@neodrag/svelte/globals"]
+	}
 }
 ```
 

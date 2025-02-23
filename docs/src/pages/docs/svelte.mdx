@@ -102,13 +102,13 @@ How to use events-as-options? The syntax is similar to the custom events one ðŸ‘
 ```svelte
 <div
   use:draggable={{
-    onDragStart: ({ offsetX, offsetY, rootNode, currentNode }) => {
+    onDragStart: ({ offsetX, offsetY, rootNode, currentNode, event }) => {
       // Do something
     },
-    onDrag: ({ offsetX, offsetY, rootNode, currentNode }) => {
+    onDrag: ({ offsetX, offsetY, rootNode, currentNode, event }) => {
       // Do something
     },
-    onDragEnd: ({ offsetX, offsetY, rootNode, currentNode }) => {
+    onDragEnd: ({ offsetX, offsetY, rootNode, currentNode, event }) => {
       // Do something
     },
   }}
