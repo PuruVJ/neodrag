@@ -13,6 +13,7 @@ const default_drag_state: DragState = {
 	rootNode: null as unknown as HTMLElement,
 	currentNode: null as unknown as HTMLElement,
 	isDragging: false,
+	event: null as unknown as PointerEvent,
 };
 
 // Create the state sync plugin with the provided setState function
@@ -23,7 +24,7 @@ const state_sync = unstable_definePlugin<
 	priority: -1000, // Run last to ensure we get final values
 	cancelable: false,
 
-	start: ([setDragState], ctx) => {
+	start: ([setDragState], ctx, _state, event) => {
 		ctx.effect.immediate(() => {
 			setDragState((prev) => ({
 				...prev,
@@ -31,22 +32,24 @@ const state_sync = unstable_definePlugin<
 				offset: { ...ctx.offset },
 				rootNode: ctx.rootNode,
 				currentNode: ctx.currentlyDraggedNode,
+				event,
 			}));
 		});
 	},
 
-	drag: ([setDragState], ctx) => {
+	drag: ([setDragState], ctx, _state, event) => {
 		ctx.effect.immediate(() => {
 			setDragState((prev) => ({
 				...prev,
 				offset: { ...ctx.offset },
 				rootNode: ctx.rootNode,
 				currentNode: ctx.currentlyDraggedNode,
+				event,
 			}));
 		});
 	},
 
-	end: ([setDragState], ctx) => {
+	end: ([setDragState], ctx, _state, event) => {
 		ctx.effect.immediate(() => {
 			setDragState((prev) => ({
 				...prev,
@@ -54,6 +57,7 @@ const state_sync = unstable_definePlugin<
 				offset: { ...ctx.offset },
 				rootNode: ctx.rootNode,
 				currentNode: ctx.currentlyDraggedNode,
+				event,
 			}));
 		});
 	},

@@ -783,13 +783,13 @@ function is_nested(inner: ControlZone, outer: ControlZone) {
 }
 
 // Helper function to find all zones containing a point, sorted by area (smallest first)
-const find_containing_zones = (ctx: PluginContext, event: PointerEvent, zones: ControlZone[]) => {
+function find_containing_zones(ctx: PluginContext, event: PointerEvent, zones: ControlZone[]) {
 	return zones
 		.filter((zone) => is_point_in_zone(event.clientX, event.clientY, zone, ctx.cachedRootNodeRect))
 		.sort((a, b) => a.area - b.area);
-};
+}
 
-const is_point_in_zone = (x: number, y: number, zone: ControlZone, root_rect: DOMRect) => {
+function is_point_in_zone(x: number, y: number, zone: ControlZone, root_rect: DOMRect) {
 	const relative_x = x - root_rect.left;
 	const relative_y = y - root_rect.top;
 
@@ -799,7 +799,7 @@ const is_point_in_zone = (x: number, y: number, zone: ControlZone, root_rect: DO
 		relative_y >= zone.top &&
 		relative_y <= zone.bottom
 	);
-};
+}
 
 export const controls = unstable_definePlugin<
 	[
