@@ -611,8 +611,6 @@ export function createDraggable({
 				resolver: typeof plugins === 'function' ? plugins : undefined,
 			};
 
-			console.log(instance.resolver, plugins);
-
 			let currently_dragged_element = node;
 
 			instance.ctx = {
@@ -676,50 +674,53 @@ export function createDraggable({
 				},
 			};
 
+			const subscriptions = new Set<() => void>();
+
 			if (typeof plugins === 'function') {
 				// Manual mode
 				const resolved = plugins();
-				// First resolve compartments into their current plugins
 				const resolved_plugins = resolve_plugins(resolved, instance.compartments);
-				// Then initialize plugins properly, including sorting and defaults
 				instance.plugins = initialize_plugins(resolved_plugins);
 
 				// Set up compartment subscriptions
 				resolved.forEach((item) => {
 					if (item instanceof Compartment) {
-						item.subscribe((newPlugin) => {
-							const old_plugin = instance.plugins.find(
-								(p) => instance.compartments.get(item) === p,
-							);
-							if (old_plugin) {
-								// We update the plugin reference
-								instance.plugins[instance.plugins.indexOf(old_plugin)] = newPlugin;
-								instance.compartments.set(item, newPlugin);
+						subscriptions.add(
+							item.subscribe((newPlugin) => {
+								const old_plugin = instance.plugins.find(
+									(p) => instance.compartments.get(item) === p,
+								);
+								if (old_plugin) {
+									// Skip if same instance and not live-updateable
+									if (old_plugin === newPlugin && !newPlugin.liveUpdate) {
+										return;
+									}
 
-								// But we're not properly handling the position update
-								// We need to:
-								// 1. Clean up the old plugin state
-								old_plugin.cleanup?.(instance.ctx, instance.states.get(old_plugin.name));
-								instance.states.delete(old_plugin.name);
+									// Update plugin reference
+									instance.plugins[instance.plugins.indexOf(old_plugin)] = newPlugin;
+									instance.compartments.set(item, newPlugin);
 
-								// 2. Set up the new plugin state
-								const state = newPlugin.setup?.(instance.ctx);
-								if (state) {
-									instance.states.set(newPlugin.name, state);
-								}
+									let has_changes = false;
 
-								// 3. Make sure to run plugins even if we're not dragging
-								// This is key - position updates need to work even when not dragging
-								if (instance.ctx.lastEvent) {
-									run_plugins(
-										instance,
-										instance.ctx.isDragging ? 'drag' : 'setup',
-										instance.ctx.lastEvent,
-									);
+									// Update all plugins that have liveUpdate enabled
+									for (const plugin of instance.plugins) {
+										if (plugin.liveUpdate) {
+											const old = instance.plugins.find((p) => p.name === plugin.name);
+											if (update_plugin_if_needed(instance, old, plugin)) {
+												has_changes = true;
+											}
+										}
+									}
+
+									// If changes occurred and we have a last event, rerun drag
+									if (!instance.ctx.isDragging && has_changes && instance.ctx.lastEvent) {
+										handle_pointer_move(instance.ctx.lastEvent);
+									}
+
 									flush_effects(instance);
 								}
-							}
-						});
+							}),
+						);
 					}
 				});
 			} else {
@@ -758,7 +759,11 @@ export function createDraggable({
 
 					update(instance, newOptions as Plugin[]);
 				},
-				destroy: () => destroy(instance),
+				destroy: () => {
+					subscriptions.forEach((unsubscribe) => unsubscribe());
+					subscriptions.clear();
+					destroy(instance);
+				},
 			};
 		},
 

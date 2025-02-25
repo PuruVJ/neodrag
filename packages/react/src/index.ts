@@ -1,5 +1,10 @@
 import { createDraggable } from '@neodrag/core';
-import { DragEventData, unstable_definePlugin, type Plugin } from '@neodrag/core/plugins';
+import {
+	DragEventData,
+	PluginInput,
+	unstable_definePlugin,
+	type Plugin,
+} from '@neodrag/core/plugins';
 import { useEffect, useRef, useState } from 'react';
 
 const draggable_factory = createDraggable();
@@ -23,6 +28,7 @@ const state_sync = unstable_definePlugin<
 	name: 'react-state-sync',
 	priority: -1000, // Run last to ensure we get final values
 	cancelable: false,
+	liveUpdate: true,
 
 	start: ([setDragState], ctx, _state, event) => {
 		ctx.effect.immediate(() => {
@@ -63,12 +69,20 @@ const state_sync = unstable_definePlugin<
 	},
 });
 
+function resolve_plugins(plugins: PluginInput, state_sync_plugin: Plugin) {
+	if (typeof plugins === 'function') {
+		return () => plugins().concat(state_sync_plugin);
+	} else {
+		return plugins.concat(state_sync_plugin);
+	}
+}
+
 export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
-	return (ref: React.RefObject<HTMLElement | SVGElement | null>, plugins: Plugin[] = []) => {
+	return (ref: React.RefObject<HTMLElement | SVGElement | null>, plugins: PluginInput = []) => {
 		const [drag_state, set_drag_state] = useState<DragState>(default_drag_state);
 		const instance = useRef<ReturnType<typeof draggableFactory.draggable>>();
 		const state_sync_ref = useRef(state_sync(set_drag_state));
-		const pluginsRef = useRef(plugins.concat(state_sync_ref.current));
+		const pluginsRef = useRef(resolve_plugins(plugins, state_sync_ref.current));
 		const is_first_run = useRef(true);
 
 		// Initialize draggable instance
@@ -90,7 +104,7 @@ export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 
 			if (!instance.current) return;
 
-			pluginsRef.current = plugins.concat(state_sync_ref.current);
+			pluginsRef.current = resolve_plugins(plugins, state_sync_ref.current);
 			instance.current.update(pluginsRef.current);
 		}, [plugins]); // Changed dependency
 

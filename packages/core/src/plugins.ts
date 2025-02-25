@@ -1,10 +1,9 @@
 import {
 	get_node_style,
 	is_null,
-	ReadonlyToShallowMutable,
+	type ReadonlyToShallowMutable,
 	set_node_dataset,
 	set_node_key_style,
-	set_timeout_if_firefox,
 } from './utils.ts';
 
 export interface PluginContext {
@@ -65,9 +64,8 @@ interface PluginStructure<ArgsTuple extends any[], State> extends BasePluginStru
 export class Compartment<T extends Plugin = Plugin> {
 	#current: T;
 	#subscribers: Set<(plugin: T) => void>;
+	#updating: boolean = false;
 
-	// Note: We accept a getter instead of actual value since in svelte u get the warning of state accessed outside closure
-	// This just takes the warning away
 	constructor(initial: () => T) {
 		this.#current = initial();
 		this.#subscribers = new Set();
@@ -79,8 +77,17 @@ export class Compartment<T extends Plugin = Plugin> {
 
 	set current(plugin: T) {
 		if (plugin === this.#current) return;
+
+		// Prevent recursive updates
+		if (this.#updating) return;
+
+		this.#updating = true;
 		this.#current = plugin;
+
+		// Notify subscribers with the new plugin
 		this.#subscribers.forEach((callback) => callback(plugin));
+
+		this.#updating = false;
 	}
 
 	subscribe(callback: (plugin: T) => void) {
@@ -380,14 +387,11 @@ export const transform = unstable_definePlugin<
 				translation.setTranslate(ctx.offset.x, ctx.offset.y);
 
 				const transform = element.transform.baseVal;
-				set_timeout_if_firefox(() => {
-					transform.clear();
-					transform.appendItem(translation);
-				}, 0);
+
+				transform.clear();
+				transform.appendItem(translation);
 			} else {
-				set_timeout_if_firefox(() => {
-					ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
-				}, 0);
+				ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
 			}
 		}
 
@@ -682,6 +686,7 @@ export const events = unstable_definePlugin<
 	{
 		name: 'neodrag:events',
 		cancelable: false,
+		liveUpdate: false,
 
 		setup(_args, ctx) {
 			return {
