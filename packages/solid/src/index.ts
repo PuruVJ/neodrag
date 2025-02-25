@@ -23,12 +23,12 @@ const default_drag_state: DragState = {
 };
 
 // Create the state sync plugin with the provided setter function
-const state_sync = unstable_definePlugin<[Setter<DragState>]>({
+const state_sync = unstable_definePlugin((setState: Setter<DragState>) => ({
 	name: 'solid-state-sync',
 	priority: -1000, // Run last to ensure we get final values
 	cancelable: false,
 
-	start: ([setState], ctx, _state, event) => {
+	start: (ctx, _state, event) => {
 		ctx.effect.immediate(() => {
 			setState((prev) => ({
 				...prev,
@@ -41,7 +41,7 @@ const state_sync = unstable_definePlugin<[Setter<DragState>]>({
 		});
 	},
 
-	drag: ([setState], ctx, _state, event) => {
+	drag: (ctx, _state, event) => {
 		ctx.effect.immediate(() => {
 			setState((prev) => ({
 				...prev,
@@ -53,7 +53,7 @@ const state_sync = unstable_definePlugin<[Setter<DragState>]>({
 		});
 	},
 
-	end: ([setState], ctx, _state, event) => {
+	end: (ctx, _state, event) => {
 		ctx.effect.immediate(() => {
 			setState((prev) => ({
 				...prev,
@@ -65,7 +65,7 @@ const state_sync = unstable_definePlugin<[Setter<DragState>]>({
 			}));
 		});
 	},
-});
+}));
 
 function resolve_plugins(
 	plugins: Accessor<Plugin[]> | ReturnType<PluginResolver>,

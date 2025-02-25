@@ -22,52 +22,52 @@ const default_drag_state: DragState = {
 };
 
 // Create the state sync plugin with the provided setState function
-const state_sync = unstable_definePlugin<
-	[setDragState: React.Dispatch<React.SetStateAction<DragState>>]
->({
-	name: 'react-state-sync',
-	priority: -1000, // Run last to ensure we get final values
-	cancelable: false,
-	liveUpdate: true,
+const state_sync = unstable_definePlugin(
+	(setDragState: React.Dispatch<React.SetStateAction<DragState>>) => ({
+		name: 'react-state-sync',
+		priority: -1000, // Run last to ensure we get final values
+		cancelable: false,
+		liveUpdate: true,
 
-	start: ([setDragState], ctx, _state, event) => {
-		ctx.effect.immediate(() => {
-			setDragState((prev) => ({
-				...prev,
-				isDragging: true,
-				offset: { ...ctx.offset },
-				rootNode: ctx.rootNode,
-				currentNode: ctx.currentlyDraggedNode,
-				event,
-			}));
-		});
-	},
+		start: (ctx, _state, event) => {
+			ctx.effect.immediate(() => {
+				setDragState((prev) => ({
+					...prev,
+					isDragging: true,
+					offset: { ...ctx.offset },
+					rootNode: ctx.rootNode,
+					currentNode: ctx.currentlyDraggedNode,
+					event,
+				}));
+			});
+		},
 
-	drag: ([setDragState], ctx, _state, event) => {
-		ctx.effect.immediate(() => {
-			setDragState((prev) => ({
-				...prev,
-				offset: { ...ctx.offset },
-				rootNode: ctx.rootNode,
-				currentNode: ctx.currentlyDraggedNode,
-				event,
-			}));
-		});
-	},
+		drag: (ctx, _state, event) => {
+			ctx.effect.immediate(() => {
+				setDragState((prev) => ({
+					...prev,
+					offset: { ...ctx.offset },
+					rootNode: ctx.rootNode,
+					currentNode: ctx.currentlyDraggedNode,
+					event,
+				}));
+			});
+		},
 
-	end: ([setDragState], ctx, _state, event) => {
-		ctx.effect.immediate(() => {
-			setDragState((prev) => ({
-				...prev,
-				isDragging: false,
-				offset: { ...ctx.offset },
-				rootNode: ctx.rootNode,
-				currentNode: ctx.currentlyDraggedNode,
-				event,
-			}));
-		});
-	},
-});
+		end: (ctx, _state, event) => {
+			ctx.effect.immediate(() => {
+				setDragState((prev) => ({
+					...prev,
+					isDragging: false,
+					offset: { ...ctx.offset },
+					rootNode: ctx.rootNode,
+					currentNode: ctx.currentlyDraggedNode,
+					event,
+				}));
+			});
+		},
+	}),
+);
 
 function resolve_plugins(plugins: PluginInput, state_sync_plugin: Plugin) {
 	if (typeof plugins === 'function') {
