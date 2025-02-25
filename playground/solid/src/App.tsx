@@ -17,7 +17,6 @@ const App: Component = () => {
 		pos_comp,
 		events({
 			onDrag({ offset }) {
-				console.log(1);
 				setPosition({ x: offset.x, y: offset.y });
 			},
 		}),

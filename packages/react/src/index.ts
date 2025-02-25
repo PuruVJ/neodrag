@@ -1,5 +1,6 @@
 import { createDraggable } from '@neodrag/core';
 import {
+	Compartment,
 	DragEventData,
 	PluginInput,
 	unstable_definePlugin,
@@ -110,6 +111,10 @@ export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 
 		return drag_state;
 	};
+}
+
+export function useCompartment<T extends Plugin>(initial: () => T) {
+	return useRef<Compartment<T>>(new Compartment(initial)).current;
 }
 
 export const useDraggable = wrapper(draggable_factory);

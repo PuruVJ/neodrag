@@ -38,7 +38,11 @@ export interface DraggableInstance {
 		immediate: Set<() => void>;
 	};
 	controller: AbortController;
-	compartments: Map<Compartment, Plugin>;
+	compartments: {
+		map: Map<Compartment, Plugin>;
+		pending: Set<Compartment>;
+		is_flushing: boolean;
+	};
 	resolver?: PluginResolver;
 }
 
@@ -537,6 +541,65 @@ export function createDraggable({
 		return true;
 	}
 
+	// Add a new function to process pending compartment updates
+	function process_pending_compartment_updates(instance: DraggableInstance) {
+		if (instance.compartments.is_flushing || instance.compartments.pending.size === 0) {
+			return;
+		}
+
+		instance.compartments.is_flushing = true;
+
+		queueMicrotask(() => {
+			// Store reference to pending items and clear for next batch
+			const pending = new Set(instance.compartments.pending);
+			instance.compartments.pending.clear();
+			instance.compartments.is_flushing = false;
+
+			let has_changes = false;
+
+			// Process all pending compartment updates
+			for (const compartment of pending) {
+				const new_plugin = compartment.current;
+				const old_plugin = instance.plugins.find(
+					(p) => p === instance.compartments.map.get(compartment),
+				);
+
+				if (old_plugin) {
+					// Skip if same instance and not live-updateable
+					if (old_plugin === new_plugin && !new_plugin.liveUpdate) {
+						continue;
+					}
+
+					// Update plugin reference
+					instance.plugins[instance.plugins.indexOf(old_plugin)] = new_plugin;
+					instance.compartments.map.set(compartment, new_plugin);
+
+					// Update all plugins that have liveUpdate enabled
+					for (const plugin of instance.plugins) {
+						if (plugin.liveUpdate) {
+							const old = instance.plugins.find((p) => p.name === plugin.name);
+							if (update_plugin_if_needed(instance, old, plugin)) {
+								has_changes = true;
+							}
+						}
+					}
+				}
+			}
+
+			// If changes occurred and we have a last event, rerun drag
+			if (!instance.ctx.isDragging && has_changes && instance.ctx.lastEvent) {
+				handle_pointer_move(instance.ctx.lastEvent);
+			}
+
+			flush_effects(instance);
+
+			// Check if new updates came in while we were processing
+			if (instance.compartments.pending.size > 0) {
+				process_pending_compartment_updates(instance);
+			}
+		});
+	}
+
 	function find_removed_plugins(old_plugins: Plugin[], new_plugins: Plugin[]): Plugin[] {
 		return old_plugins.filter((p) => !new_plugins.some((np) => np.name === p.name));
 	}
@@ -607,7 +670,11 @@ export function createDraggable({
 					immediate: new Set<() => void>(),
 					paint: new Set<() => void>(),
 				},
-				compartments: new Map(),
+				compartments: {
+					map: new Map(),
+					pending: new Set(),
+					is_flushing: false,
+				},
 				resolver: typeof plugins === 'function' ? plugins : undefined,
 			};
 
@@ -679,46 +746,17 @@ export function createDraggable({
 			if (typeof plugins === 'function') {
 				// Manual mode
 				const resolved = plugins();
-				const resolved_plugins = resolve_plugins(resolved, instance.compartments);
+				const resolved_plugins = resolve_plugins(resolved, instance.compartments.map);
 				instance.plugins = initialize_plugins(resolved_plugins);
 
 				// Set up compartment subscriptions
 				resolved.forEach((item) => {
 					if (item instanceof Compartment) {
 						subscriptions.add(
-							item.subscribe((newPlugin) => {
-								const old_plugin = instance.plugins.find(
-									(p) => instance.compartments.get(item) === p,
-								);
-								if (old_plugin) {
-									// Skip if same instance and not live-updateable
-									if (old_plugin === newPlugin && !newPlugin.liveUpdate) {
-										return;
-									}
-
-									// Update plugin reference
-									instance.plugins[instance.plugins.indexOf(old_plugin)] = newPlugin;
-									instance.compartments.set(item, newPlugin);
-
-									let has_changes = false;
-
-									// Update all plugins that have liveUpdate enabled
-									for (const plugin of instance.plugins) {
-										if (plugin.liveUpdate) {
-											const old = instance.plugins.find((p) => p.name === plugin.name);
-											if (update_plugin_if_needed(instance, old, plugin)) {
-												has_changes = true;
-											}
-										}
-									}
-
-									// If changes occurred and we have a last event, rerun drag
-									if (!instance.ctx.isDragging && has_changes && instance.ctx.lastEvent) {
-										handle_pointer_move(instance.ctx.lastEvent);
-									}
-
-									flush_effects(instance);
-								}
+							item.subscribe(() => {
+								// Add to pending updates and trigger processing
+								instance.compartments.pending.add(item);
+								process_pending_compartment_updates(instance);
 							}),
 						);
 					}
