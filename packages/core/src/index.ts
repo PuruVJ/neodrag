@@ -605,9 +605,7 @@ export function createDraggable({
 	}
 
 	function cleanup_plugins(instance: DraggableInstance, plugins: Plugin[]): void {
-		const len = plugins.length;
-		for (let i = 0; i < len; i++) {
-			const plugin = plugins[i];
+		for (const plugin of plugins) {
 			plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
 			instance.states.delete(plugin.name);
 		}
