@@ -38,7 +38,10 @@
 	"pnpm": {
 		"overrides": {
 			"vite": "^6.0"
-		}
+		},
+		"onlyBuiltDependencies": [
+			"esbuild"
+		]
 	},
 	"packageManager": "pnpm@9.14.0"
 }
