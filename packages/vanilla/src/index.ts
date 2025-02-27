@@ -1,37 +1,34 @@
-import { draggable, type DragOptions } from '@neodrag/core';
+import { createDraggable } from '@neodrag/core';
+import type { PluginInput } from '@neodrag/core/plugins';
 
-export class Draggable {
-	private _drag_instance: ReturnType<typeof draggable>;
-	private _options: DragOptions = {};
+const core = createDraggable();
+
+export class Wrapper {
+	#drag_instance: ReturnType<ReturnType<typeof createDraggable>['draggable']>;
+	#plugins: PluginInput = [];
+
+	get plugins() {
+		return this.#plugins;
+	}
 
 	constructor(
-		public node: HTMLElement,
-		options: DragOptions = {},
+		factory: ReturnType<typeof createDraggable>,
+		node: HTMLElement,
+		plugins: PluginInput = [],
 	) {
-		this._drag_instance = draggable(node, (this._options = options));
+		this.#drag_instance = factory.draggable(node, (this.#plugins = plugins));
 	}
 
-	public updateOptions(options: DragOptions) {
-		this._drag_instance.update(Object.assign(this._options, options));
-	}
-
-	set options(options: DragOptions) {
-		this._drag_instance.update((this._options = options));
-	}
-
-	get options() {
-		return this._options;
-	}
-
-	public destroy() {
-		this._drag_instance.destroy();
+	destroy() {
+		this.#drag_instance.destroy();
 	}
 }
 
-export type {
-	DragAxis,
-	DragBounds,
-	DragBoundsCoords,
-	DragEventData,
-	DragOptions,
-} from '@neodrag/core';
+export class Draggable extends Wrapper {
+	constructor(node: HTMLElement, plugins: PluginInput = []) {
+		super(core, node, plugins);
+	}
+}
+
+export * from '@neodrag/core/plugins';
+export const instances = core.instances;
