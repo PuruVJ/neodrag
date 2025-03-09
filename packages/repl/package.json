@@ -8,7 +8,8 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"prepack": "svelte-kit sync && svelte-package && publint",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"llm": "bun src/llm.ts ./src/lib llm.md"
 	},
 	"files": [
 		"dist",
@@ -35,10 +36,20 @@
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/package": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.3",
+		"@types/bun": "^1.2.4",
+		"@types/node": "^22.13.5",
 		"publint": "^0.3.2",
 		"svelte": "^5.20.5",
 		"svelte-check": "^4.1.4",
 		"typescript": "^5.7.3",
 		"vite": "^6.2.0"
+	},
+	"dependencies": {
+		"@babel/standalone": "^7.26.9",
+		"@rollup/browser": "^4.34.8",
+		"magic-string": "^0.30.17",
+		"resolve.exports": "^2.0.3",
+		"solid-js": "^1.8.7",
+		"vue": "^3.5.13"
 	}
 }
