@@ -235,6 +235,10 @@ importers:
         version: 2.11.0(@testing-library/jest-dom@6.6.3)(solid-js@1.9.3)(vite@5.4.11(@types/node@20.12.7)(sass@1.82.0)(terser@5.37.0))
 
   packages/svelte:
+    dependencies:
+      svelte:
+        specifier: ^3.0.0 || ^4.0.0 || ^5.0.0
+        version: 4.2.19
     devDependencies:
       '@neodrag/core':
         specifier: workspace:*
