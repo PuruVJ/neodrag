@@ -1,5 +1,11 @@
 # @neodrag/svelte
 
+## 2.3.2
+
+### Patch Changes
+
+- [`73f5960`](https://github.com/PuruVJ/neodrag/commit/73f59603e2a55936622f26551b6262aee5208903) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Add svelte peerDependency
+
 ## 2.3.1
 
 ### Patch Changes
