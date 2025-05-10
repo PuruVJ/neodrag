@@ -27,31 +27,36 @@
 	});
 </script>
 
-{#snippet box()}
-	{#if is_mounted}
-		<Box testid="draggable" plugins={[bounds(bounds_from)]} />
-	{/if}
-{/snippet}
+<div class="container">
+	{#snippet box()}
+		{#if is_mounted}
+			<Box testid="draggable" plugins={[bounds(bounds_from)]} />
+		{/if}
+	{/snippet}
 
-{#if data.bounds.type === 'parent'}
-	<div class="parent">
-		{@render box()}
-	</div>
-{:else if data.bounds.type === 'viewport'}
-	{@render box()}
-{:else if data.bounds.type === 'selector'}
-	<div class="selector">
-		<div class="selector-child">
+	{#if data.bounds.type === 'parent'}
+		<div class="parent">
 			{@render box()}
 		</div>
-	</div>
-{:else}
-	<div class="element" class:smaller={data.bounds.is_smaller_than_element} bind:this={element}>
+	{:else if data.bounds.type === 'viewport'}
 		{@render box()}
-	</div>
-{/if}
+	{:else if data.bounds.type === 'selector'}
+		<div class="selector">
+			<div class="selector-child">
+				{@render box()}
+			</div>
+		</div>
+	{:else}
+		<div class="element" class:smaller={data.bounds.is_smaller_than_element} bind:this={element}>
+			{@render box()}
+		</div>
+	{/if}
+</div>
 
 <style>
+	.container {
+		margin-top: 600px;
+	}
 	:root {
 		--size: 200px;
 	}

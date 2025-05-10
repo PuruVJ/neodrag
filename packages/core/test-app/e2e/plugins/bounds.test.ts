@@ -118,7 +118,7 @@ test.describe('BoundsFrom.selector()', () => {
 
 		await div.hover();
 		await page.mouse.down();
-		await page.mouse.move(200, 200);
+		await page.mouse.move(200, 800);
 		await page.mouse.up();
 
 		// It should have dragged viewport width minus the box width

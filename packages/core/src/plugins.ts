@@ -378,7 +378,13 @@ export const BoundsFrom = {
 		right?: number;
 		bottom?: number;
 	}): BoundFromFunction {
-		return (ctx) => BoundsFrom.element(ctx.root_node.parentNode as HTMLElement, padding)(ctx);
+		return (ctx) => {
+			// console.log(
+			// 	(ctx.root_node.parentNode as HTMLElement).getBoundingClientRect(),
+			// 	BoundsFrom.element(ctx.root_node.parentNode as HTMLElement, padding)(ctx),
+			// );
+			return BoundsFrom.element(ctx.root_node.parentNode as HTMLElement, padding)(ctx);
+		};
 	},
 };
 
@@ -411,12 +417,22 @@ export const bounds = unstable_definePlugin(
 
 			return {
 				bounds,
+				initialElementPosition: {
+					x: ctx.cachedRootNodeRect.left - ctx.offset.x,
+					y: ctx.cachedRootNodeRect.top - ctx.offset.y,
+				},
 			};
 		},
 
 		start(ctx, state) {
 			if (shouldRecompute?.({ hook: 'dragStart' })) {
 				state.bounds = value({ root_node: ctx.rootNode });
+
+				// Update the initial position on drag start
+				state.initialElementPosition = {
+					x: ctx.cachedRootNodeRect.left - ctx.offset.x,
+					y: ctx.cachedRootNodeRect.top - ctx.offset.y,
+				};
 			}
 		},
 
@@ -430,24 +446,38 @@ export const bounds = unstable_definePlugin(
 			const element_width = ctx.cachedRootNodeRect.width;
 			const element_height = ctx.cachedRootNodeRect.height;
 
-			// Convert absolute bounds to allowed movement bounds
-			// Need to consider:
-			// 1. Current accumulated offset (ctx.offset)
-			// 2. Where user grabbed the element (pointer_offset)
-			// 3. Element dimensions
-			const allowed_movement_x1 = bound_coords[0][0] - ctx.offset.x; // max left
-			const allowed_movement_y1 = bound_coords[0][1] - ctx.offset.y; // max top
-			const allowed_movement_x2 = bound_coords[1][0] - element_width - ctx.offset.x; // max right
-			const allowed_movement_y2 = bound_coords[1][1] - element_height - ctx.offset.y; // max bottom
+			// These are the viewport-coordinate limits of where the element can move
+			const min_viewport_x = bound_coords[0][0];
+			const min_viewport_y = bound_coords[0][1];
+			const max_viewport_x = bound_coords[1][0] - element_width;
+			const max_viewport_y = bound_coords[1][1] - element_height;
 
-			// Now clamp the proposed delta movement to our allowed movement bounds
+			// Get the element's initial viewport position before any dragging started
+			// Using our stored initialElementPosition
+			const initial_viewport_position = state.initialElementPosition;
+
+			// Calculate what the minimum and maximum offsets would be
+			const min_offset_x = min_viewport_x - initial_viewport_position.x;
+			const min_offset_y = min_viewport_y - initial_viewport_position.y;
+			const max_offset_x = max_viewport_x - initial_viewport_position.x;
+			const max_offset_y = max_viewport_y - initial_viewport_position.y;
+
+			// Calculate what the offset would be after this drag
+			const proposed_offset_x = ctx.offset.x + (ctx.proposed.x ?? 0);
+			const proposed_offset_y = ctx.offset.y + (ctx.proposed.y ?? 0);
+
+			// Clamp the offset
+			const clamped_offset_x = clamp(proposed_offset_x, min_offset_x, max_offset_x);
+			const clamped_offset_y = clamp(proposed_offset_y, min_offset_y, max_offset_y);
+
+			// Calculate what delta is needed to achieve the clamped offset
+			const required_delta_x = clamped_offset_x - ctx.offset.x;
+			const required_delta_y = clamped_offset_y - ctx.offset.y;
+
+			// Propose the adjusted delta
 			ctx.propose(
-				ctx.proposed.x != null
-					? clamp(ctx.proposed.x, allowed_movement_x1, allowed_movement_x2)
-					: ctx.proposed.x,
-				ctx.proposed.y != null
-					? clamp(ctx.proposed.y, allowed_movement_y1, allowed_movement_y2)
-					: ctx.proposed.y,
+				ctx.proposed.x !== null ? required_delta_x : null,
+				ctx.proposed.y !== null ? required_delta_y : null,
 			);
 		},
 
@@ -784,10 +814,12 @@ export const position = unstable_definePlugin(
 		liveUpdate: true,
 
 		setup(ctx) {
-			const x = options?.current?.x ?? options?.default?.x ?? ctx.offset.x;
-			const y = options?.current?.y ?? options?.default?.y ?? ctx.offset.y;
+			if (!ctx.isDragging) {
+				const x = options?.current?.x ?? options?.default?.x ?? ctx.offset.x;
+				const y = options?.current?.y ?? options?.default?.y ?? ctx.offset.y;
 
-			ctx.setForcedPosition(x, y);
+				ctx.setForcedPosition(x, y);
+			}
 		},
 	}),
 );
