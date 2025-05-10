@@ -1,10 +1,7 @@
 ---
-import type { MarkdownLayoutProps } from 'astro';
-
-import DocsLayout from './DocsLayout.astro';
-
 import type { Framework } from '$helpers/constants';
-import SIZES from '../data/sizes.json';
+import type { MarkdownLayoutProps } from 'astro';
+import DocsLayout from './DocsLayout.astro';
 
 type Props = MarkdownLayoutProps<{
 	title: string;
@@ -14,8 +11,9 @@ type Props = MarkdownLayoutProps<{
 const { frontmatter } = Astro.props;
 const { tagline, title, url } = frontmatter;
 
+console.log(Astro.props);
+
 const framework = url?.split('/').at(-1) as Framework;
-const { size, version } = SIZES[framework];
 ---
 
 <DocsLayout title={title}>
@@ -23,7 +21,7 @@ const { size, version } = SIZES[framework];
 		@neodrag/<span style={`color: var(--app-color-brand-${framework})`}>{framework}</span>
 	</h1>
 
-	<div class="tags">
+	<!-- <div class="tags">
 		<span class="tag">
 			{version}
 		</span>
@@ -31,7 +29,7 @@ const { size, version } = SIZES[framework];
 		<span class="tag">
 			{size}KB
 		</span>
-	</div>
+	</div> -->
 
 	<p>{tagline}</p>
 
@@ -40,12 +38,12 @@ const { size, version } = SIZES[framework];
 	<h2>Credits</h2>
 	<p>
 		Inspired from the amazing
-		<a href="https://github.com/react-grid-layout/react-draggable"> react-draggable </a>
+		<a href='https://github.com/react-grid-layout/react-draggable'> react-draggable </a>
 		library, and implements the same API.
 	</p>
 </DocsLayout>
 
-<style lang="scss">
+<style lang='scss'>
 	.tags {
 		display: flex;
 		flex-wrap: wrap;

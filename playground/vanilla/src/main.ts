@@ -7,8 +7,8 @@ const ySlider = document.querySelector<HTMLInputElement>('#y')!;
 
 let pos = { x: 0, y: 0 };
 
-const positionCompartment = new Compartment(position({ current: pos }));
-const eventsCompartment = new Compartment(
+const positionCompartment = new Compartment(() => position({ current: pos }));
+const eventsCompartment = new Compartment(() =>
 	events({
 		onDrag: ({ offset }) => {
 			pos = { ...offset };
@@ -22,7 +22,7 @@ const eventsCompartment = new Compartment(
 	}),
 );
 
-const dragInstance = new Draggable(draggableEl, [positionCompartment, eventsCompartment]);
+const dragInstance = new Draggable(draggableEl, () => [positionCompartment, eventsCompartment]);
 
 xSlider.addEventListener('input', (e: Event) => {
 	// @ts-ignore

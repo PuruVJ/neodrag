@@ -3,6 +3,7 @@ module.exports = {
 	semi: true,
 	printWidth: 100,
 	singleQuote: true,
+	jsxSingleQuote: false,
 
 	plugins: [require.resolve('prettier-plugin-astro'), require.resolve('prettier-plugin-svelte')],
 	overrides: [
@@ -10,12 +11,14 @@ module.exports = {
 			files: '*.astro',
 			options: {
 				parser: 'astro',
+				jsxSingleQuote: false,
 			},
 		},
 		{
 			files: ['*.mdx', '*.md'],
 			options: {
 				useTabs: false,
+				printWidth: 70,
 			},
 		},
 	],
