@@ -1,19 +1,57 @@
-<script lang="ts">
-	import ThemeSwitcher from '$components/ThemeSwitcher.svelte';
-	import { FRAMEWORKS, PLUGINS } from '$helpers/constants';
+---
+import ThemeSwitcher from '$components/ThemeSwitcher.svelte';
+import { getCollection } from 'astro:content';
 
-	const pathname = globalThis?.location?.pathname ?? '';
+const pathname = Astro.url.pathname;
 
-	const aria_current_val = (path: string) => (pathname.endsWith(path) ? 'page' : 'false');
+const framework_collection = (await getCollection('framework')).sort((a, b) =>
+	a.id > b.id ? 1 : -1
+);
+const guides_collection = (await getCollection('guide')).sort((a, b) => (a.id > b.id ? 1 : -1));
+const plugin_collection = (await getCollection('plugin')).sort((a, b) => (a.id > b.id ? 1 : -1));
 
-	const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(pathname)?.[1];
-</script>
+const aria_current_val = (path: string) => (pathname.endsWith(path) ? 'page' : 'false');
+
+const framework_page = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)/gi.exec(pathname)?.[1];
+
+const nav_list = [
+	{
+		title: 'framework',
+		sections: framework_collection.map((v) => ({
+			slug: `/docs/framework/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
+			title: v.data.nav_title ?? v.data.title,
+		})),
+	},
+	{
+		title: 'guide',
+		sections: guides_collection.map((v) => ({
+			slug: `/docs/guide/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
+			title: v.data.nav_title ?? v.data.title,
+		})),
+	},
+	{
+		title: 'plugin',
+		sections: plugin_collection.map((v) => ({
+			slug: `/docs/plugin/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
+			title: v.data.nav_title ?? v.data.title,
+		})),
+	},
+] satisfies {
+	title: string;
+	sections: {
+		title: string;
+		slug: string;
+	}[];
+}[];
+---
 
 <!-- Component should be wrapped in an <aside> or <header> -->
 <div
 	class="nav container"
-	style:--primary={framework ? `var(--app-color-brand-${framework})` : null}
-	style:--primary-hsl={framework ? `var(--app-color-brand-${framework}-hsl)` : null}
+	style={{
+		'--primary': framework_page ? `var(--app-color-brand-${framework_page})` : null,
+		'--primary-hsl': framework_page ? `var(--app-color-brand-${framework_page}-hsl)` : null,
+	}}
 >
 	<a href="/" class="h3 logo unstyled">
 		<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" />
@@ -21,52 +59,25 @@
 	</a>
 
 	<nav>
-		<ul class="group">
-			<div class="title">Libraries</div>
+		{
+			nav_list.map(({ title, sections }, index, arr) => (
+				<>
+					<ul class="group">
+						<div class="title">{title}</div>
 
-			{#each FRAMEWORKS as { name }}
-				<li style="text-transform: capitalize;">
-					<a href={`/docs/${name}`} aria-current={aria_current_val(name)} class="unstyled">
-						{name}
-					</a>
-				</li>
-			{/each}
-		</ul>
+						{sections.map(({ slug, title }) => (
+							<li>
+								<a href={slug} aria-current={aria_current_val(slug)} class="unstyled">
+									{title}
+								</a>
+							</li>
+						))}
+					</ul>
 
-		<hr />
-
-		<ul class="group">
-			<div class="title">Plugins</div>
-
-			<li>
-				<a href={`/docs/plugins`} aria-current={aria_current_val('/docs/plugins')} class="unstyled">
-					Plugins
-				</a>
-			</li>
-
-			{#each PLUGINS as { name }}
-				<li>
-					<a href={`/docs/plugins/${name}`} aria-current={aria_current_val(name)} class="unstyled">
-						{name}
-					</a>
-				</li>
-			{/each}
-		</ul>
-
-		<hr />
-
-		<ul class="group">
-			<div class="title">Guides</div>
-			<li>
-				<a
-					href="/docs/migrating/svelte-drag"
-					aria-current={aria_current_val('/docs/migrating/svelte-drag')}
-					class="unstyled"
-				>
-					Svelte Drag to Neodrag</a
-				>
-			</li>
-		</ul>
+					{index !== arr.length - 1 && <hr />}
+				</>
+			))
+		}
 	</nav>
 
 	<span class="spacer"></span>
@@ -78,17 +89,17 @@
 	<span class="copyright"
 		>&copy; 2021-{new Date().getUTCFullYear()}
 		<a
-			href="https://twitter.com/puruvjdev"
+			href="https://x.com/puruvjdev"
 			target="blank"
 			rel="noopener noreferrer"
-			class:framework
+			class={framework_page ? 'framework' : ''}
 		>
 			Puru Vijay</a
 		>
 	</span>
 </div>
 
-<style lang="scss">
+<style lang="scss" scoped>
 	@import '../../css/breakpoints';
 
 	.container {

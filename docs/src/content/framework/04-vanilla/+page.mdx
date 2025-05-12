@@ -1,14 +1,11 @@
 ---
-layout: '$layouts/MainDocsLayout.astro'
 title: '@neodrag/vanilla'
+nav_title: 'vanilla'
 tagline: 'A lightweight library to make your elements draggable.'
 ---
 
-import Options from '$components/options/Options.astro';
-import ExportedTypesMDX from '../../documentation/exported-types.mdx';
-
 ```sh
-npm install @neodrag/vanilla
+npm i @neodrag/vanilla
 ```
 
 ## Usage
@@ -26,17 +23,29 @@ With plugins
 ```tsx
 import { Draggable, axis, grid } from '@neodrag/vanilla';
 
-const dragInstance = new Draggable(document.querySelector('#drag'), [axis('x'), grid([10, 10])]);
+const dragInstance = new Draggable(document.querySelector('#drag'), [
+  axis('x'),
+  grid([10, 10]),
+]);
 ```
 
 Defining options elsewhere with typescript
 
 ```tsx
-import { Draggable, axis, bounds, BoundsFrom, type Plugin } from '@neodrag/vanilla';
+import {
+  Draggable,
+  axis,
+  bounds,
+  BoundsFrom,
+  type Plugin,
+} from '@neodrag/vanilla';
 
 const options: Pluginp[] = [axis('y'), bounds(BoundsFrom.parent())];
 
-const dragInstance = new Draggable(document.querySelector('#drag'), options);
+const dragInstance = new Draggable(
+  document.querySelector('#drag'),
+  options,
+);
 ```
 
 Update plugins:
@@ -45,10 +54,10 @@ Update plugins:
 import { Draggable, axis, grid, Compartment } from '@neodrag/vanilla';
 
 const axisCompartment = new Compartment(() => axis('x'));
-const dragInstance = new Draggable(document.querySelector('#drag'), () => [
-  axisCompartment,
-  grid([10, 10]),
-]);
+const dragInstance = new Draggable(
+  document.querySelector('#drag'),
+  () => [axisCompartment, grid([10, 10])],
+);
 
 // Update the axisCompartment. Automatically applies to the drag instance
 axisCompartment.current = axis('y');
@@ -81,7 +90,9 @@ After including the library via a CDN, `@neodrag/vanilla` will be available as a
 ```html
 <div id="drag">Drag me!</div>
 <script>
-  var dragInstance = new NeoDrag.Draggable(document.getElementById('drag'));
+  var dragInstance = new NeoDrag.Draggable(
+    document.getElementById('drag'),
+  );
 </script>
 ```
 

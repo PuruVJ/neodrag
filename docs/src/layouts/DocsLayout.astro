@@ -1,34 +1,28 @@
 ---
-import type { MarkdownLayoutProps } from 'astro';
-
-import Nav from '$components/docs/Nav.svelte';
+import Nav from '$components/docs/Nav.astro';
+import MetaThemeColor from '$components/MetaThemeColor.svelte';
 import MobileNav from '$components/MobileNav.svelte';
 import ToC from '$components/ToC.svelte';
 import Layout from './Layout.astro';
-import MetaThemeColor from '$components/MetaThemeColor.svelte';
 
-type Props =
-	| MarkdownLayoutProps<{
-			title: string;
-	  }>
-	| { title: string };
+type Props = { title: string };
 
-// @ts-ignore
-const { frontmatter, title } = Astro.props;
-const { title: frontmatterTitle } = frontmatter || {};
+const { title } = Astro.props;
 ---
 
 <MetaThemeColor client:load />
 
-<Layout title={title ?? frontmatterTitle}>
+<Layout title={title}>
 	<ToC client:only />
 	<div class="mobile-nav">
-		<MobileNav client:media="(max-width: 968px)" />
+		<MobileNav client:media="(max-width: 968px)">
+			<Nav />
+		</MobileNav>
 	</div>
 
 	<section class="docs-container" id="docs-container">
 		<aside>
-			<Nav client:media="(min-width: 969px)" client:load />
+			<Nav />
 		</aside>
 
 		<main>

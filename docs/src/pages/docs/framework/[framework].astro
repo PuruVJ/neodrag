@@ -1,0 +1,28 @@
+---
+import { FRAMEWORKS } from '$helpers/constants';
+import MainDocsLayout from '$layouts/MainDocsLayout.astro';
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import { getCollection } from 'astro:content';
+
+const { framework } = Astro.params;
+
+const framework_collection = await getCollection('framework');
+const framework_entry = framework_collection.find((f) => f.id.includes(framework));
+
+if (!framework_entry) {
+	return;
+}
+
+const current_framework = framework_entry.id.replace(/\d{2}-(.+)\/page/, '$1');
+
+const { Content } = await render(framework_entry);
+
+export const getStaticPaths = (() => {
+	return FRAMEWORKS.map((f) => ({ params: { framework: f.name } }));
+}) satisfies GetStaticPaths;
+---
+
+<MainDocsLayout {...framework_entry.data} framework={current_framework as any}>
+	<Content />
+</MainDocsLayout>

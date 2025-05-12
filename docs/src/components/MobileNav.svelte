@@ -7,7 +7,13 @@
 	import { fade, slide } from 'svelte/transition';
 	import CloseIcon from '~icons/material-symbols/close-rounded';
 	import MenuIcon from '~icons/ri/menu-3-fill';
-	import Nav from './docs/Nav.svelte';
+	import type { Snippet } from 'svelte';
+
+	let {
+		children,
+	}: {
+		children: Snippet;
+	} = $props();
 
 	let shadow = $state(false);
 	let is_nav_open = $state(false);
@@ -46,7 +52,8 @@
 		<button class="close-button" onclick={() => (is_nav_open = false)}>
 			<CloseIcon />
 		</button>
-		<Nav />
+
+		{@render children?.()}
 	</nav>
 {/if}
 

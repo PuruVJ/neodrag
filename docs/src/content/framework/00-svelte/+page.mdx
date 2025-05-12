@@ -1,12 +1,8 @@
 ---
-layout: '$layouts/MainDocsLayout.astro'
 title: '@neodrag/svelte'
+nav_title: 'svelte'
 tagline: 'A lightweight Svelte Action to make your elements draggable.'
 ---
-
-import Options from '$components/options/Options.astro';
-import { version } from '../../../../packages/svelte/package.json';
-import ExportedTypesMDX from '../../documentation/exported-types.mdx';
 
 ```sh
 npm i @neodrag/svelte
@@ -38,7 +34,12 @@ Defining plugins elsewhere with typescript
 
 ```svelte
 <script lang="ts">
-  import { draggable, axis, bounds, BoundsFrom } from '@neodrag/svelte';
+  import {
+    draggable,
+    axis,
+    bounds,
+    BoundsFrom,
+  } from '@neodrag/svelte';
   import type { Plugin } from '@neodrag/svelte';
 
   let plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];

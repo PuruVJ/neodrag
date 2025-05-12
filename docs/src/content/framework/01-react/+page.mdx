@@ -1,12 +1,8 @@
 ---
-layout: '$layouts/MainDocsLayout.astro'
 title: '@neodrag/react'
+nav_title: 'react'
 tagline: 'A lightweight react hook to make your elements draggable.'
 ---
-
-import ExportedTypesMDX from '../../documentation/exported-types.mdx';
-
-import Options from '$components/options/Options.astro';
 
 ```sh
 npm i @neodrag/react
@@ -43,7 +39,12 @@ function App() {
 Defining options elsewhere with typescript
 
 ```tsx
-import { useDraggable, bounds, BoundsFrom, type Plugin } from '@neodrag/react';
+import {
+  useDraggable,
+  bounds,
+  BoundsFrom,
+  type Plugin,
+} from '@neodrag/react';
 
 function App() {
   const draggableRef = useRef(null);

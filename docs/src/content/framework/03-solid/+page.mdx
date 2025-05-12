@@ -1,11 +1,8 @@
 ---
-layout: '$layouts/MainDocsLayout.astro'
 title: '@neodrag/solid'
+nav_title: 'solid'
 tagline: 'A lightweight directive to make your elements draggable.'
 ---
-
-import Options from '$components/options/Options.astro';
-import ExportedTypesMDX from '../../documentation/exported-types.mdx';
 
 ```sh
 npm i @neodrag/solid
@@ -19,7 +16,8 @@ Basic usage
 import { useDraggable } from '@neodrag/solid';
 
 export const App: Component = () => {
-  const [draggableRef, setDraggableRef] = createSignal<HTMLElement | null>(null);
+  const [draggableRef, setDraggableRef] =
+    createSignal<HTMLElement | null>(null);
 
   useDraggable(draggableRef);
 
@@ -38,7 +36,13 @@ useDraggable(draggableRef, [axis('x'), grid([10, 10])]);
 Defining plugins elsewhere with typescript
 
 ```tsx
-import { useDraggable, axis, bounds, BoundsFrom, type Plugin } from '@neodrag/solid';
+import {
+  useDraggable,
+  axis,
+  bounds,
+  BoundsFrom,
+  type Plugin,
+} from '@neodrag/solid';
 
 const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
 useDraggable(draggableRef, plugins);
