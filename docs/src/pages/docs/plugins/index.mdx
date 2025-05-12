@@ -1,0 +1,809 @@
+---
+layout: '$layouts/MainDocsLayout.astro'
+title: 'Plugins'
+tagline: 'Neodrag plugins, and how to author them.'
+---
+
+# Neodrag Plugins Guide
+
+## Introduction
+
+Welcome to the Neodrag v3 plugins guide! This document introduces the plugin system in Neodrag, explaining why plugins are essential, how they work, and how you can create your own.
+
+Neodrag is a framework-agnostic draggable implementation that uses a plugin architecture to provide powerful and flexible drag-and-drop functionality across different environments. Version 3 represents a significant shift to a fully modular plugin-based architecture, moving away from the options object approach used in v2.
+
+> **Note:** In this documentation, we're assuming that the `draggable` function is globally available in your framework. For Svelte, this is provided by the action automatically. For other frameworks, you'll need to import the appropriate hook or directive from the framework-specific package.
+
+## What are Plugins and Why Do We Need Them?
+
+In Neodrag v3, plugins are modular pieces of code that extend the core functionality of the draggable system. They allow for:
+
+- **Separation of concerns**: Each plugin has a single responsibility, making the codebase more maintainable
+- **Extensibility**: Add exactly the features you need, when you need them
+- **Customization**: Configure the behavior of each plugin independently
+- **Performance**: Only load the functionality you actually use
+
+The plugin architecture lets Neodrag maintain a small, fast core while supporting a rich ecosystem of features. Instead of a monolithic library with a complex API, you get a lightweight base with composable plugins that can be mixed and matched.
+
+## Core Plugins in Neodrag
+
+Neodrag comes with several built-in plugins that handle common drag-and-drop requirements:
+
+```typescript
+export const DEFAULTS = {
+  plugins: [
+    ignoreMultitouch(),
+    stateMarker(),
+    applyUserSelectHack(),
+    transform(),
+    threshold(),
+    touchAction(),
+  ],
+  // ... other default options
+};
+```
+
+These default plugins provide essential functionality:
+
+### Default Plugins
+
+- **ignoreMultitouch()**: Prevents conflicts when multiple touch points are active
+- **stateMarker()**: Adds data attributes to track drag state (e.g. `data-neodrag-state="dragging"`)
+- **applyUserSelectHack()**: Prevents text selection during dragging
+- **transform()**: Handles the actual visual movement of elements
+- **threshold()**: Provides control over when dragging should start
+- **touchAction()**: Configures touch behaviors for better mobile experience
+
+### Additional Built-in Plugins
+
+Neodrag provides more plugins that you can add as needed:
+
+- **axis(value)**: Constrains movement to a single axis (`'x'` or `'y'`)
+- **grid([x, y])**: Snaps movement to a grid
+- **bounds(value)**: Constrains movement within specific boundaries
+- **disabled()**: Disables dragging entirely
+- **position(options)**: Sets and maintains element position
+- **events(options)**: Provides event callbacks
+- **controls(options)**: Defines specific areas that can initiate dragging
+- **scrollLock(options)**: Prevents scrolling during dragging
+
+Each plugin can be configured with specific options, allowing you to tailor the drag behavior precisely to your needs.
+
+## Using Plugins
+
+Plugins can be provided when creating a draggable instance:
+
+```javascript
+// Assuming draggable is globally available
+import {
+  grid,
+  axis,
+  bounds,
+  BoundsFrom,
+} from '@neodrag/core/plugins';
+
+// Apply to an element with plugins
+const element = document.getElementById('my-draggable');
+const instance = draggable(element, [
+  // Core plugins are included by default
+  grid([10, 10]), // Snap to a 10x10 grid
+  axis('x'), // Restrict movement to horizontal axis
+  bounds(BoundsFrom.viewport()), // Constrain to viewport
+]);
+
+// Later, when done:
+instance.destroy();
+```
+
+### Framework-Specific Usage
+
+The exact imports and usage patterns vary slightly by framework:
+
+#### React
+
+```javascript
+import { useDraggable } from '@neodrag/react';
+import { axis } from '@neodrag/react/plugins';
+
+function MyComponent() {
+  const dragState = useDraggable(elementRef, [axis('x')]);
+  // Access drag state for position info, etc.
+}
+```
+
+#### Vue
+
+```javascript
+import { vDraggable } from '@neodrag/vue';
+import { axis } from '@neodrag/vue/plugins';
+
+app.directive('draggable', vDraggable);
+
+// In your component template:
+// <div v-draggable="[axis('x')]">Drag me</div>
+```
+
+#### Svelte
+
+```javascript
+// Import only plugins - draggable is available globally
+import { axis } from '@neodrag/svelte/plugins';
+
+// In your component template:
+// <div use:draggable={[axis('x')]}>Drag me</div>
+```
+
+#### Solid
+
+```javascript
+import { useDraggable } from '@neodrag/solid';
+import { axis } from '@neodrag/solid/plugins';
+
+function MyComponent() {
+  const dragState = useDraggable(elementRef, [axis('x')]);
+  // Access drag state for position info, etc.
+}
+```
+
+#### Vanilla
+
+```javascript
+import { Draggable } from '@neodrag/vanilla';
+import { axis } from '@neodrag/vanilla/plugins';
+
+const element = document.getElementById('my-draggable');
+const instance = new Draggable(element, [axis('x')]);
+```
+
+### Plugin Management
+
+Once initialized, plugins are primarily managed through Compartments in Neodrag v3's modular architecture. The direct `.update()` method that existed in Neodrag v2 has been replaced with this more efficient approach:
+
+```javascript
+import { Compartment } from 'neodrag/plugins';
+
+// Create a compartment for an updatable plugin
+const axisCompartment = new Compartment(() => axis('x'));
+
+// Use the compartment in initialization
+const instance = draggable(element, () => [axisCompartment]);
+
+// Later, update the plugin through its compartment
+axisCompartment.current = axis('y');
+```
+
+The framework-specific adapters (React, Vue, Solid, Svelte) handle plugin initialization patterns differently, but they all focus on using Compartments for efficient updates rather than reinstantiating all plugins.
+
+### Accessing Draggable Instances
+
+The library provides access to all current instances:
+
+```javascript
+// In Svelte
+// instances is available globally
+
+// Inspect active instances
+console.log(instances.size); // Number of active draggable elements
+```
+
+## Plugin Lifecycle
+
+Each plugin can implement hooks that run at different stages of the drag operation:
+
+- `setup`: Called when the plugin is initialized
+- `shouldStart`: Determines if dragging should begin
+- `start`: Called when dragging starts
+- `drag`: Called repeatedly during dragging
+- `end`: Called when dragging ends
+- `cleanup`: Called when a plugin is removed or destroyed
+
+Here's how the plugin lifecycle flows:
+
+1. When a draggable is created, each plugin's `setup` hook runs
+2. On pointer down, `shouldStart` hooks determine if dragging should begin
+3. If dragging starts, the `start` hooks run
+4. During dragging, the `drag` hooks run on every pointer move
+5. When the pointer is released, the `end` hooks run
+6. When a plugin is removed or the draggable is destroyed, `cleanup` hooks run
+
+## Writing Your Own Plugin
+
+Let's create a simple plugin that logs drag events to the console.
+
+```typescript
+// Define the plugin
+const loggerPlugin = {
+  name: 'neodrag:logger', // Unique name for the plugin
+
+  // Optional setup hook - runs when plugin is initialized
+  setup(ctx) {
+    console.log('Logger plugin initialized');
+    // Return state if needed
+    return { count: 0 };
+  },
+
+  // Start hook - runs when dragging begins
+  start(ctx, state, event) {
+    console.log('Drag started at:', ctx.initial.x, ctx.initial.y);
+    state.count++;
+    console.log(`This is drag #${state.count}`);
+  },
+
+  // Drag hook - runs during dragging
+  drag(ctx, state, event) {
+    console.log('Current position:', ctx.offset.x, ctx.offset.y);
+    console.log('Delta:', ctx.delta.x, ctx.delta.y);
+  },
+
+  // End hook - runs when dragging ends
+  end(ctx, state, event) {
+    console.log('Drag ended at:', ctx.offset.x, ctx.offset.y);
+    console.log('Total drags:', state.count);
+  },
+
+  // Cleanup hook - runs when plugin is removed
+  cleanup(ctx, state) {
+    console.log(
+      'Logger plugin cleaned up after',
+      state.count,
+      'drags',
+    );
+  },
+};
+
+// Use the plugin
+const { draggable } = createDraggable({
+  plugins: [loggerPlugin],
+});
+
+// Apply to an element
+draggable(document.getElementById('my-draggable'));
+```
+
+### Plugin Interface
+
+A plugin follows this TypeScript interface:
+
+```typescript
+interface Plugin<State = any> {
+  name: string; // Unique identifier for the plugin
+  priority?: number; // Higher numbers run earlier (default: 0)
+  liveUpdate?: boolean; // Whether plugin can update during active drag
+  cancelable?: boolean; // Whether plugin respects cancellation (default: true)
+
+  // Lifecycle hooks
+  setup?: (ctx: PluginContext) => State;
+  shouldStart?: (
+    ctx: PluginContext,
+    state: State,
+    event: PointerEvent,
+  ) => boolean;
+  start?: (
+    ctx: PluginContext,
+    state: State,
+    event: PointerEvent,
+  ) => void;
+  drag?: (
+    ctx: PluginContext,
+    state: State,
+    event: PointerEvent,
+  ) => void;
+  end?: (
+    ctx: PluginContext,
+    state: State,
+    event: PointerEvent,
+  ) => void;
+  cleanup?: (ctx: PluginContext, state: State) => void;
+}
+```
+
+## Understanding the Plugin Context
+
+Each plugin hook receives a `ctx` parameter, which provides access to:
+
+- **State information**:
+  - `isDragging`: Whether the element is currently being dragged
+  - `isInteracting`: Whether the user is interacting with the element (including before dragging starts)
+- **Position information**:
+  - `initial`: The starting position `{x, y}` when drag began
+  - `offset`: The current position offset `{x, y}` relative to original position
+  - `delta`: The change in position `{x, y}` since drag started
+  - `proposed`: The proposed change to be applied `{x, y}` in this drag cycle
+- **DOM elements**:
+  - `rootNode`: The element with the draggable applied
+  - `currentlyDraggedNode`: The element being dragged (can be changed)
+  - `cachedRootNodeRect`: Cached bounding rectangle of the root node
+  - `lastEvent`: The last pointer event that triggered a drag operation
+- **Methods**:
+  - `propose(x, y)`: Propose new delta values for this drag cycle
+  - `cancel()`: Cancel current drag cycle for plugins with `cancelable: true`
+  - `preventStart()`: Prevent dragging from starting
+  - `setForcedPosition(x, y)`: Immediately set position
+- **Effect scheduling**:
+  - `effect.immediate(fn)`: Run in next microtask (fast, synchronous-like)
+  - `effect.paint(fn)`: Run in next requestAnimationFrame (better for visual changes)
+
+Here's the complete context interface:
+
+```typescript
+interface PluginContext {
+  delta: { x: number; y: number };
+  proposed: { x: number | null; y: number | null };
+  offset: { x: number; y: number };
+  initial: { x: number; y: number };
+  isDragging: boolean;
+  isInteracting: boolean;
+  rootNode: HTMLElement | SVGElement;
+  lastEvent: PointerEvent | null;
+  cachedRootNodeRect: DOMRect;
+  currentlyDraggedNode: HTMLElement | SVGElement;
+
+  effect: {
+    immediate: (fn: () => void) => void;
+    paint: (fn: () => void) => void;
+  };
+
+  propose: (x: number | null, y: number | null) => void;
+  cancel: () => void;
+  preventStart: () => void;
+  setForcedPosition: (x: number, y: number) => void;
+}
+```
+
+### Context Example: Modified Drag Position
+
+Here's an example of a plugin that limits diagonal movement:
+
+```typescript
+// A plugin that limits diagonal movement
+const diagonalLimit = {
+  name: 'neodrag:diagonalLimit',
+
+  drag(ctx) {
+    // Calculate magnitude of movement
+    const magnitude =
+      Math.abs(ctx.proposed.x) + Math.abs(ctx.proposed.y);
+
+    // Scale down both x and y to limit diagonal speed
+    const scale = magnitude
+      ? Math.min(
+          1,
+          magnitude /
+            Math.max(
+              Math.abs(ctx.proposed.x),
+              Math.abs(ctx.proposed.y),
+            ),
+        )
+      : 1;
+
+    // Propose new values
+    ctx.propose(
+      ctx.proposed.x !== null ? ctx.proposed.x * scale : null,
+      ctx.proposed.y !== null ? ctx.proposed.y * scale : null,
+    );
+  },
+};
+```
+
+## Using the Plugin Factory
+
+Neodrag provides a plugin factory function for creating configurable plugins:
+
+```typescript
+import { unstable_definePlugin } from 'neodrag/plugins';
+
+// Create a simple plugin factory
+const colorIndicator = unstable_definePlugin(
+  (color = 'rgba(255, 0, 0, 0.3)') => ({
+    name: 'neodrag:colorIndicator',
+
+    setup(ctx) {
+      // Store original background
+      const originalBackground = ctx.rootNode.style.background;
+      return { originalBackground };
+    },
+
+    start(ctx, state) {
+      // Change background color when drag starts
+      ctx.effect.paint(() => {
+        ctx.rootNode.style.background = color;
+      });
+    },
+
+    end(ctx, state) {
+      // Restore original background when drag ends
+      ctx.effect.paint(() => {
+        ctx.rootNode.style.background = state.originalBackground;
+      });
+    },
+  }),
+);
+
+// Use the configurable plugin
+const { draggable } = createDraggable({
+  plugins: [colorIndicator('rgba(0, 255, 0, 0.3)')],
+});
+```
+
+The `unstable_definePlugin` factory creates a function that returns a plugin, allowing you to:
+
+1. Create configurable plugins with custom options
+2. Encapsulate plugin logic and state
+3. Provide clear interfaces for plugin users
+
+> **Note:** The "unstable" prefix indicates this API may change in future versions, but it's fully functional in the current version.
+
+### Real-World Example: Creating a Debug Plugin
+
+Here's a simple example of creating a plugin that adds debug information to the draggable element:
+
+```typescript
+import { unstable_definePlugin } from '@neodrag/core/plugins';
+
+// Create a simple debug plugin factory
+const debugInfo = unstable_definePlugin(
+  (options = { showCoordinates: true }) => ({
+    name: 'neodrag:debug',
+
+    setup(ctx) {
+      // Create debug overlay element
+      const debugEl = document.createElement('div');
+      debugEl.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 9999;
+    `;
+      ctx.rootNode.appendChild(debugEl);
+
+      return {
+        debugEl,
+        options,
+      };
+    },
+
+    drag(ctx, state) {
+      if (state.options.showCoordinates) {
+        // Update debug info on each drag
+        ctx.effect.paint(() => {
+          state.debugEl.textContent = `x: ${Math.round(ctx.offset.x)}, y: ${Math.round(ctx.offset.y)}`;
+        });
+      }
+    },
+
+    end(_ctx, state) {
+      // Clear debug info when drag ends
+      state.debugEl.textContent = 'Drag ended';
+    },
+
+    cleanup(_ctx, state) {
+      // Remove the debug element when plugin is cleaned up
+      state.debugEl.remove();
+    },
+  }),
+);
+
+// Usage
+// Assuming draggable is globally available
+const element = document.getElementById('my-draggable');
+draggable(element, [debugInfo({ showCoordinates: true })]);
+```
+
+````
+
+## Plugin Priority and Cancellation
+
+Plugins run in order of priority, and some plugins can cancel the drag operation or affect the execution of other plugins.
+
+### Priority System
+
+- Plugins are sorted by `priority` (higher numbers run earlier, default is 0)
+- Core plugins typically use negative priorities to run after your custom plugins
+- Order matters: plugins can modify values that later plugins read
+
+```typescript
+{
+  name: 'neodrag:highPriority',
+  priority: 100, // Will run before plugins with lower or default priority
+  // ...
+}
+````
+
+### Cancellation Methods
+
+There are four ways to control the plugin execution flow:
+
+1. **Return `false` from a hook**: Prevents other plugins from running that specific hook
+2. **Use `ctx.cancel()`**: Prevents later plugins with `cancelable: true` from running in the current drag cycle
+3. **Use `ctx.preventStart()`**: Prevents dragging from starting in the threshold phase
+4. **Set `cancelable: false`**: Makes a plugin immune to cancellation by other plugins
+
+### Execution Flow Example
+
+```typescript
+const dragPermission = {
+  name: 'neodrag:permission',
+  priority: 999, // Very high priority, runs early
+
+  shouldStart(ctx, state, event) {
+    // Check if dragging is allowed
+    const isAllowed = checkDragPermission(event);
+
+    // If not allowed, cancel drag and prevent other plugins
+    if (!isAllowed) {
+      return false; // This prevents other shouldStart hooks from running
+    }
+
+    return true;
+  },
+};
+
+const uncancelablePlugin = {
+  name: 'neodrag:alwaysRun',
+  cancelable: false, // This plugin will run even if another plugin calls ctx.cancel()
+
+  drag(ctx, state, event) {
+    // This will always run even when other plugins cancel the drag cycle
+    console.log('This plugin always runs!');
+  },
+};
+```
+
+### Plugin Execution Sequence
+
+Here's the flow of plugin execution in a typical drag operation:
+
+1. Plugins are sorted by priority (highest first)
+2. For each hook (`shouldStart`, `start`, `drag`, etc.):
+   - Plugins are executed in priority order
+   - If a plugin returns `false`, the remaining plugins skip that hook
+   - If a plugin calls `ctx.cancel()`, later plugins with `cancelable: true` are skipped
+   - Plugins with `cancelable: false` always run regardless of cancellation
+
+This system allows for complex coordination between plugins and gives you fine-grained control over the dragging behavior.
+
+## Performance and Manual Mode
+
+### Understanding the Manual Mode
+
+Neodrag v3 offers two modes for handling plugin updates:
+
+1. **Automatic Mode** (default): Plugins array is directly passed and fully re-evaluated on updates
+2. **Manual Mode**: Plugins are provided as a function returning an array, with updates managed through Compartments
+
+Manual mode provides significant performance benefits, especially in reactive UI frameworks:
+
+```javascript
+// Assuming draggable is globally available
+import {
+  Compartment,
+  position,
+  axis,
+  grid,
+} from '@neodrag/core/plugins';
+
+// Create compartments for plugins that might change
+const positionCompartment = new Compartment(() =>
+  position({ current: { x: 0, y: 0 } }),
+);
+const axisCompartment = new Compartment(() => axis('x'));
+
+// Enter Manual Mode by providing a function that returns plugins array
+const element = document.getElementById('my-draggable');
+const instance = draggable(element, () => [
+  // Static plugins
+  grid([10, 10]),
+
+  // Compartmentalized plugins that can be updated
+  positionCompartment,
+  axisCompartment,
+]);
+
+// Later, update individual plugins without re-evaluating the whole array
+positionCompartment.current = position({
+  current: { x: 100, y: 50 },
+});
+axisCompartment.current = axis('y');
+```
+
+In Manual Mode:
+
+- The entire plugins array is not re-evaluated on every update
+- Only changed compartments trigger updates
+- Updates can happen during active drags
+- The system efficiently processes only what changed
+
+### Live Updates with Compartments
+
+For plugins to work with live updates, add the `liveUpdate: true` flag:
+
+```javascript
+const liveUpdatePlugin = {
+  name: 'neodrag:liveupdatable',
+  liveUpdate: true,
+
+  // Plugin implementation...
+};
+```
+
+### Framework-Specific Examples
+
+Here are examples of how to use Compartments with different frameworks:
+
+#### React
+
+```javascript
+import { useDraggable, useCompartment } from '@neodrag/react';
+import { position } from '@neodrag/react/plugins';
+
+function MyComponent() {
+  const positionComp = useCompartment(() =>
+    position({ current: { x: 0, y: 0 } }),
+  );
+  const dragState = useDraggable(elementRef, () => [positionComp]);
+
+  // Update on state change
+  useEffect(() => {
+    positionComp.current = position({
+      current: { x: newX, y: newY },
+    });
+  }, [newX, newY]);
+}
+```
+
+#### Vue
+
+```javascript
+import { vDraggable } from '@neodrag/vue';
+import { Compartment, position } from '@neodrag/vue/plugins';
+
+// In your component
+export default {
+  setup() {
+    const positionComp = new Compartment(() =>
+      position({ current: { x: 0, y: 0 } }),
+    );
+    const plugins = () => [positionComp];
+
+    // Use watch to update
+    watch(
+      () => [x.value, y.value],
+      ([newX, newY]) => {
+        positionComp.current = position({
+          current: { x: newX, y: newY },
+        });
+      },
+    );
+
+    return { plugins };
+  },
+};
+
+// In your template
+// <div v-draggable="plugins"></div>
+```
+
+#### Svelte
+
+```javascript
+<script>
+  // Import only plugins - draggable is available globally
+  import { Compartment, position } from '@neodrag/svelte/plugins';
+
+  let x = 0;
+  let y = 0;
+
+  const positionComp = new Compartment(() => position({ current: { x: 0, y: 0 } }));
+  const plugins = () => [positionComp];
+
+  // Reactively update
+  $: {
+    positionComp.current = position({ current: { x, y } });
+  }
+</script>
+
+<div use:draggable={plugins}>Drag me</div>
+```
+
+#### Solid
+
+```javascript
+import { useDraggable } from '@neodrag/solid';
+import { Compartment, position } from '@neodrag/solid/plugins';
+
+function MyComponent() {
+  const [x, setX] = createSignal(0);
+  const [y, setY] = createSignal(0);
+
+  const positionComp = new Compartment(() =>
+    position({ current: { x: 0, y: 0 } }),
+  );
+  const dragState = useDraggable(element, () => [positionComp]);
+
+  createEffect(() => {
+    positionComp.current = position({ current: { x: x(), y: y() } });
+  });
+
+  return <div ref={element}>Drag me</div>;
+}
+```
+
+#### Vanilla
+
+```javascript
+import { Draggable } from '@neodrag/vanilla';
+import { Compartment, position } from '@neodrag/vanilla/plugins';
+
+const element = document.getElementById('my-draggable');
+const positionComp = new Compartment(() =>
+  position({ current: { x: 0, y: 0 } }),
+);
+const instance = new Draggable(element, () => [positionComp]);
+
+// Update when needed
+function updatePosition(x, y) {
+  positionComp.current = position({ current: { x, y } });
+}
+```
+
+This approach is especially important for high-performance applications or when using reactive frameworks where unnecessary re-renders should be minimized.
+
+## Extending Neodrag with Third-Party Plugins
+
+One of the key improvements in Neodrag v3 is full support for third-party plugins. The modular plugin architecture allows developers to create and share plugins that extend Neodrag's functionality.
+
+### Creating a Third-Party Plugin
+
+To create a publishable plugin:
+
+1. Create a plugin using the `unstable_definePlugin` factory
+2. Export the plugin function
+3. Document the plugin's options and behavior
+4. Publish to npm with a name like `neodrag-plugin-yourpluginname`
+
+```typescript
+// my-neodrag-plugin.ts
+import {
+  unstable_definePlugin,
+  type Plugin,
+} from '@neodrag/core/plugins';
+
+export const myPlugin = unstable_definePlugin((options = {}) => ({
+  name: 'yourname:plugin',
+  // Implementation...
+}));
+```
+
+### Using Third-Party Plugins
+
+Using third-party plugins is as simple as importing them:
+
+```javascript
+// Assuming draggable is globally available
+import { grid, axis } from '@neodrag/core/plugins';
+import { myPlugin } from 'neodrag-plugin-yourpluginname';
+
+const element = document.getElementById('my-draggable');
+draggable(element, [
+  grid([10, 10]),
+  axis('x'),
+  myPlugin({
+    /* options */
+  }),
+]);
+```
+
+This extensibility means the Neodrag ecosystem can grow beyond the core library, with specialized plugins for different use cases.
+
+## Conclusion
+
+The plugin system makes Neodrag v3 highly extensible and customizable. By understanding the plugin lifecycle and context, you can create powerful plugins that enhance dragging behavior for your specific needs.
+
+Start with the built-in plugins, then create your own or use third-party plugins to add custom functionality. The modular architecture ensures you only pay the performance cost for the features you actually use.
+
+For more advanced usage, explore the patterns of combining multiple plugins to create complex dragging behaviors, and consider publishing your own plugins to contribute to the Neodrag ecosystem.

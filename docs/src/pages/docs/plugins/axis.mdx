@@ -1,0 +1,253 @@
+---
+layout: '$layouts/MainDocsLayout.astro'
+title: 'axis - Plugin'
+tagline: 'Restrict movement to a single axis (x or y)'
+---
+
+## Overview
+
+The `axis` plugin restricts movement to a single axis, allowing elements to be dragged either horizontally (x-axis) or vertically (y-axis). This is particularly useful for creating sliders, scrollbars, or any interface where movement should be constrained to a single dimension.
+
+## Installation
+
+The `axis` plugin is included with the Neodrag core package:
+
+```javascript
+import { axis } from '@neodrag/core/plugins';
+```
+
+## API
+
+The `axis` plugin accepts a single parameter:
+
+```typescript
+axis(value?: 'x' | 'y' | null | undefined)
+```
+
+### Parameters
+
+- `value`: Specifies the axis of movement:
+  - `'x'`: Restricts movement to the horizontal axis
+  - `'y'`: Restricts movement to the vertical axis
+  - `null` or `undefined`: No restriction (allows movement in both axes)
+
+### Return Value
+
+Returns a configured plugin that can be passed to the draggable function.
+
+## Basic Usage
+
+```javascript
+// Assuming draggable is globally available in Svelte
+import { axis } from '@neodrag/core/plugins';
+
+// Create a horizontal draggable (x-axis only)
+const element = document.getElementById('horizontal-slider');
+draggable(element, [axis('x')]);
+
+// Create a vertical draggable (y-axis only)
+const verticalElement = document.getElementById('vertical-slider');
+draggable(verticalElement, [axis('y')]);
+```
+
+## Framework Specific Examples
+
+### React
+
+```jsx
+import { useDraggable } from '@neodrag/react';
+import { axis } from '@neodrag/core/plugins';
+
+function HorizontalSlider() {
+  const elementRef = useRef(null);
+  useDraggable(elementRef, [axis('x')]);
+
+  return (
+    <div className="slider-track">
+      <div ref={elementRef} className="slider-handle" />
+    </div>
+  );
+}
+```
+
+### Svelte
+
+```svelte
+<script>
+  // Import plugin from core - draggable is globally available
+  import { axis } from '@neodrag/core/plugins';
+
+  export let orientation = 'horizontal';
+  $: axisValue = orientation === 'horizontal' ? 'x' : 'y';
+</script>
+
+<div class="slider-track">
+  <div use:draggable={[axis(axisValue)]} class="slider-handle" />
+</div>
+```
+
+### Vue
+
+```vue
+<template>
+  <div class="slider-track">
+    <div
+      v-draggable="[axis(orientation === 'horizontal' ? 'x' : 'y')]"
+      class="slider-handle"
+    ></div>
+  </div>
+</template>
+
+<script setup>
+import { vDraggable } from '@neodrag/vue';
+import { axis } from '@neodrag/core/plugins';
+
+const props = defineProps({
+  orientation: {
+    type: String,
+    default: 'horizontal',
+  },
+});
+</script>
+```
+
+## Advanced Usage
+
+### Dynamic Axis Switching
+
+Using compartments, you can dynamically change the axis of movement:
+
+```javascript
+import { axis, Compartment } from '@neodrag/core/plugins';
+
+const element = document.getElementById('dynamic-element');
+const axisCompartment = new Compartment(() => axis('x'));
+
+// Start with horizontal movement
+draggable(element, () => [axisCompartment]);
+
+// Switch to vertical movement on a button click
+document
+  .getElementById('toggle-button')
+  .addEventListener('click', () => {
+    const currentAxis =
+      axisCompartment.current.name === 'x' ? 'y' : 'x';
+    axisCompartment.current = axis(currentAxis);
+  });
+```
+
+## Behavior with Other Plugins
+
+### With Grid Plugin
+
+When combining `axis` and `grid`, the grid's snapping effect will only apply to the allowed axis:
+
+```javascript
+import { axis, grid } from '@neodrag/core/plugins';
+
+// Horizontal movement with grid snapping at 10px intervals
+draggable(element, [
+  axis('x'),
+  grid([10, 10]), // Only the x-value (10) will affect movement
+]);
+```
+
+### With Bounds Plugin
+
+The bounds plugin will restrict the overall movement area, while the axis plugin restricts the direction:
+
+```javascript
+import { axis, bounds, BoundsFrom } from '@neodrag/core/plugins';
+
+// Horizontal movement within parent container
+draggable(element, [axis('x'), bounds(BoundsFrom.parent())]);
+```
+
+## Implementation Details
+
+### Plugin Order
+
+The axis plugin generally should be placed before transform-related plugins to ensure the constraint is applied before visual updates:
+
+```javascript
+import { axis, transform } from '@neodrag/core/plugins';
+
+// Correct order: constraint first, then visual effect
+draggable(element, [axis('x'), transform()]);
+```
+
+### Null Value Behavior
+
+When the axis value is `null` or `undefined`, the plugin essentially becomes a no-op, allowing free movement in both axes:
+
+```javascript
+import { axis } from '@neodrag/core/plugins';
+
+// Free movement (same as not including the axis plugin)
+draggable(element, [axis(null)]);
+```
+
+### Under the Hood
+
+The axis plugin works by modifying the `proposed` coordinates during the drag operation:
+
+- For `'x'` axis: It sets `proposed.y = null` to prevent vertical movement
+- For `'y'` axis: It sets `proposed.x = null` to prevent horizontal movement
+
+This is done in the `drag` hook of the plugin, which is called during each drag operation.
+
+## Common Use Cases
+
+### Slider Controls
+
+The axis plugin is perfect for creating slider controls where users should only be able to move in one direction:
+
+```javascript
+import { axis, bounds } from '@neodrag/core/plugins';
+
+// Create a horizontal slider with bounds
+const slider = document.getElementById('slider');
+const track = document.getElementById('track');
+
+draggable(slider, [axis('x'), bounds(BoundsFrom.element(track))]);
+
+// Listen for position changes to update a value
+slider.addEventListener('neodrag:end', (e) => {
+  const trackWidth = track.offsetWidth;
+  const sliderPosition = e.detail.offset.x;
+  const percentage = (sliderPosition / trackWidth) * 100;
+
+  // Update your application state with the percentage value
+  console.log(`Slider value: ${percentage.toFixed(2)}%`);
+});
+```
+
+### Split Panes
+
+The axis plugin can be used to create resizable split panes:
+
+```javascript
+import { axis, bounds } from '@neodrag/core/plugins';
+
+const divider = document.getElementById('divider');
+const container = document.getElementById('container');
+
+draggable(divider, [
+  axis('x'), // Only allow horizontal resizing
+  bounds(
+    BoundsFrom.element(container, {
+      left: container.offsetWidth * 0.2, // Min 20% width
+      right: container.offsetWidth * 0.2, // Max 80% width
+    }),
+  ),
+]);
+
+divider.addEventListener('neodrag:move', (e) => {
+  document.getElementById('left-pane').style.width =
+    `${e.detail.offset.x}px`;
+});
+```
+
+## Conclusion
+
+The axis plugin provides a simple yet powerful way to constrain movement to a single dimension. It's ideal for creating UI controls like sliders, scrollbars, and other elements that should only move in one direction. By combining it with other plugins such as `bounds` and `grid`, you can create sophisticated draggable elements with precise movement constraints.

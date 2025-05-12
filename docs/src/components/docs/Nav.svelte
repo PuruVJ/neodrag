@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ThemeSwitcher from '$components/ThemeSwitcher.svelte';
-	import { FRAMEWORKS } from '$helpers/constants';
+	import { FRAMEWORKS, PLUGINS } from '$helpers/constants';
 
 	const pathname = globalThis?.location?.pathname ?? '';
 
@@ -27,6 +27,26 @@
 			{#each FRAMEWORKS as { name }}
 				<li style="text-transform: capitalize;">
 					<a href={`/docs/${name}`} aria-current={aria_current_val(name)} class="unstyled">
+						{name}
+					</a>
+				</li>
+			{/each}
+		</ul>
+
+		<hr />
+
+		<ul class="group">
+			<div class="title">Plugins</div>
+
+			<li>
+				<a href={`/docs/plugins`} aria-current={aria_current_val('/docs/plugins')} class="unstyled">
+					Plugins
+				</a>
+			</li>
+
+			{#each PLUGINS as { name }}
+				<li>
+					<a href={`/docs/plugins/${name}`} aria-current={aria_current_val(name)} class="unstyled">
 						{name}
 					</a>
 				</li>

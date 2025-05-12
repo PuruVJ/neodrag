@@ -4,3 +4,4 @@ dist/
 .env
 .pnpm-store/
 .turbo
+llm.md
