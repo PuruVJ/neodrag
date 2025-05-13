@@ -46,13 +46,7 @@ const nav_list = [
 ---
 
 <!-- Component should be wrapped in an <aside> or <header> -->
-<div
-	class="nav container"
-	style={{
-		'--primary': framework_page ? `var(--app-color-brand-${framework_page})` : null,
-		'--primary-hsl': framework_page ? `var(--app-color-brand-${framework_page}-hsl)` : null,
-	}}
->
+<div class="nav container">
 	<a href="/" class="h3 logo unstyled">
 		<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" />
 		Neodrag
@@ -99,14 +93,11 @@ const nav_list = [
 	</span>
 </div>
 
-<style lang="scss" scoped>
-	@import '../../css/breakpoints';
-
+<style>
 	.container {
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-
 		height: 100%;
 	}
 
@@ -114,14 +105,11 @@ const nav_list = [
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-
 		text-decoration: none;
-
 		font-weight: 600;
-
 		margin: 0.25rem 1rem;
 
-		@include media('>=tablet') {
+		@media (min-width: 968px) {
 			margin: 1rem;
 		}
 
@@ -132,7 +120,6 @@ const nav_list = [
 
 	nav {
 		flex: 1 1 auto;
-
 		padding: 0.5rem;
 	}
 
@@ -150,18 +137,13 @@ const nav_list = [
 		&,
 		&:visited {
 			display: block;
-
 			padding: 0.25rem 0.75rem;
-
 			text-decoration: none;
 			color: color-mix(in lch, var(--app-color-light), var(--app-color-anti-mixer) 90%);
 			font-family: var(--app-font-mono);
 			font-size: 1rem;
-
 			border-radius: 4px;
-
 			transition: background-color 0.05s ease-in;
-
 			margin: 0;
 		}
 
@@ -195,12 +177,10 @@ const nav_list = [
 
 	.copyright {
 		width: 100%;
-
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		gap: 0.5rem;
-
 		font-family: var(--app-font-mono);
 		font-size: 0.9rem;
 
@@ -217,9 +197,7 @@ const nav_list = [
 		display: flex;
 		justify-content: center;
 		gap: 1rem;
-
 		font-size: 1.5rem;
-
 		width: 100%;
 	}
 </style>
