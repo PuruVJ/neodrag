@@ -16,13 +16,13 @@ if (!framework_entry) {
 
 const current_framework = framework_entry.id.replace(/\d{2}-(.+)\/page/, '$1');
 
-const { Content } = await render(framework_entry);
+const { Content, headings } = await render(framework_entry);
 
 export const getStaticPaths = (() => {
 	return FRAMEWORKS.map((f) => ({ params: { framework: f.name } }));
 }) satisfies GetStaticPaths;
 ---
 
-<MainDocsLayout {...framework_entry.data} framework={current_framework as any}>
+<MainDocsLayout {...framework_entry.data} framework={current_framework as any} headings={headings}>
 	<Content />
 </MainDocsLayout>

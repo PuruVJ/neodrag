@@ -1,76 +1,58 @@
 body,
 body.light {
-	// #a1182b
-	--app-color-primary: hsl(352, 74%, 36%);
-	--app-color-primary-hsl: 352, 74%, 36%;
-	--app-color-primary-contrast: hsl(0, 0%, 95%);
-	--app-color-primary-contrast-hsl: 0, 0%, 10%;
+	--app-color-mixer: white;
+	--app-color-anti-mixer: black;
+
+	/* // #a1182b */
+	--app-color-primary: lch(34.59% 59.96 26.65);
+	--app-color-primary-contrast: color-mix(in lch, var(--app-color-primary), white 95%);
 
 	--brand: var(--app-color-primary);
 
 	--app-color-primary-gradient: radial-gradient(
 		circle farthest-corner at 10% 20%,
-		#f093fb 0%,
-		#f5576c 100%
+		lch(73.78% 63.16 323.51) 0%,
+		lch(59.26% 65.43 19.41) 100%
 	);
-	--app-color-primary-gradient-contrast: hsl(0 0% 10%);
+	--app-color-primary-gradient-contrast: lch(9.26% 0 296.81);
 
-	--app-color-dark: hsl(0 0% 10%);
+	--app-color-dark: lch(9.26% 0 296.81);
 	--app-color-dark-contrast: var(--app-color-light);
-	--app-color-dark-hsl: 0, 0%, 10%;
-	--app-color-dark-hs: 0, 0%;
+	/* --app-color-dark-hsl: 0, 0%, 10%; */
+	/* --app-color-dark-hs: 0, 0%; */
 
 	--app-color-light: var(--gray-1);
 	--app-color-light-contrast: var(--app-color-dark);
-	--app-color-light-hsl: 0, 0%, 98%;
+	/* --app-color-light-hsl: 0, 0%, 98%; */
 
 	--app-color-shell: hsl(200, 8%, 100%);
-	--app-color-shell-contrast: hsl(0, 0%, 10%);
+	--app-color-shell-contrast: color-mix(in lch, var(--app-color-shell), black 10%);
 
-	--app-color-brand-svelte: hsl(15, 100%, 45%);
-	--app-color-brand-svelte-hsl: 15, 100%, 45%;
-	--app-color-brand-svelte-body-gradient: radial-gradient(
-		ellipse farthest-corner at 95% 2%,
-		hsla(var(--app-color-brand-svelte-hsl), 0.2) 0%,
-		var(--app-color-shell) 100%
+	--app-color-brand-svelte: color-mix(
+		in lch,
+		lch(51.55% 90.27 44.76),
+		var(--app-color-anti-mixer) 15%
 	);
-	--app-color-brand-svelte-navbar: #ffd9cc;
-
-	--app-color-brand-react: hsl(189, 100%, 35%);
-	--app-color-brand-react-hsl: 189, 100%, 35%;
-	--app-color-brand-react-body-gradient: radial-gradient(
-		ellipse farthest-corner at 95% 2%,
-		hsla(var(--app-color-brand-react-hsl), 0.3),
-		var(--app-color-shell)
+	--app-color-brand-react: color-mix(
+		in lch,
+		lch(57.76% 33.42 224.77),
+		var(--app-color-anti-mixer) 15%
 	);
-	--app-color-brand-react-navbar: #e6f7ff;
-
-	--app-color-brand-vue: #3aa676;
-	--app-color-brand-vue-hsl: 153, 48%, 44%;
-	--app-color-brand-vue-body-gradient: radial-gradient(
-		ellipse farthest-corner at 95% 2%,
-		hsla(var(--app-color-brand-vue-hsl), 0.3) 0%,
-		var(--app-color-shell) 100%
+	--app-color-brand-vue: color-mix(
+		in lch,
+		lch(61.2% 45.16 159.22),
+		var(--app-color-anti-mixer) 15%
 	);
-	--app-color-brand-vue-navbar: #c4e4d6;
-
-	--app-color-brand-solid: #2c4f7d;
-	--app-color-brand-solid-hsl: 214, 48%, 33%;
-	--app-color-brand-solid-body-gradient: radial-gradient(
-		ellipse farthest-corner at 95% 2%,
-		hsla(var(--app-color-brand-solid-hsl), 0.4) 0%,
-		var(--app-color-shell) 100%
+	--app-color-brand-solid: color-mix(
+		in lch,
+		lch(33.15% 29.98 275.63),
+		var(--app-color-anti-mixer) 15%
 	);
-	--app-color-brand-solid-navbar: #c0cad8;
-
-	--app-color-brand-vanilla: var(--app-color-dark);
-	--app-color-brand-vanilla-hsl: var(--app-color-dark-hsl);
-	--app-color-brand-vanilla-body-gradient: radial-gradient(
-		ellipse farthest-corner at 95% 2%,
-		hsla(53, 93%, 54%, 0.4) 0%,
-		var(--app-color-shell) 100%
+	--app-color-brand-vanilla: color-mix(
+		in lch,
+		lch(79.75% 80.99 94.66),
+		var(--app-color-anti-mixer) 15%
 	);
-	--app-color-brand-vanilla-navbar: #fdf5bb;
 
 	--app-font-mono: 'Jetbrains mono', var(--font-mono);
 	--app-font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
@@ -80,7 +62,16 @@ body.light {
 }
 
 body.dark {
-	--app-color-primary: #f88292;
+	--app-color-mixer: lch(11.37% 0.5 19.23);
+	--app-color-anti-mixer: white;
+
+	--app-color-light: var(--gray-9);
+	--app-color-dark: hsl(210, 17%, 95%);
+
+	--app-color-shell: #101213;
+	--app-color-shell-contrast: var(--gray-1);
+
+	/* --app-color-primary: #f88292;
 	--app-color-primary-hsl: 352, 89%, 74%;
 	--app-color-primary-contrast: hsl(0 0% 10%);
 	--app-color-primary-contrast-hsl: 0, 0%, 10%;
@@ -123,14 +114,13 @@ body.dark {
 	);
 	--app-color-brand-vue-navbar: #1b3429;
 
-	--app-color-brand-solid: hsl(214, 32%, 67%);
-	--app-color-brand-solid-hsl: 214, 32%, 67%;
-	--app-color-brand-solid-body-gradient: radial-gradient(
+	--app-color-brand-solid: lch(67.76% 18.5 267.22);
+	/* --app-color-brand-solid-hsl: 214, 32%, 67%; */
+	/* --app-color-brand-solid-body-gradient: radial-gradient(
 		ellipse farthest-corner at 95% 2%,
 		hsla(var(--app-color-brand-solid-hsl), 0.3) 0%,
 		var(--app-color-shell) 100%
 	);
-	--app-color-brand-solid-navbar: #2b3138;
 
 	--app-color-brand-vanilla: var(--app-color-dark);
 	--app-color-brand-vanilla-hsl: var(--app-color-dark-hsl);
@@ -139,7 +129,7 @@ body.dark {
 		hsla(53, 93%, 54%, 0.4) 0%,
 		var(--app-color-shell) 100%
 	);
-	--app-color-brand-vanilla-navbar: #4f491e;
+	--app-color-brand-vanilla-navbar: #4f491e; */
 }
 
 body.dark .astro-code,

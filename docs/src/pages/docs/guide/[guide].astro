@@ -14,7 +14,7 @@ if (!guide_entry) {
 	return;
 }
 
-const { Content } = await render(guide_entry);
+const { Content, headings } = await render(guide_entry);
 
 export const getStaticPaths = (async () => {
 	const guide_collection = await getCollection('guide');
@@ -25,6 +25,6 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 ---
 
-<MainDocsLayout {...guide_entry.data}>
+<MainDocsLayout {...guide_entry.data} headings={headings}>
 	<Content />
 </MainDocsLayout>

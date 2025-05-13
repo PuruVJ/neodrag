@@ -2,18 +2,21 @@
 import Nav from '$components/docs/Nav.astro';
 import MetaThemeColor from '$components/MetaThemeColor.svelte';
 import MobileNav from '$components/MobileNav.svelte';
-import ToC from '$components/ToC.svelte';
+import ToC from '$components/ToC.astro';
+import type { MarkdownHeading } from 'astro';
 import Layout from './Layout.astro';
 
-type Props = { title: string };
+type Props = {
+	title: string;
+	headings: MarkdownHeading[];
+};
 
-const { title } = Astro.props;
+const { title, headings } = Astro.props;
 ---
 
 <MetaThemeColor client:load />
 
 <Layout title={title}>
-	<ToC client:only />
 	<div class="mobile-nav">
 		<MobileNav client:media="(max-width: 968px)">
 			<Nav />
@@ -30,32 +33,34 @@ const { title } = Astro.props;
 				<slot />
 			</article>
 		</main>
+
+		<aside>
+			<ToC headings={headings} />
+		</aside>
 	</section>
 </Layout>
 
-<style lang="scss">
-	@import '../css/breakpoints';
-
+<style is:global>
 	.mobile-nav {
 		display: none;
 
-		@include media('<tablet') {
+		@media (max-width: 967px) {
 			display: block;
 		}
 	}
 
 	.docs-container {
 		display: grid;
-		grid-template-columns: 300px auto;
+		grid-template-columns: 300px auto 300px;
 		gap: 1rem;
 
 		width: 100%;
 		height: auto;
 
-		@include media('<tablet') {
+		@media (max-width: 967px) {
 			grid-template-columns: 1fr;
 
-			aside {
+			& aside {
 				display: none;
 			}
 		}
@@ -66,19 +71,19 @@ const { title } = Astro.props;
 	}
 
 	main {
-		// Needed for the navigation bar intersection observer
+		/* Needed for the navigation bar intersection observer */
 		position: relative;
 
 		min-width: 0;
 		height: 100vh;
 
-		padding: 0 1rem;
+		padding: 1rem;
 
 		overflow-y: auto;
 		overflow-x: hidden;
 		scroll-behavior: smooth;
 
-		@include media('<=sm-tablet') {
+		@media (max-width: 768px) {
 			padding: 4rem 1rem;
 		}
 	}
@@ -88,15 +93,18 @@ const { title } = Astro.props;
 	}
 
 	.docs-container {
-		:global(p, pre.astro-code, blockquote) {
+		p,
+		pre.astro-code,
+		blockquote {
 			max-width: clamp(20ch, 100vw, var(--entity-width));
 
-			@include media('<tablet') {
+			@media (max-width: 967px) {
 				max-width: 100%;
 			}
 		}
 
-		:global(p, a) {
+		p,
+		a {
 			margin: 1.5rem 0;
 
 			font-size: clamp(1.1rem, 2vw, 1.2rem);
@@ -139,76 +147,43 @@ const { title } = Astro.props;
 			height: auto;
 		}
 	}
-</style>
 
-<style lang="scss" is:global>
-	@import '../css/breakpoints';
-
-	:root {
-		--entity-width: clamp(400px, 60vw, 800px);
-	}
+	/* Global styles below */
 
 	body {
+		--secondary-color: var(--app-color-primary);
+		--app-color-scrolling-navbar: color-mix(
+			in lch,
+			var(--secondary-color),
+			var(--app-color-mixer) 80%
+		);
+
+		background-image: radial-gradient(
+			ellipse farthest-corner at 95% 2%,
+			color-mix(in lch, var(--secondary-color), transparent 50%) 0%,
+			var(--app-color-shell) 100%
+		);
+
 		overflow: hidden;
 
 		&[data-framework='svelte'] {
-			background-image: var(--app-color-brand-svelte-body-gradient);
 			--secondary-color: var(--app-color-brand-svelte);
-			--secondary-color-hsl: var(--app-color-brand-svelte-hsl);
-			--app-color-scrolling-navbar: var(--app-color-brand-svelte-navbar);
 		}
 
 		&[data-framework='vue'] {
-			background-image: var(--app-color-brand-vue-body-gradient);
 			--secondary-color: var(--app-color-brand-vue);
-			--secondary-color-hsl: var(--app-color-brand-vue-hsl);
-			--app-color-scrolling-navbar: var(--app-color-brand-vue-navbar);
 		}
 
 		&[data-framework='react'] {
-			background-image: var(--app-color-brand-react-body-gradient);
 			--secondary-color: var(--app-color-brand-react);
-			--secondary-color-hsl: var(--app-color-brand-react-hsl);
-			--app-color-scrolling-navbar: var(--app-color-brand-react-navbar);
 		}
 
 		&[data-framework='solid'] {
-			background-image: var(--app-color-brand-solid-body-gradient);
 			--secondary-color: var(--app-color-brand-solid);
-			--secondary-color-hsl: var(--app-color-brand-solid-hsl);
-			--app-color-scrolling-navbar: var(--app-color-brand-solid-navbar);
 		}
 
 		&[data-framework='vanilla'] {
-			background-image: var(--app-color-brand-vanilla-body-gradient);
 			--secondary-color: var(--app-color-brand-vanilla);
-			--secondary-color-hsl: var(--app-color-brand-vanilla-hsl);
-			--app-color-scrolling-navbar: var(--app-color-brand-vanilla-navbar);
-		}
-
-		&:not([data-framework]) {
-			--secondary-color: var(--app-color-primary);
-			--secondary-color-hsl: var(--app-color-primary-hsl);
-
-			&.dark {
-				--app-color-scrolling-navbar: #60383e;
-
-				background-image: radial-gradient(
-					ellipse farthest-corner at 100% 2%,
-					hsla(var(--app-color-primary-hsl), 0.35),
-					var(--app-color-primary-contrast)
-				);
-			}
-
-			&.light {
-				--app-color-scrolling-navbar: #efd3d6;
-
-				background-image: radial-gradient(
-					ellipse farthest-corner at 100% 2%,
-					hsla(var(--app-color-primary-hsl), 0.2),
-					var(--app-color-primary-contrast)
-				);
-			}
 		}
 	}
 
@@ -224,11 +199,11 @@ const { title } = Astro.props;
 
 		width: var(--entity-width);
 
-		@include media('<tablet') {
+		@media (max-width: 967px) {
 			width: 100%;
 		}
 
-		code {
+		& code {
 			font-size: var(--font-size) !important;
 
 			background-color: transparent;

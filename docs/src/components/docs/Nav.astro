@@ -154,7 +154,7 @@ const nav_list = [
 			padding: 0.25rem 0.75rem;
 
 			text-decoration: none;
-			color: var(--app-color-light-contrast);
+			color: color-mix(in lch, var(--app-color-light), var(--app-color-anti-mixer) 90%);
 			font-family: var(--app-font-mono);
 			font-size: 1rem;
 
@@ -166,7 +166,7 @@ const nav_list = [
 		}
 
 		&:hover {
-			background-color: hsla(var(--secondary-color-hsl, var(--app-color-primary-hsl)), 0.1);
+			background-color: color-mix(in lch, var(--secondary-color), transparent 90%);
 		}
 	}
 
@@ -189,7 +189,7 @@ const nav_list = [
 
 	.group a {
 		&[aria-current='page'] {
-			background-color: hsla(var(--secondary-color-hsl, var(--app-color-primary-hsl)), 0.2);
+			background-color: color-mix(in lch, var(--secondary-color), transparent 80%);
 		}
 	}
 
@@ -209,7 +209,6 @@ const nav_list = [
 
 			&.framework {
 				--app-color-primary: var(--secondary-color);
-				--app-color-primary-hsl: var(--secondary-color-hsl);
 			}
 		}
 	}

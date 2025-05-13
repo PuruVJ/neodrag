@@ -1,16 +1,15 @@
 /* optional imports that use the props */
-@import url('open-props/normalize.min.css');
-
-@import './themes';
-@import './breakpoints';
-@import './include-media';
+@import 'open-props/normalize.min.css';
+@import './themes.css';
+/* @import './include-media'; */
 
 * {
 	color: var(--app-color-dark);
 }
 
 *:focus-visible {
-	box-shadow: 0 0 0 4px hsla(var(--secondary-color-hsl, --app-color-primary-hsl), 0.25);
+	box-shadow: 0 0 0 4px
+		color-mix(in lch, var(--secondary-color, var(--app-color-primary)), transparent 75%);
 }
 
 html {
@@ -21,58 +20,50 @@ html,
 body {
 	height: 100%;
 	width: 100%;
-
 	background-color: var(--app-color-shell);
-
 	scroll-behavior: smooth;
 	overflow-x: hidden;
-
 	font-family: var(--app-font-main);
 }
 
 body {
 	height: auto !important;
-
 	accent-color: var(--app-color-primary);
 }
 
 :is(h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5) {
 	width: max-content;
-
 	color: var(--app-color-dark);
 	font-family: var(--app-font-heading);
 	word-break: break-all;
-
 	margin: 0.75em 0 0.25em;
-
 	max-width: 100%;
 }
 
 h1,
 .h1 {
 	margin-top: 0;
-	font-size: clamp(2.35rem, 10vw, 3.998rem);
+	font-size: clamp(2rem, 8.5vw, 3.4rem);
 }
 
 h2,
 .h2 {
-	font-size: clamp(1.77rem, 5vw, 2.827rem);
+	font-size: clamp(1.5rem, 4.25vw, 2.4rem);
 }
 
 h3,
 .h3 {
-	font-size: clamp(1.33rem, 2.5vw, 1.999rem);
+	font-size: clamp(1.13rem, 2.1vw, 1.7rem);
 }
 
 h4,
 .h4 {
-	font-size: clamp(1rem, 1.25vw, 1.414rem);
+	font-size: clamp(0.85rem, 1.05vw, 1.2rem);
 }
 
 code {
 	color: var(--app-color-dark);
 	background-color: var(--app-color-dark-contrast);
-
 	font-family: var(--app-font-mono);
 }
 
@@ -91,13 +82,10 @@ kbd {
 	--opacity: 0.35;
 	--duration: 150ms;
 	--easing: ease-in-out;
-
 	color: var(--app-color-primary);
 	font-weight: 600 !important;
 	text-decoration: none;
-
 	padding: 0 0.25rem;
-
 	background-image: linear-gradient(
 		transparent 0%,
 		transparent var(--distance),
@@ -106,19 +94,15 @@ kbd {
 	);
 	background-size: 100% 200%;
 	background-position: 0 0;
-
 	transition: var(--duration) var(--easing);
 	transition-property: color, background-position, background-image, border-radius;
 
 	&:hover,
 	&:focus-visible {
 		background-position: 0 100%;
-
 		color: var(--app-color-primary-contrast);
 		font-weight: 600 !important;
-
 		border-radius: 0.25rem;
-
 		--opacity: 1;
 	}
 }
@@ -135,26 +119,55 @@ kbd {
 	border-width: 0;
 }
 
-// Set the text-FRAMEWORK
-// Map of frameworks
-$frameworks: svelte, react, vue, solid, vanilla;
+/* Framework specific classes */
+/* Replaced SCSS @each with individual class definitions */
+.text-svelte {
+	color: var(--app-color-brand-svelte);
+	fill: var(--app-color-brand-svelte);
+}
 
-@each $framework in $frameworks {
-	// Set the text-FRAMEWORK
-	.text-#{$framework} {
-		color: var(--app-color-brand-#{$framework});
-		fill: var(--app-color-brand-#{$framework});
-	}
+.bg-svelte {
+	background-color: var(--app-color-brand-svelte);
+}
 
-	.bg-#{$framework} {
-		background-color: var(--app-color-brand-#{$framework});
-	}
+.text-react {
+	color: var(--app-color-brand-react);
+	fill: var(--app-color-brand-react);
+}
+
+.bg-react {
+	background-color: var(--app-color-brand-react);
+}
+
+.text-vue {
+	color: var(--app-color-brand-vue);
+	fill: var(--app-color-brand-vue);
+}
+
+.bg-vue {
+	background-color: var(--app-color-brand-vue);
+}
+
+.text-solid {
+	color: var(--app-color-brand-solid);
+	fill: var(--app-color-brand-solid);
+}
+
+.bg-solid {
+	background-color: var(--app-color-brand-solid);
+}
+
+.text-vanilla {
+	color: var(--app-color-brand-vanilla);
+	fill: var(--app-color-brand-vanilla);
+}
+
+.bg-vanilla {
+	background-color: var(--app-color-brand-vanilla);
 }
 
 ::selection {
-	background-color: hsla(var(--secondary-color-hsl, var(--app-color-primary-hsl)), 0.3);
-	// color: var(--app-color-primary-contrast);
-	// -webkit-text-fill-color: var(--app-color-primary-contrast);
+	background-color: color-mix(in lch, var(--secondary-color), transparent 70%);
 }
 
 p {

@@ -1,17 +1,19 @@
 ---
 import { type Framework } from '$helpers/constants';
+import type { MarkdownHeading } from 'astro';
 import DocsLayout from './DocsLayout.astro';
 
 type Props = {
 	title: string;
 	tagline: string;
 	framework?: Framework;
+	headings: MarkdownHeading[];
 };
 
-const { tagline, title, framework } = Astro.props;
+const { tagline, title, framework, headings } = Astro.props;
 ---
 
-<DocsLayout title={title}>
+<DocsLayout title={title} headings={headings}>
 	<h1>
 		{
 			framework ? (
@@ -46,7 +48,7 @@ const { tagline, title, framework } = Astro.props;
 	</p> -->
 </DocsLayout>
 
-<style lang="scss">
+<style>
 	.tags {
 		display: flex;
 		flex-wrap: wrap;
@@ -54,7 +56,7 @@ const { tagline, title, framework } = Astro.props;
 		margin: 0.5rem 0 1rem;
 	}
 
-	.tag {
+	/* .tag {
 		background: hsla(var(--secondary-color-hsl), 0.1);
 		border-radius: 24px;
 		color: var(--secondary-color);
@@ -63,5 +65,5 @@ const { tagline, title, framework } = Astro.props;
 		font-weight: 600;
 		line-height: 1;
 		padding: 0.75rem 0.75rem;
-	}
+	} */
 </style>

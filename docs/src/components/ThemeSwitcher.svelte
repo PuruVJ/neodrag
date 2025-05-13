@@ -14,6 +14,7 @@
 	import { Tween } from 'svelte/motion';
 	import SunnyIcon from '~icons/ion/sunny-outline';
 	import MoonIcon from '~icons/ph/moon-fill';
+	import { untrack } from 'svelte';
 
 	let container_width = $state(0);
 
@@ -39,9 +40,13 @@
 
 	$effect(() => {
 		if (mounted.current && draggable_el)
-			position_x.set(
-				theme.current === 'dark' ? container_width - draggable_el.getBoundingClientRect().width : 0,
-				{ duration: 0 },
+			untrack(() =>
+				position_x.set(
+					theme.current === 'dark'
+						? container_width - draggable_el!.getBoundingClientRect().width
+						: 0,
+					{ duration: 0 },
+				),
 			);
 	});
 </script>
@@ -67,21 +72,21 @@
 		use:draggable={() => [
 			axis('x'),
 			bounds(BoundsFrom.parent()),
-			position_compartment,
-			events({
-				onDrag: ({ offset }) => {
-					position_x.set(offset.x, { duration: 0 });
-					change_theme();
-				},
-				onDragEnd: ({ offset, rootNode }) => {
-					if (offset.x / container_width > 0.3) {
-						position_x.target = container_width - rootNode.getBoundingClientRect().width;
-					} else {
-						position_x.target = 0;
-					}
-					change_theme();
-				},
-			}),
+			// position_compartment,
+			// events({
+			// 	onDrag: ({ offset }) => {
+			// 		position_x.set(offset.x, { duration: 0 });
+			// 		change_theme();
+			// 	},
+			// 	onDragEnd: ({ offset, rootNode }) => {
+			// 		if (offset.x / container_width > 0.3) {
+			// 			position_x.target = container_width - rootNode.getBoundingClientRect().width;
+			// 		} else {
+			// 			position_x.target = 0;
+			// 		}
+			// 		change_theme();
+			// 	},
+			// }),
 		]}
 	></div>
 
@@ -105,7 +110,7 @@
 		height: 2rem;
 		padding: 0;
 		border-radius: 24px;
-		background-color: hsla(var(--secondary-color-hsl), 0.05);
+		background-color: color-mix(in lch, var(--secondary-color), transparent 95%);
 	}
 
 	.draggable {
@@ -128,7 +133,7 @@
 		pointer-events: none;
 
 		font-size: 0.8em;
-		color: var(--secondary-color-contrast);
+		color: color-mix(in lch, var(--secondary-color), var(--app-color-anti-mixer) 70%);
 
 		padding: 0;
 
