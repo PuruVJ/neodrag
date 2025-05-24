@@ -41,10 +41,10 @@
 		}),
 	])}></span> -->
 
-<!-- <div
-    {@attach draggable([
-		position({ current: $state.snapshot(pos.current) }),
-		// position_compartment,
+<div
+    {@attach draggable(() => [
+		// position({ current: $state.snapshot(pos.current) }),
+		position_compartment,
 		events({
 			onDragStart({ offset }) {
 				pos.set({ x: offset.x, y: offset.y }, { duration: 0 });
@@ -58,9 +58,9 @@
 		}),
 	])
 }
-></div> -->
+></div>
 
-<div
+<!-- <div
 	use:legacyDraggable={[
 		position({ current: $state.snapshot(pos.current) }),
 		// position_compartment,
@@ -76,7 +76,7 @@
 			},
 		}),
 	]}
-></div>
+></div> -->
 
 <style>
 	div {

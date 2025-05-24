@@ -7,7 +7,7 @@ import {
 	type Plugin,
 } from '@neodrag/core/plugins';
 import type { Accessor, Setter } from 'solid-js';
-import { createEffect, createSignal, untrack } from 'solid-js';
+import { createEffect, createRenderEffect, createSignal, untrack } from 'solid-js';
 
 const draggable_factory = createDraggable();
 
@@ -94,7 +94,6 @@ function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 		const [drag_state, set_drag_state] = createSignal<DragState>(default_drag_state);
 		let instance: ReturnType<typeof draggableFactory.draggable> | undefined;
 		const state_sync_plugin = state_sync(set_drag_state);
-		let is_first_update = true;
 
 		createEffect(() => {
 			const node = element();
@@ -105,17 +104,6 @@ function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 			);
 
 			return () => instance?.destroy();
-		});
-
-		// Add debouncing/batching to prevent rapid updates
-		createEffect(() => {
-			const current_plugins = resolve_plugins(plugins, state_sync_plugin);
-			if (is_first_update) {
-				is_first_update = false;
-				return;
-			}
-
-			instance!.update(current_plugins);
 		});
 
 		return drag_state;
@@ -129,7 +117,7 @@ export function createCompartment<T extends Plugin>(reactive: () => T) {
 	const compartment = new Compartment(() => untrack(reactive));
 
 	// Automatically track reactive dependencies and update compartment
-	createEffect(() => {
+	createRenderEffect(() => {
 		compartment.current = reactive();
 	});
 

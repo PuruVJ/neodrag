@@ -1,64 +1,44 @@
 <script setup lang="ts">
-import { ControlFrom, controls, events, grid, vDraggable } from '@neodrag/vue';
-import { ref } from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import { events, position, useCompartment, vDraggable } from '@neodrag/vue';
+import { ref, watchEffect } from 'vue';
 
-let unmounted = ref(false);
-// let axis = ref<'x' | 'y' | null>(null);
+const pos = ref({ x: 0, y: 0 });
 
-let cancel1 = ref<HTMLDivElement>();
-let cancel2 = ref<HTMLDivElement>();
+const position_compartment = useCompartment(() =>
+	position({ current: { x: pos.value.x, y: pos.value.y } }),
+);
 
-// function switchAxis() {
-// 	if (axis.value === 'y') {
-// 		axis.value = 'x';
-// 	} else {
-// 		axis.value = 'both';
-// 	}
-// }
-
-setTimeout(() => (unmounted.value = true), 3000);
-
-function onDrag(e: { offset: { x: number; y: number } }) {
-	console.log(e);
-}
+watchEffect(() => console.log(pos.value));
 </script>
 
 <template>
-	<HelloWorld v-if="!unmounted" />
-
 	<div
 		class="box"
-		v-draggable="[
-			events({ onDrag }),
-			grid([10, 10]),
-			controls({ block: ControlFrom.elements([cancel1, cancel2]) }),
-		]"
-	>
-		2nd
-		<br /><br />
-		<div class="cancel" ref="cancel1">Cancel me out</div>
-		<div class="cancel" ref="cancel2">Cancel me out pt 2</div>
-	</div>
+		v-draggable="
+			() => [
+				position_compartment,
+				events({
+					onDrag: ({ offset }) => {
+						pos.x = offset.x;
+						pos.y = offset.y;
+					},
+				}),
+			]
+		"
+	></div>
 
 	<br /><br />
 
-	<!-- <button @click="switchAxis">Change axis</button> -->
+	X:
+	<input type="range" min="0" max="300" :value="pos.x" @input="(e) => (pos.x = +e.target.value)" />
+	Y:
+	<input type="range" min="0" max="300" :value="pos.y" @input="(e) => (pos.y = +e.target.value)" />
 </template>
 
 <style scoped>
-:global(#app) {
-	font-family: Avenir, Helvetica, Arial, sans-serif;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	text-align: center;
-	color: #2c3e50;
-	margin-top: 60px;
-}
-
 .box {
-	height: 100%;
-	width: 100%;
+	height: 100px;
+	width: 100px;
 	background-color: cyan;
 }
 </style>

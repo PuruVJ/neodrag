@@ -84,7 +84,6 @@ export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 		const instance = useRef<ReturnType<typeof draggableFactory.draggable>>();
 		const state_sync_ref = useRef(state_sync(set_drag_state));
 		const pluginsRef = useRef(resolve_plugins(plugins, state_sync_ref.current));
-		const is_first_run = useRef(true);
 
 		// Initialize draggable instance
 		useEffect(() => {
@@ -96,37 +95,24 @@ export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 			return () => instance.current?.destroy();
 		}, []); // Changed dependency
 
-		// Handle plugin updates
-		useEffect(() => {
-			if (is_first_run.current) {
-				is_first_run.current = false;
-				return;
-			}
-
-			if (!instance.current) return;
-
-			pluginsRef.current = resolve_plugins(plugins, state_sync_ref.current);
-			instance.current.update(pluginsRef.current);
-		}, [plugins]); // Changed dependency
-
 		return drag_state;
 	};
 }
 
-export function useCompartment<T extends Plugin>(reactive: () => T, deps: React.DependencyList) {
-	const compartmentRef = useRef<Compartment<T>>();
+export function useCompartment<T extends Plugin>(reactive: () => T, deps?: React.DependencyList) {
+	const compartment_ref = useRef<Compartment<T>>();
 
 	// Initialize compartment once
-	if (!compartmentRef.current) {
-		compartmentRef.current = new Compartment(reactive);
+	if (!compartment_ref.current) {
+		compartment_ref.current = new Compartment(reactive);
 	}
 
 	// Update compartment when dependencies change
 	useEffect(() => {
-		compartmentRef.current!.current = reactive();
+		compartment_ref.current!.current = reactive();
 	}, deps);
 
-	return compartmentRef.current;
+	return compartment_ref.current;
 }
 
 export const useDraggable = wrapper(draggable_factory);

@@ -13,8 +13,6 @@ export const wrapper = (
 		mounted: (el, { value = [] }) =>
 			!draggable_map.has(el) && draggable_map.set(el, factory.draggable(el, value)),
 
-		updated: (el, { value = [] }) => draggable_map.get(el)!.update(value),
-
 		unmounted: (el) => {
 			draggable_map.get(el)!.destroy();
 			draggable_map.delete(el);
@@ -22,18 +20,16 @@ export const wrapper = (
 	};
 };
 
-// Option 1: Composable function (most idiomatic Vue way)
 export function useCompartment<T extends Plugin>(reactive: () => T) {
 	const compartment = new Compartment(reactive);
 
-	// Automatically track reactive dependencies and update compartment
-	const stopWatcher = watchEffect(() => {
-		compartment.current = reactive();
+	const stop_watcher = watchEffect(() => (compartment.current = reactive()), {
+		flush: 'pre',
 	});
 
 	// Cleanup on unmount
 	onUnmounted(() => {
-		stopWatcher();
+		stop_watcher();
 	});
 
 	return compartment;
