@@ -115,7 +115,7 @@ function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 				return;
 			}
 
-			instance!.update(current_plugins);
+			instance!.update();
 		});
 
 		return drag_state;

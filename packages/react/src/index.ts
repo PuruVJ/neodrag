@@ -106,7 +106,7 @@ export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 			if (!instance.current) return;
 
 			pluginsRef.current = resolve_plugins(plugins, state_sync_ref.current);
-			instance.current.update(pluginsRef.current);
+			instance.current.update();
 		}, [plugins]); // Changed dependency
 
 		return drag_state;
