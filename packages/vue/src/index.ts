@@ -13,8 +13,6 @@ export const wrapper = (
 		mounted: (el, { value = [] }) =>
 			!draggable_map.has(el) && draggable_map.set(el, factory.draggable(el, value)),
 
-		updated: (el) => draggable_map.get(el)!.update(),
-
 		unmounted: (el) => {
 			draggable_map.get(el)!.destroy();
 			draggable_map.delete(el);

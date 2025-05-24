@@ -11,28 +11,13 @@ export const legacyDraggable = core as Action<HTMLElement | SVGElement, PluginIn
 export const draggable =
 	(plugins: PluginInput | undefined): Attachment<HTMLElement> =>
 	(element) => {
-		const { update, destroy } = core(element, plugins);
-
-		let is_first_run = true;
-
-		$effect.pre(() => {
-			plugins;
-
-			if (is_first_run) {
-				is_first_run = false;
-				return;
-			}
-
-			update();
-		});
-
-		return destroy;
+		core(element, plugins).destroy;
 	};
 
 export * from '@neodrag/core/plugins';
 export { instances };
 
-export function reactiveCompartment<T extends Plugin>(reactive: () => T) {
+export function createCompartment<T extends Plugin>(reactive: () => T) {
 	let compartment = new Compartment(reactive);
 
 	// @ts-ignore
