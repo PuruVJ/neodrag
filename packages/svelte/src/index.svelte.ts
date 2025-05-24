@@ -13,11 +13,17 @@ export const draggable =
 	(element) => {
 		const { update, destroy } = core(element, plugins);
 
-		console.log('PLease dont udpate');
+		let is_first_run = true;
 
 		$effect.pre(() => {
-			// console.log(plugins);
-			if (plugins) update(plugins);
+			plugins;
+
+			if (is_first_run) {
+				is_first_run = false;
+				return;
+			}
+
+			update();
 		});
 
 		return destroy;
