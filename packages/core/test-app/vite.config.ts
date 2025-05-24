@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
 	plugins: [sveltekit(), kitRoutes()],
-	preview: {
+	server: {
 		port: 3291,
 	},
 });

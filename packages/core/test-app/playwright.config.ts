@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
 	webServer: {
-		command: 'pnpm build && pnpm preview',
+		command: 'pnpm dev',
 		port: 3291,
 	},
 

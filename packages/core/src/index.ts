@@ -39,7 +39,7 @@ export interface DraggableInstance {
 	};
 	controller: AbortController;
 	compartments: {
-		map: Map<Compartment, Plugin>;
+		map: Map<Compartment, Plugin | undefined>;
 		pending: Set<Compartment>;
 		is_flushing: boolean;
 	};
@@ -418,7 +418,6 @@ export function createDraggable({
 		return true;
 	}
 
-	// Add a new function to process pending compartment updates
 	function process_pending_compartment_updates(instance: DraggableInstance, is_external = false) {
 		if (instance.compartments.is_flushing || instance.compartments.pending.size === 0) {
 			return;
@@ -454,24 +453,69 @@ export function createDraggable({
 				);
 
 				if (old_plugin) {
-					// Skip if same instance and not live-updateable
-					if (old_plugin === new_plugin && !new_plugin.liveUpdate) {
-						continue;
-					}
+					if (new_plugin === undefined) {
+						// Remove the plugin
+						const plugin_index = instance.plugins.indexOf(old_plugin);
+						old_plugin.cleanup?.(instance.ctx, instance.states.get(old_plugin.name));
+						instance.states.delete(old_plugin.name);
+						instance.plugins.splice(plugin_index, 1);
+						instance.compartments.map.set(compartment, undefined);
+						has_changes = true;
+					} else {
+						// Skip if same instance and not live-updateable
+						if (old_plugin === new_plugin && !new_plugin.liveUpdate) {
+							continue;
+						}
 
-					// Update plugin reference
-					instance.plugins[instance.plugins.indexOf(old_plugin)] = new_plugin;
+						// Update plugin reference
+						instance.plugins[instance.plugins.indexOf(old_plugin)] = new_plugin;
+						instance.compartments.map.set(compartment, new_plugin);
+
+						// Update all plugins that have liveUpdate enabled
+						for (const plugin of instance.plugins) {
+							if (plugin.liveUpdate) {
+								const old = instance.plugins.find((p) => p.name === plugin.name);
+								if (update_plugin_if_needed(instance, old, plugin)) {
+									has_changes = true;
+								}
+							}
+						}
+					}
+				} else if (new_plugin !== undefined) {
+					// Add new plugin when compartment was empty
+					instance.plugins.push(new_plugin);
 					instance.compartments.map.set(compartment, new_plugin);
 
-					// Update all plugins that have liveUpdate enabled
+					const setup_result = resultify(
+						() => {
+							const state = new_plugin.setup?.(instance.ctx);
+							if (state) {
+								instance.states.set(new_plugin.name, state);
+							}
+							return state;
+						},
+						{
+							phase: 'setup',
+							plugin: { name: new_plugin.name, hook: 'setup' },
+							node: instance.root_node,
+						},
+					);
+
+					if (!setup_result.ok) {
+						instance.failed_plugins.add(new_plugin.name);
+					}
+
+					// Use the same update logic as replacement case
 					for (const plugin of instance.plugins) {
-						if (plugin.liveUpdate) {
+						if (plugin.liveUpdate && plugin !== new_plugin) {
 							const old = instance.plugins.find((p) => p.name === plugin.name);
 							if (update_plugin_if_needed(instance, old, plugin)) {
 								has_changes = true;
 							}
 						}
 					}
+
+					has_changes = true;
 				}
 			}
 

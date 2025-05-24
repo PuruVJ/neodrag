@@ -1,10 +1,9 @@
 <script lang="ts">
 	import {
+		createCompartment,
 		draggable,
 		events,
-		legacyDraggable,
-		position,
-		reactiveCompartment,
+		position
 	} from '@neodrag/svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { expoOut } from 'svelte/easing';
@@ -12,7 +11,7 @@
 
 	const pos = new Tween({ x: 0, y: 0 }, { duration: 2000, easing: expoOut });
 
-	const position_compartment = reactiveCompartment(() => position({ current: pos.current }));
+	const position_compartment = createCompartment(() => position({ current: pos.current }));
 
 	// $inspect(pos.current);
 

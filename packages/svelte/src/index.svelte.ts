@@ -3,19 +3,25 @@ import { Compartment, type PluginInput, type Plugin } from '@neodrag/core/plugin
 import type { Action } from 'svelte/action';
 import { Attachment } from 'svelte/attachments';
 
-const { draggable: core, instances } = createDraggable();
+const factory = createDraggable();
 
 /** @deprecated Use `{@attach draggable}` instead */
-export const legacyDraggable = core as Action<HTMLElement | SVGElement, PluginInput | undefined>;
+export const legacyDraggable = factory.draggable as Action<
+	HTMLElement | SVGElement,
+	PluginInput | undefined
+>;
 
-export const draggable =
-	(plugins: PluginInput | undefined): Attachment<HTMLElement> =>
-	(element) => {
-		core(element, plugins).destroy;
-	};
+export const wrapper = (factory: ReturnType<typeof createDraggable>) => {
+	return (plugins: PluginInput | undefined): Attachment<HTMLElement> =>
+		(element) => {
+			return factory.draggable(element, plugins).destroy;
+		};
+};
+
+export const draggable = wrapper(factory);
 
 export * from '@neodrag/core/plugins';
-export { instances };
+export const instances = factory.instances;
 
 export function createCompartment<T extends Plugin>(reactive: () => T) {
 	let compartment = new Compartment(reactive);

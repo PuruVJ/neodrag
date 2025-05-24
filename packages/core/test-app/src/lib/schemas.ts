@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 export const SCHEMAS = {
+	COMPARTMENT: z.enum(['undefined-to-plugin', 'plugin-func-to-undefined', 'plugin-func-to-plugin']),
+
 	PLUGINS: {
 		AXIS: z.enum(['x', 'y']).optional(),
 

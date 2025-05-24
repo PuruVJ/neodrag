@@ -39,20 +39,20 @@ export type PluginResolver = () => (Plugin | Compartment<any>)[];
 export type PluginInput = Plugin[] | PluginResolver;
 
 export class Compartment<T extends Plugin = Plugin> {
-	#current: T;
-	#subscribers: Set<(plugin: T) => void>;
+	#current: T | undefined;
+	#subscribers: Set<(plugin: T | undefined) => void>;
 	#updating: boolean = false;
 
-	constructor(initial: () => T) {
-		this.#current = initial();
+	constructor(initial?: () => T) {
+		this.#current = initial ? initial() : undefined;
 		this.#subscribers = new Set();
 	}
 
-	get current(): T {
+	get current(): T | undefined {
 		return this.#current;
 	}
 
-	set current(plugin: T) {
+	set current(plugin: T | undefined) {
 		if (plugin === this.#current) return;
 
 		// Prevent recursive updates
@@ -61,13 +61,13 @@ export class Compartment<T extends Plugin = Plugin> {
 		this.#updating = true;
 		this.#current = plugin;
 
-		// Notify subscribers with the new plugin
+		// Notify subscribers with the new plugin (which could be undefined)
 		this.#subscribers.forEach((callback) => callback(plugin));
 
 		this.#updating = false;
 	}
 
-	subscribe(callback: (plugin: T) => void) {
+	subscribe(callback: (plugin: T | undefined) => void) {
 		this.#subscribers.add(callback);
 		return () => this.#subscribers.delete(callback);
 	}
@@ -75,15 +75,18 @@ export class Compartment<T extends Plugin = Plugin> {
 
 export function resolve_plugins(
 	items: (Plugin | Compartment)[],
-	compartments: Map<Compartment, Plugin>,
+	compartments: Map<Compartment, Plugin | undefined>,
 ): Plugin[] {
-	return items.map((item) => {
-		if (item instanceof Compartment) {
-			compartments.set(item, item.current);
-			return item.current;
-		}
-		return item;
-	});
+	return items
+		.map((item) => {
+			if (item instanceof Compartment) {
+				const current = item.current;
+				compartments.set(item, current);
+				return current;
+			}
+			return item;
+		})
+		.filter((plugin): plugin is Plugin => plugin !== undefined); // Filter out undefined
 }
 
 export function unstable_definePlugin<State, Args extends unknown[]>(

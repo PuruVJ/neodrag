@@ -10,5 +10,5 @@
 		"moduleResolution": "Bundler",
 		"types": ["vitest/globals", "svelte"]
 	},
-	"files": ["./src/index.ts"]
+	"files": ["./src/index.svelte.ts"]
 }
