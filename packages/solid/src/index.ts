@@ -1,5 +1,6 @@
 import { createDraggable } from '@neodrag/core';
 import {
+	Compartment,
 	DragEventData,
 	PluginResolver,
 	unstable_definePlugin,
@@ -122,6 +123,18 @@ function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 }
 
 export const useDraggable = wrapper(draggable_factory);
+
+// Option 1: Hook-style (most common SolidJS pattern)
+export function createCompartment<T extends Plugin>(reactive: () => T) {
+	const compartment = new Compartment(() => untrack(reactive));
+
+	// Automatically track reactive dependencies and update compartment
+	createEffect(() => {
+		compartment.current = reactive();
+	});
+
+	return compartment;
+}
 
 // Export necessary types and utilities
 export * from '@neodrag/core/plugins';

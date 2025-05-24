@@ -113,8 +113,20 @@ export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 	};
 }
 
-export function useCompartment<T extends Plugin>(initial: () => T) {
-	return useRef<Compartment<T>>(new Compartment(initial)).current;
+export function useCompartment<T extends Plugin>(reactive: () => T, deps: React.DependencyList) {
+	const compartmentRef = useRef<Compartment<T>>();
+
+	// Initialize compartment once
+	if (!compartmentRef.current) {
+		compartmentRef.current = new Compartment(reactive);
+	}
+
+	// Update compartment when dependencies change
+	useEffect(() => {
+		compartmentRef.current!.current = reactive();
+	}, deps);
+
+	return compartmentRef.current;
 }
 
 export const useDraggable = wrapper(draggable_factory);

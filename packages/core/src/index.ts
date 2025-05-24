@@ -133,7 +133,7 @@ export function createDraggable({
 			const handler = plugin[hook];
 			if (!handler) continue;
 
-			if (instance.current_drag_hook_cancelled && plugin.cancelable !== false) continue;
+			if (instance.current_drag_hook_cancelled && plugin.cancelable) continue;
 
 			const result = resultify(
 				() => handler.call(plugin, instance.ctx, instance.states.get(plugin.name), event),
@@ -168,21 +168,17 @@ export function createDraggable({
 		// This prevents new effects added during execution from being lost
 		clear_effects(instance);
 
-		if (immediate_effects.size > 0) {
-			queueMicrotask(() => {
-				for (const effect of immediate_effects) {
-					effect();
-				}
-			});
-		}
+		queueMicrotask(() => {
+			for (const effect of immediate_effects) {
+				effect();
+			}
+		});
 
-		if (paint_effects.size > 0) {
-			requestAnimationFrame(() => {
-				for (const effect of paint_effects) {
-					effect();
-				}
-			});
-		}
+		requestAnimationFrame(() => {
+			for (const effect of paint_effects) {
+				effect();
+			}
+		});
 	}
 
 	function clear_effects(instance: DraggableInstance) {
@@ -230,27 +226,16 @@ export function createDraggable({
 
 		// Find the draggable node that contains the target
 		const draggable_node = find_draggable_node(e);
-
 		if (!draggable_node) return;
 
-		const instance = instances.get(draggable_node)!;
+		const instance = instances.get(draggable_node);
+		if (!instance) return;
+
+		// Cache it right here
+		// TODO: It could be misleading, since the x and y wont be updated in drag. Maybe only expose the dimensions
 		instance.ctx.cachedRootNodeRect = draggable_node.getBoundingClientRect();
 
-		// Modify this if draggable_node is SVG
-		// Calculate scale differently for SVG vs HTML
-		let inverse_scale = 1;
-		if (draggable_node instanceof SVGElement) {
-			// For SVG elements, use the bounding box for scale
-			const bbox = (draggable_node as SVGGraphicsElement).getBBox();
-			const rect = instance.ctx.cachedRootNodeRect;
-			// Only calculate scale if we have valid dimensions
-			if (bbox.width && rect.width) {
-				inverse_scale = bbox.width / rect.width;
-			}
-		} else {
-			// For HTML elements, use the original calculation
-			inverse_scale = draggable_node.offsetWidth / instance.ctx.cachedRootNodeRect.width;
-		}
+		const inverse_scale = calculate_inverse_scale(instance);
 
 		instance.ctx.initial.x = e.clientX - instance.ctx.offset.x / inverse_scale;
 		instance.ctx.initial.y = e.clientY - instance.ctx.offset.y / inverse_scale;
@@ -278,7 +263,7 @@ export function createDraggable({
 		}
 	}
 
-	function handle_pointer_move(e: PointerEvent) {
+	function handle_pointer_move(e: PointerEvent, sync_only = false) {
 		const draggable_node = active_nodes.get(e.pointerId);
 		if (!draggable_node) return;
 
@@ -305,12 +290,14 @@ export function createDraggable({
 
 		e.preventDefault();
 
-		instance.ctx.delta.x = e.clientX - instance.ctx.initial.x - instance.ctx.offset.x;
-		instance.ctx.delta.y = e.clientY - instance.ctx.initial.y - instance.ctx.offset.y;
+		if (!sync_only) {
+			instance.ctx.delta.x = e.clientX - instance.ctx.initial.x - instance.ctx.offset.x;
+			instance.ctx.delta.y = e.clientY - instance.ctx.initial.y - instance.ctx.offset.y;
 
-		// Core proposes delta
-		instance.ctx.proposed.x = instance.ctx.delta.x;
-		instance.ctx.proposed.y = instance.ctx.delta.y;
+			// Core proposes delta
+			instance.ctx.proposed.x = instance.ctx.delta.x;
+			instance.ctx.proposed.y = instance.ctx.delta.y;
+		}
 
 		// Run the plugins
 		const run_result = run_plugins(instance, 'drag', e);
@@ -318,9 +305,11 @@ export function createDraggable({
 		if (run_result) flush_effects(instance);
 		else return clear_effects(instance);
 
-		// Whatever offset we have had till now since the draggable() was mounted, add proposals to it, as long as they're not null
-		instance.ctx.offset.x += instance.ctx.proposed.x ?? 0;
-		instance.ctx.offset.y += instance.ctx.proposed.y ?? 0;
+		if (!sync_only) {
+			// Whatever offset we have had till now since the draggable() was mounted, add proposals to it, as long as they're not null
+			instance.ctx.offset.x += instance.ctx.proposed.x ?? 0;
+			instance.ctx.offset.y += instance.ctx.proposed.y ?? 0;
+		}
 	}
 
 	function handle_pointer_up(e: PointerEvent) {
@@ -446,7 +435,7 @@ export function createDraggable({
 
 			// Only rerun drag if changes occurred and we have a last event
 			if (has_changes && instance.ctx.lastEvent && is_node_active(instance.root_node)) {
-				handle_pointer_move(instance.ctx.lastEvent);
+				handle_pointer_move(instance.ctx.lastEvent, true);
 			}
 
 			return;
@@ -588,7 +577,7 @@ export function createDraggable({
 
 			// If changes occurred and we have a last event, rerun drag
 			if (!instance.ctx.isDragging && has_changes && instance.ctx.lastEvent) {
-				handle_pointer_move(instance.ctx.lastEvent);
+				handle_pointer_move(instance.ctx.lastEvent, true);
 			}
 
 			flush_effects(instance);
@@ -598,6 +587,32 @@ export function createDraggable({
 				process_pending_compartment_updates(instance);
 			}
 		});
+	}
+
+	function calculate_inverse_scale(instance: DraggableInstance) {
+		const draggable_node = instance.ctx.rootNode;
+
+		let inverse_scale = 1;
+		if (draggable_node instanceof SVGElement) {
+			// For SVG elements, use the bounding box for scale
+			const bbox = (draggable_node as SVGGraphicsElement).getBBox();
+			const rect = instance.ctx.cachedRootNodeRect;
+			// Only calculate scale if we have valid dimensions
+			if (bbox.width && rect.width) {
+				inverse_scale = bbox.width / rect.width;
+			}
+		} else {
+			// For HTML elements, use the original calculation
+			// @ts-ignore
+			inverse_scale = draggable_node.offsetWidth / instance.ctx.cachedRootNodeRect.width;
+		}
+
+		// Fallback to 1 if calculation results in NaN or invalid value
+		if (isNaN(inverse_scale) || inverse_scale <= 0) {
+			inverse_scale = 1;
+		}
+
+		return inverse_scale;
 	}
 
 	function find_removed_plugins(old_plugins: Plugin[], new_plugins: Plugin[]): Plugin[] {
@@ -730,12 +745,6 @@ export function createDraggable({
 				setForcedPosition(x, y) {
 					this.offset.x = x;
 					this.offset.y = y;
-					// Only sync initial with offset when not dragging
-					// This maintains the drag calculations during active drags
-					if (!this.isDragging) {
-						this.initial.x = x;
-						this.initial.y = y;
-					}
 				},
 			};
 

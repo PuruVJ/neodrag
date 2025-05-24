@@ -2,20 +2,17 @@
 	"name": "@neodrag/svelte",
 	"version": "2.3.1",
 	"description": "Svelte Action to add dragging to your apps 😉",
-	"main": "./dist/index.js",
-	"module": "./dist/index.js",
 	"type": "module",
-	"types": "./dist/index.d.ts",
 	"files": [
 		"dist/*"
 	],
 	"sideEffects": false,
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"svelte": "./dist/index.js",
-			"import": "./dist/index.js",
-			"default": "./dist/index.js"
+			"types": "./dist/index.svelte.d.ts",
+			"svelte": "./dist/index.svelte.js",
+			"import": "./dist/index.svelte.js",
+			"default": "./dist/index.svelte.js"
 		},
 		"./package.json": "./package.json"
 	},
@@ -50,5 +47,8 @@
 	"dependencies": {
 		"@neodrag/core": "workspace:*"
 	},
-	"homepage": "https://neodrag.dev/docs/svelte"
+	"homepage": "https://neodrag.dev/docs/svelte",
+	"devDependencies": {
+		"svelte": "^5.33.1"
+	}
 }

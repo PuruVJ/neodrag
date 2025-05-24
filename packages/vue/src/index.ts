@@ -1,6 +1,6 @@
 import { createDraggable } from '@neodrag/core';
-import type { PluginInput } from '@neodrag/core/plugins';
-import { type Directive } from 'vue';
+import { Compartment, Plugin, type PluginInput } from '@neodrag/core/plugins';
+import { onUnmounted, watchEffect, type Directive } from 'vue';
 
 const factory = createDraggable();
 
@@ -21,6 +21,23 @@ export const wrapper = (
 		},
 	};
 };
+
+// Option 1: Composable function (most idiomatic Vue way)
+export function useCompartment<T extends Plugin>(reactive: () => T) {
+	const compartment = new Compartment(reactive);
+
+	// Automatically track reactive dependencies and update compartment
+	const stopWatcher = watchEffect(() => {
+		compartment.current = reactive();
+	});
+
+	// Cleanup on unmount
+	onUnmounted(() => {
+		stopWatcher();
+	});
+
+	return compartment;
+}
 
 export const vDraggable = wrapper(factory);
 export const instances = factory.instances;

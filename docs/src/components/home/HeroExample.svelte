@@ -2,7 +2,7 @@
 	import squircle from '$/worklet/squircle.js?url';
 	import { typingEffect } from '$actions/typingEffect';
 	import { browser } from '$helpers/utils';
-	import { draggable } from '@neodrag/svelte';
+	import { bounds, BoundsFrom, Compartment, draggable, events, position } from '@neodrag/svelte';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
@@ -20,6 +20,12 @@
 	});
 
 	let drag_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
+
+	const position_compartment = new Compartment(() => position({ current: drag_position.current }));
+
+	$effect(() => {
+		position_compartment.current = position({ current: drag_position.current });
+	});
 
 	function handle_mouse_move(e: MouseEvent) {
 		coords_cursor ??= { x: 0, y: 0 };
@@ -48,18 +54,22 @@
 	<div
 		class="box"
 		class:wiggles={box_wiggles}
-		use:draggable={{
-			bounds: 'parent',
-			position: drag_position.current,
-			onDragStart: () => {
-				box_wiggles = false;
-			},
-			onDrag: ({ offsetX, offsetY }) =>
-				drag_position.set({ x: offsetX, y: offsetY }, { duration: 0 }),
-			onDragEnd: () => {
-				drag_position.target = { x: 0, y: 0 };
-			},
-		}}
+		use:draggable={() => [
+			bounds(BoundsFrom.parent()),
+			position_compartment,
+			events({
+				onDragStart: () => {
+					box_wiggles = false;
+				},
+				onDrag: ({ offset }) => {
+					console.log(offset);
+					drag_position.set({ x: offset.x, y: offset.y }, { duration: 0 });
+				},
+				onDragEnd: () => {
+					drag_position.target = { x: 0, y: 0 };
+				},
+			}),
+		]}
 	>
 		<div class="paw">
 			<PawIcon />
@@ -85,7 +95,7 @@
 		width: auto;
 		height: 100%;
 
-		background-color: hsla(var(--app-color-dark-hsl), 0.1);
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 90%);
 
 		border-radius: 1rem;
 		box-shadow: var(--inner-shadow-4);
@@ -118,7 +128,7 @@
 		top: 25%;
 
 		font-family: var(--app-font-mono);
-		color: hsla(var(--app-color-dark-hsl), 0.6);
+		color: color-mix(in lch, var(--app-color-dark), transparent 40%);
 		word-spacing: 4px;
 		font-size: clamp(1rem, 2vw, 2.5rem);
 

@@ -814,7 +814,7 @@ export const position = unstable_definePlugin(
 		liveUpdate: true,
 
 		setup(ctx) {
-			if (!ctx.isDragging) {
+			if (!ctx.isInteracting) {
 				const x = options?.current?.x ?? options?.default?.x ?? ctx.offset.x;
 				const y = options?.current?.y ?? options?.default?.y ?? ctx.offset.y;
 
