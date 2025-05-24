@@ -7,7 +7,7 @@ import {
 	type Plugin,
 } from '@neodrag/core/plugins';
 import type { Accessor, Setter } from 'solid-js';
-import { createEffect, createSignal, untrack } from 'solid-js';
+import { createEffect, createRenderEffect, createSignal, untrack } from 'solid-js';
 
 const draggable_factory = createDraggable();
 
@@ -117,7 +117,7 @@ export function createCompartment<T extends Plugin>(reactive: () => T) {
 	const compartment = new Compartment(() => untrack(reactive));
 
 	// Automatically track reactive dependencies and update compartment
-	createEffect(() => {
+	createRenderEffect(() => {
 		compartment.current = reactive();
 	});
 

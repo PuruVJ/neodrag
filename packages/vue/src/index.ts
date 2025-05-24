@@ -20,18 +20,16 @@ export const wrapper = (
 	};
 };
 
-// Option 1: Composable function (most idiomatic Vue way)
 export function useCompartment<T extends Plugin>(reactive: () => T) {
 	const compartment = new Compartment(reactive);
 
-	// Use watchEffect with explicit tracking
-	const stopWatcher = watchEffect(() => (compartment.current = reactive()), {
+	const stop_watcher = watchEffect(() => (compartment.current = reactive()), {
 		flush: 'pre',
 	});
 
 	// Cleanup on unmount
 	onUnmounted(() => {
-		stopWatcher();
+		stop_watcher();
 	});
 
 	return compartment;
