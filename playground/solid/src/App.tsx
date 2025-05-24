@@ -1,17 +1,22 @@
-import { Compartment, events, position as positionPlugin, useDraggable } from '@neodrag/solid';
-import { Component, createEffect, createSignal } from 'solid-js';
+import {
+	createCompartment,
+	events,
+	position as positionPlugin,
+	useDraggable,
+} from '@neodrag/solid';
+import { Component, createSignal } from 'solid-js';
 
 const App: Component = () => {
 	const [draggableRef, setDraggableRef] = createSignal<HTMLElement>();
 
 	const [position, setPosition] = createSignal({ x: 0, y: 0 });
 
-	const pos_comp = new Compartment(() => positionPlugin({ current: position() }));
+	const pos_comp = createCompartment(() => positionPlugin({ current: position() }));
 
-	createEffect(() => {
-		const { x, y } = position();
-		pos_comp.current = positionPlugin({ current: { x, y } });
-	});
+	// createEffect(() => {
+	// 	const { x, y } = position();
+	// 	pos_comp.current = positionPlugin({ current: { x, y } });
+	// });
 
 	const dragState = useDraggable(draggableRef, [
 		pos_comp,

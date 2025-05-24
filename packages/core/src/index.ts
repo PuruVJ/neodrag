@@ -656,21 +656,6 @@ export function createDraggable({
 			instances.set(node, instance);
 
 			return {
-				update: () => {
-					if (instance.resolver) {
-						// Manual mode - updates should come through compartments
-						return;
-					}
-
-					// // Static mode - warn in dev and ignore
-					// console.warn(
-					// 	'🚫 Calling update() on static plugin array has no effect.\n' +
-					// 		'💡 For reactive plugins, switch to function mode with compartments:\n' +
-					// 		'   ❌ draggable([plugin1, plugin2])\n' +
-					// 		'   ✅ draggable(() => [compartment1, plugin2])\n' +
-					// 		'   📖 See: https://neodrag.dev/docs/compartments',
-					// );
-				},
 				destroy: () => {
 					subscriptions.forEach((unsubscribe) => unsubscribe());
 					subscriptions.clear();

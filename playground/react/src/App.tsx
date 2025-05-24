@@ -1,9 +1,9 @@
-import { position as position_plugin, useDraggable, useCompartment } from '@neodrag/react';
+import { position as position_plugin, useCompartment, useDraggable } from '@neodrag/react';
 import { useEffect, useRef, useState } from 'react';
 
 function App() {
 	const [position, setPosition] = useState({ x: 0, y: 0 });
-	const pos_comp = useCompartment(() => position_plugin({ current: position }));
+	const pos_comp = useCompartment(() => position_plugin({ current: position }), [position]);
 
 	const draggable_ref = useRef<HTMLDivElement>(null);
 
@@ -12,14 +12,6 @@ function App() {
 	useEffect(() => {
 		setPosition(drag_state.offset);
 	}, [drag_state.offset]);
-
-	useEffect(() => {
-		pos_comp.current = position_plugin({ current: position });
-	}, [position]);
-
-	// useEffect(() => {
-	// 	console.log(position);
-	// }, [position]);
 
 	return (
 		<>

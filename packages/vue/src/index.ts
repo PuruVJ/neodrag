@@ -26,9 +26,9 @@ export const wrapper = (
 export function useCompartment<T extends Plugin>(reactive: () => T) {
 	const compartment = new Compartment(reactive);
 
-	// Automatically track reactive dependencies and update compartment
-	const stopWatcher = watchEffect(() => {
-		compartment.current = reactive();
+	// Use watchEffect with explicit tracking
+	const stopWatcher = watchEffect(() => (compartment.current = reactive()), {
+		flush: 'pre',
 	});
 
 	// Cleanup on unmount
