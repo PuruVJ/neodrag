@@ -818,7 +818,10 @@ export const position = unstable_definePlugin(
 				const x = options?.current?.x ?? options?.default?.x ?? ctx.offset.x;
 				const y = options?.current?.y ?? options?.default?.y ?? ctx.offset.y;
 
-				ctx.setForcedPosition(x, y);
+				// ✅ Only set if position actually changed
+				if (x !== ctx.offset.x || y !== ctx.offset.y) {
+					ctx.setForcedPosition(x, y);
+				}
 			}
 		},
 	}),

@@ -44,6 +44,10 @@ export interface DraggableInstance {
 		is_flushing: boolean;
 	};
 	resolver?: PluginResolver;
+
+	// ✅ PID SYSTEM - Add these properties
+	is_processing_external_update: boolean;
+	update_cycle_id: symbol | null;
 }
 
 type Result<T> = { ok: true; value: T } | { ok: false; error: unknown };
@@ -270,6 +274,12 @@ export function createDraggable({
 		const instance = instances.get(draggable_node)!;
 		if (!instance.ctx.isInteracting) return;
 
+		// ✅ Prevent re-entry during external update processing
+		if (instance.is_processing_external_update && instance.ctx.lastEvent === e) {
+			console.warn('Preventing recursive handle_pointer_move during external update');
+			return;
+		}
+
 		instance.ctx.lastEvent = e;
 
 		if (!instance.ctx.isDragging) {
@@ -409,12 +419,24 @@ export function createDraggable({
 	}
 
 	// Add a new function to process pending compartment updates
-	function process_pending_compartment_updates(instance: DraggableInstance) {
+	function process_pending_compartment_updates(instance: DraggableInstance, is_external = false) {
 		if (instance.compartments.is_flushing || instance.compartments.pending.size === 0) {
 			return;
 		}
 
+		// ✅ CRITICAL FIX: Block recursive internal updates
+		if (!is_external && instance.is_processing_external_update) {
+			console.warn('Blocking recursive compartment update to prevent infinite loop');
+			return;
+		}
+
 		instance.compartments.is_flushing = true;
+
+		// ✅ Mark external updates and assign unique cycle ID
+		if (is_external) {
+			instance.is_processing_external_update = true;
+			instance.update_cycle_id = Symbol('external_update');
+		}
 
 		queueMicrotask(() => {
 			// Store reference to pending items and clear for next batch
@@ -454,15 +476,24 @@ export function createDraggable({
 			}
 
 			// If changes occurred and we have a last event, rerun drag
-			if (!instance.ctx.isDragging && has_changes && instance.ctx.lastEvent) {
+			if (is_external && !instance.ctx.isDragging && has_changes && instance.ctx.lastEvent) {
 				handle_pointer_move(instance.ctx.lastEvent, true);
+			}
+
+			// ✅ Reset flags AFTER processing
+			instance.compartments.is_flushing = false;
+			if (is_external) {
+				instance.is_processing_external_update = false;
+				instance.update_cycle_id = null;
 			}
 
 			flush_effects(instance);
 
 			// Check if new updates came in while we were processing
 			if (instance.compartments.pending.size > 0) {
-				process_pending_compartment_updates(instance);
+				setTimeout(() => {
+					process_pending_compartment_updates(instance, false);
+				}, 0);
 			}
 		});
 	}
@@ -549,6 +580,10 @@ export function createDraggable({
 					is_flushing: false,
 				},
 				resolver: typeof plugins === 'function' ? plugins : undefined,
+
+				// ✅ Initialize PID system
+				is_processing_external_update: false,
+				update_cycle_id: null,
 			};
 
 			let currently_dragged_element = node;
@@ -623,7 +658,7 @@ export function createDraggable({
 							item.subscribe(() => {
 								// Add to pending updates and trigger processing
 								instance.compartments.pending.add(item);
-								process_pending_compartment_updates(instance);
+								process_pending_compartment_updates(instance, true);
 							}),
 						);
 					}
