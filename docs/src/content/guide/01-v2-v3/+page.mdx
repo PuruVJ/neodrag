@@ -5,137 +5,166 @@ tagline: 'Migrating from Neodrag v2 to v3'
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-This guide will help you migrate your existing Neodrag v2 code to the new v3 plugin-based architecture. v3 introduces significant improvements in performance, bundle size, and flexibility, but requires some changes to your existing code.
+This guide covers migrating from Neodrag v2's options-based API to v3's plugin-based architecture.
 
-## Why the Change?
+## Why Migrate to v3?
 
-Neodrag v3 represents a fundamental shift in architecture driven by real-world usage patterns and community feedback:
+**v2 Limitations:**
 
-### The Problems with v2
+- Monolithic bundle - pay for unused features
+- Performance issues - 3 event listeners per draggable
+- Limited extensibility - can't add custom behavior
+- Manual reactivity management
 
-**Bundle Bloat**: In v2, even if you only needed basic dragging, you paid for the entire feature set - bounds checking, grid snapping, threshold detection, etc. The library was monolithic.
+**v3 Improvements:**
 
-**Limited Extensibility**: Adding new features meant modifying the core library. Users couldn't easily extend functionality without forking the project.
+- Tree-shakable plugins - 50% smaller bundle
+- Event delegation - 3 listeners total regardless of draggable count
+- Custom plugin support
+- Better performance and pointer capture
 
-**Performance Issues**: v2 registered 3 event listeners (`pointerdown`, `pointermove`, `pointerup`) for each draggable element. With 100 draggables, you had 300 event listeners consuming memory unnecessarily.
+## Architecture Overview
 
-**Maintenance Complexity**: The single large options object made the codebase harder to maintain and test.
+| Aspect        | v2                    | v3                            |
+| ------------- | --------------------- | ----------------------------- |
+| Configuration | Single options object | Plugin array                  |
+| Reactivity    | Automatic             | Manual compartments           |
+| Events        | Built-in callbacks    | Event plugin                  |
+| Bounds        | String or object      | BoundsFrom helpers            |
+| Bundle Size   | ~2.2KB all features   | ~1.1KB plus only used plugins |
 
-### The v3 Solution
-
-**Plugin Architecture**: Features are now modular plugins. Import only what you need, keeping your bundle lean.
-
-**Event Delegation**: Only 3 event listeners total, regardless of how many draggables you have.
-
-**Extensibility**: Create custom plugins or use community plugins without touching the core.
-
-**Better Performance**: Pointer capture, optimized transforms, and reduced memory footprint.
-
-**Developer Experience**: Better error handling, TypeScript support, and debugging capabilities.
-
-## Quick Migration Overview
-
-| v2 Concept           | v3 Equivalent        |
-| -------------------- | -------------------- |
-| Options object       | Plugin array         |
-| Automatic reactivity | Manual compartments  |
-| Built-in events      | Event plugins        |
-| String-based bounds  | `BoundsFrom` helpers |
-| Single import        | Core + plugins       |
-
-## Installation Changes
+## Installation
 
 <FrameworkSwitch>
 <div slot="svelte">
 
-### v2 Installation
-
-```bash
-npm install @neodrag/svelte@^2
-```
-
-### v3 Installation
+Update package and import changes:
 
 ```bash
 npm install @neodrag/svelte@^3
+```
+
+```javascript
+// Old imports
+import { draggable } from '@neodrag/svelte';
+
+// New imports
+import {
+  draggable,
+  axis,
+  bounds,
+  BoundsFrom,
+  events,
+} from '@neodrag/svelte';
 ```
 
 </div>
 
 <div slot="react">
 
-### v2 Installation
-
-```bash
-npm install @neodrag/react@^2
-```
-
-### v3 Installation
+Update package and import changes:
 
 ```bash
 npm install @neodrag/react@^3
+```
+
+```javascript
+// Old imports
+import { useDraggable } from '@neodrag/react';
+
+// New imports
+import {
+  useDraggable,
+  axis,
+  bounds,
+  BoundsFrom,
+  events,
+} from '@neodrag/react';
 ```
 
 </div>
 
 <div slot="vue">
 
-### v2 Installation
-
-```bash
-npm install @neodrag/vue@^2
-```
-
-### v3 Installation
+Update package and import changes:
 
 ```bash
 npm install @neodrag/vue@^3
+```
+
+```javascript
+// Old imports
+import { vDraggable } from '@neodrag/vue';
+
+// New imports
+import {
+  vDraggable,
+  axis,
+  bounds,
+  BoundsFrom,
+  events,
+} from '@neodrag/vue';
 ```
 
 </div>
 
 <div slot="solid">
 
-### v2 Installation
-
-```bash
-npm install @neodrag/solid@^2
-```
-
-### v3 Installation
+Update package and import changes:
 
 ```bash
 npm install @neodrag/solid@^3
+```
+
+```javascript
+// Old imports
+import { createDraggable } from '@neodrag/solid';
+
+// New imports
+import {
+  useDraggable,
+  axis,
+  bounds,
+  BoundsFrom,
+  events,
+} from '@neodrag/solid';
 ```
 
 </div>
 
 <div slot="vanilla">
 
-### v2 Installation
-
-```bash
-npm install @neodrag/vanilla@^2
-```
-
-### v3 Installation
+Update package and import changes:
 
 ```bash
 npm install @neodrag/vanilla@^3
 ```
 
+```javascript
+// Old imports
+import { draggable } from '@neodrag/vanilla';
+
+// New imports
+import {
+  Draggable,
+  axis,
+  bounds,
+  BoundsFrom,
+  events,
+} from '@neodrag/vanilla';
+```
+
 </div>
 </FrameworkSwitch>
 
-## Basic Usage Migration
-
-### v2: Options-Based
+## Basic Usage Examples
 
 <FrameworkSwitch>
 <div slot="svelte">
 
+**Before - v2 Options:**
+
 ```svelte
-<!-- v2 - Single configuration object -->
 <script>
   import { draggable } from '@neodrag/svelte';
 </script>
@@ -145,134 +174,24 @@ npm install @neodrag/vanilla@^3
     axis: 'x',
     bounds: 'parent',
     grid: [10, 10],
-    disabled: false,
-    onDragStart: (data) => console.log('start', data),
-    onDrag: (data) => console.log('drag', data),
-    onDragEnd: (data) => console.log('end', data),
+    onDrag: (data) => console.log(data),
   }}
 >
   Drag me
 </div>
 ```
 
-</div>
-
-<div slot="react">
-
-```tsx
-// v2 - Single configuration object
-import { useRef } from 'react';
-import { useDraggable } from '@neodrag/react';
-
-function DragExample() {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useDraggable(ref, {
-    axis: 'x',
-    bounds: 'parent',
-    grid: [10, 10],
-    disabled: false,
-    onDragStart: (data) => console.log('start', data),
-    onDrag: (data) => console.log('drag', data),
-    onDragEnd: (data) => console.log('end', data),
-  });
-
-  return <div ref={ref}>Drag me</div>;
-}
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<!-- v2 - Single configuration object -->
-<script setup>
-import { vDraggable } from '@neodrag/vue';
-
-const options = {
-  axis: 'x',
-  bounds: 'parent',
-  grid: [10, 10],
-  disabled: false,
-  onDragStart: (data) => console.log('start', data),
-  onDrag: (data) => console.log('drag', data),
-  onDragEnd: (data) => console.log('end', data),
-};
-</script>
-
-<template>
-  <div v-draggable="options">Drag me</div>
-</template>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-// v2 - Single configuration object
-import { createDraggable } from '@neodrag/solid';
-
-function DragExample() {
-  const { draggable } = createDraggable();
-
-  return (
-    <div
-      use:draggable={{
-        axis: 'x',
-        bounds: 'parent',
-        grid: [10, 10],
-        disabled: false,
-        onDragStart: (data) => console.log('start', data),
-        onDrag: (data) => console.log('drag', data),
-        onDragEnd: (data) => console.log('end', data),
-      }}
-    >
-      Drag me
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vanilla">
-
-```typescript
-// v2 - Single configuration object
-import { draggable } from '@neodrag/vanilla';
-
-const element = document.getElementById('drag-me');
-const { destroy } = draggable(element, {
-  axis: 'x',
-  bounds: 'parent',
-  grid: [10, 10],
-  disabled: false,
-  onDragStart: (data) => console.log('start', data),
-  onDrag: (data) => console.log('drag', data),
-  onDragEnd: (data) => console.log('end', data),
-});
-```
-
-</div>
-</FrameworkSwitch>
-
-### v3: Plugin-Based
-
-<FrameworkSwitch>
-<div slot="svelte">
+**After - v3 Plugins:**
 
 ```svelte
-<!-- v3 - Plugin array with Svelte 5 syntax -->
 <script>
   import {
+    draggable,
     axis,
     bounds,
     BoundsFrom,
     grid,
     events,
-    draggable,
   } from '@neodrag/svelte';
 </script>
 
@@ -281,11 +200,7 @@ const { destroy } = draggable(element, {
     axis('x'),
     bounds(BoundsFrom.parent()),
     grid([10, 10]),
-    events({
-      onDragStart: (data) => console.log('start', data),
-      onDrag: (data) => console.log('drag', data),
-      onDragEnd: (data) => console.log('end', data),
-    }),
+    events({ onDrag: (data) => console.log(data) }),
   ])}
 >
   Drag me
@@ -296,8 +211,29 @@ const { destroy } = draggable(element, {
 
 <div slot="react">
 
+**Before - v2 Options:**
+
 ```tsx
-// v3 - Plugin array
+import { useRef } from 'react';
+import { useDraggable } from '@neodrag/react';
+
+function App() {
+  const ref = useRef(null);
+
+  useDraggable(ref, {
+    axis: 'x',
+    bounds: 'parent',
+    grid: [10, 10],
+    onDrag: (data) => console.log(data),
+  });
+
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+**After - v3 Plugins:**
+
+```tsx
 import { useRef } from 'react';
 import {
   useDraggable,
@@ -308,18 +244,14 @@ import {
   events,
 } from '@neodrag/react';
 
-function DragExample() {
-  const ref = useRef<HTMLDivElement>(null);
+function App() {
+  const ref = useRef(null);
 
   useDraggable(ref, [
     axis('x'),
     bounds(BoundsFrom.parent()),
     grid([10, 10]),
-    events({
-      onDragStart: (data) => console.log('start', data),
-      onDrag: (data) => console.log('drag', data),
-      onDragEnd: (data) => console.log('end', data),
-    }),
+    events({ onDrag: (data) => console.log(data) }),
   ]);
 
   return <div ref={ref}>Drag me</div>;
@@ -330,8 +262,28 @@ function DragExample() {
 
 <div slot="vue">
 
+**Before - v2 Options:**
+
 ```vue
-<!-- v3 - Plugin array -->
+<script setup>
+import { vDraggable } from '@neodrag/vue';
+
+const options = {
+  axis: 'x',
+  bounds: 'parent',
+  grid: [10, 10],
+  onDrag: (data) => console.log(data),
+};
+</script>
+
+<template>
+  <div v-draggable="options">Drag me</div>
+</template>
+```
+
+**After - v3 Plugins:**
+
+```vue
 <script setup>
 import {
   vDraggable,
@@ -346,11 +298,7 @@ const plugins = [
   axis('x'),
   bounds(BoundsFrom.parent()),
   grid([10, 10]),
-  events({
-    onDragStart: (data) => console.log('start', data),
-    onDrag: (data) => console.log('drag', data),
-    onDragEnd: (data) => console.log('end', data),
-  }),
+  events({ onDrag: (data) => console.log(data) }),
 ];
 </script>
 
@@ -363,8 +311,32 @@ const plugins = [
 
 <div slot="solid">
 
+**Before - v2 Options:**
+
 ```tsx
-// v3 - Plugin array
+import { createDraggable } from '@neodrag/solid';
+
+function App() {
+  const { draggable } = createDraggable();
+
+  return (
+    <div
+      use:draggable={{
+        axis: 'x',
+        bounds: 'parent',
+        grid: [10, 10],
+        onDrag: (data) => console.log(data),
+      }}
+    >
+      Drag me
+    </div>
+  );
+}
+```
+
+**After - v3 Plugins:**
+
+```tsx
 import { createSignal } from 'solid-js';
 import {
   useDraggable,
@@ -375,18 +347,14 @@ import {
   events,
 } from '@neodrag/solid';
 
-function DragExample() {
-  const [element, setElement] = createSignal<HTMLDivElement>();
+function App() {
+  const [element, setElement] = createSignal();
 
   useDraggable(element, [
     axis('x'),
     bounds(BoundsFrom.parent()),
     grid([10, 10]),
-    events({
-      onDragStart: (data) => console.log('start', data),
-      onDrag: (data) => console.log('drag', data),
-      onDragEnd: (data) => console.log('end', data),
-    }),
+    events({ onDrag: (data) => console.log(data) }),
   ]);
 
   return <div ref={setElement}>Drag me</div>;
@@ -397,8 +365,23 @@ function DragExample() {
 
 <div slot="vanilla">
 
+**Before - v2 Options:**
+
 ```typescript
-// v3 - Plugin array
+import { draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('drag-me');
+const { destroy } = draggable(element, {
+  axis: 'x',
+  bounds: 'parent',
+  grid: [10, 10],
+  onDrag: (data) => console.log(data),
+});
+```
+
+**After - v3 Plugins:**
+
+```typescript
 import {
   Draggable,
   axis,
@@ -413,457 +396,234 @@ const instance = new Draggable(element, [
   axis('x'),
   bounds(BoundsFrom.parent()),
   grid([10, 10]),
+  events({ onDrag: (data) => console.log(data) }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Plugin Conversion Reference
+
+### Movement Control
+
+| v2 Option        | v3 Plugin        | Purpose                   |
+| ---------------- | ---------------- | ------------------------- |
+| `axis: 'x'`      | `axis('x')`      | Horizontal only           |
+| `axis: 'y'`      | `axis('y')`      | Vertical only             |
+| `axis: 'both'`   | no plugin needed | Both directions (default) |
+| `disabled: true` | `disabled()`     | Disable dragging          |
+
+### Bounds and Constraints
+
+| v2 Option              | v3 Plugin                                   | Purpose                            |
+| ---------------------- | ------------------------------------------- | ---------------------------------- |
+| `bounds: 'parent'`     | `bounds(BoundsFrom.parent())`               | Constrain to parent element        |
+| `bounds: '#container'` | `bounds(BoundsFrom.selector('#container'))` | Constrain to specific element      |
+| `bounds: element`      | `bounds(BoundsFrom.element(element))`       | Constrain to DOM element           |
+| `bounds: { top: 50 }`  | `bounds(BoundsFrom.viewport({ top: 50 }))`  | Constrain to viewport with padding |
+
+### Grid and Snapping
+
+| v2 Option                    | v3 Plugin                    | Purpose              |
+| ---------------------------- | ---------------------------- | -------------------- |
+| `grid: [20, 20]`             | `grid([20, 20])`             | Snap to grid         |
+| `threshold: { distance: 5 }` | `threshold({ distance: 5 })` | Movement threshold   |
+| `threshold: { delay: 100 }`  | `threshold({ delay: 100 })`  | Time delay threshold |
+
+### Controls and Interaction
+
+| v2 Option                | v3 Plugin                                              | Purpose                 |
+| ------------------------ | ------------------------------------------------------ | ----------------------- |
+| `handle: '.handle'`      | `controls({ allow: ControlFrom.selector('.handle') })` | Drag only from handle   |
+| `cancel: '.cancel'`      | `controls({ block: ControlFrom.selector('.cancel') })` | Prevent drag from area  |
+| `ignoreMultitouch: true` | `ignoreMultitouch(true)`                               | Ignore multiple touches |
+
+### Events and Callbacks
+
+Events moved from options to dedicated plugin. Event data structure also changed:
+
+- **v2**: `offsetX`, `offsetY`, `rootNode`, `currentNode`, `event`
+- **v3**: offset object with x and y properties, `rootNode`, `currentNode`, `event`
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+**v2 Events:**
+
+```svelte
+<div use:draggable={{
+  onDragStart: ({ offsetX, offsetY }) => console.log('start', offsetX, offsetY),
+  onDrag: ({ offsetX, offsetY }) => console.log('drag', offsetX, offsetY),
+  onDragEnd: ({ offsetX, offsetY }) => console.log('end', offsetX, offsetY)
+}}>
+```
+
+**v3 Events:**
+
+```svelte
+<div {@attach draggable([
   events({
-    onDragStart: (data) => console.log('start', data),
-    onDrag: (data) => console.log('drag', data),
-    onDragEnd: (data) => console.log('end', data),
+    onDragStart: ({ offset }) => console.log('start', offset.x, offset.y),
+    onDrag: ({ offset }) => console.log('drag', offset.x, offset.y),
+    onDragEnd: ({ offset }) => console.log('end', offset.x, offset.y)
+  })
+])}>
+```
+
+</div>
+
+<div slot="react">
+
+**v2 Events:**
+
+```tsx
+useDraggable(ref, {
+  onDragStart: ({ offsetX, offsetY }) =>
+    console.log('start', offsetX, offsetY),
+  onDrag: ({ offsetX, offsetY }) =>
+    console.log('drag', offsetX, offsetY),
+  onDragEnd: ({ offsetX, offsetY }) =>
+    console.log('end', offsetX, offsetY),
+});
+```
+
+**v3 Events:**
+
+```tsx
+useDraggable(ref, [
+  events({
+    onDragStart: ({ offset }) =>
+      console.log('start', offset.x, offset.y),
+    onDrag: ({ offset }) => console.log('drag', offset.x, offset.y),
+    onDragEnd: ({ offset }) => console.log('end', offset.x, offset.y),
   }),
 ]);
-
-// Later: instance.destroy();
-```
-
-</div>
-</FrameworkSwitch>
-
-## Option-by-Option Migration
-
-### Axis Control
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-**v2:**
-
-```javascript
-axis: 'x'; // Horizontal only
-axis: 'y'; // Vertical only
-axis: 'both'; // Both directions (default)
-axis: 'none'; // Disabled
-```
-
-**v3:**
-
-```javascript
-axis('x'); // Horizontal only
-axis('y'); // Vertical only
-/* no axis plugin */ // Both directions (default)
-disabled(); // Disabled
-```
-
-</div>
-
-<div slot="react">
-
-**v2:**
-
-```javascript
-axis: 'x'; // Horizontal only
-axis: 'y'; // Vertical only
-axis: 'both'; // Both directions (default)
-axis: 'none'; // Disabled
-```
-
-**v3:**
-
-```javascript
-axis('x'); // Horizontal only
-axis('y'); // Vertical only
-/* no axis plugin */ // Both directions (default)
-disabled(); // Disabled
 ```
 
 </div>
 
 <div slot="vue">
 
-**v2:**
+**v2 Events:**
 
-```javascript
-axis: 'x'; // Horizontal only
-axis: 'y'; // Vertical only
-axis: 'both'; // Both directions (default)
-axis: 'none'; // Disabled
+```vue
+<script setup>
+const options = {
+  onDragStart: ({ offsetX, offsetY }) =>
+    console.log('start', offsetX, offsetY),
+  onDrag: ({ offsetX, offsetY }) =>
+    console.log('drag', offsetX, offsetY),
+  onDragEnd: ({ offsetX, offsetY }) =>
+    console.log('end', offsetX, offsetY),
+};
+</script>
 ```
 
-**v3:**
+**v3 Events:**
 
-```javascript
-axis('x'); // Horizontal only
-axis('y'); // Vertical only
-/* no axis plugin */ // Both directions (default)
-disabled(); // Disabled
-```
-
-</div>
-
-<div slot="solid">
-
-**v2:**
-
-```javascript
-axis: 'x'; // Horizontal only
-axis: 'y'; // Vertical only
-axis: 'both'; // Both directions (default)
-axis: 'none'; // Disabled
-```
-
-**v3:**
-
-```javascript
-axis('x'); // Horizontal only
-axis('y'); // Vertical only
-/* no axis plugin */ // Both directions (default)
-disabled(); // Disabled
-```
-
-</div>
-
-<div slot="vanilla">
-
-**v2:**
-
-```javascript
-axis: 'x'; // Horizontal only
-axis: 'y'; // Vertical only
-axis: 'both'; // Both directions (default)
-axis: 'none'; // Disabled
-```
-
-**v3:**
-
-```javascript
-axis('x'); // Horizontal only
-axis('y'); // Vertical only
-/* no axis plugin */ // Both directions (default)
-disabled(); // Disabled
-```
-
-</div>
-</FrameworkSwitch>
-
-### Bounds Configuration
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-**v2:**
-
-```javascript
-bounds: 'parent'
-bounds: '#container'
-bounds: { top: 50, left: 50, right: 50, bottom: 50 }
-```
-
-**v3:**
-
-```javascript
-bounds(BoundsFrom.parent());
-bounds(BoundsFrom.selector('#container'));
-bounds(
-  BoundsFrom.viewport({ top: 50, left: 50, right: 50, bottom: 50 }),
-);
-```
-
-</div>
-
-<div slot="react">
-
-**v2:**
-
-```javascript
-bounds: 'parent'
-bounds: '#container'
-bounds: { top: 50, left: 50, right: 50, bottom: 50 }
-```
-
-**v3:**
-
-```javascript
-bounds(BoundsFrom.parent());
-bounds(BoundsFrom.selector('#container'));
-bounds(
-  BoundsFrom.viewport({ top: 50, left: 50, right: 50, bottom: 50 }),
-);
-```
-
-</div>
-
-<div slot="vue">
-
-**v2:**
-
-```javascript
-bounds: 'parent'
-bounds: '#container'
-bounds: { top: 50, left: 50, right: 50, bottom: 50 }
-```
-
-**v3:**
-
-```javascript
-bounds(BoundsFrom.parent());
-bounds(BoundsFrom.selector('#container'));
-bounds(
-  BoundsFrom.viewport({ top: 50, left: 50, right: 50, bottom: 50 }),
-);
+```vue
+<script setup>
+const plugins = [
+  events({
+    onDragStart: ({ offset }) =>
+      console.log('start', offset.x, offset.y),
+    onDrag: ({ offset }) => console.log('drag', offset.x, offset.y),
+    onDragEnd: ({ offset }) => console.log('end', offset.x, offset.y),
+  }),
+];
+</script>
 ```
 
 </div>
 
 <div slot="solid">
 
-**v2:**
+**v2 Events:**
 
-```javascript
-bounds: 'parent'
-bounds: '#container'
-bounds: { top: 50, left: 50, right: 50, bottom: 50 }
+```tsx
+<div use:draggable={{
+  onDragStart: ({ offsetX, offsetY }) => console.log('start', offsetX, offsetY),
+  onDrag: ({ offsetX, offsetY }) => console.log('drag', offsetX, offsetY),
+  onDragEnd: ({ offsetX, offsetY }) => console.log('end', offsetX, offsetY)
+}}>
 ```
 
-**v3:**
+**v3 Events:**
 
-```javascript
-bounds(BoundsFrom.parent());
-bounds(BoundsFrom.selector('#container'));
-bounds(
-  BoundsFrom.viewport({ top: 50, left: 50, right: 50, bottom: 50 }),
-);
-```
-
-</div>
-
-<div slot="vanilla">
-
-**v2:**
-
-```javascript
-bounds: 'parent'
-bounds: '#container'
-bounds: { top: 50, left: 50, right: 50, bottom: 50 }
-```
-
-**v3:**
-
-```javascript
-bounds(BoundsFrom.parent());
-bounds(BoundsFrom.selector('#container'));
-bounds(
-  BoundsFrom.viewport({ top: 50, left: 50, right: 50, bottom: 50 }),
-);
-```
-
-</div>
-</FrameworkSwitch>
-
-### Grid Snapping
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-**v2:**
-
-```javascript
-grid: [25, 25];
-```
-
-**v3:**
-
-```javascript
-grid([25, 25]);
-```
-
-</div>
-
-<div slot="react">
-
-**v2:**
-
-```javascript
-grid: [25, 25];
-```
-
-**v3:**
-
-```javascript
-grid([25, 25]);
-```
-
-</div>
-
-<div slot="vue">
-
-**v2:**
-
-```javascript
-grid: [25, 25];
-```
-
-**v3:**
-
-```javascript
-grid([25, 25]);
-```
-
-</div>
-
-<div slot="solid">
-
-**v2:**
-
-```javascript
-grid: [25, 25];
-```
-
-**v3:**
-
-```javascript
-grid([25, 25]);
+```tsx
+useDraggable(element, [
+  events({
+    onDragStart: ({ offset }) =>
+      console.log('start', offset.x, offset.y),
+    onDrag: ({ offset }) => console.log('drag', offset.x, offset.y),
+    onDragEnd: ({ offset }) => console.log('end', offset.x, offset.y),
+  }),
+]);
 ```
 
 </div>
 
 <div slot="vanilla">
 
-**v2:**
+**v2 Events:**
 
-```javascript
-grid: [25, 25];
+```typescript
+draggable(element, {
+  onDragStart: ({ offsetX, offsetY }) =>
+    console.log('start', offsetX, offsetY),
+  onDrag: ({ offsetX, offsetY }) =>
+    console.log('drag', offsetX, offsetY),
+  onDragEnd: ({ offsetX, offsetY }) =>
+    console.log('end', offsetX, offsetY),
+});
 ```
 
-**v3:**
+**v3 Events:**
 
-```javascript
-grid([25, 25]);
+```typescript
+new Draggable(element, [
+  events({
+    onDragStart: ({ offset }) =>
+      console.log('start', offset.x, offset.y),
+    onDrag: ({ offset }) => console.log('drag', offset.x, offset.y),
+    onDragEnd: ({ offset }) => console.log('end', offset.x, offset.y),
+  }),
+]);
 ```
 
 </div>
 </FrameworkSwitch>
 
-### Handle and Cancel
+## Reactive Updates: The Biggest Change
+
+**v2** automatically updated when options changed. **v3** requires manual compartments for reactive behavior.
 
 <FrameworkSwitch>
 <div slot="svelte">
 
-**v2:**
-
-```javascript
-handle: '.drag-handle';
-cancel: '.no-drag';
-```
-
-**v3:**
-
-```javascript
-controls({
-  allow: ControlFrom.selector('.drag-handle'),
-  block: ControlFrom.selector('.no-drag'),
-});
-```
-
-</div>
-
-<div slot="react">
-
-**v2:**
-
-```javascript
-handle: '.drag-handle';
-cancel: '.no-drag';
-```
-
-**v3:**
-
-```javascript
-controls({
-  allow: ControlFrom.selector('.drag-handle'),
-  block: ControlFrom.selector('.no-drag'),
-});
-```
-
-</div>
-
-<div slot="vue">
-
-**v2:**
-
-```javascript
-handle: '.drag-handle';
-cancel: '.no-drag';
-```
-
-**v3:**
-
-```javascript
-controls({
-  allow: ControlFrom.selector('.drag-handle'),
-  block: ControlFrom.selector('.no-drag'),
-});
-```
-
-</div>
-
-<div slot="solid">
-
-**v2:**
-
-```javascript
-handle: '.drag-handle';
-cancel: '.no-drag';
-```
-
-**v3:**
-
-```javascript
-controls({
-  allow: ControlFrom.selector('.drag-handle'),
-  block: ControlFrom.selector('.no-drag'),
-});
-```
-
-</div>
-
-<div slot="vanilla">
-
-**v2:**
-
-```javascript
-handle: '.drag-handle';
-cancel: '.no-drag';
-```
-
-**v3:**
-
-```javascript
-controls({
-  allow: ControlFrom.selector('.drag-handle'),
-  block: ControlFrom.selector('.no-drag'),
-});
-```
-
-</div>
-</FrameworkSwitch>
-
-## Framework-Specific Changes
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-### Svelte: Actions → Attachments
-
-**v2:**
+**v2 Automatic Reactivity:**
 
 ```svelte
 <script>
-  import { draggable } from '@neodrag/svelte';
+  let currentAxis = 'x';
+  let isConstrained = false;
 
-  let options = { axis: 'x', bounds: 'parent' };
+  // Automatically reactive
+  $: options = {
+    axis: currentAxis,
+    bounds: isConstrained ? 'parent' : undefined,
+  };
 </script>
 
 <div use:draggable={options}>Drag me</div>
+<button on:click={() => (currentAxis = 'y')}>Switch to Y</button>
+<button on:click={() => (isConstrained = !isConstrained)}
+  >Toggle bounds</button
+>
 ```
 
-**v3:**
+**v3 Manual Compartments:**
 
 ```svelte
 <script>
@@ -872,269 +632,88 @@ controls({
     axis,
     bounds,
     BoundsFrom,
-  } from '@neodrag/svelte';
-</script>
-
-<div {@attach draggable([axis('x'), bounds(BoundsFrom.parent())])}>
-  Drag me
-</div>
-```
-
-</div>
-
-<div slot="react">
-
-### React: Hook Usage
-
-**v2:**
-
-```tsx
-import { useDraggable } from '@neodrag/react';
-
-function MyComponent() {
-  const ref = useRef(null);
-
-  useDraggable(ref, {
-    axis: 'x',
-    bounds: 'parent',
-  });
-
-  return <div ref={ref}>Drag me</div>;
-}
-```
-
-**v3:**
-
-```tsx
-import {
-  useDraggable,
-  axis,
-  bounds,
-  BoundsFrom,
-} from '@neodrag/react';
-
-function MyComponent() {
-  const ref = useRef(null);
-
-  useDraggable(ref, [axis('x'), bounds(BoundsFrom.parent())]);
-
-  return <div ref={ref}>Drag me</div>;
-}
-```
-
-</div>
-
-<div slot="vue">
-
-### Vue: Directive Usage
-
-**v2:**
-
-```vue
-<script setup>
-import { vDraggable } from '@neodrag/vue';
-
-const options = { axis: 'x', bounds: 'parent' };
-</script>
-
-<template>
-  <div v-draggable="options">Drag me</div>
-</template>
-```
-
-**v3:**
-
-```vue
-<script setup>
-import { vDraggable, axis, bounds, BoundsFrom } from '@neodrag/vue';
-
-const plugins = [axis('x'), bounds(BoundsFrom.parent())];
-</script>
-
-<template>
-  <div v-draggable="plugins">Drag me</div>
-</template>
-```
-
-</div>
-
-<div slot="solid">
-
-### Solid: Hook Pattern
-
-**v2:**
-
-```tsx
-import { createDraggable } from '@neodrag/solid';
-
-function MyComponent() {
-  const { draggable } = createDraggable();
-
-  return (
-    <div use:draggable={{ axis: 'x', bounds: 'parent' }}>Drag me</div>
-  );
-}
-```
-
-**v3:**
-
-```tsx
-import {
-  useDraggable,
-  axis,
-  bounds,
-  BoundsFrom,
-} from '@neodrag/solid';
-
-function MyComponent() {
-  const [element, setElement] = createSignal();
-
-  useDraggable(element, [axis('x'), bounds(BoundsFrom.parent())]);
-
-  return <div ref={setElement}>Drag me</div>;
-}
-```
-
-</div>
-
-<div slot="vanilla">
-
-### Vanilla: Class Instantiation
-
-**v2:**
-
-```typescript
-import { draggable } from '@neodrag/vanilla';
-
-const element = document.getElementById('drag-me');
-const { destroy } = draggable(element, {
-  axis: 'x',
-  bounds: 'parent',
-});
-```
-
-**v3:**
-
-```typescript
-import {
-  Draggable,
-  axis,
-  bounds,
-  BoundsFrom,
-} from '@neodrag/vanilla';
-
-const element = document.getElementById('drag-me');
-const instance = new Draggable(element, [
-  axis('x'),
-  bounds(BoundsFrom.parent()),
-]);
-
-// Later: instance.destroy();
-```
-
-</div>
-</FrameworkSwitch>
-
-## Reactive Updates with Compartments
-
-One of the biggest changes in v3 is how reactive updates work. v2 automatically detected option changes, while v3 requires manual management using Compartments.
-
-### The Problem
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-**v2 (Automatic):**
-
-```svelte
-<script>
-  import { draggable } from '@neodrag/svelte';
-
-  let currentAxis = 'x';
-
-  // Changes automatically applied
-  $: options = { axis: currentAxis };
-</script>
-
-<div use:draggable={options}>Drag me</div>
-<button on:click={() => (currentAxis = 'y')}>
-  Switch to Y-axis
-</button>
-```
-
-**v3 (Manual):**
-
-```svelte
-<script>
-  import {
-    draggable,
-    axis,
     createCompartment,
   } from '@neodrag/svelte';
 
   let currentAxis = $state('x');
+  let isConstrained = $state(false);
 
-  // Manual compartment management
-  const axisComp = createCompartment(() => axis(currentAxis));
+  // Manual compartments
+  const axisComp = createCompartment(() =>
+    currentAxis === 'both' ? null : axis(currentAxis),
+  );
+  const boundsComp = createCompartment(() =>
+    isConstrained ? bounds(BoundsFrom.parent()) : null,
+  );
 </script>
 
-<div {@attach draggable(() => [axisComp])}>Drag me</div>
-<button onclick={() => (currentAxis = 'y')}>
-  Switch to Y-axis
-</button>
+<div
+  {@attach draggable(() => [axisComp, boundsComp].filter(Boolean))}
+>
+  Drag me
+</div>
+<button onclick={() => (currentAxis = 'y')}>Switch to Y</button>
+<button onclick={() => (isConstrained = !isConstrained)}
+  >Toggle bounds</button
+>
 ```
 
 </div>
 
 <div slot="react">
 
-**v2 (Automatic):**
+**v2 Automatic Reactivity:**
 
 ```tsx
-import { useRef, useState } from 'react';
-import { useDraggable } from '@neodrag/react';
-
 function App() {
-  const ref = useRef(null);
   const [currentAxis, setCurrentAxis] = useState('x');
+  const [isConstrained, setIsConstrained] = useState(false);
 
-  // Changes automatically applied
-  useDraggable(ref, { axis: currentAxis });
+  // Automatically reactive
+  useDraggable(ref, {
+    axis: currentAxis,
+    bounds: isConstrained ? 'parent' : undefined,
+  });
 
   return (
     <div>
       <div ref={ref}>Drag me</div>
-      <button onClick={() => setCurrentAxis('y')}>
-        Switch to Y-axis
+      <button onClick={() => setCurrentAxis('y')}>Switch to Y</button>
+      <button onClick={() => setIsConstrained(!isConstrained)}>
+        Toggle bounds
       </button>
     </div>
   );
 }
 ```
 
-**v3 (Manual):**
+**v3 Manual Compartments:**
 
 ```tsx
-import { useRef, useState } from 'react';
-import { useDraggable, axis, useCompartment } from '@neodrag/react';
+import { useCompartment } from '@neodrag/react';
 
 function App() {
-  const ref = useRef(null);
   const [currentAxis, setCurrentAxis] = useState('x');
+  const [isConstrained, setIsConstrained] = useState(false);
 
-  // Manual compartment management
+  // Manual compartments
   const axisComp = useCompartment(
-    () => axis(currentAxis),
+    () => (currentAxis === 'both' ? null : axis(currentAxis)),
     [currentAxis],
   );
+  const boundsComp = useCompartment(
+    () => (isConstrained ? bounds(BoundsFrom.parent()) : null),
+    [isConstrained],
+  );
 
-  useDraggable(ref, () => [axisComp].filter(Boolean));
+  useDraggable(ref, () => [axisComp, boundsComp].filter(Boolean));
 
   return (
     <div>
       <div ref={ref}>Drag me</div>
-      <button onClick={() => setCurrentAxis('y')}>
-        Switch to Y-axis
+      <button onClick={() => setCurrentAxis('y')}>Switch to Y</button>
+      <button onClick={() => setIsConstrained(!isConstrained)}>
+        Toggle bounds
       </button>
     </div>
   );
@@ -1145,46 +724,61 @@ function App() {
 
 <div slot="vue">
 
-**v2 (Automatic):**
+**v2 Automatic Reactivity:**
 
 ```vue
 <script setup>
 import { ref, computed } from 'vue';
-import { vDraggable } from '@neodrag/vue';
 
 const currentAxis = ref('x');
+const isConstrained = ref(false);
 
-// Changes automatically applied
-const options = computed(() => ({ axis: currentAxis.value }));
+// Automatically reactive
+const options = computed(() => ({
+  axis: currentAxis.value,
+  bounds: isConstrained.value ? 'parent' : undefined,
+}));
 </script>
 
 <template>
   <div>
     <div v-draggable="options">Drag me</div>
-    <button @click="currentAxis = 'y'">Switch to Y-axis</button>
+    <button @click="currentAxis = 'y'">Switch to Y</button>
+    <button @click="isConstrained = !isConstrained">
+      Toggle bounds
+    </button>
   </div>
 </template>
 ```
 
-**v3 (Manual):**
+**v3 Manual Compartments:**
 
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { vDraggable, axis, useCompartment } from '@neodrag/vue';
+import { useCompartment } from '@neodrag/vue';
 
 const currentAxis = ref('x');
+const isConstrained = ref(false);
 
-// Manual compartment management
-const axisComp = useCompartment(() => axis(currentAxis.value));
+// Manual compartments
+const axisComp = useCompartment(() =>
+  currentAxis.value === 'both' ? null : axis(currentAxis.value),
+);
+const boundsComp = useCompartment(() =>
+  isConstrained.value ? bounds(BoundsFrom.parent()) : null,
+);
 
-const plugins = () => [axisComp].filter(Boolean);
+const plugins = () => [axisComp, boundsComp].filter(Boolean);
 </script>
 
 <template>
   <div>
     <div v-draggable="plugins">Drag me</div>
-    <button @click="currentAxis = 'y'">Switch to Y-axis</button>
+    <button @click="currentAxis = 'y'">Switch to Y</button>
+    <button @click="isConstrained = !isConstrained">
+      Toggle bounds
+    </button>
   </div>
 </template>
 ```
@@ -1193,54 +787,57 @@ const plugins = () => [axisComp].filter(Boolean);
 
 <div slot="solid">
 
-**v2 (Automatic):**
+**v2 Automatic Reactivity:**
 
 ```tsx
-import { createSignal } from 'solid-js';
-import { createDraggable } from '@neodrag/solid';
-
 function App() {
-  const { draggable } = createDraggable();
   const [currentAxis, setCurrentAxis] = createSignal('x');
+  const [isConstrained, setIsConstrained] = createSignal(false);
 
-  // Changes automatically applied
-  const options = () => ({ axis: currentAxis() });
+  // Automatically reactive
+  const options = () => ({
+    axis: currentAxis(),
+    bounds: isConstrained() ? 'parent' : undefined,
+  });
 
   return (
     <div>
       <div use:draggable={options()}>Drag me</div>
-      <button onClick={() => setCurrentAxis('y')}>
-        Switch to Y-axis
+      <button onClick={() => setCurrentAxis('y')}>Switch to Y</button>
+      <button onClick={() => setIsConstrained(!isConstrained())}>
+        Toggle bounds
       </button>
     </div>
   );
 }
 ```
 
-**v3 (Manual):**
+**v3 Manual Compartments:**
 
 ```tsx
-import { createSignal } from 'solid-js';
-import {
-  useDraggable,
-  axis,
-  createCompartment,
-} from '@neodrag/solid';
+import { createCompartment } from '@neodrag/solid';
 
 function App() {
   const [element, setElement] = createSignal();
   const [currentAxis, setCurrentAxis] = createSignal('x');
+  const [isConstrained, setIsConstrained] = createSignal(false);
 
-  // Manual compartment management
-  const axisComp = createCompartment(() => axis(currentAxis()));
+  // Manual compartments
+  const axisComp = createCompartment(() =>
+    currentAxis() === 'both' ? null : axis(currentAxis()),
+  );
+  const boundsComp = createCompartment(() =>
+    isConstrained() ? bounds(BoundsFrom.parent()) : null,
+  );
 
-  useDraggable(element, [axisComp]);
+  useDraggable(element, [axisComp, boundsComp]);
 
   return (
     <div>
       <div ref={setElement}>Drag me</div>
-      <button onClick={() => setCurrentAxis('y')}>
-        Switch to Y-axis
+      <button onClick={() => setCurrentAxis('y')}>Switch to Y</button>
+      <button onClick={() => setIsConstrained(!isConstrained())}>
+        Toggle bounds
       </button>
     </div>
   );
@@ -1251,700 +848,93 @@ function App() {
 
 <div slot="vanilla">
 
-**v2 (Automatic):**
+**v2 Manual Updates:**
 
 ```typescript
-import { draggable } from '@neodrag/vanilla';
-
-const element = document.getElementById('drag-me');
-const button = document.getElementById('switch-btn');
-
 let currentAxis = 'x';
-let instance = draggable(element, { axis: currentAxis });
+let isConstrained = false;
+let instance = draggable(element, {
+  axis: currentAxis,
+  bounds: isConstrained ? 'parent' : undefined,
+});
 
-button.addEventListener('click', () => {
-  currentAxis = 'y';
+// Manual recreation needed
+function updateSettings() {
   instance.destroy();
-  instance = draggable(element, { axis: currentAxis });
+  instance = draggable(element, {
+    axis: currentAxis,
+    bounds: isConstrained ? 'parent' : undefined,
+  });
+}
+
+document.getElementById('axis-btn').addEventListener('click', () => {
+  currentAxis = 'y';
+  updateSettings();
 });
 ```
 
-**v3 (Manual):**
+**v3 Easy Compartments:**
 
 ```typescript
-import { Draggable, axis, Compartment } from '@neodrag/vanilla';
-
-const element = document.getElementById('drag-me');
-const button = document.getElementById('switch-btn');
+import { Compartment } from '@neodrag/vanilla';
 
 let currentAxis = 'x';
+let isConstrained = false;
 
-// Manual compartment management
-const axisComp = new Compartment(() => axis(currentAxis));
+// Easy compartments
+const axisComp = new Compartment(() =>
+  currentAxis === 'both' ? null : axis(currentAxis),
+);
+const boundsComp = new Compartment(() =>
+  isConstrained ? bounds(BoundsFrom.parent()) : null,
+);
 
 const instance = new Draggable(element, () =>
-  [axisComp].filter(Boolean),
+  [axisComp, boundsComp].filter(Boolean),
 );
 
-button.addEventListener('click', () => {
+// Simple updates
+document.getElementById('axis-btn').addEventListener('click', () => {
   currentAxis = 'y';
   axisComp.current = axis(currentAxis);
 });
-```
 
-</div>
-</FrameworkSwitch>
-
-### Why Compartments?
-
-Compartments provide several advantages:
-
-1. **Performance**: Updates only when you explicitly change them
-2. **Predictability**: No hidden reactivity causing unexpected re-renders
-3. **Flexibility**: Mix reactive and static plugins in the same array
-4. **Debugging**: Easier to track when and why updates happen
-
-### Compartment Patterns
-
-#### Simple Value Updates
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-```svelte
-<script>
-  import { axis, disabled, createCompartment } from '@neodrag/svelte';
-
-  let currentAxis = $state('x');
-  let isDisabled = $state(false);
-
-  const axisComp = createCompartment(() => axis(currentAxis));
-  const disabledComp = createCompartment(() =>
-    isDisabled ? disabled() : null,
-  );
-</script>
-```
-
-</div>
-
-<div slot="react">
-
-```tsx
-import { axis, disabled, useCompartment } from '@neodrag/react';
-
-function Component() {
-  const [currentAxis, setCurrentAxis] = useState('x');
-  const [isDisabled, setIsDisabled] = useState(false);
-
-  const axisComp = useCompartment(
-    () => axis(currentAxis),
-    [currentAxis],
-  );
-  const disabledComp = useCompartment(
-    () => (isDisabled ? disabled() : null),
-    [isDisabled],
-  );
-
-  // ...
-}
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<script setup>
-import { ref } from 'vue';
-import { axis, disabled, useCompartment } from '@neodrag/vue';
-
-const currentAxis = ref('x');
-const isDisabled = ref(false);
-
-const axisComp = useCompartment(() => axis(currentAxis.value));
-const disabledComp = useCompartment(() =>
-  isDisabled.value ? disabled() : null,
-);
-</script>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-import { createSignal } from 'solid-js';
-import { axis, disabled, createCompartment } from '@neodrag/solid';
-
-function Component() {
-  const [currentAxis, setCurrentAxis] = createSignal('x');
-  const [isDisabled, setIsDisabled] = createSignal(false);
-
-  const axisComp = createCompartment(() => axis(currentAxis()));
-  const disabledComp = createCompartment(() =>
-    isDisabled() ? disabled() : null,
-  );
-
-  // ...
-}
-```
-
-</div>
-
-<div slot="vanilla">
-
-```typescript
-import { axis, disabled, Compartment } from '@neodrag/vanilla';
-
-let currentAxis = 'x';
-let isDisabled = false;
-
-const axisComp = new Compartment(() => axis(currentAxis));
-const disabledComp = new Compartment(() =>
-  isDisabled ? disabled() : null,
-);
-
-// Update when needed
-function updateAxis(newAxis) {
-  currentAxis = newAxis;
-  axisComp.current = axis(currentAxis);
-}
-
-function updateDisabled(newDisabled) {
-  isDisabled = newDisabled;
-  disabledComp.current = isDisabled ? disabled() : null;
-}
-```
-
-</div>
-</FrameworkSwitch>
-
-#### Complex Logic
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-```svelte
-<script>
-  import {
-    bounds,
-    BoundsFrom,
-    createCompartment,
-  } from '@neodrag/svelte';
-
-  let containerType = $state('parent');
-  let padding = $state(20);
-  let customSelector = $state('#container');
-
-  const boundsComp = createCompartment(() => {
-    if (containerType === 'parent') {
-      return bounds(BoundsFrom.parent());
-    } else if (containerType === 'viewport') {
-      return bounds(BoundsFrom.viewport({ top: padding }));
-    } else {
-      return bounds(BoundsFrom.selector(customSelector));
-    }
+document
+  .getElementById('bounds-btn')
+  .addEventListener('click', () => {
+    isConstrained = !isConstrained;
+    boundsComp.current = isConstrained
+      ? bounds(BoundsFrom.parent())
+      : null;
   });
-</script>
-```
-
-</div>
-
-<div slot="react">
-
-```tsx
-import { bounds, BoundsFrom, useCompartment } from '@neodrag/react';
-
-function Component() {
-  const [containerType, setContainerType] = useState('parent');
-  const [padding, setPadding] = useState(20);
-  const [customSelector, setCustomSelector] = useState('#container');
-
-  const boundsComp = useCompartment(() => {
-    if (containerType === 'parent') {
-      return bounds(BoundsFrom.parent());
-    } else if (containerType === 'viewport') {
-      return bounds(BoundsFrom.viewport({ top: padding }));
-    } else {
-      return bounds(BoundsFrom.selector(customSelector));
-    }
-  }, [containerType, padding, customSelector]);
-
-  // ...
-}
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<script setup>
-import { ref } from 'vue';
-import { bounds, BoundsFrom, useCompartment } from '@neodrag/vue';
-
-const containerType = ref('parent');
-const padding = ref(20);
-const customSelector = ref('#container');
-
-const boundsComp = useCompartment(() => {
-  if (containerType.value === 'parent') {
-    return bounds(BoundsFrom.parent());
-  } else if (containerType.value === 'viewport') {
-    return bounds(BoundsFrom.viewport({ top: padding.value }));
-  } else {
-    return bounds(BoundsFrom.selector(customSelector.value));
-  }
-});
-</script>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-import { createSignal } from 'solid-js';
-import {
-  bounds,
-  BoundsFrom,
-  createCompartment,
-} from '@neodrag/solid';
-
-function Component() {
-  const [containerType, setContainerType] = createSignal('parent');
-  const [padding, setPadding] = createSignal(20);
-  const [customSelector, setCustomSelector] =
-    createSignal('#container');
-
-  const boundsComp = createCompartment(() => {
-    if (containerType() === 'parent') {
-      return bounds(BoundsFrom.parent());
-    } else if (containerType() === 'viewport') {
-      return bounds(BoundsFrom.viewport({ top: padding() }));
-    } else {
-      return bounds(BoundsFrom.selector(customSelector()));
-    }
-  });
-
-  // ...
-}
-```
-
-</div>
-
-<div slot="vanilla">
-
-```typescript
-import { bounds, BoundsFrom, Compartment } from '@neodrag/vanilla';
-
-let containerType = 'parent';
-let padding = 20;
-let customSelector = '#container';
-
-const boundsComp = new Compartment(() => {
-  if (containerType === 'parent') {
-    return bounds(BoundsFrom.parent());
-  } else if (containerType === 'viewport') {
-    return bounds(BoundsFrom.viewport({ top: padding }));
-  } else {
-    return bounds(BoundsFrom.selector(customSelector));
-  }
-});
-
-// Update when needed
-function updateBounds(newType, newPadding, newSelector) {
-  containerType = newType;
-  padding = newPadding;
-  customSelector = newSelector;
-  boundsComp.current = boundsComp.current; // Trigger update
-}
 ```
 
 </div>
 </FrameworkSwitch>
 
-## Event System Changes
-
-### v2 Events
+## Complex Configuration Examples
 
 <FrameworkSwitch>
 <div slot="svelte">
 
-```svelte
-<!-- v2 - Multiple event options -->
-<script>
-  import { draggable } from '@neodrag/svelte';
-</script>
-
-<!-- Option 1: Events as options -->
-<div
-  use:draggable={{
-    onDragStart: ({
-      offsetX,
-      offsetY,
-      rootNode,
-      currentNode,
-      event,
-    }) => {
-      console.log('Drag started');
-    },
-    onDrag: ({ offsetX, offsetY, rootNode, currentNode, event }) => {
-      console.log('Dragging');
-    },
-    onDragEnd: ({
-      offsetX,
-      offsetY,
-      rootNode,
-      currentNode,
-      event,
-    }) => {
-      console.log('Drag ended');
-    },
-  }}
->
-  Drag me
-</div>
-
-<!-- Option 2: Custom events -->
-<div
-  use:draggable
-  on:neodrag:start={handleStart}
-  on:neodrag={handleDrag}
-  on:neodrag:end={handleEnd}
->
-  Drag me
-</div>
-```
-
-</div>
-
-<div slot="react">
-
-```tsx
-// v2 - Events as options
-import { useDraggable } from '@neodrag/react';
-
-function Component() {
-  const ref = useRef(null);
-
-  useDraggable(ref, {
-    onDragStart: ({
-      offsetX,
-      offsetY,
-      rootNode,
-      currentNode,
-      event,
-    }) => {
-      console.log('Drag started');
-    },
-    onDrag: ({ offsetX, offsetY, rootNode, currentNode, event }) => {
-      console.log('Dragging');
-    },
-    onDragEnd: ({
-      offsetX,
-      offsetY,
-      rootNode,
-      currentNode,
-      event,
-    }) => {
-      console.log('Drag ended');
-    },
-  });
-
-  return <div ref={ref}>Drag me</div>;
-}
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<!-- v2 - Events as options -->
-<script setup>
-import { vDraggable } from '@neodrag/vue';
-
-const options = {
-  onDragStart: ({
-    offsetX,
-    offsetY,
-    rootNode,
-    currentNode,
-    event,
-  }) => {
-    console.log('Drag started');
-  },
-  onDrag: ({ offsetX, offsetY, rootNode, currentNode, event }) => {
-    console.log('Dragging');
-  },
-  onDragEnd: ({ offsetX, offsetY, rootNode, currentNode, event }) => {
-    console.log('Drag ended');
-  },
-};
-</script>
-
-<template>
-  <div v-draggable="options">Drag me</div>
-</template>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-// v2 - Events as options
-import { createDraggable } from '@neodrag/solid';
-
-function Component() {
-  const { draggable } = createDraggable();
-
-  return (
-    <div
-      use:draggable={{
-        onDragStart: ({
-          offsetX,
-          offsetY,
-          rootNode,
-          currentNode,
-          event,
-        }) => {
-          console.log('Drag started');
-        },
-        onDrag: ({
-          offsetX,
-          offsetY,
-          rootNode,
-          currentNode,
-          event,
-        }) => {
-          console.log('Dragging');
-        },
-        onDragEnd: ({
-          offsetX,
-          offsetY,
-          rootNode,
-          currentNode,
-          event,
-        }) => {
-          console.log('Drag ended');
-        },
-      }}
-    >
-      Drag me
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vanilla">
-
-```typescript
-// v2 - Events as options
-import { draggable } from '@neodrag/vanilla';
-
-const element = document.getElementById('drag-me');
-const { destroy } = draggable(element, {
-  onDragStart: ({
-    offsetX,
-    offsetY,
-    rootNode,
-    currentNode,
-    event,
-  }) => {
-    console.log('Drag started');
-  },
-  onDrag: ({ offsetX, offsetY, rootNode, currentNode, event }) => {
-    console.log('Dragging');
-  },
-  onDragEnd: ({ offsetX, offsetY, rootNode, currentNode, event }) => {
-    console.log('Drag ended');
-  },
-});
-```
-
-</div>
-</FrameworkSwitch>
-
-### v3 Events
-
-<FrameworkSwitch>
-<div slot="svelte">
+**Complete v2 to v3 Migration:**
 
 ```svelte
-<!-- v3 - Events plugin -->
-<script>
-  import { draggable, events } from '@neodrag/svelte';
-</script>
-
-<div
-  {@attach draggable([
-    events({
-      onDragStart: ({ offset, rootNode, currentNode, event }) => {
-        console.log('Drag started');
-      },
-      onDrag: ({ offset, rootNode, currentNode, event }) => {
-        console.log('Dragging');
-      },
-      onDragEnd: ({ offset, rootNode, currentNode, event }) => {
-        console.log('Drag ended');
-      },
-    }),
-  ])}
->
-  Drag me
-</div>
-```
-
-</div>
-
-<div slot="react">
-
-```tsx
-// v3 - Events plugin
-import { useDraggable, events } from '@neodrag/react';
-
-function Component() {
-  const ref = useRef(null);
-
-  useDraggable(ref, [
-    events({
-      onDragStart: ({ offset, rootNode, currentNode, event }) => {
-        console.log('Drag started');
-      },
-      onDrag: ({ offset, rootNode, currentNode, event }) => {
-        console.log('Dragging');
-      },
-      onDragEnd: ({ offset, rootNode, currentNode, event }) => {
-        console.log('Drag ended');
-      },
-    }),
-  ]);
-
-  return <div ref={ref}>Drag me</div>;
-}
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<!-- v3 - Events plugin -->
-<script setup>
-import { vDraggable, events } from '@neodrag/vue';
-
-const plugins = [
-  events({
-    onDragStart: ({ offset, rootNode, currentNode, event }) => {
-      console.log('Drag started');
-    },
-    onDrag: ({ offset, rootNode, currentNode, event }) => {
-      console.log('Dragging');
-    },
-    onDragEnd: ({ offset, rootNode, currentNode, event }) => {
-      console.log('Drag ended');
-    },
-  }),
-];
-</script>
-
-<template>
-  <div v-draggable="plugins">Drag me</div>
-</template>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-// v3 - Events plugin
-import { useDraggable, events } from '@neodrag/solid';
-
-function Component() {
-  const [element, setElement] = createSignal();
-
-  useDraggable(element, [
-    events({
-      onDragStart: ({ offset, rootNode, currentNode, event }) => {
-        console.log('Drag started');
-      },
-      onDrag: ({ offset, rootNode, currentNode, event }) => {
-        console.log('Dragging');
-      },
-      onDragEnd: ({ offset, rootNode, currentNode, event }) => {
-        console.log('Drag ended');
-      },
-    }),
-  ]);
-
-  return <div ref={setElement}>Drag me</div>;
-}
-```
-
-</div>
-
-<div slot="vanilla">
-
-```typescript
-// v3 - Events plugin
-import { Draggable, events } from '@neodrag/vanilla';
-
-const element = document.getElementById('drag-me');
-const instance = new Draggable(element, [
-  events({
-    onDragStart: ({ offset, rootNode, currentNode, event }) => {
-      console.log('Drag started');
-    },
-    onDrag: ({ offset, rootNode, currentNode, event }) => {
-      console.log('Dragging');
-    },
-    onDragEnd: ({ offset, rootNode, currentNode, event }) => {
-      console.log('Drag ended');
-    },
-  }),
-]);
-```
-
-</div>
-</FrameworkSwitch>
-
-**Event Data Changes:**
-
-- `offsetX, offsetY` → `offset: { x, y }`
-- Same `rootNode`, `currentNode`, `event` properties
-
-## Complex Migration Example
-
-Here's a comprehensive example showing a complex v2 setup migrated to v3:
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-```svelte
-<!-- v2 - Complex setup -->
+<!-- BEFORE: v2 Complex Setup -->
 <script>
   import { draggable } from '@neodrag/svelte';
 
-  let isConstrained = false;
-  let currentAxis = 'both';
+  let axis = 'both';
   let gridSize = 20;
   let isEnabled = true;
 
-  $: complexOptions = {
-    axis: currentAxis,
-    bounds: isConstrained ? 'parent' : undefined,
+  $: options = {
+    axis: axis,
+    bounds: 'parent',
     grid: [gridSize, gridSize],
     threshold: { distance: 5, delay: 100 },
     handle: '.drag-handle',
     cancel: '.no-drag',
-    ignoreMultitouch: true,
-    applyUserSelectHack: true,
-    position: { x: 50, y: 50 },
     disabled: !isEnabled,
     onDragStart: (data) => console.log('start', data),
     onDrag: (data) => console.log('drag', data),
@@ -1952,63 +942,38 @@ Here's a comprehensive example showing a complex v2 setup migrated to v3:
   };
 </script>
 
-<div use:draggable={complexOptions}>
-  <div class="drag-handle">Handle</div>
-  <div class="content">Drag me</div>
-  <div class="no-drag">Don't drag</div>
+<div use:draggable={options}>
+  <div class="drag-handle">Drag Handle</div>
+  <div class="content">Content</div>
+  <div class="no-drag">No Drag Zone</div>
 </div>
 
-<!-- v3 - Plugin-based with Svelte 5 -->
+<!-- AFTER: v3 Plugin Setup -->
 <script>
   import {
-    draggable,
-    axis,
-    bounds,
-    BoundsFrom,
-    grid,
-    threshold,
-    controls,
-    ControlFrom,
-    ignoreMultitouch,
-    applyUserSelectHack,
-    position,
-    disabled,
-    events,
-    createCompartment
+    draggable, axis, bounds, BoundsFrom, grid, threshold,
+    controls, ControlFrom, disabled, events, createCompartment
   } from '@neodrag/svelte';
 
-  let isConstrained = $state(false);
   let currentAxis = $state('both');
   let gridSize = $state(20);
   let isEnabled = $state(true);
 
-  // Individual compartments for reactive updates
+  // Reactive compartments
   const axisComp = createCompartment(() =>
     currentAxis === 'both' ? null : axis(currentAxis)
   );
+  const gridComp = createCompartment(() => grid([gridSize, gridSize]));
+  const disabledComp = createCompartment(() => !isEnabled ? disabled() : null);
 
-  const boundsComp = createCompartment(() =>
-    isConstrained ? bounds(BoundsFrom.parent()) : null
-  );
-
-  const gridComp = createCompartment(() =>
-    grid([gridSize, gridSize])
-  );
-
-  const disabledComp = createCompartment(() =>
-    !isEnabled ? disabled() : null
-  );
-
-  // Static plugins (no reactivity needed)
+  // Static plugins
   const staticPlugins = [
+    bounds(BoundsFrom.parent()),
     threshold({ distance: 5, delay: 100 }),
     controls({
       allow: ControlFrom.selector('.drag-handle'),
       block: ControlFrom.selector('.no-drag')
     }),
-    ignoreMultitouch(true),
-    applyUserSelectHack(true),
-    position({ current: { x: 50, y: 50 } }),
     events({
       onDragStart: (data) => console.log('start', data),
       onDrag: (data) => console.log('drag', data),
@@ -2020,13 +985,12 @@ Here's a comprehensive example showing a complex v2 setup migrated to v3:
 <div {@attach draggable(() => [
   ...staticPlugins,
   axisComp,
-  boundsComp,
   gridComp,
   disabledComp
 ].filter(Boolean))}>
-  <div class="drag-handle">Handle</div>
-  <div class="content">Drag me</div>
-  <div class="no-drag">Don't drag</div>
+  <div class="drag-handle">Drag Handle</div>
+  <div class="content">Content</div>
+  <div class="no-drag">No Drag Zone</div>
 </div>
 ```
 
@@ -2034,49 +998,47 @@ Here's a comprehensive example showing a complex v2 setup migrated to v3:
 
 <div slot="react">
 
+**Complete v2 to v3 Migration:**
+
 ```tsx
-// v2 - Complex setup
+// BEFORE: v2 Complex Setup
 import { useRef, useState, useMemo } from 'react';
 import { useDraggable } from '@neodrag/react';
 
 function ComplexDraggable() {
   const ref = useRef(null);
-  const [isConstrained, setIsConstrained] = useState(false);
-  const [currentAxis, setCurrentAxis] = useState('both');
+  const [axis, setAxis] = useState('both');
   const [gridSize, setGridSize] = useState(20);
   const [isEnabled, setIsEnabled] = useState(true);
 
-  const complexOptions = useMemo(
+  const options = useMemo(
     () => ({
-      axis: currentAxis,
-      bounds: isConstrained ? 'parent' : undefined,
+      axis: axis,
+      bounds: 'parent',
       grid: [gridSize, gridSize],
       threshold: { distance: 5, delay: 100 },
       handle: '.drag-handle',
       cancel: '.no-drag',
-      ignoreMultitouch: true,
-      applyUserSelectHack: true,
-      position: { x: 50, y: 50 },
       disabled: !isEnabled,
       onDragStart: (data) => console.log('start', data),
       onDrag: (data) => console.log('drag', data),
       onDragEnd: (data) => console.log('end', data),
     }),
-    [isConstrained, currentAxis, gridSize, isEnabled],
+    [axis, gridSize, isEnabled],
   );
 
-  useDraggable(ref, complexOptions);
+  useDraggable(ref, options);
 
   return (
     <div ref={ref}>
-      <div className="drag-handle">Handle</div>
-      <div className="content">Drag me</div>
-      <div className="no-drag">Don't drag</div>
+      <div className="drag-handle">Drag Handle</div>
+      <div className="content">Content</div>
+      <div className="no-drag">No Drag Zone</div>
     </div>
   );
 }
 
-// v3 - Plugin-based
+// AFTER: v3 Plugin Setup
 import { useRef, useState } from 'react';
 import {
   useDraggable,
@@ -2087,9 +1049,6 @@ import {
   threshold,
   controls,
   ControlFrom,
-  ignoreMultitouch,
-  applyUserSelectHack,
-  position,
   disabled,
   events,
   useCompartment,
@@ -2097,42 +1056,32 @@ import {
 
 function ComplexDraggable() {
   const ref = useRef(null);
-  const [isConstrained, setIsConstrained] = useState(false);
   const [currentAxis, setCurrentAxis] = useState('both');
   const [gridSize, setGridSize] = useState(20);
   const [isEnabled, setIsEnabled] = useState(true);
 
-  // Individual compartments for reactive updates
+  // Reactive compartments
   const axisComp = useCompartment(
     () => (currentAxis === 'both' ? null : axis(currentAxis)),
     [currentAxis],
   );
-
-  const boundsComp = useCompartment(
-    () => (isConstrained ? bounds(BoundsFrom.parent()) : null),
-    [isConstrained],
-  );
-
   const gridComp = useCompartment(
     () => grid([gridSize, gridSize]),
     [gridSize],
   );
-
   const disabledComp = useCompartment(
     () => (!isEnabled ? disabled() : null),
     [isEnabled],
   );
 
-  // Static plugins (no reactivity needed)
+  // Static plugins
   const staticPlugins = [
+    bounds(BoundsFrom.parent()),
     threshold({ distance: 5, delay: 100 }),
     controls({
       allow: ControlFrom.selector('.drag-handle'),
       block: ControlFrom.selector('.no-drag'),
     }),
-    ignoreMultitouch(true),
-    applyUserSelectHack(true),
-    position({ current: { x: 50, y: 50 } }),
     events({
       onDragStart: (data) => console.log('start', data),
       onDrag: (data) => console.log('drag', data),
@@ -2141,20 +1090,16 @@ function ComplexDraggable() {
   ];
 
   useDraggable(ref, () =>
-    [
-      ...staticPlugins,
-      axisComp,
-      boundsComp,
-      gridComp,
-      disabledComp,
-    ].filter(Boolean),
+    [...staticPlugins, axisComp, gridComp, disabledComp].filter(
+      Boolean,
+    ),
   );
 
   return (
     <div ref={ref}>
-      <div className="drag-handle">Handle</div>
-      <div className="content">Drag me</div>
-      <div className="no-drag">Don't drag</div>
+      <div className="drag-handle">Drag Handle</div>
+      <div className="content">Content</div>
+      <div className="no-drag">No Drag Zone</div>
     </div>
   );
 }
@@ -2164,27 +1109,25 @@ function ComplexDraggable() {
 
 <div slot="vue">
 
+**Complete v2 to v3 Migration:**
+
 ```vue
-<!-- v2 - Complex setup -->
+<!-- BEFORE: v2 Complex Setup -->
 <script setup>
 import { ref, computed } from 'vue';
 import { vDraggable } from '@neodrag/vue';
 
-const isConstrained = ref(false);
-const currentAxis = ref('both');
+const axis = ref('both');
 const gridSize = ref(20);
 const isEnabled = ref(true);
 
-const complexOptions = computed(() => ({
-  axis: currentAxis.value,
-  bounds: isConstrained.value ? 'parent' : undefined,
+const options = computed(() => ({
+  axis: axis.value,
+  bounds: 'parent',
   grid: [gridSize.value, gridSize.value],
   threshold: { distance: 5, delay: 100 },
   handle: '.drag-handle',
   cancel: '.no-drag',
-  ignoreMultitouch: true,
-  applyUserSelectHack: true,
-  position: { x: 50, y: 50 },
   disabled: !isEnabled.value,
   onDragStart: (data) => console.log('start', data),
   onDrag: (data) => console.log('drag', data),
@@ -2193,14 +1136,14 @@ const complexOptions = computed(() => ({
 </script>
 
 <template>
-  <div v-draggable="complexOptions">
-    <div class="drag-handle">Handle</div>
-    <div class="content">Drag me</div>
-    <div class="no-drag">Don't drag</div>
+  <div v-draggable="options">
+    <div class="drag-handle">Drag Handle</div>
+    <div class="content">Content</div>
+    <div class="no-drag">No Drag Zone</div>
   </div>
 </template>
 
-<!-- v3 - Plugin-based -->
+<!-- AFTER: v3 Plugin Setup -->
 <script setup>
 import { ref } from 'vue';
 import {
@@ -2212,46 +1155,34 @@ import {
   threshold,
   controls,
   ControlFrom,
-  ignoreMultitouch,
-  applyUserSelectHack,
-  position,
   disabled,
   events,
   useCompartment,
 } from '@neodrag/vue';
 
-const isConstrained = ref(false);
 const currentAxis = ref('both');
 const gridSize = ref(20);
 const isEnabled = ref(true);
 
-// Individual compartments for reactive updates
+// Reactive compartments
 const axisComp = useCompartment(() =>
   currentAxis.value === 'both' ? null : axis(currentAxis.value),
 );
-
-const boundsComp = useCompartment(() =>
-  isConstrained.value ? bounds(BoundsFrom.parent()) : null,
-);
-
 const gridComp = useCompartment(() =>
   grid([gridSize.value, gridSize.value]),
 );
-
 const disabledComp = useCompartment(() =>
   !isEnabled.value ? disabled() : null,
 );
 
-// Static plugins (no reactivity needed)
+// Static plugins
 const staticPlugins = [
+  bounds(BoundsFrom.parent()),
   threshold({ distance: 5, delay: 100 }),
   controls({
     allow: ControlFrom.selector('.drag-handle'),
     block: ControlFrom.selector('.no-drag'),
   }),
-  ignoreMultitouch(true),
-  applyUserSelectHack(true),
-  position({ current: { x: 50, y: 50 } }),
   events({
     onDragStart: (data) => console.log('start', data),
     onDrag: (data) => console.log('drag', data),
@@ -2260,20 +1191,16 @@ const staticPlugins = [
 ];
 
 const plugins = () =>
-  [
-    ...staticPlugins,
-    axisComp,
-    boundsComp,
-    gridComp,
-    disabledComp,
-  ].filter(Boolean);
+  [...staticPlugins, axisComp, gridComp, disabledComp].filter(
+    Boolean,
+  );
 </script>
 
 <template>
   <div v-draggable="plugins">
-    <div class="drag-handle">Handle</div>
-    <div class="content">Drag me</div>
-    <div class="no-drag">Don't drag</div>
+    <div class="drag-handle">Drag Handle</div>
+    <div class="content">Content</div>
+    <div class="no-drag">No Drag Zone</div>
   </div>
 </template>
 ```
@@ -2282,28 +1209,26 @@ const plugins = () =>
 
 <div slot="solid">
 
+**Complete v2 to v3 Migration:**
+
 ```tsx
-// v2 - Complex setup
+// BEFORE: v2 Complex Setup
 import { createSignal, createMemo } from 'solid-js';
 import { createDraggable } from '@neodrag/solid';
 
 function ComplexDraggable() {
   const { draggable } = createDraggable();
-  const [isConstrained, setIsConstrained] = createSignal(false);
-  const [currentAxis, setCurrentAxis] = createSignal('both');
+  const [axis, setAxis] = createSignal('both');
   const [gridSize, setGridSize] = createSignal(20);
   const [isEnabled, setIsEnabled] = createSignal(true);
 
-  const complexOptions = createMemo(() => ({
-    axis: currentAxis(),
-    bounds: isConstrained() ? 'parent' : undefined,
+  const options = createMemo(() => ({
+    axis: axis(),
+    bounds: 'parent',
     grid: [gridSize(), gridSize()],
     threshold: { distance: 5, delay: 100 },
     handle: '.drag-handle',
     cancel: '.no-drag',
-    ignoreMultitouch: true,
-    applyUserSelectHack: true,
-    position: { x: 50, y: 50 },
     disabled: !isEnabled(),
     onDragStart: (data) => console.log('start', data),
     onDrag: (data) => console.log('drag', data),
@@ -2311,15 +1236,15 @@ function ComplexDraggable() {
   }));
 
   return (
-    <div use:draggable={complexOptions()}>
-      <div class="drag-handle">Handle</div>
-      <div class="content">Drag me</div>
-      <div class="no-drag">Don't drag</div>
+    <div use:draggable={options()}>
+      <div class="drag-handle">Drag Handle</div>
+      <div class="content">Content</div>
+      <div class="no-drag">No Drag Zone</div>
     </div>
   );
 }
 
-// v3 - Plugin-based
+// AFTER: v3 Plugin Setup
 import { createSignal } from 'solid-js';
 import {
   useDraggable,
@@ -2330,9 +1255,6 @@ import {
   threshold,
   controls,
   ControlFrom,
-  ignoreMultitouch,
-  applyUserSelectHack,
-  position,
   disabled,
   events,
   createCompartment,
@@ -2340,38 +1262,29 @@ import {
 
 function ComplexDraggable() {
   const [element, setElement] = createSignal();
-  const [isConstrained, setIsConstrained] = createSignal(false);
   const [currentAxis, setCurrentAxis] = createSignal('both');
   const [gridSize, setGridSize] = createSignal(20);
   const [isEnabled, setIsEnabled] = createSignal(true);
 
-  // Individual compartments for reactive updates
+  // Reactive compartments
   const axisComp = createCompartment(() =>
     currentAxis() === 'both' ? null : axis(currentAxis()),
   );
-
-  const boundsComp = createCompartment(() =>
-    isConstrained() ? bounds(BoundsFrom.parent()) : null,
-  );
-
   const gridComp = createCompartment(() =>
     grid([gridSize(), gridSize()]),
   );
-
   const disabledComp = createCompartment(() =>
     !isEnabled() ? disabled() : null,
   );
 
-  // Static plugins (no reactivity needed)
+  // Static plugins
   const staticPlugins = [
+    bounds(BoundsFrom.parent()),
     threshold({ distance: 5, delay: 100 }),
     controls({
       allow: ControlFrom.selector('.drag-handle'),
       block: ControlFrom.selector('.no-drag'),
     }),
-    ignoreMultitouch(true),
-    applyUserSelectHack(true),
-    position({ current: { x: 50, y: 50 } }),
     events({
       onDragStart: (data) => console.log('start', data),
       onDrag: (data) => console.log('drag', data),
@@ -2382,16 +1295,15 @@ function ComplexDraggable() {
   useDraggable(element, [
     ...staticPlugins,
     axisComp,
-    boundsComp,
     gridComp,
     disabledComp,
   ]);
 
   return (
     <div ref={setElement}>
-      <div class="drag-handle">Handle</div>
-      <div class="content">Drag me</div>
-      <div class="no-drag">Don't drag</div>
+      <div class="drag-handle">Drag Handle</div>
+      <div class="content">Content</div>
+      <div class="no-drag">No Drag Zone</div>
     </div>
   );
 }
@@ -2401,28 +1313,25 @@ function ComplexDraggable() {
 
 <div slot="vanilla">
 
+**Complete v2 to v3 Migration:**
+
 ```typescript
-// v2 - Complex setup
+// BEFORE: v2 Complex Setup
 import { draggable } from '@neodrag/vanilla';
 
 const element = document.getElementById('drag-me');
-
-let isConstrained = false;
-let currentAxis = 'both';
+let axis = 'both';
 let gridSize = 20;
 let isEnabled = true;
 
-function createComplexOptions() {
+function createOptions() {
   return {
-    axis: currentAxis,
-    bounds: isConstrained ? 'parent' : undefined,
+    axis: axis,
+    bounds: 'parent',
     grid: [gridSize, gridSize],
     threshold: { distance: 5, delay: 100 },
     handle: '.drag-handle',
     cancel: '.no-drag',
-    ignoreMultitouch: true,
-    applyUserSelectHack: true,
-    position: { x: 50, y: 50 },
     disabled: !isEnabled,
     onDragStart: (data) => console.log('start', data),
     onDrag: (data) => console.log('drag', data),
@@ -2430,15 +1339,15 @@ function createComplexOptions() {
   };
 }
 
-let instance = draggable(element, createComplexOptions());
+let instance = draggable(element, createOptions());
 
-// Manual updates required
+// Manual recreation for updates
 function updateOptions() {
   instance.destroy();
-  instance = draggable(element, createComplexOptions());
+  instance = draggable(element, createOptions());
 }
 
-// v3 - Plugin-based
+// AFTER: v3 Plugin Setup
 import {
   Draggable,
   axis,
@@ -2448,46 +1357,33 @@ import {
   threshold,
   controls,
   ControlFrom,
-  ignoreMultitouch,
-  applyUserSelectHack,
-  position,
   disabled,
   events,
   Compartment,
 } from '@neodrag/vanilla';
 
 const element = document.getElementById('drag-me');
-
-let isConstrained = false;
 let currentAxis = 'both';
 let gridSize = 20;
 let isEnabled = true;
 
-// Individual compartments for reactive updates
+// Reactive compartments
 const axisComp = new Compartment(() =>
   currentAxis === 'both' ? null : axis(currentAxis),
 );
-
-const boundsComp = new Compartment(() =>
-  isConstrained ? bounds(BoundsFrom.parent()) : null,
-);
-
 const gridComp = new Compartment(() => grid([gridSize, gridSize]));
-
 const disabledComp = new Compartment(() =>
   !isEnabled ? disabled() : null,
 );
 
-// Static plugins (no reactivity needed)
+// Static plugins
 const staticPlugins = [
+  bounds(BoundsFrom.parent()),
   threshold({ distance: 5, delay: 100 }),
   controls({
     allow: ControlFrom.selector('.drag-handle'),
     block: ControlFrom.selector('.no-drag'),
   }),
-  ignoreMultitouch(true),
-  applyUserSelectHack(true),
-  position({ current: { x: 50, y: 50 } }),
   events({
     onDragStart: (data) => console.log('start', data),
     onDrag: (data) => console.log('drag', data),
@@ -2496,36 +1392,25 @@ const staticPlugins = [
 ];
 
 const instance = new Draggable(element, () =>
-  [
-    ...staticPlugins,
-    axisComp,
-    boundsComp,
-    gridComp,
-    disabledComp,
-  ].filter(Boolean),
+  [...staticPlugins, axisComp, gridComp, disabledComp].filter(
+    Boolean,
+  ),
 );
 
-// Easy updates with compartments
+// Easy updates
 function updateAxis(newAxis) {
   currentAxis = newAxis;
   axisComp.current =
     currentAxis === 'both' ? null : axis(currentAxis);
 }
 
-function updateBounds(newConstrained) {
-  isConstrained = newConstrained;
-  boundsComp.current = isConstrained
-    ? bounds(BoundsFrom.parent())
-    : null;
-}
-
-function updateGrid(newGridSize) {
-  gridSize = newGridSize;
+function updateGrid(newSize) {
+  gridSize = newSize;
   gridComp.current = grid([gridSize, gridSize]);
 }
 
-function updateEnabled(newEnabled) {
-  isEnabled = newEnabled;
+function updateEnabled(enabled) {
+  isEnabled = enabled;
   disabledComp.current = !isEnabled ? disabled() : null;
 }
 ```
@@ -2533,53 +1418,11 @@ function updateEnabled(newEnabled) {
 </div>
 </FrameworkSwitch>
 
-## Performance Improvements
-
-### Bundle Size Reduction
-
-**v2**: All features included regardless of usage
-
-```javascript
-// Imports everything: bounds, grid, threshold, etc.
-import { draggable } from '@neodrag/svelte'; // ~2.2KB
-```
-
-**v3**: Tree-shakable plugins
-
-```javascript
-// Only imports what you use
-import { draggable, axis } from '@neodrag/svelte'; // ~1.1KB
-```
-
-### Memory Usage
-
-**v2**: `3 × number_of_draggables` event listeners
-
-```javascript
-// 100 draggables = 300 event listeners
-for (let i = 0; i < 100; i++) {
-  draggable(elements[i], options);
-}
-```
-
-**v3**: 3 total event listeners (event delegation)
-
-```javascript
-// 100 draggables = 3 event listeners total
-for (let i = 0; i < 100; i++) {
-  draggable(elements[i], plugins);
-}
-```
-
-### Pointer Capture
-
-**v3 Improvement**: Automatic pointer capture prevents losing drag when moving over iframes or other elements.
-
-## New Features in v3
+## New v3 Features
 
 ### Custom Plugins
 
-Create your own behavior:
+Create your own dragging behavior:
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -2588,11 +1431,11 @@ Create your own behavior:
 <script>
   import { draggable, unstable_definePlugin } from '@neodrag/svelte';
 
-  const customPlugin = unstable_definePlugin(() => ({
-    name: 'my-custom-plugin',
+  const loggerPlugin = unstable_definePlugin(() => ({
+    name: 'logger',
 
     setup(ctx) {
-      console.log('Plugin initialized');
+      console.log('Drag initialized');
       return { startTime: 0 };
     },
 
@@ -2612,7 +1455,7 @@ Create your own behavior:
   }));
 </script>
 
-<div {@attach draggable([customPlugin])}>Custom behavior</div>
+<div {@attach draggable([loggerPlugin])}>Custom behavior</div>
 ```
 
 </div>
@@ -2622,11 +1465,11 @@ Create your own behavior:
 ```tsx
 import { useDraggable, unstable_definePlugin } from '@neodrag/react';
 
-const customPlugin = unstable_definePlugin(() => ({
-  name: 'my-custom-plugin',
+const loggerPlugin = unstable_definePlugin(() => ({
+  name: 'logger',
 
   setup(ctx) {
-    console.log('Plugin initialized');
+    console.log('Drag initialized');
     return { startTime: 0 };
   },
 
@@ -2647,7 +1490,7 @@ const customPlugin = unstable_definePlugin(() => ({
 
 function CustomExample() {
   const ref = useRef(null);
-  useDraggable(ref, [customPlugin]);
+  useDraggable(ref, [loggerPlugin]);
 
   return <div ref={ref}>Custom behavior</div>;
 }
@@ -2661,11 +1504,11 @@ function CustomExample() {
 <script setup>
 import { vDraggable, unstable_definePlugin } from '@neodrag/vue';
 
-const customPlugin = unstable_definePlugin(() => ({
-  name: 'my-custom-plugin',
+const loggerPlugin = unstable_definePlugin(() => ({
+  name: 'logger',
 
   setup(ctx) {
-    console.log('Plugin initialized');
+    console.log('Drag initialized');
     return { startTime: 0 };
   },
 
@@ -2684,7 +1527,7 @@ const customPlugin = unstable_definePlugin(() => ({
   },
 }));
 
-const plugins = [customPlugin];
+const plugins = [loggerPlugin];
 </script>
 
 <template>
@@ -2699,11 +1542,11 @@ const plugins = [customPlugin];
 ```tsx
 import { useDraggable, unstable_definePlugin } from '@neodrag/solid';
 
-const customPlugin = unstable_definePlugin(() => ({
-  name: 'my-custom-plugin',
+const loggerPlugin = unstable_definePlugin(() => ({
+  name: 'logger',
 
   setup(ctx) {
-    console.log('Plugin initialized');
+    console.log('Drag initialized');
     return { startTime: 0 };
   },
 
@@ -2724,7 +1567,7 @@ const customPlugin = unstable_definePlugin(() => ({
 
 function CustomExample() {
   const [element, setElement] = createSignal();
-  useDraggable(element, [customPlugin]);
+  useDraggable(element, [loggerPlugin]);
 
   return <div ref={setElement}>Custom behavior</div>;
 }
@@ -2737,11 +1580,11 @@ function CustomExample() {
 ```typescript
 import { Draggable, unstable_definePlugin } from '@neodrag/vanilla';
 
-const customPlugin = unstable_definePlugin(() => ({
-  name: 'my-custom-plugin',
+const loggerPlugin = unstable_definePlugin(() => ({
+  name: 'logger',
 
   setup(ctx) {
-    console.log('Plugin initialized');
+    console.log('Drag initialized');
     return { startTime: 0 };
   },
 
@@ -2761,7 +1604,7 @@ const customPlugin = unstable_definePlugin(() => ({
 }));
 
 const element = document.getElementById('custom');
-const instance = new Draggable(element, [customPlugin]);
+const instance = new Draggable(element, [loggerPlugin]);
 ```
 
 </div>
@@ -2769,7 +1612,7 @@ const instance = new Draggable(element, [customPlugin]);
 
 ### ScrollLock Plugin
 
-New feature for preventing page scrolling:
+Prevent page scrolling during drag:
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -2787,7 +1630,7 @@ New feature for preventing page scrolling:
     }),
   ])}
 >
-  Prevents page scrolling while dragging
+  No page scroll while dragging
 </div>
 ```
 
@@ -2808,7 +1651,7 @@ function ScrollLockExample() {
     }),
   ]);
 
-  return <div ref={ref}>Prevents page scrolling while dragging</div>;
+  return <div ref={ref}>No page scroll while dragging</div>;
 }
 ```
 
@@ -2829,9 +1672,7 @@ const plugins = [
 </script>
 
 <template>
-  <div v-draggable="plugins">
-    Prevents page scrolling while dragging
-  </div>
+  <div v-draggable="plugins">No page scroll while dragging</div>
 </template>
 ```
 
@@ -2852,9 +1693,7 @@ function ScrollLockExample() {
     }),
   ]);
 
-  return (
-    <div ref={setElement}>Prevents page scrolling while dragging</div>
-  );
+  return <div ref={setElement}>No page scroll while dragging</div>;
 }
 ```
 
@@ -2877,190 +1716,122 @@ const instance = new Draggable(element, [
 </div>
 </FrameworkSwitch>
 
-### Better Error Handling
+## Framework-Specific Syntax Changes
 
-**v3**: Graceful error recovery with detailed error messages in development.
+<FrameworkSwitch>
+<div slot="svelte">
 
-## Breaking Changes Summary
+**Key Svelte Changes:**
 
-### API Changes
+- Actions become attachments: `use:draggable` → `{@attach draggable}`
+- Reactive declarations: `let var = value` → `let var = $state(value)`
+- Event handlers: `on:click` → `onclick`
+- Use `createCompartment` for reactive plugins
 
-- Options object → Plugin array
-- Automatic reactivity → Manual compartments
-- Built-in events → Event plugin
-- String bounds → `BoundsFrom` helpers
+</div>
 
-### Import Changes
+<div slot="react">
 
-- Single import → Core + plugins
-- Different framework hook names
+**Key React Changes:**
 
-### Event Data Changes
+- Same `useDraggable` hook pattern
+- Options object becomes plugin array
+- Add `useCompartment` for reactive plugins with dependency arrays
+- No other major syntax changes
 
-- `offsetX, offsetY` → `offset: { x, y }`
-- Custom events removed (use events plugin)
+</div>
 
-### Removed Features
+<div slot="vue">
 
-- `legacyTranslate` option (always uses modern approach)
-- `gpuAcceleration` option (optimized automatically)
-- `recomputeBounds` option (use bounds plugin options)
+**Key Vue Changes:**
+
+- Same `v-draggable` directive pattern
+- Options object becomes plugin array
+- Add `useCompartment` for reactive plugins
+- Works with Vue 3 composition API
+
+</div>
+
+<div slot="solid">
+
+**Key Solid Changes:**
+
+- `createDraggable()` pattern → `useDraggable()` hook
+- `use:draggable` directive → `useDraggable(element, plugins)`
+- Add `createCompartment` for reactive plugins
+- Works with Solid's reactivity system
+
+</div>
+
+<div slot="vanilla">
+
+**Key Vanilla Changes:**
+
+- Function call → Class instantiation: `draggable(el, opts)` → `new Draggable(el, plugins)`
+- Add `Compartment` class for reactive updates
+- Instance methods remain similar: `instance.destroy()`
+
+</div>
+</FrameworkSwitch>
 
 ## Migration Checklist
 
-### Before Starting
+### Step 1: Update Dependencies
 
-- [ ] Backup your current v2 implementation
-- [ ] Identify all draggable usages in your codebase
-- [ ] List all options you're currently using
+- Install v3 package for your framework
+- Update import statements to include needed plugins
+- Update TypeScript types if using TypeScript
 
-### Update Dependencies
+### Step 2: Convert Options to Plugins
 
-<FrameworkSwitch>
-<div slot="svelte">
+- Replace options object with plugin array
+- Convert each option using the reference tables above
+- Import required plugin functions
 
-- [ ] Update to v3: `npm install @neodrag/svelte@^3`
-- [ ] Update import statements
-- [ ] Update TypeScript types if using TypeScript
+### Step 3: Handle Reactive Updates
 
-</div>
+- Identify dynamic/reactive options in v2 code
+- Create compartments for each reactive value
+- Wire up compartment updates to state changes
 
-<div slot="react">
+### Step 4: Update Framework Syntax
 
-- [ ] Update to v3: `npm install @neodrag/react@^3`
-- [ ] Update import statements
-- [ ] Update TypeScript types if using TypeScript
+- Apply framework-specific syntax changes
+- Update event handlers to use events plugin
+- Test basic functionality
 
-</div>
+### Step 5: Update Event Data Usage
 
-<div slot="vue">
+- Change from offsetX/offsetY to offset.x/offset.y
+- Update any event handler logic
+- Verify all event callbacks work correctly
 
-- [ ] Update to v3: `npm install @neodrag/vue@^3`
-- [ ] Update import statements
-- [ ] Update TypeScript types if using TypeScript
+### Step 6: Test and Validate
 
-</div>
+- Test all drag behaviors
+- Verify reactive updates work with compartments
+- Check performance and bundle size improvements
+- Test on different devices and browsers
 
-<div slot="solid">
+## Common Migration Issues
 
-- [ ] Update to v3: `npm install @neodrag/solid@^3`
-- [ ] Update import statements
-- [ ] Update TypeScript types if using TypeScript
+**Missing Plugin Imports**
+Make sure to import all plugins you use. Forgetting imports is the most common issue.
 
-</div>
+**Reactivity Not Working**
+Remember to use compartments for any value that should update dynamically. v3 doesn't have automatic reactivity like v2.
 
-<div slot="vanilla">
+**Events Not Firing**
+Events are now handled by the events plugin, not built-in options. Add the events plugin with your callbacks.
 
-- [ ] Update to v3: `npm install @neodrag/vanilla@^3`
-- [ ] Update import statements
-- [ ] Update TypeScript types if using TypeScript
+**TypeScript Errors**
+Update type imports and ensure you're using the correct v3 types for your framework.
 
-</div>
-</FrameworkSwitch>
+## Performance Benefits
 
-### Convert Each Usage
+**Performance**: 50% reduction through tree-shaking - only import plugins you use  
+**Memory Usage**: Event delegation means 3 total listeners instead of 3 per draggable  
+**Reliability**: Pointer capture prevents losing drag when moving over iframes  
+**Extensibility**: Custom plugins allow community-driven extensions
 
-- [ ] Replace options objects with plugin arrays
-- [ ] Convert bounds strings to `BoundsFrom` helpers
-- [ ] Move events to `events()` plugin
-- [ ] Add compartments for reactive values
-- [ ] Test drag functionality
-
-### Framework-Specific
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-- [ ] **Svelte**: Replace `use:draggable` with `{@attach draggable}`
-- [ ] Update to Svelte 5 syntax patterns
-
-</div>
-
-<div slot="react">
-
-- [ ] **React**: Update hook usage pattern
-- [ ] Add useCompartment for reactive updates
-
-</div>
-
-<div slot="vue">
-
-- [ ] **Vue**: Update directive usage
-- [ ] Add useCompartment for reactive updates
-
-</div>
-
-<div slot="solid">
-
-- [ ] **Solid**: Switch to `useDraggable` hook
-- [ ] Add createCompartment for reactive updates
-
-</div>
-
-<div slot="vanilla">
-
-- [ ] **Vanilla**: Use `new Draggable()` class
-- [ ] Use Compartment for reactive updates
-
-</div>
-</FrameworkSwitch>
-
-### Testing
-
-- [ ] Verify all drag behaviors work as expected
-- [ ] Test reactive updates with compartments
-- [ ] Check event handling
-- [ ] Validate bounds and constraints
-- [ ] Test on different devices/browsers
-
-## Troubleshooting
-
-### Common Issues
-
-**"Plugin not found" errors**
-
-```javascript
-// Missing import
-import { axis, bounds, BoundsFrom } from '@neodrag/svelte';
-```
-
-**Reactivity not working**
-
-```javascript
-// Forgot compartment
-const axisComp = createCompartment(() => axis(currentAxis));
-```
-
-**Events not firing**
-
-```javascript
-// Missing events plugin
-draggable([events({ onDrag: handleDrag })]);
-```
-
-**TypeScript errors**
-
-```typescript
-// Update types
-import type { Plugin } from '@neodrag/svelte';
-```
-
-### Getting Help
-
-- [Documentation](https://neodrag.dev)
-- [GitHub Issues](https://github.com/PuruVJ/neodrag/issues)
-- [Discord Community](https://discord.gg/neodrag)
-
-## Conclusion
-
-While migrating from v2 to v3 requires some refactoring, the benefits are substantial:
-
-- **Smaller bundle size** through tree-shaking
-- **Better performance** with event delegation
-- **More flexibility** with custom plugins
-- **Improved reliability** with pointer capture
-- **Better developer experience** with enhanced debugging
-
-The plugin architecture future-proofs your dragging implementation and opens up possibilities for community-driven extensions.
-
-Take the migration step-by-step, test thoroughly, and enjoy the improved performance and capabilities of Neodrag v3!
+The migration requires some refactoring, but v3 provides significant improvements in performance, bundle size, and flexibility. Take it step-by-step, use compartments for reactivity, and enjoy the enhanced capabilities of Neodrag v3!
