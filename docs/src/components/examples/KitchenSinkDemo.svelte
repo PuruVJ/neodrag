@@ -1,7 +1,20 @@
 <script lang="ts">
 	import { browser } from '$helpers/utils';
-	import { axis, bounds, BoundsFrom, ControlFrom, controls, createCompartment, disabled, draggable, events, grid, position, scrollLock } from '@neodrag/svelte';
-//@ts-ignore
+	import {
+		axis,
+		bounds,
+		BoundsFrom,
+		ControlFrom,
+		controls,
+		createCompartment,
+		disabled,
+		draggable,
+		events,
+		grid,
+		position,
+		scrollLock,
+	} from '@neodrag/svelte';
+	//@ts-ignore
 	import squircle from '$/worklet/squircle?url';
 	import { style } from 'svelte-body';
 	import { expoOut, sineIn } from 'svelte/easing';
@@ -85,9 +98,9 @@
 		y: 0,
 	});
 	const return_to_position_compartment = createCompartment(() => {
-console.log('this triggers?', $state.snapshot(return_to_position_val))
-		return position({ current: $state.snapshot(return_to_position_val) })}
-	);
+		console.log('this triggers?', $state.snapshot(return_to_position_val));
+		return position({ current: $state.snapshot(return_to_position_val) });
+	});
 
 	let return_to_position_transition_val = new Tween(
 		{
@@ -96,8 +109,8 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 		},
 		{ easing: expoOut, duration: 1200 },
 	);
-	const return_to_position_transition_compartment = createCompartment(() => 
-		position({ current: $state.snapshot(return_to_position_transition_val.current) })
+	const return_to_position_transition_compartment = createCompartment(() =>
+		position({ current: $state.snapshot(return_to_position_transition_val.current) }),
 	);
 
 	if (browser)
@@ -183,10 +196,7 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 			class="box single-handle"
 			style:z-index={z_indices[5]}
 			data-paw-cursor="true"
-			{@attach draggable([
-				scrollLock(),
-				events(drag_handlers)
-			])}
+			{@attach draggable([scrollLock(), events(drag_handlers)])}
 		>
 			I will lock scrolling
 		</div>
@@ -201,8 +211,8 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 					onDrag: (data) => {
 						drag_handlers.onDrag?.(data);
 						track_my_position = { x: data.offset.x, y: data.offset.y };
-					}, 
-				})
+					},
+				}),
 			])}
 		>
 			I track my position:
@@ -213,8 +223,8 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 			class="box single-handle"
 			style:z-index={z_indices[5]}
 			{@attach draggable([
-				controls({allow: ControlFrom.selector('.handle')}), 
-				events(drag_handlers)
+				controls({ allow: ControlFrom.selector('.handle') }),
+				events(drag_handlers),
 			])}
 		>
 			<button class="handle" data-paw-cursor="true" data-paw-color="light"> Drag here </button>
@@ -226,8 +236,8 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 			class="box multiple-handles"
 			style:z-index={z_indices[6]}
 			{@attach draggable([
-				controls({ allow: ControlFrom.selector('.handle') }), 
-				events(drag_handlers)
+				controls({ allow: ControlFrom.selector('.handle') }),
+				events(drag_handlers),
 			])}
 		>
 			I can be dragged with all the handles
@@ -243,8 +253,8 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 			style:z-index={z_indices[7]}
 			data-paw-cursor="true"
 			{@attach draggable([
-				controls({ block: ControlFrom.selector('.cancel') }), 
-				events(drag_handlers)
+				controls({ block: ControlFrom.selector('.cancel') }),
+				events(drag_handlers),
 			])}
 		>
 			I can be dragged anywhere
@@ -256,10 +266,7 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[8]}
-			{@attach draggable([
-				grid([25, 25]),
-				events(drag_handlers)
-			])}
+			{@attach draggable([grid([25, 25]), events(drag_handlers)])}
 		>
 			I snap to 25x25 grid
 		</div>
@@ -268,10 +275,7 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[9]}
-			{@attach draggable([
-				grid([100, 25]),
-				events(drag_handlers)
-			])}
+			{@attach draggable([grid([100, 25]), events(drag_handlers)])}
 		>
 			I snap to 100x25 grid
 		</div>
@@ -284,17 +288,17 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 				bounds(BoundsFrom.parent()),
 				events({
 					onDrag: ({ rootNode }) => {
-					highlight_parent = true;
-					rootNode.style.zIndex = '20';
-				},
-				onDragEnd: ({ rootNode }) => {
-					highlight_parent = false;
+						highlight_parent = true;
+						rootNode.style.zIndex = '20';
+					},
+					onDragEnd: ({ rootNode }) => {
+						highlight_parent = false;
 
-					setTimeout(() => {
-						update_z_index(rootNode);
-					}, 200);
-				},
-				})
+						setTimeout(() => {
+							update_z_index(rootNode);
+						}, 200);
+					},
+				}),
 			])}
 		>
 			I can be dragged within my parents container only
@@ -318,7 +322,7 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 							update_z_index(rootNode);
 						}, 200);
 					},
-				})
+				}),
 			])}
 		>
 			I can be dragged within the body
@@ -329,11 +333,11 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 			data-paw-cursor="true"
 			style:z-index={z_indices[12]}
 			{@attach draggable([
-				bounds(BoundsFrom.viewport( coord_bounds)),
+				bounds(BoundsFrom.viewport(coord_bounds)),
 				events({
 					onDrag: ({ rootNode }) => {
 						show_markers = true;
-					rootNode.style.zIndex = '20';
+						rootNode.style.zIndex = '20';
 					},
 					onDragEnd: ({ rootNode }) => {
 						show_markers = false;
@@ -342,7 +346,7 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 							update_z_index(rootNode);
 						}, 200);
 					},
-				})
+				}),
 			])}
 		>
 			Bounds
@@ -362,9 +366,9 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 					},
 					onDragEnd: async (data) => {
 						drag_handlers.onDragEnd?.(data);
-    				return_to_position_val = { x: 0, y: 0 };
+						return_to_position_val = { x: 0, y: 0 };
 					},
-				})
+				}),
 			])}
 		>
 			I will return to my position on drop
@@ -388,9 +392,8 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 						drag_handlers.onDragEnd?.(data);
 						return_to_position_transition_val.target = { x: 0, y: 0 };
 					},
-				})
+				}),
 			])}
-			
 		>
 			I will return to my position on drop, but with style! 😉
 		</div>
@@ -399,10 +402,7 @@ console.log('this triggers?', $state.snapshot(return_to_position_val))
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[15]}
-			{@attach draggable([
-				disabled(),
-				events(drag_handlers)
-			])}
+			{@attach draggable([disabled(), events(drag_handlers)])}
 		>
 			<code>disabled: true</code>
 

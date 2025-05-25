@@ -102,7 +102,7 @@ Using Unpkg
 Include the library in your HTML using the following `<script>` tag. This will load the latest version of `@neodrag/vanilla` directly from unpkg:
 
 ```html
-<script src="https://unpkg.com/@neodrag/vanilla@latest/dist/umd/index.js"> </script>
+<script src="https://unpkg.com/@neodrag/vanilla@latest/dist/umd/index.js"></script>
 ```
 
 Using jsDelivr
@@ -110,7 +110,7 @@ Using jsDelivr
 Alternatively, you can use jsDelivr as a CDN to load `@neodrag/vanilla`. Include the following line in your HTML:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@neodrag/vanilla@latest/dist/umd/index.js"> </script>
+<script src="https://cdn.jsdelivr.net/npm/@neodrag/vanilla@latest/dist/umd/index.js"></script>
 ```
 
 Usage with CDN
@@ -118,7 +118,10 @@ Usage with CDN
 After including the library via a CDN, `@neodrag/vanilla` will be available as a global variable `NeoDrag`. Here’s how you can use it to make an element draggable:
 
 ```html
-<div id="drag">Drag me!</div> <script>   var dragInstance = new NeoDrag.Draggable(document.getElementById('drag')); </script>
+<div id="drag">Drag me!</div>
+<script>
+	var dragInstance = new NeoDrag.Draggable(document.getElementById('drag'));
+</script>
 ```
 
 This method allows you to use `@neodrag/vanilla` without any build tools or npm installations, directly in your browser.

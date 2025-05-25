@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { portal } from '$actions/portal';
 	import type { Framework } from '$helpers/constants';
-	import { createCompartment, draggable, events, position, type DragEventData } from '@neodrag/svelte';
+	import {
+		createCompartment,
+		draggable,
+		events,
+		position,
+		type DragEventData,
+	} from '@neodrag/svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
@@ -54,7 +60,7 @@
 	// Cache for element positions to avoid repeated getBoundingClientRect calls
 	let cached_positions = {
 		logo: { left: 0, top: 0, width: 0, height: 0, timestamp: 0 },
-		button: { left: 0, top: 0, width: 0, height: 0, timestamp: 0 }
+		button: { left: 0, top: 0, width: 0, height: 0, timestamp: 0 },
 	};
 
 	// Flags to control when to recalculate
@@ -68,9 +74,9 @@
 	function get_cached_offset(el: HTMLElement, cache_key: 'logo' | 'button') {
 		const now = performance.now();
 		const cached = cached_positions[cache_key];
-		
+
 		// Return cached position if it's recent and we don't need an update
-		if (!needs_position_update && (now - cached.timestamp) < CACHE_DURATION) {
+		if (!needs_position_update && now - cached.timestamp < CACHE_DURATION) {
 			return cached;
 		}
 
@@ -81,7 +87,7 @@
 			top: rect.top + window.scrollY,
 			width: rect.width || el.offsetWidth,
 			height: rect.height || el.offsetHeight,
-			timestamp: now
+			timestamp: now,
 		};
 
 		cached_positions[cache_key] = position;
@@ -193,7 +199,6 @@
 		};
 	});
 
-
 	$effect(() => {
 		const current = draggable_position.current;
 		// Mark for update when position changes
@@ -224,7 +229,7 @@
 				mark_for_update();
 				on_drag_end?.(data);
 			},
-		})
+		}),
 	])}
 	use:connect={logoEl}
 	onclick={selectFramework}

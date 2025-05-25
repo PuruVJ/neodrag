@@ -4,29 +4,26 @@
 		axis,
 		bounds,
 		BoundsFrom,
-		Compartment,
+		createCompartment,
 		draggable,
 		events,
 		position,
 	} from '@neodrag/svelte';
 	import { IsMounted } from 'runed';
+	import { untrack } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import SunnyIcon from '~icons/ion/sunny-outline';
 	import MoonIcon from '~icons/ph/moon-fill';
-	import { untrack } from 'svelte';
 
 	let container_width = $state(0);
 
 	let draggable_el = $state<HTMLDivElement>();
 
 	const position_x = new Tween(0, { duration: 400, easing: expoOut });
-	const position_compartment = new Compartment(() => position({ current: { x: 0, y: 0 } }));
-
-	$effect.pre(() => {
-		// console.log(position_x.current);
-		position_compartment.current = position({ current: { x: position_x.current, y: 0 } });
-	});
+	const position_compartment = createCompartment(() =>
+		position({ current: { x: position_x.current, y: 0 } }),
+	);
 
 	const mounted = new IsMounted();
 
@@ -57,7 +54,6 @@
 		class:selected={theme.current === 'light'}
 		data-paw-cursor="true"
 		onclick={() => {
-			console.log(1);
 			position_x.target = 0;
 			change_theme();
 		}}
@@ -69,25 +65,25 @@
 		class="draggable"
 		data-paw-cursor="true"
 		bind:this={draggable_el}
-		use:draggable={() => [
+		{@attach draggable(() => [
 			axis('x'),
 			bounds(BoundsFrom.parent()),
-			// position_compartment,
-			// events({
-			// 	onDrag: ({ offset }) => {
-			// 		position_x.set(offset.x, { duration: 0 });
-			// 		change_theme();
-			// 	},
-			// 	onDragEnd: ({ offset, rootNode }) => {
-			// 		if (offset.x / container_width > 0.3) {
-			// 			position_x.target = container_width - rootNode.getBoundingClientRect().width;
-			// 		} else {
-			// 			position_x.target = 0;
-			// 		}
-			// 		change_theme();
-			// 	},
-			// }),
-		]}
+			position_compartment,
+			events({
+				onDrag: ({ offset }) => {
+					position_x.set(offset.x, { duration: 0 });
+					change_theme();
+				},
+				onDragEnd: ({ offset, rootNode }) => {
+					if (offset.x / container_width > 0.3) {
+						position_x.target = container_width - rootNode.getBoundingClientRect().width;
+					} else {
+						position_x.target = 0;
+					}
+					change_theme();
+				},
+			}),
+		])}
 	></div>
 
 	<button
@@ -120,6 +116,7 @@
 		box-shadow: 0 1px 4px 1px hsla(0, 0%, 13%, 0.3);
 		border-radius: 50%;
 		background-color: var(--secondary-color);
+		z-index: 2;
 	}
 
 	.theme-button {

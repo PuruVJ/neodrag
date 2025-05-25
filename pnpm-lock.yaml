@@ -41,6 +41,9 @@ importers:
       jsdom:
         specifier: ^24.0.0
         version: 24.1.3
+      prettier-plugin-svelte:
+        specifier: ^3.4.0
+        version: 3.4.0(prettier@3.4.2)(svelte@5.33.1)
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -163,8 +166,8 @@ importers:
         specifier: ^0.14.1
         version: 0.14.1
       prettier-plugin-svelte:
-        specifier: ^3.3.2
-        version: 3.3.2(prettier@3.4.2)(svelte@5.33.1)
+        specifier: ^3.4.0
+        version: 3.4.0(prettier@3.4.2)(svelte@5.33.1)
       rehype-autolink-headings:
         specifier: ^7.1.0
         version: 7.1.0
@@ -4268,6 +4271,12 @@ packages:
 
   prettier-plugin-svelte@3.3.2:
     resolution: {integrity: sha512-kRPjH8wSj2iu+dO+XaUv4vD8qr5mdDmlak3IT/7AOgGIMRG86z/EHOLauFcClKEnOUf4A4nOA7sre5KrJD4Raw==}
+    peerDependencies:
+      prettier: ^3.0.0
+      svelte: ^3.2.0 || ^4.0.0-next.0 || ^5.0.0-next.0
+
+  prettier-plugin-svelte@3.4.0:
+    resolution: {integrity: sha512-pn1ra/0mPObzqoIQn/vUTR3ZZI6UuZ0sHqMK5x2jMLGrs53h0sXhkVuDcrlssHwIMk7FYrMjHBPoUSyyEEDlBQ==}
     peerDependencies:
       prettier: ^3.0.0
       svelte: ^3.2.0 || ^4.0.0-next.0 || ^5.0.0-next.0
@@ -10357,6 +10366,11 @@ snapshots:
       sass-formatter: 0.7.9
 
   prettier-plugin-svelte@3.3.2(prettier@3.4.2)(svelte@5.33.1):
+    dependencies:
+      prettier: 3.4.2
+      svelte: 5.33.1
+
+  prettier-plugin-svelte@3.4.0(prettier@3.4.2)(svelte@5.33.1):
     dependencies:
       prettier: 3.4.2
       svelte: 5.33.1

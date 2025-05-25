@@ -1,4 +1,4 @@
-const Draggable = NeoDrag.Draggable
+const Draggable = NeoDrag.Draggable;
 
 const draggableEl = document.querySelector('.box');
 const xSlider = document.querySelector('#x');

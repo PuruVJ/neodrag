@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { createDraggable, DEFAULTS } from '../../../src';
 	import type { Plugin, PluginInput } from '../../../src/plugins';
-	import {wrapper} from '../../../../../packages/svelte/src/index.svelte'
+	import { wrapper } from '../../../../../packages/svelte/src/index.svelte';
 
 	const {
 		testid,
@@ -21,7 +21,7 @@
 	});
 
 	// @ts-ignore
-	const svelte_one = wrapper(factory)
+	const svelte_one = wrapper(factory);
 </script>
 
 <div class="box" {@attach svelte_one(plugins)} data-testid={testid}>

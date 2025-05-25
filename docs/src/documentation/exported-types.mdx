@@ -28,7 +28,10 @@ This package exports these types you can use:
 ```ts
 export type DragAxis = 'both' | 'x' | 'y' | 'none';
 
-export type DragBounds = 'parent' | string | Partial<DragBoundsCoords>;
+export type DragBounds =
+  | 'parent'
+  | string
+  | Partial<DragBoundsCoords>;
 
 export type DragEventData = {
   /** How much element moved from its original position horizontally */

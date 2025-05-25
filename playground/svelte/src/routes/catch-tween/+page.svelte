@@ -1,10 +1,5 @@
 <script lang="ts">
-	import {
-		createCompartment,
-		draggable,
-		events,
-		position
-	} from '@neodrag/svelte';
+	import { createCompartment, draggable, events, position } from '@neodrag/svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
@@ -41,7 +36,7 @@
 	])}></span> -->
 
 <div
-    {@attach draggable(() => [
+	{@attach draggable(() => [
 		// position({ current: $state.snapshot(pos.current) }),
 		position_compartment,
 		events({
@@ -55,8 +50,7 @@
 				await pos.set({ x: 0, y: 0 }, { duration: 4000 });
 			},
 		}),
-	])
-}
+	])}
 ></div>
 
 <!-- <div

@@ -18,7 +18,7 @@ export interface Props {
 const { title } = Astro.props;
 
 const body_class = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)/gi.exec(
-	Astro.url.pathname
+	Astro.url.pathname,
 )?.[1];
 ---
 
