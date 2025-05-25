@@ -14,7 +14,7 @@ const framework = defineCollection({
 	}),
 });
 
-const guide = defineCollection({
+const migration = defineCollection({
 	loader: glob({
 		pattern: '**/+page.mdx',
 		base: './src/content/guide',
@@ -42,6 +42,6 @@ const plugin = defineCollection({
 
 export const collections = {
 	framework,
-	guide,
+	migration,
 	plugin,
 };

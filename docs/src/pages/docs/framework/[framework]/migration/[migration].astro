@@ -1,0 +1,33 @@
+---
+import { FRAMEWORKS } from '$helpers/constants';
+import MainDocsLayout from '$layouts/MainDocsLayout.astro';
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+
+const { migration, framework } = Astro.params;
+
+const guide_collection = await getCollection('migration');
+const guide_entry = guide_collection.find((f) => f.id.includes(migration));
+
+if (!guide_entry) {
+	return;
+}
+
+const { Content, headings } = await render(guide_entry);
+
+export const getStaticPaths = (async () => {
+	const migration_collection = await getCollection('migration');
+
+	return migration_collection
+		.map((f) =>
+			FRAMEWORKS.map(({ name }) => ({
+				params: { migration: f.id.replace(/\d{2}-(.+)\/page/, '$1'), framework: name },
+			}))
+		)
+		.flat();
+}) satisfies GetStaticPaths;
+---
+
+<MainDocsLayout {...guide_entry.data} headings={headings} framework={framework}>
+	<Content />
+</MainDocsLayout>

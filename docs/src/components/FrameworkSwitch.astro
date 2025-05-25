@@ -1,41 +1,11 @@
-<div class="framework-specific-slot svelte">
-	<slot name="svelte" />
-</div>
-<div class="framework-specific-slot react">
-	<slot name="react" />
-</div>
-<div class="framework-specific-slot vue">
-	<slot name="vue" />
-</div>
-<div class="framework-specific-slot solid">
-	<slot name="solid" />
-</div>
-<div class="framework-specific-slot vanilla">
-	<slot name="vanilla" />
-</div>
+---
+const framework = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)/gi.exec(
+	Astro.url.pathname
+)?.[1];
+---
 
-<style is:global>
-	.framework-specific-slot {
-		display: none;
-	}
-
-	body[data-code-block-framework='svelte'] .framework-specific-slot.svelte {
-		display: contents;
-	}
-
-	body[data-code-block-framework='react'] .framework-specific-slot.react {
-		display: contents;
-	}
-
-	body[data-code-block-framework='vue'] .framework-specific-slot.vue {
-		display: contents;
-	}
-
-	body[data-code-block-framework='solid'] .framework-specific-slot.solid {
-		display: contents;
-	}
-
-	body[data-code-block-framework='vanilla'] .framework-specific-slot.vanilla {
-		display: contents;
-	}
-</style>
+{framework === 'svelte' && <slot name="svelte" />}
+{framework === 'react' && <slot name="react" />}
+{framework === 'vue' && <slot name="vue" />}
+{framework === 'solid' && <slot name="solid" />}
+{framework === 'vanilla' && <slot name="vanilla" />}

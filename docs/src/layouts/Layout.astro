@@ -17,7 +17,7 @@ export interface Props {
 
 const { title } = Astro.props;
 
-const body_class = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)/gi.exec(
+const framework = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)/gi.exec(
 	Astro.url.pathname
 )?.[1];
 ---
@@ -66,12 +66,10 @@ const body_class = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)/gi.exec(
 
 			document.body.classList.remove('light', 'dark');
 			document.body.classList.add(theme);
-
-			localStorage.setItem('neodrag:theme', JSON.stringify(theme));
 		</script>
 	</head>
 
-	<body data-framework={body_class} data-code-block-framework="svelte">
+	<body data-framework={framework}>
 		<ThemeWatcher client:load />
 
 		<slot />

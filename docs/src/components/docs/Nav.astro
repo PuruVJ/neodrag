@@ -5,14 +5,16 @@ import { getCollection } from 'astro:content';
 const pathname = Astro.url.pathname;
 
 const framework_collection = (await getCollection('framework')).sort((a, b) =>
-	a.id > b.id ? 1 : -1,
+	a.id > b.id ? 1 : -1
 );
-const guides_collection = (await getCollection('guide')).sort((a, b) => (a.id > b.id ? 1 : -1));
+const migrations_collection = (await getCollection('migration')).sort((a, b) =>
+	a.id > b.id ? 1 : -1
+);
 const plugin_collection = (await getCollection('plugin')).sort((a, b) => (a.id > b.id ? 1 : -1));
 
 const aria_current_val = (path: string) => (pathname.endsWith(path) ? 'page' : 'false');
 
-const framework_page = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)/gi.exec(pathname)?.[1];
+const framework = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)/gi.exec(pathname)?.[1];
 
 const nav_list = [
 	{
@@ -23,16 +25,16 @@ const nav_list = [
 		})),
 	},
 	{
-		title: 'guide',
-		sections: guides_collection.map((v) => ({
-			slug: `/docs/guide/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
+		title: 'plugin',
+		sections: plugin_collection.map((v) => ({
+			slug: `/docs/framework/${framework}/plugin/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
 			title: v.data.nav_title ?? v.data.title,
 		})),
 	},
 	{
-		title: 'plugin',
-		sections: plugin_collection.map((v) => ({
-			slug: `/docs/plugin/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
+		title: 'migration',
+		sections: migrations_collection.map((v) => ({
+			slug: `/docs/framework/${framework}/migration/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
 			title: v.data.nav_title ?? v.data.title,
 		})),
 	},
@@ -86,7 +88,7 @@ const nav_list = [
 			href="https://x.com/puruvjdev"
 			target="blank"
 			rel="noopener noreferrer"
-			class={framework_page ? 'framework' : ''}
+			class={framework ? 'framework' : ''}
 		>
 			Puru Vijay</a
 		>
