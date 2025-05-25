@@ -98,7 +98,6 @@
 		y: 0,
 	});
 	const return_to_position_compartment = createCompartment(() => {
-		console.log('this triggers?', $state.snapshot(return_to_position_val));
 		return position({ current: $state.snapshot(return_to_position_val) });
 	});
 
