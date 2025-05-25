@@ -284,7 +284,7 @@ export const transform = unstable_definePlugin(
 				transform.clear();
 				transform.appendItem(translation);
 			} else {
-				ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
+				ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px 0.0001px`;
 			}
 
 			return { is_svg: is_svg };
@@ -314,7 +314,7 @@ export const transform = unstable_definePlugin(
 					transform.appendItem(translation);
 					// debugger;
 				} else {
-					ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
+					ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px 0.0001px`;
 				}
 			});
 		},
