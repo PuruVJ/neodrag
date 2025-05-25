@@ -712,6 +712,12 @@ export function createDraggable({
 				instance.plugins = initialize_plugins(plugins);
 			}
 
+			if (node instanceof SVGGraphicsElement) {
+				const initial_transform = get_current_transform(node);
+				instance.ctx.offset.x = initial_transform.x;
+				instance.ctx.offset.y = initial_transform.y;
+			}
+
 			for (const plugin of instance.plugins) {
 				const result = resultify(
 					() => {
@@ -745,4 +751,18 @@ export function createDraggable({
 
 		dispose,
 	};
+}
+
+function get_current_transform(element: SVGGraphicsElement) {
+	const transform = element.transform.baseVal;
+	if (transform.numberOfItems === 0) {
+		const svg = element.ownerSVGElement;
+		if (!svg) return { x: 0, y: 0 };
+
+		const matrix = svg.createSVGTransform().matrix;
+		transform.insertItemBefore(svg.createSVGTransformFromMatrix(matrix), 0);
+	}
+
+	const matrix = transform.consolidate()?.matrix;
+	return matrix ? { x: matrix.e, y: matrix.f } : { x: 0, y: 0 };
 }

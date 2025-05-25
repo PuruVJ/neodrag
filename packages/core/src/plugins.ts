@@ -229,23 +229,42 @@ export const disabled = unstable_definePlugin((value: boolean = true) => ({
 	},
 }));
 
-function get_current_transform(element: SVGGraphicsElement) {
-	const transform = element.transform.baseVal;
-	if (transform.numberOfItems === 0) {
-		const svg = element.ownerSVGElement;
-		if (!svg) return { x: 0, y: 0 };
+function apply_transform(
+	ctx: PluginContext,
+	func?: (args: { offset: { x: number; y: number }; rootNode: HTMLElement | SVGElement }) => void,
+) {
+	const is_svg = ctx.rootNode instanceof SVGElement;
 
-		const matrix = svg.createSVGTransform().matrix;
-		transform.insertItemBefore(svg.createSVGTransformFromMatrix(matrix), 0);
-	}
+	ctx.effect.paint(() => {
+		if (func) {
+			return func({
+				offset: { ...ctx.offset },
+				rootNode: ctx.rootNode,
+			});
+		}
 
-	const matrix = transform.consolidate()?.matrix;
-	return matrix ? { x: matrix.e, y: matrix.f } : { x: 0, y: 0 };
+		if (is_svg) {
+			const element = ctx.rootNode as SVGGraphicsElement;
+			const svg = element.ownerSVGElement;
+			if (!svg) return;
+
+			const translation = svg.createSVGTransform();
+
+			translation.setTranslate(ctx.offset.x, ctx.offset.y);
+
+			const transform = element.transform.baseVal;
+			transform.clear();
+			transform.appendItem(translation);
+			// debugger;
+		} else {
+			ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px 0.0001px`;
+		}
+	});
 }
 
 export const transform = unstable_definePlugin(
 	(
-		func?: (args: { offsetX: number; offsetY: number; rootNode: HTMLElement | SVGElement }) => void,
+		func?: (args: { offset: { x: number; y: number }; rootNode: HTMLElement | SVGElement }) => void,
 	) => ({
 		name: 'neodrag:transform',
 		priority: -1000,
@@ -253,70 +272,11 @@ export const transform = unstable_definePlugin(
 		liveUpdate: true,
 
 		setup(ctx) {
-			const is_svg = ctx.rootNode instanceof SVGElement;
-
-			if (is_svg) {
-				// For SVG elements, get initial transform
-				const element = ctx.rootNode as SVGGraphicsElement;
-				const current_transform = get_current_transform(element);
-				ctx.offset.x = current_transform.x;
-				ctx.offset.y = current_transform.y;
-			}
-
-			// Apply initial transform if needed
-
-			if (func) {
-				func({
-					offsetX: ctx.offset.x,
-					offsetY: ctx.offset.y,
-					rootNode: ctx.rootNode,
-				});
-			} else if (is_svg) {
-				const element = ctx.rootNode as SVGGraphicsElement;
-				const svg = element.ownerSVGElement;
-				if (!svg) throw new Error("Root Node's ownerSVGElement is null");
-
-				const translation = svg.createSVGTransform();
-				translation.setTranslate(ctx.offset.x, ctx.offset.y);
-
-				const transform = element.transform.baseVal;
-
-				transform.clear();
-				transform.appendItem(translation);
-			} else {
-				ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px 0.0001px`;
-			}
-
-			return { is_svg: is_svg };
+			apply_transform(ctx, func);
 		},
 
-		drag(ctx, state) {
-			ctx.effect.paint(() => {
-				if (func) {
-					return func({
-						offsetX: ctx.offset.x,
-						offsetY: ctx.offset.y,
-						rootNode: ctx.rootNode,
-					});
-				}
-
-				if (state?.is_svg) {
-					const element = ctx.rootNode as SVGGraphicsElement;
-					const svg = element.ownerSVGElement;
-					if (!svg) return;
-
-					const translation = svg.createSVGTransform();
-
-					translation.setTranslate(ctx.offset.x, ctx.offset.y);
-
-					const transform = element.transform.baseVal;
-					transform.clear();
-					transform.appendItem(translation);
-					// debugger;
-				} else {
-					ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px 0.0001px`;
-				}
-			});
+		drag(ctx) {
+			apply_transform(ctx, func);
 		},
 	}),
 );
