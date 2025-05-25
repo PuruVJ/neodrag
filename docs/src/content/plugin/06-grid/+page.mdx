@@ -1,0 +1,967 @@
+---
+title: 'grid'
+tagline: 'Snap movement to a grid pattern'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+## What it does
+
+The `grid` plugin snaps draggable movement to a grid pattern. Instead of smooth, continuous movement, elements jump between grid points - perfect for alignment, layout tools, or pixel-perfect positioning.
+
+```typescript
+grid([20, 20]); // 20px square grid
+grid([50, 25]); // 50px wide, 25px tall rectangles
+grid([10, null]); // Only snap horizontally every 10px
+grid([null, 15]); // Only snap vertically every 15px
+```
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { grid } from '@neodrag/svelte';
+</script>
+
+<!-- Square 20px grid -->
+<div {@attach draggable([grid([20, 20])])}>Snaps to 20px squares</div>
+
+<!-- Rectangular grid -->
+<div {@attach draggable([grid([50, 30])])}>
+  Snaps to 50x30px rectangles
+</div>
+
+<!-- Horizontal-only snapping -->
+<div {@attach draggable([grid([25, null])])}>
+  Only snaps horizontally
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { grid, useDraggable } from '@neodrag/react';
+
+function GridExamples() {
+  const squareRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<HTMLDivElement>(null);
+  const horizontalRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(squareRef, [grid([20, 20])]);
+  useDraggable(rectRef, [grid([50, 30])]);
+  useDraggable(horizontalRef, [grid([25, null])]);
+
+  return (
+    <div>
+      <div ref={squareRef}>Snaps to 20px squares</div>
+      <div ref={rectRef}>Snaps to 50x30px rectangles</div>
+      <div ref={horizontalRef}>Only snaps horizontally</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { grid, vDraggable } from '@neodrag/vue';
+</script>
+
+<template>
+  <div>
+    <div v-draggable="[grid([20, 20])]">Snaps to 20px squares</div>
+
+    <div v-draggable="[grid([50, 30])]">
+      Snaps to 50x30px rectangles
+    </div>
+
+    <div v-draggable="[grid([25, null])]">
+      Only snaps horizontally
+    </div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { grid, useDraggable } from '@neodrag/solid';
+
+function GridExamples() {
+  const [square, setSquare] = createSignal<HTMLDivElement>();
+  const [rect, setRect] = createSignal<HTMLDivElement>();
+  const [horizontal, setHorizontal] = createSignal<HTMLDivElement>();
+
+  useDraggable(square, [grid([20, 20])]);
+  useDraggable(rect, [grid([50, 30])]);
+  useDraggable(horizontal, [grid([25, null])]);
+
+  return (
+    <div>
+      <div ref={setSquare}>Snaps to 20px squares</div>
+      <div ref={setRect}>Snaps to 50x30px rectangles</div>
+      <div ref={setHorizontal}>Only snaps horizontally</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { grid, Draggable } from '@neodrag/vanilla';
+
+const square = document.getElementById('square');
+const rect = document.getElementById('rect');
+const horizontal = document.getElementById('horizontal');
+
+new Draggable(square, [grid([20, 20])]);
+new Draggable(rect, [grid([50, 30])]);
+new Draggable(horizontal, [grid([25, null])]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Grid Patterns
+
+### Square Grid
+
+```typescript
+grid([20, 20]); // Perfect 20x20px squares
+```
+
+### Rectangular Grid
+
+```typescript
+grid([40, 20]); // 40px wide, 20px tall rectangles
+```
+
+### Single-Axis Snapping
+
+```typescript
+grid([15, null]); // Only horizontal snapping every 15px
+grid([null, 10]); // Only vertical snapping every 10px
+```
+
+### Disabled Grid
+
+```typescript
+grid([null, null]); // No snapping (same as no grid plugin)
+grid(null); // No snapping
+```
+
+## Dynamic Grid
+
+Change grid size on the fly using compartments:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { grid, createCompartment } from '@neodrag/svelte';
+
+  let gridSize = $state(20);
+  let gridType = $state('square');
+
+  const gridComp = createCompartment(() => {
+    switch (gridType) {
+      case 'square':
+        return grid([gridSize, gridSize]);
+      case 'horizontal':
+        return grid([gridSize, null]);
+      case 'vertical':
+        return grid([null, gridSize]);
+      case 'off':
+        return grid([null, null]);
+      default:
+        return grid([gridSize, gridSize]);
+    }
+  });
+</script>
+
+<div {@attach draggable(() => [gridComp])}>
+  Grid: {gridType} ({gridSize}px)
+</div>
+
+<label>
+  Grid Size:
+  <input type="range" min="5" max="50" bind:value={gridSize} />
+  {gridSize}px
+</label>
+
+<select bind:value={gridType}>
+  <option value="square">Square</option>
+  <option value="horizontal">Horizontal Only</option>
+  <option value="vertical">Vertical Only</option>
+  <option value="off">Off</option>
+</select>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import { grid, useDraggable, useCompartment } from '@neodrag/react';
+
+function DynamicGrid() {
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [gridSize, setGridSize] = useState(20);
+  const [gridType, setGridType] = useState('square');
+
+  const gridComp = useCompartment(() => {
+    switch (gridType) {
+      case 'square':
+        return grid([gridSize, gridSize]);
+      case 'horizontal':
+        return grid([gridSize, null]);
+      case 'vertical':
+        return grid([null, gridSize]);
+      case 'off':
+        return grid([null, null]);
+      default:
+        return grid([gridSize, gridSize]);
+    }
+  }, [gridSize, gridType]);
+
+  useDraggable(elementRef, () => [gridComp]);
+
+  return (
+    <div>
+      <div ref={elementRef}>
+        Grid: {gridType} ({gridSize}px)
+      </div>
+
+      <label>
+        Grid Size:
+        <input
+          type="range"
+          min="5"
+          max="50"
+          value={gridSize}
+          onChange={(e) => setGridSize(Number(e.target.value))}
+        />
+        {gridSize}px
+      </label>
+
+      <select
+        value={gridType}
+        onChange={(e) => setGridType(e.target.value)}
+      >
+        <option value="square">Square</option>
+        <option value="horizontal">Horizontal Only</option>
+        <option value="vertical">Vertical Only</option>
+        <option value="off">Off</option>
+      </select>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { grid, vDraggable, useCompartment } from '@neodrag/vue';
+
+const gridSize = ref(20);
+const gridType = ref('square');
+
+const gridComp = useCompartment(() => {
+  switch (gridType.value) {
+    case 'square':
+      return grid([gridSize.value, gridSize.value]);
+    case 'horizontal':
+      return grid([gridSize.value, null]);
+    case 'vertical':
+      return grid([null, gridSize.value]);
+    case 'off':
+      return grid([null, null]);
+    default:
+      return grid([gridSize.value, gridSize.value]);
+  }
+});
+
+const plugins = () => [gridComp];
+</script>
+
+<template>
+  <div>
+    <div v-draggable="plugins">
+      Grid: {{ gridType }} ({{ gridSize }}px)
+    </div>
+
+    <label>
+      Grid Size:
+      <input type="range" min="5" max="50" v-model="gridSize" />
+      {{ gridSize }}px
+    </label>
+
+    <select v-model="gridType">
+      <option value="square">Square</option>
+      <option value="horizontal">Horizontal Only</option>
+      <option value="vertical">Vertical Only</option>
+      <option value="off">Off</option>
+    </select>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  grid,
+  useDraggable,
+  createCompartment,
+} from '@neodrag/solid';
+
+function DynamicGrid() {
+  const [element, setElement] = createSignal<HTMLDivElement>();
+  const [gridSize, setGridSize] = createSignal(20);
+  const [gridType, setGridType] = createSignal('square');
+
+  const gridComp = createCompartment(() => {
+    switch (gridType()) {
+      case 'square':
+        return grid([gridSize(), gridSize()]);
+      case 'horizontal':
+        return grid([gridSize(), null]);
+      case 'vertical':
+        return grid([null, gridSize()]);
+      case 'off':
+        return grid([null, null]);
+      default:
+        return grid([gridSize(), gridSize()]);
+    }
+  });
+
+  useDraggable(element, [gridComp]);
+
+  return (
+    <div>
+      <div ref={setElement}>
+        Grid: {gridType()} ({gridSize()}px)
+      </div>
+
+      <label>
+        Grid Size:
+        <input
+          type="range"
+          min="5"
+          max="50"
+          value={gridSize()}
+          onInput={(e) => setGridSize(Number(e.target.value))}
+        />
+        {gridSize()}px
+      </label>
+
+      <select
+        value={gridType()}
+        onChange={(e) => setGridType(e.target.value)}
+      >
+        <option value="square">Square</option>
+        <option value="horizontal">Horizontal Only</option>
+        <option value="vertical">Vertical Only</option>
+        <option value="off">Off</option>
+      </select>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { grid, Compartment, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('element');
+const sizeSlider = document.getElementById('size-slider');
+const typeSelect = document.getElementById('type-select');
+
+let gridSize = 20;
+let gridType = 'square';
+
+const gridComp = new Compartment(() => {
+  switch (gridType) {
+    case 'square':
+      return grid([gridSize, gridSize]);
+    case 'horizontal':
+      return grid([gridSize, null]);
+    case 'vertical':
+      return grid([null, gridSize]);
+    case 'off':
+      return grid([null, null]);
+    default:
+      return grid([gridSize, gridSize]);
+  }
+});
+
+new Draggable(element, () => [gridComp]);
+
+sizeSlider.addEventListener('input', (e) => {
+  gridSize = Number(e.target.value);
+  gridComp.current = gridComp.current; // Trigger update
+});
+
+typeSelect.addEventListener('change', (e) => {
+  gridType = e.target.value;
+  gridComp.current = gridComp.current; // Trigger update
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+## Combining with Other Plugins
+
+### Grid with Bounds
+
+```typescript
+// Grid snapping within a bounded area
+const plugins = [grid([25, 25]), bounds(BoundsFrom.parent())];
+```
+
+### Grid with Axis Constraint
+
+```typescript
+// Horizontal movement that snaps to 20px intervals
+const plugins = [
+  axis('x'),
+  grid([20, 20]), // Only X snapping will apply
+];
+```
+
+### Plugin Order Matters
+
+```typescript
+// Recommended: Apply grid before bounds
+const plugins = [
+  grid([20, 20]), // Snap to grid first
+  bounds(BoundsFrom.parent()), // Then check boundaries
+];
+
+// This order might cause elements to go outside bounds
+const plugins = [
+  bounds(BoundsFrom.parent()), // Apply bounds first
+  grid([20, 20]), // Grid might push outside bounds
+];
+```
+
+## Common Use Cases
+
+### Layout Editor
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { grid, bounds, BoundsFrom } from '@neodrag/svelte';
+
+  let snapSize = $state(20);
+  let isSnapEnabled = $state(true);
+
+  $: gridPlugin = isSnapEnabled
+    ? grid([snapSize, snapSize])
+    : grid([null, null]);
+</script>
+
+<div class="editor-canvas">
+  <div
+    class="widget"
+    {@attach draggable([
+      gridPlugin,
+      bounds(BoundsFrom.selector('.editor-canvas')),
+    ])}
+  >
+    Widget {isSnapEnabled ? `(${snapSize}px grid)` : '(free move)'}
+  </div>
+</div>
+
+<div class="toolbar">
+  <label>
+    <input type="checkbox" bind:checked={isSnapEnabled} />
+    Enable Grid Snap
+  </label>
+
+  {#if isSnapEnabled}
+    <label>
+      Grid Size:
+      <select bind:value={snapSize}>
+        <option value={10}>10px</option>
+        <option value={20}>20px</option>
+        <option value={25}>25px</option>
+        <option value={50}>50px</option>
+      </select>
+    </label>
+  {/if}
+</div>
+
+<style>
+  .editor-canvas {
+    width: 400px;
+    height: 300px;
+    border: 2px solid #ddd;
+    position: relative;
+    background-image: linear-gradient(
+        to right,
+        #f0f0f0 1px,
+        transparent 1px
+      ),
+      linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .widget {
+    position: absolute;
+    width: 80px;
+    height: 60px;
+    background: #007bff;
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: move;
+    user-select: none;
+    font-size: 12px;
+  }
+
+  .toolbar {
+    margin-top: 10px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+</style>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import {
+  grid,
+  bounds,
+  BoundsFrom,
+  useDraggable,
+} from '@neodrag/react';
+
+function LayoutEditor() {
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const widgetRef = useRef<HTMLDivElement>(null);
+  const [snapSize, setSnapSize] = useState(20);
+  const [isSnapEnabled, setIsSnapEnabled] = useState(true);
+
+  const gridPlugin = isSnapEnabled
+    ? grid([snapSize, snapSize])
+    : grid([null, null]);
+
+  useDraggable(widgetRef, [
+    gridPlugin,
+    bounds(() => BoundsFrom.element(canvasRef.current)),
+  ]);
+
+  return (
+    <div>
+      <div
+        ref={canvasRef}
+        style={{
+          width: '400px',
+          height: '300px',
+          border: '2px solid #ddd',
+          position: 'relative',
+          backgroundImage: `
+            linear-gradient(to right, #f0f0f0 1px, transparent 1px),
+            linear-gradient(to bottom, #f0f0f0 1px, transparent 1px)
+          `,
+          backgroundSize: '20px 20px',
+        }}
+      >
+        <div
+          ref={widgetRef}
+          style={{
+            position: 'absolute',
+            width: '80px',
+            height: '60px',
+            background: '#007bff',
+            color: 'white',
+            padding: '8px',
+            borderRadius: '4px',
+            cursor: 'move',
+            userSelect: 'none',
+            fontSize: '12px',
+          }}
+        >
+          Widget{' '}
+          {isSnapEnabled ? `(${snapSize}px grid)` : '(free move)'}
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: '10px',
+          display: 'flex',
+          gap: '15px',
+          alignItems: 'center',
+        }}
+      >
+        <label>
+          <input
+            type="checkbox"
+            checked={isSnapEnabled}
+            onChange={(e) => setIsSnapEnabled(e.target.checked)}
+          />
+          Enable Grid Snap
+        </label>
+
+        {isSnapEnabled && (
+          <label>
+            Grid Size:
+            <select
+              value={snapSize}
+              onChange={(e) => setSnapSize(Number(e.target.value))}
+            >
+              <option value={10}>10px</option>
+              <option value={20}>20px</option>
+              <option value={25}>25px</option>
+              <option value={50}>50px</option>
+            </select>
+          </label>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { grid, bounds, BoundsFrom, vDraggable } from '@neodrag/vue';
+
+const canvasRef = ref();
+const snapSize = ref(20);
+const isSnapEnabled = ref(true);
+
+const plugins = computed(() => [
+  isSnapEnabled.value
+    ? grid([snapSize.value, snapSize.value])
+    : grid([null, null]),
+  bounds(() => BoundsFrom.element(canvasRef.value)),
+]);
+</script>
+
+<template>
+  <div>
+    <div ref="canvasRef" class="editor-canvas">
+      <div v-draggable="plugins" class="widget">
+        Widget
+        {{ isSnapEnabled ? `(${snapSize}px grid)` : '(free move)' }}
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <label>
+        <input type="checkbox" v-model="isSnapEnabled" />
+        Enable Grid Snap
+      </label>
+
+      <label v-if="isSnapEnabled">
+        Grid Size:
+        <select v-model="snapSize">
+          <option :value="10">10px</option>
+          <option :value="20">20px</option>
+          <option :value="25">25px</option>
+          <option :value="50">50px</option>
+        </select>
+      </label>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.editor-canvas {
+  width: 400px;
+  height: 300px;
+  border: 2px solid #ddd;
+  position: relative;
+  background-image: linear-gradient(
+      to right,
+      #f0f0f0 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.widget {
+  position: absolute;
+  width: 80px;
+  height: 60px;
+  background: #007bff;
+  color: white;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: move;
+  user-select: none;
+  font-size: 12px;
+}
+
+.toolbar {
+  margin-top: 10px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+</style>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  grid,
+  bounds,
+  BoundsFrom,
+  useDraggable,
+} from '@neodrag/solid';
+
+function LayoutEditor() {
+  const [canvas, setCanvas] = createSignal<HTMLDivElement>();
+  const [widget, setWidget] = createSignal<HTMLDivElement>();
+  const [snapSize, setSnapSize] = createSignal(20);
+  const [isSnapEnabled, setIsSnapEnabled] = createSignal(true);
+
+  const plugins = () => [
+    isSnapEnabled()
+      ? grid([snapSize(), snapSize()])
+      : grid([null, null]),
+    bounds(() => BoundsFrom.element(canvas())),
+  ];
+
+  useDraggable(widget, plugins);
+
+  return (
+    <div>
+      <div
+        ref={setCanvas}
+        style={{
+          width: '400px',
+          height: '300px',
+          border: '2px solid #ddd',
+          position: 'relative',
+          'background-image': `
+            linear-gradient(to right, #f0f0f0 1px, transparent 1px),
+            linear-gradient(to bottom, #f0f0f0 1px, transparent 1px)
+          `,
+          'background-size': '20px 20px',
+        }}
+      >
+        <div
+          ref={setWidget}
+          style={{
+            position: 'absolute',
+            width: '80px',
+            height: '60px',
+            background: '#007bff',
+            color: 'white',
+            padding: '8px',
+            'border-radius': '4px',
+            cursor: 'move',
+            'user-select': 'none',
+            'font-size': '12px',
+          }}
+        >
+          Widget{' '}
+          {isSnapEnabled() ? `(${snapSize()}px grid)` : '(free move)'}
+        </div>
+      </div>
+
+      <div
+        style={{
+          'margin-top': '10px',
+          display: 'flex',
+          gap: '15px',
+          'align-items': 'center',
+        }}
+      >
+        <label>
+          <input
+            type="checkbox"
+            checked={isSnapEnabled()}
+            onChange={(e) => setIsSnapEnabled(e.target.checked)}
+          />
+          Enable Grid Snap
+        </label>
+
+        {isSnapEnabled() && (
+          <label>
+            Grid Size:
+            <select
+              value={snapSize()}
+              onChange={(e) => setSnapSize(Number(e.target.value))}
+            >
+              <option value={10}>10px</option>
+              <option value={20}>20px</option>
+              <option value={25}>25px</option>
+              <option value={50}>50px</option>
+            </select>
+          </label>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import {
+  grid,
+  bounds,
+  BoundsFrom,
+  Draggable,
+} from '@neodrag/vanilla';
+
+const canvas = document.getElementById('canvas');
+const widget = document.getElementById('widget');
+const snapToggle = document.getElementById('snap-toggle');
+const sizeSelect = document.getElementById('size-select');
+
+let snapSize = 20;
+let isSnapEnabled = true;
+
+function getGridPlugin() {
+  return isSnapEnabled
+    ? grid([snapSize, snapSize])
+    : grid([null, null]);
+}
+
+const instance = new Draggable(widget, [
+  getGridPlugin(),
+  bounds(BoundsFrom.element(canvas)),
+]);
+
+snapToggle.addEventListener('change', (e) => {
+  isSnapEnabled = e.target.checked;
+  // Update draggable with new plugins
+  instance.destroy();
+  instance = new Draggable(widget, [
+    getGridPlugin(),
+    bounds(BoundsFrom.element(canvas)),
+  ]);
+});
+
+sizeSelect.addEventListener('change', (e) => {
+  snapSize = Number(e.target.value);
+  if (isSnapEnabled) {
+    instance.destroy();
+    instance = new Draggable(widget, [
+      getGridPlugin(),
+      bounds(BoundsFrom.element(canvas)),
+    ]);
+  }
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+### Pixel Art Editor
+
+```typescript
+// Precise 1px grid for pixel-perfect editing
+const plugins = [grid([1, 1]), bounds(BoundsFrom.element(canvas))];
+```
+
+### Card Layout System
+
+```typescript
+// Cards snap to a 12-column grid system
+const columnWidth = containerWidth / 12;
+const plugins = [
+  grid([columnWidth, 40]), // 12-column, 40px row height
+  bounds(BoundsFrom.parent()),
+];
+```
+
+## How It Works
+
+The grid plugin modifies movement by snapping to grid points:
+
+1. **Calculate grid position** - Uses `Math.ceil(value / gridSize) * gridSize` to find the next grid point
+2. **Apply to proposed movement** - Modifies `ctx.proposed.x` and `ctx.proposed.y`
+3. **Null handling** - When grid value is `null`, no snapping occurs on that axis
+
+```typescript
+// Simplified internal logic
+drag(ctx) {
+  const snapX = gridX ? Math.ceil(ctx.proposed.x / gridX) * gridX : ctx.proposed.x;
+  const snapY = gridY ? Math.ceil(ctx.proposed.y / gridY) * gridY : ctx.proposed.y;
+  ctx.propose(snapX, snapY);
+}
+```
+
+The snapping always rounds **up** to the next grid line, ensuring consistent behavior regardless of drag direction.
+
+## API Reference
+
+```typescript
+function grid(
+  values?: [x: number | null, y: number | null] | null,
+): Plugin;
+```
+
+**Parameters:**
+
+- `values` - Grid spacing `[x, y]` in pixels
+  - `[20, 20]` - 20px square grid
+  - `[50, 25]` - 50px wide, 25px tall rectangles
+  - `[10, null]` - Only horizontal snapping every 10px
+  - `[null, 15]` - Only vertical snapping every 15px
+  - `[null, null]` or `null` - No snapping
+
+**Returns:** A plugin object for use with draggable.
+
+**Behavior:**
+
+- Snapping uses `Math.ceil()` to always round up to the next grid line
+- `null` values disable snapping on that axis
+- Works with any positive number (including decimals)

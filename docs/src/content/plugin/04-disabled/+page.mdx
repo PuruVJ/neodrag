@@ -1,0 +1,549 @@
+---
+title: 'disabled'
+tagline: 'Completely disable dragging functionality'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+## What it does
+
+The `disabled` plugin completely turns off dragging for an element. Pass `true` to disable, `false` to enable, or omit the argument to disable by default.
+
+```typescript
+disabled(); // Disabled (default)
+disabled(true); // Disabled
+disabled(false); // Enabled (same as not using plugin)
+```
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { disabled } from '@neodrag/svelte';
+</script>
+
+<!-- This won't drag at all -->
+<div {@attach draggable([disabled(true)])}>Can't drag me!</div>
+
+<!-- This will drag normally -->
+<div {@attach draggable([disabled(false)])}>Can drag me!</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { disabled, useDraggable } from '@neodrag/react';
+
+function DisabledExample() {
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(elementRef, [disabled(true)]);
+
+  return <div ref={elementRef}>Can't drag me!</div>;
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { disabled, vDraggable } from '@neodrag/vue';
+</script>
+
+<template>
+  <div v-draggable="[disabled(true)]">Can't drag me!</div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { disabled, useDraggable } from '@neodrag/solid';
+
+function DisabledExample() {
+  const [element, setElement] = createSignal<HTMLDivElement>();
+
+  useDraggable(element, [disabled(true)]);
+
+  return <div ref={setElement}>Can't drag me!</div>;
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { disabled, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('element');
+new Draggable(element, [disabled(true)]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Toggle Dragging
+
+The real power comes from dynamically enabling/disabling with compartments:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { disabled, createCompartment } from '@neodrag/svelte';
+
+  let isDragDisabled = $state(false);
+
+  const disabledComp = createCompartment(() =>
+    disabled(isDragDisabled),
+  );
+</script>
+
+<div {@attach draggable(() => [disabledComp])}>
+  Dragging is {isDragDisabled ? 'disabled' : 'enabled'}
+</div>
+
+<button onclick={() => (isDragDisabled = !isDragDisabled)}>
+  {isDragDisabled ? 'Enable' : 'Disable'} Dragging
+</button>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import {
+  disabled,
+  useDraggable,
+  useCompartment,
+} from '@neodrag/react';
+
+function ToggleDragging() {
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [isDragDisabled, setIsDragDisabled] = useState(false);
+
+  const disabledComp = useCompartment(
+    () => disabled(isDragDisabled),
+    [isDragDisabled],
+  );
+
+  useDraggable(elementRef, () => [disabledComp]);
+
+  return (
+    <div>
+      <div ref={elementRef}>
+        Dragging is {isDragDisabled ? 'disabled' : 'enabled'}
+      </div>
+
+      <button onClick={() => setIsDragDisabled(!isDragDisabled)}>
+        {isDragDisabled ? 'Enable' : 'Disable'} Dragging
+      </button>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { disabled, vDraggable, useCompartment } from '@neodrag/vue';
+
+const isDragDisabled = ref(false);
+
+const disabledComp = useCompartment(() =>
+  disabled(isDragDisabled.value),
+);
+
+const plugins = () => [disabledComp];
+
+function toggle() {
+  isDragDisabled.value = !isDragDisabled.value;
+}
+</script>
+
+<template>
+  <div>
+    <div v-draggable="plugins">
+      Dragging is {{ isDragDisabled ? 'disabled' : 'enabled' }}
+    </div>
+
+    <button @click="toggle">
+      {{ isDragDisabled ? 'Enable' : 'Disable' }} Dragging
+    </button>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  disabled,
+  useDraggable,
+  createCompartment,
+} from '@neodrag/solid';
+
+function ToggleDragging() {
+  const [element, setElement] = createSignal<HTMLDivElement>();
+  const [isDragDisabled, setIsDragDisabled] = createSignal(false);
+
+  const disabledComp = createCompartment(() =>
+    disabled(isDragDisabled()),
+  );
+
+  useDraggable(element, [disabledComp]);
+
+  return (
+    <div>
+      <div ref={setElement}>
+        Dragging is {isDragDisabled() ? 'disabled' : 'enabled'}
+      </div>
+
+      <button onClick={() => setIsDragDisabled(!isDragDisabled())}>
+        {isDragDisabled() ? 'Enable' : 'Disable'} Dragging
+      </button>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { disabled, Compartment, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('element');
+const button = document.getElementById('toggle-button');
+
+let isDragDisabled = false;
+
+const disabledComp = new Compartment(() => disabled(isDragDisabled));
+
+new Draggable(element, () => [disabledComp]);
+
+button.addEventListener('click', () => {
+  isDragDisabled = !isDragDisabled;
+  disabledComp.current = disabled(isDragDisabled);
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+## Common Use Cases
+
+### Conditional Disabling
+
+```typescript
+// Disable dragging during loading
+const plugins = [disabled(isLoading), grid([10, 10])];
+
+// Disable based on user permissions
+const plugins = [disabled(!userCanDrag), bounds(BoundsFrom.parent())];
+```
+
+### Form Mode Toggle
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { disabled, createCompartment } from '@neodrag/svelte';
+
+  let isEditMode = $state(false);
+
+  const disabledComp = createCompartment(() => disabled(isEditMode));
+</script>
+
+<div class="card" {@attach draggable(() => [disabledComp])}>
+  <div class="card-header">
+    Card Title
+    <button onclick={() => (isEditMode = !isEditMode)}>
+      {isEditMode ? 'Save' : 'Edit'}
+    </button>
+  </div>
+
+  <div class="card-content">
+    {#if isEditMode}
+      <input type="text" placeholder="Edit content..." />
+    {:else}
+      <p>
+        Card content - {isEditMode
+          ? "can't drag in edit mode"
+          : 'drag me around'}
+      </p>
+    {/if}
+  </div>
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import {
+  disabled,
+  useDraggable,
+  useCompartment,
+} from '@neodrag/react';
+
+function EditableCard() {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  const disabledComp = useCompartment(
+    () => disabled(isEditMode),
+    [isEditMode],
+  );
+
+  useDraggable(cardRef, () => [disabledComp]);
+
+  return (
+    <div ref={cardRef} className="card">
+      <div className="card-header">
+        Card Title
+        <button onClick={() => setIsEditMode(!isEditMode)}>
+          {isEditMode ? 'Save' : 'Edit'}
+        </button>
+      </div>
+
+      <div className="card-content">
+        {isEditMode ? (
+          <input type="text" placeholder="Edit content..." />
+        ) : (
+          <p>
+            Card content -{' '}
+            {isEditMode
+              ? "can't drag in edit mode"
+              : 'drag me around'}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { disabled, vDraggable, useCompartment } from '@neodrag/vue';
+
+const isEditMode = ref(false);
+
+const disabledComp = useCompartment(() => disabled(isEditMode.value));
+
+const plugins = () => [disabledComp];
+
+function toggle() {
+  isEditMode.value = !isEditMode.value;
+}
+</script>
+
+<template>
+  <div v-draggable="plugins" class="card">
+    <div class="card-header">
+      Card Title
+      <button @click="toggle">
+        {{ isEditMode ? 'Save' : 'Edit' }}
+      </button>
+    </div>
+
+    <div class="card-content">
+      <input
+        v-if="isEditMode"
+        type="text"
+        placeholder="Edit content..."
+      />
+      <p v-else>
+        Card content -
+        {{
+          isEditMode ? "can't drag in edit mode" : 'drag me around'
+        }}
+      </p>
+    </div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  disabled,
+  useDraggable,
+  createCompartment,
+} from '@neodrag/solid';
+
+function EditableCard() {
+  const [card, setCard] = createSignal<HTMLDivElement>();
+  const [isEditMode, setIsEditMode] = createSignal(false);
+
+  const disabledComp = createCompartment(() =>
+    disabled(isEditMode()),
+  );
+
+  useDraggable(card, [disabledComp]);
+
+  return (
+    <div ref={setCard} class="card">
+      <div class="card-header">
+        Card Title
+        <button onClick={() => setIsEditMode(!isEditMode())}>
+          {isEditMode() ? 'Save' : 'Edit'}
+        </button>
+      </div>
+
+      <div class="card-content">
+        {isEditMode() ? (
+          <input type="text" placeholder="Edit content..." />
+        ) : (
+          <p>
+            Card content -{' '}
+            {isEditMode()
+              ? "can't drag in edit mode"
+              : 'drag me around'}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { disabled, Compartment, Draggable } from '@neodrag/vanilla';
+
+const card = document.getElementById('card');
+const editButton = document.getElementById('edit-button');
+const content = document.getElementById('content');
+
+let isEditMode = false;
+
+const disabledComp = new Compartment(() => disabled(isEditMode));
+
+new Draggable(card, () => [disabledComp]);
+
+editButton.addEventListener('click', () => {
+  isEditMode = !isEditMode;
+
+  if (isEditMode) {
+    content.innerHTML =
+      '<input type="text" placeholder="Edit content..." />';
+    editButton.textContent = 'Save';
+  } else {
+    content.innerHTML = '<p>Card content - drag me around</p>';
+    editButton.textContent = 'Edit';
+  }
+
+  disabledComp.current = disabled(isEditMode);
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+### Loading States
+
+```typescript
+// Disable dragging while data is loading
+const loadingComp = new Compartment(() => disabled(isLoading));
+
+// Disable during async operations
+const savingComp = new Compartment(() => disabled(isSaving));
+```
+
+## Why Use This Instead of No Draggable?
+
+You might wonder why use `disabled()` instead of just not applying draggable. Here's when disabled is better:
+
+```typescript
+// ❌ Hard to toggle - requires destroying/recreating draggable
+if (canDrag) {
+  draggable(element, [bounds(BoundsFrom.parent())]);
+}
+
+// ✅ Easy to toggle - just update the disabled state
+const disabledComp = new Compartment(() => disabled(!canDrag));
+draggable(element, () => [disabledComp, bounds(BoundsFrom.parent())]);
+```
+
+Benefits of using `disabled()`:
+
+- **Performance** - No need to destroy/recreate draggable instances
+- **State preservation** - Other plugins maintain their state
+- **Cleaner code** - Toggle without complex conditional logic
+
+## How It Works
+
+The disabled plugin is simple but flexible:
+
+```typescript
+{
+  name: 'neodrag:disabled',
+  shouldStart() {
+    return !value;  // Return false when value is true (disabled)
+  }
+}
+```
+
+It runs in the `shouldStart` hook and returns the inverse of the provided boolean value. When `value` is `true` (disabled), it returns `false` to prevent dragging. When `value` is `false` (enabled), it returns `true` to allow dragging.
+
+## API Reference
+
+```typescript
+function disabled(value?: boolean): Plugin;
+```
+
+**Parameters:**
+
+- `value` - Whether dragging should be disabled (default: `true`)
+  - `true` - Disable dragging
+  - `false` - Allow dragging (same as not using the plugin)
+
+**Returns:** A plugin object that prevents/allows dragging based on the value.
+
+**Usage patterns:**
+
+- `disabled()` - Always disabled (default true)
+- `disabled(true)` - Explicitly disabled
+- `disabled(false)` - Explicitly enabled
+- `disabled(condition)` - Conditionally disabled based on boolean

@@ -1,0 +1,879 @@
+---
+title: 'position'
+tagline: 'Control element position programmatically'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+## What it does
+
+The `position` plugin lets you control where a draggable element is positioned. Set initial positions, move elements programmatically, or create two-way binding where your app state and element position stay in sync.
+
+```typescript
+position({ default: { x: 100, y: 50 } }); // Initial position
+position({ current: { x: 200, y: 100 } }); // Move to specific position
+position({ current: uiState.position }); // Two-way binding with state
+```
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { position } from '@neodrag/svelte';
+</script>
+
+<!-- Set initial position -->
+<div {@attach draggable([position({ default: { x: 100, y: 50 } })])}>
+  Starts at (100, 50)
+</div>
+
+<!-- Position controlled by variable -->
+<div {@attach draggable([position({ current: { x: 200, y: 100 } })])}>
+  Always at (200, 100)
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { position, useDraggable } from '@neodrag/react';
+
+function PositionExamples() {
+  const initialRef = useRef<HTMLDivElement>(null);
+  const controlledRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(initialRef, [
+    position({ default: { x: 100, y: 50 } }),
+  ]);
+
+  useDraggable(controlledRef, [
+    position({ current: { x: 200, y: 100 } }),
+  ]);
+
+  return (
+    <div>
+      <div ref={initialRef}>Starts at (100, 50)</div>
+      <div ref={controlledRef}>Always at (200, 100)</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { position, vDraggable } from '@neodrag/vue';
+</script>
+
+<template>
+  <div>
+    <div v-draggable="[position({ default: { x: 100, y: 50 } })]">
+      Starts at (100, 50)
+    </div>
+
+    <div v-draggable="[position({ current: { x: 200, y: 100 } })]">
+      Always at (200, 100)
+    </div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { position, useDraggable } from '@neodrag/solid';
+
+function PositionExamples() {
+  const [initial, setInitial] = createSignal<HTMLDivElement>();
+  const [controlled, setControlled] = createSignal<HTMLDivElement>();
+
+  useDraggable(initial, [position({ default: { x: 100, y: 50 } })]);
+
+  useDraggable(controlled, [
+    position({ current: { x: 200, y: 100 } }),
+  ]);
+
+  return (
+    <div>
+      <div ref={setInitial}>Starts at (100, 50)</div>
+      <div ref={setControlled}>Always at (200, 100)</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { position, Draggable } from '@neodrag/vanilla';
+
+const initial = document.getElementById('initial');
+const controlled = document.getElementById('controlled');
+
+new Draggable(initial, [position({ default: { x: 100, y: 50 } })]);
+
+new Draggable(controlled, [
+  position({ current: { x: 200, y: 100 } }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Position Options
+
+### Default Position
+
+Sets the initial position when the element is first made draggable:
+
+```typescript
+position({ default: { x: 50, y: 100 } });
+// Element starts at (50, 100) but can be dragged normally
+```
+
+### Current Position
+
+Forces the element to a specific position, overriding user dragging:
+
+```typescript
+position({ current: { x: 200, y: 75 } });
+// Element is always at (200, 75) regardless of dragging
+```
+
+### Both Options
+
+```typescript
+position({
+  default: { x: 0, y: 0 }, // Start position
+  current: { x: 100, y: 50 }, // Current overrides default
+});
+```
+
+## Two-Way Binding
+
+Create reactive positioning where element position and app state stay synchronized:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import {
+    position,
+    events,
+    createCompartment,
+  } from '@neodrag/svelte';
+
+  let elementPosition = $state({ x: 100, y: 100 });
+
+  const positionComp = createCompartment(() =>
+    position({ current: elementPosition }),
+  );
+
+  const eventsComp = events({
+    onDrag: (data) => {
+      elementPosition = { x: data.offset.x, y: data.offset.y };
+    },
+  });
+</script>
+
+<div {@attach draggable(() => [positionComp, eventsComp])}>
+  Two-way position binding
+</div>
+
+<div class="controls">
+  <label>
+    X: <input type="number" bind:value={elementPosition.x} />
+  </label>
+  <label>
+    Y: <input type="number" bind:value={elementPosition.y} />
+  </label>
+
+  <button onclick={() => (elementPosition = { x: 0, y: 0 })}>
+    Reset to Origin
+  </button>
+
+  <button
+    onclick={() =>
+      (elementPosition = {
+        x: Math.random() * 300,
+        y: Math.random() * 200,
+      })}
+  >
+    Random Position
+  </button>
+</div>
+
+<p>Element is at: ({elementPosition.x}, {elementPosition.y})</p>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import {
+  position,
+  events,
+  useDraggable,
+  useCompartment,
+} from '@neodrag/react';
+
+function TwoWayBinding() {
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [elementPosition, setElementPosition] = useState({
+    x: 100,
+    y: 100,
+  });
+
+  const positionComp = useCompartment(
+    () => position({ current: elementPosition }),
+    [elementPosition],
+  );
+
+  const eventsComp = events({
+    onDrag: (data) => {
+      setElementPosition({ x: data.offset.x, y: data.offset.y });
+    },
+  });
+
+  useDraggable(elementRef, () => [positionComp, eventsComp]);
+
+  return (
+    <div>
+      <div ref={elementRef}>Two-way position binding</div>
+
+      <div className="controls">
+        <label>
+          X:{' '}
+          <input
+            type="number"
+            value={elementPosition.x}
+            onChange={(e) =>
+              setElementPosition((prev) => ({
+                ...prev,
+                x: Number(e.target.value),
+              }))
+            }
+          />
+        </label>
+        <label>
+          Y:{' '}
+          <input
+            type="number"
+            value={elementPosition.y}
+            onChange={(e) =>
+              setElementPosition((prev) => ({
+                ...prev,
+                y: Number(e.target.value),
+              }))
+            }
+          />
+        </label>
+
+        <button onClick={() => setElementPosition({ x: 0, y: 0 })}>
+          Reset to Origin
+        </button>
+
+        <button
+          onClick={() =>
+            setElementPosition({
+              x: Math.random() * 300,
+              y: Math.random() * 200,
+            })
+          }
+        >
+          Random Position
+        </button>
+      </div>
+
+      <p>
+        Element is at: ({elementPosition.x}, {elementPosition.y})
+      </p>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import {
+  position,
+  events,
+  vDraggable,
+  useCompartment,
+} from '@neodrag/vue';
+
+const elementPosition = ref({ x: 100, y: 100 });
+
+const positionComp = useCompartment(() =>
+  position({ current: elementPosition.value }),
+);
+
+const eventsComp = events({
+  onDrag: (data) => {
+    elementPosition.value = { x: data.offset.x, y: data.offset.y };
+  },
+});
+
+const plugins = () => [positionComp, eventsComp];
+
+function resetPosition() {
+  elementPosition.value = { x: 0, y: 0 };
+}
+
+function randomPosition() {
+  elementPosition.value = {
+    x: Math.random() * 300,
+    y: Math.random() * 200,
+  };
+}
+</script>
+
+<template>
+  <div>
+    <div v-draggable="plugins">Two-way position binding</div>
+
+    <div class="controls">
+      <label>
+        X: <input type="number" v-model="elementPosition.x" />
+      </label>
+      <label>
+        Y: <input type="number" v-model="elementPosition.y" />
+      </label>
+
+      <button @click="resetPosition">Reset to Origin</button>
+
+      <button @click="randomPosition">Random Position</button>
+    </div>
+
+    <p>
+      Element is at: ({{ elementPosition.x }},
+      {{ elementPosition.y }})
+    </p>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  position,
+  events,
+  useDraggable,
+  createCompartment,
+} from '@neodrag/solid';
+
+function TwoWayBinding() {
+  const [element, setElement] = createSignal<HTMLDivElement>();
+  const [elementPosition, setElementPosition] = createSignal({
+    x: 100,
+    y: 100,
+  });
+
+  const positionComp = createCompartment(() =>
+    position({ current: elementPosition() }),
+  );
+
+  const eventsComp = events({
+    onDrag: (data) => {
+      setElementPosition({ x: data.offset.x, y: data.offset.y });
+    },
+  });
+
+  useDraggable(element, [positionComp, eventsComp]);
+
+  return (
+    <div>
+      <div ref={setElement}>Two-way position binding</div>
+
+      <div class="controls">
+        <label>
+          X:{' '}
+          <input
+            type="number"
+            value={elementPosition().x}
+            onInput={(e) =>
+              setElementPosition((prev) => ({
+                ...prev,
+                x: Number(e.target.value),
+              }))
+            }
+          />
+        </label>
+        <label>
+          Y:{' '}
+          <input
+            type="number"
+            value={elementPosition().y}
+            onInput={(e) =>
+              setElementPosition((prev) => ({
+                ...prev,
+                y: Number(e.target.value),
+              }))
+            }
+          />
+        </label>
+
+        <button onClick={() => setElementPosition({ x: 0, y: 0 })}>
+          Reset to Origin
+        </button>
+
+        <button
+          onClick={() =>
+            setElementPosition({
+              x: Math.random() * 300,
+              y: Math.random() * 200,
+            })
+          }
+        >
+          Random Position
+        </button>
+      </div>
+
+      <p>
+        Element is at: ({elementPosition().x}, {elementPosition().y})
+      </p>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import {
+  position,
+  events,
+  Compartment,
+  Draggable,
+} from '@neodrag/vanilla';
+
+const element = document.getElementById('element');
+const xInput = document.getElementById('x-input');
+const yInput = document.getElementById('y-input');
+const resetBtn = document.getElementById('reset-btn');
+const randomBtn = document.getElementById('random-btn');
+const positionDisplay = document.getElementById('position-display');
+
+let elementPosition = { x: 100, y: 100 };
+
+const positionComp = new Compartment(() =>
+  position({ current: elementPosition }),
+);
+
+const eventsComp = events({
+  onDrag: (data) => {
+    elementPosition = { x: data.offset.x, y: data.offset.y };
+    updateInputs();
+    updateDisplay();
+  },
+});
+
+function updateInputs() {
+  xInput.value = elementPosition.x;
+  yInput.value = elementPosition.y;
+}
+
+function updateDisplay() {
+  positionDisplay.textContent = `Element is at: (${elementPosition.x}, ${elementPosition.y})`;
+}
+
+new Draggable(element, () => [positionComp, eventsComp]);
+
+xInput.addEventListener('input', (e) => {
+  elementPosition.x = Number(e.target.value);
+  positionComp.current = position({ current: elementPosition });
+  updateDisplay();
+});
+
+yInput.addEventListener('input', (e) => {
+  elementPosition.y = Number(e.target.value);
+  positionComp.current = position({ current: elementPosition });
+  updateDisplay();
+});
+
+resetBtn.addEventListener('click', () => {
+  elementPosition = { x: 0, y: 0 };
+  positionComp.current = position({ current: elementPosition });
+  updateInputs();
+  updateDisplay();
+});
+
+randomBtn.addEventListener('click', () => {
+  elementPosition = {
+    x: Math.random() * 300,
+    y: Math.random() * 200,
+  };
+  positionComp.current = position({ current: elementPosition });
+  updateInputs();
+  updateDisplay();
+});
+
+// Initialize
+updateInputs();
+updateDisplay();
+```
+
+</div>
+</FrameworkSwitch>
+
+## Common Use Cases
+
+### Restore Saved Positions
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { position, events } from '@neodrag/svelte';
+  import { onMount } from 'svelte';
+
+  let savedPosition = $state({ x: 0, y: 0 });
+
+  // Load saved position on mount
+  onMount(() => {
+    const saved = localStorage.getItem('elementPosition');
+    if (saved) {
+      savedPosition = JSON.parse(saved);
+    }
+  });
+
+  // Save position when dragging ends
+  const saveEvents = events({
+    onDragEnd: (data) => {
+      const pos = { x: data.offset.x, y: data.offset.y };
+      localStorage.setItem('elementPosition', JSON.stringify(pos));
+    },
+  });
+</script>
+
+<div
+  {@attach draggable([
+    position({ default: savedPosition }),
+    saveEvents,
+  ])}
+>
+  Position persists between page reloads
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState, useEffect } from 'react';
+import { position, events, useDraggable } from '@neodrag/react';
+
+function PersistentPosition() {
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [savedPosition, setSavedPosition] = useState({ x: 0, y: 0 });
+
+  // Load saved position on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('elementPosition');
+    if (saved) {
+      setSavedPosition(JSON.parse(saved));
+    }
+  }, []);
+
+  useDraggable(elementRef, [
+    position({ default: savedPosition }),
+    events({
+      onDragEnd: (data) => {
+        const pos = { x: data.offset.x, y: data.offset.y };
+        localStorage.setItem('elementPosition', JSON.stringify(pos));
+      },
+    }),
+  ]);
+
+  return (
+    <div ref={elementRef}>Position persists between page reloads</div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref, onMounted } from 'vue';
+import { position, events, vDraggable } from '@neodrag/vue';
+
+const savedPosition = ref({ x: 0, y: 0 });
+
+// Load saved position on mount
+onMounted(() => {
+  const saved = localStorage.getItem('elementPosition');
+  if (saved) {
+    savedPosition.value = JSON.parse(saved);
+  }
+});
+
+const plugins = [
+  position({ default: savedPosition.value }),
+  events({
+    onDragEnd: (data) => {
+      const pos = { x: data.offset.x, y: data.offset.y };
+      localStorage.setItem('elementPosition', JSON.stringify(pos));
+    },
+  }),
+];
+</script>
+
+<template>
+  <div v-draggable="plugins">
+    Position persists between page reloads
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal, onMount } from 'solid-js';
+import { position, events, useDraggable } from '@neodrag/solid';
+
+function PersistentPosition() {
+  const [element, setElement] = createSignal<HTMLDivElement>();
+  const [savedPosition, setSavedPosition] = createSignal({
+    x: 0,
+    y: 0,
+  });
+
+  // Load saved position on mount
+  onMount(() => {
+    const saved = localStorage.getItem('elementPosition');
+    if (saved) {
+      setSavedPosition(JSON.parse(saved));
+    }
+  });
+
+  useDraggable(element, [
+    position({ default: savedPosition() }),
+    events({
+      onDragEnd: (data) => {
+        const pos = { x: data.offset.x, y: data.offset.y };
+        localStorage.setItem('elementPosition', JSON.stringify(pos));
+      },
+    }),
+  ]);
+
+  return (
+    <div ref={setElement}>Position persists between page reloads</div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { position, events, Draggable } from '@neodrag/vanilla';
+
+// Load saved position
+let savedPosition = { x: 0, y: 0 };
+const saved = localStorage.getItem('elementPosition');
+if (saved) {
+  savedPosition = JSON.parse(saved);
+}
+
+const element = document.getElementById('element');
+
+new Draggable(element, [
+  position({ default: savedPosition }),
+  events({
+    onDragEnd: (data) => {
+      const pos = { x: data.offset.x, y: data.offset.y };
+      localStorage.setItem('elementPosition', JSON.stringify(pos));
+    },
+  }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+### Animated Positioning
+
+```typescript
+// Move element to target position with animation
+function animateToPosition(targetX, targetY, duration = 500) {
+  const startPos = getCurrentPosition();
+  const startTime = Date.now();
+
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Easing function
+    const ease = 1 - Math.pow(1 - progress, 3);
+
+    const currentX = startPos.x + (targetX - startPos.x) * ease;
+    const currentY = startPos.y + (targetY - startPos.y) * ease;
+
+    positionComp.current = position({
+      current: { x: currentX, y: currentY },
+    });
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  animate();
+}
+```
+
+### Multi-Element Coordination
+
+```typescript
+// Keep multiple elements in formation
+const formation = [
+  { id: 'leader', offset: { x: 0, y: 0 } },
+  { id: 'follower1', offset: { x: 50, y: 0 } },
+  { id: 'follower2', offset: { x: 25, y: 50 } },
+];
+
+// When leader moves, update all followers
+events({
+  onDrag: (data) => {
+    if (data.rootNode.id === 'leader') {
+      formation.forEach((item) => {
+        if (item.id !== 'leader') {
+          const followerPos = {
+            x: data.offset.x + item.offset.x,
+            y: data.offset.y + item.offset.y,
+          };
+          updateElementPosition(item.id, followerPos);
+        }
+      });
+    }
+  },
+});
+```
+
+### Snap to Targets
+
+```typescript
+// Snap to specific target positions when close enough
+const targets = [
+  { x: 100, y: 100 },
+  { x: 200, y: 150 },
+  { x: 300, y: 50 },
+];
+
+const snapDistance = 20;
+
+events({
+  onDragEnd: (data) => {
+    const nearest = targets.find((target) => {
+      const distance = Math.sqrt(
+        Math.pow(data.offset.x - target.x, 2) +
+          Math.pow(data.offset.y - target.y, 2),
+      );
+      return distance <= snapDistance;
+    });
+
+    if (nearest) {
+      positionComp.current = position({ current: nearest });
+    }
+  },
+});
+```
+
+## Plugin Priority
+
+The position plugin has high priority (1000) so it runs early in the plugin chain:
+
+```typescript
+// Position sets the base position first
+const plugins = [
+  position({ current: { x: 100, y: 50 } }), // High priority - runs first
+  grid([20, 20]), // Then grid snapping
+  bounds(BoundsFrom.parent()), // Finally bounds checking
+];
+```
+
+This ensures other plugins work with the position set by the position plugin.
+
+## How It Works
+
+The position plugin:
+
+1. **Runs in setup** when not currently interacting
+2. **Uses `setForcedPosition()`** to immediately jump to the specified coordinates
+3. **Checks for changes** - only updates if position actually changed
+4. **High priority** - runs before other position-modifying plugins
+5. **Live updates** - can change position even during active drags
+
+```typescript
+setup(ctx) {
+  if (!ctx.isInteracting) {
+    const x = options?.current?.x ?? options?.default?.x ?? ctx.offset.x;
+    const y = options?.current?.y ?? options?.default?.y ?? ctx.offset.y;
+
+    if (x !== ctx.offset.x || y !== ctx.offset.y) {
+      ctx.setForcedPosition(x, y);
+    }
+  }
+}
+```
+
+## API Reference
+
+```typescript
+function position(
+  options?: {
+    current?: { x: number; y: number } | null;
+    default?: { x: number; y: number } | null;
+  } | null,
+): Plugin;
+```
+
+**Options:**
+
+- `current` - Force element to this position (overrides dragging)
+- `default` - Set initial position (user can still drag normally)
+
+**Behavior:**
+
+- `current` takes precedence over `default`
+- Only updates if position actually changed
+- Runs with high priority (1000)
+- Supports live updates during dragging
+
+**Returns:** A plugin object for use with draggable.

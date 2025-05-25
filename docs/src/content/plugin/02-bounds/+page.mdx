@@ -1,440 +1,697 @@
 ---
 title: 'bounds'
-tagline: 'Restrict movement to a single axis (x or y)'
+tagline: 'Keep draggable elements within specified boundaries'
 ---
 
-## Overview
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-The `bounds` plugin restricts movement within a specified area, ensuring elements can't be dragged outside defined boundaries. This is essential for containing draggable elements within their parent containers, viewports, or custom-defined regions.
+## What it does
 
-## Installation
-
-The `bounds` plugin is included with the Neodrag core package:
-
-```javascript
-import { bounds, BoundsFrom } from '@neodrag/core/plugins';
-```
-
-## API
-
-The `bounds` plugin accepts a function that returns boundary coordinates:
+The `bounds` plugin keeps draggable elements within specified boundaries. Whether it's staying inside a parent container, the viewport, or custom regions - bounds ensures your elements can't escape their designated areas.
 
 ```typescript
-bounds(
-  valueFn: () => [[x1: number, y1: number], [x2: number, y2: number]] | BoundsFromFunction,
-  shouldRecompute?: (ctx: { readonly hook: 'dragStart' | 'drag' | 'dragEnd' }) => boolean
-)
+bounds(BoundsFrom.viewport()); // Stay in browser window
+bounds(BoundsFrom.parent()); // Stay in parent element
+bounds(BoundsFrom.element(el)); // Stay in specific element
 ```
-
-### Parameters
-
-- `valueFn`: A function that returns boundary coordinates in the format:
-
-  - `[[x1, y1], [x2, y2]]` where `[x1, y1]` is the top-left corner and `[x2, y2]` is the bottom-right corner
-  - Or a function created using `BoundsFrom` utility (see below)
-
-- `shouldRecompute`: (Optional) A function that determines when boundaries should be recalculated:
-  - Returns `true` to recalculate bounds at a specific hook
-  - Default: Recalculates only on drag start (`ctx.hook === 'dragStart'`)
-
-### Return Value
-
-Returns a configured plugin that can be passed to the draggable function.
 
 ## Basic Usage
 
-```javascript
-// Assuming draggable is globally available in Svelte
-import { bounds, BoundsFrom } from '@neodrag/core/plugins';
+<FrameworkSwitch>
+<div slot="svelte">
 
-// Constrain to viewport
-const element = document.getElementById('my-draggable');
-draggable(element, [bounds(BoundsFrom.viewport())]);
+```svelte
+<script>
+  import { bounds, BoundsFrom } from '@neodrag/svelte';
+</script>
 
-// Constrain to parent element
-const childElement = document.getElementById('child');
-draggable(childElement, [bounds(BoundsFrom.parent())]);
+<!-- Stay within viewport -->
+<div {@attach draggable([bounds(BoundsFrom.viewport())])}>
+  Can't leave the screen
+</div>
+
+<!-- Stay within parent -->
+<div class="container">
+  <div {@attach draggable([bounds(BoundsFrom.parent())])}>
+    Contained child
+  </div>
+</div>
 ```
 
-## The BoundsFrom Utility
+</div>
 
-The `BoundsFrom` utility provides convenient methods for defining common boundary types:
+<div slot="react">
 
-### BoundsFrom.element()
-
-Creates boundaries based on a specific element:
-
-```javascript
-BoundsFrom.element(
-  element: HTMLElement,
-  padding?: {
-    top?: number;
-    left?: number;
-    right?: number;
-    bottom?: number
-  }
-): BoundFromFunction
-```
-
-#### Example
-
-```javascript
-import { bounds, BoundsFrom } from '@neodrag/core/plugins';
-
-const container = document.getElementById('container');
-draggable(element, [
-  bounds(
-    BoundsFrom.element(container, {
-      top: 10, // 10px padding from top
-      left: 10, // 10px padding from left
-      right: 10, // 10px padding from right
-      bottom: 10, // 10px padding from bottom
-    }),
-  ),
-]);
-```
-
-### BoundsFrom.selector()
-
-Creates boundaries based on an element selected by a CSS selector:
-
-```javascript
-BoundsFrom.selector(
-  selector: string,
-  padding?: {
-    top?: number;
-    left?: number;
-    right?: number;
-    bottom?: number
-  },
-  root?: HTMLElement
-): BoundFromFunction
-```
-
-#### Example
-
-```javascript
-import { bounds, BoundsFrom } from '@neodrag/core/plugins';
-
-draggable(element, [
-  bounds(
-    BoundsFrom.selector('#container', {
-      top: 10,
-      left: 10,
-      right: 10,
-      bottom: 10,
-    }),
-  ),
-]);
-```
-
-### BoundsFrom.viewport()
-
-Creates boundaries based on the browser viewport:
-
-```javascript
-BoundsFrom.viewport(
-  padding?: {
-    top?: number;
-    left?: number;
-    right?: number;
-    bottom?: number;
-  }
-): BoundFromFunction
-```
-
-#### Example
-
-```javascript
-import { bounds, BoundsFrom } from '@neodrag/core/plugins';
-
-draggable(element, [
-  bounds(
-    BoundsFrom.viewport({
-      top: 50, // Keep 50px from viewport top
-      bottom: 50, // Keep 50px from viewport bottom
-    }),
-  ),
-]);
-```
-
-### BoundsFrom.parent()
-
-Creates boundaries based on the element's parent node:
-
-```javascript
-BoundsFrom.parent(
-  padding?: {
-    top?: number;
-    left?: number;
-    right?: number;
-    bottom?: number;
-  }
-): BoundFromFunction
-```
-
-#### Example
-
-```javascript
-import { bounds, BoundsFrom } from '@neodrag/core/plugins';
-
-draggable(element, [
-  bounds(
-    BoundsFrom.parent({
-      top: 5,
-      left: 5,
-      right: 5,
-      bottom: 5,
-    }),
-  ),
-]);
-```
-
-## Framework Specific Examples
-
-### React
-
-```jsx
-import { useDraggable } from '@neodrag/react';
-import { bounds, BoundsFrom } from '@neodrag/core/plugins';
+```tsx
 import { useRef } from 'react';
+import { bounds, BoundsFrom, useDraggable } from '@neodrag/react';
 
-function BoundedElement() {
-  const containerRef = useRef(null);
-  const elementRef = useRef(null);
+function BoundedElements() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
 
-  useDraggable(elementRef, [
-    bounds(() => BoundsFrom.element(containerRef.current)),
-  ]);
+  useDraggable(viewportRef, [bounds(BoundsFrom.viewport())]);
+  useDraggable(parentRef, [bounds(BoundsFrom.parent())]);
 
   return (
-    <div ref={containerRef} className="container">
-      <div ref={elementRef} className="draggable-item" />
+    <div>
+      <div ref={viewportRef}>Can't leave the screen</div>
+
+      <div className="container">
+        <div ref={parentRef}>Contained child</div>
+      </div>
     </div>
   );
 }
 ```
 
-### Svelte
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { bounds, BoundsFrom, vDraggable } from '@neodrag/vue';
+</script>
+
+<template>
+  <div>
+    <div v-draggable="[bounds(BoundsFrom.viewport())]">
+      Can't leave the screen
+    </div>
+
+    <div class="container">
+      <div v-draggable="[bounds(BoundsFrom.parent())]">
+        Contained child
+      </div>
+    </div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { bounds, BoundsFrom, useDraggable } from '@neodrag/solid';
+
+function BoundedElements() {
+  const [viewport, setViewport] = createSignal<HTMLDivElement>();
+  const [parent, setParent] = createSignal<HTMLDivElement>();
+
+  useDraggable(viewport, [bounds(BoundsFrom.viewport())]);
+  useDraggable(parent, [bounds(BoundsFrom.parent())]);
+
+  return (
+    <div>
+      <div ref={setViewport}>Can't leave the screen</div>
+
+      <div class="container">
+        <div ref={setParent}>Contained child</div>
+      </div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { bounds, BoundsFrom, Draggable } from '@neodrag/vanilla';
+
+const viewport = document.getElementById('viewport');
+const parent = document.getElementById('parent');
+
+new Draggable(viewport, [bounds(BoundsFrom.viewport())]);
+new Draggable(parent, [bounds(BoundsFrom.parent())]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## BoundsFrom Utility
+
+The `BoundsFrom` utility provides ready-made boundary functions:
+
+### Common Boundaries
+
+```typescript
+// Stay within browser viewport
+BoundsFrom.viewport();
+
+// Stay within parent element
+BoundsFrom.parent();
+
+// Stay within specific element
+BoundsFrom.element(containerElement);
+
+// Stay within element found by selector
+BoundsFrom.selector('#container');
+```
+
+### With Padding
+
+Add padding to create margins around boundaries:
+
+```typescript
+// Viewport with 50px margin on all sides
+BoundsFrom.viewport({
+  top: 50,
+  right: 50,
+  bottom: 50,
+  left: 50,
+});
+
+// Parent with 20px top/bottom margin
+BoundsFrom.parent({
+  top: 20,
+  bottom: 20,
+});
+```
+
+## Dynamic Boundaries
+
+Update boundaries using compartments:
+
+<FrameworkSwitch>
+<div slot="svelte">
 
 ```svelte
 <script>
-  import { bounds, BoundsFrom } from '@neodrag/core/plugins';
+  import {
+    bounds,
+    BoundsFrom,
+    createCompartment,
+  } from '@neodrag/svelte';
 
-  let container;
+  let boundaryType = $state('viewport');
+  let containerRef = $state();
+
+  const boundsComp = createCompartment(() => {
+    switch (boundaryType) {
+      case 'viewport':
+        return bounds(BoundsFrom.viewport());
+      case 'parent':
+        return bounds(BoundsFrom.parent());
+      case 'container':
+        return bounds(BoundsFrom.element(containerRef));
+      default:
+        return bounds(BoundsFrom.viewport());
+    }
+  });
 </script>
 
-<div bind:this={container} class="container">
-  <div
-    use:draggable={[bounds(BoundsFrom.element(container))]}
-    class="draggable-item"
-  />
+<div bind:this={containerRef} class="container">
+  <div {@attach draggable(() => [boundsComp])}>
+    Current boundary: {boundaryType}
+  </div>
 </div>
+
+<select bind:value={boundaryType}>
+  <option value="viewport">Viewport</option>
+  <option value="parent">Parent</option>
+  <option value="container">Container</option>
+</select>
 ```
 
-### Vue
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import {
+  bounds,
+  BoundsFrom,
+  useDraggable,
+  useCompartment,
+} from '@neodrag/react';
+
+function DynamicBounds() {
+  const elementRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [boundaryType, setBoundaryType] = useState('viewport');
+
+  const boundsComp = useCompartment(() => {
+    switch (boundaryType) {
+      case 'viewport':
+        return bounds(BoundsFrom.viewport());
+      case 'parent':
+        return bounds(BoundsFrom.parent());
+      case 'container':
+        return bounds(BoundsFrom.element(containerRef.current));
+      default:
+        return bounds(BoundsFrom.viewport());
+    }
+  }, [boundaryType]);
+
+  useDraggable(elementRef, () => [boundsComp]);
+
+  return (
+    <div>
+      <div ref={containerRef} className="container">
+        <div ref={elementRef}>Current boundary: {boundaryType}</div>
+      </div>
+
+      <select
+        value={boundaryType}
+        onChange={(e) => setBoundaryType(e.target.value)}
+      >
+        <option value="viewport">Viewport</option>
+        <option value="parent">Parent</option>
+        <option value="container">Container</option>
+      </select>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
 
 ```vue
+<script setup>
+import { ref } from 'vue';
+import {
+  bounds,
+  BoundsFrom,
+  vDraggable,
+  useCompartment,
+} from '@neodrag/vue';
+
+const boundaryType = ref('viewport');
+const containerRef = ref();
+
+const boundsComp = useCompartment(() => {
+  switch (boundaryType.value) {
+    case 'viewport':
+      return bounds(BoundsFrom.viewport());
+    case 'parent':
+      return bounds(BoundsFrom.parent());
+    case 'container':
+      return bounds(BoundsFrom.element(containerRef.value));
+    default:
+      return bounds(BoundsFrom.viewport());
+  }
+});
+
+const plugins = () => [boundsComp];
+</script>
+
 <template>
-  <div ref="container" class="container">
-    <div
-      v-draggable="[bounds(() => BoundsFrom.element(container))]"
-      class="draggable-item"
-    ></div>
+  <div>
+    <div ref="containerRef" class="container">
+      <div v-draggable="plugins">
+        Current boundary: {{ boundaryType }}
+      </div>
+    </div>
+
+    <select v-model="boundaryType">
+      <option value="viewport">Viewport</option>
+      <option value="parent">Parent</option>
+      <option value="container">Container</option>
+    </select>
   </div>
 </template>
-
-<script setup>
-import { vDraggable } from '@neodrag/vue';
-import { bounds, BoundsFrom } from '@neodrag/core/plugins';
-import { ref } from 'vue';
-
-const container = ref(null);
-</script>
 ```
 
-## Advanced Usage
+</div>
 
-### Custom Boundaries
+<div slot="solid">
 
-You can define completely custom boundaries by returning coordinate pairs:
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  bounds,
+  BoundsFrom,
+  useDraggable,
+  createCompartment,
+} from '@neodrag/solid';
 
-```javascript
-import { bounds } from '@neodrag/core/plugins';
+function DynamicBounds() {
+  const [element, setElement] = createSignal<HTMLDivElement>();
+  const [container, setContainer] = createSignal<HTMLDivElement>();
+  const [boundaryType, setBoundaryType] = createSignal('viewport');
 
-draggable(element, [
-  bounds(() => {
-    // Define diagonal movement bounds
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
+  const boundsComp = createCompartment(() => {
+    switch (boundaryType()) {
+      case 'viewport':
+        return bounds(BoundsFrom.viewport());
+      case 'parent':
+        return bounds(BoundsFrom.parent());
+      case 'container':
+        return bounds(BoundsFrom.element(container()));
+      default:
+        return bounds(BoundsFrom.viewport());
+    }
+  });
 
-    return [
-      [100, 100], // Top-left boundary
-      [screenWidth - 100, screenHeight - 100], // Bottom-right boundary
-    ];
-  }),
-]);
+  useDraggable(element, [boundsComp]);
+
+  return (
+    <div>
+      <div ref={setContainer} class="container">
+        <div ref={setElement}>Current boundary: {boundaryType()}</div>
+      </div>
+
+      <select
+        value={boundaryType()}
+        onChange={(e) => setBoundaryType(e.target.value)}
+      >
+        <option value="viewport">Viewport</option>
+        <option value="parent">Parent</option>
+        <option value="container">Container</option>
+      </select>
+    </div>
+  );
+}
 ```
 
-### Dynamic Boundaries
+</div>
 
-Using the `shouldRecompute` parameter, you can control when boundaries update:
+<div slot="vanilla">
 
-```javascript
-import { bounds, BoundsFrom } from '@neodrag/core/plugins';
-
-draggable(element, [
-  bounds(
-    BoundsFrom.parent(),
-    // Recalculate on every drag move
-    (ctx) => ctx.hook === 'dragStart' || ctx.hook === 'drag',
-  ),
-]);
-```
-
-### Using Compartments for Reactive Boundaries
-
-```javascript
+```typescript
 import {
   bounds,
   BoundsFrom,
   Compartment,
-} from '@neodrag/core/plugins';
+  Draggable,
+} from '@neodrag/vanilla';
 
-const boundsCompartment = new Compartment(() =>
-  bounds(BoundsFrom.viewport()),
-);
+const element = document.getElementById('element');
+const container = document.getElementById('container');
+const select = document.getElementById('boundary-select');
 
-draggable(element, () => [boundsCompartment]);
+let boundaryType = 'viewport';
 
-// Later, update to be constrained to a specific element
-const container = document.getElementById('new-container');
-boundsCompartment.current = bounds(BoundsFrom.element(container));
+const boundsComp = new Compartment(() => {
+  switch (boundaryType) {
+    case 'viewport':
+      return bounds(BoundsFrom.viewport());
+    case 'parent':
+      return bounds(BoundsFrom.parent());
+    case 'container':
+      return bounds(BoundsFrom.element(container));
+    default:
+      return bounds(BoundsFrom.viewport());
+  }
+});
+
+new Draggable(element, () => [boundsComp]);
+
+select.addEventListener('change', (e) => {
+  boundaryType = e.target.value;
+  boundsComp.current = boundsComp.current; // Trigger update
+});
 ```
 
-## Behavior with Other Plugins
+</div>
+</FrameworkSwitch>
 
-### With Axis Plugin
+## Combining with Other Plugins
 
-When combining with the `axis` plugin, the bounds will restrict the overall movement area while axis restricts direction:
+### With Axis Constraint
 
-```javascript
-import { bounds, BoundsFrom, axis } from '@neodrag/core/plugins';
-
-draggable(element, [
-  axis('x'), // Only horizontal movement
-  bounds(BoundsFrom.parent()), // Within parent boundaries
-]);
+```typescript
+// Horizontal slider that stays within parent
+const plugins = [axis('x'), bounds(BoundsFrom.parent())];
 ```
 
-### With Grid Plugin
+### With Grid Snapping
 
-When used with the `grid` plugin, the element will snap to grid points within the bounds:
-
-```javascript
-import { bounds, BoundsFrom, grid } from '@neodrag/core/plugins';
-
-draggable(element, [
-  grid([20, 20]), // Snap to 20x20 grid
-  bounds(BoundsFrom.parent()), // Within parent boundaries
-]);
+```typescript
+// Grid snapping within viewport boundaries
+const plugins = [
+  grid([20, 20]),
+  bounds(BoundsFrom.viewport({ top: 50 })),
+];
 ```
 
-## Implementation Details
+### Plugin Order
 
-### Function vs Value
+Bounds typically runs after other movement plugins:
 
-Unlike some other plugins, `bounds` always takes a function rather than a direct value. This ensures boundaries can be dynamically recalculated:
-
-```javascript
-// Correct - pass a function
-bounds(() => [
-  [0, 0],
-  [500, 500],
-]);
-
-// Incorrect - don't pass direct values
-// bounds([[0, 0], [500, 500]])
-```
-
-### Boundary Size Requirements
-
-The boundary area must be at least as large as the draggable element:
-
-```javascript
-import { bounds } from '@neodrag/core/plugins';
-
-draggable(element, [
-  bounds(() => {
-    const elementRect = element.getBoundingClientRect();
-
-    // Ensure boundaries are at least as large as the element
-    return [
-      [0, 0],
-      [
-        Math.max(500, elementRect.width),
-        Math.max(500, elementRect.height),
-      ],
-    ];
-  }),
-]);
+```typescript
+const plugins = [
+  grid([10, 10]), // Apply grid first
+  bounds(BoundsFrom.parent()), // Then constrain to bounds
+];
 ```
 
 ## Common Use Cases
 
-### Modal Windows
+### Draggable Modal
 
-Contain modal dialogs within the viewport:
+<FrameworkSwitch>
+<div slot="svelte">
 
-```javascript
-import { bounds, BoundsFrom } from '@neodrag/core/plugins';
+```svelte
+<script>
+  import {
+    bounds,
+    BoundsFrom,
+    controls,
+    ControlFrom,
+  } from '@neodrag/svelte';
+</script>
 
-const modalHeader = document.querySelector('.modal-header');
-const modalDialog = document.querySelector('.modal-dialog');
+<div
+  class="modal"
+  {@attach draggable([
+    bounds(BoundsFrom.viewport({ top: 0 })),
+    controls({ allow: ControlFrom.selector('.modal-header') }),
+  ])}
+>
+  <div class="modal-header">Drag me to move modal</div>
+  <div class="modal-content">Modal content here...</div>
+</div>
 
-draggable(
-  modalDialog,
-  [
-    bounds(
-      BoundsFrom.viewport({
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-      }),
-    ),
-  ],
-  { handle: modalHeader },
-);
+<style>
+  .modal {
+    position: fixed;
+    top: 50px;
+    left: 100px;
+    width: 400px;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .modal-header {
+    padding: 16px;
+    background: #f5f5f5;
+    cursor: move;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .modal-content {
+    padding: 16px;
+  }
+</style>
 ```
 
-### Map Panning with Limits
+</div>
 
-Create a map that can be panned but not beyond its boundaries:
+<div slot="react">
 
-```javascript
-import { bounds } from '@neodrag/core/plugins';
+```tsx
+import { useRef } from 'react';
+import {
+  bounds,
+  BoundsFrom,
+  controls,
+  ControlFrom,
+  useDraggable,
+} from '@neodrag/react';
 
-const map = document.getElementById('map');
-const mapContainer = document.getElementById('map-container');
+function DraggableModal() {
+  const modalRef = useRef<HTMLDivElement>(null);
 
-draggable(map, [
-  bounds(() => {
-    const mapRect = map.getBoundingClientRect();
-    const containerRect = mapContainer.getBoundingClientRect();
+  useDraggable(modalRef, [
+    bounds(BoundsFrom.viewport({ top: 0 })),
+    controls({ allow: ControlFrom.selector('.modal-header') }),
+  ]);
 
-    // Allow the map to be panned to see all edges
-    return [
-      [
-        containerRect.width - mapRect.width,
-        containerRect.height - mapRect.height,
-      ],
-      [0, 0],
-    ];
-  }),
+  return (
+    <div ref={modalRef} className="modal">
+      <div className="modal-header">Drag me to move modal</div>
+      <div className="modal-content">Modal content here...</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import {
+  bounds,
+  BoundsFrom,
+  controls,
+  ControlFrom,
+  vDraggable,
+} from '@neodrag/vue';
+
+const plugins = [
+  bounds(BoundsFrom.viewport({ top: 0 })),
+  controls({ allow: ControlFrom.selector('.modal-header') }),
+];
+</script>
+
+<template>
+  <div v-draggable="plugins" class="modal">
+    <div class="modal-header">Drag me to move modal</div>
+    <div class="modal-content">Modal content here...</div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  bounds,
+  BoundsFrom,
+  controls,
+  ControlFrom,
+  useDraggable,
+} from '@neodrag/solid';
+
+function DraggableModal() {
+  const [modal, setModal] = createSignal<HTMLDivElement>();
+
+  useDraggable(modal, [
+    bounds(BoundsFrom.viewport({ top: 0 })),
+    controls({ allow: ControlFrom.selector('.modal-header') }),
+  ]);
+
+  return (
+    <div ref={setModal} class="modal">
+      <div class="modal-header">Drag me to move modal</div>
+      <div class="modal-content">Modal content here...</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import {
+  bounds,
+  BoundsFrom,
+  controls,
+  ControlFrom,
+  Draggable,
+} from '@neodrag/vanilla';
+
+const modal = document.getElementById('modal');
+
+new Draggable(modal, [
+  bounds(BoundsFrom.viewport({ top: 0 })),
+  controls({ allow: ControlFrom.selector('.modal-header') }),
 ]);
 ```
 
-## Conclusion
+</div>
+</FrameworkSwitch>
 
-The `bounds` plugin provides precise control over the movement limits of draggable elements. When combined with the `BoundsFrom` utility, it offers an intuitive way to define common boundary types. By applying appropriate boundaries, you can create draggable elements that respect the constraints of their containers and provide a better user experience.
+### Drag and Drop with Zones
+
+```typescript
+// Card that can be dropped in specific zones
+const plugins = [
+  bounds(() => {
+    const zone1 = document
+      .getElementById('drop-zone-1')
+      .getBoundingClientRect();
+    const zone2 = document
+      .getElementById('drop-zone-2')
+      .getBoundingClientRect();
+
+    // Allow movement between zones
+    return [
+      [
+        Math.min(zone1.left, zone2.left),
+        Math.min(zone1.top, zone2.top),
+      ],
+      [
+        Math.max(zone1.right, zone2.right),
+        Math.max(zone1.bottom, zone2.bottom),
+      ],
+    ];
+  }),
+];
+```
+
+## Custom Boundaries
+
+For complex boundary logic, pass a function that returns coordinates:
+
+```typescript
+bounds(() => {
+  // Custom diamond-shaped boundary
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+  const size = 200;
+
+  return [
+    [centerX - size, centerY - size],
+    [centerX + size, centerY + size],
+  ];
+});
+```
+
+## How It Works
+
+The bounds plugin calculates the allowed movement area and clamps the proposed position:
+
+1. **Boundary calculation** - Runs the boundary function to get `[[x1, y1], [x2, y2]]`
+2. **Element positioning** - Considers the element's size and current position
+3. **Movement clamping** - Limits `proposed.x` and `proposed.y` to stay within bounds
+
+The boundary function is called:
+
+- On drag start (always)
+- During drag (if `shouldRecompute` returns true)
+- On drag end (if `shouldRecompute` returns true)
+
+## API Reference
+
+```typescript
+function bounds(
+  boundsFn: () => [[number, number], [number, number]],
+  shouldRecompute?: (ctx: {
+    hook: 'dragStart' | 'drag' | 'dragEnd';
+  }) => boolean,
+): Plugin;
+```
+
+**Parameters:**
+
+- `boundsFn` - Function returning `[[x1, y1], [x2, y2]]` coordinates
+- `shouldRecompute` - When to recalculate boundaries (default: drag start only)
+
+**BoundsFrom utilities:**
+
+- `BoundsFrom.viewport(padding?)` - Browser viewport
+- `BoundsFrom.parent(padding?)` - Parent element
+- `BoundsFrom.element(el, padding?)` - Specific element
+- `BoundsFrom.selector(selector, padding?, root?)` - Element by selector
+
+**Returns:** A plugin object for use with draggable.
