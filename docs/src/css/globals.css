@@ -35,9 +35,20 @@ body {
 	width: max-content;
 	color: var(--app-color-dark);
 	font-family: var(--app-font-heading);
-	word-break: break-all;
+	text-transform: balanced;
 	margin: 0.75em 0 0.25em;
 	max-width: 100%;
+
+	&:has(.heading-anchor) {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+
+		.heading-anchor {
+			line-height: 1;
+			margin: 0;
+		}
+	}
 }
 
 h1,

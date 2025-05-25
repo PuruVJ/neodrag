@@ -103,6 +103,15 @@ const { title, headings } = Astro.props;
 			}
 		}
 
+		.astro-code .line {
+			display: inline-block;
+			width: 100%;
+		}
+
+		.astro-code .line.highlighted {
+			background-color: color-mix(in lch, var(--app-color-dark), transparent 40%) !important;
+		}
+
 		p,
 		a {
 			margin: 1.5rem 0;
