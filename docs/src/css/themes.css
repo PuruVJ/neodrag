@@ -71,6 +71,9 @@ body.dark {
 	--app-color-shell: #101213;
 	--app-color-shell-contrast: var(--gray-1);
 
+	--app-color-primary: lch(68.02% 48.05 14.68);
+	--app-color-primary-contrast: color-mix(in lch, var(--app-color-primary), black 95%);
+
 	/* --app-color-primary: #f88292;
 	--app-color-primary-hsl: 352, 89%, 74%;
 	--app-color-primary-contrast: hsl(0 0% 10%);

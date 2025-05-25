@@ -1,21 +1,24 @@
-<script>
-	import { FRAMEWORKS } from '$helpers/constants';
+<script lang="ts">
+	import { type Framework } from '$helpers/constants';
 	import { FRAMEWORK_ICONS } from '$helpers/framework-icons';
+
+	const frameworks: Framework[] = ['solid', 'react', 'svelte', 'vue', 'vanilla'];
+	const scales = [1, 1, 1, 1, 0.85];
 </script>
 
 <h2 class="h1">Pick your framework</h2>
 
 <section class="frameworks">
-	{#each FRAMEWORKS as { name }}
+	{#each frameworks as name, idx}
 		{@const Icon = FRAMEWORK_ICONS[name]}
 
-		<a class="unstyled" href="/docs/{name}">
+		<a class="unstyled" href="/docs/{name}" style:--scale={scales[idx]}>
 			<Icon />
 		</a>
 	{/each}
 </section>
 
-<style lang="scss">
+<style>
 	h2 {
 		word-break: normal;
 
@@ -25,14 +28,13 @@
 	.frameworks {
 		display: flex;
 		gap: clamp(2rem, 10vw, 8rem);
+		align-items: end;
 	}
 
 	a {
-		transition: transform 150ms ease-in;
-
-		&:hover {
-			transform: scale3d(1.2, 1.2, 1);
-		}
+		transition: scale 150ms ease-in;
+		scale: var(--scale) var(--scale);
+		transform-origin: center bottom;
 
 		:global(svg) {
 			width: clamp(2rem, 10vw, 8rem);

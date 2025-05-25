@@ -20,6 +20,7 @@
 		plugins: default_plugins,
 	});
 
+	// @ts-ignore
 	const svelte_one = wrapper(factory)
 </script>
 

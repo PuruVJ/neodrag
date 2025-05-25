@@ -77,37 +77,79 @@
 	<img bind:this={logo_el} src="/logo.svg" draggable="false" class="logo" alt="Neodrag logo" />
 </section>
 
-<style lang="scss">
-	@import '../../../../css/breakpoints';
-
-	@mixin on-circle($item-count, $circle-size, $item-size) {
+<style>
+	.animation-frameworks {
 		position: relative;
-		width: $circle-size;
-		height: $circle-size;
+		width: 30rem;
+		height: 30rem;
 		padding: 0;
 		border-radius: 50%;
 		list-style: none;
+		display: flex;
+		align-items: flex-start;
+		/* margin: 0 auto; */
+		font-size: 3rem;
+		font-weight: 600;
+		font-family: 'Jetbrains Mono', monospace;
 
 		> * {
 			display: block;
 			position: absolute;
 			top: 50%;
 			left: 50%;
-			width: $item-size;
-			height: $item-size;
-			margin: calc(-1 * ($item-size / 2));
+			width: 3rem;
+			height: 3rem;
+			margin: calc(-1 * (3rem / 2));
+		}
 
-			$angle: calc(360 / $item-count);
-			$rot: -18;
+		> *:nth-of-type(1) {
+			transform: rotate(-18deg) translate(15rem) rotate(18deg);
+		}
 
-			@for $i from 1 through $item-count {
-				&:nth-of-type(#{$i}) {
-					transform: rotate(calc($rot * 1deg))
-						translate(calc($circle-size / 2))
-						rotate(calc($rot * -1deg));
-				}
+		> *:nth-of-type(2) {
+			transform: rotate(54deg) translate(15rem) rotate(-54deg);
+		}
 
-				$rot: $rot + $angle;
+		> *:nth-of-type(3) {
+			transform: rotate(126deg) translate(15rem) rotate(-126deg);
+		}
+
+		> *:nth-of-type(4) {
+			transform: rotate(198deg) translate(15rem) rotate(-198deg);
+		}
+
+		> *:nth-of-type(5) {
+			transform: rotate(270deg) translate(15rem) rotate(-270deg);
+		}
+
+		@media (max-width: 767px) {
+			width: 20rem;
+			height: 20rem;
+
+			> * {
+				width: 2rem;
+				height: 2rem;
+				margin: -1rem;
+			}
+
+			> *:nth-of-type(1) {
+				transform: rotate(-18deg) translate(10rem) rotate(18deg);
+			}
+
+			> *:nth-of-type(2) {
+				transform: rotate(54deg) translate(10rem) rotate(-54deg);
+			}
+
+			> *:nth-of-type(3) {
+				transform: rotate(126deg) translate(10rem) rotate(-126deg);
+			}
+
+			> *:nth-of-type(4) {
+				transform: rotate(198deg) translate(10rem) rotate(-198deg);
+			}
+
+			> *:nth-of-type(5) {
+				transform: rotate(270deg) translate(10rem) rotate(-270deg);
 			}
 		}
 	}
@@ -115,12 +157,11 @@
 	.container {
 		display: grid;
 		place-items: center;
+		position: relative;
 
-		@include media('>tablet') {
+		@media (min-width: 969px) {
 			padding: 0 6rem;
 		}
-
-		position: relative;
 	}
 
 	.logo {
@@ -128,27 +169,8 @@
 		top: 50%;
 		left: 50%;
 		z-index: 7;
-
 		transform: translate(-50%, -50%);
-
 		width: clamp(4rem, 20vw, 7rem);
-	}
-
-	.animation-frameworks {
-		@include on-circle($item-count: 5, $circle-size: 30rem, $item-size: 3rem);
-
-		@include media('<sm-tablet') {
-			@include on-circle($item-count: 5, $circle-size: 20rem, $item-size: 2rem);
-		}
-
-		display: flex;
-		align-items: flex-start;
-
-		// margin: 0 auto;
-
-		font-size: 3rem;
-		font-weight: 600;
-		font-family: 'Jetbrains Mono', monospace;
 	}
 
 	.reset {
@@ -156,14 +178,10 @@
 		right: 8px;
 		top: 8px;
 		z-index: 20;
-
 		font-size: 1.2rem;
-
 		padding: 0.5rem;
-
 		border-radius: 8px;
-
-		background-color: hsla(var(--app-color-dark-hsl), 0.3);
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 70%);
 		backdrop-filter: blur(5px);
 
 		&:hover :global(svg) {
@@ -172,7 +190,6 @@
 
 		:global(svg) {
 			transition: transform 0.2s ease-in-out;
-
 			color: var(--app-color-dark);
 		}
 	}

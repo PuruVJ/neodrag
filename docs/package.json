@@ -27,7 +27,7 @@
 	"devDependencies": {
 		"@astrojs/mdx": "^4.2.6",
 		"@astrojs/sitemap": "^3.3.1",
-		"@astrojs/svelte": "^7.0.13",
+		"@astrojs/svelte": "^7.1.0",
 		"@iconify/json": "^2.2.159",
 		"@types/throttle-debounce": "^5.0.2",
 		"astro": "^5.7.12",
@@ -43,7 +43,7 @@
 		"rehype-autolink-headings": "^7.1.0",
 		"remark-custom-container": "^1.2.0",
 		"sass": "^1.82.0",
-		"svelte": "^5.28.2",
+		"svelte": "^5.33.1",
 		"typescript": "^5.8.0",
 		"unplugin-icons": "^22.1.0",
 		"vite": "^6.0.3"

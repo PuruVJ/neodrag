@@ -15,6 +15,13 @@ module.exports = {
 			},
 		},
 		{
+			files: '*.svelte',
+			options: {
+				parser: 'svelte',
+				jsxSingleQuote: false,
+			},
+		},
+		{
 			files: ['*.mdx', '*.md'],
 			options: {
 				useTabs: false,

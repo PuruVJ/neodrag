@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { draggable, type DragOptions } from '@neodrag/svelte';
 	import { browser } from '$helpers/utils';
-	//@ts-ignore
+	import { axis, bounds, BoundsFrom, ControlFrom, controls, createCompartment, disabled, draggable, events, grid, position, scrollLock } from '@neodrag/svelte';
+//@ts-ignore
 	import squircle from '$/worklet/squircle?url';
 	import { style } from 'svelte-body';
 	import { expoOut, sineIn } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
+	import { tick } from 'svelte';
 
 	let reset = $state(0);
 
@@ -48,7 +49,9 @@
 	 * it reduces z index of all of them by the minimum z index of all elements.
 	 * @param node
 	 */
-	function update_z_index(node: HTMLElement) {
+	function update_z_index(node: HTMLElement | SVGElement) {
+		if (node instanceof SVGElement) return;
+
 		const index = get_node_index(node);
 		z_indices[index] = Math.max(...z_indices) + 1;
 
@@ -63,7 +66,7 @@
 		}
 	}
 
-	const drag_handlers: Pick<DragOptions, 'onDrag' | 'onDragStart' | 'onDragEnd'> = {
+	const drag_handlers: Parameters<typeof events>[0] = {
 		onDrag: ({ rootNode }) => {
 			is_backdrop_visible = true;
 			rootNode.style.zIndex = '20';
@@ -81,6 +84,10 @@
 		x: 0,
 		y: 0,
 	});
+	const return_to_position_compartment = createCompartment(() => {
+console.log('this triggers?', $state.snapshot(return_to_position_val))
+		return position({ current: $state.snapshot(return_to_position_val) })}
+	);
 
 	let return_to_position_transition_val = new Tween(
 		{
@@ -88,6 +95,9 @@
 			y: 0,
 		},
 		{ easing: expoOut, duration: 1200 },
+	);
+	const return_to_position_transition_compartment = createCompartment(() => 
+		position({ current: $state.snapshot(return_to_position_transition_val.current) })
 	);
 
 	if (browser)
@@ -137,7 +147,7 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[0]}
-			use:draggable={{ ...drag_handlers }}
+			{@attach draggable([events(drag_handlers)])}
 		>
 			I will drag in all directions
 		</div>
@@ -146,7 +156,7 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[1]}
-			use:draggable={{ axis: 'x', ...drag_handlers }}
+			{@attach draggable([axis('x'), events(drag_handlers)])}
 		>
 			I will drag horizontally
 		</div>
@@ -155,31 +165,45 @@
 			class="box"
 			style:z-index={z_indices[2]}
 			data-paw-cursor="true"
-			use:draggable={{ axis: 'y', ...drag_handlers }}
+			{@attach draggable([axis('y'), events(drag_handlers)])}
 		>
 			I will drag vertically
 		</div>
 
-		<div
+		<!-- <div
 			class="box"
 			style:z-index={z_indices[3]}
 			data-paw-cursor="true"
 			use:draggable={{ axis: 'none', ...drag_handlers }}
 		>
 			<span><code>axis: none</code> disables dragging</span>
+		</div> -->
+
+		<div
+			class="box single-handle"
+			style:z-index={z_indices[5]}
+			data-paw-cursor="true"
+			{@attach draggable([
+				scrollLock(),
+				events(drag_handlers)
+			])}
+		>
+			I will lock scrolling
 		</div>
 
 		<div
 			class="box track-position"
 			style:z-index={z_indices[4]}
 			data-paw-cursor="true"
-			use:draggable={{
-				...drag_handlers,
-				onDrag: ({ offsetX, offsetY, rootNode, currentNode }) => {
-					drag_handlers.onDrag?.({ offsetX, offsetY, rootNode, currentNode });
-					track_my_position = { x: offsetX, y: offsetY };
-				},
-			}}
+			{@attach draggable([
+				events({
+					...drag_handlers,
+					onDrag: (data) => {
+						drag_handlers.onDrag?.(data);
+						track_my_position = { x: data.offset.x, y: data.offset.y };
+					}, 
+				})
+			])}
 		>
 			I track my position:
 			<code>x: {track_my_position.x} <br /> y: {track_my_position.y}</code>
@@ -188,7 +212,10 @@
 		<div
 			class="box single-handle"
 			style:z-index={z_indices[5]}
-			use:draggable={{ handle: '.handle', ...drag_handlers }}
+			{@attach draggable([
+				controls({allow: ControlFrom.selector('.handle')}), 
+				events(drag_handlers)
+			])}
 		>
 			<button class="handle" data-paw-cursor="true" data-paw-color="light"> Drag here </button>
 
@@ -198,7 +225,10 @@
 		<div
 			class="box multiple-handles"
 			style:z-index={z_indices[6]}
-			use:draggable={{ handle: '.handle', ...drag_handlers }}
+			{@attach draggable([
+				controls({ allow: ControlFrom.selector('.handle') }), 
+				events(drag_handlers)
+			])}
 		>
 			I can be dragged with all the handles
 
@@ -212,7 +242,10 @@
 			class="box"
 			style:z-index={z_indices[7]}
 			data-paw-cursor="true"
-			use:draggable={{ cancel: '.cancel', ...drag_handlers }}
+			{@attach draggable([
+				controls({ block: ControlFrom.selector('.cancel') }), 
+				events(drag_handlers)
+			])}
 		>
 			I can be dragged anywhere
 
@@ -223,7 +256,10 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[8]}
-			use:draggable={{ grid: [25, 25], ...drag_handlers }}
+			{@attach draggable([
+				grid([25, 25]),
+				events(drag_handlers)
+			])}
 		>
 			I snap to 25x25 grid
 		</div>
@@ -232,7 +268,10 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[9]}
-			use:draggable={{ grid: [100, 25], ...drag_handlers }}
+			{@attach draggable([
+				grid([100, 25]),
+				events(drag_handlers)
+			])}
 		>
 			I snap to 100x25 grid
 		</div>
@@ -241,13 +280,13 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[10]}
-			use:draggable={{
-				bounds: 'parent',
-				onDrag: ({ rootNode }) => {
+			{@attach draggable([
+				bounds(BoundsFrom.parent()),
+				events({
+					onDrag: ({ rootNode }) => {
 					highlight_parent = true;
 					rootNode.style.zIndex = '20';
 				},
-
 				onDragEnd: ({ rootNode }) => {
 					highlight_parent = false;
 
@@ -255,7 +294,8 @@
 						update_z_index(rootNode);
 					}, 200);
 				},
-			}}
+				})
+			])}
 		>
 			I can be dragged within my parents container only
 		</div>
@@ -264,20 +304,22 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[11]}
-			use:draggable={{
-				bounds: 'body',
-				onDrag: ({ rootNode }) => {
-					hightlight_body = true;
-					rootNode.style.zIndex = '20';
-				},
-				onDragEnd: ({ rootNode }) => {
-					hightlight_body = false;
+			{@attach draggable([
+				bounds(BoundsFrom.selector('body')),
+				events({
+					onDrag: ({ rootNode }) => {
+						hightlight_body = true;
+						rootNode.style.zIndex = '20';
+					},
+					onDragEnd: ({ rootNode }) => {
+						hightlight_body = false;
 
-					setTimeout(() => {
-						update_z_index(rootNode);
-					}, 200);
-				},
-			}}
+						setTimeout(() => {
+							update_z_index(rootNode);
+						}, 200);
+					},
+				})
+			])}
 		>
 			I can be dragged within the body
 		</div>
@@ -286,20 +328,22 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[12]}
-			use:draggable={{
-				bounds: coord_bounds,
-				onDrag: ({ rootNode }) => {
-					show_markers = true;
+			{@attach draggable([
+				bounds(BoundsFrom.viewport( coord_bounds)),
+				events({
+					onDrag: ({ rootNode }) => {
+						show_markers = true;
 					rootNode.style.zIndex = '20';
-				},
-				onDragEnd: ({ rootNode }) => {
-					show_markers = false;
+					},
+					onDragEnd: ({ rootNode }) => {
+						show_markers = false;
 
-					setTimeout(() => {
-						update_z_index(rootNode);
-					}, 200);
-				},
-			}}
+						setTimeout(() => {
+							update_z_index(rootNode);
+						}, 200);
+					},
+				})
+			])}
 		>
 			Bounds
 			<code>top: 20 <br /> bottom: 50 <br /> left: 200 <br /> right: 400</code>
@@ -309,17 +353,19 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[13]}
-			use:draggable={{
-				position: return_to_position_val,
-				onDrag: (data) => {
-					drag_handlers.onDrag?.(data);
-					return_to_position_val = { x: data.offsetX, y: data.offsetY };
-				},
-				onDragEnd: (data) => {
-					drag_handlers.onDragEnd?.(data);
-					return_to_position_val = { x: 0, y: 0 };
-				},
-			}}
+			{@attach draggable(() => [
+				return_to_position_compartment,
+				events({
+					onDrag: (data) => {
+						drag_handlers.onDrag?.(data);
+						return_to_position_val = { x: data.offset.x, y: data.offset.y };
+					},
+					onDragEnd: async (data) => {
+						drag_handlers.onDragEnd?.(data);
+    				return_to_position_val = { x: 0, y: 0 };
+					},
+				})
+			])}
 		>
 			I will return to my position on drop
 		</div>
@@ -328,20 +374,23 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[14]}
-			use:draggable={{
-				position: return_to_position_transition_val.current,
-				onDrag: (data) => {
-					drag_handlers.onDrag?.(data);
-					return_to_position_transition_val.set(
-						{ x: data.offsetX, y: data.offsetY },
-						{ duration: 0 },
-					);
-				},
-				onDragEnd: (data) => {
-					drag_handlers.onDragEnd?.(data);
-					return_to_position_transition_val.target = { x: 0, y: 0 };
-				},
-			}}
+			{@attach draggable(() => [
+				return_to_position_transition_compartment,
+				events({
+					onDrag: (data) => {
+						drag_handlers.onDrag?.(data);
+						return_to_position_transition_val.set(
+							{ x: data.offset.x, y: data.offset.y },
+							{ duration: 0 },
+						);
+					},
+					onDragEnd: async (data) => {
+						drag_handlers.onDragEnd?.(data);
+						return_to_position_transition_val.target = { x: 0, y: 0 };
+					},
+				})
+			])}
+			
 		>
 			I will return to my position on drop, but with style! 😉
 		</div>
@@ -350,7 +399,10 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[15]}
-			use:draggable={{ disabled: true, ...drag_handlers }}
+			{@attach draggable([
+				disabled(),
+				events(drag_handlers)
+			])}
 		>
 			<code>disabled: true</code>
 

@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { portal } from '$actions/portal';
-	import { draggable, type DragEventData } from '@neodrag/svelte';
 	import type { Framework } from '$helpers/constants';
+	import { createCompartment, draggable, events, position, type DragEventData } from '@neodrag/svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
-	import { untrack } from 'svelte';
 
 	type Props = {
 		logoEl: HTMLImageElement;
@@ -48,36 +47,61 @@
 
 	let draggable_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
 
-	function get_offset(el: HTMLElement) {
-		const rect = el.getBoundingClientRect();
+	const position_compartment = createCompartment(() =>
+		position({ current: draggable_position.current }),
+	);
 
-		return {
+	// Cache for element positions to avoid repeated getBoundingClientRect calls
+	let cached_positions = {
+		logo: { left: 0, top: 0, width: 0, height: 0, timestamp: 0 },
+		button: { left: 0, top: 0, width: 0, height: 0, timestamp: 0 }
+	};
+
+	// Flags to control when to recalculate
+	let needs_position_update = true;
+	let is_dragging = false;
+	let raf_id: number | null = null;
+
+	const CACHE_DURATION = 16; // ~1 frame at 60fps
+	const THICKNESS = 2;
+
+	function get_cached_offset(el: HTMLElement, cache_key: 'logo' | 'button') {
+		const now = performance.now();
+		const cached = cached_positions[cache_key];
+		
+		// Return cached position if it's recent and we don't need an update
+		if (!needs_position_update && (now - cached.timestamp) < CACHE_DURATION) {
+			return cached;
+		}
+
+		// Recalculate and cache
+		const rect = el.getBoundingClientRect();
+		const position = {
 			left: rect.left + window.scrollX,
 			top: rect.top + window.scrollY,
 			width: rect.width || el.offsetWidth,
 			height: rect.height || el.offsetHeight,
+			timestamp: now
 		};
+
+		cached_positions[cache_key] = position;
+		return position;
 	}
 
-	const THICKNESS = 2;
+	function calculate_line_properties() {
+		if (!button_el || !logoEl) return;
 
-	function update_line_position(node: HTMLElement, rootEl: HTMLElement) {
-		if (!rootEl) return;
-
-		const root_rect = get_offset(rootEl);
-		const node_rect = get_offset(node);
+		const root_rect = get_cached_offset(logoEl, 'logo');
+		const node_rect = get_cached_offset(button_el, 'button');
 
 		const x1 = root_rect.left + root_rect.width / 2;
 		const y1 = root_rect.top + root_rect.height / 2;
-		// top right
 		const x2 = node_rect.left + node_rect.width / 2;
 		const y2 = node_rect.top + node_rect.height / 2;
-		// distance
-		const length = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 
+		const length = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 		const cx = (x1 + x2) / 2 - length / 2;
 		const cy = (y1 + y2) / 2 - THICKNESS / 2;
-		// angle
 		const angle = Math.atan2(y1 - y2, x1 - x2) * (180 / Math.PI);
 
 		line_properties = {
@@ -89,34 +113,64 @@
 		};
 	}
 
+	function raf_update() {
+		// Only update if dragging or if we explicitly need an update
+		if (is_dragging || needs_position_update) {
+			calculate_line_properties();
+			needs_position_update = false;
+		}
+
+		// Continue the loop
+		raf_id = requestAnimationFrame(raf_update);
+	}
+
+	function start_raf_loop() {
+		if (raf_id === null) {
+			raf_id = requestAnimationFrame(raf_update);
+		}
+	}
+
+	function stop_raf_loop() {
+		if (raf_id !== null) {
+			cancelAnimationFrame(raf_id);
+			raf_id = null;
+		}
+	}
+
+	function mark_for_update() {
+		needs_position_update = true;
+	}
+
 	function connect(node: HTMLElement, root_el: HTMLElement) {
-		// TODO: Investigate replacing with resizeobserver
-		window.addEventListener('resize', () => update_line_position(node, root_el));
+		const handle_resize = () => {
+			// Invalidate cache and mark for update
+			cached_positions.logo.timestamp = 0;
+			cached_positions.button.timestamp = 0;
+			mark_for_update();
+		};
+
+		window.addEventListener('resize', handle_resize);
+
+		// Initial update
+		mark_for_update();
 
 		return {
 			update(newRootEl: HTMLElement) {
 				root_el = newRootEl;
-				update_line_position(node, root_el);
+				mark_for_update();
 			},
 			destroy: () => {
-				window.removeEventListener('resize', () => update_line_position(node, root_el));
+				window.removeEventListener('resize', handle_resize);
 			},
 		};
 	}
 
 	function selectFramework() {
 		const fn = () => onselect?.({ framework });
-
-		// TODO
-		// if (lastDraggingTime === null) return fn();
-
-		// console.log(+new Date() - +lastDraggingTime);
-
-		// if (+new Date() - +lastDraggingTime > 300) return fn();
-
 		fn();
 	}
 
+	// Lifecycle management
 	$effect(() => {
 		if (framework) {
 			resetFns[framework] = reset;
@@ -127,30 +181,51 @@
 		};
 	});
 
+	// Start RAF loop when elements are available
 	$effect(() => {
-		draggable_position.current;
+		if (button_el && logoEl) {
+			start_raf_loop();
+			mark_for_update();
+		}
 
-		if (button_el && logoEl) untrack(() => update_line_position(button_el!, logoEl));
+		return () => {
+			stop_raf_loop();
+		};
+	});
+
+
+	$effect(() => {
+		const current = draggable_position.current;
+		// Mark for update when position changes
+		mark_for_update();
 	});
 </script>
 
 <button
 	data-paw-cursor="true"
 	bind:this={button_el}
-	use:draggable={{
-		position: draggable_position.current,
-		onDragStart: (data) => {
-			on_drag_start?.(data);
-		},
-		onDrag: (data) => {
-			on_drag?.(data);
-			draggable_position.set({ x: data.offsetX, y: data.offsetY }, { duration: 0 });
-		},
-		onDragEnd: (data) => {
-			on_drag_end?.(data);
-			update_line_position(button_el!, logoEl);
-		},
-	}}
+	{@attach draggable(() => [
+		position_compartment,
+		events({
+			onDragStart: (data) => {
+				is_dragging = true;
+				mark_for_update();
+				on_drag_start?.(data);
+			},
+			onDrag: (data) => {
+				on_drag?.(data);
+				draggable_position.set({ x: data.offset.x, y: data.offset.y }, { duration: 0 });
+				// Position will be updated in RAF loop
+			},
+			onDragEnd: (data) => {
+				is_dragging = false;
+				// Invalidate cache for final position
+				cached_positions.button.timestamp = 0;
+				mark_for_update();
+				on_drag_end?.(data);
+			},
+		})
+	])}
 	use:connect={logoEl}
 	onclick={selectFramework}
 >
@@ -174,7 +249,7 @@
 	></div>
 {/if}
 
-<style lang="scss">
+<style>
 	button {
 		background-color: transparent;
 
@@ -199,7 +274,7 @@
 		padding: 0px;
 		margin: 0px;
 
-		background-color: hsla(var(--app-color-dark-hsl), 0.5);
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 50%);
 		line-height: 1px;
 
 		height: var(--thickness);

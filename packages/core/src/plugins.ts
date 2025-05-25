@@ -222,10 +222,10 @@ export const grid = unstable_definePlugin(
 	}),
 );
 
-export const disabled = unstable_definePlugin(() => ({
+export const disabled = unstable_definePlugin((value: boolean = true) => ({
 	name: 'neodrag:disabled',
 	shouldStart() {
-		return false;
+		return value;
 	},
 }));
 
@@ -264,28 +264,27 @@ export const transform = unstable_definePlugin(
 			}
 
 			// Apply initial transform if needed
-			if (ctx.offset.x !== 0 || ctx.offset.y !== 0) {
-				if (func) {
-					func({
-						offsetX: ctx.offset.x,
-						offsetY: ctx.offset.y,
-						rootNode: ctx.rootNode,
-					});
-				} else if (is_svg) {
-					const element = ctx.rootNode as SVGGraphicsElement;
-					const svg = element.ownerSVGElement;
-					if (!svg) throw new Error("Root Node's ownerSVGElement is null");
 
-					const translation = svg.createSVGTransform();
-					translation.setTranslate(ctx.offset.x, ctx.offset.y);
+			if (func) {
+				func({
+					offsetX: ctx.offset.x,
+					offsetY: ctx.offset.y,
+					rootNode: ctx.rootNode,
+				});
+			} else if (is_svg) {
+				const element = ctx.rootNode as SVGGraphicsElement;
+				const svg = element.ownerSVGElement;
+				if (!svg) throw new Error("Root Node's ownerSVGElement is null");
 
-					const transform = element.transform.baseVal;
+				const translation = svg.createSVGTransform();
+				translation.setTranslate(ctx.offset.x, ctx.offset.y);
 
-					transform.clear();
-					transform.appendItem(translation);
-				} else {
-					ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
-				}
+				const transform = element.transform.baseVal;
+
+				transform.clear();
+				transform.appendItem(translation);
+			} else {
+				ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px`;
 			}
 
 			return { is_svg: is_svg };
@@ -372,7 +371,29 @@ export const BoundsFrom = {
 		right?: number;
 		bottom?: number;
 	}): BoundFromFunction {
-		return (ctx) => BoundsFrom.element(document.documentElement, padding)(ctx);
+		return (_ctx) => {
+			// The viewport bounds are always relative to the current visible area,
+			// regardless of scroll position. The viewport always starts at (0,0)
+			// and extends to the window's inner dimensions.
+			const bounds = {
+				top: 0 + (padding?.top ?? 0),
+				left: 0 + (padding?.left ?? 0),
+				right: window.innerWidth - (padding?.right ?? 0),
+				bottom: window.innerHeight - (padding?.bottom ?? 0),
+			};
+
+			// Validate bounds
+			if (bounds.right <= bounds.left || bounds.bottom <= bounds.top) {
+				throw new Error(
+					'Viewport bounds are invalid after applying padding. Check your padding values.',
+				);
+			}
+
+			return [
+				[bounds.left, bounds.top],
+				[bounds.right, bounds.bottom],
+			];
+		};
 	},
 
 	parent(padding?: {

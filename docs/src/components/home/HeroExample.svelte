@@ -2,7 +2,14 @@
 	import squircle from '$/worklet/squircle.js?url';
 	import { typingEffect } from '$actions/typingEffect';
 	import { browser } from '$helpers/utils';
-	import { bounds, BoundsFrom, Compartment, draggable, events, position } from '@neodrag/svelte';
+	import {
+		bounds,
+		BoundsFrom,
+		createCompartment,
+		draggable,
+		events,
+		position,
+	} from '@neodrag/svelte';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
@@ -21,11 +28,9 @@
 
 	let drag_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
 
-	const position_compartment = new Compartment(() => position({ current: drag_position.current }));
-
-	$effect(() => {
-		position_compartment.current = position({ current: drag_position.current });
-	});
+	const position_compartment = createCompartment(() =>
+		position({ current: drag_position.current }),
+	);
 
 	function handle_mouse_move(e: MouseEvent) {
 		coords_cursor ??= { x: 0, y: 0 };
@@ -54,7 +59,7 @@
 	<div
 		class="box"
 		class:wiggles={box_wiggles}
-		use:draggable={() => [
+		{@attach draggable(() => [
 			bounds(BoundsFrom.parent()),
 			position_compartment,
 			events({
@@ -69,7 +74,7 @@
 					drag_position.target = { x: 0, y: 0 };
 				},
 			}),
-		]}
+		])}
 	>
 		<div class="paw">
 			<PawIcon />
