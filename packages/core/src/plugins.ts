@@ -225,7 +225,7 @@ export const grid = unstable_definePlugin(
 export const disabled = unstable_definePlugin((value: boolean = true) => ({
 	name: 'neodrag:disabled',
 	shouldStart() {
-		return value;
+		return !value;
 	},
 }));
 
