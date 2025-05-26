@@ -10,13 +10,17 @@ type Props = {
 	headings: MarkdownHeading[];
 };
 
+const is_framework_only_page = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)$/gi.test(
+	Astro.url.pathname
+);
+
 const { tagline, title, framework, headings } = Astro.props;
 ---
 
 <DocsLayout title={title} headings={headings}>
 	<h1>
 		{
-			framework ? (
+			is_framework_only_page ? (
 				<>
 					@neodrag/<span style={`color: var(--app-color-brand-${framework})`}>{framework}</span>
 				</>
