@@ -62,7 +62,8 @@ body.light {
 }
 
 body.dark {
-	--app-color-mixer: lch(11.37% 0.5 19.23);
+	/* Keep it in word only */
+	--app-color-mixer: black;
 	--app-color-anti-mixer: white;
 
 	--app-color-light: var(--gray-9);

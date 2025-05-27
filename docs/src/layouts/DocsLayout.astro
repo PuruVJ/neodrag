@@ -5,27 +5,29 @@ import MobileNav from '$components/MobileNav.svelte';
 import ToC from '$components/ToC.astro';
 import type { MarkdownHeading } from 'astro';
 import Layout from './Layout.astro';
+import type { Framework } from '$helpers/constants';
 
 type Props = {
 	title: string;
 	headings: MarkdownHeading[];
+	framework: Framework;
 };
 
-const { title, headings } = Astro.props;
+const { title, headings, framework } = Astro.props;
 ---
 
-<MetaThemeColor client:load />
+<MetaThemeColor client:load transition:persist />
 
 <Layout title={title}>
 	<div class="mobile-nav">
 		<MobileNav client:media="(max-width: 968px)">
-			<Nav />
+			<Nav framework={framework} />
 		</MobileNav>
 	</div>
 
 	<section class="docs-container" id="docs-container">
 		<aside>
-			<Nav />
+			<Nav framework={framework} />
 		</aside>
 
 		<main>
@@ -164,7 +166,7 @@ const { title, headings } = Astro.props;
 		--app-color-scrolling-navbar: color-mix(
 			in lch,
 			var(--secondary-color),
-			var(--app-color-mixer) 80%
+			var(--app-color-mixer) 35%
 		);
 
 		background-image: radial-gradient(

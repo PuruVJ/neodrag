@@ -17,9 +17,7 @@ export interface Props {
 
 const { title } = Astro.props;
 
-const framework = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)/gi.exec(
-	Astro.url.pathname
-)?.[1];
+const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pathname)?.[1];
 ---
 
 <!doctype html>
@@ -31,7 +29,7 @@ const framework = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)/gi.exec(
 		<meta name="generator" content={Astro.generator} />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 
-		<ClientRouter />
+		<ClientRouter fallback="swap" />
 
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 

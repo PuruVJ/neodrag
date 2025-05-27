@@ -6,18 +6,18 @@ import DocsLayout from './DocsLayout.astro';
 type Props = {
 	title: string;
 	tagline: string;
-	framework?: Framework;
+	framework: Framework;
 	headings: MarkdownHeading[];
 };
 
-const is_framework_only_page = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)$/gi.test(
+const is_framework_only_page = /\/docs\/(svelte|react|solid|vanilla|vue)$/gi.test(
 	Astro.url.pathname
 );
 
 const { tagline, title, framework, headings } = Astro.props;
 ---
 
-<DocsLayout title={title} headings={headings}>
+<DocsLayout title={title} headings={headings} framework={framework}>
 	<h1>
 		{
 			is_framework_only_page ? (

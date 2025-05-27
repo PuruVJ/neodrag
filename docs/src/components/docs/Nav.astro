@@ -1,6 +1,13 @@
 ---
 import ThemeSwitcher from '$components/ThemeSwitcher.svelte';
+import type { Framework } from '$helpers/constants';
 import { getCollection } from 'astro:content';
+
+type Props = {
+	framework: Framework;
+};
+
+const { framework } = Astro.props;
 
 const pathname = Astro.url.pathname;
 
@@ -14,27 +21,25 @@ const plugin_collection = (await getCollection('plugin')).sort((a, b) => (a.id >
 
 const aria_current_val = (path: string) => (pathname.endsWith(path) ? 'page' : 'false');
 
-const framework = /\/docs\/framework\/(svelte|react|solid|vanilla|vue)/gi.exec(pathname)?.[1];
-
 const nav_list = [
 	{
 		title: 'framework',
 		sections: framework_collection.map((v) => ({
-			slug: `/docs/framework/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
+			slug: `/docs/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
 			title: v.data.nav_title ?? v.data.title,
 		})),
 	},
 	{
 		title: 'plugin',
 		sections: plugin_collection.map((v) => ({
-			slug: `/docs/framework/${framework}/plugin/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
+			slug: `/docs/${framework}/plugin/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
 			title: v.data.nav_title ?? v.data.title,
 		})),
 	},
 	{
 		title: 'migration',
 		sections: migrations_collection.map((v) => ({
-			slug: `/docs/framework/${framework}/migration/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
+			slug: `/docs/${framework}/migration/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
 			title: v.data.nav_title ?? v.data.title,
 		})),
 	},
