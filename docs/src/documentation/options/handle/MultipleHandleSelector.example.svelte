@@ -17,14 +17,16 @@
 	</OptionsDemoBase>
 </div>
 
-<style lang="scss">
-	@import './handle-base.mixin.scss';
-
+<style>
 	div :global(.box) {
-		@include box;
+		color: hsla(var(--app-color-primary-contrast-hsl), 0.7);
 	}
 
 	.handle {
-		@include handle;
+		background-color: hsla(var(--app-color-primary-contrast-hsl), 1);
+
+		padding: 0.25rem 0.25rem;
+
+		border-radius: 4px;
 	}
 </style>

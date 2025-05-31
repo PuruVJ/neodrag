@@ -367,7 +367,7 @@ export const BoundsFrom = {
 			// 	(ctx.root_node.parentNode as HTMLElement).getBoundingClientRect(),
 			// 	BoundsFrom.element(ctx.root_node.parentNode as HTMLElement, padding)(ctx),
 			// );
-			return BoundsFrom.element(ctx.root_node.parentNode as HTMLElement, padding)(ctx);
+			return BoundsFrom.element(ctx.root_node.parentElement as HTMLElement, padding)(ctx);
 		};
 	},
 };

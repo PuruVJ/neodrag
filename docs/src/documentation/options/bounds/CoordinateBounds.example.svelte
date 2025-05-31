@@ -2,7 +2,7 @@
 	import OptionsDemoBase from '$components/options/OptionsDemoBase.svelte';
 	import { browser } from '$helpers/utils';
 	import type { DragBoundsCoords } from '@neodrag/svelte';
-	import { throttle } from 'throttle-debounce';
+	// import { throttle } from 'throttle-debounce';
 
 	let container_el: HTMLElement | undefined = $state();
 	let first_scrollable_parent = $state<Node>();
@@ -51,7 +51,7 @@
 		if (browser) setComputedBounds();
 	});
 
-	const debouncedFn = throttle(100, setComputedBounds);
+	const debouncedFn = (100, setComputedBounds);
 
 	$effect(() => {
 		if (browser && container_el) {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Theme } from '$state/user-preferences.svelte.ts';
-	import { IsMounted } from 'runed';
+	import { onMount } from 'svelte';
 	import { on } from 'svelte/events';
 	import { get, type Writable, writable } from 'svelte/store';
 	import PawIcon from '~icons/mdi/paw';
@@ -12,7 +12,7 @@
 
 	let isTouchDevice = globalThis.matchMedia('(hover: none)').matches;
 
-	const mounted = new IsMounted();
+	let mounted = $state(false);
 
 	function handleMouseMove(e: MouseEvent) {
 		if (isTouchDevice) return;
@@ -96,6 +96,10 @@
 		}
 	});
 
+	onMount(() => {
+		mounted = true;
+	});
+
 	$effect(() => {
 		return on(window, 'mousemove', handleMouseMove, { passive: true });
 	});
@@ -107,12 +111,12 @@
 	style:left="{coordsCursor?.x ?? 0}px"
 	style:--opacity={showCustomCursor && coordsCursor ? 1 : 0}
 	style:--color="var(--app-color-{cursorColor ?? 'dark'})"
-	style:display={mounted.current ? 'block' : 'none'}
+	style:display={mounted ? 'block' : 'none'}
 >
 	<PawIcon style="font-size: 2rem;" />
 </div>
 
-<style lang="scss">
+<style>
 	.cursor {
 		--color: var(--app-color-dark);
 

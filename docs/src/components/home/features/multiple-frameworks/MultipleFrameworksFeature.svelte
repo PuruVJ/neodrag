@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { copy } from '$/attachments/copy';
 	import type { Framework } from '$helpers/constants';
-	import { copy } from 'svelte-copy';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
 	import IconCopyToClipboard from '~icons/material-symbols/content-copy-outline-rounded';
@@ -50,10 +50,10 @@
 			class="copy-button"
 			class:copied
 			disabled={copied}
-			use:copy={{
+			{@attach copy({
 				text: `npm install @neodrag/${selected_framework}`,
 				onCopy: () => (copied = true),
-			}}
+			})}
 		>
 			<!-- {#key copied} -->
 			<div>

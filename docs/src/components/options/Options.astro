@@ -1,6 +1,5 @@
 ---
 import type { MDXInstance } from 'astro';
-import slugify from 'slugify';
 import PhLinkThin from '~icons/ph/link-thin';
 
 type OptionsFrontMatter = {
@@ -11,6 +10,14 @@ type OptionsFrontMatter = {
 	deprecated?: boolean;
 	deprecatedText?: string;
 };
+
+const slugify = (str: string) =>
+	str
+		.toLowerCase()
+		.trim()
+		.replace(/[^\w\s-]/g, '')
+		.replace(/[\s_-]+/g, '-')
+		.replace(/^-+|-+$/g, '');
 
 const ORDER = [
 	'axis',
@@ -39,7 +46,7 @@ const ORDER = [
 const optionsMD = Object.values(
 	import.meta.glob<MDXInstance<OptionsFrontMatter>>('../../documentation/options/*/+option.mdx', {
 		eager: true,
-	}),
+	})
 );
 
 function validate() {
@@ -62,7 +69,7 @@ function validate() {
 validate();
 
 const orderedOptionsMD = ORDER.map(
-	(property) => optionsMD.find((option) => option.frontmatter.title === property)!,
+	(property) => optionsMD.find((option) => option.frontmatter.title === property)!
 ) as typeof optionsMD & { shortDescription: string }[];
 ---
 
@@ -96,12 +103,12 @@ const orderedOptionsMD = ORDER.map(
 
 					<Content />
 				</>
-			),
+			)
 		)
 	}
 </section>
 
-<style lang="scss">
+<style>
 	.code-like {
 		font-family: var(--app-font-mono);
 		font-size: 0.8em;

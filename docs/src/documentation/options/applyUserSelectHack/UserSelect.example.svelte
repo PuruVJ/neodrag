@@ -22,10 +22,14 @@
 	{/snippet}
 </OptionsDemoBase>
 
-<style lang="scss">
-	@import './user-select.mixin.scss';
-
+<style>
 	kbd {
-		@include userSelectKBD();
+		display: flex;
+		align-items: center;
+		gap: 1ch;
+
+		padding: 0.2rem 0.2rem;
+
+		line-height: 1;
 	}
 </style>

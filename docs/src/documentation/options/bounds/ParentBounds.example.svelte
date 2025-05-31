@@ -8,7 +8,7 @@
 	</OptionsDemoBase>
 </div>
 
-<style lang="scss">
+<style>
 	div :global(.parent) {
 		width: 90%;
 		height: 70%;

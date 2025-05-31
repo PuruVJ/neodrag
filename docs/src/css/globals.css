@@ -1,8 +1,9 @@
 /* optional imports that use the props */
-@import 'open-props/normalize.min.css';
+/* @import 'open-props/normalize.min.css'; */
+@import './normalize.css';
 @import './themes.css';
-/* @import './include-media'; */
 
+/* @import './include-media'; */
 * {
 	color: var(--app-color-dark);
 }
@@ -10,6 +11,10 @@
 *:focus-visible {
 	box-shadow: 0 0 0 4px
 		color-mix(in lch, var(--secondary-color, var(--app-color-primary)), transparent 75%);
+}
+
+button {
+	all: unset;
 }
 
 html {

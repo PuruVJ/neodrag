@@ -91,9 +91,7 @@
 	</div>
 </div>
 
-<style lang="scss">
-	@import '../../css/breakpoints';
-
+<style>
 	.container {
 		position: relative;
 
@@ -110,7 +108,7 @@
 		place-content: center;
 		gap: 2rem;
 
-		@include media('<desktop') {
+		@media (max-width: 1223px) {
 			height: 80vh;
 		}
 
@@ -239,9 +237,9 @@
 			right: calc(0.03 * var(--size));
 			bottom: calc(0.03 * var(--size));
 
-			// width: 61%;
+			/* width: 61%; */
 			min-width: clamp(calc(0.61 * 4rem), calc(0.61 * 20vw), calc(0.61 * 12rem));
-			// height: auto;
+			/* height: auto; */
 		}
 
 		:global(svg path) {

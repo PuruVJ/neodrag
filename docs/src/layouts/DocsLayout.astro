@@ -16,7 +16,7 @@ type Props = {
 const { title, headings, framework } = Astro.props;
 ---
 
-<MetaThemeColor client:load transition:persist />
+<MetaThemeColor client:load />
 
 <Layout title={title}>
 	<div class="mobile-nav">

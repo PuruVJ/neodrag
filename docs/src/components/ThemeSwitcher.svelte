@@ -9,8 +9,8 @@
 		events,
 		position,
 	} from '@neodrag/svelte';
-	import { IsMounted } from 'runed';
-	import { untrack } from 'svelte';
+
+	import { onMount, untrack } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import SunnyIcon from '~icons/ion/sunny-outline';
@@ -25,7 +25,7 @@
 		position({ current: { x: position_x.current, y: 0 } }),
 	);
 
-	const mounted = new IsMounted();
+	let mounted = $state(false);
 
 	function change_theme() {
 		if (position_x.current / container_width >= 0.39) {
@@ -36,7 +36,7 @@
 	}
 
 	$effect(() => {
-		if (mounted.current && draggable_el)
+		if (mounted && draggable_el)
 			untrack(() =>
 				position_x.set(
 					theme.current === 'dark'
@@ -45,6 +45,10 @@
 					{ duration: 0 },
 				),
 			);
+	});
+
+	onMount(() => {
+		mounted = true;
 	});
 </script>
 

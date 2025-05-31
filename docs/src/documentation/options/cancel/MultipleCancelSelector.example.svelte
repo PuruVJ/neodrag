@@ -15,10 +15,17 @@
 	{/snippet}
 </OptionsDemoBase>
 
-<style lang="scss">
-	@import './cancel-base.mixin.scss';
-
+<style>
 	.cancel {
-		@include cancelExample;
+		text-decoration: line-through;
+		color: hsla(var(--app-color-primary-contrast-hsl), 0.7);
+
+		background-color: hsla(var(--app-color-primary-contrast-hsl), 0.1);
+
+		padding: 0.25rem 0.25rem;
+
+		border-radius: 4px;
+
+		cursor: not-allowed;
 	}
 </style>

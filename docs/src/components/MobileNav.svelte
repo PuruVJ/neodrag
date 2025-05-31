@@ -57,7 +57,7 @@
 	</nav>
 {/if}
 
-<style lang="scss">
+<style>
 	.view-judge {
 		position: absolute;
 		top: 0;

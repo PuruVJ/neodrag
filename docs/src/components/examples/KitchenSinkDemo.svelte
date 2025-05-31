@@ -1,4 +1,5 @@
 <script lang="ts">
+	import squircle from '$/worklet/squircle?url';
 	import { browser } from '$helpers/utils';
 	import {
 		axis,
@@ -14,13 +15,9 @@
 		position,
 		scrollLock,
 	} from '@neodrag/svelte';
-	//@ts-ignore
-	import squircle from '$/worklet/squircle?url';
-	import { style } from 'svelte-body';
 	import { expoOut, sineIn } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
-	import { tick } from 'svelte';
 
 	let reset = $state(0);
 
@@ -117,13 +114,13 @@
 			// @ts-ignore
 			CSS.paintWorklet.addModule(squircle);
 		}
-</script>
 
-<svelte:body
-	use:style={{
-		boxShadow: hightlight_body ? 'inset 0 0 0 2px var(--app-color-primary)' : '',
-	}}
-/>
+	$effect(() => {
+		document.body.style.boxShadow = hightlight_body
+			? 'inset 0 0 0 2px var(--app-color-primary)'
+			: '';
+	});
+</script>
 
 {#if is_backdrop_visible || show_markers}
 	<div class="backdrop" transition:fade={{ duration: 200, easing: sineIn }}></div>
@@ -412,7 +409,7 @@
 
 <button onclick={() => reset++}>Reset examples</button>
 
-<style lang="scss">
+<style>
 	.examples-container {
 		--size: clamp(120px, 20vw, 175px);
 
@@ -460,6 +457,7 @@
 		border-radius: 0.5rem;
 
 		mask-image: paint(squircle);
+		-webkit-mask-image: paint(squircle);
 		--squircle-radius: 50px;
 		--squircle-smooth: 1;
 
