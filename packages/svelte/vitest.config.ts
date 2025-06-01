@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
 	plugins: [svelte({ hot: !process.env.VITEST })],
 	test: {
-		global: true,
+		globals: true,
 		environment: 'jsdom',
 	},
 });
