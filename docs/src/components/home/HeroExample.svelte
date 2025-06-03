@@ -83,8 +83,8 @@
 
 	<div
 		class="cursor"
-		style:transform="translate3d(calc({coords_cursor?.x ?? 0}px - 50%), calc({coords_cursor?.y ??
-			0}px - 50%), 0)"
+		style:translate="calc({coords_cursor?.x ?? 0}px - 50%) calc({coords_cursor?.y ?? 0}px - 50%)
+		0.000001px"
 		style:--opacity={show_custom_cursor && coords_cursor ? 1 : 0}
 	>
 		<PawIcon style="font-size: 2rem;" />

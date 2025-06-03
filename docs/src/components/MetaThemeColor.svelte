@@ -52,12 +52,13 @@
 
 		return () => observer.disconnect();
 	}
+
+	$effect(() => {
+		const meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement;
+		if (meta && theme_color) {
+			meta.content = theme_color;
+		}
+	});
 </script>
 
 <div style="display: hidden;" {@attach get_theme_color}></div>
-
-<svelte:head>
-	{#if theme_color}
-		<meta name="theme-color" content={theme_color} />
-	{/if}
-</svelte:head>

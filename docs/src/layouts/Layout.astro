@@ -28,6 +28,7 @@ const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pa
 		<link rel="icon" type="image/svg+xml" href="/favicon.png" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="theme-color" content="black" />
 
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
@@ -54,7 +55,7 @@ const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pa
 	</head>
 
 	<body transition:persist data-framework={framework}>
-		<script is:inline data-astro-rerun>
+		<script is:inline>
 			function do_it() {
 				// Get localstorage value
 				const localTheme = JSON.parse(localStorage.getItem('neodrag:theme')) || 'light';
@@ -68,6 +69,10 @@ const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pa
 			}
 
 			do_it();
+
+			window.addEventListener('astro:swap', () => {
+				do_it();
+			});
 		</script>
 
 		<ThemeWatcher client:load />
