@@ -66,7 +66,7 @@ export const DEFAULTS = {
 		console.error(error);
 	},
 
-	delegate: () => document.body,
+	delegate: () => document.documentElement,
 };
 
 export function createDraggable({
