@@ -1,0 +1,808 @@
+---
+title: 'stateMarker'
+tagline: 'Add data attributes to track drag state'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+## What it does
+
+The `stateMarker` plugin adds data attributes to draggable elements that track their current drag state. These attributes enable CSS styling based on drag status and provide useful hooks for debugging and analytics.
+
+```typescript
+stateMarker(); // Adds data-neodrag-state and data-neodrag-count attributes
+```
+
+**Attributes added:**
+
+- `data-neodrag=""` - Marks element as draggable
+- `data-neodrag-state="idle|dragging"` - Current drag state
+- `data-neodrag-count="0"` - Number of completed drags
+
+> **Note:** StateMarker is included by default in most Neodrag setups and is non-cancelable, so it always runs regardless of other plugin cancellations.
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { stateMarker } from '@neodrag/svelte';
+</script>
+
+<div {@attach draggable([stateMarker()])}>
+  Drag me - watch the data attributes change
+</div>
+
+<style>
+  /* Style based on drag state */
+  [data-neodrag-state='idle'] {
+    background: #e3f2fd;
+    border: 2px solid #2196f3;
+  }
+
+  [data-neodrag-state='dragging'] {
+    background: #fff3e0;
+    border: 2px solid #ff9800;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: scale(1.05);
+  }
+</style>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { stateMarker, useDraggable } from '@neodrag/react';
+
+function StateMarkerExample() {
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(elementRef, [stateMarker()]);
+
+  return (
+    <div>
+      <div ref={elementRef} className="draggable">
+        Drag me - watch the data attributes change
+      </div>
+
+      <style jsx>{`
+        .draggable[data-neodrag-state='idle'] {
+          background: #e3f2fd;
+          border: 2px solid #2196f3;
+        }
+
+        .draggable[data-neodrag-state='dragging'] {
+          background: #fff3e0;
+          border: 2px solid #ff9800;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          transform: scale(1.05);
+        }
+      `}</style>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { stateMarker, vDraggable } from '@neodrag/vue';
+</script>
+
+<template>
+  <div v-draggable="[stateMarker()]" class="draggable">
+    Drag me - watch the data attributes change
+  </div>
+</template>
+
+<style scoped>
+.draggable[data-neodrag-state='idle'] {
+  background: #e3f2fd;
+  border: 2px solid #2196f3;
+}
+
+.draggable[data-neodrag-state='dragging'] {
+  background: #fff3e0;
+  border: 2px solid #ff9800;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+</style>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { stateMarker, useDraggable } from '@neodrag/solid';
+
+function StateMarkerExample() {
+  const [element, setElement] = createSignal<HTMLDivElement>();
+
+  useDraggable(element, [stateMarker()]);
+
+  return (
+    <div>
+      <div
+        ref={setElement}
+        class="draggable"
+        style={{
+          padding: '20px',
+          border: '2px solid #2196f3',
+          background: '#e3f2fd',
+          cursor: 'move',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        Drag me - watch the data attributes change
+      </div>
+
+      <style>{`
+        .draggable[data-neodrag-state="dragging"] {
+          background: #fff3e0 !important;
+          border-color: #ff9800 !important;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+          transform: scale(1.05) !important;
+        }
+      `}</style>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { stateMarker, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('element');
+
+new Draggable(element, [stateMarker()]);
+
+// Add CSS for state-based styling
+const style = document.createElement('style');
+style.textContent = `
+  [data-neodrag-state="idle"] {
+    background: #e3f2fd;
+    border: 2px solid #2196f3;
+  }
+  
+  [data-neodrag-state="dragging"] {
+    background: #fff3e0;
+    border: 2px solid #ff9800;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: scale(1.05);
+  }
+`;
+document.head.appendChild(style);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Data Attributes
+
+### data-neodrag
+
+Marks the element as having Neodrag applied:
+
+```html
+<div data-neodrag="">...</div>
+```
+
+Useful for:
+
+- CSS selectors targeting all draggable elements
+- JavaScript queries to find draggable elements
+- Debugging and development tools
+
+### data-neodrag-state
+
+Tracks the current drag state:
+
+```html
+<!-- When not being dragged -->
+<div data-neodrag-state="idle">...</div>
+
+<!-- While actively dragging -->
+<div data-neodrag-state="dragging">...</div>
+```
+
+### data-neodrag-count
+
+Tracks how many times the element has been dragged:
+
+```html
+<!-- Never dragged -->
+<div data-neodrag-count="0">...</div>
+
+<!-- Dragged once -->
+<div data-neodrag-count="1">...</div>
+
+<!-- Dragged multiple times -->
+<div data-neodrag-count="5">...</div>
+```
+
+## CSS Styling Examples
+
+### Visual Feedback
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { stateMarker } from '@neodrag/svelte';
+</script>
+
+<div class="container">
+  <div {@attach draggable([stateMarker()])} class="card">
+    Card with drag feedback
+  </div>
+
+  <div {@attach draggable([stateMarker()])} class="button">
+    Button with hover effect
+  </div>
+</div>
+
+<style>
+  .container {
+    padding: 40px;
+    display: flex;
+    gap: 20px;
+  }
+
+  .card,
+  .button {
+    padding: 20px;
+    border-radius: 8px;
+    cursor: move;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+
+  /* Idle state */
+  .card[data-neodrag-state='idle'] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .button[data-neodrag-state='idle'] {
+    background: #4caf50;
+    color: white;
+    border: none;
+  }
+
+  /* Dragging state */
+  .card[data-neodrag-state='dragging'] {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    transform: rotate(5deg) scale(1.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+
+  .button[data-neodrag-state='dragging'] {
+    background: #ff5722;
+    transform: scale(1.15);
+    box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);
+  }
+
+  /* Experience indicator */
+  [data-neodrag-count='0']::after {
+    content: ' 🆕';
+  }
+
+  [data-neodrag-count='1']::after {
+    content: ' ⭐';
+  }
+
+  [data-neodrag-count='5']::after {
+    content: ' 🏆';
+  }
+
+  [data-neodrag-count]:is(
+      [data-neodrag-count='10'],
+      [data-neodrag-count='15'],
+      [data-neodrag-count='20']
+    )::after {
+    content: ' 👑';
+  }
+</style>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { stateMarker, useDraggable } from '@neodrag/react';
+
+function StyledDraggables() {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(cardRef, [stateMarker()]);
+  useDraggable(buttonRef, [stateMarker()]);
+
+  return (
+    <div style={{ padding: '40px', display: 'flex', gap: '20px' }}>
+      <div ref={cardRef} className="card">
+        Card with drag feedback
+      </div>
+
+      <div ref={buttonRef} className="button">
+        Button with hover effect
+      </div>
+
+      <style jsx>{`
+        .card,
+        .button {
+          padding: 20px;
+          border-radius: 8px;
+          cursor: move;
+          transition: all 0.2s ease;
+          user-select: none;
+        }
+
+        .card[data-neodrag-state='idle'] {
+          background: linear-gradient(
+            135deg,
+            #667eea 0%,
+            #764ba2 100%
+          );
+          color: white;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .button[data-neodrag-state='idle'] {
+          background: #4caf50;
+          color: white;
+          border: none;
+        }
+
+        .card[data-neodrag-state='dragging'] {
+          background: linear-gradient(
+            135deg,
+            #f093fb 0%,
+            #f5576c 100%
+          );
+          transform: rotate(5deg) scale(1.1);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+          z-index: 1000;
+        }
+
+        .button[data-neodrag-state='dragging'] {
+          background: #ff5722;
+          transform: scale(1.15);
+          box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);
+        }
+      `}</style>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { stateMarker, vDraggable } from '@neodrag/vue';
+</script>
+
+<template>
+  <div class="container">
+    <div v-draggable="[stateMarker()]" class="card">
+      Card with drag feedback
+    </div>
+
+    <div v-draggable="[stateMarker()]" class="button">
+      Button with hover effect
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.container {
+  padding: 40px;
+  display: flex;
+  gap: 20px;
+}
+
+.card,
+.button {
+  padding: 20px;
+  border-radius: 8px;
+  cursor: move;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.card[data-neodrag-state='idle'] {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.button[data-neodrag-state='idle'] {
+  background: #4caf50;
+  color: white;
+  border: none;
+}
+
+.card[data-neodrag-state='dragging'] {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  transform: rotate(5deg) scale(1.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.button[data-neodrag-state='dragging'] {
+  background: #ff5722;
+  transform: scale(1.15);
+  box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);
+}
+</style>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { stateMarker, useDraggable } from '@neodrag/solid';
+
+function StyledDraggables() {
+  const [card, setCard] = createSignal<HTMLDivElement>();
+  const [button, setButton] = createSignal<HTMLDivElement>();
+
+  useDraggable(card, [stateMarker()]);
+  useDraggable(button, [stateMarker()]);
+
+  return (
+    <div style={{ padding: '40px', display: 'flex', gap: '20px' }}>
+      <div ref={setCard} class="card">
+        Card with drag feedback
+      </div>
+
+      <div ref={setButton} class="button">
+        Button with hover effect
+      </div>
+
+      <style>{`
+        .card, .button {
+          padding: 20px;
+          border-radius: 8px;
+          cursor: move;
+          transition: all 0.2s ease;
+          user-select: none;
+        }
+        
+        .card[data-neodrag-state="idle"] {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .button[data-neodrag-state="idle"] {
+          background: #4caf50;
+          color: white;
+          border: none;
+        }
+        
+        .card[data-neodrag-state="dragging"] {
+          background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+          transform: rotate(5deg) scale(1.1) !important;
+          box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+          z-index: 1000;
+        }
+        
+        .button[data-neodrag-state="dragging"] {
+          background: #ff5722;
+          transform: scale(1.15) !important;
+          box-shadow: 0 4px 15px rgba(255,87,34,0.4);
+        }
+      `}</style>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { stateMarker, Draggable } from '@neodrag/vanilla';
+
+const card = document.getElementById('card');
+const button = document.getElementById('button');
+
+new Draggable(card, [stateMarker()]);
+new Draggable(button, [stateMarker()]);
+
+// Add comprehensive styling
+const style = document.createElement('style');
+style.textContent = `
+  .card, .button {
+    padding: 20px;
+    border-radius: 8px;
+    cursor: move;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  
+  .card[data-neodrag-state="idle"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .button[data-neodrag-state="idle"] {
+    background: #4caf50;
+    color: white;
+    border: none;
+  }
+  
+  .card[data-neodrag-state="dragging"] {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    transform: rotate(5deg) scale(1.1);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    z-index: 1000;
+  }
+  
+  .button[data-neodrag-state="dragging"] {
+    background: #ff5722;
+    transform: scale(1.15);
+    box-shadow: 0 4px 15px rgba(255,87,34,0.4);
+  }
+`;
+document.head.appendChild(style);
+```
+
+</div>
+</FrameworkSwitch>
+
+## JavaScript Integration
+
+### Query Draggable Elements
+
+```typescript
+// Find all draggable elements
+const draggables = document.querySelectorAll('[data-neodrag]');
+
+// Find currently dragging elements
+const dragging = document.querySelectorAll(
+  '[data-neodrag-state="dragging"]',
+);
+
+// Find elements that have been dragged
+const experienced = document.querySelectorAll(
+  '[data-neodrag-count]:not([data-neodrag-count="0"])',
+);
+```
+
+### Analytics and Tracking
+
+```typescript
+// Track drag usage
+function trackDragUsage() {
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (
+        mutation.type === 'attributes' &&
+        mutation.attributeName === 'data-neodrag-count'
+      ) {
+        const element = mutation.target as HTMLElement;
+        const count = parseInt(element.dataset.neodragCount || '0');
+
+        analytics.track('element_dragged', {
+          element: element.id || element.className,
+          dragCount: count,
+          timestamp: Date.now(),
+        });
+      }
+    });
+  });
+
+  // Observe all draggable elements
+  document.querySelectorAll('[data-neodrag]').forEach((el) => {
+    observer.observe(el, {
+      attributes: true,
+      attributeFilter: ['data-neodrag-count'],
+    });
+  });
+}
+```
+
+### Conditional Behavior
+
+```typescript
+// Different behavior based on drag experience
+function setupConditionalBehavior() {
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const dragCount = parseInt(target.dataset.neodragCount || '0');
+
+    if (dragCount === 0) {
+      showTooltip(target, 'Try dragging me!');
+    } else if (dragCount >= 10) {
+      showTooltip(target, "You're a drag expert! 👑");
+    }
+  });
+}
+```
+
+## Debugging and Development
+
+### Visual Debug Mode
+
+```css
+/* Show all drag states visually */
+[data-neodrag] {
+  outline: 2px dashed transparent;
+  position: relative;
+}
+
+[data-neodrag]::before {
+  content: attr(data-neodrag-state) ' (' attr(data-neodrag-count) ')';
+  position: absolute;
+  top: -20px;
+  left: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2px 6px;
+  font-size: 10px;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+[data-neodrag-state='idle'] {
+  outline-color: #4caf50;
+}
+
+[data-neodrag-state='dragging'] {
+  outline-color: #ff9800;
+}
+```
+
+### Browser DevTools
+
+The data attributes are visible in browser DevTools:
+
+```html
+<!-- In Elements panel -->
+<div
+  data-neodrag=""
+  data-neodrag-state="dragging"
+  data-neodrag-count="3"
+>
+  Draggable element
+</div>
+```
+
+## Common Use Cases
+
+### Progress Indicators
+
+```css
+/* Show progress based on drag count */
+[data-neodrag-count='1']::after {
+  content: '⭐ Beginner';
+}
+[data-neodrag-count='5']::after {
+  content: '🔥 Getting good';
+}
+[data-neodrag-count='10']::after {
+  content: '🏆 Expert';
+}
+```
+
+### Accessibility Enhancements
+
+```css
+/* High contrast mode for dragging */
+@media (prefers-reduced-motion: no-preference) {
+  [data-neodrag-state='dragging'] {
+    animation: pulse 1s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+```
+
+### Game-like Interactions
+
+```css
+/* Gamification elements */
+[data-neodrag-count='0'] {
+  filter: grayscale(100%);
+}
+
+[data-neodrag-count]:not([data-neodrag-count='0']) {
+  filter: none;
+  animation: unlock 0.5s ease-out;
+}
+
+@keyframes unlock {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+```
+
+## How It Works
+
+The stateMarker plugin manages data attributes through the drag lifecycle:
+
+1. **Setup phase**:
+
+   - Adds `data-neodrag=""` to mark element
+   - Sets `data-neodrag-state="idle"`
+   - Initializes `data-neodrag-count="0"`
+
+2. **Start phase**:
+
+   - Updates `data-neodrag-state="dragging"`
+
+3. **End phase**:
+
+   - Resets `data-neodrag-state="idle"`
+   - Increments `data-neodrag-count`
+
+4. **Non-cancelable**:
+   - Always runs regardless of other plugin cancellations
+   - Ensures consistent state tracking
+
+## API Reference
+
+```typescript
+function stateMarker(): Plugin;
+```
+
+**Parameters:** None
+
+**Data attributes added:**
+
+- `data-neodrag=""` - Marks element as draggable
+- `data-neodrag-state="idle|dragging"` - Current drag state
+- `data-neodrag-count="0"` - Number of completed drags
+
+**Behavior:**
+
+- Non-cancelable - always runs
+- Updates attributes automatically during drag lifecycle
+- Increments count only on successful drag completion
+- Provides hooks for CSS styling and JavaScript integration
+
+**Returns:** A plugin object for use with draggable.
