@@ -1,7 +1,8 @@
 ---
 import ThemeSwitcher from '$components/ThemeSwitcher.svelte';
-import type { Framework } from '$helpers/constants';
+import { FRAMEWORKS, type Framework } from '$helpers/constants';
 import { getCollection } from 'astro:content';
+import FrameworkDropdown from './FrameworkDropdown.svelte';
 
 type Props = {
 	framework: Framework;
@@ -59,6 +60,8 @@ const nav_list = [
 		Neodrag
 	</a>
 
+	<FrameworkDropdown pathname={Astro.url.pathname} selected={framework} client:load />
+
 	<nav>
 		{
 			nav_list.map(({ title, sections }, index, arr) => (
@@ -101,6 +104,13 @@ const nav_list = [
 </div>
 
 <style>
+	select {
+		background-color: var(--app-color-scrolling-navbar);
+		width: 95%;
+		margin: 0 auto;
+		padding-right: 1rem;
+		border: none;
+	}
 	.container {
 		display: flex;
 		flex-direction: column;

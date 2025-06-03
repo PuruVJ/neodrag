@@ -15,6 +15,7 @@
 		"@fontsource/plus-jakarta-sans": "^5.0.18",
 		"@neodrag/svelte": "workspace:*",
 		"astro-seo": "^0.8.4",
+		"melt": "^0.34.0",
 		"svelte-inview": "^4.0.1"
 	},
 	"devDependencies": {

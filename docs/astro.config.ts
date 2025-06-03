@@ -30,6 +30,11 @@ export default defineConfig({
 	site: 'https://neodrag.dev',
 	integrations: [svelte(), mdx(), sitemap()],
 
+	prefetch: {
+		prefetchAll: true,
+		defaultStrategy: 'hover',
+	},
+
 	markdown: {
 		extendDefaultPlugins: true,
 		shikiConfig: {

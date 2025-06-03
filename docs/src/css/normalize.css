@@ -102,17 +102,12 @@ select:focus {
 }
 
 button {
-	background-color: #0066cc;
 	color: white;
 	border: none;
 	border-radius: 4px;
 	padding: 0.5rem 1rem;
 	cursor: pointer;
 	font-weight: 500;
-}
-
-button:hover {
-	background-color: #0052a3;
 }
 
 button:disabled {
@@ -155,7 +150,8 @@ code,
 kbd,
 samp,
 pre {
-	font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+	font-family:
+		'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
 	font-size: 0.9em;
 }
 
