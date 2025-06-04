@@ -28,11 +28,33 @@
 	let mounted = $state(false);
 
 	function change_theme() {
-		if (position_x.current / container_width >= 0.39) {
-			theme.current = 'dark';
-		} else {
-			theme.current = 'light';
-		}
+		const previous_theme = theme.current;
+
+		// Determine new theme BEFORE starting transition
+		const new_theme = position_x.current / container_width >= 0.39 ? 'dark' : 'light';
+
+		// Don't transition if theme hasn't changed
+		if (previous_theme === new_theme) return;
+
+		// Ensure current state is stable before transition
+		requestAnimationFrame(() => {
+			if (document.startViewTransition) {
+				document.startViewTransition(() => {
+					// Only update state inside the callback
+					theme.current = new_theme;
+					apply_theme_to_dom(new_theme);
+				});
+			} else {
+				// Fallback for browsers without view transitions
+				theme.current = new_theme;
+				apply_theme_to_dom(new_theme);
+			}
+		});
+	}
+
+	function apply_theme_to_dom(new_theme: string) {
+		document.body.classList.remove('light', 'dark');
+		document.body.classList.add(new_theme);
 	}
 
 	$effect(() => {
@@ -148,6 +170,56 @@
 
 		&.dark {
 			right: 0.2em;
+		}
+	}
+
+	:global {
+		/* Improved view transition animations */
+		::view-transition-old(root),
+		::view-transition-new(root) {
+			animation-duration: 0.5s;
+			animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		::view-transition-old(root) {
+			animation-name: theme-fade-out;
+		}
+
+		::view-transition-new(root) {
+			animation-name: theme-fade-in;
+		}
+
+		@keyframes theme-fade-out {
+			0% {
+				opacity: 1;
+			}
+			100% {
+				opacity: 0;
+			}
+		}
+
+		@keyframes theme-fade-in {
+			0% {
+				opacity: 0;
+			}
+			100% {
+				opacity: 1;
+			}
+		}
+
+		/* Ensure smooth transitions for reduced motion users */
+		@media (prefers-reduced-motion: reduce) {
+			::view-transition-old(root),
+			::view-transition-new(root) {
+				animation-duration: 0.1s !important;
+				animation-name: simple-fade !important;
+			}
+		}
+
+		@keyframes simple-fade {
+			to {
+				opacity: 0;
+			}
 		}
 	}
 </style>

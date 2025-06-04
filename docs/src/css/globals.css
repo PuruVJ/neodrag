@@ -197,3 +197,31 @@ button {
 .font-mono {
 	font-family: var(--app-font-mono);
 }
+
+::-webkit-scrollbar {
+	background-color: transparent;
+	width: 1rem;
+}
+
+::-webkit-scrollbar-track {
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: color-mix(
+		in lch,
+		var(--app-color-scrolling-navbar),
+		var(--app-color-anti-mixer) 20%
+	);
+	border-radius: 10px;
+	border: 5px solid rgba(0, 0, 0, 0);
+	background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background-color: color-mix(
+		in lch,
+		var(--app-color-scrolling-navbar),
+		var(--app-color-anti-mixer) 30%
+	);
+}

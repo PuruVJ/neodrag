@@ -1,6 +1,6 @@
 ---
 import ThemeSwitcher from '$components/ThemeSwitcher.svelte';
-import { FRAMEWORKS, type Framework } from '$helpers/constants';
+import type { Framework } from '$helpers/constants';
 import { getCollection } from 'astro:content';
 import FrameworkDropdown from './FrameworkDropdown.svelte';
 
@@ -116,6 +116,7 @@ const nav_list = [
 		flex-direction: column;
 		gap: 1rem;
 		height: 100%;
+		overflow-y: auto;
 	}
 
 	.logo {

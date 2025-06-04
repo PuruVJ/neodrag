@@ -35,7 +35,7 @@ const { title, headings, framework } = Astro.props;
 			</article>
 		</main>
 
-		<aside>
+		<aside class="toc">
 			<ToC headings={headings} />
 		</aside>
 	</section>
@@ -51,12 +51,12 @@ const { title, headings, framework } = Astro.props;
 	}
 
 	.docs-container {
-		display: grid;
-		grid-template-columns: 300px auto 300px;
-		gap: 1rem;
-
 		width: 100%;
 		height: auto;
+
+		overflow-y: auto;
+		overflow-x: hidden;
+		scroll-behavior: smooth;
 
 		@media (max-width: 967px) {
 			grid-template-columns: 1fr;
@@ -64,11 +64,27 @@ const { title, headings, framework } = Astro.props;
 			& aside {
 				display: none;
 			}
+
+			main {
+				width: 100%;
+				padding-left: 1rem;
+				padding-top: 2.5rem;
+			}
 		}
 	}
 
 	aside {
 		height: 100%;
+		width: 300px;
+		position: fixed;
+
+		z-index: 1;
+	}
+
+	.toc {
+		right: 20px;
+		top: 0;
+		width: 280px;
 	}
 
 	main {
@@ -76,13 +92,12 @@ const { title, headings, framework } = Astro.props;
 		position: relative;
 
 		min-width: 0;
+		width: calc(100% - 300px);
 		height: 100vh;
 
 		padding: 1rem;
 
-		overflow-y: auto;
-		overflow-x: hidden;
-		scroll-behavior: smooth;
+		padding-left: 332px;
 
 		@media (max-width: 768px) {
 			padding: 4rem 1rem;
