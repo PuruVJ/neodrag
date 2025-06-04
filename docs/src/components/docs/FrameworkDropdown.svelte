@@ -59,7 +59,7 @@
 <style>
 	section {
 		--color: color-mix(in lch, var(--app-color-scrolling-navbar), transparent 0%);
-		width: 100%;
+		width: 97%;
 		padding: 0 0.5rem;
 		font-family: var(--app-font-mono);
 	}
