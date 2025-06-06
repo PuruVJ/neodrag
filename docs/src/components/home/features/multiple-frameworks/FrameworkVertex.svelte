@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { portal } from '$actions/portal';
+	import { portal } from '$attachments/portal.svelte';
 	import type { Framework } from '$helpers/constants';
 	import {
 		createCompartment,
@@ -8,7 +8,9 @@
 		position,
 		type DragEventData,
 	} from '@neodrag/svelte';
+	import type { Attachment } from 'svelte/attachments';
 	import { expoOut } from 'svelte/easing';
+	import { on } from 'svelte/events';
 	import { Tween } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
 
@@ -147,29 +149,47 @@
 		needs_position_update = true;
 	}
 
-	function connect(node: HTMLElement, root_el: HTMLElement) {
-		const handle_resize = () => {
-			// Invalidate cache and mark for update
-			cached_positions.logo.timestamp = 0;
-			cached_positions.button.timestamp = 0;
-			mark_for_update();
-		};
+	// function connect(node: HTMLElement, root_el: HTMLElement) {
+	// const handle_resize = () => {
+	// 	// Invalidate cache and mark for update
+	// 	cached_positions.logo.timestamp = 0;
+	// 	cached_positions.button.timestamp = 0;
+	// 	mark_for_update();
+	// };
 
-		window.addEventListener('resize', handle_resize);
+	// window.addEventListener('resize', handle_resize);
 
-		// Initial update
-		mark_for_update();
+	// // Initial update
+	// mark_for_update();
 
-		return {
-			update(newRootEl: HTMLElement) {
-				root_el = newRootEl;
+	// return {
+	// 	update(newRootEl: HTMLElement) {
+	// 		root_el = newRootEl;
+	// 		mark_for_update();
+	// 	},
+	// 	destroy: () => {
+	// 		window.removeEventListener('resize', handle_resize);
+	// 	},
+	// };
+	// }
+
+	const connect =
+		(root_el: HTMLElement): Attachment =>
+		(_node) => {
+			const unsub = on(window, 'resize', () => {
+				// Invalidate cache and mark for update
+				cached_positions.logo.timestamp = 0;
+				cached_positions.button.timestamp = 0;
 				mark_for_update();
-			},
-			destroy: () => {
-				window.removeEventListener('resize', handle_resize);
-			},
+			});
+
+			$effect(() => {
+				root_el;
+				mark_for_update();
+			});
+
+			return unsub;
 		};
-	}
 
 	function selectFramework() {
 		const fn = () => onselect?.({ framework });
@@ -200,7 +220,7 @@
 	});
 
 	$effect(() => {
-		const current = draggable_position.current;
+		draggable_position.current;
 		// Mark for update when position changes
 		mark_for_update();
 	});
@@ -231,7 +251,7 @@
 			},
 		}),
 	])}
-	use:connect={logoEl}
+	{@attach connect(logoEl)}
 	onclick={selectFramework}
 >
 	<span>
@@ -249,7 +269,7 @@
 		style:--length="{line_properties.width}px"
 		style:--thickness="{line_properties.thickness}px"
 		style:--angle="{line_properties.angle}deg"
-		use:portal={'body'}
+		{@attach portal('body')}
 		in:fade={{ delay: 1000 }}
 	></div>
 {/if}

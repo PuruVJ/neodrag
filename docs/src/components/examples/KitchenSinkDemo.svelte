@@ -179,15 +179,6 @@
 			I will drag vertically
 		</div>
 
-		<!-- <div
-			class="box"
-			style:z-index={z_indices[3]}
-			data-paw-cursor="true"
-			use:draggable={{ axis: 'none', ...drag_handlers }}
-		>
-			<span><code>axis: none</code> disables dragging</span>
-		</div> -->
-
 		<div
 			class="box single-handle"
 			style:z-index={z_indices[5]}

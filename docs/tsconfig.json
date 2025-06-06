@@ -7,7 +7,7 @@
 			"$layouts/*": ["src/layouts/*"],
 			"$components/*": ["src/components/*"],
 			"$state/*": ["src/state/*"],
-			"$actions/*": ["src/actions/*"],
+			"$attachments/*": ["src/attachments/*"],
 			"$helpers/*": ["src/helpers/*"],
 			"$/*": ["src/*"]
 		}

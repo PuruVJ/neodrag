@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { portal } from '$actions/portal';
+	import { portal } from '$attachments/portal.svelte';
 	import { theme } from '$state/user-preferences.svelte.ts';
+	import type { Snippet } from 'svelte';
 	import { inview } from 'svelte-inview';
 	import { expoOut } from 'svelte/easing';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { fade, slide } from 'svelte/transition';
 	import CloseIcon from '~icons/material-symbols/close-rounded';
 	import MenuIcon from '~icons/ri/menu-3-fill';
-	import type { Snippet } from 'svelte';
 
 	let {
 		children,
@@ -23,7 +23,7 @@
 
 <div
 	class="view-judge"
-	use:portal={'#docs-container main'}
+	{@attach portal('#docs-container main')}
 	use:inview={{ threshold: 0.1 }}
 	oninview_change={() => (shadow = false)}
 	oninview_leave={() => (shadow = true)}

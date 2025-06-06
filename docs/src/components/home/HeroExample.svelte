@@ -1,6 +1,6 @@
 <script lang="ts">
 	import squircle from '$/worklet/squircle.js?url';
-	import { typingEffect } from '$actions/typingEffect';
+	import { typingEffect } from '$attachments/typingEffect.svelte';
 	import { browser } from '$helpers/utils';
 	import {
 		bounds,
@@ -51,7 +51,7 @@
 
 <div class="container">
 	{#key heading_text}
-		<p class="h3" class:hidden={false} use:typingEffect={60}>
+		<p class="h3" class:hidden={false} {@attach typingEffect(60)}>
 			{browser ? heading_text : ''}
 		</p>
 	{/key}

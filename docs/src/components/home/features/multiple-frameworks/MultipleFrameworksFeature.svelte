@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { copy } from '$/attachments/copy';
+	import { copy } from '$attachments/copy';
 	import type { Framework } from '$helpers/constants';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
