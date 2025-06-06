@@ -1,15 +1,7 @@
-import { createDraggable } from '@neodrag/core';
-import { Compartment, type PluginInput, type Plugin } from '@neodrag/core/plugins';
-import type { Action } from 'svelte/action';
+import type { createDraggable } from '@neodrag/core';
+import { Compartment, type Plugin, type PluginInput } from '@neodrag/core/plugins';
 import { Attachment } from 'svelte/attachments';
-
-const factory = createDraggable();
-
-/** @deprecated Use `{@attach draggable}` instead */
-export const legacyDraggable = factory.draggable as Action<
-	HTMLElement | SVGElement,
-	PluginInput | undefined
->;
+import { factory } from './shared';
 
 export const wrapper = (factory: ReturnType<typeof createDraggable>) => {
 	return (plugins: PluginInput | undefined): Attachment<HTMLElement> =>

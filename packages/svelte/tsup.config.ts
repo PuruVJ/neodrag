@@ -2,7 +2,10 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig([
 	{
-		entry: [`./src/index.svelte.ts`],
+		entry: {
+			'index.svelte': './src/index.svelte.ts',
+			legacy: './src/legacy.ts',
+		},
 		format: 'esm',
 		dts: true,
 		external: ['svelte/action', '@neodrag/core'],
