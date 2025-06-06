@@ -57,7 +57,7 @@ const nav_list = [
 <div class="nav container">
 	<a href="/" class="h3 logo unstyled">
 		<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" />
-		Neodrag
+		<span class="h3">Neodrag</span>
 	</a>
 
 	<FrameworkDropdown pathname={Astro.url.pathname} selected={framework} client:load />
@@ -89,18 +89,6 @@ const nav_list = [
 	<div class="theme-switcher">
 		<ThemeSwitcher client:load />
 	</div>
-
-	<span class="copyright"
-		>&copy; 2021-{new Date().getUTCFullYear()}
-		<a
-			href="https://x.com/puruvjdev"
-			target="blank"
-			rel="noopener noreferrer"
-			class={framework ? 'framework' : ''}
-		>
-			Puru Vijay</a
-		>
-	</span>
 </div>
 
 <style>
@@ -131,6 +119,10 @@ const nav_list = [
 
 		@media (min-width: 968px) {
 			margin: 1rem;
+		}
+
+		.h3 {
+			margin: 0;
 		}
 
 		img {
@@ -192,24 +184,6 @@ const nav_list = [
 	.group a {
 		&[aria-current='page'] {
 			background-color: color-mix(in lch, var(--secondary-color), transparent 80%);
-		}
-	}
-
-	.copyright {
-		width: 100%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		gap: 0.5rem;
-		font-family: var(--app-font-mono);
-		font-size: 0.9rem;
-
-		a {
-			font-size: inherit;
-
-			&.framework {
-				--app-color-primary: var(--secondary-color);
-			}
 		}
 	}
 

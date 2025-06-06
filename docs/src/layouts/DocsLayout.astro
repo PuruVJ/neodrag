@@ -32,6 +32,20 @@ const { title, headings, framework } = Astro.props;
 		<main>
 			<article>
 				<slot />
+
+				<footer>
+					<span class="copyright"
+						>&copy; 2021-{new Date().getUTCFullYear()}
+						<a
+							href="https://x.com/puruvjdev"
+							target="blank"
+							rel="noopener noreferrer"
+							class={framework ? 'framework' : ''}
+						>
+							Puru Vijay</a
+						>
+					</span>
+				</footer>
 			</article>
 		</main>
 
@@ -71,6 +85,10 @@ const { title, headings, framework } = Astro.props;
 				padding-top: 2.5rem;
 			}
 		}
+	}
+
+	article {
+		padding-bottom: 3rem;
 	}
 
 	aside {
@@ -232,6 +250,24 @@ const { title, headings, framework } = Astro.props;
 			font-size: var(--font-size) !important;
 
 			background-color: transparent;
+		}
+	}
+
+	.copyright {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 0.5rem;
+		font-family: var(--app-font-mono);
+		font-size: 0.9rem;
+
+		a {
+			font-size: inherit;
+
+			&.framework {
+				--app-color-primary: var(--secondary-color);
+			}
 		}
 	}
 </style>

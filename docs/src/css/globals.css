@@ -183,7 +183,11 @@ kbd {
 }
 
 ::selection {
-	background-color: color-mix(in lch, var(--secondary-color), transparent 70%);
+	background-color: color-mix(
+		in lch,
+		var(--secondary-color, var(--app-color-primary)),
+		transparent 70%
+	);
 }
 
 p {

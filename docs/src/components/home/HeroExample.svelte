@@ -2,11 +2,15 @@
 	import squircle from '$/worklet/squircle.js?url';
 	import { typingEffect } from '$attachments/typingEffect.svelte';
 	import { browser } from '$helpers/utils';
+	import { theme } from '$state/user-preferences.svelte';
 	import { bounds, BoundsFrom, Compartment, draggable, events, position } from '@neodrag/svelte';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import PawIcon from '~icons/mdi/paw';
+
+	// This is here so that it gets triggered on homepage
+	theme.current;
 
 	let heading_text = 'Try dragging the box below';
 
