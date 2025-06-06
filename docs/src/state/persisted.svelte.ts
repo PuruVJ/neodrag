@@ -1,5 +1,4 @@
 import { browser } from '$helpers/utils.ts';
-import * as devalue from 'devalue';
 import { on } from 'svelte/events';
 import { createSubscriber } from 'svelte/reactivity';
 import { auto_destroy_effect_root } from './auto-destroy-effect-root.svelte.ts';
@@ -10,8 +9,8 @@ export type Serde = {
 };
 
 const default_serde: Serde = {
-	stringify: (value) => devalue.stringify(value),
-	parse: (value) => devalue.parse(value),
+	stringify: (value) => JSON.stringify(value),
+	parse: (value) => JSON.parse(value),
 };
 
 function get_value_from_storage(key: string, serde = default_serde) {
