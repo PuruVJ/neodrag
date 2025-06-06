@@ -1,24 +1,32 @@
 import { browser } from '$helpers/utils.ts';
+import * as devalue from 'devalue';
+import { on } from 'svelte/events';
+import { createSubscriber } from 'svelte/reactivity';
 import { auto_destroy_effect_root } from './auto-destroy-effect-root.svelte.ts';
 
-type Primitive = string | null | symbol | boolean | number | undefined | bigint;
-
-const is_primitive = (val: any): val is Primitive => {
-	return val !== Object(val) || val === null;
+export type Serde = {
+	stringify: (value: any) => string;
+	parse: (value: string) => any;
 };
 
-function get_value_from_storage(key: string) {
+const default_serde: Serde = {
+	stringify: (value) => devalue.stringify(value),
+	parse: (value) => devalue.parse(value),
+};
+
+function get_value_from_storage(key: string, serde = default_serde) {
 	const value = localStorage.getItem(key);
 
-	if (value === null) return { found: false, value: null };
+	if (!value) return { found: false, value: null };
 
 	try {
 		return {
 			found: true,
-			value: JSON.parse(value),
+			value: serde.parse(value),
 		};
 	} catch (e) {
-		console.error(`Error when parsing ${value} from persisted store "${key}"`, e);
+		localStorage.removeItem(key);
+
 		return {
 			found: false,
 			value: null,
@@ -26,44 +34,57 @@ function get_value_from_storage(key: string) {
 	}
 }
 
-export function persisted<T>(key: string, initial: T) {
-	const existing = browser ? localStorage.getItem(key) : JSON.stringify(initial);
+export class Persisted<T> {
+	#current = $state<T>(undefined as T);
+	#subscribe: () => void;
+	#key: string;
 
-	const primitive = is_primitive(initial);
-	const parsed_value = existing ? JSON.parse(existing) : initial;
+	constructor(key: string, initial: T, serde = default_serde) {
+		this.#current = initial;
+		this.#key = key;
 
-	let state = $state<T extends Primitive ? { current: T } : T>(
-		primitive ? { current: parsed_value } : parsed_value,
-	);
+		if (browser) {
+			const val = get_value_from_storage(key, serde);
+			if (val.found) {
+				this.#current = val.value;
+			}
+		}
 
-	auto_destroy_effect_root(() => {
-		$effect(() => {
-			const controller = new AbortController();
-
-			addEventListener(
-				'storage',
-				(event) => {
-					if (event.key === key) {
-						const val = get_value_from_storage(key);
-						if (val.found) {
-							state = primitive ? { current: val.value } : val.value;
-						}
+		// Create subscriber that only triggers for this specific key
+		this.#subscribe = createSubscriber((update) => {
+			return on(window, 'storage', (e: StorageEvent) => {
+				if (e.key === this.#key) {
+					const val = get_value_from_storage(this.#key, serde);
+					if (val.found) {
+						this.#current = val.value;
+						update();
 					}
-				},
-				{ signal: controller.signal },
-			);
-
-			return () => controller.abort();
+				}
+			});
 		});
 
-		$effect(() => {
-			localStorage.setItem(
-				key,
-				// @ts-ignore
-				JSON.stringify(primitive ? state.current : state),
-			);
-		});
-	});
+		auto_destroy_effect_root(() => {
+			let is_first_run = true;
 
-	return state;
+			$effect(() => {
+				this.#subscribe();
+
+				const current = $state.snapshot(this.#current);
+				if (!is_first_run) {
+					console.log('SHUD RUn');
+					localStorage.setItem(key, serde.stringify(current));
+				}
+
+				is_first_run = false;
+			});
+		});
+	}
+
+	get current() {
+		return this.#current;
+	}
+
+	set current(value: T) {
+		this.#current = value;
+	}
 }

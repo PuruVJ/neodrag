@@ -2,19 +2,20 @@
 	--gray-1: #f1f3f5;
 	--gray-9: #212529;
 
-	--app-font-mono: 'Jetbrains mono', monospace;
-	--app-font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-		Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-	--app-font-heading: 'Plus Jakarta sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-		Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	--app-font-mono: 'Jetbrains mono Variable', monospace;
+	--app-font-main:
+		system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+		'Open Sans', 'Helvetica Neue', sans-serif;
+	--app-font-heading:
+		'EB Garamond Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+		Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 body,
-body.light {
+body[data-theme='light'] {
 	--app-color-mixer: white;
 	--app-color-anti-mixer: black;
 
-	/* // #a1182b */
 	--app-color-primary: lch(34.59% 59.96 26.65);
 	--app-color-primary-contrast: color-mix(in lch, var(--app-color-primary), white 95%);
 
@@ -29,12 +30,9 @@ body.light {
 
 	--app-color-dark: lch(9.26% 0 296.81);
 	--app-color-dark-contrast: var(--app-color-light);
-	/* --app-color-dark-hsl: 0, 0%, 10%; */
-	/* --app-color-dark-hs: 0, 0%; */
 
 	--app-color-light: var(--gray-1);
 	--app-color-light-contrast: var(--app-color-dark);
-	/* --app-color-light-hsl: 0, 0%, 98%; */
 
 	--app-color-shell: hsl(200, 8%, 100%);
 	--app-color-shell-contrast: color-mix(in lch, var(--app-color-shell), black 10%);
@@ -66,7 +64,7 @@ body.light {
 	);
 }
 
-body.dark {
+body[data-theme='dark'] {
 	/* Keep it in word only */
 	--app-color-mixer: black;
 	--app-color-anti-mixer: white;
@@ -79,70 +77,10 @@ body.dark {
 
 	--app-color-primary: lch(68.02% 48.05 14.68);
 	--app-color-primary-contrast: color-mix(in lch, var(--app-color-primary), black 95%);
-
-	/* --app-color-primary: #f88292;
-	--app-color-primary-hsl: 352, 89%, 74%;
-	--app-color-primary-contrast: hsl(0 0% 10%);
-	--app-color-primary-contrast-hsl: 0, 0%, 10%;
-
-	--brand: var(--app-color-primary);
-
-	--app-color-dark: hsl(210, 17%, 95%);
-	--app-color-dark-hsl: 210, 17%, 95%;
-	--app-color-dark-hs: 210, 17%;
-
-	--app-color-light: var(--gray-9);
-
-	--app-color-shell: #101213;
-	--app-color-shell-contrast: var(--gray-1);
-
-	--app-color-brand-svelte: hsl(14, 100%, 59%);
-	--app-color-brand-svelte-hsl: 14, 100%, 59%;
-	--app-color-brand-svelte-body-gradient: radial-gradient(
-		ellipse farthest-corner at 95% 2%,
-		hsla(var(--app-color-brand-svelte-hsl), 0.2) 0%,
-		var(--app-color-shell) 100%
-	);
-	--app-color-brand-svelte-navbar: #311b16;
-
-	--app-color-brand-react: hsl(193, 96%, 68%);
-	--app-color-brand-react-hsl: 193, 96%, 68%;
-	--app-color-brand-react-body-gradient: radial-gradient(
-		ellipse farthest-corner at 95% 2%,
-		hsla(var(--app-color-brand-react-hsl), 0.2) 0%,
-		var(--app-color-shell) 100%
-	);
-	--app-color-brand-react-navbar: #1c2d33;
-
-	--app-color-brand-vue: hsl(153, 47%, 49%);
-	--app-color-brand-vue-hsl: 153, 47%, 49%;
-	--app-color-brand-vue-body-gradient: radial-gradient(
-		ellipse farthest-corner at 95% 2%,
-		hsla(var(--app-color-brand-vue-hsl), 0.3) 0%,
-		var(--app-color-shell) 100%
-	);
-	--app-color-brand-vue-navbar: #1b3429;
-
-	--app-color-brand-solid: lch(67.76% 18.5 267.22);
-	/* --app-color-brand-solid-hsl: 214, 32%, 67%; */
-	/* --app-color-brand-solid-body-gradient: radial-gradient(
-		ellipse farthest-corner at 95% 2%,
-		hsla(var(--app-color-brand-solid-hsl), 0.3) 0%,
-		var(--app-color-shell) 100%
-	);
-
-	--app-color-brand-vanilla: var(--app-color-dark);
-	--app-color-brand-vanilla-hsl: var(--app-color-dark-hsl);
-	--app-color-brand-vanilla-body-gradient: radial-gradient(
-		ellipse farthest-corner at 95% 2%,
-		hsla(53, 93%, 54%, 0.4) 0%,
-		var(--app-color-shell) 100%
-	);
-	--app-color-brand-vanilla-navbar: #4f491e; */
 }
 
-body.dark .astro-code,
-body.dark .astro-code span {
+body[data-theme='dark'] .astro-code,
+body[data-theme='dark'] .astro-code span {
 	color: var(--shiki-dark) !important;
 	background-color: var(--shiki-dark-bg) !important;
 	/* Optional, if you also want font styles */

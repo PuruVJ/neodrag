@@ -12,7 +12,7 @@
 	{#each frameworks as name, idx}
 		{@const Icon = FRAMEWORK_ICONS[name]}
 
-		<a class="unstyled" href="/docs/framework/{name}" style:--scale={scales[idx]}>
+		<a class="unstyled" href="/docs/{name}" style:--scale={scales[idx]}>
 			<Icon />
 		</a>
 	{/each}

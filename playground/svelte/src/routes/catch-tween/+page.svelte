@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { createCompartment, draggable, events, position } from '@neodrag/svelte';
+	import { Compartment, draggable, events, position } from '@neodrag/svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 
 	const pos = new Tween({ x: 0, y: 0 }, { duration: 2000, easing: expoOut });
 
-	const position_compartment = createCompartment(() => position({ current: pos.current }));
+	const position_compartment = Compartment.of(() => position({ current: pos.current }));
 
 	// $inspect(pos.current);
 

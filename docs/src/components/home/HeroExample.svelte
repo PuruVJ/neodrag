@@ -2,14 +2,7 @@
 	import squircle from '$/worklet/squircle.js?url';
 	import { typingEffect } from '$attachments/typingEffect.svelte';
 	import { browser } from '$helpers/utils';
-	import {
-		bounds,
-		BoundsFrom,
-		createCompartment,
-		draggable,
-		events,
-		position,
-	} from '@neodrag/svelte';
+	import { bounds, BoundsFrom, Compartment, draggable, events, position } from '@neodrag/svelte';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
@@ -28,9 +21,7 @@
 
 	let drag_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
 
-	const position_compartment = createCompartment(() =>
-		position({ current: drag_position.current }),
-	);
+	const position_compartment = Compartment.of(() => position({ current: drag_position.current }));
 
 	function handle_mouse_move(e: MouseEvent) {
 		coords_cursor ??= { x: 0, y: 0 };

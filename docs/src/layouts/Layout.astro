@@ -1,13 +1,13 @@
 ---
 import '@fontsource-variable/jetbrains-mono';
-import '@fontsource/plus-jakarta-sans/400.css';
-import '@fontsource/plus-jakarta-sans/500.css';
+import '@fontsource-variable/eb-garamond';
+// import '@fontsource/plus-jakarta-sans/400.css';
+// import '@fontsource/plus-jakarta-sans/500.css';
 import '../css/globals.css';
 
 import PawCursor from '$components/PawCursor.svelte';
 import { SEO } from 'astro-seo';
 import { ClientRouter } from 'astro:transitions';
-import ThemeWatcher from './ThemeWatcher.svelte';
 
 export interface Props {
 	title: string;
@@ -54,28 +54,47 @@ const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pa
 		/>
 	</head>
 
-	<body transition:persist data-framework={framework}>
-		<script is:inline>
+	<body data-framework={framework}>
+		<script is:inline data-astro-rerun>
+			function parse_theme_storage(storage_value) {
+				if (!storage_value) return null;
+
+				try {
+					// Simple array parsing - we know the structure
+					const parsed = JSON.parse(storage_value);
+
+					if (!Array.isArray(parsed) || parsed.length < 2) return null;
+
+					const meta = parsed[0];
+					const current_theme = parsed[1]; // "dark" or "light"
+					const has_system_indicator = parsed.length > 2 && parsed[2] === 'system';
+
+					// preference: 1 = specific theme chosen, 2 = system preference
+					const preference =
+						meta.preference === 2 || has_system_indicator ? 'system' : current_theme;
+
+					return {
+						preference, // "system", "light", or "dark"
+						current: current_theme, // "light" or "dark"
+					};
+				} catch {
+					return null;
+				}
+			}
+
 			function do_it() {
-				// Get localstorage value
-				const localTheme = JSON.parse(localStorage.getItem('neodrag:theme')) || 'light';
+				const local_theme = parse_theme_storage(localStorage.getItem('neodrag:theme'));
 
-				const prefersTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				let theme = local_theme.current;
+				if (local_theme.preference === 'system') {
+					theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				}
 
-				const theme = localTheme || (prefersTheme ? 'dark' : 'light');
-
-				document.body.classList.remove('light', 'dark');
-				document.body.classList.add(theme);
+				document.body.dataset.theme = theme;
 			}
 
 			do_it();
-
-			window.addEventListener('astro:swap', () => {
-				do_it();
-			});
 		</script>
-
-		<ThemeWatcher client:load />
 
 		<div>
 			<slot />

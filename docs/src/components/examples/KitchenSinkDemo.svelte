@@ -7,7 +7,7 @@
 		BoundsFrom,
 		ControlFrom,
 		controls,
-		createCompartment,
+		Compartment,
 		disabled,
 		draggable,
 		events,
@@ -94,7 +94,7 @@
 		x: 0,
 		y: 0,
 	});
-	const return_to_position_compartment = createCompartment(() => {
+	const return_to_position_compartment = Compartment.of(() => {
 		return position({ current: $state.snapshot(return_to_position_val) });
 	});
 
@@ -105,7 +105,7 @@
 		},
 		{ easing: expoOut, duration: 1200 },
 	);
-	const return_to_position_transition_compartment = createCompartment(() =>
+	const return_to_position_transition_compartment = Compartment.of(() =>
 		position({ current: $state.snapshot(return_to_position_transition_val.current) }),
 	);
 
