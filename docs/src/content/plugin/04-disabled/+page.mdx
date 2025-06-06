@@ -103,13 +103,11 @@ The real power comes from dynamically enabling/disabling with compartments:
 
 ```svelte
 <script>
-  import { disabled, createCompartment } from '@neodrag/svelte';
+  import { disabled, Compartment } from '@neodrag/svelte';
 
   let isDragDisabled = $state(false);
 
-  const disabledComp = createCompartment(() =>
-    disabled(isDragDisabled),
-  );
+  const disabledComp = Compartment.of(() => disabled(isDragDisabled));
 </script>
 
 <div {@attach draggable(() => [disabledComp])}>
@@ -273,11 +271,11 @@ const plugins = [disabled(!userCanDrag), bounds(BoundsFrom.parent())];
 
 ```svelte
 <script>
-  import { disabled, createCompartment } from '@neodrag/svelte';
+  import { disabled, Compartment } from '@neodrag/svelte';
 
   let isEditMode = $state(false);
 
-  const disabledComp = createCompartment(() => disabled(isEditMode));
+  const disabledComp = Compartment.of(() => disabled(isEditMode));
 </script>
 
 <div class="card" {@attach draggable(() => [disabledComp])}>

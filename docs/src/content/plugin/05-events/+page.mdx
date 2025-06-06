@@ -226,12 +226,12 @@ Update event handlers using compartments:
 
 ```svelte
 <script>
-  import { events, createCompartment } from '@neodrag/svelte';
+  import { events, Compartment } from '@neodrag/svelte';
 
   let logMode = $state('console');
   let logs = $state([]);
 
-  const eventsComp = createCompartment(() => {
+  const eventsComp = Compartment.of(() => {
     if (logMode === 'console') {
       return events({
         onDragStart: () => console.log('Drag started'),

@@ -269,12 +269,12 @@ Update control zones using compartments:
   import {
     controls,
     ControlFrom,
-    createCompartment,
+    Compartment,
   } from '@neodrag/svelte';
 
   let mode = $state('header-only');
 
-  const controlsComp = createCompartment(() => {
+  const controlsComp = Compartment.of(() => {
     switch (mode) {
       case 'header-only':
         return controls({ allow: ControlFrom.selector('.header') });

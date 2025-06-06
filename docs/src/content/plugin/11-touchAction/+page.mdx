@@ -189,12 +189,12 @@ Adjust touch behavior based on context or device:
 
 ```svelte
 <script>
-  import { touchAction, createCompartment } from '@neodrag/svelte';
+  import { touchAction, Compartment } from '@neodrag/svelte';
 
   let mode = $state('manipulation');
   let allowScroll = $state(false);
 
-  const touchActionComp = createCompartment(() => {
+  const touchActionComp = Compartment.of(() => {
     if (mode === 'disabled') return touchAction(false);
     if (allowScroll) return touchAction('pan-y');
     return touchAction(mode);

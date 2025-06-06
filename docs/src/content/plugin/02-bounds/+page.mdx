@@ -183,16 +183,12 @@ Update boundaries using compartments:
 
 ```svelte
 <script>
-  import {
-    bounds,
-    BoundsFrom,
-    createCompartment,
-  } from '@neodrag/svelte';
+  import { bounds, BoundsFrom, Compartment } from '@neodrag/svelte';
 
   let boundaryType = $state('viewport');
   let containerRef = $state();
 
-  const boundsComp = createCompartment(() => {
+  const boundsComp = Compartment.of(() => {
     switch (boundaryType) {
       case 'viewport':
         return bounds(BoundsFrom.viewport());

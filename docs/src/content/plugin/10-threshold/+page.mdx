@@ -188,12 +188,12 @@ Adjust thresholds based on device or user preferences:
 
 ```svelte
 <script>
-  import { threshold, createCompartment } from '@neodrag/svelte';
+  import { threshold, Compartment } from '@neodrag/svelte';
 
   let deviceType = $state('desktop');
   let sensitivity = $state('normal');
 
-  const thresholdComp = createCompartment(() => {
+  const thresholdComp = Compartment.of(() => {
     if (deviceType === 'mobile') {
       return threshold({
         distance: sensitivity === 'high' ? 8 : 12,

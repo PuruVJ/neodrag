@@ -632,17 +632,17 @@ new Draggable(element, [
     axis,
     bounds,
     BoundsFrom,
-    createCompartment,
+    Compartment,
   } from '@neodrag/svelte';
 
   let currentAxis = $state('x');
   let isConstrained = $state(false);
 
   // Manual compartments
-  const axisComp = createCompartment(() =>
+  const axisComp = Compartment.of(() =>
     currentAxis === 'both' ? null : axis(currentAxis),
   );
-  const boundsComp = createCompartment(() =>
+  const boundsComp = Compartment.of(() =>
     isConstrained ? bounds(BoundsFrom.parent()) : null,
   );
 </script>
@@ -952,7 +952,7 @@ document
 <script>
   import {
     draggable, axis, bounds, BoundsFrom, grid, threshold,
-    controls, ControlFrom, disabled, events, createCompartment
+    controls, ControlFrom, disabled, events, Compartment
   } from '@neodrag/svelte';
 
   let currentAxis = $state('both');
@@ -960,11 +960,11 @@ document
   let isEnabled = $state(true);
 
   // Reactive compartments
-  const axisComp = createCompartment(() =>
+  const axisComp = Compartment.of(() =>
     currentAxis === 'both' ? null : axis(currentAxis)
   );
-  const gridComp = createCompartment(() => grid([gridSize, gridSize]));
-  const disabledComp = createCompartment(() => !isEnabled ? disabled() : null);
+  const gridComp = Compartment.of(() => grid([gridSize, gridSize]));
+  const disabledComp = Compartment.of(() => !isEnabled ? disabled() : null);
 
   // Static plugins
   const staticPlugins = [
@@ -1726,7 +1726,7 @@ const instance = new Draggable(element, [
 - Actions become attachments: `use:draggable` → `{@attach draggable}`
 - Reactive declarations: `let var = value` → `let var = $state(value)`
 - Event handlers: `on:click` → `onclick`
-- Use `createCompartment` for reactive plugins
+- Use `Compartment.of` for reactive plugins
 
 </div>
 

@@ -198,16 +198,12 @@ function updateDraggable() {
 
 ```svelte
 <script>
-  import {
-    draggable,
-    axis,
-    createCompartment,
-  } from '@neodrag/svelte';
+  import { draggable, axis, Compartment } from '@neodrag/svelte';
 
   let currentAxis = $state('x');
 
   // Compartment automatically tracks currentAxis
-  const axisComp = createCompartment(() => axis(currentAxis));
+  const axisComp = Compartment.of(() => axis(currentAxis));
 </script>
 
 <div {@attach draggable(() => [axisComp])}>Drag me</div>
@@ -344,7 +340,7 @@ document
   let color = $state('blue'); // Doesn't affect dragging
 
   // Only axis changes trigger drag updates
-  const axisComp = createCompartment(() => axis(axis));
+  const axisComp = Compartment.of(() => axis(axis));
 
   // Color changes don't trigger unnecessary drag updates
 </script>
@@ -438,7 +434,7 @@ function updateColor(newColor) {
   let confirmedAxis = $state('x');
 
   // Only updates when confirmed, not while editing
-  const axisComp = createCompartment(() => axis(confirmedAxis));
+  const axisComp = Compartment.of(() => axis(confirmedAxis));
 
   function confirmChanges() {
     confirmedAxis = tempAxis; // This triggers the update
@@ -544,12 +540,12 @@ function confirmChanges() {
   let isDebugMode = $state(false);
 
   // Only add debug plugin in development + debug mode
-  const debugComp = createCompartment(() =>
+  const debugComp = Compartment.of(() =>
     isDevelopment && isDebugMode ? debugPlugin() : null,
   );
 
   // Grid only when snap mode is enabled
-  const gridComp = createCompartment(() =>
+  const gridComp = Compartment.of(() =>
     snapMode === 'grid' ? grid([20, 20]) : null,
   );
 </script>
@@ -671,8 +667,8 @@ function setSnapMode(mode) {
   let gridSize = $state(20);
 
   // Reactive compartments
-  const axisComp = createCompartment(() => axis(currentAxis));
-  const gridComp = createCompartment(() => grid([gridSize, gridSize]));
+  const axisComp = Compartment.of(() => axis(currentAxis));
+  const gridComp = Compartment.of(() => grid([gridSize, gridSize]));
 
   // Static plugins (never change)
   const staticPlugins = [
@@ -828,7 +824,7 @@ function updateGrid(newSize) {
   let isConstrained = $state(true);
   
   // Complex bounds logic
-  const boundsComp = createCompartment(() => {
+  const boundsComp = Compartment.of(() => {
     if (!isConstrained) return null;
     
     if (containerType === 'parent') {
@@ -986,11 +982,11 @@ function updateBounds() {
   let showGrid = $state(false);
   let enableBounds = $state(false);
 
-  const gridComp = createCompartment(() =>
+  const gridComp = Compartment.of(() =>
     showGrid ? grid([20, 20]) : null
   );
 
-  const boundsComp = createCompartment(() =>
+  const boundsComp = Compartment.of(() =>
     enableBounds ? bounds(BoundsFrom.parent()) : null
   );
 </script>
@@ -1157,13 +1153,11 @@ function toggleBounds() {
   // ✅ Good use of compartments - dynamic values
   let userAxisChoice = $state('x');
   let gridSize = $state(20);
-  const axisComp = createCompartment(() => axis(userAxisChoice));
-  const gridComp = createCompartment(() =>
-    grid([gridSize, gridSize]),
-  );
+  const axisComp = Compartment.of(() => axis(userAxisChoice));
+  const gridComp = Compartment.of(() => grid([gridSize, gridSize]));
 
   // ❌ Bad use - static values
-  const staticBounds = createCompartment(() =>
+  const staticBounds = Compartment.of(() =>
     bounds(BoundsFrom.parent()),
   );
 
@@ -1172,12 +1166,12 @@ function toggleBounds() {
 
   // ✅ Good use - conditional logic
   let isDebugMode = $state(false);
-  const debugComp = createCompartment(() =>
+  const debugComp = Compartment.of(() =>
     isDebugMode ? debugPlugin() : null,
   );
 
   // ❌ Bad use - simple boolean
-  const simpleComp = createCompartment(() =>
+  const simpleComp = Compartment.of(() =>
     showGrid ? grid([10, 10]) : null,
   );
 
@@ -1365,141 +1359,6 @@ const plugins = () => [
 
 ## Performance Considerations
 
-### Compartment Overhead
-
-**Minimal**: Each compartment adds ~100 bytes and one reactive primitive.
-
-**Good Practice**: Group related logic into single compartments rather than many small ones:
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-```svelte
-<script>
-  // ❌ Too many compartments
-  const axisComp = createCompartment(() => axis(currentAxis));
-  const gridXComp = createCompartment(() => gridX);
-  const gridYComp = createCompartment(() => gridY);
-  const gridComp = createCompartment(() =>
-    grid([gridXComp, gridYComp]),
-  );
-
-  // ✅ Better - group related logic
-  const movementComp = createCompartment(() => {
-    const plugins = [];
-    if (currentAxis !== 'both') plugins.push(axis(currentAxis));
-    if (enableGrid) plugins.push(grid([gridX, gridY]));
-    return plugins;
-  });
-</script>
-```
-
-</div>
-
-<div slot="react">
-
-```tsx
-// ❌ Too many compartments
-const axisComp = useCompartment(
-  () => axis(currentAxis),
-  [currentAxis],
-);
-const gridXComp = useCompartment(() => gridX, [gridX]);
-const gridYComp = useCompartment(() => gridY, [gridY]);
-const gridComp = useCompartment(
-  () => grid([gridXComp, gridYComp]),
-  [gridXComp, gridYComp],
-);
-
-// ✅ Better - group related logic
-const movementComp = useCompartment(() => {
-  const plugins = [];
-  if (currentAxis !== 'both') plugins.push(axis(currentAxis));
-  if (enableGrid) plugins.push(grid([gridX, gridY]));
-  return plugins;
-}, [currentAxis, enableGrid, gridX, gridY]);
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<script setup>
-// ❌ Too many compartments
-const axisComp = useCompartment(() => axis(currentAxis.value));
-const gridXComp = useCompartment(() => gridX.value);
-const gridYComp = useCompartment(() => gridY.value);
-const gridComp = useCompartment(() => grid([gridXComp, gridYComp]));
-
-// ✅ Better - group related logic
-const movementComp = useCompartment(() => {
-  const plugins = [];
-  if (currentAxis.value !== 'both')
-    plugins.push(axis(currentAxis.value));
-  if (enableGrid.value)
-    plugins.push(grid([gridX.value, gridY.value]));
-  return plugins;
-});
-</script>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-// ❌ Too many compartments
-const axisComp = createCompartment(() => axis(currentAxis()));
-const gridXComp = createCompartment(() => gridX());
-const gridYComp = createCompartment(() => gridY());
-const gridComp = createCompartment(() =>
-  grid([gridXComp(), gridYComp()]),
-);
-
-// ✅ Better - group related logic
-const movementComp = createCompartment(() => {
-  const plugins = [];
-  if (currentAxis() !== 'both') plugins.push(axis(currentAxis()));
-  if (enableGrid()) plugins.push(grid([gridX(), gridY()]));
-  return plugins;
-});
-```
-
-</div>
-
-<div slot="vanilla">
-
-```typescript
-// ❌ Too many compartments
-const axisComp = new Compartment(() => axis(currentAxis));
-const gridXComp = new Compartment(() => gridX);
-const gridYComp = new Compartment(() => gridY);
-const gridComp = new Compartment(() =>
-  grid([gridXComp.current, gridYComp.current]),
-);
-
-// ✅ Better - group related logic
-const movementComp = new Compartment(() => {
-  const plugins = [];
-  if (currentAxis !== 'both') plugins.push(axis(currentAxis));
-  if (enableGrid) plugins.push(grid([gridX, gridY]));
-  return plugins;
-});
-
-function updateMovement() {
-  movementComp.current = (() => {
-    const plugins = [];
-    if (currentAxis !== 'both') plugins.push(axis(currentAxis));
-    if (enableGrid) plugins.push(grid([gridX, gridY]));
-    return plugins;
-  })();
-}
-```
-
-</div>
-</FrameworkSwitch>
-
 ### Update Batching
 
 **Frameworks handle batching differently**:
@@ -1615,10 +1474,10 @@ function updateAllCompartments() {
   let axis = $state('x');
 
   // ❌ Wrong - captures initial value
-  const axisComp = createCompartment(() => axis('x'));
+  const axisComp = Compartment.of(() => axis('x'));
 
   // ✅ Correct - reactive reference
-  const axisComp = createCompartment(() => axis(axis));
+  const axisComp = Compartment.of(() => axis(axis));
 </script>
 ```
 
@@ -1695,7 +1554,7 @@ Add logging to see when compartments update:
 
 ```svelte
 <script>
-  const axisComp = createCompartment(() => {
+  const axisComp = Compartment.of(() => {
     console.log('Axis compartment updating:', currentAxis);
     return axis(currentAxis);
   });

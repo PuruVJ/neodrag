@@ -163,13 +163,13 @@ Configure scroll locking based on conditions:
 
 ```svelte
 <script>
-  import { scrollLock, createCompartment } from '@neodrag/svelte';
+  import { scrollLock, Compartment } from '@neodrag/svelte';
 
   let lockMode = $state('both');
   let allowScrollbar = $state(false);
   let containerRef = $state();
 
-  const scrollLockComp = createCompartment(() => {
+  const scrollLockComp = Compartment.of(() => {
     const options = {
       lockAxis: lockMode,
       allowScrollbar: allowScrollbar,

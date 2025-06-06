@@ -178,10 +178,10 @@ Want to change plugin behavior while the user is dragging? Use Compartments:
 
 ```svelte
 <script>
-  import { axis, createCompartment } from '@neodrag/svelte';
+  import { axis, Compartment } from '@neodrag/svelte';
 
   let currentAxis = $state('x');
-  const axisCompartment = createCompartment(() => axis(currentAxis));
+  const axisCompartment = Compartment.of(() => axis(currentAxis));
 </script>
 
 <div {@attach draggable(() => [axisCompartment])}>Drag me!</div>
@@ -782,7 +782,7 @@ For high-performance apps, use Compartments to update plugins efficiently:
 
 ```svelte
 <script>
-  import { position, axis, createCompartment } from '@neodrag/svelte';
+  import { position, axis, Compartment } from '@neodrag/svelte';
 
   // Create reactive state
   let x = $state(0);
@@ -790,11 +790,11 @@ For high-performance apps, use Compartments to update plugins efficiently:
   let currentAxis = $state('both');
 
   // Create compartments that react to state changes
-  const positionComp = createCompartment(() =>
+  const positionComp = Compartment.of(() =>
     position({ current: { x, y } }),
   );
 
-  const axisComp = createCompartment(() =>
+  const axisComp = Compartment.of(() =>
     currentAxis !== 'both' ? axis(currentAxis) : undefined,
   );
 

@@ -123,10 +123,10 @@ Change the axis while dragging using compartments:
 
 ```svelte
 <script>
-  import { axis, createCompartment } from '@neodrag/svelte';
+  import { axis, Compartment } from '@neodrag/svelte';
 
   let direction = $state('x');
-  const axisComp = createCompartment(() => axis(direction));
+  const axisComp = Compartment.of(() => axis(direction));
 </script>
 
 <div {@attach draggable(() => [axisComp])}>

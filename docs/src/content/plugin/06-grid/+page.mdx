@@ -174,12 +174,12 @@ Change grid size on the fly using compartments:
 
 ```svelte
 <script>
-  import { grid, createCompartment } from '@neodrag/svelte';
+  import { grid, Compartment } from '@neodrag/svelte';
 
   let gridSize = $state(20);
   let gridType = $state('square');
 
-  const gridComp = createCompartment(() => {
+  const gridComp = Compartment.of(() => {
     switch (gridType) {
       case 'square':
         return grid([gridSize, gridSize]);
@@ -529,11 +529,8 @@ const plugins = [
     height: 300px;
     border: 2px solid #ddd;
     position: relative;
-    background-image: linear-gradient(
-        to right,
-        #f0f0f0 1px,
-        transparent 1px
-      ),
+    background-image:
+      linear-gradient(to right, #f0f0f0 1px, transparent 1px),
       linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
     background-size: 20px 20px;
   }
@@ -716,11 +713,8 @@ const plugins = computed(() => [
   height: 300px;
   border: 2px solid #ddd;
   position: relative;
-  background-image: linear-gradient(
-      to right,
-      #f0f0f0 1px,
-      transparent 1px
-    ),
+  background-image:
+    linear-gradient(to right, #f0f0f0 1px, transparent 1px),
     linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
   background-size: 20px 20px;
 }
