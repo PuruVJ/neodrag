@@ -57,7 +57,11 @@ const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pa
 	<body data-framework={framework}>
 		<script is:inline data-astro-rerun>
 			function parse_theme_storage(storage_value) {
-				if (!storage_value) return null;
+				const DEFAULT = {
+					current: 'light',
+					preference: 'system',
+				};
+				if (!storage_value) return DEFAULT;
 
 				let parsed = null;
 				try {
@@ -70,7 +74,7 @@ const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pa
 						preference: 'system',
 					};
 
-				if (!Array.isArray(parsed) || parsed.length < 2) return null;
+				if (!Array.isArray(parsed) || parsed.length < 2) return DEFAULT;
 
 				const meta = parsed[0];
 				const current_theme = parsed[1]; // "dark" or "light"
