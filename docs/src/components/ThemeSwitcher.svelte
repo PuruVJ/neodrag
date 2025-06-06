@@ -173,53 +173,50 @@
 		}
 	}
 
-	:global {
-		/* Improved view transition animations */
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation-duration: 0.5s;
+		animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	::view-transition-old(root) {
+		animation-name: theme-fade-out;
+	}
+
+	::view-transition-new(root) {
+		animation-name: theme-fade-in;
+	}
+
+	@keyframes theme-fade-out {
+		0% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+		}
+	}
+
+	@keyframes theme-fade-in {
+		0% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
+
+	/* Ensure smooth transitions for reduced motion users */
+	@media (prefers-reduced-motion: reduce) {
 		::view-transition-old(root),
 		::view-transition-new(root) {
-			animation-duration: 0.5s;
-			animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+			animation-duration: 0.1s !important;
+			animation-name: simple-fade !important;
 		}
+	}
 
-		::view-transition-old(root) {
-			animation-name: theme-fade-out;
-		}
-
-		::view-transition-new(root) {
-			animation-name: theme-fade-in;
-		}
-
-		@keyframes theme-fade-out {
-			0% {
-				opacity: 1;
-			}
-			100% {
-				opacity: 0;
-			}
-		}
-
-		@keyframes theme-fade-in {
-			0% {
-				opacity: 0;
-			}
-			100% {
-				opacity: 1;
-			}
-		}
-
-		/* Ensure smooth transitions for reduced motion users */
-		@media (prefers-reduced-motion: reduce) {
-			::view-transition-old(root),
-			::view-transition-new(root) {
-				animation-duration: 0.1s !important;
-				animation-name: simple-fade !important;
-			}
-		}
-
-		@keyframes simple-fade {
-			to {
-				opacity: 0;
-			}
+	@keyframes simple-fade {
+		to {
+			opacity: 0;
 		}
 	}
 </style>
