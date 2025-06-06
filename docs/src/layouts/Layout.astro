@@ -59,27 +59,30 @@ const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pa
 			function parse_theme_storage(storage_value) {
 				if (!storage_value) return null;
 
+				let parsed = null;
 				try {
-					// Simple array parsing - we know the structure
-					const parsed = JSON.parse(storage_value);
+					parsed = JSON.parse(storage_value);
+				} catch {}
 
-					if (!Array.isArray(parsed) || parsed.length < 2) return null;
-
-					const meta = parsed[0];
-					const current_theme = parsed[1]; // "dark" or "light"
-					const has_system_indicator = parsed.length > 2 && parsed[2] === 'system';
-
-					// preference: 1 = specific theme chosen, 2 = system preference
-					const preference =
-						meta.preference === 2 || has_system_indicator ? 'system' : current_theme;
-
+				if (!parsed)
 					return {
-						preference, // "system", "light", or "dark"
-						current: current_theme, // "light" or "dark"
+						current: 'light',
+						preference: 'system',
 					};
-				} catch {
-					return null;
-				}
+
+				if (!Array.isArray(parsed) || parsed.length < 2) return null;
+
+				const meta = parsed[0];
+				const current_theme = parsed[1]; // "dark" or "light"
+				const has_system_indicator = parsed.length > 2 && parsed[2] === 'system';
+
+				// preference: 1 = specific theme chosen, 2 = system preference
+				const preference = meta.preference === 2 || has_system_indicator ? 'system' : current_theme;
+
+				return {
+					preference, // "system", "light", or "dark"
+					current: current_theme, // "light" or "dark"
+				};
 			}
 
 			function do_it() {
