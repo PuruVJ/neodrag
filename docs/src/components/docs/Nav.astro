@@ -1,8 +1,6 @@
 ---
-import ThemeSwitcher from '$components/ThemeSwitcher.svelte';
 import type { Framework } from '$helpers/constants';
 import { getCollection } from 'astro:content';
-import FrameworkDropdown from './FrameworkDropdown.svelte';
 
 type Props = {
 	framework: Framework;
@@ -60,8 +58,6 @@ const nav_list = [
 		<span class="h3">Neodrag</span>
 	</a>
 
-	<FrameworkDropdown pathname={Astro.url.pathname} selected={framework} client:load />
-
 	<nav>
 		{
 			nav_list.map(({ title, sections }, index, arr) => (
@@ -85,10 +81,6 @@ const nav_list = [
 	</nav>
 
 	<span class="spacer"></span>
-
-	<div class="theme-switcher">
-		<ThemeSwitcher client:load />
-	</div>
 </div>
 
 <style>

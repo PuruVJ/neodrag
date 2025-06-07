@@ -1,6 +1,7 @@
 ---
 import '@fontsource-variable/jetbrains-mono';
 import '@fontsource-variable/eb-garamond';
+import Dock from '$components/nav/Dock.svelte';
 // import '@fontsource/plus-jakarta-sans/400.css';
 // import '@fontsource/plus-jakarta-sans/500.css';
 import '../css/globals.css';
@@ -89,6 +90,12 @@ const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pa
 		</script>
 
 		<div>
+			<Dock
+				pathname={Astro.url.pathname}
+				selected={framework}
+				client:visible
+				transition:persist="dock"
+			/>
 			<slot />
 		</div>
 

@@ -8,7 +8,7 @@ import { Attachment } from 'svelte/attachments';
 import { factory } from './shared';
 
 export const wrapper = (factory: ReturnType<typeof createDraggable>) => {
-	return (plugins: PluginInput | undefined): Attachment<HTMLElement> =>
+	return (plugins?: PluginInput | undefined): Attachment<HTMLElement> =>
 		(element) => {
 			return factory.draggable(element, plugins).destroy;
 		};

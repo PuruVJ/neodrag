@@ -214,7 +214,7 @@ button {
 ::-webkit-scrollbar-thumb {
 	background-color: color-mix(
 		in lch,
-		var(--app-color-scrolling-navbar),
+		var(--app-color-scrolling-navbar, var(--app-color-primary)),
 		var(--app-color-anti-mixer) 20%
 	);
 	border-radius: 10px;
