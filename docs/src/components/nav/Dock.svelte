@@ -44,11 +44,11 @@
 
 <section class="dock-container">
 	<div class="dock-el" {@attach draggable([controls({ allow: ControlFrom.selector('.handle') })])}>
-		<button class="search-button">
+		<!-- <button class="search-button">
 			<SearchIcon />
-		</button>
+		</button> -->
 
-		<div class="divider"></div>
+		<!-- <div class="divider"></div> -->
 
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
@@ -182,7 +182,23 @@
 		font-size: 1.4rem;
 	}
 
-	.search-button {
+	/* .logo {
+		display: flex;
+		align-items: center;
+		height: 100%;
+		gap: 0.5rem;
+
+		padding: 0.75rem;
+
+		text-decoration: none;
+		font-weight: 600;
+
+		img {
+			width: clamp(2rem, 5vw, 3rem);
+		}
+	} */
+
+	/* .search-button {
 		display: flex;
 		height: 80%;
 
@@ -194,5 +210,5 @@
 		font-size: 1.4rem;
 
 		background-color: color-mix(in lch, var(--app-color-dark), transparent 90%);
-	}
+	} */
 </style>
