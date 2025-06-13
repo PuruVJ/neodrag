@@ -96,7 +96,7 @@ const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pa
 				transition:persist="dock"
 			>
 				<Fragment slot="nav_menu">
-					<Nav framework={framework as any} />
+					<Nav framework={(framework as any) ?? 'svelte'} />
 				</Fragment>
 			</Dock>
 			<slot />
