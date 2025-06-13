@@ -1,11 +1,10 @@
 ---
-import '@fontsource-variable/jetbrains-mono';
 import '@fontsource-variable/eb-garamond';
-import Dock from '$components/nav/Dock.svelte';
-// import '@fontsource/plus-jakarta-sans/400.css';
-// import '@fontsource/plus-jakarta-sans/500.css';
+import '@fontsource-variable/jetbrains-mono';
 import '../css/globals.css';
 
+import Nav from '$components/docs/Nav.astro';
+import Dock from '$components/nav/Dock.svelte';
 import PawCursor from '$components/PawCursor.svelte';
 import { SEO } from 'astro-seo';
 import { ClientRouter } from 'astro:transitions';
@@ -95,7 +94,11 @@ const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pa
 				selected={framework}
 				client:visible
 				transition:persist="dock"
-			/>
+			>
+				<Fragment slot="nav_menu">
+					<Nav framework={framework as any} />
+				</Fragment>
+			</Dock>
 			<slot />
 		</div>
 

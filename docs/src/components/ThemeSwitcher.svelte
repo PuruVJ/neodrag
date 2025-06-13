@@ -1,56 +1,115 @@
-<script>
+<script lang="ts">
 	import { theme } from '$state/user-preferences.svelte';
-	import SunIcon from '~icons/line-md/sunny-outline';
+	import SunIcon from '~icons/material-symbols-light/wb-sunny-rounded';
 	import SystemIcon from '~icons/heroicons/computer-desktop-20-solid';
-	import MoonIcon from '~icons/line-md/moon-simple';
+	import MoonIcon from '~icons/solar/moon-bold';
+
+	type Props = {
+		thumbnail?: boolean;
+		onclick?: () => void;
+		embedded?: boolean;
+	};
+
+	const { thumbnail = false, onclick, embedded = false }: Props = $props();
+
+	const SelectedIcon = $derived(
+		{ light: SunIcon, dark: MoonIcon, system: SystemIcon }[theme.preference],
+	);
 </script>
 
-<div class="theme-switcher">
-	<!-- Sliding indicator with conditional classes -->
-	<div
-		class="indicator"
-		class:indicator-light={theme.preference === 'light'}
-		class:indicator-system={theme.preference === 'system'}
-		class:indicator-dark={theme.preference === 'dark'}
-	></div>
+<div class={['theme-switcher', thumbnail && 'thumbnail', embedded && 'embedded']}>
+	{#if thumbnail}
+		<button class="theme-button" {onclick}>
+			<SelectedIcon />
+		</button>
+	{:else}
+		<!-- Sliding indicator with conditional classes -->
+		<div
+			class="indicator"
+			class:indicator-light={theme.preference === 'light'}
+			class:indicator-system={theme.preference === 'system'}
+			class:indicator-dark={theme.preference === 'dark'}
+		></div>
 
-	<button
-		class="theme-button light"
-		class:active={theme.preference === 'light'}
-		onclick={() => (theme.preference = 'light')}
-	>
-		<SunIcon fill="currentColor" />
-	</button>
-	<button
-		class="theme-button system"
-		class:active={theme.preference === 'system'}
-		onclick={() => (theme.preference = 'system')}
-	>
-		<SystemIcon fill="currentColor" />
-	</button>
-	<button
-		class="theme-button dark"
-		class:active={theme.preference === 'dark'}
-		onclick={() => (theme.preference = 'dark')}
-	>
-		<MoonIcon fill="currentColor" />
-	</button>
+		<button
+			class="theme-button light"
+			class:active={theme.preference === 'light'}
+			onclick={() => {
+				theme.preference = 'light';
+				onclick?.();
+			}}
+		>
+			<SunIcon width="1.6rem" height="1.6rem" fill="currentColor" />
+		</button>
+		<button
+			class="theme-button system"
+			class:active={theme.preference === 'system'}
+			onclick={() => {
+				theme.preference = 'system';
+				onclick?.();
+			}}
+		>
+			<SystemIcon width="1.6rem" height="1.6rem" fill="currentColor" />
+		</button>
+		<button
+			class="theme-button dark"
+			class:active={theme.preference === 'dark'}
+			onclick={() => {
+				theme.preference = 'dark';
+				onclick?.();
+			}}
+		>
+			<MoonIcon width="1.6rem" height="1.6rem" fill="currentColor" />
+		</button>
+	{/if}
 </div>
 
 <style>
 	.theme-switcher {
 		position: relative;
 		display: flex;
-		height: 90%;
+		height: 3rem;
 		padding: 0 0.28rem;
-		margin-block: 0.2rem;
-		margin-left: 0.2rem;
-		margin-right: 0.2rem;
-
-		font-size: 1.2rem;
+		margin: 0.2rem;
 
 		background-color: color-mix(in lch, var(--app-color-dark), transparent 95%);
 		border-radius: 0.5rem;
+
+		&.embedded {
+			/* Remove margins and adjust padding */
+			margin: 0;
+			padding: 0 0.28rem 0.2rem 0.28rem; /* Move margin into padding */
+
+			border-top-left-radius: 1.5rem;
+			border-top-right-radius: 1.5rem;
+			border-bottom-left-radius: 0;
+			border-bottom-right-radius: 0;
+
+			.theme-button {
+				/* Remove margin from buttons in embedded mode */
+				margin: 0;
+				padding: 0.75rem 0.5rem; /* Compensate with padding */
+			}
+
+			.indicator {
+				/* Adjust indicator positioning without margins */
+				top: 0.2rem;
+				left: 0.28rem;
+				height: calc(100% - 0.4rem);
+			}
+
+			.indicator-light {
+				border-top-left-radius: 1.3rem;
+			}
+
+			.indicator-dark {
+				border-top-right-radius: 1.3rem;
+			}
+		}
+
+		&.thumbnail {
+			background-color: transparent;
+		}
 	}
 
 	.indicator {
@@ -89,10 +148,20 @@
 		margin: 0.25rem 0;
 		background: transparent;
 		border: none;
+		display: flex;
+		justify-content: center;
 		cursor: pointer;
 
 		color: color-mix(in lch, var(--app-color-dark), transparent 90%);
 		transition: color 0.2s ease;
+
+		:global {
+			svg {
+				width: 1.6rem !important;
+				flex-shrink: 0;
+				display: block;
+			}
+		}
 	}
 
 	.theme-button:hover {

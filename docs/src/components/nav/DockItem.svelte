@@ -103,7 +103,11 @@
 			style:width="{width_px.current / 16}rem"
 			draggable="false"
 		/> -->
-		<Icon style="width: {width_px.current / 16}rem" />
+		<Icon
+			height={width_px.current}
+			width={width_px.current}
+			style="width: {width_px.current}px; height: {width_px.current}px"
+		/>
 	</span>
 
 	<div class="dot" style:--opacity={selected ? 1 : 0}></div>
@@ -179,7 +183,7 @@
 		color: var(--app-color-light-contrast);
 		/* font-family: var(--system-font-family); */
 		font-weight: 400;
-		font-size: 0.9rem;
+		font-size: 15px;
 		letter-spacing: 0.4px;
 
 		display: none;

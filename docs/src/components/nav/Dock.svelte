@@ -3,7 +3,8 @@
 	import { FRAMEWORKS, type Framework } from '$helpers/constants';
 	import { ControlFrom, controls, draggable } from '@neodrag/svelte';
 	import { prefetch } from 'astro:prefetch';
-	import type { Component } from 'svelte';
+	import { tick, type Component, type Snippet } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import GridIcon from '~icons/iconoir/dots-grid-3x3';
 	import VanillaIcon from '~icons/ri/javascript-fill';
 	import MenuIcon from '~icons/ri/menu-3-fill';
@@ -12,20 +13,41 @@
 	import VueIcon from '~icons/ri/vuejs-fill';
 	import SolidIcon from '~icons/tabler/brand-solidjs';
 	import DockItem from './DockItem.svelte';
-	import { Popover } from 'melt/builders';
-	import MobileMenu from './MobileMenu.svelte';
+	import { expoOut } from 'svelte/easing';
+	import { MediaQuery } from 'svelte/reactivity';
 
 	type Props = {
 		pathname: string;
 		selected: Framework;
+
+		nav_menu: Snippet;
 	};
 
-	const { pathname, selected }: Props = $props();
+	class MenuView {
+		#current = $state<'framework' | 'theme' | 'menu' | null>(null);
+		#menu_open = $state(false);
+
+		get current() {
+			return this.#current;
+		}
+
+		get open() {
+			return this.#menu_open;
+		}
+
+		async toggle(value: 'framework' | 'theme' | 'menu' | null) {
+			this.#menu_open = !this.#menu_open;
+			this.#current = value;
+		}
+	}
+
+	const { pathname, selected, nav_menu }: Props = $props();
 
 	const frameworks: Framework[] = ['solid', 'react', 'svelte', 'vue', 'vanilla'];
 	const scales = [1, 1, 1, 1, 1];
 
 	let dock_mouse_x = $state<number | null>(null);
+	let menu_view = new MenuView();
 
 	const REGEX = /\/docs\/(svelte|react|solid|vanilla|vue)/gi;
 
@@ -43,75 +65,118 @@
 		vue: VueIcon,
 	};
 
-	const popover = new Popover({});
+	const CurrentIcon = $derived(Icons[selected]);
+
+	const is_tablet = new MediaQuery('(max-width: 967px)');
 </script>
 
 <section class="dock-container">
-	<div class="dock-el" {@attach draggable([controls({ allow: ControlFrom.selector('.handle') })])}>
-		<!-- <button class="search-button">
-			<SearchIcon />
-		</button> -->
+	<div
+		class={['dock-el', menu_view.open && 'menu-open']}
+		{@attach draggable([controls({ allow: ControlFrom.selector('.handle') })])}
+	>
+		<div class="mobile expanded-menu">
+			{#if menu_view.open}
+				<div style="width: 100%" transition:slide={{ duration: 400, easing: expoOut }}>
+					{#if menu_view.current === 'framework'}
+						{@render framework_selector(false)}
+					{:else if menu_view.current === 'theme'}
+						<div>
+							<ThemeSwitcher embedded />
+						</div>
+					{:else}
+						<div class="nav">
+							{@render nav_menu?.()}
+						</div>
+					{/if}
+				</div>
+			{/if}
+		</div>
 
-		<!-- <div class="divider"></div> -->
+		<div class="main">
+			<div class="desktop">
+				{@render framework_selector(true)}
 
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div
-			class="zoomable"
-			onmouseenter={() => {
-				for (const framework of FRAMEWORKS) {
-					prefetch(replace_framework_from_pathname(framework.name));
-				}
-			}}
-			onmousemove={(e) => (dock_mouse_x = e.clientX)}
-			onmouseleave={() => (dock_mouse_x = null)}
-		>
-			{#each frameworks as name, idx}
-				<a
-					class="unstyled"
-					href={replace_framework_from_pathname(name)}
-					style:--scale={scales[idx]}
-				>
-					<DockItem
-						mouse_x={dock_mouse_x}
-						framework={name}
-						selected={selected === name}
-						Icon={Icons[name]}
-					/>
+				<div class="divider"></div>
+
+				<ThemeSwitcher />
+
+				<div class="divider"></div>
+
+				<div class="handle" data-paw-cursor="true">
+					<GridIcon />
+				</div>
+			</div>
+
+			<div class="mobile">
+				<a href="/" class="logo unstyled">
+					<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" />
 				</a>
-			{/each}
-		</div>
 
-		<div class="divider"></div>
+				<span style="flex: 1 1 auto"></span>
 
-		<ThemeSwitcher />
+				<div class="theme-selector">
+					<ThemeSwitcher thumbnail onclick={() => menu_view.toggle('theme')} />
+				</div>
 
-		<div class="divider"></div>
+				<div class="framework-selector">
+					<button onclick={() => menu_view.toggle('framework')}>
+						<CurrentIcon />
+					</button>
+				</div>
 
-		<div class="handle" data-paw-cursor="true">
-			<GridIcon />
-		</div>
-
-		<div class="menu mobile">
-			<button {...popover.trigger}>
-				<MenuIcon />
-			</button>
+				<div class="menu">
+					<button onclick={() => menu_view.toggle('menu')}>
+						<MenuIcon />
+					</button>
+				</div>
+			</div>
 		</div>
 	</div>
-
-	<MobileMenu {popover} />
 </section>
 
+{#snippet framework_selector(is_desktop = true)}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class={['zoomable', is_desktop && 'desktop']}
+		onmouseenter={() => {
+			for (const framework of FRAMEWORKS) {
+				prefetch(replace_framework_from_pathname(framework.name));
+			}
+		}}
+		onmousemove={(e) => !is_tablet.current && (dock_mouse_x = e.clientX)}
+		onmouseleave={() => (dock_mouse_x = null)}
+	>
+		{#each frameworks as name, idx}
+			<a
+				class="unstyled"
+				href={replace_framework_from_pathname(name)}
+				style:--scale={scales[idx]}
+				onclick={() => {
+					menu_view.toggle(null);
+				}}
+			>
+				<DockItem
+					mouse_x={dock_mouse_x}
+					framework={name}
+					selected={selected === name}
+					Icon={Icons[name]}
+				/>
+			</a>
+		{/each}
+	</div>
+{/snippet}
+
+<!-- <MobileMenu {popover} --background-color="var(--background-color)" /> -->
+
 <style>
+	/* enabled! */
 	@custom-media --tablet (width <= 768px);
 
 	a {
 		transition: scale 150ms ease-in;
 		scale: var(--scale) var(--scale);
 		transform-origin: center bottom;
-
-		:global(svg) {
-			width: clamp(2rem, 10vw, 8rem);
-		}
 	}
 
 	.dock-container {
@@ -141,6 +206,11 @@
 			pointer-events: none;
 		}
 
+		:global(svg) {
+			width: 4rem;
+			max-width: unset;
+		}
+
 		@media (--tablet) {
 			bottom: 0;
 			padding: 0;
@@ -150,6 +220,9 @@
 
 	.dock-el {
 		backface-visibility: hidden;
+
+		display: flex;
+		flex-direction: column;
 
 		background-color: var(--background-color);
 
@@ -169,7 +242,9 @@
 		display: flex;
 		align-items: flex-end;
 
-		transition: transform 0.3s ease;
+		transition:
+			transform 0.3s ease,
+			height 0.2s ease-in;
 
 		&:not(.hidden) {
 			pointer-events: auto;
@@ -180,18 +255,80 @@
 			backface-visibility: hidden;
 		}
 
-		@media (--tablet) {
-			border-radius: 0;
+		.main {
+			display: flex;
+			height: 100%;
 			width: 100%;
-			bottom: 0;
-			box-shadow: hsla(0, 0%, 0%, 0.3) 2px 5px 19px 7px;
-			/* background-color: var(--app-color-scrolling-navbar); */
+
+			.mobile {
+				display: none;
+
+				.logo {
+					display: flex;
+					align-items: center;
+					gap: 0.5rem;
+					margin-left: 0.6rem;
+					img {
+						height: 2rem;
+						width: 2rem;
+					}
+				}
+			}
+
+			.desktop {
+				display: flex;
+			}
+
+			@media (--tablet) {
+				height: 100%;
+				.mobile {
+					display: flex;
+					width: 100%;
+				}
+
+				.desktop {
+					display: none;
+				}
+			}
+		}
+
+		@media (--tablet) {
+			border-radius: 2rem;
+			width: 90%;
+			bottom: 1rem;
+			height: auto;
+		}
+	}
+
+	.expanded-menu {
+		display: none;
+
+		width: 100%;
+
+		@media (--tablet) {
+			display: block;
+			/* contain: layout style;
+			will-change: height; */
+		}
+
+		.nav {
+			max-height: 48vh;
+			overflow-y: auto;
 		}
 	}
 
 	.zoomable {
 		display: flex;
 		align-items: flex-end;
+		justify-content: space-around;
+
+		width: 100%;
+
+		@media (--tablet) {
+			&.desktop {
+				display: none;
+			}
+		}
 	}
 
 	.divider {
@@ -206,6 +343,7 @@
 	.handle,
 	.menu {
 		height: 100%;
+		width: 4rem;
 
 		padding: 0.75rem;
 		display: flex;
@@ -217,41 +355,16 @@
 		}
 	}
 
-	.menu {
-		display: none;
+	.menu,
+	.framework-selector {
+		display: flex;
+		padding: 0.75rem;
+		width: 3rem;
 
-		@media (--tablet) {
-			display: block;
+		:global {
+			svg {
+				width: 1.7rem !important;
+			}
 		}
 	}
-
-	/* .logo {
-		display: flex;
-		align-items: center;
-		height: 100%;
-		gap: 0.5rem;
-
-		padding: 0.75rem;
-
-		text-decoration: none;
-		font-weight: 600;
-
-		img {
-			width: clamp(2rem, 5vw, 3rem);
-		}
-	} */
-
-	/* .search-button {
-		display: flex;
-		height: 80%;
-
-		padding: 0 0.6rem;
-		margin-bottom: 0.4rem;
-		margin-left: 0.4rem;
-		margin-right: 0.2rem;
-		border-radius: 50%;
-		font-size: 1.4rem;
-
-		background-color: color-mix(in lch, var(--app-color-dark), transparent 90%);
-	} */
 </style>
