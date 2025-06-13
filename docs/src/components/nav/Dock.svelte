@@ -65,7 +65,7 @@
 		vue: VueIcon,
 	};
 
-	const CurrentIcon = $derived(Icons[selected]);
+	const CurrentIcon = $derived(Icons[selected] ?? SvelteIcon);
 
 	const is_tablet = new MediaQuery('(max-width: 967px)');
 </script>
