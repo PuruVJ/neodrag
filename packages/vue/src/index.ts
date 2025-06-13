@@ -1,22 +1,19 @@
-import { createDraggable } from '@neodrag/core';
+import { DraggableFactory } from '@neodrag/core';
 import { Compartment, Plugin, type PluginInput } from '@neodrag/core/plugins';
 import { onUnmounted, watchEffect, type Directive } from 'vue';
 
-const factory = createDraggable();
-
-const draggable_map = new WeakMap<HTMLElement | SVGElement, ReturnType<typeof factory.draggable>>();
+const factory = new DraggableFactory();
+const CLEANUP = Symbol();
 
 export const wrapper = (
-	factory: ReturnType<typeof createDraggable>,
+	factory: DraggableFactory,
 ): Directive<HTMLElement | SVGElement, PluginInput | undefined> => {
 	return {
-		mounted: (el, { value = [] }) =>
-			!draggable_map.has(el) && draggable_map.set(el, factory.draggable(el, value)),
-
-		unmounted: (el) => {
-			draggable_map.get(el)!.destroy();
-			draggable_map.delete(el);
+		mounted: (el, { value = [] }) => {
+			(el as any)[CLEANUP] = factory.draggable(el, value);
 		},
+
+		unmounted: (el) => (el as any)[CLEANUP](),
 	};
 };
 
@@ -27,10 +24,7 @@ export function useCompartment<T extends Plugin>(reactive: () => T) {
 		flush: 'pre',
 	});
 
-	// Cleanup on unmount
-	onUnmounted(() => {
-		stop_watcher();
-	});
+	onUnmounted(stop_watcher);
 
 	return compartment;
 }

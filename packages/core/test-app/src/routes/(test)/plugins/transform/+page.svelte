@@ -1,24 +1,29 @@
 <script lang="ts">
-	import { createDraggable } from '../../../../../../src';
+	import { wrapper } from '../../../../../../../svelte/src/index.svelte';
+	import { DraggableFactory } from '../../../../../../src';
 	import { transform } from '../../../../../../src/plugins';
 
 	const { data } = $props();
 
-	const { draggable } = createDraggable({
+	const factory = new DraggableFactory({
 		plugins: [],
 	});
 
+	// @ts-ignore
+	const draggable = wrapper(factory);
+
+	const plugins = [transform(data.is_func ? func : undefined)];
+
 	function func({
-		offsetX,
-		offsetY,
+		offset,
 		rootNode,
 	}: Parameters<Exclude<Parameters<typeof transform>[0], undefined>>[0]) {
 		if (rootNode instanceof SVGElement) {
-			rootNode.setAttribute('transform', `translate(${offsetX} ${offsetY})`);
+			rootNode.setAttribute('transform', `translate(${offset.x} ${offset.y})`);
 			rootNode.dataset.proofFuncWorked = '';
 		} else {
-			rootNode.style.left = `${offsetX}px`;
-			rootNode.style.top = `${offsetY}px`;
+			rootNode.style.left = `${offset.x}px`;
+			rootNode.style.top = `${offset.y}px`;
 		}
 	}
 </script>
@@ -26,7 +31,7 @@
 {#if data.is_svg}
 	<svg width="400" height="400" viewBox="0 0 400 400">
 		<circle
-			use:draggable={[transform(data.is_func ? func : undefined)]}
+			{@attach draggable(plugins)}
 			cx="100"
 			cy="100"
 			r="50"
@@ -39,7 +44,7 @@
 	<div
 		class="box"
 		style:position={data.is_func ? 'absolute' : null}
-		use:draggable={[transform(data.is_func ? func : undefined)]}
+		{@attach draggable(plugins)}
 		data-testid="draggable"
 	></div>
 {/if}

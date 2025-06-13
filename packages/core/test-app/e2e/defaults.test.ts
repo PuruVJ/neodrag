@@ -6,7 +6,7 @@ test.describe('defaults', () => {
 		await setup(page);
 
 		const div = page.getByTestId('draggable');
-		await expect(div).toHaveCSS('translate', 'none');
+		await expect(div).toHaveCSS('translate', '0px');
 	});
 
 	test('should be dragged by mouse', async ({ page, isMobile }) => {

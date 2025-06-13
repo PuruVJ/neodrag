@@ -4,4 +4,5 @@ packages:
   - playground/*
   - '!**/test/**'
   - docs
+  - docs/scripts
   - config

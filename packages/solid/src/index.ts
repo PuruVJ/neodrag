@@ -1,7 +1,8 @@
-import { createDraggable } from '@neodrag/core';
+import { DraggableFactory } from '@neodrag/core';
 import {
 	Compartment,
 	DragEventData,
+	PluginContext,
 	PluginResolver,
 	unstable_definePlugin,
 	type Plugin,
@@ -9,7 +10,7 @@ import {
 import type { Accessor, Setter } from 'solid-js';
 import { createEffect, createRenderEffect, createSignal, untrack } from 'solid-js';
 
-const draggable_factory = createDraggable();
+const draggable_factory = new DraggableFactory();
 
 interface DragState extends DragEventData {
 	isDragging: boolean;
@@ -23,61 +24,38 @@ const default_drag_state: DragState = {
 	event: null as unknown as PointerEvent,
 };
 
-// Create the state sync plugin with the provided setter function
-const state_sync = unstable_definePlugin((setState: Setter<DragState>) => ({
-	name: 'solid-state-sync',
-	priority: -1000, // Run last to ensure we get final values
-	cancelable: false,
-
-	start: (ctx, _state, event) => {
-		ctx.effect.immediate(() => {
-			setState((prev) => ({
-				...prev,
-				isDragging: true,
-				offset: { ...ctx.offset },
-				rootNode: ctx.rootNode,
-				currentNode: ctx.currentlyDraggedNode,
-				event,
-			}));
-		});
-	},
-
-	drag: (ctx, _state, event) => {
-		ctx.effect.immediate(() => {
-			setState((prev) => ({
+const state_sync = unstable_definePlugin((set_state: Setter<DragState>) => {
+	const update_state = (
+		ctx: PluginContext,
+		event: PointerEvent,
+		overrides: Partial<DragState> = {},
+	) =>
+		ctx.effect.immediate(() =>
+			set_state((prev) => ({
 				...prev,
 				offset: { ...ctx.offset },
 				rootNode: ctx.rootNode,
 				currentNode: ctx.currentlyDraggedNode,
 				event,
-			}));
-		});
-	},
+				...overrides,
+			})),
+		);
 
-	end: (ctx, _state, event) => {
-		ctx.effect.immediate(() => {
-			setState((prev) => ({
-				...prev,
-				isDragging: false,
-				offset: { ...ctx.offset },
-				rootNode: ctx.rootNode,
-				currentNode: ctx.currentlyDraggedNode,
-				event,
-			}));
-		});
-	},
-}));
+	return {
+		name: 'sss', // solid-state-sync
+		priority: -1000,
+		cancelable: false,
+		start: (ctx, _state, event) => update_state(ctx, event, { isDragging: true }),
+		drag: (ctx, _state, event) => update_state(ctx, event),
+		end: (ctx, _state, event) => update_state(ctx, event, { isDragging: false }),
+	};
+});
 
 function resolve_plugins(
 	plugins: Accessor<Plugin[]> | ReturnType<PluginResolver>,
 	state_sync_plugin: Plugin,
 ) {
-	const p =
-		typeof plugins === 'function'
-			? // Regular reactive plugins
-				plugins()
-			: // Manual plugins
-				() => plugins;
+	const p = typeof plugins === 'function' ? plugins() : () => plugins;
 
 	if (typeof p === 'function') {
 		return () => p().concat(state_sync_plugin);
@@ -86,24 +64,22 @@ function resolve_plugins(
 	}
 }
 
-function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
+function wrapper(draggableFactory: DraggableFactory) {
 	return (
 		element: Accessor<HTMLElement | SVGElement | null | undefined>,
 		plugins: Accessor<Plugin[]> | ReturnType<PluginResolver> = () => [],
 	) => {
 		const [drag_state, set_drag_state] = createSignal<DragState>(default_drag_state);
-		let instance: ReturnType<typeof draggableFactory.draggable> | undefined;
 		const state_sync_plugin = state_sync(set_drag_state);
 
 		createEffect(() => {
 			const node = element();
 			if (!node) return;
-			instance = draggableFactory.draggable(
+
+			return draggableFactory.draggable(
 				node,
 				untrack(() => resolve_plugins(plugins, state_sync_plugin)),
 			);
-
-			return () => instance?.destroy();
 		});
 
 		return drag_state;
@@ -112,11 +88,9 @@ function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
 
 export const useDraggable = wrapper(draggable_factory);
 
-// Option 1: Hook-style (most common SolidJS pattern)
 export function createCompartment<T extends Plugin>(reactive: () => T) {
 	const compartment = new Compartment(() => untrack(reactive));
 
-	// Automatically track reactive dependencies and update compartment
 	createRenderEffect(() => {
 		compartment.current = reactive();
 	});
@@ -124,6 +98,5 @@ export function createCompartment<T extends Plugin>(reactive: () => T) {
 	return compartment;
 }
 
-// Export necessary types and utilities
 export * from '@neodrag/core/plugins';
 export const instances = draggable_factory.instances;

@@ -1,20 +1,21 @@
-import { createDraggable } from '@neodrag/core';
+import { DraggableFactory } from '@neodrag/core';
 import {
 	Compartment,
 	DragEventData,
+	PluginContext,
 	PluginInput,
 	unstable_definePlugin,
 	type Plugin,
 } from '@neodrag/core/plugins';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-const draggable_factory = createDraggable();
+const factory = new DraggableFactory();
 
 interface DragState extends DragEventData {
 	isDragging: boolean;
 }
 
-const default_drag_state: DragState = {
+const defaultState: DragState = {
 	offset: { x: 0, y: 0 },
 	rootNode: null as unknown as HTMLElement,
 	currentNode: null as unknown as HTMLElement,
@@ -22,99 +23,66 @@ const default_drag_state: DragState = {
 	event: null as unknown as PointerEvent,
 };
 
-// Create the state sync plugin with the provided setState function
-const state_sync = unstable_definePlugin(
-	(setDragState: React.Dispatch<React.SetStateAction<DragState>>) => ({
-		name: 'react-state-sync',
-		priority: -1000, // Run last to ensure we get final values
+const create_sync_plugin = (setState: React.Dispatch<React.SetStateAction<DragState>>) => {
+	const update_state = (
+		ctx: PluginContext,
+		event: PointerEvent,
+		overrides: Partial<DragState> = {},
+	) =>
+		ctx.effect.immediate(() =>
+			setState((prev) => ({
+				...prev,
+				offset: { ...ctx.offset },
+				rootNode: ctx.rootNode,
+				currentNode: ctx.currentlyDraggedNode,
+				event,
+				...overrides,
+			})),
+		);
+
+	return unstable_definePlugin(() => ({
+		name: 'rss', // react-state-sync
+		priority: -1000,
 		cancelable: false,
 		liveUpdate: true,
+		start: (ctx, _, event) => update_state(ctx, event, { isDragging: true }),
+		drag: (ctx, _, event) => update_state(ctx, event),
+		end: (ctx, _, event) => update_state(ctx, event, { isDragging: false }),
+	}));
+};
 
-		start: (ctx, _state, event) => {
-			ctx.effect.immediate(() => {
-				setDragState((prev) => ({
-					...prev,
-					isDragging: true,
-					offset: { ...ctx.offset },
-					rootNode: ctx.rootNode,
-					currentNode: ctx.currentlyDraggedNode,
-					event,
-				}));
-			});
-		},
+const resolve_plugins = (plugins: PluginInput, sync_plugin: Plugin) =>
+	typeof plugins === 'function' ? () => plugins().concat(sync_plugin) : plugins.concat(sync_plugin);
 
-		drag: (ctx, _state, event) => {
-			ctx.effect.immediate(() => {
-				setDragState((prev) => ({
-					...prev,
-					offset: { ...ctx.offset },
-					rootNode: ctx.rootNode,
-					currentNode: ctx.currentlyDraggedNode,
-					event,
-				}));
-			});
-		},
+export const wrapper =
+	(draggableFactory: DraggableFactory) =>
+	(ref: React.RefObject<HTMLElement | SVGElement | null>, plugins: PluginInput = []) => {
+		const [state, set_state] = useState<DragState>(defaultState);
+		const sync_plugin = useRef(create_sync_plugin(set_state));
+		const resolvedPlugins = useRef(resolve_plugins(plugins, sync_plugin.current));
 
-		end: (ctx, _state, event) => {
-			ctx.effect.immediate(() => {
-				setDragState((prev) => ({
-					...prev,
-					isDragging: false,
-					offset: { ...ctx.offset },
-					rootNode: ctx.rootNode,
-					currentNode: ctx.currentlyDraggedNode,
-					event,
-				}));
-			});
-		},
-	}),
-);
-
-function resolve_plugins(plugins: PluginInput, state_sync_plugin: Plugin) {
-	if (typeof plugins === 'function') {
-		return () => plugins().concat(state_sync_plugin);
-	} else {
-		return plugins.concat(state_sync_plugin);
-	}
-}
-
-export function wrapper(draggableFactory: ReturnType<typeof createDraggable>) {
-	return (ref: React.RefObject<HTMLElement | SVGElement | null>, plugins: PluginInput = []) => {
-		const [drag_state, set_drag_state] = useState<DragState>(default_drag_state);
-		const instance = useRef<ReturnType<typeof draggableFactory.draggable>>();
-		const state_sync_ref = useRef(state_sync(set_drag_state));
-		const pluginsRef = useRef(resolve_plugins(plugins, state_sync_ref.current));
-
-		// Initialize draggable instance
 		useEffect(() => {
-			const node = ref.current;
-			if (!node) return;
+			if (!ref.current) return;
+			return draggableFactory.draggable(ref.current, resolvedPlugins.current);
+		}, []);
 
-			instance.current = draggableFactory.draggable(node, pluginsRef.current);
-
-			return () => instance.current?.destroy();
-		}, []); // Changed dependency
-
-		return drag_state;
+		return state;
 	};
-}
 
 export function useCompartment<T extends Plugin>(reactive: () => T, deps?: React.DependencyList) {
-	const compartment_ref = useRef<Compartment<T>>();
+	const compartment = useRef<Compartment<T>>();
 
-	// Initialize compartment once
-	if (!compartment_ref.current) {
-		compartment_ref.current = new Compartment(reactive);
+	if (!compartment.current) {
+		compartment.current = new Compartment(reactive);
 	}
 
-	// Update compartment when dependencies change
-	useEffect(() => {
-		compartment_ref.current!.current = reactive();
+	useLayoutEffect(() => {
+		compartment.current!.current = reactive();
 	}, deps);
 
-	return compartment_ref.current;
+	return compartment.current;
 }
 
-export const useDraggable = wrapper(draggable_factory);
+export const useDraggable = wrapper(factory);
 export * from '@neodrag/core/plugins';
-export const instances = draggable_factory.instances;
+export const instances = factory.instances;

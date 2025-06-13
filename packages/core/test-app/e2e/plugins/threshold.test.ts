@@ -129,6 +129,8 @@ test('negative distance', async ({ page }) => {
 
 	const console_error = await console_message_promise;
 
+	console.log(console_error);
+
 	expect((await console_error.args()[0].jsonValue()).error.toString()).toContain(
 		'distance must be >= 0',
 	);

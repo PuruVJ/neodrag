@@ -1,4 +1,4 @@
-import type { createDraggable } from '@neodrag/core';
+import type { DraggableFactory } from '@neodrag/core';
 import {
 	Compartment as CoreCompartment,
 	type Plugin,
@@ -7,11 +7,10 @@ import {
 import { Attachment } from 'svelte/attachments';
 import { factory } from './shared';
 
-export const wrapper = (factory: ReturnType<typeof createDraggable>) => {
+export const wrapper = (factory: DraggableFactory) => {
 	return (plugins?: PluginInput | undefined): Attachment<HTMLElement> =>
-		(element) => {
-			return factory.draggable(element, plugins).destroy;
-		};
+		(element) =>
+			factory.draggable(element, plugins);
 };
 
 export const draggable = wrapper(factory);

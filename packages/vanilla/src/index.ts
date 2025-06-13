@@ -1,26 +1,17 @@
-import { createDraggable } from '@neodrag/core';
+import { DraggableFactory } from '@neodrag/core';
 import type { PluginInput } from '@neodrag/core/plugins';
 
-const core = createDraggable();
+const core = new DraggableFactory();
 
 export class Wrapper {
-	#drag_instance: ReturnType<ReturnType<typeof createDraggable>['draggable']>;
-	#plugins: PluginInput = [];
+	#destroy: () => void;
 
-	get plugins() {
-		return this.#plugins;
-	}
-
-	constructor(
-		factory: ReturnType<typeof createDraggable>,
-		node: HTMLElement,
-		plugins: PluginInput = [],
-	) {
-		this.#drag_instance = factory.draggable(node, (this.#plugins = plugins));
+	constructor(factory: DraggableFactory, node: HTMLElement, plugins: PluginInput = []) {
+		this.#destroy = factory.draggable(node, plugins);
 	}
 
 	destroy() {
-		this.#drag_instance.destroy();
+		this.#destroy();
 	}
 }
 
