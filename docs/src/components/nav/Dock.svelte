@@ -1,17 +1,19 @@
 <script lang="ts">
-	import { FRAMEWORKS, type Framework } from '$helpers/constants';
-	import { prefetch } from 'astro:prefetch';
-	import DockItem from './DockItem.svelte';
 	import ThemeSwitcher from '$components/ThemeSwitcher.svelte';
+	import { FRAMEWORKS, type Framework } from '$helpers/constants';
 	import { ControlFrom, controls, draggable } from '@neodrag/svelte';
-	import GridIcon from '~icons/iconoir/dots-grid-3x3';
-	import SearchIcon from '~icons/ph/magnifying-glass-light';
-	import SvelteIcon from '~icons/ri/svelte-fill';
-	import ReactIcon from '~icons/ri/reactjs-fill';
-	import VueIcon from '~icons/ri/vuejs-fill';
-	import VanillaIcon from '~icons/ri/javascript-fill';
-	import SolidIcon from '~icons/tabler/brand-solidjs';
+	import { prefetch } from 'astro:prefetch';
 	import type { Component } from 'svelte';
+	import GridIcon from '~icons/iconoir/dots-grid-3x3';
+	import VanillaIcon from '~icons/ri/javascript-fill';
+	import MenuIcon from '~icons/ri/menu-3-fill';
+	import ReactIcon from '~icons/ri/reactjs-fill';
+	import SvelteIcon from '~icons/ri/svelte-fill';
+	import VueIcon from '~icons/ri/vuejs-fill';
+	import SolidIcon from '~icons/tabler/brand-solidjs';
+	import DockItem from './DockItem.svelte';
+	import { Popover } from 'melt/builders';
+	import MobileMenu from './MobileMenu.svelte';
 
 	type Props = {
 		pathname: string;
@@ -40,6 +42,8 @@
 		vanilla: VanillaIcon,
 		vue: VueIcon,
 	};
+
+	const popover = new Popover({});
 </script>
 
 <section class="dock-container">
@@ -86,10 +90,20 @@
 		<div class="handle" data-paw-cursor="true">
 			<GridIcon />
 		</div>
+
+		<div class="menu mobile">
+			<button {...popover.trigger}>
+				<MenuIcon />
+			</button>
+		</div>
 	</div>
+
+	<MobileMenu {popover} />
 </section>
 
 <style>
+	@custom-media --tablet (width <= 768px);
+
 	a {
 		transition: scale 150ms ease-in;
 		scale: var(--scale) var(--scale);
@@ -101,6 +115,12 @@
 	}
 
 	.dock-container {
+		--background-color: color-mix(
+			in lch,
+			var(--secondary-color, var(--app-color-primary)),
+			var(--app-color-mixer) 60%
+		);
+
 		display: flex;
 		gap: clamp(2rem, 10vw, 8rem);
 		align-items: end;
@@ -120,16 +140,18 @@
 		&:not(.dock-hidden) {
 			pointer-events: none;
 		}
+
+		@media (--tablet) {
+			bottom: 0;
+			padding: 0;
+			height: 4rem;
+		}
 	}
 
 	.dock-el {
 		backface-visibility: hidden;
 
-		background-color: color-mix(
-			in lch,
-			var(--secondary-color, var(--app-color-primary)),
-			var(--app-color-mixer) 60%
-		);
+		background-color: var(--background-color);
 
 		box-shadow:
 			inset 0 0 0 0.2px color-mix(in lch, var(--gray-1), transparent 30%),
@@ -157,6 +179,14 @@
 			transform: translate3d(-1px);
 			backface-visibility: hidden;
 		}
+
+		@media (--tablet) {
+			border-radius: 0;
+			width: 100%;
+			bottom: 0;
+			box-shadow: hsla(0, 0%, 0%, 0.3) 2px 5px 19px 7px;
+			/* background-color: var(--app-color-scrolling-navbar); */
+		}
 	}
 
 	.zoomable {
@@ -173,13 +203,26 @@
 		margin: 0 4px;
 	}
 
-	.handle {
+	.handle,
+	.menu {
 		height: 100%;
 
 		padding: 0.75rem;
 		display: flex;
 
 		font-size: 1.4rem;
+
+		@media (--tablet) {
+			display: none;
+		}
+	}
+
+	.menu {
+		display: none;
+
+		@media (--tablet) {
+			display: block;
+		}
 	}
 
 	/* .logo {

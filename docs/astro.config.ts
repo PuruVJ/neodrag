@@ -80,6 +80,9 @@ export default defineConfig({
 			transformer: 'lightningcss',
 			lightningcss: {
 				targets: browserslistToTargets(browserslist(['defaults'])),
+				drafts: {
+					customMedia: true,
+				},
 			},
 		},
 
