@@ -2,26 +2,33 @@
 	"name": "@neodrag/vanilla",
 	"version": "2.3.0",
 	"description": "JS library to add dragging to your apps 😉",
-	"main": "./dist/index.js",
 	"unpkg": "./dist/umd/index.js",
 	"jsdelivr": "./dist/umd/index.js",
-	"module": "./dist/index.js",
 	"type": "module",
-	"types": "./dist/index.d.ts",
 	"files": [
 		"dist/*"
 	],
 	"sideEffects": false,
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"import": {
-				"production": "./dist/min/index.js",
-				"development": "./dist/index.js"
-			},
-			"default": "./dist/min/index.js"
+			"types": "./src/index.ts",
+			"import": "./src/index.ts",
+			"default": "./src/index.ts"
 		},
 		"./package.json": "./package.json"
+	},
+	"publishConfig": {
+		"exports": {
+			".": {
+				"types": "./dist/index.d.ts",
+				"import": {
+					"production": "./dist/min/index.js",
+					"development": "./dist/index.js"
+				},
+				"default": "./dist/min/index.js"
+			},
+			"./package.json": "./package.json"
+		}
 	},
 	"repository": {
 		"type": "git",
@@ -49,6 +56,7 @@
 	"scripts": {
 		"compile": "tsup",
 		"compile:watch": "tsup --watch",
+		"prepublishOnly": "turbo compile",
 		"pub": "pnpm compile && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm compile && pnpm publish --dry-run --no-git-checks --access public"
 	},

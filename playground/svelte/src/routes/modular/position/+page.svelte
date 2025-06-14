@@ -20,7 +20,7 @@
 	]);
 </script>
 
-<div use:draggable={options}>I can be moved with the slider too</div>
+<div {@attach draggable(options)}>I can be moved with the slider too</div>
 X:
 <input type="range" min="0" max="300" bind:value={pos.x} />
 Y:

@@ -7,4 +7,8 @@ export default defineConfig({
 	server: {
 		port: 3291,
 	},
+
+	optimizeDeps: {
+		exclude: ['@neodrag/*'],
+	},
 });

@@ -73,22 +73,6 @@ export class Compartment<T extends Plugin = Plugin> {
 	}
 }
 
-export function resolve_plugins(
-	items: (Plugin | Compartment)[],
-	compartments: Map<Compartment, Plugin | undefined>,
-): Plugin[] {
-	return items
-		.map((item) => {
-			if (item instanceof Compartment) {
-				const current = item.current;
-				compartments.set(item, current);
-				return current;
-			}
-			return item;
-		})
-		.filter((plugin): plugin is Plugin => plugin !== undefined); // Filter out undefined
-}
-
 export function unstable_definePlugin<State, Args extends unknown[]>(
 	fn: (...args: Args) => Plugin<State>,
 ) {

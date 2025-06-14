@@ -3,24 +3,19 @@
 
 	let pos = $state({ x: 0, y: 0 });
 
-	const positionCompartment = new Compartment(() => position({ current: pos }));
-
-	$effect(() => {
-		console.log(23);
-		positionCompartment.current = position({ current: $state.snapshot(pos) });
-	});
+	const position_compartment = Compartment.of(() => position({ current: $state.snapshot(pos) }));
 </script>
 
 <div
-	use:draggable={() => [
+	{@attach draggable(() => [
 		events({
 			onDrag: ({ offset }) => {
 				pos.x = offset.x;
 				pos.y = offset.y;
 			},
 		}),
-		positionCompartment,
-	]}
+		position_compartment,
+	])}
 >
 	I can be moved with the slider too
 </div>

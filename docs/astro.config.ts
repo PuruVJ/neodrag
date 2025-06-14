@@ -73,8 +73,11 @@ export default defineConfig({
 	},
 
 	vite: {
-		// @ts-ignore
 		plugins: [UnpluginIcons({ autoInstall: true, compiler: 'svelte' })],
+
+		optimizeDeps: {
+			exclude: ['@neodrag/*'],
+		},
 
 		css: {
 			transformer: 'lightningcss',

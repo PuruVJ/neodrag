@@ -7,4 +7,8 @@ export default defineConfig({
 		minify: false,
 		target: 'esnext',
 	},
+
+	optimizeDeps: {
+		exclude: ['@neodrag/*'],
+	},
 });

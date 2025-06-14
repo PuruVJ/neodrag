@@ -10,4 +10,8 @@ export default defineConfig({
 			},
 		}),
 	],
+
+	optimizeDeps: {
+		exclude: ['@neodrag/*'],
+	},
 });

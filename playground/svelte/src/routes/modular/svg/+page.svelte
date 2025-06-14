@@ -6,11 +6,11 @@
 <div class="container">
 	<!-- HTML Element -->
 	<div
-		use:draggable={[
+		{@attach draggable([
 			events({
 				onDrag: (e) => console.log('HTML drag:', e.offset),
 			}),
-		]}
+		])}
 		class="draggable-div"
 	>
 		Drag me (HTML)
@@ -19,7 +19,7 @@
 	<!-- SVG Elements -->
 	<svg width="400" height="400" viewBox="0 0 400 400">
 		<circle
-			use:draggable={[bounds(BoundsFrom.parent())]}
+			{@attach draggable([bounds(BoundsFrom.parent())])}
 			cx="100"
 			cy="100"
 			r="50"
@@ -27,11 +27,11 @@
 			opacity="0.5"
 		/>
 		<rect
-			use:draggable={[
+			{@attach draggable([
 				events({
 					onDrag: (e) => console.log('SVG drag:', e.offset),
 				}),
-			]}
+			])}
 			x="200"
 			y="200"
 			width="100"

@@ -2,15 +2,14 @@ import {
 	applyUserSelectHack,
 	Compartment,
 	ignoreMultitouch,
-	PluginInput,
-	PluginResolver,
-	resolve_plugins,
 	stateMarker,
 	threshold,
 	touchAction,
 	transform,
 	type Plugin,
 	type PluginContext,
+	type PluginInput,
+	type PluginResolver,
 } from './plugins.ts';
 import { is_svg_element, is_svg_svg_element, listen, type DeepMutable } from './utils.ts';
 
@@ -250,7 +249,7 @@ export class DraggableFactory {
 		if (typeof plugins === 'function') {
 			// Manual mode
 			const resolved = plugins();
-			const resolved_plugins = resolve_plugins(resolved, instance.compartments.map);
+			const resolved_plugins = this.#resolve_plugins(resolved, instance.compartments.map);
 			instance.plugins = this.#initialize_plugins(resolved_plugins);
 
 			// Set up compartment subscriptions
@@ -310,6 +309,22 @@ export class DraggableFactory {
 				}, new Map<string, Plugin>())
 				.values(),
 		) as Plugin[];
+	}
+
+	#resolve_plugins(
+		items: (Plugin | Compartment)[],
+		compartments: Map<Compartment, Plugin | undefined>,
+	): Plugin[] {
+		return items
+			.map((item) => {
+				if (item instanceof Compartment) {
+					const current = item.current;
+					compartments.set(item, current);
+					return current;
+				}
+				return item;
+			})
+			.filter((plugin): plugin is Plugin => plugin !== undefined); // Filter out undefined
 	}
 
 	#run_plugins(instance: DraggableInstance, hook: ErrorInfo['phase'], event: PointerEvent) {
