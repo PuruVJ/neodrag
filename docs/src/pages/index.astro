@@ -3,6 +3,7 @@ import FeatureRichFeature from '$components/home/features/feature-rich/FeatureRi
 import MultipleFrameworksFeature from '$components/home/features/multiple-frameworks/MultipleFrameworksFeature.svelte';
 import SSRFriendlyFeature from '$components/home/features/ssr-friendly/SSRFriendlyFeature.svelte';
 import HeroExample from '$components/home/HeroExample.svelte';
+import BundleSizeBuilderFeature from '$components/home/features/bundle-size/BundleSizeBuilderFeature.svelte';
 import Layout from '$layouts/Layout.astro';
 ---
 
@@ -32,6 +33,10 @@ import Layout from '$layouts/Layout.astro';
 
 		<section class="feature-multi-frameworks two-col">
 			<MultipleFrameworksFeature client:visible />
+		</section>
+
+		<section class="feature-transparent two-col">
+			<BundleSizeBuilderFeature client:visible />
 		</section>
 
 		<section class="feature-ssr-friendly two-col">

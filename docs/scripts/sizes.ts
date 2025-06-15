@@ -27,6 +27,16 @@ function createKeyMap(exports: string[]): void {
 	});
 }
 
+// Convert combination to bitmask
+function combinationToBitmask(combination: string[]): number {
+	let bitmask = 0;
+	for (const plugin of combination) {
+		const pluginIndex = exportKeyMap[plugin];
+		bitmask |= 1 << pluginIndex;
+	}
+	return bitmask;
+}
+
 async function setupCoreEnvironment() {
 	const tempDir = resolve(__dirname, 'temp', 'core-analysis');
 	mkdirSync(tempDir, { recursive: true });
@@ -117,16 +127,19 @@ function extractExportsFromContent(jsContent: string): string[] {
 	return [...new Set(exports)].filter((exp) => exp !== 'default' && exp.length > 0);
 }
 
-function* generateAllCombinations<T>(arr: T[]): Generator<T[]> {
+function* generateAllCombinations<T>(arr: T[], maxCombinations = Infinity): Generator<T[]> {
 	const n = arr.length;
-	for (let i = 0; i < Math.pow(2, n); i++) {
-		const combination: T[] = [];
+	let count = 0;
+
+	for (let i = 0; i < Math.pow(2, n) && count < maxCombinations; i++) {
+		const combination = [];
 		for (let j = 0; j < n; j++) {
 			if (i & (1 << j)) {
 				combination.push(arr[j]);
 			}
 		}
 		yield combination;
+		count++;
 	}
 }
 
@@ -181,9 +194,7 @@ async function measureCombinationWithBuild(
 import { DraggableFactory } from '@neodrag/core';
 import { ${actualImports.join(', ')} } from '@neodrag/core/plugins';
 
-export const factory = new DraggableFactory({
-	plugins: [${actualImports.join(', ')}]
-});
+export const factory = DraggableFactory(${actualImports.join(',')});
 `;
 
 	const entryPath = join(measureDir, 'test.js');
@@ -294,7 +305,7 @@ function cleanup() {
 async function main() {
 	cleanup();
 
-	console.log('🚀 Starting Core Plugin Bundle Analysis...\n');
+	console.log('🚀 Starting Core Plugin Bundle Analysis (Bitmask Output)...\n');
 
 	// Setup core environment
 	const tempDir = await setupCoreEnvironment();
@@ -331,18 +342,20 @@ async function main() {
 	const baseSize = await measureCombinationWithBuild([], tempDir, 0);
 	console.log(`✅ Base DraggableFactory size: ${baseSize} bytes`);
 
+	// Use object with string keys for JSON compatibility
 	const sizes: Record<string, number> = {};
 
 	// Generate ALL combinations and measure them
-	console.log(`\n🧮 Generating all ${Math.pow(2, allPlugins.length)} combinations...`);
+	console.log(`\n🧮 Generating combinations with bitmask keys...`);
 
 	let total = 0;
 	let calculated = 0;
 	let built = 0;
 
 	for (const combination of generateAllCombinations(allPlugins)) {
-		const comboKeys = combination.map((p) => exportKeyMap[p]).sort();
-		const comboKey = comboKeys.join(',');
+		// Generate bitmask and use as string key
+		const bitmask = combinationToBitmask(combination);
+		const bitmaskKey = bitmask.toString();
 
 		total++;
 
@@ -354,16 +367,16 @@ async function main() {
 
 		if (combination.length === 0) {
 			// Base case
-			sizes[comboKey] = baseSize;
+			sizes[bitmaskKey] = baseSize;
 			calculated++;
 		} else if (isSubsetOfDefaults(combination)) {
 			// Default plugin combination - calculate in memory
-			sizes[comboKey] = estimateSizeForDefaultCombination(combination, baseSize);
+			sizes[bitmaskKey] = estimateSizeForDefaultCombination(combination, baseSize);
 			calculated++;
 		} else {
 			// Non-default combination - build it
 			const size = await measureCombinationWithBuild(combination, tempDir, baseSize);
-			sizes[comboKey] = size;
+			sizes[bitmaskKey] = size;
 			built++;
 
 			if (built % 50 === 0) {
@@ -377,16 +390,16 @@ async function main() {
 	console.log(`  🧮 Calculated in memory: ${calculated}`);
 	console.log(`  🔨 Built with tsup: ${built}`);
 
-	// Prepare final output
+	// Prepare final output (same structure as before, but with bitmask keys)
 	const output = {
-		_keyMap: reverseKeyMap,
-		...sizes,
+		keys: reverseKeyMap,
+		sizes,
 	};
 
-	// Write results
+	// Write results to same file as before
 	const sizesPath = new URL('../src/sizes.json', import.meta.url);
 	writeFileSync(sizesPath, JSON.stringify(output, null, 2));
-	console.log(`\n✅ Wrote sizes.json with ${Object.keys(sizes).length} combinations`);
+	console.log(`\n✅ Wrote sizes.json with ${Object.keys(sizes).length} bitmask-based combinations`);
 
 	// Summary
 	console.log('\n📈 CORE PLUGIN BUNDLE SIZE ANALYSIS:');
@@ -400,8 +413,9 @@ async function main() {
 
 		// Show size distribution by plugin count
 		const byPluginCount = new Map<number, number[]>();
-		sizeEntries.forEach(([combo, size]) => {
-			const pluginCount = combo === '' ? 0 : combo.split(',').length;
+		sizeEntries.forEach(([bitmaskStr, size]) => {
+			const bitmask = parseInt(bitmaskStr);
+			const pluginCount = bitmask === 0 ? 0 : bitmask.toString(2).split('1').length - 1;
 			if (!byPluginCount.has(pluginCount)) {
 				byPluginCount.set(pluginCount, []);
 			}
@@ -424,14 +438,19 @@ async function main() {
 
 		// Show most efficient combinations
 		console.log(`\n🏆 Most efficient plugin combinations:`);
-		const pluginEntries = sizeEntries.filter(([combo]) => combo !== '');
-		pluginEntries.slice(0, 5).forEach(([combo, size]) => {
-			const pluginKeys = combo.split(',');
-			const plugins = pluginKeys.map((key) => reverseKeyMap[parseInt(key)]);
+		const pluginEntries = sizeEntries.filter(([bitmaskStr]) => bitmaskStr !== '0');
+		pluginEntries.slice(0, 5).forEach(([bitmaskStr, size]) => {
+			const bitmask = parseInt(bitmaskStr);
+			const plugins = [];
+			for (let i = 0; i < 14; i++) {
+				if (bitmask & (1 << i)) {
+					plugins.push(reverseKeyMap[i]);
+				}
+			}
 			const overhead = size - baseSize;
 			const overheadPercent = Math.round((overhead / baseSize) * 100);
 			console.log(
-				`    +${overhead.toString().padStart(4)} bytes (+${overheadPercent.toString().padStart(2)}%): [${plugins.join(', ')}]`,
+				`    +${overhead.toString().padStart(4)} bytes (+${overheadPercent.toString().padStart(2)}%): [${plugins.join(', ')}] (bitmask: ${bitmask})`,
 			);
 		});
 	}
@@ -440,20 +459,4 @@ async function main() {
 	console.log('\n🎉 Core analysis complete!');
 }
 
-function convert_from_ew() {
-	const sizes_file = resolve(__dirname, 'sizes.json');
-	const sizes = JSON.parse(readFileSync(sizes_file, 'utf-8'));
-
-	const { _keyMap, ...keys } = sizes;
-
-	const new_obj = {
-		keys: _keyMap,
-		sizes: keys,
-	};
-
-	writeFileSync(sizes_file, JSON.stringify(new_obj, null, 2));
-}
-
 await main().catch(console.error);
-
-convert_from_ew();
