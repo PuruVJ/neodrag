@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/core",
-	"version": "2.3.0",
+	"version": "0.0.0",
 	"type": "module",
 	"files": [
 		"dist/*"
@@ -18,9 +18,7 @@
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
-		"files": [
-			"dist/*"
-		],
+		"access": "public",
 		"exports": {
 			".": {
 				"types": "./dist/index.d.ts",
