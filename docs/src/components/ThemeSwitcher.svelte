@@ -12,9 +12,12 @@
 
 	const { thumbnail = false, onclick, embedded = false }: Props = $props();
 
-	const SelectedIcon = $derived(
-		{ light: SunIcon, dark: MoonIcon, system: SystemIcon }[theme.preference],
-	);
+	const ICONS = {
+		light: SunIcon,
+		dark: MoonIcon,
+		system: SystemIcon,
+	};
+	const SelectedIcon = $derived(ICONS[theme.preference]);
 </script>
 
 <div class={['theme-switcher', thumbnail && 'thumbnail', embedded && 'embedded']}>
@@ -80,30 +83,10 @@
 			margin: 0;
 			padding: 0 0.28rem 0.2rem 0.28rem; /* Move margin into padding */
 
-			border-top-left-radius: 1.5rem;
-			border-top-right-radius: 1.5rem;
-			border-bottom-left-radius: 0;
-			border-bottom-right-radius: 0;
-
 			.theme-button {
 				/* Remove margin from buttons in embedded mode */
 				margin: 0;
 				padding: 0.75rem 0.5rem; /* Compensate with padding */
-			}
-
-			.indicator {
-				/* Adjust indicator positioning without margins */
-				top: 0.2rem;
-				left: 0.28rem;
-				height: calc(100% - 0.4rem);
-			}
-
-			.indicator-light {
-				border-top-left-radius: 1.3rem;
-			}
-
-			.indicator-dark {
-				border-top-right-radius: 1.3rem;
 			}
 		}
 

@@ -3,11 +3,12 @@ import '@fontsource-variable/eb-garamond';
 import '@fontsource-variable/jetbrains-mono';
 import '../css/globals.css';
 
-import Nav from '$components/docs/Nav.astro';
+import Nav from '$components/docs/Nav.svelte';
 import Dock from '$components/nav/Dock.svelte';
 import PawCursor from '$components/PawCursor.svelte';
 import { SEO } from 'astro-seo';
 import { ClientRouter } from 'astro:transitions';
+import { get_nav_list } from '$/nav';
 
 export interface Props {
 	title: string;
@@ -16,6 +17,8 @@ export interface Props {
 const { title } = Astro.props;
 
 const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pathname)?.[1];
+
+const nav_list = get_nav_list(framework as any);
 ---
 
 <!doctype html>
@@ -90,15 +93,12 @@ const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pa
 
 		<div>
 			<Dock
-				pathname={Astro.url.pathname}
 				selected={framework}
-				client:visible
+				pathname={Astro.url.pathname}
+				nav_list={nav_list}
+				client:load
 				transition:persist="dock"
-			>
-				<Fragment slot="nav_menu">
-					<Nav framework={(framework as any) ?? 'svelte'} />
-				</Fragment>
-			</Dock>
+			/>
 			<slot />
 		</div>
 
