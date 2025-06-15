@@ -22,7 +22,7 @@ import { vDraggable } from '@neodrag/vue';
 </template>
 ```
 
-With options
+With plugins
 
 ```vue
 <script setup>
@@ -34,7 +34,7 @@ import { vDraggable, axis, grid } from '@neodrag/vue';
 </template>
 ```
 
-Defining options elsewhere with typescript
+Defining plugins elsewhere with TypeScript
 
 ```vue
 <script setup lang="ts">
@@ -46,4 +46,165 @@ const plugins: Plugin[] = [axis('y'), grid([10, 10])];
 <template>
   <div v-draggable="plugins">I am draggable</div>
 </template>
+```
+
+## Reactive Plugins with useCompartment
+
+For dynamic behavior that changes during runtime:
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { vDraggable, axis, useCompartment } from '@neodrag/vue';
+
+const currentAxis = ref('x');
+
+const axisComp = useCompartment(() => axis(currentAxis.value));
+
+const plugins = () => [axisComp];
+</script>
+
+<template>
+  <div>
+    <div v-draggable="plugins">Current axis: {{ currentAxis }}</div>
+    <button @click="currentAxis = currentAxis === 'x' ? 'y' : 'x'">
+      Switch Axis
+    </button>
+  </div>
+</template>
+```
+
+Multiple reactive compartments
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import {
+  vDraggable,
+  axis,
+  bounds,
+  BoundsFrom,
+  grid,
+  useCompartment,
+} from '@neodrag/vue';
+
+const currentAxis = ref('x');
+const gridSize = ref(20);
+const enableBounds = ref(false);
+
+const axisComp = useCompartment(() => axis(currentAxis.value));
+const gridComp = useCompartment(() =>
+  grid([gridSize.value, gridSize.value]),
+);
+const boundsComp = useCompartment(() =>
+  enableBounds.value ? bounds(BoundsFrom.parent()) : null,
+);
+
+const plugins = () => [axisComp, gridComp, boundsComp];
+</script>
+
+<template>
+  <div>
+    <div v-draggable="plugins">Reactive draggable</div>
+
+    <div>
+      <select v-model="currentAxis">
+        <option value="x">X</option>
+        <option value="y">Y</option>
+      </select>
+
+      <input
+        type="range"
+        min="10"
+        max="50"
+        v-model.number="gridSize"
+      />
+
+      <label>
+        <input type="checkbox" v-model="enableBounds" />
+        Enable bounds
+      </label>
+    </div>
+  </div>
+</template>
+```
+
+## Event Handling
+
+```vue
+<script setup>
+import { vDraggable, events } from '@neodrag/vue';
+
+const plugins = [
+  events({
+    onDragStart: (data) => console.log('Started:', data.offset),
+    onDrag: (data) => console.log('Dragging:', data.offset),
+    onDragEnd: (data) => console.log('Ended:', data.offset),
+  }),
+];
+</script>
+
+<template>
+  <div v-draggable="plugins">Check console while dragging</div>
+</template>
+```
+
+## Drag Controls
+
+```vue
+<script setup>
+import { vDraggable, controls, ControlFrom } from '@neodrag/vue';
+
+const plugins = [
+  controls({
+    allow: ControlFrom.selector('.drag-handle'),
+    block: ControlFrom.selector('.no-drag'),
+  }),
+];
+</script>
+
+<template>
+  <div v-draggable="plugins">
+    <div class="drag-handle">🔸 Drag from here</div>
+    <div>Content area</div>
+    <div class="no-drag">❌ Can't drag from here</div>
+  </div>
+</template>
+```
+
+## Available Plugins
+
+All plugins from `@neodrag/core` are available:
+
+- **[axis](/docs/vue/plugin/axis)(direction)** - Constrain movement to 'x', 'y', or 'both'
+- **[bounds](/docs/vue/plugin/bounds)(boundary)** - Limit dragging within boundaries
+- **[grid](/docs/vue/plugin/grid)([x, y])** - Snap to grid positions
+- **[events](/docs/vue/plugin/events)(handlers)** - Handle drag events
+- **[controls](/docs/vue/plugin/controls)(options)** - Specify drag handles and cancel elements
+- **[disabled](/docs/vue/plugin/disabled)()** - Disable dragging entirely
+- **[threshold](/docs/vue/plugin/threshold)(options)** - Set distance/time thresholds
+- **[touchAction](/docs/vue/plugin/touch-action)(mode)** - Control touch gesture handling
+- **[transform](/docs/vue/plugin/transform)(options)** - Customize positioning behavior
+
+Import using:
+
+```vue
+<script setup>
+import {
+  vDraggable,
+  useCompartment,
+  axis,
+  bounds,
+  BoundsFrom,
+  grid,
+  events,
+  controls,
+  ControlFrom,
+  disabled,
+  threshold,
+  touchAction,
+  transform,
+  type Plugin
+} from '@neodrag/vue';
+</script>
 ```

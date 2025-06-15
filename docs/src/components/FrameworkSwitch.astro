@@ -1,5 +1,5 @@
 ---
-const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pathname)?.[1];
+const framework = /\/docs\/(svelte|react|solid|vanilla|vue|core)/gi.exec(Astro.url.pathname)?.[1];
 ---
 
 {framework === 'svelte' && <slot name="svelte" />}
@@ -7,3 +7,4 @@ const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pa
 {framework === 'vue' && <slot name="vue" />}
 {framework === 'solid' && <slot name="solid" />}
 {framework === 'vanilla' && <slot name="vanilla" />}
+{framework === 'vanilla' && <slot name="core" />}

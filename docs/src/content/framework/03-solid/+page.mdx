@@ -25,15 +25,24 @@ export const App: Component = () => {
 };
 ```
 
+> Note: Neodrag uses `useDraggable` instead of `createDraggable` because it's built on a shared [DraggableFactory](/docs/core#solid) instance from `@neodrag/core`, providing consistent APIs across all frameworks and better performance through shared event delegation.
+
 With plugins
 
 ```tsx
 import { useDraggable, axis, grid } from '@neodrag/solid';
 
-useDraggable(draggableRef, [axis('x'), grid([10, 10])]);
+export const App: Component = () => {
+  const [draggableRef, setDraggableRef] =
+    createSignal<HTMLElement | null>(null);
+
+  useDraggable(draggableRef, [axis('x'), grid([10, 10])]);
+
+  return <div ref={setDraggableRef}>Horizontal grid snapping</div>;
+};
 ```
 
-Defining plugins elsewhere with typescript
+Defining plugins elsewhere with TypeScript
 
 ```tsx
 import {
@@ -44,20 +53,223 @@ import {
   type Plugin,
 } from '@neodrag/solid';
 
-const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
-useDraggable(draggableRef, plugins);
+export const App: Component = () => {
+  const [draggableRef, setDraggableRef] =
+    createSignal<HTMLElement | null>(null);
+
+  const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
+  useDraggable(draggableRef, plugins);
+
+  return <div ref={setDraggableRef}>Type-safe dragging</div>;
+};
 ```
 
-Reactive options:
+Getting drag state
+
+```tsx
+import { useDraggable } from '@neodrag/solid';
+
+export const App: Component = () => {
+  const [draggableRef, setDraggableRef] =
+    createSignal<HTMLElement | null>(null);
+  const dragState = useDraggable(draggableRef);
+
+  createEffect(() => {
+    console.log('Position:', dragState().offset);
+    console.log('Is dragging:', dragState().isDragging);
+  });
+
+  return (
+    <div ref={setDraggableRef}>Check console while dragging</div>
+  );
+};
+```
+
+## Reactive Plugins with createCompartment
+
+For dynamic behavior that changes during runtime:
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { useDraggable } from '@neodrag/solid';
+import {
+  useDraggable,
+  axis,
+  createCompartment,
+} from '@neodrag/solid';
 
-const [axisValue, setAxisValue] = createSignal('y');
+export const App: Component = () => {
+  const [draggableRef, setDraggableRef] =
+    createSignal<HTMLElement | null>(null);
+  const [currentAxis, setCurrentAxis] = createSignal<'x' | 'y'>('x');
 
-useDraggable(draggableRef, () => [axis(axisValue())]);
+  const axisCompartment = createCompartment(() =>
+    axis(currentAxis()),
+  );
 
-// You can update axisValue using a button or any other event
-// Neodrag will automatically update to the new value 😉
+  useDraggable(draggableRef, [axisCompartment]);
+
+  return (
+    <div>
+      <div ref={setDraggableRef}>Current axis: {currentAxis()}</div>
+      <button
+        onClick={() =>
+          setCurrentAxis(currentAxis() === 'x' ? 'y' : 'x')
+        }
+      >
+        Switch Axis
+      </button>
+    </div>
+  );
+};
+```
+
+Multiple reactive compartments
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  useDraggable,
+  axis,
+  bounds,
+  BoundsFrom,
+  grid,
+  createCompartment,
+} from '@neodrag/solid';
+
+export const App: Component = () => {
+  const [draggableRef, setDraggableRef] =
+    createSignal<HTMLElement | null>(null);
+  const [currentAxis, setCurrentAxis] = createSignal<'x' | 'y'>('x');
+  const [gridSize, setGridSize] = createSignal(20);
+  const [enableBounds, setEnableBounds] = createSignal(false);
+
+  const axisComp = createCompartment(() => axis(currentAxis()));
+  const gridComp = createCompartment(() =>
+    grid([gridSize(), gridSize()]),
+  );
+  const boundsComp = createCompartment(() =>
+    enableBounds() ? bounds(BoundsFrom.parent()) : null,
+  );
+
+  useDraggable(draggableRef, [axisComp, gridComp, boundsComp]);
+
+  return (
+    <div>
+      <div ref={setDraggableRef}>Reactive draggable</div>
+
+      <div>
+        <select
+          value={currentAxis()}
+          onChange={(e) =>
+            setCurrentAxis(e.target.value as 'x' | 'y')
+          }
+        >
+          <option value="x">X</option>
+          <option value="y">Y</option>
+        </select>
+
+        <input
+          type="range"
+          min="10"
+          max="50"
+          value={gridSize()}
+          onInput={(e) => setGridSize(Number(e.target.value))}
+        />
+
+        <label>
+          <input
+            type="checkbox"
+            checked={enableBounds()}
+            onChange={(e) => setEnableBounds(e.target.checked)}
+          />
+          Enable bounds
+        </label>
+      </div>
+    </div>
+  );
+};
+```
+
+## Event Handling
+
+```tsx
+import { useDraggable, events } from '@neodrag/solid';
+
+export const App: Component = () => {
+  const [draggableRef, setDraggableRef] =
+    createSignal<HTMLElement | null>(null);
+
+  useDraggable(draggableRef, [
+    events({
+      onDragStart: (data) => console.log('Started:', data.offset),
+      onDrag: (data) => console.log('Dragging:', data.offset),
+      onDragEnd: (data) => console.log('Ended:', data.offset),
+    }),
+  ]);
+
+  return (
+    <div ref={setDraggableRef}>Check console while dragging</div>
+  );
+};
+```
+
+## Drag Controls
+
+```tsx
+import { useDraggable, controls, ControlFrom } from '@neodrag/solid';
+
+export const App: Component = () => {
+  const [draggableRef, setDraggableRef] =
+    createSignal<HTMLElement | null>(null);
+
+  useDraggable(draggableRef, [
+    controls({
+      allow: ControlFrom.selector('.drag-handle'),
+      block: ControlFrom.selector('.no-drag'),
+    }),
+  ]);
+
+  return (
+    <div ref={setDraggableRef}>
+      <div class="drag-handle">🔸 Drag from here</div>
+      <div>Content area</div>
+      <div class="no-drag">❌ Can't drag from here</div>
+    </div>
+  );
+};
+```
+
+## Available Plugins
+
+All plugins from `@neodrag/core` are available:
+
+- **[axis](/docs/solid/plugin/axis)(direction)** - Constrain movement to 'x', 'y', or 'both'
+- **[bounds](/docs/solid/plugin/bounds)(boundary)** - Limit dragging within boundaries
+- **[grid](/docs/solid/plugin/grid)([x, y])** - Snap to grid positions
+- **[events](/docs/solid/plugin/events)(handlers)** - Handle drag events
+- **[controls](/docs/solid/plugin/controls)(options)** - Specify drag handles and cancel elements
+- **[disabled](/docs/solid/plugin/disabled)()** - Disable dragging entirely
+- **[threshold](/docs/solid/plugin/threshold)(options)** - Set distance/time thresholds
+- **[touchAction](/docs/solid/plugin/touch-action)(mode)** - Control touch gesture handling
+- **[transform](/docs/solid/plugin/transform)(options)** - Customize positioning behavior
+
+Import using:
+
+```tsx
+import {
+  useDraggable,
+  createCompartment,
+  axis,
+  bounds,
+  BoundsFrom,
+  grid,
+  events,
+  controls,
+  ControlFrom,
+  disabled,
+  threshold,
+  touchAction,
+  transform,
+  type Plugin,
+} from '@neodrag/solid';
 ```

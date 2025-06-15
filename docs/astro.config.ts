@@ -37,7 +37,7 @@ export default defineConfig({
 	},
 
 	markdown: {
-		extendDefaultPlugins: true,
+		// extendDefaultPlugins: true,
 		shikiConfig: {
 			themes: {
 				light: 'github-light',
@@ -45,7 +45,7 @@ export default defineConfig({
 			},
 		},
 		// @ts-ignore
-		remarkPlugins: [container],
+		// remarkPlugins: [container],
 		rehypePlugins: [
 			rehypeHeadingIds,
 			[
@@ -92,6 +92,10 @@ export default defineConfig({
 		build: {
 			minify: 'terser',
 			cssMinify: 'lightningcss',
+
+			rollupOptions: {
+				output: {},
+			},
 		},
 	},
 });

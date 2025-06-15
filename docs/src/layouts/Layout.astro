@@ -3,12 +3,11 @@ import '@fontsource-variable/eb-garamond';
 import '@fontsource-variable/jetbrains-mono';
 import '../css/globals.css';
 
-import Nav from '$components/docs/Nav.svelte';
+import { get_nav_list } from '$/nav';
 import Dock from '$components/nav/Dock.svelte';
 import PawCursor from '$components/PawCursor.svelte';
 import { SEO } from 'astro-seo';
 import { ClientRouter } from 'astro:transitions';
-import { get_nav_list } from '$/nav';
 
 export interface Props {
 	title: string;
@@ -16,7 +15,7 @@ export interface Props {
 
 const { title } = Astro.props;
 
-const framework = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.pathname)?.[1];
+const framework = /\/docs\/(svelte|react|solid|vanilla|vue|core)/gi.exec(Astro.url.pathname)?.[1];
 
 const nav_list = get_nav_list(framework as any);
 ---

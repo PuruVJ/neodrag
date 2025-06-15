@@ -56,6 +56,12 @@ body {
 	}
 }
 
+code {
+	color: var(--app-color-dark);
+	background-color: var(--app-color-dark-contrast);
+	font-family: var(--app-font-mono);
+}
+
 h1,
 .h1 {
 	margin-top: 0;
@@ -77,15 +83,17 @@ h4,
 	font-size: clamp(0.85rem, 1.05vw, 1.2rem);
 }
 
-code {
-	color: var(--app-color-dark);
-	background-color: var(--app-color-dark-contrast);
-	font-family: var(--app-font-mono);
-}
-
 pre code {
 	color: initial;
 	background-color: initial;
+}
+
+blockquote {
+	border-left: 0.25rem solid var(--app-color-dark);
+	background-color: color-mix(in lch, var(--app-color-dark), transparent 95%);
+	border-radius: 0 0.5rem 0.5rem 0;
+	padding: 0.51rem;
+	padding-left: 1rem;
 }
 
 kbd {
@@ -133,53 +141,6 @@ kbd {
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border-width: 0;
-}
-
-/* Framework specific classes */
-/* Replaced SCSS @each with individual class definitions */
-.text-svelte {
-	color: var(--app-color-brand-svelte);
-	fill: var(--app-color-brand-svelte);
-}
-
-.bg-svelte {
-	background-color: var(--app-color-brand-svelte);
-}
-
-.text-react {
-	color: var(--app-color-brand-react);
-	fill: var(--app-color-brand-react);
-}
-
-.bg-react {
-	background-color: var(--app-color-brand-react);
-}
-
-.text-vue {
-	color: var(--app-color-brand-vue);
-	fill: var(--app-color-brand-vue);
-}
-
-.bg-vue {
-	background-color: var(--app-color-brand-vue);
-}
-
-.text-solid {
-	color: var(--app-color-brand-solid);
-	fill: var(--app-color-brand-solid);
-}
-
-.bg-solid {
-	background-color: var(--app-color-brand-solid);
-}
-
-.text-vanilla {
-	color: var(--app-color-brand-vanilla);
-	fill: var(--app-color-brand-vanilla);
-}
-
-.bg-vanilla {
-	background-color: var(--app-color-brand-vanilla);
 }
 
 ::selection {

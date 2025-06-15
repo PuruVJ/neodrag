@@ -9,6 +9,8 @@ const migrations_collection = (await getCollection('migration')).sort((a, b) =>
 const plugin_collection = (await getCollection('plugin')).sort((a, b) => (a.id > b.id ? 1 : -1));
 
 export function get_nav_list(framework: string) {
+	framework = framework === 'core' ? 'svelte' : framework;
+
 	return [
 		{
 			title: 'framework',
