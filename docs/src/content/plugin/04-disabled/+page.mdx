@@ -5,8 +5,6 @@ tagline: 'Completely disable dragging functionality'
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-## What it does
-
 The `disabled` plugin completely turns off dragging for an element. Pass `true` to disable, `false` to enable, or omit the argument to disable by default.
 
 ```typescript
@@ -94,7 +92,7 @@ new Draggable(element, [disabled(true)]);
 </div>
 </FrameworkSwitch>
 
-## Toggle Dragging
+## Dynamic Toggle
 
 The real power comes from dynamically enabling/disabling with compartments:
 
@@ -106,7 +104,6 @@ The real power comes from dynamically enabling/disabling with compartments:
   import { disabled, Compartment } from '@neodrag/svelte';
 
   let isDragDisabled = $state(false);
-
   const disabledComp = Compartment.of(() => disabled(isDragDisabled));
 </script>
 
@@ -147,7 +144,6 @@ function ToggleDragging() {
       <div ref={elementRef}>
         Dragging is {isDragDisabled ? 'disabled' : 'enabled'}
       </div>
-
       <button onClick={() => setIsDragDisabled(!isDragDisabled)}>
         {isDragDisabled ? 'Enable' : 'Disable'} Dragging
       </button>
@@ -166,12 +162,9 @@ import { ref } from 'vue';
 import { disabled, vDraggable, useCompartment } from '@neodrag/vue';
 
 const isDragDisabled = ref(false);
-
 const disabledComp = useCompartment(() =>
   disabled(isDragDisabled.value),
 );
-
-const plugins = () => [disabledComp];
 
 function toggle() {
   isDragDisabled.value = !isDragDisabled.value;
@@ -180,10 +173,9 @@ function toggle() {
 
 <template>
   <div>
-    <div v-draggable="plugins">
+    <div v-draggable="() => [disabledComp]">
       Dragging is {{ isDragDisabled ? 'disabled' : 'enabled' }}
     </div>
-
     <button @click="toggle">
       {{ isDragDisabled ? 'Enable' : 'Disable' }} Dragging
     </button>
@@ -210,7 +202,6 @@ function ToggleDragging() {
   const disabledComp = createCompartment(() =>
     disabled(isDragDisabled()),
   );
-
   useDraggable(element, [disabledComp]);
 
   return (
@@ -218,7 +209,6 @@ function ToggleDragging() {
       <div ref={setElement}>
         Dragging is {isDragDisabled() ? 'disabled' : 'enabled'}
       </div>
-
       <button onClick={() => setIsDragDisabled(!isDragDisabled())}>
         {isDragDisabled() ? 'Enable' : 'Disable'} Dragging
       </button>
@@ -234,16 +224,13 @@ function ToggleDragging() {
 ```typescript
 import { disabled, Compartment, Draggable } from '@neodrag/vanilla';
 
-const element = document.getElementById('element');
-const button = document.getElementById('toggle-button');
-
 let isDragDisabled = false;
-
 const disabledComp = new Compartment(() => disabled(isDragDisabled));
 
+const element = document.getElementById('element');
 new Draggable(element, () => [disabledComp]);
 
-button.addEventListener('click', () => {
+document.getElementById('toggle').addEventListener('click', () => {
   isDragDisabled = !isDragDisabled;
   disabledComp.current = disabled(isDragDisabled);
 });
@@ -254,17 +241,7 @@ button.addEventListener('click', () => {
 
 ## Common Use Cases
 
-### Conditional Disabling
-
-```typescript
-// Disable dragging during loading
-const plugins = [disabled(isLoading), grid([10, 10])];
-
-// Disable based on user permissions
-const plugins = [disabled(!userCanDrag), bounds(BoundsFrom.parent())];
-```
-
-### Form Mode Toggle
+### Edit Mode Toggle
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -274,13 +251,12 @@ const plugins = [disabled(!userCanDrag), bounds(BoundsFrom.parent())];
   import { disabled, Compartment } from '@neodrag/svelte';
 
   let isEditMode = $state(false);
-
   const disabledComp = Compartment.of(() => disabled(isEditMode));
 </script>
 
-<div class="card" {@attach draggable(() => [disabledComp])}>
+<div {@attach draggable(() => [disabledComp])} class="card">
   <div class="card-header">
-    Card Title
+    <h3>Card Title</h3>
     <button onclick={() => (isEditMode = !isEditMode)}>
       {isEditMode ? 'Save' : 'Edit'}
     </button>
@@ -313,7 +289,7 @@ import {
 } from '@neodrag/react';
 
 function EditableCard() {
-  const cardRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
   const disabledComp = useCompartment(
@@ -321,12 +297,12 @@ function EditableCard() {
     [isEditMode],
   );
 
-  useDraggable(cardRef, () => [disabledComp]);
+  useDraggable(ref, () => [disabledComp]);
 
   return (
-    <div ref={cardRef} className="card">
+    <div ref={ref} className="card">
       <div className="card-header">
-        Card Title
+        <h3>Card Title</h3>
         <button onClick={() => setIsEditMode(!isEditMode)}>
           {isEditMode ? 'Save' : 'Edit'}
         </button>
@@ -359,21 +335,18 @@ import { ref } from 'vue';
 import { disabled, vDraggable, useCompartment } from '@neodrag/vue';
 
 const isEditMode = ref(false);
-
 const disabledComp = useCompartment(() => disabled(isEditMode.value));
 
-const plugins = () => [disabledComp];
-
-function toggle() {
+function toggleEdit() {
   isEditMode.value = !isEditMode.value;
 }
 </script>
 
 <template>
-  <div v-draggable="plugins" class="card">
+  <div v-draggable="() => [disabledComp]" class="card">
     <div class="card-header">
-      Card Title
-      <button @click="toggle">
+      <h3>Card Title</h3>
+      <button @click="toggleEdit">
         {{ isEditMode ? 'Save' : 'Edit' }}
       </button>
     </div>
@@ -414,13 +387,12 @@ function EditableCard() {
   const disabledComp = createCompartment(() =>
     disabled(isEditMode()),
   );
-
   useDraggable(card, [disabledComp]);
 
   return (
     <div ref={setCard} class="card">
       <div class="card-header">
-        Card Title
+        <h3>Card Title</h3>
         <button onClick={() => setIsEditMode(!isEditMode())}>
           {isEditMode() ? 'Save' : 'Edit'}
         </button>
@@ -455,7 +427,6 @@ const editButton = document.getElementById('edit-button');
 const content = document.getElementById('content');
 
 let isEditMode = false;
-
 const disabledComp = new Compartment(() => disabled(isEditMode));
 
 new Draggable(card, () => [disabledComp]);
@@ -489,6 +460,16 @@ const loadingComp = new Compartment(() => disabled(isLoading));
 const savingComp = new Compartment(() => disabled(isSaving));
 ```
 
+### Permission-Based Dragging
+
+```typescript
+// Disable based on user permissions
+const permissionComp = new Compartment(() => disabled(!canUserDrag));
+
+// Disable for readonly mode
+const readonlyComp = new Compartment(() => disabled(isReadonly));
+```
+
 ## Why Use This Instead of No Draggable?
 
 You might wonder why use `disabled()` instead of just not applying draggable. Here's when disabled is better:
@@ -504,7 +485,7 @@ const disabledComp = new Compartment(() => disabled(!canDrag));
 draggable(element, () => [disabledComp, bounds(BoundsFrom.parent())]);
 ```
 
-Benefits of using `disabled()`:
+**Benefits of using `disabled()`:**
 
 - **Performance** - No need to destroy/recreate draggable instances
 - **State preservation** - Other plugins maintain their state
@@ -512,7 +493,7 @@ Benefits of using `disabled()`:
 
 ## How It Works
 
-The disabled plugin is simple but flexible:
+The disabled plugin is simple but effective:
 
 ```typescript
 {
@@ -537,11 +518,11 @@ function disabled(value?: boolean): Plugin;
   - `true` - Disable dragging
   - `false` - Allow dragging (same as not using the plugin)
 
-**Returns:** A plugin object that prevents/allows dragging based on the value.
-
 **Usage patterns:**
 
 - `disabled()` - Always disabled (default true)
 - `disabled(true)` - Explicitly disabled
 - `disabled(false)` - Explicitly enabled
 - `disabled(condition)` - Conditionally disabled based on boolean
+
+**Returns:** A plugin object that prevents/allows dragging based on the value.

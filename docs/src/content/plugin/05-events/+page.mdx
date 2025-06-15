@@ -5,8 +5,6 @@ tagline: 'Listen to drag start, drag, and drag end events'
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-## What it does
-
 The `events` plugin provides callbacks that fire during different phases of dragging. Get notified when dragging starts, during movement, and when it ends - perfect for updating UI state, logging, or triggering animations.
 
 ```typescript
@@ -354,13 +352,13 @@ const eventsComp = useCompartment(() => {
     });
   }
 });
-
-const plugins = () => [eventsComp];
 </script>
 
 <template>
   <div>
-    <div v-draggable="plugins">Drag me ({{ logMode }} mode)</div>
+    <div v-draggable="() => [eventsComp]">
+      Drag me ({{ logMode }} mode)
+    </div>
 
     <select v-model="logMode">
       <option value="console">Console</option>
@@ -427,7 +425,9 @@ function DynamicEvents() {
 
       {logMode() === 'ui' && (
         <ul>
-          <For each={logs()}>{(log) => <li>{log}</li>}</For>
+          {logs().map((log, i) => (
+            <li key={i}>{log}</li>
+          ))}
         </ul>
       )}
     </div>
@@ -442,12 +442,8 @@ function DynamicEvents() {
 ```typescript
 import { events, Compartment, Draggable } from '@neodrag/vanilla';
 
-const element = document.getElementById('element');
-const select = document.getElementById('log-mode');
-const logsList = document.getElementById('logs-list');
-
 let logMode = 'console';
-const logs = [];
+let logs = [];
 
 const eventsComp = new Compartment(() => {
   if (logMode === 'console') {
@@ -458,32 +454,23 @@ const eventsComp = new Compartment(() => {
     });
   } else {
     return events({
-      onDragStart: () => {
-        logs.push('Started');
-        updateLogsList();
-      },
-      onDrag: (data) => {
-        logs.push(`Moving: ${data.offset.x}, ${data.offset.y}`);
-        updateLogsList();
-      },
-      onDragEnd: () => {
-        logs.push('Ended');
-        updateLogsList();
-      },
+      onDragStart: () => logs.push('Started'),
+      onDrag: (data) =>
+        logs.push(`Moving: ${data.offset.x}, ${data.offset.y}`),
+      onDragEnd: () => logs.push('Ended'),
     });
   }
 });
 
-function updateLogsList() {
-  logsList.innerHTML = logs.map((log) => `<li>${log}</li>`).join('');
-}
-
+const element = document.getElementById('element');
 new Draggable(element, () => [eventsComp]);
 
-select.addEventListener('change', (e) => {
-  logMode = e.target.value;
-  eventsComp.current = eventsComp.current; // Trigger update
-});
+document
+  .getElementById('mode-select')
+  .addEventListener('change', (e) => {
+    logMode = e.target.value;
+    eventsComp.current = eventsComp.current; // Trigger update
+  });
 ```
 
 </div>
@@ -491,7 +478,7 @@ select.addEventListener('change', (e) => {
 
 ## Common Use Cases
 
-### Position Tracking
+### Velocity Tracking
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -500,47 +487,35 @@ select.addEventListener('change', (e) => {
 <script>
   import { events } from '@neodrag/svelte';
 
-  let position = $state({ x: 0, y: 0 });
   let velocity = $state({ x: 0, y: 0 });
   let lastTime = 0;
   let lastPosition = { x: 0, y: 0 };
 
-  const trackingEvents = events({
+  const velocityTracker = events({
     onDrag: (data) => {
       const now = Date.now();
       const deltaTime = now - lastTime;
 
       if (deltaTime > 0) {
-        velocity = {
-          x: ((data.offset.x - lastPosition.x) / deltaTime) * 1000,
-          y: ((data.offset.y - lastPosition.y) / deltaTime) * 1000,
-        };
+        velocity.x = Math.round(
+          ((data.offset.x - lastPosition.x) / deltaTime) * 1000,
+        );
+        velocity.y = Math.round(
+          ((data.offset.y - lastPosition.y) / deltaTime) * 1000,
+        );
       }
 
-      position = { ...data.offset };
       lastPosition = { ...data.offset };
       lastTime = now;
     },
   });
 </script>
 
-<div {@attach draggable([trackingEvents])}>
-  Position: ({position.x}, {position.y})
+<div {@attach draggable([velocityTracker])}>
+  Position: {lastPosition.x}, {lastPosition.y}
   <br />
-  Velocity: ({Math.round(velocity.x)}px/s, {Math.round(
-    velocity.y,
-  )}px/s)
+  Velocity: {velocity.x}px/s, {velocity.y}px/s
 </div>
-
-<style>
-  div {
-    padding: 20px;
-    border: 2px solid #ddd;
-    background: #f9f9f9;
-    cursor: move;
-    user-select: none;
-  }
-</style>
 ```
 
 </div>
@@ -551,31 +526,32 @@ select.addEventListener('change', (e) => {
 import { useRef, useState } from 'react';
 import { events, useDraggable } from '@neodrag/react';
 
-function PositionTracker() {
-  const elementRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+function VelocityTracker() {
+  const ref = useRef<HTMLDivElement>(null);
   const [velocity, setVelocity] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const lastTime = useRef(0);
   const lastPosition = useRef({ x: 0, y: 0 });
 
-  useDraggable(elementRef, [
+  useDraggable(ref, [
     events({
       onDrag: (data) => {
         const now = Date.now();
         const deltaTime = now - lastTime.current;
 
         if (deltaTime > 0) {
-          setVelocity({
-            x:
-              ((data.offset.x - lastPosition.current.x) / deltaTime) *
+          const velocityX = Math.round(
+            ((data.offset.x - lastPosition.current.x) / deltaTime) *
               1000,
-            y:
-              ((data.offset.y - lastPosition.current.y) / deltaTime) *
+          );
+          const velocityY = Math.round(
+            ((data.offset.y - lastPosition.current.y) / deltaTime) *
               1000,
-          });
+          );
+          setVelocity({ x: velocityX, y: velocityY });
         }
 
-        setPosition({ ...data.offset });
+        setPosition(data.offset);
         lastPosition.current = { ...data.offset };
         lastTime.current = now;
       },
@@ -583,20 +559,10 @@ function PositionTracker() {
   ]);
 
   return (
-    <div
-      ref={elementRef}
-      style={{
-        padding: '20px',
-        border: '2px solid #ddd',
-        background: '#f9f9f9',
-        cursor: 'move',
-        userSelect: 'none',
-      }}
-    >
-      Position: ({position.x}, {position.y})
+    <div ref={ref}>
+      Position: {position.x}, {position.y}
       <br />
-      Velocity: ({Math.round(velocity.x)}px/s,{' '}
-      {Math.round(velocity.y)}px/s)
+      Velocity: {velocity.x}px/s, {velocity.y}px/s
     </div>
   );
 }
@@ -611,8 +577,8 @@ function PositionTracker() {
 import { ref } from 'vue';
 import { events, vDraggable } from '@neodrag/vue';
 
-const position = ref({ x: 0, y: 0 });
 const velocity = ref({ x: 0, y: 0 });
+const position = ref({ x: 0, y: 0 });
 let lastTime = 0;
 let lastPosition = { x: 0, y: 0 };
 
@@ -623,10 +589,12 @@ const plugins = [
       const deltaTime = now - lastTime;
 
       if (deltaTime > 0) {
-        velocity.value = {
-          x: ((data.offset.x - lastPosition.x) / deltaTime) * 1000,
-          y: ((data.offset.y - lastPosition.y) / deltaTime) * 1000,
-        };
+        velocity.value.x = Math.round(
+          ((data.offset.x - lastPosition.x) / deltaTime) * 1000,
+        );
+        velocity.value.y = Math.round(
+          ((data.offset.y - lastPosition.y) / deltaTime) * 1000,
+        );
       }
 
       position.value = { ...data.offset };
@@ -638,23 +606,12 @@ const plugins = [
 </script>
 
 <template>
-  <div v-draggable="plugins" class="tracker">
-    Position: ({{ position.x }}, {{ position.y }})
+  <div v-draggable="plugins">
+    Position: {{ position.x }}, {{ position.y }}
     <br />
-    Velocity: ({{ Math.round(velocity.x) }}px/s,
-    {{ Math.round(velocity.y) }}px/s)
+    Velocity: {{ velocity.x }}px/s, {{ velocity.y }}px/s
   </div>
 </template>
-
-<style scoped>
-.tracker {
-  padding: 20px;
-  border: 2px solid #ddd;
-  background: #f9f9f9;
-  cursor: move;
-  user-select: none;
-}
-</style>
 ```
 
 </div>
@@ -665,10 +622,10 @@ const plugins = [
 import { createSignal } from 'solid-js';
 import { events, useDraggable } from '@neodrag/solid';
 
-function PositionTracker() {
+function VelocityTracker() {
   const [element, setElement] = createSignal<HTMLDivElement>();
-  const [position, setPosition] = createSignal({ x: 0, y: 0 });
   const [velocity, setVelocity] = createSignal({ x: 0, y: 0 });
+  const [position, setPosition] = createSignal({ x: 0, y: 0 });
   let lastTime = 0;
   let lastPosition = { x: 0, y: 0 };
 
@@ -679,10 +636,13 @@ function PositionTracker() {
         const deltaTime = now - lastTime;
 
         if (deltaTime > 0) {
-          setVelocity({
-            x: ((data.offset.x - lastPosition.x) / deltaTime) * 1000,
-            y: ((data.offset.y - lastPosition.y) / deltaTime) * 1000,
-          });
+          const velocityX = Math.round(
+            ((data.offset.x - lastPosition.x) / deltaTime) * 1000,
+          );
+          const velocityY = Math.round(
+            ((data.offset.y - lastPosition.y) / deltaTime) * 1000,
+          );
+          setVelocity({ x: velocityX, y: velocityY });
         }
 
         setPosition({ ...data.offset });
@@ -693,20 +653,10 @@ function PositionTracker() {
   ]);
 
   return (
-    <div
-      ref={setElement}
-      style={{
-        padding: '20px',
-        border: '2px solid #ddd',
-        background: '#f9f9f9',
-        cursor: 'move',
-        'user-select': 'none',
-      }}
-    >
-      Position: ({position().x}, {position().y})
+    <div ref={setElement}>
+      Position: {position().x}, {position().y}
       <br />
-      Velocity: ({Math.round(velocity().x)}px/s,{' '}
-      {Math.round(velocity().y)}px/s)
+      Velocity: {velocity().x}px/s, {velocity().y}px/s
     </div>
   );
 }
@@ -735,14 +685,16 @@ new Draggable(element, [
       let velocityX = 0,
         velocityY = 0;
       if (deltaTime > 0) {
-        velocityX =
-          ((data.offset.x - lastPosition.x) / deltaTime) * 1000;
-        velocityY =
-          ((data.offset.y - lastPosition.y) / deltaTime) * 1000;
+        velocityX = Math.round(
+          ((data.offset.x - lastPosition.x) / deltaTime) * 1000,
+        );
+        velocityY = Math.round(
+          ((data.offset.y - lastPosition.y) / deltaTime) * 1000,
+        );
       }
 
       positionEl.textContent = `(${data.offset.x}, ${data.offset.y})`;
-      velocityEl.textContent = `(${Math.round(velocityX)}px/s, ${Math.round(velocityY)}px/s)`;
+      velocityEl.textContent = `(${velocityX}px/s, ${velocityY}px/s)`;
 
       lastPosition = { ...data.offset };
       lastTime = now;
@@ -754,7 +706,7 @@ new Draggable(element, [
 </div>
 </FrameworkSwitch>
 
-### Drag Progress Indicator
+### Progress Indicator
 
 ```typescript
 // Show progress based on how far element has moved
@@ -777,7 +729,7 @@ events({
 });
 ```
 
-### Save Position on Drag End
+### Save Position
 
 ```typescript
 // Persist position to localStorage when dragging stops
@@ -795,7 +747,7 @@ events({
 });
 ```
 
-### Analytics and Telemetry
+### Analytics
 
 ```typescript
 // Track user interactions for analytics

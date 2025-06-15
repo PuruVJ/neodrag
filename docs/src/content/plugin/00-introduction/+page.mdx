@@ -5,17 +5,11 @@ tagline: 'Neodrag plugins, and how to author them.'
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-## What are Plugins?
+Plugins are modular pieces that add specific dragging behaviors. Instead of one giant library, you mix and match only what you need.
 
-Think of plugins as Lego blocks for dragging behavior. Instead of having one giant library that does everything, Neodrag v3 breaks things down into small, focused pieces that you can mix and match.
-
-Want grid snapping? Add the `grid()` plugin. Need to constrain movement? Use `bounds()`. Want both? Just use them together. This keeps your bundle small and your code clean.
-
-> **Note:** In this documentation, we assume `draggable` is available in your framework. Svelte provides this automatically, while other frameworks need you to import the appropriate hook or directive.
+Want grid snapping? Add `grid()`. Need movement constraints? Use `bounds()`. Want both? Use them together. This keeps bundles small and code clean.
 
 ## Built-in Plugins
-
-Neodrag comes with plugins for common drag behaviors. Here's how you use them:
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -41,25 +35,24 @@ Neodrag comes with plugins for common drag behaviors. Here's how you use them:
 <div slot="react">
 
 ```tsx
-import { useRef } from 'react';
 import {
+  useDraggable,
   grid,
   axis,
   bounds,
   BoundsFrom,
-  useDraggable,
 } from '@neodrag/react';
 
 function MyComponent() {
-  const dragRef = useRef<HTMLDivElement>(null);
+  const ref = useRef(null);
 
-  const dragState = useDraggable(dragRef, [
-    grid([20, 20]), // Snap to 20px grid
-    axis('x'), // Only move horizontally
-    bounds(BoundsFrom.viewport()), // Stay in viewport
+  useDraggable(ref, [
+    grid([20, 20]),
+    axis('x'),
+    bounds(BoundsFrom.viewport()),
   ]);
 
-  return <div ref={dragRef}>Drag me around!</div>;
+  return <div ref={ref}>Drag me around!</div>;
 }
 ```
 
@@ -70,24 +63,22 @@ function MyComponent() {
 ```vue
 <script setup>
 import {
+  vDraggable,
   grid,
   axis,
   bounds,
   BoundsFrom,
-  vDraggable,
 } from '@neodrag/vue';
+
+const plugins = [
+  grid([20, 20]),
+  axis('x'),
+  bounds(BoundsFrom.viewport()),
+];
 </script>
 
 <template>
-  <div
-    v-draggable="[
-      grid([20, 20]),
-      axis('x'),
-      bounds(BoundsFrom.viewport()),
-    ]"
-  >
-    Drag me around!
-  </div>
+  <div v-draggable="plugins">Drag me around!</div>
 </template>
 ```
 
@@ -97,21 +88,20 @@ import {
 
 ```tsx
 import {
+  useDraggable,
   grid,
   axis,
   bounds,
   BoundsFrom,
-  useDraggable,
 } from '@neodrag/solid';
-import { createSignal } from 'solid-js';
 
 function MyComponent() {
-  const [element, setElement] = createSignal<HTMLDivElement>();
+  const [element, setElement] = createSignal();
 
-  const dragState = useDraggable(element, [
-    grid([20, 20]), // Snap to 20px grid
-    axis('x'), // Only move horizontally
-    bounds(BoundsFrom.viewport()), // Stay in viewport
+  useDraggable(element, [
+    grid([20, 20]),
+    axis('x'),
+    bounds(BoundsFrom.viewport()),
   ]);
 
   return <div ref={setElement}>Drag me around!</div>;
@@ -124,71 +114,50 @@ function MyComponent() {
 
 ```typescript
 import {
+  Draggable,
   grid,
   axis,
   bounds,
   BoundsFrom,
-  Draggable,
 } from '@neodrag/vanilla';
 
-const element = document.getElementById('my-draggable');
+const element = document.getElementById('drag-me');
 const instance = new Draggable(element, [
-  grid([20, 20]), // Snap to 20px grid
-  axis('x'), // Only move horizontally
-  bounds(BoundsFrom.viewport()), // Stay in viewport
+  grid([20, 20]),
+  axis('x'),
+  bounds(BoundsFrom.viewport()),
 ]);
 ```
 
 </div>
 </FrameworkSwitch>
 
-That's it! You just created a draggable that snaps to a grid, only moves horizontally, and stays within the browser window.
+**Available plugins:**
 
-## Built-in Plugins You Can Use
+- `axis()` - Constrain movement to x or y axis
+- `bounds()` - Keep element within boundaries
+- `grid()` - Snap to grid positions
+- `position()` - Set initial or forced positions
+- `scrollLock()` - Prevent page scrolling while dragging
+- `events()` - Handle drag lifecycle events
 
-Here are the main plugins that come with Neodrag:
+## Dynamic Plugins with Compartments
 
-**Movement Control:**
-
-- `axis('x' | 'y')` - Lock movement to one direction
-- `grid([x, y])` - Snap to grid points
-- `bounds(area)` - Keep element within boundaries
-- `threshold({ distance: 10, delay: 100 })` - Control when dragging starts
-
-**Visual & Interaction:**
-
-- `disabled()` - Turn off dragging completely
-- `controls({ allow: selector })` - Only drag from specific areas
-- `events({ onDrag, onDragStart, onDragEnd })` - Get notified of drag events
-
-**System Plugins (included by default):**
-
-- `transform()` - Actually moves the element
-- `touchAction()` - Handles mobile touch behavior
-- `applyUserSelectHack()` - Prevents text selection while dragging
-
-You can also remove default plugins if you don't need them, but `transform()` is usually required unless you're handling movement yourself.
-
-## Dynamic Updates
-
-Want to change plugin behavior while the user is dragging? Use Compartments:
+For plugins that change based on user interaction, use Compartments:
 
 <FrameworkSwitch>
 <div slot="svelte">
 
 ```svelte
 <script>
-  import { axis, Compartment } from '@neodrag/svelte';
+  import { draggable, axis, Compartment } from '@neodrag/svelte';
 
   let currentAxis = $state('x');
-  const axisCompartment = Compartment.of(() => axis(currentAxis));
+  const axisComp = Compartment.of(() => axis(currentAxis));
 </script>
 
-<div {@attach draggable(() => [axisCompartment])}>Drag me!</div>
-
-<button onclick={() => (currentAxis = 'y')}>
-  Switch to Y axis
-</button>
+<div {@attach draggable(() => [axisComp])}>Drag me</div>
+<button onclick={() => (currentAxis = 'y')}>Switch to Y axis</button>
 ```
 
 </div>
@@ -196,23 +165,20 @@ Want to change plugin behavior while the user is dragging? Use Compartments:
 <div slot="react">
 
 ```tsx
-import { useRef, useState } from 'react';
-import { axis, useDraggable, useCompartment } from '@neodrag/react';
+import { useCompartment, useDraggable, axis } from '@neodrag/react';
 
-function MyComponent() {
-  const dragRef = useRef<HTMLDivElement>(null);
+function DynamicAxis() {
   const [currentAxis, setCurrentAxis] = useState('x');
-
-  const axisCompartment = useCompartment(
+  const axisComp = useCompartment(
     () => axis(currentAxis),
     [currentAxis],
   );
 
-  const dragState = useDraggable(dragRef, () => [axisCompartment]);
+  useDraggable(ref, () => [axisComp]);
 
   return (
     <div>
-      <div ref={dragRef}>Drag me!</div>
+      <div ref={ref}>Drag me</div>
       <button onClick={() => setCurrentAxis('y')}>
         Switch to Y axis
       </button>
@@ -228,19 +194,15 @@ function MyComponent() {
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { axis, vDraggable, useCompartment } from '@neodrag/vue';
+import { vDraggable, axis, useCompartment } from '@neodrag/vue';
 
 const currentAxis = ref('x');
-const axisCompartment = useCompartment(() => axis(currentAxis.value));
-
-const plugins = () => [axisCompartment];
+const axisComp = useCompartment(() => axis(currentAxis.value));
 </script>
 
 <template>
-  <div>
-    <div v-draggable="plugins">Drag me!</div>
-    <button @click="currentAxis = 'y'">Switch to Y axis</button>
-  </div>
+  <div v-draggable="() => [axisComp]">Drag me</div>
+  <button @click="currentAxis = 'y'">Switch to Y axis</button>
 </template>
 ```
 
@@ -251,24 +213,20 @@ const plugins = () => [axisCompartment];
 ```tsx
 import { createSignal } from 'solid-js';
 import {
-  axis,
   useDraggable,
+  axis,
   createCompartment,
 } from '@neodrag/solid';
 
-function MyComponent() {
-  const [element, setElement] = createSignal<HTMLDivElement>();
+function DynamicAxis() {
   const [currentAxis, setCurrentAxis] = createSignal('x');
+  const axisComp = createCompartment(() => axis(currentAxis()));
 
-  const axisCompartment = createCompartment(() =>
-    axis(currentAxis()),
-  );
-
-  const dragState = useDraggable(element, [axisCompartment]);
+  useDraggable(element, [axisComp]);
 
   return (
     <div>
-      <div ref={setElement}>Drag me!</div>
+      <div ref={setElement}>Drag me</div>
       <button onClick={() => setCurrentAxis('y')}>
         Switch to Y axis
       </button>
@@ -282,29 +240,26 @@ function MyComponent() {
 <div slot="vanilla">
 
 ```typescript
-import { Compartment, axis, Draggable } from '@neodrag/vanilla';
+import { Draggable, axis, Compartment } from '@neodrag/vanilla';
 
 let currentAxis = 'x';
-const axisCompartment = new Compartment(() => axis(currentAxis));
+const axisComp = new Compartment(() => axis(currentAxis));
+const instance = new Draggable(element, () => [axisComp]);
 
-const element = document.getElementById('my-draggable');
-const instance = new Draggable(element, () => [axisCompartment]);
-
-// Later, update the axis
-currentAxis = 'y';
-axisCompartment.current = axis(currentAxis);
+function switchAxis() {
+  currentAxis = 'y';
+  axisComp.current = axis(currentAxis); // Manual update
+}
 ```
 
 </div>
 </FrameworkSwitch>
 
-Compartments let you update individual plugins without recreating the whole drag system. This is especially useful for reactive UIs.
+> **Important:** v3 requires Compartments for dynamic behavior. Simply changing plugin options or recreating arrays won't update the draggable.
 
-> **⚠️ Important:** Automatic updates no longer work in v3! Simply changing plugin options or recreating plugin arrays won't update the draggable. You must use Compartments for dynamic behavior.
+## Writing Custom Plugins
 
-## Writing Plugins
-
-Let's create a simple plugin that logs drag events:
+Create a simple logging plugin:
 
 ```typescript
 const logger = {
@@ -324,55 +279,15 @@ const logger = {
 };
 ```
 
-Then use it like any other plugin:
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-```svelte
-<div {@attach draggable([logger])}>
-  Check your console while dragging!
-</div>
-```
-
-</div>
-
-<div slot="react">
-
-```tsx
-const dragState = useDraggable(dragRef, [logger]);
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<div v-draggable="[logger]">
-  Check your console while dragging!
-</div>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-const dragState = useDraggable(element, [logger]);
-```
-
-</div>
-
-<div slot="vanilla">
+Use it like any built-in plugin:
 
 ```typescript
-const instance = new Draggable(element, [logger]);
+const plugins = [logger, grid([10, 10])];
 ```
 
-</div>
-</FrameworkSwitch>
+### Configurable Plugins
 
-Want to make it configurable? Use the plugin factory:
+Make plugins configurable with a factory function:
 
 ```typescript
 import { unstable_definePlugin } from '@neodrag/core/plugins';
@@ -397,19 +312,13 @@ const logger = unstable_definePlugin((prefix = 'DRAG') => ({
   },
 }));
 
-// Use it with custom prefix
+// Use with custom prefix
 const plugins = [logger('MY_APP')];
 ```
 
----
+## Plugin Lifecycle
 
-## Plugin Internals
-
-Now let's look under the hood at how plugins really work.
-
-## Lifecycle Hooks
-
-Every plugin can implement these hooks. They run at different stages of dragging:
+Plugins can implement these hooks that run at different drag stages:
 
 ```typescript
 interface Plugin {
@@ -418,8 +327,7 @@ interface Plugin {
   liveUpdate?: boolean; // Can update during active drag
   cancelable?: boolean; // Respects cancellation (default: true)
 
-  // Lifecycle hooks
-  setup?: (ctx) => state; // Plugin initialization
+  setup?: (ctx) => state; // Initialize plugin
   shouldStart?: (ctx, state, event) => boolean; // Should dragging begin?
   start?: (ctx, state, event) => void; // Dragging started
   drag?: (ctx, state, event) => void; // During dragging
@@ -428,651 +336,91 @@ interface Plugin {
 }
 ```
 
-Here's the complete flow:
+**Execution flow:**
 
-1. **`setup`** - Plugin initializes, returns state object
-2. **`shouldStart`** - User pressed down, should we start dragging?
-3. **`start`** - Dragging actually begins
-4. **`drag`** - Called repeatedly while dragging
-5. **`end`** - User released, dragging stops
-6. **`cleanup`** - Plugin is being removed/destroyed
+1. `setup` - Plugin initializes, returns state object
+2. `shouldStart` - User pressed down, should we start dragging?
+3. `start` - Dragging begins
+4. `drag` - Called repeatedly while dragging
+5. `end` - User released, dragging stops
+6. `cleanup` - Plugin destroyed (when instance is destroyed)
 
-## Context Object
+### Plugin Context
 
-The `ctx` parameter gives you access to everything about the current drag:
+The `ctx` parameter provides access to drag state and actions:
 
 ```typescript
 interface PluginContext {
   // Position data
-  initial: { x: number; y: number }; // Where drag started
   offset: { x: number; y: number }; // Current position
-  delta: { x: number; y: number }; // Change since drag started
-  proposed: { x: number | null; y: number | null }; // Proposed change this cycle
+  initial: { x: number; y: number }; // Starting position
+  delta: { x: number; y: number }; // Change since last event
+  proposed: { x: number | null; y: number | null }; // Next position
 
-  // State
-  isDragging: boolean; // Currently dragging?
-  isInteracting: boolean; // User pressed down?
+  // State flags
+  isDragging: boolean; // Currently in drag operation
+  isInteracting: boolean; // User is actively interacting
 
-  // DOM elements
-  rootNode: HTMLElement | SVGElement; // Element with draggable applied
-  currentlyDraggedNode: HTMLElement | SVGElement; // What's actually being dragged
-  cachedRootNodeRect: DOMRect; // Cached bounding box
-  lastEvent: PointerEvent | null; // Last pointer event
+  // DOM references
+  rootNode: HTMLElement | SVGElement; // The draggable element
+  currentlyDraggedNode: HTMLElement | SVGElement; // Element being dragged
+  lastEvent: PointerEvent | null; // Most recent pointer event
 
-  // Control methods
-  propose: (x: number | null, y: number | null) => void; // Suggest new movement
-  cancel: () => void; // Cancel this drag cycle
-  preventStart: () => void; // Don't start dragging
-  setForcedPosition: (x: number, y: number) => void; // Jump to position
-
-  // Effect scheduling
-  effect: {
-    immediate: (fn) => void; // Run in next microtask
-    paint: (fn) => void; // Run in next animation frame
-  };
+  // Actions
+  propose(x: number | null, y: number | null): void; // Set next position
+  cancel(): void; // Cancel current drag
+  preventStart(): void; // Prevent drag from starting
+  setForcedPosition(x: number, y: number): void; // Jump to position
 }
 ```
 
-### Position Values Explained
+### Plugin State
 
-- **`initial`** - Mouse position when dragging started (never changes)
-- **`offset`** - How far the element has moved from its original position
-- **`delta`** - Same as offset, but resets each drag cycle
-- **`proposed`** - What movement the current plugin cycle wants to apply
-
-Here's a practical example:
+Plugins can maintain state between lifecycle calls:
 
 ```typescript
-const positionLogger = {
-  name: 'position:logger',
-
-  drag(ctx) {
-    console.log({
-      // Where the mouse was when drag started
-      initial: ctx.initial,
-
-      // Total movement since drag started
-      offset: ctx.offset,
-
-      // Movement just this cycle
-      delta: ctx.delta,
-
-      // What movement is being proposed this cycle
-      proposed: ctx.proposed,
-    });
-  },
-};
-```
-
-## Modifying Movement
-
-Plugins can change how the element moves by calling `ctx.propose()`:
-
-```typescript
-// A plugin that halves all movement
-const slowMotion = {
-  name: 'my:slowmotion',
-
-  drag(ctx) {
-    // Take the proposed movement and cut it in half
-    const halfX =
-      ctx.proposed.x !== null ? ctx.proposed.x * 0.5 : null;
-    const halfY =
-      ctx.proposed.y !== null ? ctx.proposed.y * 0.5 : null;
-
-    ctx.propose(halfX, halfY);
-  },
-};
-
-// A plugin that only allows upward movement
-const onlyUp = {
-  name: 'my:onlyup',
-
-  drag(ctx) {
-    // Keep X movement, but only allow negative Y (upward)
-    const limitedY =
-      ctx.proposed.y !== null ? Math.min(0, ctx.proposed.y) : null;
-
-    ctx.propose(ctx.proposed.x, limitedY);
-  },
-};
-```
-
-The key thing: plugins run in order, so later plugins see the changes made by earlier plugins.
-
-## Priority & Order
-
-Plugins run in priority order (higher numbers first):
-
-```typescript
-const firstPlugin = {
-  name: 'first',
-  priority: 100, // Runs first
-  drag(ctx) {
-    console.log('I run first!');
-    ctx.propose(ctx.proposed.x, 0); // Lock Y movement
-  },
-};
-
-const secondPlugin = {
-  name: 'second',
-  priority: 50, // Runs second
-  drag(ctx) {
-    console.log('I run second, Y is already locked');
-    // ctx.proposed.y is now 0 from the first plugin
-  },
-};
-
-const defaultPlugin = {
-  name: 'default',
-  // priority: 0 (default)
-  drag(ctx) {
-    console.log('I run last');
-  },
-};
-```
-
-Core plugins typically use negative priorities so your plugins run first:
-
-```typescript
-// Your plugin runs before the built-in transform plugin
-const yourPlugin = {
-  name: 'your:plugin',
-  priority: 10, // Positive priority
-  // ...
-};
-
-// Built-in transform plugin
-const transform = {
-  name: 'neodrag:transform',
-  priority: -1000, // Very low priority, runs last
-  // ...
-};
-```
-
-## Cancellation
-
-Plugins can control whether other plugins run using several methods:
-
-### 1. Return `false` to stop the hook chain
-
-```typescript
-const gatekeeper = {
-  name: 'gatekeeper',
-  priority: 100,
-
-  shouldStart(ctx, state, event) {
-    if (!userCanDrag()) {
-      return false; // No other shouldStart hooks will run
-    }
-    return true;
-  },
-};
-```
-
-### 2. Use `ctx.cancel()` to skip cancelable plugins
-
-```typescript
-const conditionalCancel = {
-  name: 'conditional',
-
-  drag(ctx) {
-    if (ctx.offset.x > 100) {
-      ctx.cancel(); // Skip remaining cancelable plugins this cycle
-    }
-  },
-};
-
-const alwaysRuns = {
-  name: 'always',
-  cancelable: false, // Will run even after ctx.cancel()
-
-  drag(ctx) {
-    console.log('I always run!');
-  },
-};
-```
-
-### 3. Use `ctx.preventStart()` during threshold phase
-
-```typescript
-const smartThreshold = {
-  name: 'smart:threshold',
-
-  drag(ctx) {
-    // If not dragging yet, we're in threshold phase
-    if (!ctx.isDragging) {
-      if (shouldPreventDragging()) {
-        ctx.preventStart(); // Don't start dragging
-      }
-    }
-  },
-};
-```
-
-## Effect Scheduling
-
-Use `ctx.effect` to schedule DOM updates efficiently:
-
-```typescript
-const visualFeedback = {
-  name: 'visual:feedback',
+const statefulPlugin = {
+  name: 'stateful:example',
 
   setup(ctx) {
     return {
-      indicator: document.createElement('div'),
+      startTime: null,
+      moveCount: 0,
     };
   },
 
-  start(ctx, state) {
-    // Use paint for visual changes
-    ctx.effect.paint(() => {
-      state.indicator.style.display = 'block';
-      document.body.appendChild(state.indicator);
-    });
+  start(ctx, state, event) {
+    state.startTime = Date.now();
+    state.moveCount = 0;
   },
 
-  drag(ctx, state) {
-    // Use immediate for fast updates
-    ctx.effect.immediate(() => {
-      state.indicator.textContent = `${ctx.offset.x}, ${ctx.offset.y}`;
-    });
-
-    // Use paint for visual positioning
-    ctx.effect.paint(() => {
-      state.indicator.style.left = ctx.offset.x + 'px';
-      state.indicator.style.top = ctx.offset.y + 'px';
-    });
+  drag(ctx, state, event) {
+    state.moveCount++;
+    console.log(`Move #${state.moveCount}`);
   },
 
-  end(ctx, state) {
-    ctx.effect.paint(() => {
-      state.indicator.remove();
-    });
+  end(ctx, state, event) {
+    const duration = Date.now() - state.startTime;
+    console.log(
+      `Dragged for ${duration}ms with ${state.moveCount} moves`,
+    );
   },
 };
 ```
-
-- **`immediate`** - Runs in next microtask (fast, for data updates)
-- **`paint`** - Runs in next animation frame (smooth, for visual changes)
-
-## Advanced Example
-
-Here's a more complex plugin that creates a ghost element during dragging:
-
-```typescript
-import { unstable_definePlugin } from '@neodrag/core/plugins';
-
-const ghostElement = unstable_definePlugin((options = {}) => ({
-  name: 'my:ghost',
-
-  setup(ctx) {
-    return {
-      ghost: null,
-      originalOpacity: ctx.rootNode.style.opacity,
-      options: { opacity: 0.5, ...options },
-    };
-  },
-
-  start(ctx, state) {
-    ctx.effect.paint(() => {
-      // Create ghost element
-      state.ghost = ctx.rootNode.cloneNode(true);
-      state.ghost.style.position = 'absolute';
-      state.ghost.style.opacity = state.options.opacity;
-      state.ghost.style.pointerEvents = 'none';
-      state.ghost.style.zIndex = '9999';
-
-      // Position it at current location
-      const rect = ctx.cachedRootNodeRect;
-      state.ghost.style.left = rect.left + 'px';
-      state.ghost.style.top = rect.top + 'px';
-
-      // Add to document
-      document.body.appendChild(state.ghost);
-
-      // Make original element semi-transparent
-      ctx.rootNode.style.opacity = '0.3';
-    });
-  },
-
-  drag(ctx, state) {
-    if (state.ghost) {
-      ctx.effect.paint(() => {
-        // Update ghost position
-        const rect = ctx.cachedRootNodeRect;
-        state.ghost.style.left = rect.left + ctx.offset.x + 'px';
-        state.ghost.style.top = rect.top + ctx.offset.y + 'px';
-      });
-    }
-  },
-
-  end(ctx, state) {
-    ctx.effect.paint(() => {
-      // Remove ghost
-      if (state.ghost) {
-        state.ghost.remove();
-        state.ghost = null;
-      }
-
-      // Restore original opacity
-      ctx.rootNode.style.opacity = state.originalOpacity;
-    });
-  },
-
-  cleanup(ctx, state) {
-    // Clean up if plugin is removed mid-drag
-    if (state.ghost) {
-      state.ghost.remove();
-    }
-    ctx.rootNode.style.opacity = state.originalOpacity;
-  },
-}));
-
-// Usage
-const plugins = [ghostElement({ opacity: 0.7 })];
-```
-
-## Performance
-
-For high-performance apps, use Compartments to update plugins efficiently:
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-```svelte
-<script>
-  import { position, axis, Compartment } from '@neodrag/svelte';
-
-  // Create reactive state
-  let x = $state(0);
-  let y = $state(0);
-  let currentAxis = $state('both');
-
-  // Create compartments that react to state changes
-  const positionComp = Compartment.of(() =>
-    position({ current: { x, y } }),
-  );
-
-  const axisComp = Compartment.of(() =>
-    currentAxis !== 'both' ? axis(currentAxis) : undefined,
-  );
-
-  function moveX() {
-    x += 10;
-  }
-
-  function toggleAxis() {
-    currentAxis = currentAxis === 'x' ? 'y' : 'x';
-  }
-</script>
-
-<div {@attach draggable(() => [positionComp, axisComp])}>
-  High-performance draggable!
-</div>
-
-<button onclick={moveX}>Move X +10</button>
-<button onclick={toggleAxis}>Toggle Axis</button>
-```
-
-</div>
-
-<div slot="react">
-
-```tsx
-import { useState, useRef } from 'react';
-import {
-  position,
-  axis,
-  useDraggable,
-  useCompartment,
-} from '@neodrag/react';
-
-function HighPerformanceComponent() {
-  const dragRef = useRef<HTMLDivElement>(null);
-  const [x, setX] = useState(0);
-  const [y, setY] = useState(0);
-  const [currentAxis, setCurrentAxis] = useState('both');
-
-  // Create compartments that react to state changes
-  const positionComp = useCompartment(
-    () => position({ current: { x, y } }),
-    [x, y],
-  );
-
-  const axisComp = useCompartment(
-    () => (currentAxis !== 'both' ? axis(currentAxis) : undefined),
-    [currentAxis],
-  );
-
-  const dragState = useDraggable(dragRef, () => [
-    positionComp,
-    axisComp,
-  ]);
-
-  return (
-    <div>
-      <div ref={dragRef}>High-performance draggable!</div>
-      <button onClick={() => setX(x + 10)}>Move X +10</button>
-      <button
-        onClick={() =>
-          setCurrentAxis(currentAxis === 'x' ? 'y' : 'x')
-        }
-      >
-        Toggle Axis
-      </button>
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<script setup>
-import { ref } from 'vue';
-import {
-  position,
-  axis,
-  vDraggable,
-  useCompartment,
-} from '@neodrag/vue';
-
-const x = ref(0);
-const y = ref(0);
-const currentAxis = ref('both');
-
-// Create compartments that react to state changes
-const positionComp = useCompartment(() =>
-  position({ current: { x: x.value, y: y.value } }),
-);
-
-const axisComp = useCompartment(() =>
-  currentAxis.value !== 'both' ? axis(currentAxis.value) : undefined,
-);
-
-const plugins = () => [positionComp, axisComp];
-
-function moveX() {
-  x.value += 10;
-}
-
-function toggleAxis() {
-  currentAxis.value = currentAxis.value === 'x' ? 'y' : 'x';
-}
-</script>
-
-<template>
-  <div>
-    <div v-draggable="plugins">High-performance draggable!</div>
-    <button @click="moveX">Move X +10</button>
-    <button @click="toggleAxis">Toggle Axis</button>
-  </div>
-</template>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-import { createSignal } from 'solid-js';
-import {
-  position,
-  axis,
-  useDraggable,
-  createCompartment,
-} from '@neodrag/solid';
-
-function HighPerformanceComponent() {
-  const [element, setElement] = createSignal<HTMLDivElement>();
-  const [x, setX] = createSignal(0);
-  const [y, setY] = createSignal(0);
-  const [currentAxis, setCurrentAxis] = createSignal('both');
-
-  // Create compartments that react to signals
-  const positionComp = createCompartment(() =>
-    position({ current: { x: x(), y: y() } }),
-  );
-
-  const axisComp = createCompartment(() =>
-    currentAxis() !== 'both' ? axis(currentAxis()) : undefined,
-  );
-
-  const dragState = useDraggable(element, [positionComp, axisComp]);
-
-  return (
-    <div>
-      <div ref={setElement}>High-performance draggable!</div>
-      <button onClick={() => setX(x() + 10)}>Move X +10</button>
-      <button
-        onClick={() =>
-          setCurrentAxis(currentAxis() === 'x' ? 'y' : 'x')
-        }
-      >
-        Toggle Axis
-      </button>
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vanilla">
-
-```typescript
-import {
-  Compartment,
-  position,
-  axis,
-  Draggable,
-} from '@neodrag/vanilla';
-
-let x = 0,
-  y = 0,
-  currentAxis = 'both';
-
-// Create compartments
-const positionComp = new Compartment(() =>
-  position({ current: { x, y } }),
-);
-
-const axisComp = new Compartment(() =>
-  currentAxis !== 'both' ? axis(currentAxis) : undefined,
-);
-
-const element = document.getElementById('my-draggable');
-const instance = new Draggable(element, () => [
-  positionComp,
-  axisComp,
-]);
-
-// Update when values change
-function updatePosition(newX, newY) {
-  x = newX;
-  y = newY;
-  positionComp.current = position({ current: { x, y } });
-}
-
-function updateAxis(newAxis) {
-  currentAxis = newAxis;
-  axisComp.current =
-    currentAxis !== 'both' ? axis(currentAxis) : undefined;
-}
-```
-
-</div>
-</FrameworkSwitch>
-
-With Compartments:
-
-- Only changed plugins get updated
-- Updates can happen during active drags
-- Much better performance in reactive apps
-- No unnecessary plugin recreation
-
-## Composition
-
-One of the most powerful features of Neodrag v3 is how easily you can combine plugins. Each plugin focuses on one thing, making complex behaviors simple to build.
-
-### Combining Multiple Behaviors
-
-```typescript
-// A draggable that snaps to grid, stays in bounds, and logs events
-const plugins = [
-  grid([20, 20]),
-  bounds(BoundsFrom.viewport({ padding: { top: 50 } })),
-  events({
-    onDragStart: (data) => console.log('Started at:', data.offset),
-    onDrag: (data) => console.log('Moving to:', data.offset),
-    onDragEnd: (data) => console.log('Ended at:', data.offset),
-  }),
-];
-```
-
-### Plugin Order Matters
-
-Plugins run in priority order, so their sequence affects the final behavior:
-
-```typescript
-// Order 1: Grid first, then bounds
-const plugins1 = [
-  grid([50, 50]), // Snaps to 50px grid
-  bounds(BoundsFrom.viewport()), // Then applies bounds
-];
-
-// Order 2: Bounds first, then grid
-const plugins2 = [
-  bounds(BoundsFrom.viewport()), // Applies bounds first
-  grid([50, 50]), // Then snaps to grid (might go out of bounds!)
-];
-
-// Better: Use priority to be explicit
-const plugins3 = [
-  { ...bounds(BoundsFrom.viewport()), priority: -1 }, // Lower priority = later
-  grid([50, 50]), // Higher priority = earlier
-];
-```
-
-The first example works better because grid snapping happens first, then bounds checking ensures the element stays in view.
 
 ## Third-Party Plugins
 
-Want to share your plugin? Here's how to create a publishable one:
+Create publishable plugins for the community:
 
 ```typescript
 // my-awesome-plugin.ts
 import { unstable_definePlugin } from '@neodrag/core/plugins';
 
 export const awesomePlugin = unstable_definePlugin(
-  (options = {}) => ({
+  (options: AwesomePluginOptions = {}) => ({
     name: 'awesome:plugin',
 
     setup(ctx) {
-      // Plugin setup logic
       return {
         /* state */
       };
@@ -1082,20 +430,17 @@ export const awesomePlugin = unstable_definePlugin(
   }),
 );
 
-// Export types for TypeScript users
 export interface AwesomePluginOptions {
   speed?: number;
   color?: string;
 }
 ```
 
-Publish it as `neodrag-plugin-awesome` and users can install it:
+Publish as `neodrag-plugin-awesome`:
 
 ```bash
 npm install neodrag-plugin-awesome
 ```
-
-Then use it like any built-in plugin:
 
 ```typescript
 import { awesomePlugin } from 'neodrag-plugin-awesome';
@@ -1105,12 +450,12 @@ const plugins = [awesomePlugin({ speed: 2, color: 'blue' })];
 
 ## Debugging
 
-Add console logs to understand plugin execution:
+Add logging to understand plugin execution:
 
 ```typescript
 const debugPlugin = {
   name: 'debug:execution',
-  priority: 999, // Run early to see what happens
+  priority: 999, // Run early
 
   setup(ctx) {
     console.log('🔧 Plugin setup');
@@ -1136,13 +481,13 @@ const debugPlugin = {
 };
 ```
 
-You can also inspect the global instances:
+Inspect active instances:
 
 ```typescript
 // Check all active draggable instances
 console.log('Active draggables:', instances.size);
 
-// Inspect a specific instance
+// Inspect specific instance
 for (const [element, instance] of instances) {
   console.log('Element:', element);
   console.log(
@@ -1153,4 +498,13 @@ for (const [element, instance] of instances) {
 }
 ```
 
-That's the complete guide to Neodrag plugins! Start with the built-in plugins, then create your own when you need custom behavior. The plugin system is designed to be simple to use but powerful enough for complex drag interactions.
+## Summary
+
+- **Built-in plugins** handle common drag behaviors
+- **Compartments** enable reactive plugin updates
+- **Custom plugins** use lifecycle hooks for specific needs
+- **Plugin context** provides access to drag state and actions
+- **Plugin state** persists data between lifecycle calls
+- **Third-party plugins** extend functionality through npm packages
+
+Start with built-in plugins, then create custom ones for specialized behavior. The plugin system balances simplicity with power for complex drag interactions.

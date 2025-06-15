@@ -5,16 +5,14 @@ tagline: 'Apply visual transformations to move elements'
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-## What it does
-
-The `transform` plugin is responsible for actually moving elements visually on screen. While other plugins calculate where elements should go, transform applies the visual changes. It handles both HTML and SVG elements automatically and can use custom transform functions for advanced effects.
+The `transform` plugin applies visual movement to elements on screen. While other plugins calculate where elements should go, transform applies the visual changes. Handles both HTML and SVG elements automatically and supports custom transform functions for advanced effects.
 
 ```typescript
 transform(); // Default CSS translate movement
 transform(customFunction); // Custom transform implementation
 ```
 
-> **Note:** Transform is included by default in most Neodrag setups. You typically only need to configure it for custom visual effects.
+> **Note:** Transform is included by default with lowest priority (-1000) ensuring it runs after all other position calculations are complete.
 
 ## Basic Usage
 
@@ -33,8 +31,10 @@ transform(customFunction); // Custom transform implementation
 <div
   {@attach draggable([
     transform((data) => {
-      // Custom visual movement
-      data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) rotate(${data.offsetX * 0.5}deg)`;
+      data.rootNode.style.transform = `
+    translate(${data.offsetX}px, ${data.offsetY}px) 
+    rotate(${data.offsetX * 0.5}deg)
+  `;
     }),
   ])}
 >
@@ -58,8 +58,10 @@ function TransformExamples() {
 
   useDraggable(customRef, [
     transform((data) => {
-      // Custom visual movement
-      data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) rotate(${data.offsetX * 0.5}deg)`;
+      data.rootNode.style.transform = `
+      translate(${data.offsetX}px, ${data.offsetY}px) 
+      rotate(${data.offsetX * 0.5}deg)
+    `;
     }),
   ]);
 
@@ -81,8 +83,10 @@ function TransformExamples() {
 import { transform, vDraggable } from '@neodrag/vue';
 
 const customTransform = (data) => {
-  // Custom visual movement
-  data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) rotate(${data.offsetX * 0.5}deg)`;
+  data.rootNode.style.transform = `
+    translate(${data.offsetX}px, ${data.offsetY}px) 
+    rotate(${data.offsetX * 0.5}deg)
+  `;
 };
 </script>
 
@@ -103,25 +107,24 @@ const customTransform = (data) => {
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { transform, useDraggable } from '@neodrag/solid';
+import { transform, createDraggable } from '@neodrag/solid';
 
 function TransformExamples() {
-  const [standard, setStandard] = createSignal<HTMLDivElement>();
-  const [custom, setCustom] = createSignal<HTMLDivElement>();
+  const { as: standardDiv } = createDraggable(() => [transform()]);
 
-  useDraggable(standard, [transform()]);
-
-  useDraggable(custom, [
+  const { as: customDiv } = createDraggable(() => [
     transform((data) => {
-      // Custom visual movement
-      data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) rotate(${data.offsetX * 0.5}deg)`;
+      data.rootNode.style.transform = `
+      translate(${data.offsetX}px, ${data.offsetY}px) 
+      rotate(${data.offsetX * 0.5}deg)
+    `;
     }),
   ]);
 
   return (
     <div>
-      <div ref={setStandard}>Standard dragging</div>
-      <div ref={setCustom}>Rotates while dragging</div>
+      <standardDiv>Standard dragging</standardDiv>
+      <customDiv>Rotates while dragging</customDiv>
     </div>
   );
 }
@@ -132,17 +135,19 @@ function TransformExamples() {
 <div slot="vanilla">
 
 ```typescript
-import { transform, Draggable } from '@neodrag/vanilla';
+import { draggable, transform } from '@neodrag/vanilla';
 
 const standard = document.getElementById('standard');
 const custom = document.getElementById('custom');
 
-new Draggable(standard, [transform()]);
+draggable(standard, [transform()]);
 
-new Draggable(custom, [
+draggable(custom, [
   transform((data) => {
-    // Custom visual movement
-    data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) rotate(${data.offsetX * 0.5}deg)`;
+    data.rootNode.style.transform = `
+    translate(${data.offsetX}px, ${data.offsetY}px) 
+    rotate(${data.offsetX * 0.5}deg)
+  `;
   }),
 ]);
 ```
@@ -154,9 +159,9 @@ new Draggable(custom, [
 
 When used without arguments, transform automatically handles movement:
 
-- **HTML elements**: Uses `element.style.translate = "Xpx Ypx"`
-- **SVG elements**: Uses SVG transform matrices
-- **Performance optimized**: Uses modern CSS properties for hardware acceleration
+- **HTML elements:** Uses `element.style.translate = "Xpx Ypx"` (GPU accelerated)
+- **SVG elements:** Uses SVG transform matrices for proper coordinate handling
+- **Performance optimized:** Uses `ctx.effect.paint()` with `requestAnimationFrame`
 
 ## Custom Transform Functions
 
@@ -172,19 +177,28 @@ Create custom visual effects by providing a transform function:
   // Scaling effect
   const scaleTransform = (data) => {
     const scale = 1 + Math.abs(data.offsetX) * 0.001;
-    data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) scale(${scale})`;
+    data.rootNode.style.transform = `
+      translate(${data.offsetX}px, ${data.offsetY}px) 
+      scale(${scale})
+    `;
   };
 
   // Rotation effect
   const rotateTransform = (data) => {
     const rotation = data.offsetX * 0.5;
-    data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) rotate(${rotation}deg)`;
+    data.rootNode.style.transform = `
+      translate(${data.offsetX}px, ${data.offsetY}px) 
+      rotate(${rotation}deg)
+    `;
   };
 
   // Skew effect
   const skewTransform = (data) => {
     const skewX = data.offsetY * 0.1;
-    data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) skewX(${skewX}deg)`;
+    data.rootNode.style.transform = `
+      translate(${data.offsetX}px, ${data.offsetY}px) 
+      skewX(${skewX}deg)
+    `;
   };
 </script>
 
@@ -199,24 +213,6 @@ Create custom visual effects by providing a transform function:
 <div {@attach draggable([transform(skewTransform)])}>
   Skews while dragging
 </div>
-
-<style>
-  div {
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(45deg, #007bff, #00d4ff);
-    margin: 20px;
-    display: inline-block;
-    cursor: move;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    text-align: center;
-  }
-</style>
 ```
 
 </div>
@@ -235,51 +231,39 @@ function CustomTransforms() {
   // Scaling effect
   const scaleTransform = (data) => {
     const scale = 1 + Math.abs(data.offsetX) * 0.001;
-    data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) scale(${scale})`;
+    data.rootNode.style.transform = `
+      translate(${data.offsetX}px, ${data.offsetY}px) 
+      scale(${scale})
+    `;
   };
 
   // Rotation effect
   const rotateTransform = (data) => {
     const rotation = data.offsetX * 0.5;
-    data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) rotate(${rotation}deg)`;
+    data.rootNode.style.transform = `
+      translate(${data.offsetX}px, ${data.offsetY}px) 
+      rotate(${rotation}deg)
+    `;
   };
 
   // Skew effect
   const skewTransform = (data) => {
     const skewX = data.offsetY * 0.1;
-    data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) skewX(${skewX}deg)`;
+    data.rootNode.style.transform = `
+      translate(${data.offsetX}px, ${data.offsetY}px) 
+      skewX(${skewX}deg)
+    `;
   };
 
   useDraggable(scaleRef, [transform(scaleTransform)]);
   useDraggable(rotateRef, [transform(rotateTransform)]);
   useDraggable(skewRef, [transform(skewTransform)]);
 
-  const boxStyle = {
-    width: '100px',
-    height: '100px',
-    background: 'linear-gradient(45deg, #007bff, #00d4ff)',
-    margin: '20px',
-    display: 'inline-flex',
-    cursor: 'move',
-    borderRadius: '8px',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  };
-
   return (
     <div>
-      <div ref={scaleRef} style={boxStyle}>
-        Scales while dragging
-      </div>
-      <div ref={rotateRef} style={boxStyle}>
-        Rotates while dragging
-      </div>
-      <div ref={skewRef} style={boxStyle}>
-        Skews while dragging
-      </div>
+      <div ref={scaleRef}>Scales while dragging</div>
+      <div ref={rotateRef}>Rotates while dragging</div>
+      <div ref={skewRef}>Skews while dragging</div>
     </div>
   );
 }
@@ -296,52 +280,44 @@ import { transform, vDraggable } from '@neodrag/vue';
 // Scaling effect
 const scaleTransform = (data) => {
   const scale = 1 + Math.abs(data.offsetX) * 0.001;
-  data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) scale(${scale})`;
+  data.rootNode.style.transform = `
+    translate(${data.offsetX}px, ${data.offsetY}px) 
+    scale(${scale})
+  `;
 };
 
 // Rotation effect
 const rotateTransform = (data) => {
   const rotation = data.offsetX * 0.5;
-  data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) rotate(${rotation}deg)`;
+  data.rootNode.style.transform = `
+    translate(${data.offsetX}px, ${data.offsetY}px) 
+    rotate(${rotation}deg)
+  `;
 };
 
 // Skew effect
 const skewTransform = (data) => {
   const skewX = data.offsetY * 0.1;
-  data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) skewX(${skewX}deg)`;
+  data.rootNode.style.transform = `
+    translate(${data.offsetX}px, ${data.offsetY}px) 
+    skewX(${skewX}deg)
+  `;
 };
 </script>
 
 <template>
   <div>
-    <div v-draggable="[transform(scaleTransform)]" class="box">
+    <div v-draggable="[transform(scaleTransform)]">
       Scales while dragging
     </div>
-    <div v-draggable="[transform(rotateTransform)]" class="box">
+    <div v-draggable="[transform(rotateTransform)]">
       Rotates while dragging
     </div>
-    <div v-draggable="[transform(skewTransform)]" class="box">
+    <div v-draggable="[transform(skewTransform)]">
       Skews while dragging
     </div>
   </div>
 </template>
-
-<style scoped>
-.box {
-  width: 100px;
-  height: 100px;
-  background: linear-gradient(45deg, #007bff, #00d4ff);
-  margin: 20px;
-  display: inline-flex;
-  cursor: move;
-  border-radius: 8px;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  text-align: center;
-}
-</style>
 ```
 
 </div>
@@ -350,61 +326,51 @@ const skewTransform = (data) => {
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { transform, useDraggable } from '@neodrag/solid';
+import { transform, createDraggable } from '@neodrag/solid';
 
 function CustomTransforms() {
-  const [scale, setScale] = createSignal<HTMLDivElement>();
-  const [rotate, setRotate] = createSignal<HTMLDivElement>();
-  const [skew, setSkew] = createSignal<HTMLDivElement>();
-
   // Scaling effect
   const scaleTransform = (data) => {
     const scale = 1 + Math.abs(data.offsetX) * 0.001;
-    data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) scale(${scale})`;
+    data.rootNode.style.transform = `
+      translate(${data.offsetX}px, ${data.offsetY}px) 
+      scale(${scale})
+    `;
   };
 
   // Rotation effect
   const rotateTransform = (data) => {
     const rotation = data.offsetX * 0.5;
-    data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) rotate(${rotation}deg)`;
+    data.rootNode.style.transform = `
+      translate(${data.offsetX}px, ${data.offsetY}px) 
+      rotate(${rotation}deg)
+    `;
   };
 
   // Skew effect
   const skewTransform = (data) => {
     const skewX = data.offsetY * 0.1;
-    data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) skewX(${skewX}deg)`;
+    data.rootNode.style.transform = `
+      translate(${data.offsetX}px, ${data.offsetY}px) 
+      skewX(${skewX}deg)
+    `;
   };
 
-  useDraggable(scale, [transform(scaleTransform)]);
-  useDraggable(rotate, [transform(rotateTransform)]);
-  useDraggable(skew, [transform(skewTransform)]);
-
-  const boxStyle = {
-    width: '100px',
-    height: '100px',
-    background: 'linear-gradient(45deg, #007bff, #00d4ff)',
-    margin: '20px',
-    display: 'inline-flex',
-    cursor: 'move',
-    'border-radius': '8px',
-    'align-items': 'center',
-    'justify-content': 'center',
-    color: 'white',
-    'font-weight': 'bold',
-    'text-align': 'center',
-  };
+  const { as: scaleDiv } = createDraggable(() => [
+    transform(scaleTransform),
+  ]);
+  const { as: rotateDiv } = createDraggable(() => [
+    transform(rotateTransform),
+  ]);
+  const { as: skewDiv } = createDraggable(() => [
+    transform(skewTransform),
+  ]);
 
   return (
     <div>
-      <div ref={setScale} style={boxStyle}>
-        Scales while dragging
-      </div>
-      <div ref={setRotate} style={boxStyle}>
-        Rotates while dragging
-      </div>
-      <div ref={setSkew} style={boxStyle}>
-        Skews while dragging
-      </div>
+      <scaleDiv>Scales while dragging</scaleDiv>
+      <rotateDiv>Rotates while dragging</rotateDiv>
+      <skewDiv>Skews while dragging</skewDiv>
     </div>
   );
 }
@@ -415,7 +381,7 @@ function CustomTransforms() {
 <div slot="vanilla">
 
 ```typescript
-import { transform, Draggable } from '@neodrag/vanilla';
+import { draggable, transform } from '@neodrag/vanilla';
 
 const scale = document.getElementById('scale');
 const rotate = document.getElementById('rotate');
@@ -424,43 +390,37 @@ const skew = document.getElementById('skew');
 // Scaling effect
 const scaleTransform = (data) => {
   const scale = 1 + Math.abs(data.offsetX) * 0.001;
-  data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) scale(${scale})`;
+  data.rootNode.style.transform = `
+    translate(${data.offsetX}px, ${data.offsetY}px) 
+    scale(${scale})
+  `;
 };
 
 // Rotation effect
 const rotateTransform = (data) => {
   const rotation = data.offsetX * 0.5;
-  data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) rotate(${rotation}deg)`;
+  data.rootNode.style.transform = `
+    translate(${data.offsetX}px, ${data.offsetY}px) 
+    rotate(${rotation}deg)
+  `;
 };
 
 // Skew effect
 const skewTransform = (data) => {
   const skewX = data.offsetY * 0.1;
-  data.rootNode.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) skewX(${skewX}deg)`;
+  data.rootNode.style.transform = `
+    translate(${data.offsetX}px, ${data.offsetY}px) 
+    skewX(${skewX}deg)
+  `;
 };
 
-new Draggable(scale, [transform(scaleTransform)]);
-new Draggable(rotate, [transform(rotateTransform)]);
-new Draggable(skew, [transform(skewTransform)]);
+draggable(scale, [transform(scaleTransform)]);
+draggable(rotate, [transform(rotateTransform)]);
+draggable(skew, [transform(skewTransform)]);
 ```
 
 </div>
 </FrameworkSwitch>
-
-## Transform Function Data
-
-Custom transform functions receive data about the current drag state:
-
-```typescript
-transform((data) => {
-  // data.offsetX: Current X position relative to start
-  // data.offsetY: Current Y position relative to start
-  // data.rootNode: The element being transformed
-
-  // Apply custom transformation
-  data.rootNode.style.transform = `your-transform-here`;
-});
-```
 
 ## Advanced Examples
 
@@ -556,24 +516,10 @@ const perspectiveTransform = (data) => {
 
 ## SVG Support
 
-Transform automatically handles SVG elements differently:
+Transform automatically handles SVG elements using proper SVG transformation matrices:
 
 ```typescript
-// HTML element - uses CSS translate
-htmlElement.style.translate = '100px 50px';
-
-// SVG element - uses SVG transform matrix
-svgElement.transform.baseVal.clear();
-svgElement.transform.baseVal.appendItem(
-  svg.createSVGTransformFromMatrix(
-    svg.createSVGMatrix().translate(100, 50),
-  ),
-);
-```
-
-For custom SVG transforms:
-
-```typescript
+// For custom SVG transforms
 const svgTransform = (data) => {
   if (data.rootNode instanceof SVGElement) {
     const svg = data.rootNode.ownerSVGElement;
@@ -601,7 +547,7 @@ const svgTransform = (data) => {
 
 ### GPU Acceleration
 
-The default transform uses modern CSS properties that leverage GPU acceleration:
+The default transform uses modern CSS properties for hardware acceleration:
 
 ```typescript
 // Modern (default) - GPU accelerated
@@ -613,7 +559,7 @@ element.style.transform = 'translate(100px, 50px)';
 
 ### Efficient Updates
 
-Transform uses `ctx.effect.paint()` to optimize rendering:
+Transform uses `ctx.effect.paint()` for optimized rendering:
 
 ```typescript
 // Automatically batched with requestAnimationFrame
@@ -642,7 +588,7 @@ const optimizedTransform = (data) => {
 
 ## Plugin Priority
 
-Transform has the lowest priority (-1000) so it runs last:
+Transform has the lowest priority (-1000) ensuring it runs after all position calculations:
 
 ```typescript
 // Plugin execution order:
@@ -651,29 +597,27 @@ Transform has the lowest priority (-1000) so it runs last:
 // 3. Transform (priority: -1000) - applies final visual changes
 ```
 
-This ensures all position calculations are complete before applying visual transformations.
-
 ## How It Works
 
 The transform plugin:
 
-1. **Setup phase**:
+1. **Setup phase:**
 
    - Detects HTML vs SVG elements
    - Applies initial position if element has existing offset
 
-2. **Drag phase**:
+2. **Drag phase:**
 
    - Runs with lowest priority (after all other plugins)
    - Uses `ctx.effect.paint()` for optimal rendering
    - Applies either custom function or default movement
 
-3. **Default behavior**:
+3. **Default behavior:**
 
    - HTML: `element.style.translate = "Xpx Ypx"`
    - SVG: Creates and applies SVG transform matrix
 
-4. **Custom functions**:
+4. **Custom functions:**
    - Receive current offset and root node
    - Can apply any CSS transform or SVG transformation
    - Run on every drag update

@@ -5,9 +5,7 @@ tagline: 'Restrict movement to a single axis (x or y)'
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-## What it does
-
-The `axis` plugin locks movement to either horizontal (`x`) or vertical (`y`) direction. Perfect for sliders, scrollbars, or any UI where you need one-dimensional dragging.
+The `axis` plugin locks movement to horizontal (`x`) or vertical (`y`) direction. Perfect for sliders, scrollbars, or any UI requiring one-dimensional dragging.
 
 ```typescript
 axis('x'); // Only horizontal movement
@@ -116,7 +114,7 @@ new Draggable(vertical, [axis('y')]);
 
 ## Dynamic Switching
 
-Change the axis while dragging using compartments:
+Change axis while dragging using compartments:
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -151,7 +149,6 @@ function DynamicAxis() {
   const [direction, setDirection] = useState('x');
 
   const axisComp = useCompartment(() => axis(direction), [direction]);
-
   useDraggable(ref, () => [axisComp]);
 
   return (
@@ -179,8 +176,6 @@ import { axis, vDraggable, useCompartment } from '@neodrag/vue';
 const direction = ref('x');
 const axisComp = useCompartment(() => axis(direction.value));
 
-const plugins = () => [axisComp];
-
 function toggle() {
   direction.value = direction.value === 'x' ? 'y' : 'x';
 }
@@ -188,7 +183,9 @@ function toggle() {
 
 <template>
   <div>
-    <div v-draggable="plugins">Current: {{ direction }}-axis</div>
+    <div v-draggable="() => [axisComp]">
+      Current: {{ direction }}-axis
+    </div>
     <button @click="toggle">
       Switch to {{ direction === 'x' ? 'Y' : 'X' }} axis
     </button>
@@ -213,7 +210,6 @@ function DynamicAxis() {
   const [direction, setDirection] = createSignal('x');
 
   const axisComp = createCompartment(() => axis(direction()));
-
   useDraggable(element, [axisComp]);
 
   return (
@@ -238,8 +234,8 @@ import { axis, Compartment, Draggable } from '@neodrag/vanilla';
 
 let direction = 'x';
 const axisComp = new Compartment(() => axis(direction));
-
 const element = document.getElementById('element');
+
 new Draggable(element, () => [axisComp]);
 
 document.getElementById('toggle').addEventListener('click', () => {
@@ -253,27 +249,14 @@ document.getElementById('toggle').addEventListener('click', () => {
 
 ## Combining with Other Plugins
 
-### With Grid Snapping
-
 ```typescript
-// Horizontal movement that snaps to 20px intervals
-const plugins = [
-  axis('x'),
-  grid([20, 20]), // Only X grid applies
-];
-```
+// Horizontal movement with 20px grid snapping
+const plugins = [axis('x'), grid([20, 20])];
 
-### With Bounds
-
-```typescript
 // Vertical slider constrained to parent
 const plugins = [axis('y'), bounds(BoundsFrom.parent())];
-```
 
-### Plugin Order Matters
-
-```typescript
-// Correct: Apply axis constraint first
+// Plugin order matters - apply axis constraint first
 const plugins = [
   axis('x'), // Constrains movement
   grid([10, 10]), // Then applies grid
@@ -314,23 +297,6 @@ const plugins = [
 </div>
 
 <p>Value: {value}%</p>
-
-<style>
-  .track {
-    width: 200px;
-    height: 20px;
-    background: #ddd;
-    position: relative;
-  }
-
-  .handle {
-    width: 20px;
-    height: 20px;
-    background: #007bff;
-    border-radius: 50%;
-    cursor: grab;
-  }
-</style>
 ```
 
 </div>
@@ -353,15 +319,16 @@ function RangeSlider() {
   const [value, setValue] = useState(50);
 
   const handleDrag = useCallback((data) => {
-    if (trackRef.current) {
-      const trackWidth = trackRef.current.offsetWidth;
+    const trackEl = trackRef.current;
+    if (trackEl) {
+      const trackWidth = trackEl.offsetWidth;
       setValue(Math.round((data.offset.x / trackWidth) * 100));
     }
   }, []);
 
   useDraggable(handleRef, [
     axis('x'),
-    bounds(BoundsFrom.element(trackRef.current)),
+    bounds(() => BoundsFrom.element(trackRef.current)),
     events({ onDrag: handleDrag }),
   ]);
 
@@ -391,26 +358,27 @@ import {
   vDraggable,
 } from '@neodrag/vue';
 
-const trackRef = ref();
 const value = ref(50);
+const track = ref();
 
-function handleDrag(data) {
-  if (trackRef.value) {
-    const trackWidth = trackRef.value.offsetWidth;
+const handleDrag = (data) => {
+  const trackEl = track.value;
+  if (trackEl) {
+    const trackWidth = trackEl.offsetWidth;
     value.value = Math.round((data.offset.x / trackWidth) * 100);
   }
-}
+};
 
 const plugins = [
   axis('x'),
-  bounds(() => BoundsFrom.element(trackRef.value)),
+  bounds(() => BoundsFrom.element(track.value)),
   events({ onDrag: handleDrag }),
 ];
 </script>
 
 <template>
   <div>
-    <div ref="trackRef" class="track">
+    <div ref="track" class="track">
       <div v-draggable="plugins" class="handle" />
     </div>
     <p>Value: {{ value }}%</p>

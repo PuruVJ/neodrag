@@ -5,8 +5,6 @@ tagline: 'Define which areas can initiate dragging'
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-## What it does
-
 The `controls` plugin defines which parts of an element can be used to start dragging. Think modal headers, card handles, or toolbar grips - only specific areas should be draggable while the rest remains interactive.
 
 ```typescript
@@ -184,82 +182,41 @@ new Draggable(card, [
 </div>
 </FrameworkSwitch>
 
-## ControlFrom Utility
-
-The `ControlFrom` utility helps you define control zones:
-
-### By Selector
+## ControlFrom Utilities
 
 ```typescript
-// Only elements matching selector can drag
-ControlFrom.selector('.drag-handle');
-ControlFrom.selector('[data-draggable]');
-ControlFrom.selector('.header, .toolbar');
+// CSS selectors
+ControlFrom.selector('.handle'); // All elements matching selector
+ControlFrom.selector('button, input'); // Multiple selectors
+
+// Specific elements
+const handleElement = document.querySelector('.my-handle');
+ControlFrom.elements([handleElement]);
+ControlFrom.elements(document.querySelectorAll('.handles'));
 ```
 
-### By Elements
+## Priority with Overlapping Zones
 
-```typescript
-// Specific DOM elements
-const handle = document.querySelector('.handle');
-ControlFrom.elements([handle]);
-
-// Multiple elements
-const handles = document.querySelectorAll('.handle');
-ControlFrom.elements(handles);
-```
-
-## Control Options
-
-### Allow Only
-
-When you specify `allow` zones, only those areas can initiate dragging:
-
-```typescript
-controls({
-  allow: ControlFrom.selector('.drag-handle'),
-});
-// Only .drag-handle can start dragging
-```
-
-### Block Areas
-
-When you specify `block` zones, those areas cannot initiate dragging:
-
-```typescript
-controls({
-  block: ControlFrom.selector('button, input, a'),
-});
-// Everything except buttons, inputs, and links can drag
-```
-
-### Combined Allow and Block
-
-Use both to create complex control patterns:
+When zones overlap, control which takes precedence:
 
 ```typescript
 controls({
   allow: ControlFrom.selector('.card-header'),
   block: ControlFrom.selector('.card-header .close-button'),
+  priority: 'block', // Block wins when zones overlap
 });
-// Header can drag, except the close button
-```
 
-### Priority
-
-When zones overlap, priority determines which takes precedence:
-
-```typescript
+// Default priority: 'allow' (allow zones win)
 controls({
-  allow: ControlFrom.selector('.container'),
-  block: ControlFrom.selector('.no-drag'),
-  priority: 'block', // Block zones win when overlapping
+  allow: ControlFrom.selector('.toolbar'),
+  block: ControlFrom.selector('.toolbar button'),
+  // priority: 'allow' is default - toolbar dragging works except on buttons
 });
 ```
 
 ## Dynamic Controls
 
-Update control zones using compartments:
+Change control zones using compartments:
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -272,35 +229,30 @@ Update control zones using compartments:
     Compartment,
   } from '@neodrag/svelte';
 
-  let mode = $state('header-only');
+  let editMode = $state(false);
 
-  const controlsComp = Compartment.of(() => {
-    switch (mode) {
-      case 'header-only':
-        return controls({ allow: ControlFrom.selector('.header') });
-      case 'no-buttons':
-        return controls({ block: ControlFrom.selector('button') });
-      case 'free':
-        return controls({ allow: ControlFrom.selector('*') });
-      default:
-        return controls({});
-    }
-  });
+  const controlsComp = Compartment.of(() =>
+    controls({
+      allow: editMode
+        ? ControlFrom.selector('.edit-handle')
+        : ControlFrom.selector('.view-handle'),
+    }),
+  );
 </script>
 
 <div {@attach draggable(() => [controlsComp])}>
-  <div class="header">Header (mode: {mode})</div>
-  <div class="content">
-    <p>Some content</p>
-    <button>A button</button>
+  <div class="view-handle" class:hidden={editMode}>
+    View Mode Handle
   </div>
+  <div class="edit-handle" class:hidden={!editMode}>
+    Edit Mode Handle
+  </div>
+  <div class="content">Content area</div>
 </div>
 
-<select bind:value={mode}>
-  <option value="header-only">Header Only</option>
-  <option value="no-buttons">No Buttons</option>
-  <option value="free">Free Drag</option>
-</select>
+<button onclick={() => (editMode = !editMode)}>
+  Toggle {editMode ? 'View' : 'Edit'} Mode
+</button>
 ```
 
 </div>
@@ -308,7 +260,7 @@ Update control zones using compartments:
 <div slot="react">
 
 ```tsx
-import { useRef, useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   controls,
   ControlFrom,
@@ -317,39 +269,36 @@ import {
 } from '@neodrag/react';
 
 function DynamicControls() {
-  const elementRef = useRef<HTMLDivElement>(null);
-  const [mode, setMode] = useState('header-only');
+  const ref = useRef<HTMLDivElement>(null);
+  const [editMode, setEditMode] = useState(false);
 
-  const controlsComp = useCompartment(() => {
-    switch (mode) {
-      case 'header-only':
-        return controls({ allow: ControlFrom.selector('.header') });
-      case 'no-buttons':
-        return controls({ block: ControlFrom.selector('button') });
-      case 'free':
-        return controls({ allow: ControlFrom.selector('*') });
-      default:
-        return controls({});
-    }
-  }, [mode]);
+  const controlsComp = useCompartment(
+    () =>
+      controls({
+        allow: editMode
+          ? ControlFrom.selector('.edit-handle')
+          : ControlFrom.selector('.view-handle'),
+      }),
+    [editMode],
+  );
 
-  useDraggable(elementRef, () => [controlsComp]);
+  useDraggable(ref, () => [controlsComp]);
 
   return (
     <div>
-      <div ref={elementRef}>
-        <div className="header">Header (mode: {mode})</div>
-        <div className="content">
-          <p>Some content</p>
-          <button>A button</button>
+      <div ref={ref}>
+        <div className={`view-handle ${editMode ? 'hidden' : ''}`}>
+          View Mode Handle
         </div>
+        <div className={`edit-handle ${!editMode ? 'hidden' : ''}`}>
+          Edit Mode Handle
+        </div>
+        <div className="content">Content area</div>
       </div>
 
-      <select value={mode} onChange={(e) => setMode(e.target.value)}>
-        <option value="header-only">Header Only</option>
-        <option value="no-buttons">No Buttons</option>
-        <option value="free">Free Drag</option>
-      </select>
+      <button onClick={() => setEditMode(!editMode)}>
+        Toggle {editMode ? 'View' : 'Edit'} Mode
+      </button>
     </div>
   );
 }
@@ -369,39 +318,36 @@ import {
   useCompartment,
 } from '@neodrag/vue';
 
-const mode = ref('header-only');
+const editMode = ref(false);
 
-const controlsComp = useCompartment(() => {
-  switch (mode.value) {
-    case 'header-only':
-      return controls({ allow: ControlFrom.selector('.header') });
-    case 'no-buttons':
-      return controls({ block: ControlFrom.selector('button') });
-    case 'free':
-      return controls({ allow: ControlFrom.selector('*') });
-    default:
-      return controls({});
-  }
-});
+const controlsComp = useCompartment(() =>
+  controls({
+    allow: editMode.value
+      ? ControlFrom.selector('.edit-handle')
+      : ControlFrom.selector('.view-handle'),
+  }),
+);
 
-const plugins = () => [controlsComp];
+function toggleMode() {
+  editMode.value = !editMode.value;
+}
 </script>
 
 <template>
   <div>
-    <div v-draggable="plugins">
-      <div class="header">Header (mode: {{ mode }})</div>
-      <div class="content">
-        <p>Some content</p>
-        <button>A button</button>
+    <div v-draggable="() => [controlsComp]">
+      <div class="view-handle" :class="{ hidden: editMode }">
+        View Mode Handle
       </div>
+      <div class="edit-handle" :class="{ hidden: !editMode }">
+        Edit Mode Handle
+      </div>
+      <div class="content">Content area</div>
     </div>
 
-    <select v-model="mode">
-      <option value="header-only">Header Only</option>
-      <option value="no-buttons">No Buttons</option>
-      <option value="free">Free Drag</option>
-    </select>
+    <button @click="toggleMode">
+      Toggle {{ editMode ? 'View' : 'Edit' }} Mode
+    </button>
   </div>
 </template>
 ```
@@ -421,41 +367,33 @@ import {
 
 function DynamicControls() {
   const [element, setElement] = createSignal<HTMLDivElement>();
-  const [mode, setMode] = createSignal('header-only');
+  const [editMode, setEditMode] = createSignal(false);
 
-  const controlsComp = createCompartment(() => {
-    switch (mode()) {
-      case 'header-only':
-        return controls({ allow: ControlFrom.selector('.header') });
-      case 'no-buttons':
-        return controls({ block: ControlFrom.selector('button') });
-      case 'free':
-        return controls({ allow: ControlFrom.selector('*') });
-      default:
-        return controls({});
-    }
-  });
+  const controlsComp = createCompartment(() =>
+    controls({
+      allow: editMode()
+        ? ControlFrom.selector('.edit-handle')
+        : ControlFrom.selector('.view-handle'),
+    }),
+  );
 
   useDraggable(element, [controlsComp]);
 
   return (
     <div>
       <div ref={setElement}>
-        <div class="header">Header (mode: {mode()})</div>
-        <div class="content">
-          <p>Some content</p>
-          <button>A button</button>
+        <div class={`view-handle ${editMode() ? 'hidden' : ''}`}>
+          View Mode Handle
         </div>
+        <div class={`edit-handle ${!editMode() ? 'hidden' : ''}`}>
+          Edit Mode Handle
+        </div>
+        <div class="content">Content area</div>
       </div>
 
-      <select
-        value={mode()}
-        onChange={(e) => setMode(e.target.value)}
-      >
-        <option value="header-only">Header Only</option>
-        <option value="no-buttons">No Buttons</option>
-        <option value="free">Free Drag</option>
-      </select>
+      <button onClick={() => setEditMode(!editMode())}>
+        Toggle {editMode() ? 'View' : 'Edit'} Mode
+      </button>
     </div>
   );
 }
@@ -473,34 +411,49 @@ import {
   Draggable,
 } from '@neodrag/vanilla';
 
+let editMode = false;
 const element = document.getElementById('element');
-const select = document.getElementById('mode-select');
 
-let mode = 'header-only';
-
-const controlsComp = new Compartment(() => {
-  switch (mode) {
-    case 'header-only':
-      return controls({ allow: ControlFrom.selector('.header') });
-    case 'no-buttons':
-      return controls({ block: ControlFrom.selector('button') });
-    case 'free':
-      return controls({ allow: ControlFrom.selector('*') });
-    default:
-      return controls({});
-  }
-});
+const controlsComp = new Compartment(() =>
+  controls({
+    allow: editMode
+      ? ControlFrom.selector('.edit-handle')
+      : ControlFrom.selector('.view-handle'),
+  }),
+);
 
 new Draggable(element, () => [controlsComp]);
 
-select.addEventListener('change', (e) => {
-  mode = e.target.value;
-  controlsComp.current = controlsComp.current; // Trigger update
+document.getElementById('toggle').addEventListener('click', () => {
+  editMode = !editMode;
+  controlsComp.current = controls({
+    allow: editMode
+      ? ControlFrom.selector('.edit-handle')
+      : ControlFrom.selector('.view-handle'),
+  });
 });
 ```
 
 </div>
 </FrameworkSwitch>
+
+## Combining with Other Plugins
+
+```typescript
+// Draggable modal with multiple constraints
+const plugins = [
+  controls({ allow: ControlFrom.selector('.modal-header') }),
+  bounds(BoundsFrom.viewport({ top: 0 })),
+  axis('both'), // Allow any direction
+];
+
+// Card with handle and grid snapping
+const plugins = [
+  controls({ allow: ControlFrom.selector('.drag-handle') }),
+  grid([20, 20]),
+  bounds(BoundsFrom.parent()),
+];
+```
 
 ## Common Use Cases
 
@@ -515,10 +468,10 @@ select.addEventListener('change', (e) => {
 </script>
 
 <div
-  class="card"
   {@attach draggable([
     controls({ allow: ControlFrom.selector('.drag-handle') }),
   ])}
+  class="card"
 >
   <div class="card-header">
     <span class="drag-handle">⋮⋮</span>
@@ -530,48 +483,6 @@ select.addEventListener('change', (e) => {
     <button>Action Button</button>
   </div>
 </div>
-
-<style>
-  .card {
-    width: 300px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #eee;
-  }
-
-  .drag-handle {
-    cursor: grab;
-    padding: 4px;
-    margin-right: 8px;
-    color: #666;
-    user-select: none;
-  }
-
-  .drag-handle:hover {
-    background: #f0f0f0;
-    border-radius: 4px;
-  }
-
-  .close {
-    margin-left: auto;
-    background: none;
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-  }
-
-  .card-content {
-    padding: 16px;
-  }
-</style>
 ```
 
 </div>
@@ -583,14 +494,14 @@ import { useRef } from 'react';
 import { controls, ControlFrom, useDraggable } from '@neodrag/react';
 
 function DraggableCard() {
-  const cardRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
-  useDraggable(cardRef, [
+  useDraggable(ref, [
     controls({ allow: ControlFrom.selector('.drag-handle') }),
   ]);
 
   return (
-    <div ref={cardRef} className="card">
+    <div ref={ref} className="card">
       <div className="card-header">
         <span className="drag-handle">⋮⋮</span>
         <h3>Card Title</h3>

@@ -5,8 +5,6 @@ tagline: 'Keep draggable elements within specified boundaries'
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-## What it does
-
 The `bounds` plugin keeps draggable elements within specified boundaries. Whether it's staying inside a parent container, the viewport, or custom regions - bounds ensures your elements can't escape their designated areas.
 
 ```typescript
@@ -47,7 +45,6 @@ import { useRef } from 'react';
 import { bounds, BoundsFrom, useDraggable } from '@neodrag/react';
 
 function BoundedElements() {
-  const containerRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -57,7 +54,6 @@ function BoundedElements() {
   return (
     <div>
       <div ref={viewportRef}>Can't leave the screen</div>
-
       <div className="container">
         <div ref={parentRef}>Contained child</div>
       </div>
@@ -80,7 +76,6 @@ import { bounds, BoundsFrom, vDraggable } from '@neodrag/vue';
     <div v-draggable="[bounds(BoundsFrom.viewport())]">
       Can't leave the screen
     </div>
-
     <div class="container">
       <div v-draggable="[bounds(BoundsFrom.parent())]">
         Contained child
@@ -108,7 +103,6 @@ function BoundedElements() {
   return (
     <div>
       <div ref={setViewport}>Can't leave the screen</div>
-
       <div class="container">
         <div ref={setParent}>Contained child</div>
       </div>
@@ -134,85 +128,65 @@ new Draggable(parent, [bounds(BoundsFrom.parent())]);
 </div>
 </FrameworkSwitch>
 
-## BoundsFrom Utility
-
-The `BoundsFrom` utility provides ready-made boundary functions:
-
-### Common Boundaries
+## BoundsFrom Utilities
 
 ```typescript
-// Stay within browser viewport
-BoundsFrom.viewport();
+// Viewport with padding
+bounds(BoundsFrom.viewport({ top: 60, left: 20 }));
 
-// Stay within parent element
-BoundsFrom.parent();
+// Parent with padding
+bounds(BoundsFrom.parent({ bottom: 10 }));
 
-// Stay within specific element
-BoundsFrom.element(containerElement);
+// Specific element
+bounds(BoundsFrom.element(targetElement));
 
-// Stay within element found by selector
-BoundsFrom.selector('#container');
-```
+// Element by selector
+bounds(BoundsFrom.selector('#container'));
 
-### With Padding
-
-Add padding to create margins around boundaries:
-
-```typescript
-// Viewport with 50px margin on all sides
-BoundsFrom.viewport({
-  top: 50,
-  right: 50,
-  bottom: 50,
-  left: 50,
-});
-
-// Parent with 20px top/bottom margin
-BoundsFrom.parent({
-  top: 20,
-  bottom: 20,
-});
+// All padding options
+bounds(
+  BoundsFrom.viewport({
+    top: 10,
+    right: 20,
+    bottom: 30,
+    left: 40,
+  }),
+);
 ```
 
 ## Dynamic Boundaries
 
-Update boundaries using compartments:
+For boundaries that change during dragging, use a function:
 
 <FrameworkSwitch>
 <div slot="svelte">
 
 ```svelte
 <script>
-  import { bounds, BoundsFrom, Compartment } from '@neodrag/svelte';
+  import { bounds } from '@neodrag/svelte';
 
-  let boundaryType = $state('viewport');
-  let containerRef = $state();
+  let windowWidth = $state(window.innerWidth);
+  let windowHeight = $state(window.innerHeight);
 
-  const boundsComp = Compartment.of(() => {
-    switch (boundaryType) {
-      case 'viewport':
-        return bounds(BoundsFrom.viewport());
-      case 'parent':
-        return bounds(BoundsFrom.parent());
-      case 'container':
-        return bounds(BoundsFrom.element(containerRef));
-      default:
-        return bounds(BoundsFrom.viewport());
+  // Update on resize
+  $effect(() => {
+    function handleResize() {
+      windowWidth = window.innerWidth;
+      windowHeight = window.innerHeight;
     }
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   });
+
+  const dynamicBounds = () => [
+    [0, 0],
+    [windowWidth - 100, windowHeight - 100],
+  ];
 </script>
 
-<div bind:this={containerRef} class="container">
-  <div {@attach draggable(() => [boundsComp])}>
-    Current boundary: {boundaryType}
-  </div>
+<div {@attach draggable([bounds(dynamicBounds)])}>
+  Responsive boundaries
 </div>
-
-<select bind:value={boundaryType}>
-  <option value="viewport">Viewport</option>
-  <option value="parent">Parent</option>
-  <option value="container">Container</option>
-</select>
 ```
 
 </div>
@@ -220,50 +194,35 @@ Update boundaries using compartments:
 <div slot="react">
 
 ```tsx
-import { useRef, useState } from 'react';
-import {
-  bounds,
-  BoundsFrom,
-  useDraggable,
-  useCompartment,
-} from '@neodrag/react';
+import { useState, useEffect, useRef } from 'react';
+import { bounds, useDraggable } from '@neodrag/react';
 
-function DynamicBounds() {
-  const elementRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [boundaryType, setBoundaryType] = useState('viewport');
+function ResponsiveBounds() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
 
-  const boundsComp = useCompartment(() => {
-    switch (boundaryType) {
-      case 'viewport':
-        return bounds(BoundsFrom.viewport());
-      case 'parent':
-        return bounds(BoundsFrom.parent());
-      case 'container':
-        return bounds(BoundsFrom.element(containerRef.current));
-      default:
-        return bounds(BoundsFrom.viewport());
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
     }
-  }, [boundaryType]);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-  useDraggable(elementRef, () => [boundsComp]);
+  const dynamicBounds = () => [
+    [0, 0],
+    [windowSize.width - 100, windowSize.height - 100],
+  ];
 
-  return (
-    <div>
-      <div ref={containerRef} className="container">
-        <div ref={elementRef}>Current boundary: {boundaryType}</div>
-      </div>
+  useDraggable(ref, [bounds(dynamicBounds)]);
 
-      <select
-        value={boundaryType}
-        onChange={(e) => setBoundaryType(e.target.value)}
-      >
-        <option value="viewport">Viewport</option>
-        <option value="parent">Parent</option>
-        <option value="container">Container</option>
-      </select>
-    </div>
-  );
+  return <div ref={ref}>Responsive boundaries</div>;
 }
 ```
 
@@ -273,47 +232,35 @@ function DynamicBounds() {
 
 ```vue
 <script setup>
-import { ref } from 'vue';
-import {
-  bounds,
-  BoundsFrom,
-  vDraggable,
-  useCompartment,
-} from '@neodrag/vue';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { bounds, vDraggable } from '@neodrag/vue';
 
-const boundaryType = ref('viewport');
-const containerRef = ref();
+const windowWidth = ref(window.innerWidth);
+const windowHeight = ref(window.innerHeight);
 
-const boundsComp = useCompartment(() => {
-  switch (boundaryType.value) {
-    case 'viewport':
-      return bounds(BoundsFrom.viewport());
-    case 'parent':
-      return bounds(BoundsFrom.parent());
-    case 'container':
-      return bounds(BoundsFrom.element(containerRef.value));
-    default:
-      return bounds(BoundsFrom.viewport());
-  }
+function handleResize() {
+  windowWidth.value = window.innerWidth;
+  windowHeight.value = window.innerHeight;
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
 });
 
-const plugins = () => [boundsComp];
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
+
+const dynamicBounds = () => [
+  [0, 0],
+  [windowWidth.value - 100, windowHeight.value - 100],
+];
+
+const plugins = [bounds(dynamicBounds)];
 </script>
 
 <template>
-  <div>
-    <div ref="containerRef" class="container">
-      <div v-draggable="plugins">
-        Current boundary: {{ boundaryType }}
-      </div>
-    </div>
-
-    <select v-model="boundaryType">
-      <option value="viewport">Viewport</option>
-      <option value="parent">Parent</option>
-      <option value="container">Container</option>
-    </select>
-  </div>
+  <div v-draggable="plugins">Responsive boundaries</div>
 </template>
 ```
 
@@ -322,50 +269,37 @@ const plugins = () => [boundsComp];
 <div slot="solid">
 
 ```tsx
-import { createSignal } from 'solid-js';
-import {
-  bounds,
-  BoundsFrom,
-  useDraggable,
-  createCompartment,
-} from '@neodrag/solid';
+import { createSignal, onMount, onCleanup } from 'solid-js';
+import { bounds, useDraggable } from '@neodrag/solid';
 
-function DynamicBounds() {
+function ResponsiveBounds() {
   const [element, setElement] = createSignal<HTMLDivElement>();
-  const [container, setContainer] = createSignal<HTMLDivElement>();
-  const [boundaryType, setBoundaryType] = createSignal('viewport');
-
-  const boundsComp = createCompartment(() => {
-    switch (boundaryType()) {
-      case 'viewport':
-        return bounds(BoundsFrom.viewport());
-      case 'parent':
-        return bounds(BoundsFrom.parent());
-      case 'container':
-        return bounds(BoundsFrom.element(container()));
-      default:
-        return bounds(BoundsFrom.viewport());
-    }
+  const [windowSize, setWindowSize] = createSignal({
+    width: window.innerWidth,
+    height: window.innerHeight,
   });
 
-  useDraggable(element, [boundsComp]);
+  onMount(() => {
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    window.addEventListener('resize', handleResize);
+    onCleanup(() =>
+      window.removeEventListener('resize', handleResize),
+    );
+  });
 
-  return (
-    <div>
-      <div ref={setContainer} class="container">
-        <div ref={setElement}>Current boundary: {boundaryType()}</div>
-      </div>
+  const dynamicBounds = () => [
+    [0, 0],
+    [windowSize().width - 100, windowSize().height - 100],
+  ];
 
-      <select
-        value={boundaryType()}
-        onChange={(e) => setBoundaryType(e.target.value)}
-      >
-        <option value="viewport">Viewport</option>
-        <option value="parent">Parent</option>
-        <option value="container">Container</option>
-      </select>
-    </div>
-  );
+  useDraggable(element, [bounds(dynamicBounds)]);
+
+  return <div ref={setElement}>Responsive boundaries</div>;
 }
 ```
 
@@ -374,72 +308,29 @@ function DynamicBounds() {
 <div slot="vanilla">
 
 ```typescript
-import {
-  bounds,
-  BoundsFrom,
-  Compartment,
-  Draggable,
-} from '@neodrag/vanilla';
+import { bounds, Draggable } from '@neodrag/vanilla';
 
-const element = document.getElementById('element');
-const container = document.getElementById('container');
-const select = document.getElementById('boundary-select');
+let windowWidth = window.innerWidth;
+let windowHeight = window.innerHeight;
 
-let boundaryType = 'viewport';
+function handleResize() {
+  windowWidth = window.innerWidth;
+  windowHeight = window.innerHeight;
+}
 
-const boundsComp = new Compartment(() => {
-  switch (boundaryType) {
-    case 'viewport':
-      return bounds(BoundsFrom.viewport());
-    case 'parent':
-      return bounds(BoundsFrom.parent());
-    case 'container':
-      return bounds(BoundsFrom.element(container));
-    default:
-      return bounds(BoundsFrom.viewport());
-  }
-});
+window.addEventListener('resize', handleResize);
 
-new Draggable(element, () => [boundsComp]);
+const dynamicBounds = () => [
+  [0, 0],
+  [windowWidth - 100, windowHeight - 100],
+];
 
-select.addEventListener('change', (e) => {
-  boundaryType = e.target.value;
-  boundsComp.current = boundsComp.current; // Trigger update
-});
+const element = document.getElementById('responsive');
+new Draggable(element, [bounds(dynamicBounds)]);
 ```
 
 </div>
 </FrameworkSwitch>
-
-## Combining with Other Plugins
-
-### With Axis Constraint
-
-```typescript
-// Horizontal slider that stays within parent
-const plugins = [axis('x'), bounds(BoundsFrom.parent())];
-```
-
-### With Grid Snapping
-
-```typescript
-// Grid snapping within viewport boundaries
-const plugins = [
-  grid([20, 20]),
-  bounds(BoundsFrom.viewport({ top: 50 })),
-];
-```
-
-### Plugin Order
-
-Bounds typically runs after other movement plugins:
-
-```typescript
-const plugins = [
-  grid([10, 10]), // Apply grid first
-  bounds(BoundsFrom.parent()), // Then constrain to bounds
-];
-```
 
 ## Common Use Cases
 
@@ -459,38 +350,15 @@ const plugins = [
 </script>
 
 <div
-  class="modal"
   {@attach draggable([
     bounds(BoundsFrom.viewport({ top: 0 })),
     controls({ allow: ControlFrom.selector('.modal-header') }),
   ])}
+  class="modal"
 >
   <div class="modal-header">Drag me to move modal</div>
   <div class="modal-content">Modal content here...</div>
 </div>
-
-<style>
-  .modal {
-    position: fixed;
-    top: 50px;
-    left: 100px;
-    width: 400px;
-    background: white;
-    border: 1px solid #ccc;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .modal-header {
-    padding: 16px;
-    background: #f5f5f5;
-    cursor: move;
-    border-bottom: 1px solid #ddd;
-  }
-
-  .modal-content {
-    padding: 16px;
-  }
-</style>
 ```
 
 </div>
@@ -508,15 +376,15 @@ import {
 } from '@neodrag/react';
 
 function DraggableModal() {
-  const modalRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
-  useDraggable(modalRef, [
+  useDraggable(ref, [
     bounds(BoundsFrom.viewport({ top: 0 })),
     controls({ allow: ControlFrom.selector('.modal-header') }),
   ]);
 
   return (
-    <div ref={modalRef} className="modal">
+    <div ref={ref} className="modal">
       <div className="modal-header">Drag me to move modal</div>
       <div className="modal-content">Modal content here...</div>
     </div>
@@ -607,7 +475,30 @@ new Draggable(modal, [
 </div>
 </FrameworkSwitch>
 
-### Drag and Drop with Zones
+### Image Gallery Viewport
+
+```typescript
+// Image larger than container - allow scrolling via drag
+const plugins = [
+  bounds(() => {
+    const container = document.getElementById('gallery-container');
+    const image = document.getElementById('large-image');
+
+    const containerRect = container.getBoundingClientRect();
+    const imageRect = image.getBoundingClientRect();
+
+    return [
+      [
+        containerRect.width - imageRect.width,
+        containerRect.height - imageRect.height,
+      ],
+      [0, 0],
+    ];
+  }),
+];
+```
+
+### Drag and Drop Zones
 
 ```typescript
 // Card that can be dropped in specific zones
@@ -640,8 +531,8 @@ const plugins = [
 For complex boundary logic, pass a function that returns coordinates:
 
 ```typescript
+// Diamond-shaped boundary
 bounds(() => {
-  // Custom diamond-shaped boundary
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
   const size = 200;
@@ -650,6 +541,34 @@ bounds(() => {
     [centerX - size, centerY - size],
     [centerX + size, centerY + size],
   ];
+});
+
+// Time-based boundaries (smaller at night)
+bounds(() => {
+  const hour = new Date().getHours();
+  const isNight = hour < 6 || hour > 22;
+  const factor = isNight ? 0.5 : 1;
+
+  return [
+    [0, 0],
+    [window.innerWidth * factor, window.innerHeight * factor],
+  ];
+});
+```
+
+## Recomputing Boundaries
+
+By default, boundaries are calculated once at drag start. For dynamic boundaries, control when they're recalculated:
+
+```typescript
+bounds(boundaryFunction, (ctx) => {
+  // Recompute on every drag event
+  return ctx.hook === 'drag';
+});
+
+bounds(boundaryFunction, (ctx) => {
+  // Only recompute at start and end
+  return ctx.hook === 'dragStart' || ctx.hook === 'dragEnd';
 });
 ```
 
