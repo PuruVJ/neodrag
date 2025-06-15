@@ -74,11 +74,7 @@ export class DraggableFactory {
 	#delegateTargetFn: () => HTMLElement;
 	#onError?: (error: ErrorInfo) => void;
 
-	constructor({
-		plugins = DEFAULTS.plugins,
-		delegate = DEFAULTS.delegate,
-		onError = DEFAULTS.onError,
-	}: Partial<typeof DEFAULTS> = DEFAULTS) {
+	constructor({ plugins, delegate, onError }: typeof DEFAULTS) {
 		this.#initial_plugins = plugins;
 		this.#delegateTargetFn = delegate;
 		this.#onError = onError;

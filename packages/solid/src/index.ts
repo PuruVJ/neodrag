@@ -1,4 +1,4 @@
-import { DraggableFactory } from '@neodrag/core';
+import { DEFAULTS, DraggableFactory } from '@neodrag/core';
 import {
 	Compartment,
 	DragEventData,
@@ -10,7 +10,7 @@ import {
 import type { Accessor, Setter } from 'solid-js';
 import { createEffect, createRenderEffect, createSignal, untrack } from 'solid-js';
 
-const draggable_factory = new DraggableFactory();
+const draggable_factory = new DraggableFactory(DEFAULTS);
 
 interface DragState extends DragEventData {
 	isDragging: boolean;

@@ -1,8 +1,8 @@
-import { DraggableFactory } from '@neodrag/core';
+import { DEFAULTS, DraggableFactory } from '@neodrag/core';
 import { Compartment, Plugin, type PluginInput } from '@neodrag/core/plugins';
 import { onUnmounted, watchEffect, type Directive } from 'vue';
 
-const factory = new DraggableFactory();
+const factory = new DraggableFactory(DEFAULTS);
 const CLEANUP = Symbol();
 
 export const wrapper = (

@@ -421,6 +421,13 @@
 			box-shadow: inset 0 0 0 2px var(--app-color-primary);
 		}
 
+		@media (max-width: 768px) {
+			grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+			padding: 0;
+			gap: 2rem;
+			justify-content: center;
+		}
+
 		* {
 			color: var(--app-color-light-contrast);
 		}

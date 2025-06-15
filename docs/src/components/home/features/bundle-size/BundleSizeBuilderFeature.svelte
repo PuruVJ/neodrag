@@ -41,21 +41,20 @@
 
 	function conditional_format(bytes: number) {
 		if (bytes < 1024) return bytes.toFixed(2) + 'B';
-
 		return (bytes / 1024).toFixed(2) + 'KB';
 	}
-
-	const checkboxes = $state<Record<string, HTMLInputElement>>({});
 
 	let selected = $state<string[]>(default_indices);
 	let current_size = $derived(find_combination_size(selected));
 	let current_size_kb = $derived(conditional_format(current_size));
-	let delta_size_kb = $derived(conditional_format(current_size - sizes_data.sizes['0']));
+	let delta_size_kb = $derived(
+		conditional_format(Math.max(0, current_size - sizes_data.sizes[''])),
+	);
 </script>
 
 <div class="demo">
 	<h2>Transparent bundle size</h2>
-	<p>
+	<p style="text-align: center;">
 		Figure out which plugins will cost how many bytes. <a
 			target="_blank"
 			rel="external"
@@ -70,36 +69,22 @@
 
 	<br /><br />
 
-	<p>Select the plugins you want to include in your bundle</p>
-	<ul>
-		{#each Object.entries(sizes_data.keys) as [key, value]}
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
-			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-			<li
-				class={[selected.includes(key as any) && 'selected']}
-				onclick={() => {
-					checkboxes[key as any].click();
-				}}
-			>
-				<span class="icon"><TickIcon /></span>
+	<fieldset>
+		<legend class="sr-only">Select the plugins you want to include in your bundle</legend>
+		<p style="text-align: center;">Select the plugins you want to include in your bundle</p>
 
-				<label
-					onclick={() => {
-						checkboxes[key as any].click();
-					}}
-				>
-					<input
-						type="checkbox"
-						value={key}
-						bind:group={selected}
-						bind:this={checkboxes[key as any]}
-					/>
-
-					{value}
+		<div class="checkbox-grid">
+			{#each Object.entries(sizes_data.keys) as [key, value]}
+				<label class="checkbox-item" class:selected={selected.includes(key.toString())}>
+					<input type="checkbox" value={key} bind:group={selected} class="sr-only" />
+					<span class="checkbox-display">
+						<span class="icon" aria-hidden="true"><TickIcon /></span>
+						<span class="label-text">{value}</span>
+					</span>
 				</label>
-			</li>
-		{/each}
-	</ul>
+			{/each}
+		</div>
+	</fieldset>
 </div>
 
 <style>
@@ -108,13 +93,30 @@
 		place-items: center;
 	}
 
-	ul {
+	/* Screen reader only - accessible but visually hidden */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	fieldset {
+		border: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.checkbox-grid {
 		display: flex;
 		gap: 1rem;
 		flex-wrap: wrap;
 		justify-content: center;
-
-		list-style-type: none;
 	}
 
 	.h1,
@@ -124,8 +126,15 @@
 		font-weight: 660;
 	}
 
-	li {
+	.checkbox-item {
 		position: relative;
+		cursor: pointer;
+		display: block;
+	}
+
+	.checkbox-display {
+		display: flex;
+		align-items: center;
 		padding: 0.5rem 2rem;
 		border-radius: 2rem;
 		background-color: color-mix(in lch, var(--app-color-primary), transparent 90%);
@@ -134,22 +143,32 @@
 			0px 5px 6px rgba(3, 7, 18, 0.06),
 			0px 18px 24px rgba(3, 7, 18, 0.06);
 
-		transition: background 0.12s ease-in;
-
+		transition: all 0.12s ease-in;
 		user-select: none;
-
-		&.selected {
-			background-color: color-mix(in lch, var(--app-color-primary), transparent 70%);
-
-			.icon {
-				opacity: 1;
-			}
-		}
+		font-size: large;
 	}
 
-	label {
-		display: flex;
-		font-size: large;
+	/* Focus state for accessibility */
+	.checkbox-item:focus-within .checkbox-display {
+		outline: 2px solid var(--app-color-primary);
+		outline-offset: 2px;
+	}
+
+	/* Hover state */
+	.checkbox-item:hover .checkbox-display {
+		transform: translateY(-1px);
+		box-shadow:
+			0px 8px 12px rgba(3, 7, 18, 0.08),
+			0px 20px 28px rgba(3, 7, 18, 0.08);
+	}
+
+	/* Selected state */
+	.checkbox-item.selected .checkbox-display {
+		background-color: color-mix(in lch, var(--app-color-primary), transparent 70%);
+	}
+
+	.checkbox-item.selected .icon {
+		opacity: 1;
 	}
 
 	.icon {
@@ -158,11 +177,10 @@
 		left: 10px;
 		top: 50%;
 		translate: 0 -50%;
-
 		transition: opacity 0.12s ease-in;
 	}
 
-	input[type='checkbox'] {
-		display: none;
+	.label-text {
+		display: block;
 	}
 </style>

@@ -1,4 +1,4 @@
-import { DraggableFactory } from '@neodrag/core';
+import { DEFAULTS, DraggableFactory } from '@neodrag/core';
 import {
 	Compartment,
 	DragEventData,
@@ -9,7 +9,7 @@ import {
 } from '@neodrag/core/plugins';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-const factory = new DraggableFactory();
+const factory = new DraggableFactory(DEFAULTS);
 
 interface DragState extends DragEventData {
 	isDragging: boolean;

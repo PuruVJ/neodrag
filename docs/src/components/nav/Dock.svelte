@@ -88,7 +88,7 @@
 					</div>
 
 					<div>
-						{@render framework_selector(false)}
+						{@render framework_selector(true)}
 					</div>
 
 					<div>
@@ -100,7 +100,7 @@
 
 		<div class="main">
 			<div class="desktop">
-				{@render framework_selector(true)}
+				{@render framework_selector(false)}
 
 				<div class="divider"></div>
 
@@ -143,10 +143,10 @@
 	</div>
 </section>
 
-{#snippet framework_selector(is_desktop = true)}
+{#snippet framework_selector(embedded = false)}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class={['zoomable', is_desktop && 'desktop']}
+		class={['zoomable', !embedded && 'desktop']}
 		onmouseenter={() => {
 			for (const framework of FRAMEWORKS) {
 				prefetch(replace_framework_from_pathname(framework.name));
@@ -168,6 +168,7 @@
 					framework={name}
 					selected={selected === name}
 					Icon={Icons[name]}
+					{embedded}
 				/>
 			</a>
 		{/each}
@@ -333,7 +334,7 @@
 
 		@media (--tablet) {
 			border-radius: 2rem;
-			width: 90%;
+			width: 95%;
 			bottom: 1rem;
 			height: auto;
 		}

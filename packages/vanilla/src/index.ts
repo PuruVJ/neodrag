@@ -1,7 +1,7 @@
-import { DraggableFactory } from '@neodrag/core';
+import { DEFAULTS, DraggableFactory } from '@neodrag/core';
 import type { PluginInput } from '@neodrag/core/plugins';
 
-const core = new DraggableFactory();
+const core = new DraggableFactory(DEFAULTS);
 
 export class Wrapper {
 	#destroy: () => void;

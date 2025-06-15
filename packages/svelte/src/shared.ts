@@ -1,4 +1,4 @@
-import { DraggableFactory } from '@neodrag/core';
+import { DEFAULTS, DraggableFactory } from '@neodrag/core';
 
-export const factory = new DraggableFactory();
+export const factory = new DraggableFactory(DEFAULTS);
 // export const factory = createDraggable();

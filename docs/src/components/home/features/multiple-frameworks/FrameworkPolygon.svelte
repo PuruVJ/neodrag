@@ -171,6 +171,10 @@
 		z-index: 7;
 		transform: translate(-50%, -50%);
 		width: clamp(4rem, 20vw, 7rem);
+
+		@media (max-width: 768px) {
+			width: clamp(2rem, 15vw, 5rem);
+		}
 	}
 
 	.reset {

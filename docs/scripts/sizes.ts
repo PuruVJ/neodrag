@@ -6,16 +6,6 @@ import { sync } from 'brotli-size';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
-// Default plugins that are always included in DraggableFactory
-const DEFAULT_PLUGINS = [
-	'ignoreMultitouch',
-	'stateMarker',
-	'applyUserSelectHack',
-	'transform',
-	'threshold',
-	'touchAction',
-];
-
 // Global export mapping
 let exportKeyMap: Record<string, number> = {};
 let reverseKeyMap: Record<number, string> = {};
@@ -167,10 +157,6 @@ function getActualImportsForCombination(plugins: string[]): {
 	return { actualImports, usedInFactory };
 }
 
-function isSubsetOfDefaults(plugins: string[]): boolean {
-	return plugins.every((plugin) => DEFAULT_PLUGINS.includes(plugin));
-}
-
 async function measureCombinationWithBuild(
 	keyPlugins: string[], // Plugins for the key
 	tempDir: string,
@@ -190,11 +176,19 @@ async function measureCombinationWithBuild(
 	// Get actual imports (including BoundsFrom/ControlFrom if needed)
 	const { actualImports } = getActualImportsForCombination(keyPlugins);
 
-	const testContent = `
+	// Fix: Handle empty imports properly
+	const testContent =
+		actualImports.length > 0
+			? `
 import { DraggableFactory } from '@neodrag/core';
 import { ${actualImports.join(', ')} } from '@neodrag/core/plugins';
 
 export const factory = DraggableFactory(${actualImports.join(',')});
+`
+			: `
+import { DraggableFactory } from '@neodrag/core';
+
+export const factory = DraggableFactory();
 `;
 
 	const entryPath = join(measureDir, 'test.js');
@@ -271,31 +265,6 @@ function copyRecursive(src: string, dest: string) {
 	}
 }
 
-function estimateSizeForDefaultCombination(plugins: string[], baseSize: number): number {
-	// Estimate plugin sizes (these would be refined with actual measurements)
-	const pluginEstimatedSizes: Record<string, number> = {
-		ignoreMultitouch: 50,
-		stateMarker: 80,
-		applyUserSelectHack: 60,
-		transform: 120,
-		threshold: 90,
-		touchAction: 40,
-	};
-
-	let estimatedSize = baseSize;
-	let totalPluginSize = 0;
-
-	for (const plugin of plugins) {
-		totalPluginSize += pluginEstimatedSizes[plugin] || 50;
-	}
-
-	// Apply overlap reduction (shared utilities, etc.)
-	const overlapReduction = plugins.length > 1 ? Math.min(totalPluginSize * 0.1, 100) : 0;
-	estimatedSize += Math.max(0, totalPluginSize - overlapReduction);
-
-	return Math.round(estimatedSize);
-}
-
 function cleanup() {
 	try {
 		rmSync(resolve(__dirname, 'temp'), { recursive: true, force: true });
@@ -305,7 +274,7 @@ function cleanup() {
 async function main() {
 	cleanup();
 
-	console.log('🚀 Starting Core Plugin Bundle Analysis (Bitmask Output)...\n');
+	console.log('🚀 Starting Core Plugin Bundle Analysis (All Combinations)...\n');
 
 	// Setup core environment
 	const tempDir = await setupCoreEnvironment();
@@ -328,20 +297,6 @@ async function main() {
 	// Create key mapping
 	createKeyMap(allPlugins);
 
-	// Separate default and non-default plugins
-	const defaultPlugins = allPlugins.filter((p) => DEFAULT_PLUGINS.includes(p));
-	const nonDefaultPlugins = allPlugins.filter((p) => !DEFAULT_PLUGINS.includes(p));
-
-	console.log(`🔧 Default plugins (${defaultPlugins.length}): ${defaultPlugins.join(', ')}`);
-	console.log(
-		`🔌 Non-default plugins (${nonDefaultPlugins.length}): ${nonDefaultPlugins.join(', ')}`,
-	);
-
-	// Measure base size (just DraggableFactory with no plugins)
-	console.log('\n📏 Measuring base size...');
-	const baseSize = await measureCombinationWithBuild([], tempDir, 0);
-	console.log(`✅ Base DraggableFactory size: ${baseSize} bytes`);
-
 	// Use object with string keys for JSON compatibility
 	const sizes: Record<string, number> = {};
 
@@ -349,8 +304,8 @@ async function main() {
 	console.log(`\n🧮 Generating combinations with bitmask keys...`);
 
 	let total = 0;
-	let calculated = 0;
 	let built = 0;
+	let baseSize = 0; // We'll measure this as part of the loop
 
 	for (const combination of generateAllCombinations(allPlugins)) {
 		// Generate bitmask and use as string key
@@ -365,30 +320,55 @@ async function main() {
 			);
 		}
 
+		// Measure ALL combinations, including empty
+		const size = await measureCombinationWithBuild(combination, tempDir, 0);
+		sizes[bitmaskKey] = size;
+
 		if (combination.length === 0) {
-			// Base case
-			sizes[bitmaskKey] = baseSize;
-			calculated++;
-		} else if (isSubsetOfDefaults(combination)) {
-			// Default plugin combination - calculate in memory
-			sizes[bitmaskKey] = estimateSizeForDefaultCombination(combination, baseSize);
-			calculated++;
+			// This is the base case - capture it
+			baseSize = size;
+			sizes[''] = baseSize; // Store under empty key too
+			console.log(`📏 Base size measured: ${baseSize} bytes`);
 		} else {
-			// Non-default combination - build it
-			const size = await measureCombinationWithBuild(combination, tempDir, baseSize);
-			sizes[bitmaskKey] = size;
 			built++;
 
+			// Add consistency check
+			if (size < baseSize && baseSize > 0) {
+				console.warn(
+					`⚠️  Suspicious: ${combination.length} plugins (${bitmaskKey}) = ${size}b < base ${baseSize}b`,
+				);
+				console.warn(`    Plugins: [${combination.join(', ')}]`);
+			}
+
 			if (built % 50 === 0) {
-				console.log(`    🔨 Built ${built} non-default combinations so far...`);
+				console.log(`    🔨 Built ${built} combinations so far...`);
 			}
 		}
 	}
 
 	console.log(`\n✅ Processing complete:`);
 	console.log(`  📊 Total combinations: ${total}`);
-	console.log(`  🧮 Calculated in memory: ${calculated}`);
 	console.log(`  🔨 Built with tsup: ${built}`);
+	console.log(`  📊 Base size: ${baseSize} bytes`);
+
+	// Add validation check
+	const suspiciousEntries = Object.entries(sizes).filter(
+		([key, size]) => key !== '' && key !== '0' && size < baseSize,
+	);
+
+	if (suspiciousEntries.length > 0) {
+		console.log(`\n⚠️  Found ${suspiciousEntries.length} combinations smaller than base size:`);
+		suspiciousEntries.slice(0, 5).forEach(([bitmaskStr, size]) => {
+			const bitmask = parseInt(bitmaskStr);
+			const plugins = [];
+			for (let i = 0; i < 14; i++) {
+				if (bitmask & (1 << i)) {
+					plugins.push(reverseKeyMap[i]);
+				}
+			}
+			console.log(`    ${size}b (${size - baseSize}b): [${plugins.join(', ')}]`);
+		});
+	}
 
 	// Prepare final output (same structure as before, but with bitmask keys)
 	const output = {
@@ -398,7 +378,7 @@ async function main() {
 
 	// Write results to same file as before
 	const sizesPath = new URL('../src/sizes.json', import.meta.url);
-	writeFileSync(sizesPath, JSON.stringify(output, null, 2));
+	writeFileSync(sizesPath, JSON.stringify(output, null, '\t'));
 	console.log(`\n✅ Wrote sizes.json with ${Object.keys(sizes).length} bitmask-based combinations`);
 
 	// Summary
@@ -438,7 +418,9 @@ async function main() {
 
 		// Show most efficient combinations
 		console.log(`\n🏆 Most efficient plugin combinations:`);
-		const pluginEntries = sizeEntries.filter(([bitmaskStr]) => bitmaskStr !== '0');
+		const pluginEntries = sizeEntries.filter(
+			([bitmaskStr]) => bitmaskStr !== '0' && bitmaskStr !== '',
+		);
 		pluginEntries.slice(0, 5).forEach(([bitmaskStr, size]) => {
 			const bitmask = parseInt(bitmaskStr);
 			const plugins = [];

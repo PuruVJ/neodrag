@@ -35,9 +35,10 @@
 		mouse_x: number | null;
 		selected: boolean;
 		Icon: Component;
+		embedded?: boolean;
 	};
 
-	const { framework, mouse_x, selected, Icon }: Props = $props();
+	const { framework, mouse_x, selected, Icon, embedded }: Props = $props();
 
 	let image_el: HTMLElement;
 	let distance = $state(beyond_the_distance_limit);
@@ -84,25 +85,19 @@
 </script>
 
 <button aria-label="Launch {framework} page" class="dock-open-app-button">
-	<p
-		class="tooltip"
-		class:dark={theme.current === 'dark'}
-		style:top={prefersReducedMotion.current ? '-50px' : '-35%'}
-	>
-		{framework}
-	</p>
+	{#if !embedded}
+		<p
+			class={['tooltip', theme.current === 'dark' && 'dark']}
+			style:top={prefersReducedMotion.current ? '-50px' : '-35%'}
+		>
+			{framework}
+		</p>
+	{/if}
 
 	<span
 		bind:this={image_el}
 		style:translate="0 {app_open_icon_bounce_transform.current} 0.0000001px"
 	>
-		<!-- <img
-			
-			src="/logos/{framework}.svg"
-			alt={framework}
-			style:width="{width_px.current / 16}rem"
-			draggable="false"
-		/> -->
 		<Icon
 			height={width_px.current}
 			width={width_px.current}
@@ -110,11 +105,11 @@
 		/>
 	</span>
 
-	<div class="dot" style:--opacity={selected ? 1 : 0}></div>
+	{#if embedded}
+		<p class="embedded-text">{framework}</p>
+	{/if}
 
-	<!-- {#if show_pwa_badge}
-		<div class="pwa-badge" style:transform="scale({$width_px / baseWidth})">1</div>
-	{/if} -->
+	<div class="dot" style:--opacity={selected ? 1 : 0}></div>
 </button>
 
 <style>
@@ -163,18 +158,27 @@
 		}
 	}
 
+	.embedded-text {
+		color: color-mix(in lch, var(--app-color-light-contrast), transparent 20%);
+		/* font-family: var(--system-font-family); */
+		font-weight: 400;
+		font-size: 13px;
+		letter-spacing: 0.4px;
+		margin: 0;
+	}
+
 	.tooltip {
 		--double-border: 0 0 0 0 white;
 
 		white-space: nowrap;
+		line-height: 1;
 
 		position: absolute;
 
-		background-color: color-mix(in lch, var(--app-color-light), transparent 50%);
-		backdrop-filter: blur(5px);
+		background-color: var(--background-color);
 
-		padding: 0.5rem 0.75rem;
-		border-radius: 0.375rem;
+		padding: 0.5rem 0.875rem;
+		border-radius: 2rem;
 
 		box-shadow:
 			hsla(0deg, 0%, 0%, 30%) 0px 1px 5px 2px,
