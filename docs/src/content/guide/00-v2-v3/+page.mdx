@@ -38,8 +38,6 @@ This guide covers migrating from Neodrag v2's options-based API to v3's plugin-b
 <FrameworkSwitch>
 <div slot="svelte">
 
-Update package and import changes:
-
 ```bash
 npm install @neodrag/svelte@^3
 ```
@@ -61,8 +59,6 @@ import {
 </div>
 
 <div slot="react">
-
-Update package and import changes:
 
 ```bash
 npm install @neodrag/react@^3
@@ -86,8 +82,6 @@ import {
 
 <div slot="vue">
 
-Update package and import changes:
-
 ```bash
 npm install @neodrag/vue@^3
 ```
@@ -110,8 +104,6 @@ import {
 
 <div slot="solid">
 
-Update package and import changes:
-
 ```bash
 npm install @neodrag/solid@^3
 ```
@@ -133,8 +125,6 @@ import {
 </div>
 
 <div slot="vanilla">
-
-Update package and import changes:
 
 ```bash
 npm install @neodrag/vanilla@^3
@@ -441,10 +431,10 @@ const instance = new Draggable(element, [
 
 ### Events and Callbacks
 
-Events moved from options to dedicated plugin. Event data structure also changed:
+Events moved from options to dedicated plugin. Event data structure changed:
 
-- **v2**: `offsetX`, `offsetY`, `rootNode`, `currentNode`, `event`
-- **v3**: offset object with x and y properties, `rootNode`, `currentNode`, `event`
+- **v2:** `offsetX`, `offsetY`, `rootNode`, `currentNode`, `event`
+- **v3:** `offset` object with `x` and `y` properties, `rootNode`, `currentNode`, `event`
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -609,7 +599,6 @@ new Draggable(element, [
   let currentAxis = 'x';
   let isConstrained = false;
 
-  // Automatically reactive
   $: options = {
     axis: currentAxis,
     bounds: isConstrained ? 'parent' : undefined,
@@ -638,7 +627,6 @@ new Draggable(element, [
   let currentAxis = $state('x');
   let isConstrained = $state(false);
 
-  // Manual compartments
   const axisComp = Compartment.of(() =>
     currentAxis === 'both' ? null : axis(currentAxis),
   );
@@ -669,7 +657,6 @@ function App() {
   const [currentAxis, setCurrentAxis] = useState('x');
   const [isConstrained, setIsConstrained] = useState(false);
 
-  // Automatically reactive
   useDraggable(ref, {
     axis: currentAxis,
     bounds: isConstrained ? 'parent' : undefined,
@@ -696,7 +683,6 @@ function App() {
   const [currentAxis, setCurrentAxis] = useState('x');
   const [isConstrained, setIsConstrained] = useState(false);
 
-  // Manual compartments
   const axisComp = useCompartment(
     () => (currentAxis === 'both' ? null : axis(currentAxis)),
     [currentAxis],
@@ -733,7 +719,6 @@ import { ref, computed } from 'vue';
 const currentAxis = ref('x');
 const isConstrained = ref(false);
 
-// Automatically reactive
 const options = computed(() => ({
   axis: currentAxis.value,
   bounds: isConstrained.value ? 'parent' : undefined,
@@ -761,7 +746,6 @@ import { useCompartment } from '@neodrag/vue';
 const currentAxis = ref('x');
 const isConstrained = ref(false);
 
-// Manual compartments
 const axisComp = useCompartment(() =>
   currentAxis.value === 'both' ? null : axis(currentAxis.value),
 );
@@ -794,7 +778,6 @@ function App() {
   const [currentAxis, setCurrentAxis] = createSignal('x');
   const [isConstrained, setIsConstrained] = createSignal(false);
 
-  // Automatically reactive
   const options = () => ({
     axis: currentAxis(),
     bounds: isConstrained() ? 'parent' : undefined,
@@ -822,7 +805,6 @@ function App() {
   const [currentAxis, setCurrentAxis] = createSignal('x');
   const [isConstrained, setIsConstrained] = createSignal(false);
 
-  // Manual compartments
   const axisComp = createCompartment(() =>
     currentAxis() === 'both' ? null : axis(currentAxis()),
   );
@@ -858,7 +840,6 @@ let instance = draggable(element, {
   bounds: isConstrained ? 'parent' : undefined,
 });
 
-// Manual recreation needed
 function updateSettings() {
   instance.destroy();
   instance = draggable(element, {
@@ -881,7 +862,6 @@ import { Compartment } from '@neodrag/vanilla';
 let currentAxis = 'x';
 let isConstrained = false;
 
-// Easy compartments
 const axisComp = new Compartment(() =>
   currentAxis === 'both' ? null : axis(currentAxis),
 );
@@ -893,7 +873,6 @@ const instance = new Draggable(element, () =>
   [axisComp, boundsComp].filter(Boolean),
 );
 
-// Simple updates
 document.getElementById('axis-btn').addEventListener('click', () => {
   currentAxis = 'y';
   axisComp.current = axis(currentAxis);
@@ -907,512 +886,6 @@ document
       ? bounds(BoundsFrom.parent())
       : null;
   });
-```
-
-</div>
-</FrameworkSwitch>
-
-## Complex Configuration Examples
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-**Complete v2 to v3 Migration:**
-
-```svelte
-<!-- BEFORE: v2 Complex Setup -->
-<script>
-  import { draggable } from '@neodrag/svelte';
-
-  let axis = 'both';
-  let gridSize = 20;
-  let isEnabled = true;
-
-  $: options = {
-    axis: axis,
-    bounds: 'parent',
-    grid: [gridSize, gridSize],
-    threshold: { distance: 5, delay: 100 },
-    handle: '.drag-handle',
-    cancel: '.no-drag',
-    disabled: !isEnabled,
-    onDragStart: (data) => console.log('start', data),
-    onDrag: (data) => console.log('drag', data),
-    onDragEnd: (data) => console.log('end', data)
-  };
-</script>
-
-<div use:draggable={options}>
-  <div class="drag-handle">Drag Handle</div>
-  <div class="content">Content</div>
-  <div class="no-drag">No Drag Zone</div>
-</div>
-
-<!-- AFTER: v3 Plugin Setup -->
-<script>
-  import {
-    draggable, axis, bounds, BoundsFrom, grid, threshold,
-    controls, ControlFrom, disabled, events, Compartment
-  } from '@neodrag/svelte';
-
-  let currentAxis = $state('both');
-  let gridSize = $state(20);
-  let isEnabled = $state(true);
-
-  // Reactive compartments
-  const axisComp = Compartment.of(() =>
-    currentAxis === 'both' ? null : axis(currentAxis)
-  );
-  const gridComp = Compartment.of(() => grid([gridSize, gridSize]));
-  const disabledComp = Compartment.of(() => !isEnabled ? disabled() : null);
-
-  // Static plugins
-  const staticPlugins = [
-    bounds(BoundsFrom.parent()),
-    threshold({ distance: 5, delay: 100 }),
-    controls({
-      allow: ControlFrom.selector('.drag-handle'),
-      block: ControlFrom.selector('.no-drag')
-    }),
-    events({
-      onDragStart: (data) => console.log('start', data),
-      onDrag: (data) => console.log('drag', data),
-      onDragEnd: (data) => console.log('end', data)
-    })
-  ];
-</script>
-
-<div {@attach draggable(() => [
-  ...staticPlugins,
-  axisComp,
-  gridComp,
-  disabledComp
-].filter(Boolean))}>
-  <div class="drag-handle">Drag Handle</div>
-  <div class="content">Content</div>
-  <div class="no-drag">No Drag Zone</div>
-</div>
-```
-
-</div>
-
-<div slot="react">
-
-**Complete v2 to v3 Migration:**
-
-```tsx
-// BEFORE: v2 Complex Setup
-import { useRef, useState, useMemo } from 'react';
-import { useDraggable } from '@neodrag/react';
-
-function ComplexDraggable() {
-  const ref = useRef(null);
-  const [axis, setAxis] = useState('both');
-  const [gridSize, setGridSize] = useState(20);
-  const [isEnabled, setIsEnabled] = useState(true);
-
-  const options = useMemo(
-    () => ({
-      axis: axis,
-      bounds: 'parent',
-      grid: [gridSize, gridSize],
-      threshold: { distance: 5, delay: 100 },
-      handle: '.drag-handle',
-      cancel: '.no-drag',
-      disabled: !isEnabled,
-      onDragStart: (data) => console.log('start', data),
-      onDrag: (data) => console.log('drag', data),
-      onDragEnd: (data) => console.log('end', data),
-    }),
-    [axis, gridSize, isEnabled],
-  );
-
-  useDraggable(ref, options);
-
-  return (
-    <div ref={ref}>
-      <div className="drag-handle">Drag Handle</div>
-      <div className="content">Content</div>
-      <div className="no-drag">No Drag Zone</div>
-    </div>
-  );
-}
-
-// AFTER: v3 Plugin Setup
-import { useRef, useState } from 'react';
-import {
-  useDraggable,
-  axis,
-  bounds,
-  BoundsFrom,
-  grid,
-  threshold,
-  controls,
-  ControlFrom,
-  disabled,
-  events,
-  useCompartment,
-} from '@neodrag/react';
-
-function ComplexDraggable() {
-  const ref = useRef(null);
-  const [currentAxis, setCurrentAxis] = useState('both');
-  const [gridSize, setGridSize] = useState(20);
-  const [isEnabled, setIsEnabled] = useState(true);
-
-  // Reactive compartments
-  const axisComp = useCompartment(
-    () => (currentAxis === 'both' ? null : axis(currentAxis)),
-    [currentAxis],
-  );
-  const gridComp = useCompartment(
-    () => grid([gridSize, gridSize]),
-    [gridSize],
-  );
-  const disabledComp = useCompartment(
-    () => (!isEnabled ? disabled() : null),
-    [isEnabled],
-  );
-
-  // Static plugins
-  const staticPlugins = [
-    bounds(BoundsFrom.parent()),
-    threshold({ distance: 5, delay: 100 }),
-    controls({
-      allow: ControlFrom.selector('.drag-handle'),
-      block: ControlFrom.selector('.no-drag'),
-    }),
-    events({
-      onDragStart: (data) => console.log('start', data),
-      onDrag: (data) => console.log('drag', data),
-      onDragEnd: (data) => console.log('end', data),
-    }),
-  ];
-
-  useDraggable(ref, () =>
-    [...staticPlugins, axisComp, gridComp, disabledComp].filter(
-      Boolean,
-    ),
-  );
-
-  return (
-    <div ref={ref}>
-      <div className="drag-handle">Drag Handle</div>
-      <div className="content">Content</div>
-      <div className="no-drag">No Drag Zone</div>
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vue">
-
-**Complete v2 to v3 Migration:**
-
-```vue
-<!-- BEFORE: v2 Complex Setup -->
-<script setup>
-import { ref, computed } from 'vue';
-import { vDraggable } from '@neodrag/vue';
-
-const axis = ref('both');
-const gridSize = ref(20);
-const isEnabled = ref(true);
-
-const options = computed(() => ({
-  axis: axis.value,
-  bounds: 'parent',
-  grid: [gridSize.value, gridSize.value],
-  threshold: { distance: 5, delay: 100 },
-  handle: '.drag-handle',
-  cancel: '.no-drag',
-  disabled: !isEnabled.value,
-  onDragStart: (data) => console.log('start', data),
-  onDrag: (data) => console.log('drag', data),
-  onDragEnd: (data) => console.log('end', data),
-}));
-</script>
-
-<template>
-  <div v-draggable="options">
-    <div class="drag-handle">Drag Handle</div>
-    <div class="content">Content</div>
-    <div class="no-drag">No Drag Zone</div>
-  </div>
-</template>
-
-<!-- AFTER: v3 Plugin Setup -->
-<script setup>
-import { ref } from 'vue';
-import {
-  vDraggable,
-  axis,
-  bounds,
-  BoundsFrom,
-  grid,
-  threshold,
-  controls,
-  ControlFrom,
-  disabled,
-  events,
-  useCompartment,
-} from '@neodrag/vue';
-
-const currentAxis = ref('both');
-const gridSize = ref(20);
-const isEnabled = ref(true);
-
-// Reactive compartments
-const axisComp = useCompartment(() =>
-  currentAxis.value === 'both' ? null : axis(currentAxis.value),
-);
-const gridComp = useCompartment(() =>
-  grid([gridSize.value, gridSize.value]),
-);
-const disabledComp = useCompartment(() =>
-  !isEnabled.value ? disabled() : null,
-);
-
-// Static plugins
-const staticPlugins = [
-  bounds(BoundsFrom.parent()),
-  threshold({ distance: 5, delay: 100 }),
-  controls({
-    allow: ControlFrom.selector('.drag-handle'),
-    block: ControlFrom.selector('.no-drag'),
-  }),
-  events({
-    onDragStart: (data) => console.log('start', data),
-    onDrag: (data) => console.log('drag', data),
-    onDragEnd: (data) => console.log('end', data),
-  }),
-];
-
-const plugins = () =>
-  [...staticPlugins, axisComp, gridComp, disabledComp].filter(
-    Boolean,
-  );
-</script>
-
-<template>
-  <div v-draggable="plugins">
-    <div class="drag-handle">Drag Handle</div>
-    <div class="content">Content</div>
-    <div class="no-drag">No Drag Zone</div>
-  </div>
-</template>
-```
-
-</div>
-
-<div slot="solid">
-
-**Complete v2 to v3 Migration:**
-
-```tsx
-// BEFORE: v2 Complex Setup
-import { createSignal, createMemo } from 'solid-js';
-import { createDraggable } from '@neodrag/solid';
-
-function ComplexDraggable() {
-  const { draggable } = createDraggable();
-  const [axis, setAxis] = createSignal('both');
-  const [gridSize, setGridSize] = createSignal(20);
-  const [isEnabled, setIsEnabled] = createSignal(true);
-
-  const options = createMemo(() => ({
-    axis: axis(),
-    bounds: 'parent',
-    grid: [gridSize(), gridSize()],
-    threshold: { distance: 5, delay: 100 },
-    handle: '.drag-handle',
-    cancel: '.no-drag',
-    disabled: !isEnabled(),
-    onDragStart: (data) => console.log('start', data),
-    onDrag: (data) => console.log('drag', data),
-    onDragEnd: (data) => console.log('end', data),
-  }));
-
-  return (
-    <div use:draggable={options()}>
-      <div class="drag-handle">Drag Handle</div>
-      <div class="content">Content</div>
-      <div class="no-drag">No Drag Zone</div>
-    </div>
-  );
-}
-
-// AFTER: v3 Plugin Setup
-import { createSignal } from 'solid-js';
-import {
-  useDraggable,
-  axis,
-  bounds,
-  BoundsFrom,
-  grid,
-  threshold,
-  controls,
-  ControlFrom,
-  disabled,
-  events,
-  createCompartment,
-} from '@neodrag/solid';
-
-function ComplexDraggable() {
-  const [element, setElement] = createSignal();
-  const [currentAxis, setCurrentAxis] = createSignal('both');
-  const [gridSize, setGridSize] = createSignal(20);
-  const [isEnabled, setIsEnabled] = createSignal(true);
-
-  // Reactive compartments
-  const axisComp = createCompartment(() =>
-    currentAxis() === 'both' ? null : axis(currentAxis()),
-  );
-  const gridComp = createCompartment(() =>
-    grid([gridSize(), gridSize()]),
-  );
-  const disabledComp = createCompartment(() =>
-    !isEnabled() ? disabled() : null,
-  );
-
-  // Static plugins
-  const staticPlugins = [
-    bounds(BoundsFrom.parent()),
-    threshold({ distance: 5, delay: 100 }),
-    controls({
-      allow: ControlFrom.selector('.drag-handle'),
-      block: ControlFrom.selector('.no-drag'),
-    }),
-    events({
-      onDragStart: (data) => console.log('start', data),
-      onDrag: (data) => console.log('drag', data),
-      onDragEnd: (data) => console.log('end', data),
-    }),
-  ];
-
-  useDraggable(element, [
-    ...staticPlugins,
-    axisComp,
-    gridComp,
-    disabledComp,
-  ]);
-
-  return (
-    <div ref={setElement}>
-      <div class="drag-handle">Drag Handle</div>
-      <div class="content">Content</div>
-      <div class="no-drag">No Drag Zone</div>
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vanilla">
-
-**Complete v2 to v3 Migration:**
-
-```typescript
-// BEFORE: v2 Complex Setup
-import { draggable } from '@neodrag/vanilla';
-
-const element = document.getElementById('drag-me');
-let axis = 'both';
-let gridSize = 20;
-let isEnabled = true;
-
-function createOptions() {
-  return {
-    axis: axis,
-    bounds: 'parent',
-    grid: [gridSize, gridSize],
-    threshold: { distance: 5, delay: 100 },
-    handle: '.drag-handle',
-    cancel: '.no-drag',
-    disabled: !isEnabled,
-    onDragStart: (data) => console.log('start', data),
-    onDrag: (data) => console.log('drag', data),
-    onDragEnd: (data) => console.log('end', data),
-  };
-}
-
-let instance = draggable(element, createOptions());
-
-// Manual recreation for updates
-function updateOptions() {
-  instance.destroy();
-  instance = draggable(element, createOptions());
-}
-
-// AFTER: v3 Plugin Setup
-import {
-  Draggable,
-  axis,
-  bounds,
-  BoundsFrom,
-  grid,
-  threshold,
-  controls,
-  ControlFrom,
-  disabled,
-  events,
-  Compartment,
-} from '@neodrag/vanilla';
-
-const element = document.getElementById('drag-me');
-let currentAxis = 'both';
-let gridSize = 20;
-let isEnabled = true;
-
-// Reactive compartments
-const axisComp = new Compartment(() =>
-  currentAxis === 'both' ? null : axis(currentAxis),
-);
-const gridComp = new Compartment(() => grid([gridSize, gridSize]));
-const disabledComp = new Compartment(() =>
-  !isEnabled ? disabled() : null,
-);
-
-// Static plugins
-const staticPlugins = [
-  bounds(BoundsFrom.parent()),
-  threshold({ distance: 5, delay: 100 }),
-  controls({
-    allow: ControlFrom.selector('.drag-handle'),
-    block: ControlFrom.selector('.no-drag'),
-  }),
-  events({
-    onDragStart: (data) => console.log('start', data),
-    onDrag: (data) => console.log('drag', data),
-    onDragEnd: (data) => console.log('end', data),
-  }),
-];
-
-const instance = new Draggable(element, () =>
-  [...staticPlugins, axisComp, gridComp, disabledComp].filter(
-    Boolean,
-  ),
-);
-
-// Easy updates
-function updateAxis(newAxis) {
-  currentAxis = newAxis;
-  axisComp.current =
-    currentAxis === 'both' ? null : axis(currentAxis);
-}
-
-function updateGrid(newSize) {
-  gridSize = newSize;
-  gridComp.current = grid([gridSize, gridSize]);
-}
-
-function updateEnabled(enabled) {
-  isEnabled = enabled;
-  disabledComp.current = !isEnabled ? disabled() : null;
-}
 ```
 
 </div>
@@ -1455,7 +928,7 @@ Create your own dragging behavior:
   }));
 </script>
 
-<div {@attach draggable([loggerPlugin])}>Custom behavior</div>
+<div {@attach draggable([loggerPlugin()])}>Custom behavior</div>
 ```
 
 </div>
@@ -1467,22 +940,18 @@ import { useDraggable, unstable_definePlugin } from '@neodrag/react';
 
 const loggerPlugin = unstable_definePlugin(() => ({
   name: 'logger',
-
   setup(ctx) {
     console.log('Drag initialized');
     return { startTime: 0 };
   },
-
   start(ctx, state, event) {
     state.startTime = Date.now();
     console.log('Drag started');
   },
-
   drag(ctx, state, event) {
     const duration = Date.now() - state.startTime;
     console.log(`Dragging for ${duration}ms`);
   },
-
   end(ctx, state, event) {
     console.log('Drag ended');
   },
@@ -1491,7 +960,6 @@ const loggerPlugin = unstable_definePlugin(() => ({
 function CustomExample() {
   const ref = useRef(null);
   useDraggable(ref, [loggerPlugin]);
-
   return <div ref={ref}>Custom behavior</div>;
 }
 ```
@@ -1506,22 +974,18 @@ import { vDraggable, unstable_definePlugin } from '@neodrag/vue';
 
 const loggerPlugin = unstable_definePlugin(() => ({
   name: 'logger',
-
   setup(ctx) {
     console.log('Drag initialized');
     return { startTime: 0 };
   },
-
   start(ctx, state, event) {
     state.startTime = Date.now();
     console.log('Drag started');
   },
-
   drag(ctx, state, event) {
     const duration = Date.now() - state.startTime;
     console.log(`Dragging for ${duration}ms`);
   },
-
   end(ctx, state, event) {
     console.log('Drag ended');
   },
@@ -1544,22 +1008,18 @@ import { useDraggable, unstable_definePlugin } from '@neodrag/solid';
 
 const loggerPlugin = unstable_definePlugin(() => ({
   name: 'logger',
-
   setup(ctx) {
     console.log('Drag initialized');
     return { startTime: 0 };
   },
-
   start(ctx, state, event) {
     state.startTime = Date.now();
     console.log('Drag started');
   },
-
   drag(ctx, state, event) {
     const duration = Date.now() - state.startTime;
     console.log(`Dragging for ${duration}ms`);
   },
-
   end(ctx, state, event) {
     console.log('Drag ended');
   },
@@ -1568,7 +1028,6 @@ const loggerPlugin = unstable_definePlugin(() => ({
 function CustomExample() {
   const [element, setElement] = createSignal();
   useDraggable(element, [loggerPlugin]);
-
   return <div ref={setElement}>Custom behavior</div>;
 }
 ```
@@ -1582,22 +1041,18 @@ import { Draggable, unstable_definePlugin } from '@neodrag/vanilla';
 
 const loggerPlugin = unstable_definePlugin(() => ({
   name: 'logger',
-
   setup(ctx) {
     console.log('Drag initialized');
     return { startTime: 0 };
   },
-
   start(ctx, state, event) {
     state.startTime = Date.now();
     console.log('Drag started');
   },
-
   drag(ctx, state, event) {
     const duration = Date.now() - state.startTime;
     console.log(`Dragging for ${duration}ms`);
   },
-
   end(ctx, state, event) {
     console.log('Drag ended');
   },
@@ -1829,9 +1284,8 @@ Update type imports and ensure you're using the correct v3 types for your framew
 
 ## Performance Benefits
 
-**Performance**: 50% reduction through tree-shaking - only import plugins you use  
-**Memory Usage**: Event delegation means 3 total listeners instead of 3 per draggable  
-**Reliability**: Pointer capture prevents losing drag when moving over iframes  
-**Extensibility**: Custom plugins allow community-driven extensions
+**Memory Usage:** Event delegation means 3 total listeners instead of 3 per draggable  
+**Reliability:** Pointer capture prevents losing drag when moving over iframes  
+**Extensibility:** Custom plugins allow community-driven extensions
 
 The migration requires some refactoring, but v3 provides significant improvements in performance, bundle size, and flexibility. Take it step-by-step, use compartments for reactivity, and enjoy the enhanced capabilities of Neodrag v3!
