@@ -22,12 +22,9 @@ function get_value_from_storage(key: string, shape: ZodMiniType<any>, serde = de
 	if (!value) return { found: false, value: null };
 
 	try {
-		const deserialized = serde.parse(value);
-		const parsed = parse(shape, deserialized);
-
 		return {
 			found: true,
-			value: parsed,
+			value: parse(shape, serde.parse(value)),
 		};
 	} catch (e) {
 		localStorage.removeItem(key);
