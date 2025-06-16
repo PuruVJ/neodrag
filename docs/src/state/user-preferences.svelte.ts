@@ -1,20 +1,27 @@
 import { MediaQuery } from 'svelte/reactivity';
 import { Persisted } from './persisted.svelte';
 import { auto_destroy_effect_root } from './auto-destroy-effect-root.svelte';
+import * as z from 'zod/v4/mini';
 
-export type ThemeValue = {
-	current: 'light' | 'dark';
-	preference: 'system' | 'light' | 'dark';
-};
+const schema = z.object({
+	current: z.enum(['light', 'dark']),
+	preference: z.enum(['system', 'light', 'dark']),
+});
+
+export type ThemeValue = z.infer<typeof schema>;
 
 function apply_theme_to_dom(new_theme: string) {
 	document.body.dataset.theme = new_theme;
 }
 class Theme {
-	#persisted = new Persisted<ThemeValue>('neodrag:theme', {
-		current: 'light',
-		preference: 'system',
-	});
+	#persisted = new Persisted(
+		'neodrag:theme',
+		{
+			current: 'light',
+			preference: 'system',
+		},
+		schema,
+	);
 	#media_observer = new MediaQuery('prefers-color-scheme: dark');
 	#current = $derived.by(() => {
 		this.#media_observer.current;

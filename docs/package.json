@@ -19,7 +19,8 @@
 		"lightningcss": "^1.30.1",
 		"melt": "^0.34.0",
 		"popmotion": "^11.0.5",
-		"svelte-inview": "^4.0.1"
+		"svelte-inview": "^4.0.1",
+		"zod": "^3.25.64"
 	},
 	"devDependencies": {
 		"@astrojs/mdx": "^4.3.0",

@@ -113,6 +113,9 @@ importers:
       svelte-inview:
         specifier: ^4.0.1
         version: 4.0.4(svelte@5.33.14)
+      zod:
+        specifier: ^3.25.64
+        version: 3.25.64
     devDependencies:
       '@astrojs/mdx':
         specifier: ^4.3.0
@@ -4952,8 +4955,8 @@ packages:
   zod@3.24.1:
     resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
 
-  zod@3.24.4:
-    resolution: {integrity: sha512-OdqJE9UDRPwWsrHjLN2F8bPxvwJBK22EHLWtanu0LSYr5YqzsaaW3RMgmjwr8Rypg5k+meEJdSPXJZXE/yqOMg==}
+  zod@3.25.64:
+    resolution: {integrity: sha512-hbP9FpSZf7pkS7hRVUrOjhwKJNyampPgtXKc3AN6DsWtoHsg2Sb4SQaS4Tcay380zSwd2VPo9G9180emBACp5g==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -5101,7 +5104,7 @@ snapshots:
     dependencies:
       sitemap: 8.0.0
       stream-replace-string: 2.0.0
-      zod: 3.24.4
+      zod: 3.25.64
 
   '@astrojs/svelte@7.1.0(@types/node@22.10.2)(astro@5.8.1(@types/node@22.10.2)(jiti@2.4.2)(lightningcss@1.30.1)(rollup@4.29.1)(sass@1.83.0)(terser@5.37.0)(tsx@4.19.2)(typescript@5.8.3)(yaml@2.6.1))(jiti@2.4.2)(lightningcss@1.30.1)(sass@1.83.0)(svelte@5.33.14)(terser@5.37.0)(tsx@4.19.2)(typescript@5.8.3)(yaml@2.6.1)':
     dependencies:
@@ -6657,9 +6660,9 @@ snapshots:
       xxhash-wasm: 1.1.0
       yargs-parser: 21.1.1
       yocto-spinner: 0.2.2
-      zod: 3.24.4
-      zod-to-json-schema: 3.24.5(zod@3.24.4)
-      zod-to-ts: 1.2.0(typescript@5.8.3)(zod@3.24.4)
+      zod: 3.25.64
+      zod-to-json-schema: 3.24.5(zod@3.25.64)
+      zod-to-ts: 1.2.0(typescript@5.8.3)(zod@3.25.64)
     optionalDependencies:
       sharp: 0.33.5
     transitivePeerDependencies:
@@ -10224,17 +10227,17 @@ snapshots:
 
   zimmerframe@1.1.2: {}
 
-  zod-to-json-schema@3.24.5(zod@3.24.4):
+  zod-to-json-schema@3.24.5(zod@3.25.64):
     dependencies:
-      zod: 3.24.4
+      zod: 3.25.64
 
-  zod-to-ts@1.2.0(typescript@5.8.3)(zod@3.24.4):
+  zod-to-ts@1.2.0(typescript@5.8.3)(zod@3.25.64):
     dependencies:
       typescript: 5.8.3
-      zod: 3.24.4
+      zod: 3.25.64
 
   zod@3.24.1: {}
 
-  zod@3.24.4: {}
+  zod@3.25.64: {}
 
   zwitch@2.0.4: {}

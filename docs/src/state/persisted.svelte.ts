@@ -1,6 +1,7 @@
 import { browser } from '$helpers/utils.ts';
 import { on } from 'svelte/events';
 import { createSubscriber } from 'svelte/reactivity';
+import { parse, type ZodMiniType } from 'zod/v4-mini';
 import { auto_destroy_effect_root } from './auto-destroy-effect-root.svelte.ts';
 
 export type Serde = {
@@ -13,15 +14,20 @@ const default_serde: Serde = {
 	parse: (value) => JSON.parse(value),
 };
 
-function get_value_from_storage(key: string, serde = default_serde) {
+type ExtractZodType<T> = T extends ZodMiniType<infer U> ? U : never;
+
+function get_value_from_storage(key: string, shape: ZodMiniType<any>, serde = default_serde) {
 	const value = localStorage.getItem(key);
 
 	if (!value) return { found: false, value: null };
 
 	try {
+		const deserialized = serde.parse(value);
+		const parsed = parse(shape, deserialized);
+
 		return {
 			found: true,
-			value: serde.parse(value),
+			value: parsed,
 		};
 	} catch (e) {
 		localStorage.removeItem(key);
@@ -33,17 +39,17 @@ function get_value_from_storage(key: string, serde = default_serde) {
 	}
 }
 
-export class Persisted<T> {
-	#current = $state<T>(undefined as T);
+export class Persisted<T extends ZodMiniType> {
+	#current = $state<ExtractZodType<T>>(undefined as ExtractZodType<T>);
 	#subscribe: () => void;
 	#key: string;
 
-	constructor(key: string, initial: T, serde = default_serde) {
+	constructor(key: string, initial: ExtractZodType<T>, shape: T, serde = default_serde) {
 		this.#current = initial;
 		this.#key = key;
 
 		if (browser) {
-			const val = get_value_from_storage(key, serde);
+			const val = get_value_from_storage(key, shape, serde);
 			if (val.found) {
 				this.#current = val.value;
 			}
@@ -53,7 +59,7 @@ export class Persisted<T> {
 		this.#subscribe = createSubscriber((update) => {
 			return on(window, 'storage', (e: StorageEvent) => {
 				if (e.key === this.#key) {
-					const val = get_value_from_storage(this.#key, serde);
+					const val = get_value_from_storage(this.#key, shape, serde);
 					if (val.found) {
 						this.#current = val.value;
 						update();
@@ -83,7 +89,7 @@ export class Persisted<T> {
 		return this.#current;
 	}
 
-	set current(value: T) {
+	set current(value: ExtractZodType<T>) {
 		this.#current = value;
 	}
 }
