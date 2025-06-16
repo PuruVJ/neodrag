@@ -73,7 +73,6 @@ export class Persisted<T extends ZodMiniType> {
 
 				const current = $state.snapshot(this.#current);
 				if (!is_first_run) {
-					console.log('SHUD RUn');
 					localStorage.setItem(key, serde.stringify(current));
 				}
 
