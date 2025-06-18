@@ -641,7 +641,7 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 			applyUserSelectHack = options.applyUserSelectHack ?? true;
 			grid = options.grid;
 			gpuAcceleration = options.gpuAcceleration ?? true;
-			legacyTranslate = options.legacyTranslate ?? true;
+			legacyTranslate = options.legacyTranslate ?? false;
 			transform = options.transform;
 			threshold = { ...DEFAULT_DRAG_THRESHOLD, ...(options.threshold ?? {}) };
 
