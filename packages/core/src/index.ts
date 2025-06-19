@@ -430,25 +430,25 @@ export class DraggableFactory {
 				if (!start_drag) return this.#clear_effects(instance);
 				else this.#flush_effects(instance);
 
+				const capture_result = this.#resultify(
+					() => {
+						instance.pointer_captured_id = e.pointerId;
+						instance.ctx.currentlyDraggedNode.setPointerCapture(instance.pointer_captured_id);
+					},
+					{
+						phase: 'start',
+						node: instance.ctx.currentlyDraggedNode,
+					},
+				);
+
+				if (!capture_result.ok) {
+					this.#cleanup_active_node(e.pointerId);
+				}
+
 				instance.ctx.isDragging = true;
 			}
 
 			if (!instance.ctx.isDragging) return;
-		}
-
-		const capture_result = this.#resultify(
-			() => {
-				instance.pointer_captured_id = e.pointerId;
-				instance.ctx.currentlyDraggedNode.setPointerCapture(instance.pointer_captured_id);
-			},
-			{
-				phase: 'start',
-				node: instance.ctx.currentlyDraggedNode,
-			},
-		);
-
-		if (!capture_result.ok) {
-			this.#cleanup_active_node(e.pointerId);
 		}
 
 		e.preventDefault();
