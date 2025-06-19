@@ -249,7 +249,7 @@ export class DraggableFactory {
 			instance.plugins = this.#initialize_plugins(resolved_plugins);
 
 			// Set up compartment subscriptions
-			resolved.forEach((item) => {
+			for (const item of resolved)
 				if (item instanceof Compartment) {
 					subscriptions.add(
 						item.subscribe(() => {
@@ -258,7 +258,6 @@ export class DraggableFactory {
 						}),
 					);
 				}
-			});
 		} else {
 			// Automatic mode
 			instance.plugins = this.#initialize_plugins(plugins);

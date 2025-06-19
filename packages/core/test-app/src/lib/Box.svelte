@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { createDraggable, DEFAULTS } from '../../../src';
+	import { DraggableFactory, DEFAULTS } from '../../../src';
 	import type { Plugin, PluginInput } from '../../../src/plugins';
 	import { wrapper } from '../../../../../packages/svelte/src/index.svelte';
 
@@ -16,7 +16,8 @@
 		default_plugins?: Plugin[];
 	} = $props();
 
-	const factory = createDraggable({
+	const factory = new DraggableFactory({
+		...DEFAULTS,
 		plugins: default_plugins,
 	});
 
