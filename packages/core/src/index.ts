@@ -405,21 +405,6 @@ export class DraggableFactory {
 
 		instance.ctx.isInteracting = true;
 		this.#active_nodes.set(e.pointerId, draggable_node);
-
-		const capture_result = this.#resultify(
-			() => {
-				instance.pointer_captured_id = e.pointerId;
-				instance.ctx.currentlyDraggedNode.setPointerCapture(instance.pointer_captured_id);
-			},
-			{
-				phase: 'start',
-				node: instance.ctx.currentlyDraggedNode,
-			},
-		);
-
-		if (!capture_result.ok) {
-			this.#cleanup_active_node(e.pointerId);
-		}
 	}
 
 	#handle_pointer_move(e: PointerEvent, sync_only = false) {
@@ -449,6 +434,21 @@ export class DraggableFactory {
 			}
 
 			if (!instance.ctx.isDragging) return;
+		}
+
+		const capture_result = this.#resultify(
+			() => {
+				instance.pointer_captured_id = e.pointerId;
+				instance.ctx.currentlyDraggedNode.setPointerCapture(instance.pointer_captured_id);
+			},
+			{
+				phase: 'start',
+				node: instance.ctx.currentlyDraggedNode,
+			},
+		);
+
+		if (!capture_result.ok) {
+			this.#cleanup_active_node(e.pointerId);
 		}
 
 		e.preventDefault();
@@ -584,6 +584,8 @@ export class DraggableFactory {
 		for (const plugin of instance.plugins) {
 			plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
 		}
+
+		instance.controller.abort();
 
 		this.instances.delete(instance.root_node);
 	}
