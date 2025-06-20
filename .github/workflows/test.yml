@@ -3,21 +3,18 @@ name: Continuous Releases
 on: [push, pull_request]
 
 jobs:
-  release:
+  test:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - uses: pnpm/action-setup@v4
         with:
           run_install: true
 
-      - name: Compile
-        run: pnpm compile
-
-      - name: Release
-        run: pnpm dlx pkg-pr-new publish './packages/*' --compact
+      - name: Test
+        run: cd packages/core && pnpm test
