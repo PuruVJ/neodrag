@@ -42,11 +42,5 @@
 		"url": "git+https://github.com/PuruVJ/neodrag.git"
 	},
 	"author": "Puru Vijay",
-	"license": "MIT",
-	"devDependencies": {
-		"@sveltejs/vite-plugin-svelte": "^5.1.0",
-		"@vitest/browser": "^3.2.4",
-		"playwright": "^1.53.1",
-		"vitest-browser-svelte": "^0.1.0"
-	}
+	"license": "MIT"
 }

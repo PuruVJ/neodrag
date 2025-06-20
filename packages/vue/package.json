@@ -53,7 +53,10 @@
 		"compile": "tsup",
 		"prepublishOnly": "turbo compile"
 	},
-	"devDependencies": {
+	"dependencies": {
 		"@neodrag/core": "workspace:*"
+	},
+	"devDependencies": {
+		"vue": "3.5.17"
 	}
 }
