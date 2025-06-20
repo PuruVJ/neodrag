@@ -1,5 +1,5 @@
 import { Locator } from '@vitest/browser/context';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, test, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import {
 	applyUserSelectHack,
@@ -8,11 +8,15 @@ import {
 	BoundsFrom,
 	ControlFrom,
 	controls,
+	events,
+	grid,
+	position,
 	transform,
 } from '../src/plugins';
 import Bounds from './components/Bounds.svelte';
 import Box from './components/Box.svelte';
 import Controls from './components/Controls.svelte';
+import Position from './components/Position.svelte';
 import {
 	dragAndDrop,
 	mouseDown,
@@ -22,6 +26,8 @@ import {
 	stopCursorTracking,
 } from './mouse';
 import { sleepAndWaitForEffects, translate } from './utils';
+import { Compartment } from '../../svelte/src/index.svelte';
+import { flushSync } from 'svelte';
 
 beforeEach(() => {
 	startCursorTracking();
@@ -577,6 +583,288 @@ describe('controls', () => {
 			await dragAndDrop(inner_cancel, { deltaX: 100, deltaY: 100 });
 
 			await expect.element(draggable).not.toHaveStyle(translate(100, 100));
+		});
+	});
+});
+
+describe('grid', () => {
+	let draggable: Locator;
+
+	describe('[10, 10]', () => {
+		beforeEach(async () => {
+			const comp = render(Box, {
+				plugins: [grid([10, 10])],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should move 100,100', async () => {
+			await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).toHaveStyle(translate(100, 100));
+		});
+
+		it('should move 102,102', async () => {
+			await dragAndDrop(draggable, { deltaX: 102, deltaY: 102 });
+
+			await expect.element(draggable).toHaveStyle(translate(110, 110));
+		});
+	});
+
+	describe('[23, 102]', () => {
+		beforeEach(async () => {
+			const comp = render(Box, {
+				plugins: [grid([23, 102])],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should move 94,90', async () => {
+			await dragAndDrop(draggable, { deltaX: 94, deltaY: 90 });
+
+			await expect.element(draggable).toHaveStyle(translate(115, 102));
+		});
+
+		it('should move 300,291', async () => {
+			await dragAndDrop(draggable, { deltaX: 300, deltaY: 291 });
+
+			await expect.element(draggable).toHaveStyle(translate(322, 306));
+		});
+	});
+
+	describe('undefined', () => {
+		beforeEach(async () => {
+			const comp = render(Box, {
+				plugins: [grid()],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should move 94,90', async () => {
+			await dragAndDrop(draggable, { deltaX: 94, deltaY: 90 });
+
+			await expect.element(draggable).toHaveStyle(translate(94, 90));
+		});
+
+		it('should move 300,291', async () => {
+			await dragAndDrop(draggable, { deltaX: 300, deltaY: 291 });
+
+			await expect.element(draggable).toHaveStyle(translate(300, 291));
+		});
+	});
+
+	describe('[10, undefined]', () => {
+		beforeEach(async () => {
+			const comp = render(Box, {
+				plugins: [grid([10, undefined])],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should move 94,90', async () => {
+			await dragAndDrop(draggable, { deltaX: 94, deltaY: 90 });
+
+			await expect.element(draggable).toHaveStyle(translate(100, 90));
+		});
+
+		it('should move 300,291', async () => {
+			await dragAndDrop(draggable, { deltaX: 300, deltaY: 291 });
+
+			await expect.element(draggable).toHaveStyle(translate(300, 291));
+		});
+	});
+
+	describe('[undefined, undefined]', () => {
+		beforeEach(async () => {
+			const comp = render(Box, {
+				plugins: [grid([undefined, undefined])],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should move 94,90', async () => {
+			await dragAndDrop(draggable, { deltaX: 94, deltaY: 90 });
+
+			await expect.element(draggable).toHaveStyle(translate(94, 90));
+		});
+
+		it('should move 300,291', async () => {
+			await dragAndDrop(draggable, { deltaX: 300, deltaY: 291 });
+
+			await expect.element(draggable).toHaveStyle(translate(300, 291));
+		});
+	});
+});
+
+describe('ignoreMultitouch', () => {
+	test.skip(
+		'Playwright does not support multiple pointers yet https://github.com/microsoft/playwright/issues/34158',
+	);
+});
+
+describe('position', () => {
+	let draggable: Locator;
+	let state = $state({ x: 0, y: 0 });
+
+	describe('undefined', () => {
+		beforeEach(() => {
+			const comp = render(Position, {
+				plugins: [position(undefined)],
+				position: state,
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should move normally', async () => {
+			await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).toHaveStyle(translate(100, 100));
+		});
+	});
+
+	describe('undefined', () => {
+		beforeEach(() => {
+			const comp = render(Position, {
+				plugins: [position(null)],
+				position: state,
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should move normally', async () => {
+			await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).toHaveStyle(translate(100, 100));
+		});
+	});
+
+	describe('default only', () => {
+		beforeEach(() => {
+			const comp = render(Position, {
+				plugins: [position({ default: { x: 20, y: 80 } })],
+				position: state,
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should be at default position', async () => {
+			await expect.element(draggable).toHaveStyle(translate(20, 80));
+		});
+
+		it('should should move normally', async () => {
+			await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).toHaveStyle(translate(120, 180));
+		});
+	});
+
+	describe('current only', () => {
+		beforeEach(() => {
+			const comp = render(Position, {
+				plugins: [position({ current: { x: 20, y: 80 } })],
+				position: state,
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should be at default position', async () => {
+			await expect.element(draggable).toHaveStyle(translate(20, 80));
+		});
+
+		it('should should move normally', async () => {
+			await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).toHaveStyle(translate(120, 180));
+		});
+	});
+
+	describe('current-default', () => {
+		beforeEach(() => {
+			const comp = render(Position, {
+				plugins: [
+					position({
+						default: {
+							x: 20,
+							y: 80,
+						},
+						current: {
+							x: 100,
+							y: 180,
+						},
+					}),
+				],
+				position: state,
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should be at current position', async () => {
+			await expect.element(draggable).toHaveStyle(translate(100, 180));
+		});
+
+		it('should should move normally', async () => {
+			await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).toHaveStyle(translate(200, 280));
+		});
+	});
+
+	describe('two-way-binding', () => {
+		let x_slider: Locator;
+		let y_slider: Locator;
+
+		beforeEach(() => {
+			state = { x: 100, y: 180 };
+			const pos_compartment = Compartment.of(() => {
+				return position({
+					current: $state.snapshot(state),
+				});
+			});
+			const comp = render(Position, {
+				plugins: () => [
+					pos_compartment,
+					events({
+						onDrag({ offset }) {
+							state.x = offset.x;
+							state.y = offset.y;
+						},
+					}),
+				],
+				position: state,
+				two_way_binding: true,
+			});
+			draggable = comp.getByTestId('draggable');
+			x_slider = comp.getByTestId('x-slider');
+			y_slider = comp.getByTestId('y-slider');
+		});
+
+		it('should be at current position', async () => {
+			await expect.element(draggable).toHaveStyle(translate(100, 180));
+		});
+
+		it('should should move normally', async () => {
+			await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).toHaveStyle(translate(200, 280));
+		});
+
+		it('should move the sliders', async () => {
+			await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(x_slider).toHaveValue(200);
+			await expect.element(y_slider).toHaveValue(280);
+		});
+
+		it('should be moved by input', async () => {
+			state.x = 0;
+			state.y = 0;
+
+			await x_slider.fill('100');
+			await y_slider.fill('100');
+
+			await sleepAndWaitForEffects(10);
+
+			await expect.element(draggable).toHaveStyle(translate(100, 100));
 		});
 	});
 });

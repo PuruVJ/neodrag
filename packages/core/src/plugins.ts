@@ -197,7 +197,7 @@ function snap_to_grid(
 }
 
 export const grid = unstable_definePlugin(
-	(values: [x: number | null | undefined, y: number | null | undefined] | undefined | null) => ({
+	(values?: [x: number | null | undefined, y: number | null | undefined] | undefined | null) => ({
 		name: 'neodrag:grid',
 
 		drag(ctx) {

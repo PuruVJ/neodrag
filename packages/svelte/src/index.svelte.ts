@@ -4,8 +4,34 @@ import {
 	type Plugin,
 	type PluginInput,
 } from '@neodrag/core/plugins';
+import { onDestroy } from 'svelte';
 import { Attachment } from 'svelte/attachments';
 import { factory } from './shared';
+
+/**
+ * Behaves the same as `$effect.root`, but automatically
+ * cleans up the effect inside Svelte components.
+ *
+ * @returns Cleanup function to manually cleanup the effect.
+ */
+export function auto_destroy_effect_root(fn: () => void | VoidFunction) {
+	let cleanup: VoidFunction | null = $effect.root(fn);
+
+	function destroy() {
+		if (cleanup === null) {
+			return;
+		}
+
+		cleanup();
+		cleanup = null;
+	}
+
+	try {
+		onDestroy(destroy);
+	} catch {}
+
+	return destroy;
+}
 
 export const wrapper = (factory: DraggableFactory) => {
 	return (plugins?: PluginInput | undefined): Attachment<HTMLElement> =>
@@ -22,9 +48,11 @@ export class Compartment extends CoreCompartment {
 	static of(reactive: () => Plugin) {
 		const compartment = new CoreCompartment(reactive);
 
-		// @ts-ignore
-		$effect.pre(() => {
-			compartment.current = reactive();
+		auto_destroy_effect_root(() => {
+			// @ts-ignore
+			$effect.pre(() => {
+				compartment.current = reactive();
+			});
 		});
 
 		return compartment;
