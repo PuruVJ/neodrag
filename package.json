@@ -9,7 +9,7 @@
 		"docs:build": "turbo run docs#build",
 		"ci:version": "changeset version",
 		"ci:release": "changeset publish",
-		"sizes": "tsx scripts/gather-sizes.ts"
+		"test": "cd packages/core && pnpm test"
 	},
 	"devDependencies": {
 		"@changesets/changelog-github": "^0.5.1",

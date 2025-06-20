@@ -49,4 +49,4 @@ jobs:
         run: pnpx playwright install --with-deps
 
       - name: Test
-        run: cd packages/core && pnpm test
+        run: pnpm test
