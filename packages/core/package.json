@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/core",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"type": "module",
 	"files": [
 		"dist/*"
@@ -34,12 +34,19 @@
 	"scripts": {
 		"compile:watch": "tsup --watch",
 		"compile": "tsup",
-		"prepublishOnly": "npm run compile"
+		"prepublishOnly": "npm run compile",
+		"test": "vitest"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/PuruVJ/neodrag.git"
 	},
 	"author": "Puru Vijay",
-	"license": "MIT"
+	"license": "MIT",
+	"devDependencies": {
+		"@sveltejs/vite-plugin-svelte": "^5.1.0",
+		"@vitest/browser": "^3.2.4",
+		"playwright": "^1.53.1",
+		"vitest-browser-svelte": "^0.1.0"
+	}
 }

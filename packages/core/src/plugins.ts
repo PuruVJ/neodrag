@@ -35,24 +35,24 @@ export interface Plugin<State = any> {
 }
 
 // Type definitions for the new plugin system
-export type PluginResolver = () => (Plugin | Compartment<any>)[];
+export type PluginResolver = () => (Plugin | Compartment)[];
 export type PluginInput = Plugin[] | PluginResolver;
 
-export class Compartment<T extends Plugin = Plugin> {
-	#current: T | undefined;
-	#subscribers: Set<(plugin: T | undefined) => void>;
+export class Compartment {
+	#current?: Plugin;
+	#subscribers: Set<(plugin: Plugin | undefined) => void>;
 	#updating: boolean = false;
 
-	constructor(initial?: () => T) {
+	constructor(initial?: () => Plugin) {
 		this.#current = initial ? initial() : undefined;
 		this.#subscribers = new Set();
 	}
 
-	get current(): T | undefined {
+	get current(): Plugin | undefined {
 		return this.#current;
 	}
 
-	set current(plugin: T | undefined) {
+	set current(plugin: Plugin | undefined) {
 		if (plugin === this.#current) return;
 
 		// Prevent recursive updates
@@ -67,7 +67,7 @@ export class Compartment<T extends Plugin = Plugin> {
 		this.#updating = false;
 	}
 
-	subscribe(callback: (plugin: T | undefined) => void) {
+	subscribe(callback: (plugin: Plugin | undefined) => void) {
 		this.#subscribers.add(callback);
 		return () => this.#subscribers.delete(callback);
 	}
@@ -136,7 +136,7 @@ export const stateMarker = unstable_definePlugin(() => ({
 }));
 
 // Degree of Freedom X and Y
-export const axis = unstable_definePlugin((value: 'x' | 'y' | undefined | null) => ({
+export const axis = unstable_definePlugin((value?: 'x' | 'y' | undefined | null) => ({
 	name: 'neodrag:axis',
 
 	drag(ctx) {
@@ -816,14 +816,14 @@ type TouchActionMode =
 	| 'unset';
 
 export const touchAction = unstable_definePlugin(
-	(mode: TouchActionMode | false | null = 'manipulation') => ({
+	(mode: TouchActionMode | false | null = 'none') => ({
 		name: 'neodrag:touch-action',
 		cancelable: false,
 		liveUpdate: true,
 
 		setup(ctx) {
 			if (mode !== false && mode !== null) {
-				set_node_key_style(ctx.rootNode, 'touch-action', mode ?? 'manipulation');
+				set_node_key_style(ctx.rootNode, 'touch-action', mode ?? 'none');
 			}
 		},
 	}),

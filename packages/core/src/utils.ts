@@ -84,13 +84,3 @@ export type ReadonlyToShallowMutable<T> = T extends object
 	: T;
 
 export const is_null = (v: unknown): v is null => Object.is(v, null);
-
-export const is_firefox_based = () => navigator.userAgent.toLowerCase().includes('firefox');
-
-export function set_timeout_if_firefox(fn: () => void, timeout: number) {
-	if (is_firefox_based()) {
-		setTimeout(fn, timeout);
-	} else {
-		fn();
-	}
-}

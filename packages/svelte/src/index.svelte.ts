@@ -18,8 +18,8 @@ export const draggable = wrapper(factory);
 export * from '@neodrag/core/plugins';
 export const instances = factory.instances;
 
-export class Compartment<T extends Plugin<any>> extends CoreCompartment<T> {
-	static of<T extends Plugin>(reactive: () => T) {
+export class Compartment extends CoreCompartment {
+	static of(reactive: () => Plugin) {
 		const compartment = new CoreCompartment(reactive);
 
 		// @ts-ignore

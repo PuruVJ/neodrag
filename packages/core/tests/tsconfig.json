@@ -9,5 +9,5 @@
 		"allowImportingTsExtensions": true,
 		"types": ["@vitest/browser/providers/playwright"]
 	},
-	"include": ["./src/*.ts"]
+	"include": ["./**/*.ts", "./**/*.svelte"]
 }

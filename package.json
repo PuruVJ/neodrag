@@ -33,13 +33,16 @@
 		"turbo": "^2.3.3",
 		"typescript": "^5.4.5",
 		"vite": "^5.2.9",
-		"vitest": "^1.5.0",
+		"vitest": "^3.2.4",
 		"vue": "^3.4.23"
 	},
 	"pnpm": {
 		"overrides": {
 			"vite": "^6.0"
-		}
+		},
+		"onlyBuiltDependencies": [
+			"@sveltejs/kit"
+		]
 	},
-	"packageManager": "pnpm@9.14.0"
+	"packageManager": "pnpm@10.12.0"
 }
