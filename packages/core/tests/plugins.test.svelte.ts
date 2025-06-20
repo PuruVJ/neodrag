@@ -1104,7 +1104,7 @@ describe('touchAction', () => {
 	});
 });
 
-describe.only('transform', () => {
+describe('transform', () => {
 	let draggable: Locator;
 	let proof_fn_worked = false;
 
