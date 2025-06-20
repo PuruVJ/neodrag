@@ -1,4 +1,4 @@
-name: Continuous Releases
+name: Tests
 
 on: [push, pull_request]
 
@@ -15,6 +15,9 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           run_install: true
+
+      - name: Install Playwright Browsers
+        run: pnpx playwright install --with-deps
 
       - name: Test
         run: cd packages/core && pnpm test
