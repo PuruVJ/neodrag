@@ -1,17 +1,26 @@
-name: Continuous Releases
+name: Tests
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
-  release:
+  test:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -36,8 +45,8 @@ jobs:
         with:
           run_install: true
 
-      - name: Compile
-        run: pnpm compile
+      - name: Install Playwright Browsers
+        run: pnpx playwright install --with-deps
 
-      - name: Release
-        run: pnpm dlx pkg-pr-new publish './packages/*' --compact
+      - name: Test
+        run: pnpm test

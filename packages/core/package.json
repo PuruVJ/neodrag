@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/core",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"type": "module",
 	"files": [
 		"dist/*"
@@ -34,7 +34,8 @@
 	"scripts": {
 		"compile:watch": "tsup --watch",
 		"compile": "tsup",
-		"prepublishOnly": "npm run compile"
+		"prepublishOnly": "npm run compile",
+		"test": "vitest"
 	},
 	"repository": {
 		"type": "git",

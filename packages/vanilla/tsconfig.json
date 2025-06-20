@@ -7,8 +7,7 @@
 		"declarationDir": "dist",
 		"strict": true,
 		"esModuleInterop": true,
-		"moduleResolution": "Bundler",
-		"types": ["vitest/globals", "svelte"]
+		"moduleResolution": "Bundler"
 	},
 	"files": ["./src/index.ts"]
 }

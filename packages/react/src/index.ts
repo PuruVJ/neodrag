@@ -69,8 +69,8 @@ export const wrapper =
 		return state;
 	};
 
-export function useCompartment<T extends Plugin>(reactive: () => T, deps?: React.DependencyList) {
-	const compartment = useRef<Compartment<T>>();
+export function useCompartment(reactive: () => Plugin, deps?: React.DependencyList) {
+	const compartment = useRef<Compartment>();
 
 	if (!compartment.current) {
 		compartment.current = new Compartment(reactive);
