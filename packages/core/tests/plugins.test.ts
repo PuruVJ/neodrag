@@ -443,7 +443,7 @@ describe('controls', () => {
 		});
 	});
 
-	describe.only('allow-block', () => {
+	describe('allow-block', () => {
 		let handle: Locator;
 		let cancel: Locator;
 
@@ -482,7 +482,7 @@ describe('controls', () => {
 		});
 	});
 
-	describe.only('allow-block-allow', () => {
+	describe('allow-block-allow', () => {
 		let handle_text: Locator;
 		let handle2: Locator;
 		let cancel_text: Locator;
@@ -530,7 +530,7 @@ describe('controls', () => {
 		});
 	});
 
-	describe.only('block-allow-block', () => {
+	describe('block-allow-block', () => {
 		let outer_text: Locator;
 		let inner_cancel: Locator;
 		let middle_text: Locator;
