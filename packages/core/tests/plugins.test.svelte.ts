@@ -1,6 +1,7 @@
 import { Locator } from '@vitest/browser/context';
-import { afterEach, beforeEach, describe, expect, it, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, MockInstance, test, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+import { Compartment } from '../../svelte/src/index.svelte';
 import {
 	applyUserSelectHack,
 	axis,
@@ -11,6 +12,9 @@ import {
 	events,
 	grid,
 	position,
+	stateMarker,
+	threshold,
+	touchAction,
 	transform,
 } from '../src/plugins';
 import Bounds from './components/Bounds.svelte';
@@ -26,8 +30,7 @@ import {
 	stopCursorTracking,
 } from './mouse';
 import { sleepAndWaitForEffects, translate } from './utils';
-import { Compartment } from '../../svelte/src/index.svelte';
-import { flushSync } from 'svelte';
+import Transform from './components/Transform.svelte';
 
 beforeEach(() => {
 	startCursorTracking();
@@ -865,6 +868,330 @@ describe('position', () => {
 			await sleepAndWaitForEffects(10);
 
 			await expect.element(draggable).toHaveStyle(translate(100, 100));
+		});
+	});
+});
+
+describe('stateMarker', () => {
+	let draggable: Locator;
+
+	describe('attributes', () => {
+		beforeEach(() => {
+			const comp = render(Box, {
+				plugins: [stateMarker()],
+				default_plugins: [],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should have data-neodrag attribute', async () => {
+			await expect.element(draggable).toHaveAttribute('data-neodrag');
+		});
+
+		it('state=idle while not dragging', async () => {
+			await expect.element(draggable).toHaveAttribute('data-neodrag-state', 'idle');
+		});
+
+		it('state=dragging while dragging', async () => {
+			await mouseDown(draggable);
+			await mouseMove(100, 100);
+
+			await expect.element(draggable).toHaveAttribute('data-neodrag-state', 'dragging');
+
+			await mouseUp(draggable);
+
+			await expect.element(draggable).toHaveAttribute('data-neodrag-state', 'idle');
+		});
+
+		it('data-neodrag-count updates after to 4 after 4 drags', async () => {
+			await dragAndDrop(draggable, { deltaX: 1, deltaY: 1 });
+			await dragAndDrop(draggable, { deltaX: 2, deltaY: 2 });
+			await dragAndDrop(draggable, { deltaX: 3, deltaY: 3 });
+			await dragAndDrop(draggable, { deltaX: 4, deltaY: 4 });
+
+			await expect.element(draggable).toHaveAttribute('data-neodrag-count', '4');
+		});
+	});
+});
+
+describe('threshold', () => {
+	let draggable: Locator;
+
+	describe('null', () => {
+		beforeEach(() => {
+			const comp = render(Box, {
+				plugins: [threshold(null)],
+				default_plugins: [stateMarker(), transform()],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('drags', async () => {
+			await dragAndDrop(draggable, { deltaX: 1, deltaY: 0 });
+
+			await expect.element(draggable).toHaveStyle(translate(1, 0));
+		});
+	});
+
+	describe('undefined === defaults', () => {
+		beforeEach(() => {
+			const comp = render(Box, {
+				plugins: [threshold(undefined)],
+				default_plugins: [stateMarker(), transform()],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('drags', async () => {
+			await dragAndDrop(draggable, { deltaX: 1, deltaY: 0 });
+
+			await expect.element(draggable).not.toHaveStyle(translate(1, 0));
+		});
+	});
+
+	describe('{} === defaults', () => {
+		beforeEach(() => {
+			const comp = render(Box, {
+				plugins: [threshold({})],
+				default_plugins: [stateMarker(), transform()],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('drags', async () => {
+			await dragAndDrop(draggable, { deltaX: 1, deltaY: 0 });
+
+			await expect.element(draggable).not.toHaveStyle(translate(1, 0));
+		});
+	});
+
+	describe('delay:400', () => {
+		beforeEach(() => {
+			const comp = render(Box, {
+				plugins: [threshold({ delay: 400 })],
+				default_plugins: [stateMarker(), transform()],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('1px does not work', async () => {
+			await dragAndDrop(draggable, { deltaX: 1, deltaY: 0 });
+
+			await expect.element(draggable).not.toHaveStyle(translate(1, 0));
+		});
+
+		it('400ms long press', async () => {
+			await dragAndDrop(draggable, { deltaX: 4, deltaY: 0 }, { longpress: 400 });
+
+			await expect.element(draggable).toHaveStyle(translate(4, 0));
+		});
+	});
+
+	describe('delay:400 distance:0', () => {
+		beforeEach(() => {
+			const comp = render(Box, {
+				plugins: [threshold({ delay: 400, distance: 0 })],
+				default_plugins: [stateMarker(), transform()],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('1px does not work', async () => {
+			await dragAndDrop(draggable, { deltaX: 1, deltaY: 0 });
+
+			await expect.element(draggable).not.toHaveStyle(translate(1, 0));
+		});
+
+		it('400ms long press and 1px', async () => {
+			await dragAndDrop(draggable, { deltaX: 1, deltaY: 0 }, { longpress: 400 });
+
+			await expect.element(draggable).toHaveStyle(translate(1, 0));
+		});
+	});
+
+	describe('negative delay', () => {
+		let spy: MockInstance;
+
+		beforeEach(() => {
+			spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const comp = render(Box, {
+				plugins: [threshold({ delay: -1 })],
+				default_plugins: [stateMarker(), transform()],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should error', async () => {
+			expect(spy).toHaveBeenCalled();
+		});
+	});
+
+	describe('negative distance', () => {
+		let spy: MockInstance;
+
+		beforeEach(() => {
+			spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const comp = render(Box, {
+				plugins: [threshold({ distance: -1 })],
+				default_plugins: [stateMarker(), transform()],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('should error', async () => {
+			expect(spy).toHaveBeenCalled();
+		});
+	});
+});
+
+describe('touchAction', () => {
+	let draggable: Locator;
+
+	describe('undefined=default', () => {
+		beforeEach(() => {
+			const comp = render(Box, {
+				plugins: [touchAction()],
+				default_plugins: [stateMarker()],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('has touch-action: none', async () => {
+			await expect.element(draggable).toHaveStyle('touch-action: none');
+		});
+	});
+
+	describe('null=disabled', () => {
+		beforeEach(() => {
+			const comp = render(Box, {
+				plugins: [touchAction(null)],
+				default_plugins: [stateMarker()],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('does not have touch-action: none', async () => {
+			await expect.element(draggable).not.toHaveStyle('touch-action: none');
+		});
+	});
+
+	describe('false=disabled', () => {
+		beforeEach(() => {
+			const comp = render(Box, {
+				plugins: [touchAction(false)],
+				default_plugins: [stateMarker()],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('does not have touch-action: none', async () => {
+			await expect.element(draggable).not.toHaveStyle('touch-action: none');
+		});
+	});
+
+	describe('manipulation', () => {
+		beforeEach(() => {
+			const comp = render(Box, {
+				plugins: [touchAction('manipulation')],
+				default_plugins: [stateMarker()],
+			});
+			draggable = comp.getByTestId('draggable');
+		});
+
+		it('does not have touch-action: manipulation', async () => {
+			await expect.element(draggable).toHaveStyle('touch-action: manipulation');
+		});
+	});
+});
+
+describe.only('transform', () => {
+	let draggable: Locator;
+	let proof_fn_worked = false;
+
+	function func({
+		offset,
+		rootNode,
+	}: Parameters<Exclude<Parameters<typeof transform>[0], undefined>>[0]) {
+		if (rootNode instanceof SVGElement) {
+			rootNode.setAttribute('transform', `translate(${offset.x} ${offset.y})`);
+			proof_fn_worked = true;
+		} else {
+			rootNode.style.left = `${offset.x}px`;
+			rootNode.style.top = `${offset.y}px`;
+		}
+	}
+
+	describe('HTMLElement', () => {
+		describe('default', () => {
+			beforeEach(() => {
+				const comp = render(Transform, {
+					plugins: [transform()],
+					default_plugins: [],
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('has translate', async () => {
+				await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+				await expect.element(draggable).toHaveStyle(translate(100, 100));
+			});
+		});
+
+		describe('fn', () => {
+			beforeEach(() => {
+				const comp = render(Transform, {
+					plugins: [transform(func)],
+					default_plugins: [],
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('has translate', async () => {
+				await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+
+				await expect.element(draggable).toHaveStyle('left: 100px; top: 100px');
+			});
+		});
+	});
+
+	describe('SVGElement', () => {
+		describe('default', () => {
+			beforeEach(() => {
+				const comp = render(Transform, {
+					plugins: [transform()],
+					default_plugins: [],
+					svg: true,
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('has translate', async () => {
+				const is_firefox = navigator.userAgent.toLowerCase().includes('firefox');
+
+				await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+
+				await expect
+					.element(draggable)
+					.toHaveAttribute('transform', is_firefox ? 'translate(100, 100)' : 'translate(100 100)');
+			});
+		});
+
+		describe('fn', () => {
+			beforeEach(() => {
+				proof_fn_worked = false;
+				const comp = render(Transform, {
+					plugins: [transform(func)],
+					default_plugins: [],
+					svg: true,
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('has translate', async () => {
+				expect(proof_fn_worked).toBe(false);
+				await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+				expect(proof_fn_worked).toBe(true);
+			});
 		});
 	});
 });

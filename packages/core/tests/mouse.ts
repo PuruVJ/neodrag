@@ -458,6 +458,7 @@ export async function mouseDoubleClick(options: Omit<MouseOptions, 'clickCount'>
 
 /**
  * Simple drag and drop - disable pointer capture to avoid Firefox issues
+ * Now supports long press functionality
  */
 export async function dragAndDrop(
 	element: Element | { element(): Element },
@@ -465,9 +466,10 @@ export async function dragAndDrop(
 	options: {
 		steps?: number;
 		delay?: number;
+		longpress?: number; // Duration in ms to wait before starting drag
 	} = {},
 ): Promise<void> {
-	const { steps = 1, delay = 0 } = options;
+	const { steps = 1, delay = 0, longpress = 0 } = options;
 
 	// Get element coords
 	const domElement =
@@ -548,6 +550,11 @@ export async function dragAndDrop(
 			button: 0,
 			buttons: 1,
 		});
+
+		// Wait for long press duration if specified
+		if (longpress > 0) {
+			await new Promise((resolve) => setTimeout(resolve, longpress));
+		}
 
 		await new Promise((resolve) => setTimeout(resolve, holdDelay));
 
