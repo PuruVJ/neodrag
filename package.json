@@ -12,29 +12,29 @@
 		"sizes": "tsx scripts/gather-sizes.ts"
 	},
 	"devDependencies": {
-		"@changesets/changelog-github": "^0.5.0",
-		"@changesets/cli": "^2.27.1",
+		"@changesets/changelog-github": "^0.5.1",
+		"@changesets/cli": "^2.29.5",
 		"@sveltejs/vite-plugin-svelte": "5.0.2",
-		"@testing-library/jest-dom": "^6.1.5",
-		"@testing-library/svelte": "^4.0.5",
-		"@types/react": "^18.2.79",
-		"@types/react-dom": "^18.2.25",
+		"@testing-library/jest-dom": "^6.6.3",
+		"@testing-library/svelte": "^4.2.3",
+		"@types/react": "^18.3.23",
+		"@types/react-dom": "^18.3.7",
 		"@vitest/browser": "^3.2.4",
 		"playwright": "^1.53.1",
 		"prettier-plugin-svelte": "^3.4.0",
-		"terser": "^5.43.0",
 		"tsup": "^8.5.0",
 		"tsx": "^4.20.3",
 		"turbo": "^2.5.4",
-		"typescript": "^5.8.3",
+		"typescript": "catalog:",
 		"vitest": "^3.2.4",
 		"vitest-browser-svelte": "^0.1.0"
 	},
 	"pnpm": {
 		"overrides": {
-			"vite": "^6.0"
+			"vite": "catalog:"
 		},
 		"onlyBuiltDependencies": [
+			"@parcel/watcher",
 			"@sveltejs/kit"
 		]
 	},
