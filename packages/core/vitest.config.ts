@@ -146,9 +146,7 @@ export default defineConfig({
 		},
 
 		testTimeout: 5000,
-		// retry: 3,
+		// retry: 2,
 		include: ['./tests/*.test.ts', './tests/*.test.svelte.ts'],
-
-		exclude: ['test-app'],
 	},
 });
