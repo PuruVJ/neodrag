@@ -1,5 +1,23 @@
 # @neodrag/core
 
+## 3.0.0-next.0
+
+### Major Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`8ca8f37`](https://github.com/PuruVJ/neodrag/commit/8ca8f379c9ead112045d6d833da9675dd0926165) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Neodrag v3: Completely rewritten from scratch, with a new architecture and a new API.
+
+### Patch Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`326f18e`](https://github.com/PuruVJ/neodrag/commit/326f18ea389dd3b8afc4a0f919ee6fae32d60906) Thanks [@PuruVJ](https://github.com/PuruVJ)! - fix: transform plugin now works if offset are 0
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`1477cae`](https://github.com/PuruVJ/neodrag/commit/1477cae4ad966898d6f89e41e7721eaaf17c1e6f) Thanks [@PuruVJ](https://github.com/PuruVJ)! - fix: Bounds calculation now takes viewport position into account
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`3fb258f`](https://github.com/PuruVJ/neodrag/commit/3fb258fed11721fb56a48732462f9b8326e8da46) Thanks [@PuruVJ](https://github.com/PuruVJ)! - (fix) Use html tag as delegateTarget
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`1477cae`](https://github.com/PuruVJ/neodrag/commit/1477cae4ad966898d6f89e41e7721eaaf17c1e6f) Thanks [@PuruVJ](https://github.com/PuruVJ)! - fix: position plugin does nothing if isDragging
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`4c5b86b`](https://github.com/PuruVJ/neodrag/commit/4c5b86b0c0ed461a142d4919d59e0d062da6936a) Thanks [@PuruVJ](https://github.com/PuruVJ)! - fix: apply neodrag class on action init, not pointerdown
+
 ## 2.3.0
 
 ### Minor Changes
