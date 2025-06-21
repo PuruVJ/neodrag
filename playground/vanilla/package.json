@@ -1,5 +1,5 @@
 {
-	"name": "vanilla-demo",
+	"name": "@neodrag/playground-vanilla",
 	"private": true,
 	"version": "0.0.0",
 	"scripts": {

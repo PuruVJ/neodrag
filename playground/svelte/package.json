@@ -1,5 +1,5 @@
 {
-	"name": "svelte-demo",
+	"name": "@neodrag/playground-svelte",
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
