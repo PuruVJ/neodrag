@@ -48,5 +48,11 @@ jobs:
       - name: Install Playwright Browsers
         run: pnpx playwright install --with-deps
 
-      - name: Test
-        run: pnpm test
+      - name: Test webkit
+        run: pnpm test --browser=webkit
+
+      - name: Test firefox
+        run: pnpm test --browser=firefox
+
+      - name: Coverage
+        run: pnpm test --coverage --browser=chromium

@@ -42,5 +42,8 @@
 		"url": "git+https://github.com/PuruVJ/neodrag.git"
 	},
 	"author": "Puru Vijay",
-	"license": "MIT"
+	"license": "MIT",
+	"devDependencies": {
+		"@vitest/coverage-v8": "3.2.4"
+	}
 }

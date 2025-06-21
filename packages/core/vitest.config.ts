@@ -145,6 +145,10 @@ export default defineConfig({
 			},
 		},
 
+		coverage: {
+			provider: 'v8',
+		},
+
 		testTimeout: 5000,
 		// retry: 2,
 		include: ['./tests/*.test.ts', './tests/*.test.svelte.ts'],
