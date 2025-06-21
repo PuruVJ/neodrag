@@ -378,7 +378,7 @@ async function main() {
 
 	// Write results to same file as before
 	const sizesPath = new URL('../src/sizes.json', import.meta.url);
-	writeFileSync(sizesPath, JSON.stringify(output, null, '\t'));
+	writeFileSync(sizesPath, JSON.stringify(output));
 	console.log(`\n✅ Wrote sizes.json with ${Object.keys(sizes).length} bitmask-based combinations`);
 
 	// Summary
