@@ -1,6 +1,7 @@
 {
 	"name": "scripts",
-	"version": "1.0.1-next.0",
+	"private": true,
+	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
