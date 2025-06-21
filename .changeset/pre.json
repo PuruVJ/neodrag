@@ -1,0 +1,21 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "docs": "0.0.13",
+    "scripts": "1.0.0",
+    "@neodrag/core": "2.3.0",
+    "@neodrag/react": "2.3.0",
+    "@neodrag/solid": "2.3.0",
+    "@neodrag/svelte": "2.3.1",
+    "@neodrag/vanilla": "2.3.0",
+    "@neodrag/vue": "2.3.0",
+    "@neodrag/playground-react": "0.0.0",
+    "@neodrag/playground-solid": "0.0.0",
+    "@neodrag/playground-svelte": "0.0.1",
+    "@neodrag/playground-vanilla": "0.0.0",
+    "@neodrag/playground-vanilla-umd": "0.0.0",
+    "@neodrag/playground-vue": "0.0.10"
+  },
+  "changesets": []
+}
