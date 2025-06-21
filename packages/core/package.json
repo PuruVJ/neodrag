@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/core",
-	"version": "0.0.3",
+	"version": "2.3.0",
 	"type": "module",
 	"files": [
 		"dist/*"
