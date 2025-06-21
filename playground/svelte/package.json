@@ -1,7 +1,7 @@
 {
 	"name": "@neodrag/playground-svelte",
 	"private": true,
-	"version": "0.0.2-next.0",
+	"version": "0.0.2-next.1",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",

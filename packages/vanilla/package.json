@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/vanilla",
-	"version": "3.0.0-next.0",
+	"version": "3.0.0-next.1",
 	"description": "JS library to add dragging to your apps 😉",
 	"unpkg": "./dist/umd/index.js",
 	"jsdelivr": "./dist/umd/index.js",

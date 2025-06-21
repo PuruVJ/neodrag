@@ -1,5 +1,12 @@
 # @neodrag/playground-react
 
+## 0.0.1-next.1
+
+### Patch Changes
+
+- Updated dependencies [[`dc5c1fb`](https://github.com/PuruVJ/neodrag/commit/dc5c1fbb159e60f6d1ea891cf7796d3f98e093ff)]:
+  - @neodrag/react@3.0.0-next.1
+
 ## 0.0.1-next.0
 
 ### Patch Changes
