@@ -17,5 +17,12 @@
     "@neodrag/playground-vanilla-umd": "0.0.0",
     "@neodrag/playground-vue": "0.0.10"
   },
-  "changesets": []
+  "changesets": [
+    "cool-drinks-thank",
+    "four-zebras-swim",
+    "mean-mugs-hang",
+    "modern-queens-win",
+    "purple-colts-tie",
+    "rotten-bags-speak"
+  ]
 }
