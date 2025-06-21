@@ -15,8 +15,6 @@
 		"@changesets/changelog-github": "^0.5.1",
 		"@changesets/cli": "^2.29.5",
 		"@sveltejs/vite-plugin-svelte": "5.1.0",
-		"@testing-library/jest-dom": "^6.6.3",
-		"@testing-library/svelte": "^4.2.3",
 		"@types/react": "^18.3.23",
 		"@types/react-dom": "^18.3.7",
 		"@vitest/browser": "^3.2.4",
