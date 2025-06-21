@@ -6,6 +6,7 @@
 	import SvelteIcon from '~icons/ri/svelte-fill';
 	import VueIcon from '~icons/ri/vuejs-fill';
 	import SolidIcon from '~icons/tabler/brand-solidjs';
+	import GithubIcon from '~icons/mdi/github';
 
 	import { interact_outside } from '$attachments/interact-outside';
 	import Nav from '$components/docs/Nav.svelte';
@@ -108,6 +109,10 @@
 
 				<div class="divider"></div>
 
+				{@render github()}
+
+				<div class="divider"></div>
+
 				<div class="handle" data-paw-cursor="true">
 					<GridIcon />
 				</div>
@@ -121,17 +126,7 @@
 
 				<span style="flex: 1 1 auto"></span>
 
-				<!-- <div class="theme-selector">
-					{#await tick() then _}
-						<ThemeSwitcher thumbnail onclick={() => menu_view.toggle('theme')} />
-					{/await}
-				</div>
-
-				<div class="framework-selector">
-					<button onclick={() => menu_view.toggle('framework')}>
-						<CurrentIcon />
-					</button>
-				</div> -->
+				{@render github()}
 
 				<div class="menu">
 					<button onclick={() => menu_view.toggle()}>
@@ -142,6 +137,17 @@
 		</div>
 	</div>
 </section>
+
+{#snippet github()}
+	<a
+		href="https://github.com/PuruVJ/neodrag"
+		target="_blank"
+		rel="external"
+		class="unstyled github"
+	>
+		<GithubIcon />
+	</a>
+{/snippet}
 
 {#snippet framework_selector(embedded = false)}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -403,6 +409,37 @@
 		:global {
 			svg {
 				width: 1.7rem !important;
+			}
+		}
+	}
+
+	.github {
+		display: flex;
+		height: 100%;
+		padding: 0.75rem;
+
+		color: color-mix(in lch, var(--app-color-dark), transparent 25%) !important;
+
+		&:hover {
+			color: color-mix(in lch, var(--app-color-dark), transparent 5%) !important;
+		}
+
+		:global {
+			svg {
+				will-change: width;
+				width: 1.7rem;
+				height: auto;
+				width: 2rem;
+
+				@media (--tablet) {
+					width: 1.7rem;
+				}
+
+				&,
+				g,
+				path {
+					color: currentColor !important;
+				}
 			}
 		}
 	}

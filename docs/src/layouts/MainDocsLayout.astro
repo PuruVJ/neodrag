@@ -2,6 +2,12 @@
 import { type Framework } from '$helpers/constants';
 import type { MarkdownHeading } from 'astro';
 import DocsLayout from './DocsLayout.astro';
+import core_package_json from '../../../packages/core/package.json';
+import react_package_json from '../../../packages/react/package.json';
+import solid_package_json from '../../../packages/solid/package.json';
+import vue_package_json from '../../../packages/vue/package.json';
+import vanilla_package_json from '../../../packages/vanilla/package.json';
+import svelte_package_json from '../../../packages/svelte/package.json';
 
 type Props = {
 	title: string;
@@ -10,11 +16,20 @@ type Props = {
 	headings: MarkdownHeading[];
 };
 
-const is_framework_only_page = /\/docs\/(svelte|react|solid|vanilla|vue)$/gi.test(
-	Astro.url.pathname
+const is_framework_only_page = /\/docs\/(svelte|react|solid|vanilla|vue|core)$/gi.test(
+	Astro.url.pathname,
 );
 
 const { tagline, title, framework, headings } = Astro.props;
+
+const version = {
+	core: core_package_json.version,
+	react: react_package_json.version,
+	solid: solid_package_json.version,
+	vue: vue_package_json.version,
+	vanilla: vanilla_package_json.version,
+	svelte: svelte_package_json.version,
+}[framework];
 ---
 
 <DocsLayout title={title} headings={headings} framework={framework}>
@@ -30,15 +45,13 @@ const { tagline, title, framework, headings } = Astro.props;
 		}
 	</h1>
 
-	<!-- <div class="tags">
-		<span class="tag">
-			{version}
-		</span>
-
-		<span class="tag">
-			{size}KB
-		</span>
-	</div> -->
+	{
+		is_framework_only_page ? (
+			<div class="tags">
+				<span class="tag">{version}</span>
+			</div>
+		) : null
+	}
 
 	<p>{tagline}</p>
 
@@ -60,14 +73,14 @@ const { tagline, title, framework, headings } = Astro.props;
 		margin: 0.5rem 0 1rem;
 	}
 
-	/* .tag {
-		background: hsla(var(--secondary-color-hsl), 0.1);
+	.tag {
+		background: color-mix(in lch, var(--secondary-color), transparent 90%);
 		border-radius: 24px;
-		color: var(--secondary-color);
+		color: color-mix(in lch, var(--secondary-color), var(--app-color-anti-mixer) 40%);
 		display: inline-block;
 		font-size: 0.9rem;
 		font-weight: 600;
 		line-height: 1;
 		padding: 0.75rem 0.75rem;
-	} */
+	}
 </style>
