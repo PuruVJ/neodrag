@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://www.neodrag.dev"><img src="https://www.neodrag.dev/logo.svg" height="150" /></a>
+<a href="https://next.neodrag.dev"><img src="https://next.neodrag.dev/logo.svg" height="150" /></a>
 </p>
 
 <h1 align="center">
@@ -16,7 +16,7 @@ The engine that powers all Neodrag implementations
   <a href="https://www.npmjs.com/package/@neodrag/core"><img src="https://img.shields.io/npm/v/@neodrag/core?color=e63900&label="></a>
 <p>
 
-<p align="center"><a href="https://www.neodrag.dev/docs/core">Getting Started</a></p>
+<p align="center"><a href="https://next.neodrag.dev/docs/core">Getting Started</a></p>
 
 # Features
 
@@ -106,7 +106,7 @@ const plugins = [
 ];
 ```
 
-<a href="https://www.neodrag.dev/docs/core" style="font-size: 2rem">Read the docs</a>
+<a href="https://next.neodrag.dev/docs/core" style="font-size: 2rem">Read the docs</a>
 
 ## Framework Integration
 

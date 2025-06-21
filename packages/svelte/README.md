@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://www.neodrag.dev"><img src="https://www.neodrag.dev/logo.svg" height="150" /></a>
+<a href="https://next.neodrag.dev"><img src="https://next.neodrag.dev/logo.svg" height="150" /></a>
 </p>
 
 <h1 align="center">
@@ -16,7 +16,7 @@ One draggable to rule em all
   <a href="https://www.npmjs.com/package/@neodrag/svelte"><img src="https://img.shields.io/npm/v/@neodrag/svelte?color=e63900&label="></a>
 <p>
 
-<p align="center"><a href="https://www.neodrag.dev/docs/svelte">Getting Started</a></p>
+<p align="center"><a href="https://next.neodrag.dev/docs/svelte">Getting Started</a></p>
 
 # Features
 
@@ -105,7 +105,7 @@ Reactive plugins with compartments
 
 > **Note:** Legacy actions are deprecated and will be removed in v4. Migrate to Svelte 5 for better performance.
 
-<a href="https://www.neodrag.dev/docs/svelte" style="font-size: 2rem">Read the docs</a>
+<a href="https://next.neodrag.dev/docs/svelte" style="font-size: 2rem">Read the docs</a>
 
 ## Credits
 
