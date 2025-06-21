@@ -74,8 +74,6 @@ export class DraggableFactory {
 	#delegateTargetFn: () => HTMLElement;
 	#onError?: (error: ErrorInfo) => void;
 
-	#effect_batcher = new EffectBatcher();
-
 	constructor({ plugins, delegate, onError }: typeof DEFAULTS) {
 		this.#initial_plugins = plugins;
 		this.#delegateTargetFn = delegate;
@@ -114,8 +112,6 @@ export class DraggableFactory {
 		for (const instance of this.#instances.values()) {
 			this.#destroy_instance(instance);
 		}
-
-		this.#effect_batcher.clear();
 	}
 
 	#resultify<T>(fn: () => T, errorInfo: Omit<ErrorInfo, 'error'>): Result<T> {
@@ -370,14 +366,18 @@ export class DraggableFactory {
 
 		this.#clear_effects(instance);
 
-		// Add all effects to the batcher
-		for (const effect of immediate_effects) {
-			this.#effect_batcher.addImmediate(effect);
-		}
+		queueMicrotask(() => {
+			// Add all effects to the batcher
+			for (const effect of immediate_effects) {
+				effect();
+			}
+		});
 
-		for (const effect of paint_effects) {
-			this.#effect_batcher.addPaint(effect);
-		}
+		requestAnimationFrame(() => {
+			for (const effect of paint_effects) {
+				effect();
+			}
+		});
 	}
 
 	#clear_effects(instance: DraggableInstance) {
@@ -735,53 +735,5 @@ export class DraggableFactory {
 		}
 
 		return true;
-	}
-}
-
-class EffectBatcher {
-	#immediate_scheduled = false;
-	#paint_scheduled = false;
-	#immediate_callbacks = new Set<() => void>();
-	#paint_callbacks = new Set<() => void>();
-
-	addImmediate(callback: () => void): void {
-		this.#immediate_callbacks.add(callback);
-
-		if (!this.#immediate_scheduled) {
-			this.#immediate_scheduled = true;
-			queueMicrotask(() => {
-				const to_run = new Set(this.#immediate_callbacks);
-				this.#immediate_callbacks.clear();
-				this.#immediate_scheduled = false;
-
-				for (const fn of to_run) {
-					fn();
-				}
-			});
-		}
-	}
-
-	addPaint(callback: () => void): void {
-		this.#paint_callbacks.add(callback);
-
-		if (!this.#paint_scheduled) {
-			this.#paint_scheduled = true;
-			requestAnimationFrame(() => {
-				const to_run = new Set(this.#paint_callbacks);
-				this.#paint_callbacks.clear();
-				this.#paint_scheduled = false;
-
-				for (const fn of to_run) {
-					fn();
-				}
-			});
-		}
-	}
-
-	clear(): void {
-		this.#immediate_callbacks.clear();
-		this.#paint_callbacks.clear();
-		this.#immediate_scheduled = false;
-		this.#paint_scheduled = false;
 	}
 }
