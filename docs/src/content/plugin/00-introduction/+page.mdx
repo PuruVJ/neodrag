@@ -96,7 +96,9 @@ import {
 } from '@neodrag/solid';
 
 function MyComponent() {
-  const [element, setElement] = createSignal();
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
 
   useDraggable(element, [
     grid([20, 20]),
@@ -169,6 +171,7 @@ import { useCompartment, useDraggable, axis } from '@neodrag/react';
 
 function DynamicAxis() {
   const [currentAxis, setCurrentAxis] = useState('x');
+  const ref = useRef(null);
   const axisComp = useCompartment(
     () => axis(currentAxis),
     [currentAxis],
@@ -219,6 +222,9 @@ import {
 } from '@neodrag/solid';
 
 function DynamicAxis() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
   const [currentAxis, setCurrentAxis] = createSignal('x');
   const axisComp = createCompartment(() => axis(currentAxis()));
 
@@ -497,14 +503,3 @@ for (const [element, instance] of instances) {
   console.log('Current state:', instance.ctx);
 }
 ```
-
-## Summary
-
-- **Built-in plugins** handle common drag behaviors
-- **Compartments** enable reactive plugin updates
-- **Custom plugins** use lifecycle hooks for specific needs
-- **Plugin context** provides access to drag state and actions
-- **Plugin state** persists data between lifecycle calls
-- **Third-party plugins** extend functionality through npm packages
-
-Start with built-in plugins, then create custom ones for specialized behavior. The plugin system balances simplicity with power for complex drag interactions.

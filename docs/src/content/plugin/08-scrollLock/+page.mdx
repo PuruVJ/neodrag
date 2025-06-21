@@ -35,12 +35,14 @@ scrollLock({ allowScrollbar: true }); // Keep scrollbars clickable
 </div>
 
 <!-- Target specific container -->
-<div
-  {@attach draggable([
-    scrollLock({ container: document.getElementById('scroll-area') }),
-  ])}
->
-  Lock specific container
+<div bind:this={scrollContainer} class="scroll-area">
+  <div
+    {@attach draggable([
+      scrollLock({ container: () => scrollContainer }),
+    ])}
+  >
+    Lock specific container
+  </div>
 </div>
 ```
 
@@ -56,20 +58,22 @@ function ScrollLockExamples() {
   const fullLockRef = useRef<HTMLDivElement>(null);
   const horizontalRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useDraggable(fullLockRef, [scrollLock()]);
   useDraggable(horizontalRef, [scrollLock({ lockAxis: 'x' })]);
   useDraggable(containerRef, [
-    scrollLock({
-      container: document.getElementById('scroll-area'),
-    }),
+    scrollLock({ container: () => scrollAreaRef.current! }),
   ]);
 
   return (
     <div>
       <div ref={fullLockRef}>Drag me - page won't scroll</div>
       <div ref={horizontalRef}>Vertical scrolling still works</div>
-      <div ref={containerRef}>Lock specific container</div>
+
+      <div ref={scrollAreaRef} className="scroll-area">
+        <div ref={containerRef}>Lock specific container</div>
+      </div>
     </div>
   );
 }
@@ -81,7 +85,10 @@ function ScrollLockExamples() {
 
 ```vue
 <script setup>
+import { ref } from 'vue';
 import { scrollLock, vDraggable } from '@neodrag/vue';
+
+const scrollContainer = ref();
 </script>
 
 <template>
@@ -94,12 +101,14 @@ import { scrollLock, vDraggable } from '@neodrag/vue';
       Vertical scrolling still works
     </div>
 
-    <div
-      v-draggable="[
-        scrollLock({ container: $el.querySelector('#scroll-area') }),
-      ]"
-    >
-      Lock specific container
+    <div ref="scrollContainer" class="scroll-area">
+      <div
+        v-draggable="[
+          scrollLock({ container: () => scrollContainer }),
+        ]"
+      >
+        Lock specific container
+      </div>
     </div>
   </div>
 </template>
@@ -111,22 +120,34 @@ import { scrollLock, vDraggable } from '@neodrag/vue';
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { scrollLock, createDraggable } from '@neodrag/solid';
+import { scrollLock, useDraggable } from '@neodrag/solid';
 
 function ScrollLockExamples() {
-  const { as: fullLockDiv } = createDraggable(() => [scrollLock()]);
-  const { as: horizontalDiv } = createDraggable(() => [
-    scrollLock({ lockAxis: 'x' }),
-  ]);
-  const { as: containerDiv } = createDraggable(() => [
-    scrollLock({ container: document.getElementById('scroll-area') }),
+  const [fullLock, setFullLock] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [horizontal, setHorizontal] =
+    createSignal<HTMLElement | null>(null);
+  const [container, setContainer] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [scrollArea, setScrollArea] =
+    createSignal<HTMLElement | null>(null);
+
+  useDraggable(fullLock, [scrollLock()]);
+  useDraggable(horizontal, [scrollLock({ lockAxis: 'x' })]);
+  useDraggable(container, [
+    scrollLock({ container: () => scrollArea()! }),
   ]);
 
   return (
     <div>
-      <fullLockDiv>Drag me - page won't scroll</fullLockDiv>
-      <horizontalDiv>Vertical scrolling still works</horizontalDiv>
-      <containerDiv>Lock specific container</containerDiv>
+      <div ref={setFullLock}>Drag me - page won't scroll</div>
+      <div ref={setHorizontal}>Vertical scrolling still works</div>
+
+      <div ref={setScrollArea} class="scroll-area">
+        <div ref={setContainer}>Lock specific container</div>
+      </div>
     </div>
   );
 }
@@ -137,18 +158,17 @@ function ScrollLockExamples() {
 <div slot="vanilla">
 
 ```typescript
-import { draggable, scrollLock } from '@neodrag/vanilla';
+import { scrollLock, Draggable } from '@neodrag/vanilla';
 
 const fullLock = document.getElementById('full-lock');
 const horizontal = document.getElementById('horizontal');
 const container = document.getElementById('container');
+const scrollArea = document.getElementById('scroll-area');
 
-draggable(fullLock, [scrollLock()]);
-draggable(horizontal, [scrollLock({ lockAxis: 'x' })]);
-draggable(container, [
-  scrollLock({
-    container: document.getElementById('scroll-area'),
-  }),
+new Draggable(fullLock, [scrollLock()]);
+new Draggable(horizontal, [scrollLock({ lockAxis: 'x' })]);
+new Draggable(container, [
+  scrollLock({ container: () => scrollArea }),
 ]);
 ```
 
@@ -166,7 +186,7 @@ draggable(container, [
 
   let lockMode = $state('both');
   let allowScrollbar = $state(false);
-  let containerRef = $state();
+  let targetContainer = $state(null);
 
   const scrollLockComp = Compartment.of(() => {
     if (lockMode === 'none') return null;
@@ -174,30 +194,29 @@ draggable(container, [
     return scrollLock({
       lockAxis: lockMode,
       allowScrollbar: allowScrollbar,
-      container: containerRef,
+      container: targetContainer,
     });
   });
 </script>
 
-<div bind:this={containerRef} class="scroll-container">
-  <div {@attach draggable([scrollLockComp])}>
-    Drag me (lock: {lockMode})
-  </div>
-
-  <div>
-    {#each Array(50) as _, i}
-      <p>Scrollable content line {i + 1}</p>
-    {/each}
+<div bind:this={targetContainer} class="scroll-container">
+  <div {@attach draggable(() => [scrollLockComp])}>
+    Lock Mode: {lockMode}
+    <br />
+    Scrollbar: {allowScrollbar ? 'visible' : 'hidden'}
   </div>
 </div>
 
 <div class="controls">
-  <select bind:value={lockMode}>
-    <option value="both">Both Axes</option>
-    <option value="x">Horizontal Only</option>
-    <option value="y">Vertical Only</option>
-    <option value="none">No Lock</option>
-  </select>
+  <label>
+    Lock Mode:
+    <select bind:value={lockMode}>
+      <option value="both">Both Axes</option>
+      <option value="x">X-Axis Only</option>
+      <option value="y">Y-Axis Only</option>
+      <option value="none">Disabled</option>
+    </select>
+  </label>
 
   <label>
     <input type="checkbox" bind:checked={allowScrollbar} />
@@ -219,9 +238,11 @@ import {
 } from '@neodrag/react';
 
 function DynamicScrollLock() {
+  const ref = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const elementRef = useRef<HTMLDivElement>(null);
-  const [lockMode, setLockMode] = useState('both');
+  const [lockMode, setLockMode] = useState<
+    'both' | 'x' | 'y' | 'none'
+  >('both');
   const [allowScrollbar, setAllowScrollbar] = useState(false);
 
   const scrollLockComp = useCompartment(() => {
@@ -230,33 +251,35 @@ function DynamicScrollLock() {
     return scrollLock({
       lockAxis: lockMode,
       allowScrollbar: allowScrollbar,
-      container: containerRef.current,
+      container: () => containerRef.current!,
     });
   }, [lockMode, allowScrollbar]);
 
-  useDraggable(elementRef, [scrollLockComp]);
+  useDraggable(ref, () => [scrollLockComp]);
 
   return (
     <div>
       <div ref={containerRef} className="scroll-container">
-        <div ref={elementRef}>Drag me (lock: {lockMode})</div>
-        <div>
-          {Array.from({ length: 50 }, (_, i) => (
-            <p key={i}>Scrollable content line {i + 1}</p>
-          ))}
+        <div ref={ref}>
+          Lock Mode: {lockMode}
+          <br />
+          Scrollbar: {allowScrollbar ? 'visible' : 'hidden'}
         </div>
       </div>
 
       <div className="controls">
-        <select
-          value={lockMode}
-          onChange={(e) => setLockMode(e.target.value)}
-        >
-          <option value="both">Both Axes</option>
-          <option value="x">Horizontal Only</option>
-          <option value="y">Vertical Only</option>
-          <option value="none">No Lock</option>
-        </select>
+        <label>
+          Lock Mode:
+          <select
+            value={lockMode}
+            onChange={(e) => setLockMode(e.target.value as any)}
+          >
+            <option value="both">Both Axes</option>
+            <option value="x">X-Axis Only</option>
+            <option value="y">Y-Axis Only</option>
+            <option value="none">Disabled</option>
+          </select>
+        </label>
 
         <label>
           <input
@@ -281,9 +304,9 @@ function DynamicScrollLock() {
 import { ref } from 'vue';
 import { scrollLock, vDraggable, useCompartment } from '@neodrag/vue';
 
-const containerRef = ref();
 const lockMode = ref('both');
 const allowScrollbar = ref(false);
+const targetContainer = ref();
 
 const scrollLockComp = useCompartment(() => {
   if (lockMode.value === 'none') return null;
@@ -291,35 +314,34 @@ const scrollLockComp = useCompartment(() => {
   return scrollLock({
     lockAxis: lockMode.value,
     allowScrollbar: allowScrollbar.value,
-    container: containerRef.value,
+    container: () => targetContainer.value,
   });
-}, [lockMode, allowScrollbar]);
+});
 </script>
 
 <template>
   <div>
-    <div ref="containerRef" class="scroll-container">
-      <div v-draggable="[scrollLockComp]">
-        Drag me (lock: {{ lockMode }})
-      </div>
-
-      <div>
-        <p v-for="i in 50" :key="i">
-          Scrollable content line {{ i }}
-        </p>
+    <div ref="targetContainer" class="scroll-container">
+      <div v-draggable="() => [scrollLockComp]">
+        Lock Mode: {{ lockMode }}
+        <br />
+        Scrollbar: {{ allowScrollbar ? 'visible' : 'hidden' }}
       </div>
     </div>
 
     <div class="controls">
-      <select v-model="lockMode">
-        <option value="both">Both Axes</option>
-        <option value="x">Horizontal Only</option>
-        <option value="y">Vertical Only</option>
-        <option value="none">No Lock</option>
-      </select>
+      <label>
+        Lock Mode:
+        <select v-model="lockMode">
+          <option value="both">Both Axes</option>
+          <option value="x">X-Axis Only</option>
+          <option value="y">Y-Axis Only</option>
+          <option value="none">Disabled</option>
+        </select>
+      </label>
 
       <label>
-        <input type="checkbox" v-model="allowScrollbar" />
+        <input v-model="allowScrollbar" type="checkbox" />
         Allow Scrollbar
       </label>
     </div>
@@ -335,13 +357,19 @@ const scrollLockComp = useCompartment(() => {
 import { createSignal } from 'solid-js';
 import {
   scrollLock,
-  createDraggable,
+  useDraggable,
   createCompartment,
 } from '@neodrag/solid';
 
 function DynamicScrollLock() {
-  const [container, setContainer] = createSignal<HTMLDivElement>();
-  const [lockMode, setLockMode] = createSignal('both');
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [targetContainer, setTargetContainer] =
+    createSignal<HTMLElement | null>(null);
+  const [lockMode, setLockMode] = createSignal<
+    'both' | 'x' | 'y' | 'none'
+  >('both');
   const [allowScrollbar, setAllowScrollbar] = createSignal(false);
 
   const scrollLockComp = createCompartment(() => {
@@ -350,35 +378,35 @@ function DynamicScrollLock() {
     return scrollLock({
       lockAxis: lockMode(),
       allowScrollbar: allowScrollbar(),
-      container: container(),
+      container: () => targetContainer()!,
     });
   });
 
-  const { as: draggableDiv } = createDraggable(() => [
-    scrollLockComp,
-  ]);
+  useDraggable(element, [scrollLockComp]);
 
   return (
     <div>
-      <div ref={setContainer} class="scroll-container">
-        <draggableDiv>Drag me (lock: {lockMode()})</draggableDiv>
-        <div>
-          {Array.from({ length: 50 }, (_, i) => (
-            <p>Scrollable content line {i + 1}</p>
-          ))}
+      <div ref={setTargetContainer} class="scroll-container">
+        <div ref={setElement}>
+          Lock Mode: {lockMode()}
+          <br />
+          Scrollbar: {allowScrollbar() ? 'visible' : 'hidden'}
         </div>
       </div>
 
       <div class="controls">
-        <select
-          value={lockMode()}
-          onChange={(e) => setLockMode(e.target.value)}
-        >
-          <option value="both">Both Axes</option>
-          <option value="x">Horizontal Only</option>
-          <option value="y">Vertical Only</option>
-          <option value="none">No Lock</option>
-        </select>
+        <label>
+          Lock Mode:
+          <select
+            value={lockMode()}
+            onChange={(e) => setLockMode(e.target.value as any)}
+          >
+            <option value="both">Both Axes</option>
+            <option value="x">X-Axis Only</option>
+            <option value="y">Y-Axis Only</option>
+            <option value="none">Disabled</option>
+          </select>
+        </label>
 
         <label>
           <input
@@ -399,12 +427,13 @@ function DynamicScrollLock() {
 <div slot="vanilla">
 
 ```typescript
-import { draggable, scrollLock, Compartment } from '@neodrag/vanilla';
+import { scrollLock, Draggable, Compartment } from '@neodrag/vanilla';
 
-const container = document.getElementById('container');
 const element = document.getElementById('draggable');
+const container = document.getElementById('container');
 const lockSelect = document.getElementById('lock-select');
 const scrollbarToggle = document.getElementById('scrollbar-toggle');
+const statusEl = document.getElementById('status');
 
 let lockMode = 'both';
 let allowScrollbar = false;
@@ -415,20 +444,35 @@ const scrollLockComp = new Compartment(() => {
   return scrollLock({
     lockAxis: lockMode,
     allowScrollbar: allowScrollbar,
-    container: container,
+    container: () => container,
   });
 });
 
-draggable(element, [scrollLockComp]);
+new Draggable(element, () => [scrollLockComp]);
+
+function updateStatus() {
+  statusEl.textContent = `Lock Mode: ${lockMode}, Scrollbar: ${
+    allowScrollbar ? 'visible' : 'hidden'
+  }`;
+
+  scrollLockComp.current =
+    lockMode === 'none'
+      ? null
+      : scrollLock({
+          lockAxis: lockMode,
+          allowScrollbar: allowScrollbar,
+          container: () => container,
+        });
+}
 
 lockSelect.addEventListener('change', (e) => {
   lockMode = e.target.value;
-  scrollLockComp.current = scrollLockComp.current; // Trigger update
+  updateStatus();
 });
 
 scrollbarToggle.addEventListener('change', (e) => {
   allowScrollbar = e.target.checked;
-  scrollLockComp.current = scrollLockComp.current; // Trigger update
+  updateStatus();
 });
 ```
 
@@ -542,7 +586,9 @@ The scrollLock plugin prevents scrolling by temporarily modifying CSS properties
    - `overflow: hidden` - Hides scrollbars (if `allowScrollbar: false`)
    - `touch-action: pan-x/pan-y/none` - Controls touch scrolling direction
 
-**During drag end:** 3. **Restores original styles** - Everything returns to normal
+**During drag end:**
+
+3. **Restores original styles** - Everything returns to normal
 
 **Target selection:**
 

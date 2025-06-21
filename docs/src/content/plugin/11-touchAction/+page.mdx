@@ -81,7 +81,7 @@ function TouchActionExamples() {
 
 ```vue
 <script setup>
-import { touchAction, vDraggable } from '@neodrag/vue';
+import { touchAction } from '@neodrag/vue';
 </script>
 
 <template>
@@ -109,28 +109,25 @@ import { touchAction, vDraggable } from '@neodrag/vue';
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { touchAction, createDraggable } from '@neodrag/solid';
+import { touchAction, useDraggable } from '@neodrag/solid';
 
 function TouchActionExamples() {
-  const { as: manipulationDiv } = createDraggable(() => [
-    touchAction('manipulation'),
-  ]);
-  const { as: noneDiv } = createDraggable(() => [
-    touchAction('none'),
-  ]);
-  const { as: panYDiv } = createDraggable(() => [
-    touchAction('pan-y'),
-  ]);
-  const { as: defaultDiv } = createDraggable(() => [
-    touchAction(false),
-  ]);
+  const [manipulationRef, setManipulationRef] = createSignal();
+  const [noneRef, setNoneRef] = createSignal();
+  const [panYRef, setPanYRef] = createSignal();
+  const [defaultRef, setDefaultRef] = createSignal();
+
+  useDraggable(manipulationRef, [touchAction('manipulation')]);
+  useDraggable(noneRef, [touchAction('none')]);
+  useDraggable(panYRef, [touchAction('pan-y')]);
+  useDraggable(defaultRef, [touchAction(false)]);
 
   return (
     <div>
-      <manipulationDiv>Touch-optimized dragging</manipulationDiv>
-      <noneDiv>Pure drag only</noneDiv>
-      <panYDiv>Vertical scroll + drag</panYDiv>
-      <defaultDiv>Browser default behavior</defaultDiv>
+      <div ref={setManipulationRef}>Touch-optimized dragging</div>
+      <div ref={setNoneRef}>Pure drag only</div>
+      <div ref={setPanYRef}>Vertical scroll + drag</div>
+      <div ref={setDefaultRef}>Browser default behavior</div>
     </div>
   );
 }
@@ -141,17 +138,17 @@ function TouchActionExamples() {
 <div slot="vanilla">
 
 ```typescript
-import { draggable, touchAction } from '@neodrag/vanilla';
+import { Draggable, touchAction } from '@neodrag/vanilla';
 
 const manipulation = document.getElementById('manipulation');
 const none = document.getElementById('none');
 const panY = document.getElementById('pan-y');
 const defaultElement = document.getElementById('default');
 
-draggable(manipulation, [touchAction('manipulation')]);
-draggable(none, [touchAction('none')]);
-draggable(panY, [touchAction('pan-y')]);
-draggable(defaultElement, [touchAction(false)]);
+new Draggable(manipulation, [touchAction('manipulation')]);
+new Draggable(none, [touchAction('none')]);
+new Draggable(panY, [touchAction('pan-y')]);
+new Draggable(defaultElement, [touchAction(false)]);
 ```
 
 </div>
@@ -316,11 +313,7 @@ function DynamicTouchAction() {
 ```vue
 <script setup>
 import { ref, computed } from 'vue';
-import {
-  touchAction,
-  vDraggable,
-  useCompartment,
-} from '@neodrag/vue';
+import { touchAction, useCompartment } from '@neodrag/vue';
 
 const mode = ref('manipulation');
 const allowScroll = ref(false);
@@ -372,13 +365,14 @@ const currentValue = computed(() => {
 import { createSignal } from 'solid-js';
 import {
   touchAction,
-  createDraggable,
+  useDraggable,
   createCompartment,
 } from '@neodrag/solid';
 
 function DynamicTouchAction() {
   const [mode, setMode] = createSignal('manipulation');
   const [allowScroll, setAllowScroll] = createSignal(false);
+  const [elementRef, setElementRef] = createSignal();
 
   const touchActionComp = createCompartment(() => {
     if (mode() === 'disabled') return touchAction(false);
@@ -386,9 +380,7 @@ function DynamicTouchAction() {
     return touchAction(mode());
   });
 
-  const { as: draggableDiv } = createDraggable(() => [
-    touchActionComp,
-  ]);
+  useDraggable(elementRef, [touchActionComp]);
 
   const getCurrentValue = () => {
     if (mode() === 'disabled') return 'not set';
@@ -398,10 +390,10 @@ function DynamicTouchAction() {
 
   return (
     <div>
-      <draggableDiv>
+      <div ref={setElementRef}>
         Current mode: {mode()}
         {allowScroll() ? ' (scroll enabled)' : ''}
-      </draggableDiv>
+      </div>
 
       <div class="controls">
         <select
@@ -436,7 +428,7 @@ function DynamicTouchAction() {
 
 ```typescript
 import {
-  draggable,
+  Draggable,
   touchAction,
   Compartment,
 } from '@neodrag/vanilla';
@@ -464,17 +456,21 @@ function updateDisplay() {
   valueDisplay.textContent = `CSS: touch-action: ${value}`;
 }
 
-draggable(element, [touchActionComp]);
+new Draggable(element, () => [touchActionComp]);
 
 modeSelect.addEventListener('change', (e) => {
   mode = e.target.value;
-  touchActionComp.current = touchActionComp.current; // Trigger update
+  touchActionComp.current = touchAction(
+    mode === 'disabled' ? false : allowScroll ? 'pan-y' : mode,
+  );
   updateDisplay();
 });
 
 scrollToggle.addEventListener('change', (e) => {
   allowScroll = e.target.checked;
-  touchActionComp.current = touchActionComp.current; // Trigger update
+  touchActionComp.current = touchAction(
+    mode === 'disabled' ? false : allowScroll ? 'pan-y' : mode,
+  );
   updateDisplay();
 });
 
@@ -566,7 +562,9 @@ const isFullScreen = document.fullscreenElement !== null;
 
 const plugins = [
   touchAction(isFullScreen ? 'none' : 'manipulation'),
-  isMobile ? threshold({ distance: 10 }) : threshold({ distance: 3 }),
+  isMobile
+    ? threshold({ distance: 10, delay: 100 })
+    : threshold({ distance: 3, delay: 0 }),
 ];
 ```
 

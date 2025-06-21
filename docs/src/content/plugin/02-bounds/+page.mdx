@@ -94,8 +94,10 @@ import { createSignal } from 'solid-js';
 import { bounds, BoundsFrom, useDraggable } from '@neodrag/solid';
 
 function BoundedElements() {
-  const [viewport, setViewport] = createSignal<HTMLDivElement>();
-  const [parent, setParent] = createSignal<HTMLDivElement>();
+  const [viewport, setViewport] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [parent, setParent] = createSignal<HTMLElement | null>(null);
 
   useDraggable(viewport, [bounds(BoundsFrom.viewport())]);
   useDraggable(parent, [bounds(BoundsFrom.parent())]);
@@ -118,11 +120,11 @@ function BoundedElements() {
 ```typescript
 import { bounds, BoundsFrom, Draggable } from '@neodrag/vanilla';
 
-const viewport = document.getElementById('viewport');
-const parent = document.getElementById('parent');
+const viewportElement = document.getElementById('viewport-bound');
+const parentElement = document.getElementById('parent-bound');
 
-new Draggable(viewport, [bounds(BoundsFrom.viewport())]);
-new Draggable(parent, [bounds(BoundsFrom.parent())]);
+new Draggable(viewportElement, [bounds(BoundsFrom.viewport())]);
+new Draggable(parentElement, [bounds(BoundsFrom.parent())]);
 ```
 
 </div>
@@ -130,234 +132,35 @@ new Draggable(parent, [bounds(BoundsFrom.parent())]);
 
 ## BoundsFrom Utilities
 
-```typescript
-// Viewport with padding
-bounds(BoundsFrom.viewport({ top: 60, left: 20 }));
-
-// Parent with padding
-bounds(BoundsFrom.parent({ bottom: 10 }));
-
-// Specific element
-bounds(BoundsFrom.element(targetElement));
-
-// Element by selector
-bounds(BoundsFrom.selector('#container'));
-
-// All padding options
-bounds(
-  BoundsFrom.viewport({
-    top: 10,
-    right: 20,
-    bottom: 30,
-    left: 40,
-  }),
-);
-```
-
-## Dynamic Boundaries
-
-For boundaries that change during dragging, use a function:
+### Viewport Boundaries
 
 <FrameworkSwitch>
 <div slot="svelte">
 
 ```svelte
 <script>
-  import { bounds } from '@neodrag/svelte';
-
-  let windowWidth = $state(window.innerWidth);
-  let windowHeight = $state(window.innerHeight);
-
-  // Update on resize
-  $effect(() => {
-    function handleResize() {
-      windowWidth = window.innerWidth;
-      windowHeight = window.innerHeight;
-    }
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  });
-
-  const dynamicBounds = () => [
-    [0, 0],
-    [windowWidth - 100, windowHeight - 100],
-  ];
+  import { bounds, BoundsFrom } from '@neodrag/svelte';
 </script>
 
-<div {@attach draggable([bounds(dynamicBounds)])}>
-  Responsive boundaries
-</div>
-```
-
+<!-- Basic viewport bounds -->
+<div {@attach draggable([bounds(BoundsFrom.viewport())])}>
+  Stay in window
 </div>
 
-<div slot="react">
-
-```tsx
-import { useState, useEffect, useRef } from 'react';
-import { bounds, useDraggable } from '@neodrag/react';
-
-function ResponsiveBounds() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-
-  useEffect(() => {
-    function handleResize() {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    }
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const dynamicBounds = () => [
-    [0, 0],
-    [windowSize.width - 100, windowSize.height - 100],
-  ];
-
-  useDraggable(ref, [bounds(dynamicBounds)]);
-
-  return <div ref={ref}>Responsive boundaries</div>;
-}
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { bounds, vDraggable } from '@neodrag/vue';
-
-const windowWidth = ref(window.innerWidth);
-const windowHeight = ref(window.innerHeight);
-
-function handleResize() {
-  windowWidth.value = window.innerWidth;
-  windowHeight.value = window.innerHeight;
-}
-
-onMounted(() => {
-  window.addEventListener('resize', handleResize);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize);
-});
-
-const dynamicBounds = () => [
-  [0, 0],
-  [windowWidth.value - 100, windowHeight.value - 100],
-];
-
-const plugins = [bounds(dynamicBounds)];
-</script>
-
-<template>
-  <div v-draggable="plugins">Responsive boundaries</div>
-</template>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-import { createSignal, onMount, onCleanup } from 'solid-js';
-import { bounds, useDraggable } from '@neodrag/solid';
-
-function ResponsiveBounds() {
-  const [element, setElement] = createSignal<HTMLDivElement>();
-  const [windowSize, setWindowSize] = createSignal({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-
-  onMount(() => {
-    function handleResize() {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    }
-    window.addEventListener('resize', handleResize);
-    onCleanup(() =>
-      window.removeEventListener('resize', handleResize),
-    );
-  });
-
-  const dynamicBounds = () => [
-    [0, 0],
-    [windowSize().width - 100, windowSize().height - 100],
-  ];
-
-  useDraggable(element, [bounds(dynamicBounds)]);
-
-  return <div ref={setElement}>Responsive boundaries</div>;
-}
-```
-
-</div>
-
-<div slot="vanilla">
-
-```typescript
-import { bounds, Draggable } from '@neodrag/vanilla';
-
-let windowWidth = window.innerWidth;
-let windowHeight = window.innerHeight;
-
-function handleResize() {
-  windowWidth = window.innerWidth;
-  windowHeight = window.innerHeight;
-}
-
-window.addEventListener('resize', handleResize);
-
-const dynamicBounds = () => [
-  [0, 0],
-  [windowWidth - 100, windowHeight - 100],
-];
-
-const element = document.getElementById('responsive');
-new Draggable(element, [bounds(dynamicBounds)]);
-```
-
-</div>
-</FrameworkSwitch>
-
-## Common Use Cases
-
-### Draggable Modal
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-```svelte
-<script>
-  import {
-    bounds,
-    BoundsFrom,
-    controls,
-    ControlFrom,
-  } from '@neodrag/svelte';
-</script>
-
+<!-- Viewport with padding -->
 <div
   {@attach draggable([
-    bounds(BoundsFrom.viewport({ top: 0 })),
-    controls({ allow: ControlFrom.selector('.modal-header') }),
+    bounds(
+      BoundsFrom.viewport({
+        top: 20,
+        left: 20,
+        right: 20,
+        bottom: 20,
+      }),
+    ),
   ])}
-  class="modal"
 >
-  <div class="modal-header">Drag me to move modal</div>
-  <div class="modal-content">Modal content here...</div>
+  20px padding from edges
 </div>
 ```
 
@@ -367,26 +170,28 @@ new Draggable(element, [bounds(dynamicBounds)]);
 
 ```tsx
 import { useRef } from 'react';
-import {
-  bounds,
-  BoundsFrom,
-  controls,
-  ControlFrom,
-  useDraggable,
-} from '@neodrag/react';
+import { bounds, BoundsFrom, useDraggable } from '@neodrag/react';
 
-function DraggableModal() {
-  const ref = useRef<HTMLDivElement>(null);
+function ViewportBounds() {
+  const basicRef = useRef<HTMLDivElement>(null);
+  const paddedRef = useRef<HTMLDivElement>(null);
 
-  useDraggable(ref, [
-    bounds(BoundsFrom.viewport({ top: 0 })),
-    controls({ allow: ControlFrom.selector('.modal-header') }),
+  useDraggable(basicRef, [bounds(BoundsFrom.viewport())]);
+  useDraggable(paddedRef, [
+    bounds(
+      BoundsFrom.viewport({
+        top: 20,
+        left: 20,
+        right: 20,
+        bottom: 20,
+      }),
+    ),
   ]);
 
   return (
-    <div ref={ref} className="modal">
-      <div className="modal-header">Drag me to move modal</div>
-      <div className="modal-content">Modal content here...</div>
+    <div>
+      <div ref={basicRef}>Stay in window</div>
+      <div ref={paddedRef}>20px padding from edges</div>
     </div>
   );
 }
@@ -398,24 +203,25 @@ function DraggableModal() {
 
 ```vue
 <script setup>
-import {
-  bounds,
-  BoundsFrom,
-  controls,
-  ControlFrom,
-  vDraggable,
-} from '@neodrag/vue';
+import { bounds, BoundsFrom, vDraggable } from '@neodrag/vue';
 
-const plugins = [
-  bounds(BoundsFrom.viewport({ top: 0 })),
-  controls({ allow: ControlFrom.selector('.modal-header') }),
+const basicBounds = [bounds(BoundsFrom.viewport())];
+const paddedBounds = [
+  bounds(
+    BoundsFrom.viewport({
+      top: 20,
+      left: 20,
+      right: 20,
+      bottom: 20,
+    }),
+  ),
 ];
 </script>
 
 <template>
-  <div v-draggable="plugins" class="modal">
-    <div class="modal-header">Drag me to move modal</div>
-    <div class="modal-content">Modal content here...</div>
+  <div>
+    <div v-draggable="basicBounds">Stay in window</div>
+    <div v-draggable="paddedBounds">20px padding from edges</div>
   </div>
 </template>
 ```
@@ -426,26 +232,28 @@ const plugins = [
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  bounds,
-  BoundsFrom,
-  controls,
-  ControlFrom,
-  useDraggable,
-} from '@neodrag/solid';
+import { bounds, BoundsFrom, useDraggable } from '@neodrag/solid';
 
-function DraggableModal() {
-  const [modal, setModal] = createSignal<HTMLDivElement>();
+function ViewportBounds() {
+  const [basic, setBasic] = createSignal<HTMLElement | null>(null);
+  const [padded, setPadded] = createSignal<HTMLElement | null>(null);
 
-  useDraggable(modal, [
-    bounds(BoundsFrom.viewport({ top: 0 })),
-    controls({ allow: ControlFrom.selector('.modal-header') }),
+  useDraggable(basic, [bounds(BoundsFrom.viewport())]);
+  useDraggable(padded, [
+    bounds(
+      BoundsFrom.viewport({
+        top: 20,
+        left: 20,
+        right: 20,
+        bottom: 20,
+      }),
+    ),
   ]);
 
   return (
-    <div ref={setModal} class="modal">
-      <div class="modal-header">Drag me to move modal</div>
-      <div class="modal-content">Modal content here...</div>
+    <div>
+      <div ref={setBasic}>Stay in window</div>
+      <div ref={setPadded}>20px padding from edges</div>
     </div>
   );
 }
@@ -456,109 +264,398 @@ function DraggableModal() {
 <div slot="vanilla">
 
 ```typescript
-import {
-  bounds,
-  BoundsFrom,
-  controls,
-  ControlFrom,
-  Draggable,
-} from '@neodrag/vanilla';
+import { bounds, BoundsFrom, Draggable } from '@neodrag/vanilla';
 
-const modal = document.getElementById('modal');
+const basic = document.getElementById('basic');
+const padded = document.getElementById('padded');
 
-new Draggable(modal, [
-  bounds(BoundsFrom.viewport({ top: 0 })),
-  controls({ allow: ControlFrom.selector('.modal-header') }),
+new Draggable(basic, [bounds(BoundsFrom.viewport())]);
+new Draggable(padded, [
+  bounds(
+    BoundsFrom.viewport({
+      top: 20,
+      left: 20,
+      right: 20,
+      bottom: 20,
+    }),
+  ),
 ]);
 ```
 
 </div>
 </FrameworkSwitch>
 
-### Image Gallery Viewport
+### Element-Specific Boundaries
 
-```typescript
-// Image larger than container - allow scrolling via drag
-const plugins = [
-  bounds(() => {
-    const container = document.getElementById('gallery-container');
-    const image = document.getElementById('large-image');
+<FrameworkSwitch>
+<div slot="svelte">
 
-    const containerRect = container.getBoundingClientRect();
-    const imageRect = image.getBoundingClientRect();
+```svelte
+<script>
+  import { bounds, BoundsFrom } from '@neodrag/svelte';
 
-    return [
-      [
-        containerRect.width - imageRect.width,
-        containerRect.height - imageRect.height,
-      ],
-      [0, 0],
-    ];
-  }),
-];
+  let container;
+</script>
+
+<div bind:this={container} class="boundary-container">
+  <div
+    {@attach draggable([bounds(() => BoundsFrom.element(container))])}
+  >
+    Bound to container
+  </div>
+</div>
+
+<!-- Using selector -->
+<div class="zone" id="drop-zone">
+  <div
+    {@attach draggable([bounds(BoundsFrom.selector('#drop-zone'))])}
+  >
+    Bound by selector
+  </div>
+</div>
 ```
 
-### Drag and Drop Zones
+</div>
 
-```typescript
-// Card that can be dropped in specific zones
-const plugins = [
-  bounds(() => {
-    const zone1 = document
-      .getElementById('drop-zone-1')
-      .getBoundingClientRect();
-    const zone2 = document
-      .getElementById('drop-zone-2')
-      .getBoundingClientRect();
+<div slot="react">
 
-    // Allow movement between zones
-    return [
-      [
-        Math.min(zone1.left, zone2.left),
-        Math.min(zone1.top, zone2.top),
-      ],
-      [
-        Math.max(zone1.right, zone2.right),
-        Math.max(zone1.bottom, zone2.bottom),
-      ],
-    ];
-  }),
-];
+```tsx
+import { useRef } from 'react';
+import { bounds, BoundsFrom, useDraggable } from '@neodrag/react';
+
+function ElementBounds() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const boundedRef = useRef<HTMLDivElement>(null);
+  const selectorRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(boundedRef, [
+    bounds(() => BoundsFrom.element(containerRef.current!)),
+  ]);
+  useDraggable(selectorRef, [
+    bounds(BoundsFrom.selector('#drop-zone')),
+  ]);
+
+  return (
+    <div>
+      <div ref={containerRef} className="boundary-container">
+        <div ref={boundedRef}>Bound to container</div>
+      </div>
+
+      <div className="zone" id="drop-zone">
+        <div ref={selectorRef}>Bound by selector</div>
+      </div>
+    </div>
+  );
+}
 ```
 
-## Custom Boundaries
+</div>
 
-For complex boundary logic, pass a function that returns coordinates:
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { bounds, BoundsFrom, vDraggable } from '@neodrag/vue';
+
+const container = ref();
+const elementBounds = () => [
+  bounds(() => BoundsFrom.element(container.value)),
+];
+const selectorBounds = [bounds(BoundsFrom.selector('#drop-zone'))];
+</script>
+
+<template>
+  <div>
+    <div ref="container" class="boundary-container">
+      <div v-draggable="elementBounds">Bound to container</div>
+    </div>
+
+    <div class="zone" id="drop-zone">
+      <div v-draggable="selectorBounds">Bound by selector</div>
+    </div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { bounds, BoundsFrom, useDraggable } from '@neodrag/solid';
+
+function ElementBounds() {
+  const [container, setContainer] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [bounded, setBounded] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [selector, setSelector] = createSignal<HTMLElement | null>(
+    null,
+  );
+
+  useDraggable(bounded, [
+    bounds(() => BoundsFrom.element(container()!)),
+  ]);
+  useDraggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
+
+  return (
+    <div>
+      <div ref={setContainer} class="boundary-container">
+        <div ref={setBounded}>Bound to container</div>
+      </div>
+
+      <div class="zone" id="drop-zone">
+        <div ref={setSelector}>Bound by selector</div>
+      </div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
 
 ```typescript
-// Diamond-shaped boundary
-bounds(() => {
+import { bounds, BoundsFrom, Draggable } from '@neodrag/vanilla';
+
+const container = document.getElementById('container');
+const bounded = document.getElementById('bounded');
+const selector = document.getElementById('selector');
+
+new Draggable(bounded, [bounds(() => BoundsFrom.element(container))]);
+new Draggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Custom Boundary Functions
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { draggable, bounds } from '@neodrag/svelte';
+
+  // Custom circular boundary
+  function circularBounds() {
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const radius = 200;
+
+    return [
+      [centerX - radius, centerY - radius],
+      [centerX + radius, centerY + radius],
+    ];
+  }
+
+  // Dynamic boundary based on time
+  function timeBounds() {
+    const time = Date.now() / 1000;
+    const padding = Math.sin(time) * 50 + 100;
+
+    return [
+      [padding, padding],
+      [window.innerWidth - padding, window.innerHeight - padding],
+    ];
+  }
+</script>
+
+<div {@attach draggable([bounds(circularBounds)])}>
+  Circular boundary
+</div>
+
+<div {@attach draggable([bounds(timeBounds)])}>Animated boundary</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { bounds, useDraggable } from '@neodrag/react';
+
+function CustomBounds() {
+  const circularRef = useRef<HTMLDivElement>(null);
+  const timeRef = useRef<HTMLDivElement>(null);
+
+  // Custom circular boundary
+  const circularBounds = () => {
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const radius = 200;
+
+    return [
+      [centerX - radius, centerY - radius],
+      [centerX + radius, centerY + radius],
+    ] as [[number, number], [number, number]];
+  };
+
+  // Dynamic boundary based on time
+  const timeBounds = () => {
+    const time = Date.now() / 1000;
+    const padding = Math.sin(time) * 50 + 100;
+
+    return [
+      [padding, padding],
+      [window.innerWidth - padding, window.innerHeight - padding],
+    ] as [[number, number], [number, number]];
+  };
+
+  useDraggable(circularRef, [bounds(circularBounds)]);
+  useDraggable(timeRef, [bounds(timeBounds)]);
+
+  return (
+    <div>
+      <div ref={circularRef}>Circular boundary</div>
+      <div ref={timeRef}>Animated boundary</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { bounds, vDraggable } from '@neodrag/vue';
+
+// Custom circular boundary
+function circularBounds() {
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
-  const size = 200;
+  const radius = 200;
 
   return [
-    [centerX - size, centerY - size],
-    [centerX + size, centerY + size],
+    [centerX - radius, centerY - radius],
+    [centerX + radius, centerY + radius],
   ];
-});
+}
 
-// Time-based boundaries (smaller at night)
-bounds(() => {
-  const hour = new Date().getHours();
-  const isNight = hour < 6 || hour > 22;
-  const factor = isNight ? 0.5 : 1;
+// Dynamic boundary based on time
+function timeBounds() {
+  const time = Date.now() / 1000;
+  const padding = Math.sin(time) * 50 + 100;
 
   return [
-    [0, 0],
-    [window.innerWidth * factor, window.innerHeight * factor],
+    [padding, padding],
+    [window.innerWidth - padding, window.innerHeight - padding],
   ];
-});
+}
+
+const circularPlugins = [bounds(circularBounds)];
+const timePlugins = [bounds(timeBounds)];
+</script>
+
+<template>
+  <div>
+    <div v-draggable="circularPlugins">Circular boundary</div>
+    <div v-draggable="timePlugins">Animated boundary</div>
+  </div>
+</template>
 ```
 
-## Recomputing Boundaries
+</div>
 
-By default, boundaries are calculated once at drag start. For dynamic boundaries, control when they're recalculated:
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { bounds, useDraggable } from '@neodrag/solid';
+
+function CustomBounds() {
+  const [circular, setCircular] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [time, setTime] = createSignal<HTMLElement | null>(null);
+
+  // Custom circular boundary
+  const circularBounds = () => {
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const radius = 200;
+
+    return [
+      [centerX - radius, centerY - radius],
+      [centerX + radius, centerY + radius],
+    ] as [[number, number], [number, number]];
+  };
+
+  // Dynamic boundary based on time
+  const timeBounds = () => {
+    const time = Date.now() / 1000;
+    const padding = Math.sin(time) * 50 + 100;
+
+    return [
+      [padding, padding],
+      [window.innerWidth - padding, window.innerHeight - padding],
+    ] as [[number, number], [number, number]];
+  };
+
+  useDraggable(circular, [bounds(circularBounds)]);
+  useDraggable(time, [bounds(timeBounds)]);
+
+  return (
+    <div>
+      <div ref={setCircular}>Circular boundary</div>
+      <div ref={setTime}>Animated boundary</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { bounds, Draggable } from '@neodrag/vanilla';
+
+const circular = document.getElementById('circular');
+const time = document.getElementById('time');
+
+// Custom circular boundary
+function circularBounds() {
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+  const radius = 200;
+
+  return [
+    [centerX - radius, centerY - radius],
+    [centerX + radius, centerY + radius],
+  ];
+}
+
+// Dynamic boundary based on time
+function timeBounds() {
+  const time = Date.now() / 1000;
+  const padding = Math.sin(time) * 50 + 100;
+
+  return [
+    [padding, padding],
+    [window.innerWidth - padding, window.innerHeight - padding],
+  ];
+}
+
+new Draggable(circular, [bounds(circularBounds)]);
+new Draggable(time, [bounds(timeBounds)]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Dynamic Boundaries
+
+For boundaries that change during dragging, control when they're recalculated:
 
 ```typescript
 bounds(boundaryFunction, (ctx) => {

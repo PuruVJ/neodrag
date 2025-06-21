@@ -32,9 +32,9 @@ transform(customFunction); // Custom transform implementation
   {@attach draggable([
     transform((data) => {
       data.rootNode.style.transform = `
-    translate(${data.offsetX}px, ${data.offsetY}px) 
-    rotate(${data.offsetX * 0.5}deg)
-  `;
+        translate(${data.offsetX}px, ${data.offsetY}px) 
+        rotate(${data.offsetX * 0.5}deg)
+      `;
     }),
   ])}
 >
@@ -59,9 +59,9 @@ function TransformExamples() {
   useDraggable(customRef, [
     transform((data) => {
       data.rootNode.style.transform = `
-      translate(${data.offsetX}px, ${data.offsetY}px) 
-      rotate(${data.offsetX * 0.5}deg)
-    `;
+        translate(${data.offsetX}px, ${data.offsetY}px) 
+        rotate(${data.offsetX * 0.5}deg)
+      `;
     }),
   ]);
 
@@ -80,7 +80,7 @@ function TransformExamples() {
 
 ```vue
 <script setup>
-import { transform, vDraggable } from '@neodrag/vue';
+import { transform } from '@neodrag/vue';
 
 const customTransform = (data) => {
   data.rootNode.style.transform = `
@@ -107,24 +107,27 @@ const customTransform = (data) => {
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { transform, createDraggable } from '@neodrag/solid';
+import { transform, useDraggable } from '@neodrag/solid';
 
 function TransformExamples() {
-  const { as: standardDiv } = createDraggable(() => [transform()]);
+  const [standardRef, setStandardRef] = createSignal();
+  const [customRef, setCustomRef] = createSignal();
 
-  const { as: customDiv } = createDraggable(() => [
+  useDraggable(standardRef, [transform()]);
+
+  useDraggable(customRef, [
     transform((data) => {
       data.rootNode.style.transform = `
-      translate(${data.offsetX}px, ${data.offsetY}px) 
-      rotate(${data.offsetX * 0.5}deg)
-    `;
+        translate(${data.offsetX}px, ${data.offsetY}px) 
+        rotate(${data.offsetX * 0.5}deg)
+      `;
     }),
   ]);
 
   return (
     <div>
-      <standardDiv>Standard dragging</standardDiv>
-      <customDiv>Rotates while dragging</customDiv>
+      <div ref={setStandardRef}>Standard dragging</div>
+      <div ref={setCustomRef}>Rotates while dragging</div>
     </div>
   );
 }
@@ -135,19 +138,19 @@ function TransformExamples() {
 <div slot="vanilla">
 
 ```typescript
-import { draggable, transform } from '@neodrag/vanilla';
+import { Draggable, transform } from '@neodrag/vanilla';
 
 const standard = document.getElementById('standard');
 const custom = document.getElementById('custom');
 
-draggable(standard, [transform()]);
+new Draggable(standard, [transform()]);
 
-draggable(custom, [
+new Draggable(custom, [
   transform((data) => {
     data.rootNode.style.transform = `
-    translate(${data.offsetX}px, ${data.offsetY}px) 
-    rotate(${data.offsetX * 0.5}deg)
-  `;
+      translate(${data.offsetX}px, ${data.offsetY}px) 
+      rotate(${data.offsetX * 0.5}deg)
+    `;
   }),
 ]);
 ```
@@ -155,17 +158,7 @@ draggable(custom, [
 </div>
 </FrameworkSwitch>
 
-## Default Behavior
-
-When used without arguments, transform automatically handles movement:
-
-- **HTML elements:** Uses `element.style.translate = "Xpx Ypx"` (GPU accelerated)
-- **SVG elements:** Uses SVG transform matrices for proper coordinate handling
-- **Performance optimized:** Uses `ctx.effect.paint()` with `requestAnimationFrame`
-
-## Custom Transform Functions
-
-Create custom visual effects by providing a transform function:
+## Custom Transform Effects
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -205,11 +198,9 @@ Create custom visual effects by providing a transform function:
 <div {@attach draggable([transform(scaleTransform)])}>
   Scales while dragging
 </div>
-
 <div {@attach draggable([transform(rotateTransform)])}>
   Rotates while dragging
 </div>
-
 <div {@attach draggable([transform(skewTransform)])}>
   Skews while dragging
 </div>
@@ -275,7 +266,7 @@ function CustomTransforms() {
 
 ```vue
 <script setup>
-import { transform, vDraggable } from '@neodrag/vue';
+import { transform } from '@neodrag/vue';
 
 // Scaling effect
 const scaleTransform = (data) => {
@@ -326,9 +317,13 @@ const skewTransform = (data) => {
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { transform, createDraggable } from '@neodrag/solid';
+import { transform, useDraggable } from '@neodrag/solid';
 
 function CustomTransforms() {
+  const [scaleRef, setScaleRef] = createSignal();
+  const [rotateRef, setRotateRef] = createSignal();
+  const [skewRef, setSkewRef] = createSignal();
+
   // Scaling effect
   const scaleTransform = (data) => {
     const scale = 1 + Math.abs(data.offsetX) * 0.001;
@@ -356,21 +351,15 @@ function CustomTransforms() {
     `;
   };
 
-  const { as: scaleDiv } = createDraggable(() => [
-    transform(scaleTransform),
-  ]);
-  const { as: rotateDiv } = createDraggable(() => [
-    transform(rotateTransform),
-  ]);
-  const { as: skewDiv } = createDraggable(() => [
-    transform(skewTransform),
-  ]);
+  useDraggable(scaleRef, [transform(scaleTransform)]);
+  useDraggable(rotateRef, [transform(rotateTransform)]);
+  useDraggable(skewRef, [transform(skewTransform)]);
 
   return (
     <div>
-      <scaleDiv>Scales while dragging</scaleDiv>
-      <rotateDiv>Rotates while dragging</rotateDiv>
-      <skewDiv>Skews while dragging</skewDiv>
+      <div ref={setScaleRef}>Scales while dragging</div>
+      <div ref={setRotateRef}>Rotates while dragging</div>
+      <div ref={setSkewRef}>Skews while dragging</div>
     </div>
   );
 }
@@ -381,7 +370,7 @@ function CustomTransforms() {
 <div slot="vanilla">
 
 ```typescript
-import { draggable, transform } from '@neodrag/vanilla';
+import { Draggable, transform } from '@neodrag/vanilla';
 
 const scale = document.getElementById('scale');
 const rotate = document.getElementById('rotate');
@@ -414,9 +403,9 @@ const skewTransform = (data) => {
   `;
 };
 
-draggable(scale, [transform(scaleTransform)]);
-draggable(rotate, [transform(rotateTransform)]);
-draggable(skew, [transform(skewTransform)]);
+new Draggable(scale, [transform(scaleTransform)]);
+new Draggable(rotate, [transform(rotateTransform)]);
+new Draggable(skew, [transform(skewTransform)]);
 ```
 
 </div>

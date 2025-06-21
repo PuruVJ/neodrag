@@ -38,17 +38,17 @@ add_file_to_collection() {
 # Change to the input directory
 cd "$input_dir" || { echo "Error: Cannot access directory '$input_dir'"; exit 1; }
 
-# Find all TypeScript files in packages/*/src/*.ts, excluding .svelte-kit directories
+# Find all TypeScript files in packages/*/src/*.ts, excluding .svelte-kit, .turbo, and .astro directories
 if [ -d "packages" ]; then
     echo "Collecting TypeScript files from packages/*/src/..."
-    find packages -path "packages/*/src/*.ts" -not -path "*/.svelte-kit/*" | sort | while read -r file; do
+    find packages -path "packages/*/src/*.ts" -not -path "*/.svelte-kit/*" -not -path "*/.turbo/*" -not -path "*/.astro/*" | sort | while read -r file; do
         add_file_to_collection "$file" "packages"
     done
 fi
 
-# Find all Svelte files, excluding .svelte-kit directories
+# Find all Svelte files, excluding .svelte-kit, .turbo, .astro, coverage, and node_modules directories
 echo "Collecting Svelte files..."
-find . -name "*.svelte" -not -path "*/.svelte-kit/*" -not -path "*/node_modules/*" | sort | while read -r file; do
+find . -name "*.svelte" -not -path "*/.svelte-kit/*" -not -path "*/.turbo/*" -not -path "*/.astro/*" -not -path "*/coverage/*" -not -path "*/node_modules/*" | sort | while read -r file; do
     # Extract relative path
     relative_path=$(echo "$file" | sed 's|^\./||')
     
@@ -64,9 +64,9 @@ find . -name "*.svelte" -not -path "*/.svelte-kit/*" -not -path "*/node_modules/
     echo -e "\n---\n" >> "$output_file"
 done
 
-# Find all JSON files, excluding .svelte-kit and node_modules directories
+# Find all JSON files, excluding .svelte-kit, .turbo, .astro, coverage, sizes.json, and node_modules directories
 echo "Collecting JSON files..."
-find . -name "*.json" -not -path "*/.svelte-kit/*" -not -path "*/node_modules/*" | sort | while read -r file; do
+find . -name "*.json" -not -path "*/.svelte-kit/*" -not -path "*/.turbo/*" -not -path "*/.astro/*" -not -path "*/coverage/*" -not -path "*/node_modules/*" -not -name "sizes.json" | sort | while read -r file; do
     # Extract relative path
     relative_path=$(echo "$file" | sed 's|^\./||')
     
@@ -93,7 +93,7 @@ if [ -d "docs/src/content" ]; then
         echo -e "\n## File: docs/src/content/$relative_path\n" >> "$output_file"
         
         # Add the code with markdown syntax highlighting
-        echo '```markdown' >> "$output_file"
+        echo '```md' >> "$output_file"
         cat "$file" >> "$output_file"
         echo '```' >> "$output_file"
         
@@ -106,7 +106,7 @@ echo "Collection complete. Output written to $output_file"
 echo "Summary:"
 echo "- Input directory: $input_dir"
 echo "- Output file: $output_file"
-echo "- Collected TypeScript files from packages/*/src/ (excluding .svelte-kit)"
-echo "- Collected Svelte files (excluding .svelte-kit and node_modules)"
-echo "- Collected JSON files (excluding .svelte-kit and node_modules)"
+echo "- Collected TypeScript files from packages/*/src/ (excluding .svelte-kit, .turbo, .astro)"
+echo "- Collected Svelte files (excluding .svelte-kit, .turbo, .astro, coverage, and node_modules)"
+echo "- Collected JSON files (excluding .svelte-kit, .turbo, .astro, coverage, sizes.json, and node_modules)"
 echo "- Collected .mdx files recursively from docs/src/content/"

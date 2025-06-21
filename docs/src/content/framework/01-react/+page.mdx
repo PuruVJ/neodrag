@@ -230,38 +230,3 @@ function App() {
   );
 }
 ```
-
-## Available Plugins
-
-All plugins from `@neodrag/core` are available:
-
-- **[axis](/docs/react/plugin/axis)(direction)** - Constrain movement to 'x', 'y', or 'both'
-- **[bounds](/docs/react/plugin/bounds)(boundary)** - Limit dragging within boundaries
-- **[grid](/docs/react/plugin/grid)([x, y])** - Snap to grid positions
-- **[events](/docs/react/plugin/events)(handlers)** - Handle drag events
-- **[controls](/docs/react/plugin/controls)(options)** - Specify drag handles and cancel elements
-- **[disabled](/docs/react/plugin/disabled)()** - Disable dragging entirely
-- **[threshold](/docs/react/plugin/threshold)(options)** - Set distance/time thresholds
-- **[touchAction](/docs/react/plugin/touch-action)(mode)** - Control touch gesture handling
-- **[transform](/docs/react/plugin/transform)(options)** - Customize positioning behavior
-
-Import using:
-
-```tsx
-import {
-  useDraggable,
-  useCompartment,
-  axis,
-  bounds,
-  BoundsFrom,
-  grid,
-  events,
-  controls,
-  ControlFrom,
-  disabled,
-  threshold,
-  touchAction,
-  transform,
-  type Plugin,
-} from '@neodrag/react';
-```

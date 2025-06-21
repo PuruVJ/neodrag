@@ -219,38 +219,3 @@ After including the library via a CDN, `@neodrag/vanilla` will be available as a
 ```
 
 This method allows you to use `@neodrag/vanilla` without any build tools or npm installations, directly in your browser.
-
-## Available Plugins
-
-All plugins from `@neodrag/core` are available:
-
-- **[axis](/docs/vanilla/plugin/axis)(direction)** - Constrain movement to 'x', 'y', or 'both'
-- **[bounds](/docs/vanilla/plugin/bounds)(boundary)** - Limit dragging within boundaries
-- **[grid](/docs/vanilla/plugin/grid)([x, y])** - Snap to grid positions
-- **[events](/docs/vanilla/plugin/events)(handlers)** - Handle drag events
-- **[controls](/docs/vanilla/plugin/controls)(options)** - Specify drag handles and cancel elements
-- **[disabled](/docs/vanilla/plugin/disabled)()** - Disable dragging entirely
-- **[threshold](/docs/vanilla/plugin/threshold)(options)** - Set distance/time thresholds
-- **[touchAction](/docs/vanilla/plugin/touch-action)(mode)** - Control touch gesture handling
-- **[transform](/docs/vanilla/plugin/transform)(options)** - Customize positioning behavior
-
-Import using:
-
-```typescript
-import {
-  Draggable,
-  Compartment,
-  axis,
-  bounds,
-  BoundsFrom,
-  grid,
-  events,
-  controls,
-  ControlFrom,
-  disabled,
-  threshold,
-  touchAction,
-  transform,
-  type Plugin,
-} from '@neodrag/vanilla';
-```

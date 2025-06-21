@@ -327,36 +327,3 @@ The `legacyDraggable` action is **deprecated** and will be removed in **Neodrag 
 ```svelte
 <div {@attach draggable([axis('x')])}>Drag me</div>
 ```
-
-## Available Plugins
-
-All plugins from `@neodrag/core` are available:
-
-- **[axis](/docs/svelte/plugin/axis)(direction)** - Constrain movement to 'x', 'y', or 'both'
-- **[bounds](/docs/svelte/plugin/bounds)(boundary)** - Limit dragging within boundaries
-- **[grid](/docs/svelte/plugin/grid)([x, y])** - Snap to grid positions
-- **[events](/docs/svelte/plugin/events)(handlers)** - Handle drag events
-- **[controls](/docs/svelte/plugin/controls)(options)** - Specify drag handles and cancel elements
-- **[disabled](/docs/svelte/plugin/disabled)()** - Disable dragging entirely
-- **[threshold](/docs/svelte/plugin/threshold)(options)** - Set distance/time thresholds
-- **[touchAction](/docs/svelte/plugin/touch-action)(mode)** - Control touch gesture handling
-- **[transform](/docs/svelte/plugin/transform)(options)** - Customize positioning behavior
-
-Import using:
-
-```svelte
-<script>
-  import {
-    draggable,
-    axis,
-    bounds,
-    BoundsFrom,
-    grid,
-    events,
-    controls,
-    ControlFrom,
-    touchAction,
-    transform,
-  } from '@neodrag/svelte';
-</script>
-```

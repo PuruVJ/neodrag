@@ -238,38 +238,3 @@ export const App: Component = () => {
   );
 };
 ```
-
-## Available Plugins
-
-All plugins from `@neodrag/core` are available:
-
-- **[axis](/docs/solid/plugin/axis)(direction)** - Constrain movement to 'x', 'y', or 'both'
-- **[bounds](/docs/solid/plugin/bounds)(boundary)** - Limit dragging within boundaries
-- **[grid](/docs/solid/plugin/grid)([x, y])** - Snap to grid positions
-- **[events](/docs/solid/plugin/events)(handlers)** - Handle drag events
-- **[controls](/docs/solid/plugin/controls)(options)** - Specify drag handles and cancel elements
-- **[disabled](/docs/solid/plugin/disabled)()** - Disable dragging entirely
-- **[threshold](/docs/solid/plugin/threshold)(options)** - Set distance/time thresholds
-- **[touchAction](/docs/solid/plugin/touch-action)(mode)** - Control touch gesture handling
-- **[transform](/docs/solid/plugin/transform)(options)** - Customize positioning behavior
-
-Import using:
-
-```tsx
-import {
-  useDraggable,
-  createCompartment,
-  axis,
-  bounds,
-  BoundsFrom,
-  grid,
-  events,
-  controls,
-  ControlFrom,
-  disabled,
-  threshold,
-  touchAction,
-  transform,
-  type Plugin,
-} from '@neodrag/solid';
-```

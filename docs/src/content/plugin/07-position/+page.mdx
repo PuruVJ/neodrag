@@ -101,23 +101,24 @@ function moveElement() {
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { position, createDraggable } from '@neodrag/solid';
+import { position, useDraggable } from '@neodrag/solid';
 
 function PositionExample() {
+  const [controlledRef, setControlledRef] =
+    createSignal<HTMLElement | null>(null);
+  const [initialRef, setInitialRef] =
+    createSignal<HTMLElement | null>(null);
   const [currentPos, setCurrentPos] = createSignal({ x: 100, y: 50 });
 
-  const { as: controlledDiv } = createDraggable(() => [
-    position({ current: currentPos() }),
-  ]);
-
-  const { as: initialDiv } = createDraggable(() => [
-    position({ default: { x: 0, y: 0 } }),
-  ]);
+  useDraggable(controlledRef, [position({ current: currentPos() })]);
+  useDraggable(initialRef, [position({ default: { x: 0, y: 0 } })]);
 
   return (
     <div>
-      <controlledDiv>Controlled position</controlledDiv>
-      <initialDiv>Initial position, then user controls</initialDiv>
+      <div ref={setControlledRef}>Controlled position</div>
+      <div ref={setInitialRef}>
+        Initial position, then user controls
+      </div>
       <button onClick={() => setCurrentPos({ x: 200, y: 100 })}>
         Move to (200, 100)
       </button>
@@ -271,15 +272,16 @@ function updatePosition(data) {
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { position, events, createDraggable } from '@neodrag/solid';
+import { position, events, useDraggable } from '@neodrag/solid';
 
 function SyncedPosition() {
+  const [divRef, setDivRef] = createSignal<HTMLElement | null>(null);
   const [elementPosition, setElementPosition] = createSignal({
     x: 50,
     y: 50,
   });
 
-  const { as: div } = createDraggable(() => [
+  useDraggable(divRef, () => [
     position({ current: elementPosition() }),
     events({
       onDrag: (data) => {
@@ -294,7 +296,7 @@ function SyncedPosition() {
 
   return (
     <div>
-      <div>Position synced with state</div>
+      <div ref={setDivRef}>Position synced with state</div>
       <p>
         Current position: {elementPosition().x}, {elementPosition().y}
       </p>

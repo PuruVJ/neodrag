@@ -79,7 +79,7 @@ function ThresholdExamples() {
 
 ```vue
 <script setup>
-import { threshold, vDraggable } from '@neodrag/vue';
+import { vDraggable, threshold } from '@neodrag/vue';
 </script>
 
 <template>
@@ -107,28 +107,25 @@ import { threshold, vDraggable } from '@neodrag/vue';
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { threshold, createDraggable } from '@neodrag/solid';
+import { threshold, useDraggable } from '@neodrag/solid';
 
 function ThresholdExamples() {
-  const { as: distanceDiv } = createDraggable(() => [
-    threshold({ distance: 10 }),
-  ]);
-  const { as: delayDiv } = createDraggable(() => [
-    threshold({ delay: 300 }),
-  ]);
-  const { as: bothDiv } = createDraggable(() => [
-    threshold({ distance: 8, delay: 150 }),
-  ]);
-  const { as: disabledDiv } = createDraggable(() => [
-    threshold(null),
-  ]);
+  const [distanceRef, setDistanceRef] = createSignal();
+  const [delayRef, setDelayRef] = createSignal();
+  const [bothRef, setBothRef] = createSignal();
+  const [disabledRef, setDisabledRef] = createSignal();
+
+  useDraggable(distanceRef, [threshold({ distance: 10 })]);
+  useDraggable(delayRef, [threshold({ delay: 300 })]);
+  useDraggable(bothRef, [threshold({ distance: 8, delay: 150 })]);
+  useDraggable(disabledRef, [threshold(null)]);
 
   return (
     <div>
-      <distanceDiv>Drag after moving 10px</distanceDiv>
-      <delayDiv>Hold for 300ms to drag</delayDiv>
-      <bothDiv>Move 8px AND wait 150ms</bothDiv>
-      <disabledDiv>Immediate dragging</disabledDiv>
+      <div ref={setDistanceRef}>Drag after moving 10px</div>
+      <div ref={setDelayRef}>Hold for 300ms to drag</div>
+      <div ref={setBothRef}>Move 8px AND wait 150ms</div>
+      <div ref={setDisabledRef}>Immediate dragging</div>
     </div>
   );
 }
@@ -139,17 +136,17 @@ function ThresholdExamples() {
 <div slot="vanilla">
 
 ```typescript
-import { draggable, threshold } from '@neodrag/vanilla';
+import { Draggable, threshold } from '@neodrag/vanilla';
 
 const distance = document.getElementById('distance');
 const delay = document.getElementById('delay');
 const both = document.getElementById('both');
 const disabled = document.getElementById('disabled');
 
-draggable(distance, [threshold({ distance: 10 })]);
-draggable(delay, [threshold({ delay: 300 })]);
-draggable(both, [threshold({ distance: 8, delay: 150 })]);
-draggable(disabled, [threshold(null)]);
+new Draggable(distance, [threshold({ distance: 10 })]);
+new Draggable(delay, [threshold({ delay: 300 })]);
+new Draggable(both, [threshold({ distance: 8, delay: 150 })]);
+new Draggable(disabled, [threshold(null)]);
 ```
 
 </div>
@@ -214,222 +211,20 @@ Adjust thresholds based on device or user preferences:
 
 </div>
 
-<div slot="react">
-
-```tsx
-import { useRef, useState } from 'react';
-import {
-  threshold,
-  useDraggable,
-  useCompartment,
-} from '@neodrag/react';
-
-function DynamicThreshold() {
-  const elementRef = useRef<HTMLDivElement>(null);
-  const [deviceType, setDeviceType] = useState('desktop');
-  const [sensitivity, setSensitivity] = useState('normal');
-
-  const thresholdComp = useCompartment(() => {
-    if (deviceType === 'mobile') {
-      return threshold({
-        distance: sensitivity === 'high' ? 8 : 12,
-        delay: sensitivity === 'high' ? 50 : 100,
-      });
-    } else {
-      return threshold({
-        distance: sensitivity === 'high' ? 3 : 5,
-        delay: 0,
-      });
-    }
-  }, [deviceType, sensitivity]);
-
-  useDraggable(elementRef, [thresholdComp]);
-
-  const getCurrentSettings = () => {
-    if (deviceType === 'mobile') {
-      return sensitivity === 'high' ? '8px, 50ms' : '12px, 100ms';
-    } else {
-      return sensitivity === 'high' ? '3px, 0ms' : '5px, 0ms';
-    }
-  };
-
-  return (
-    <div>
-      <div ref={elementRef}>
-        Adaptive threshold ({deviceType}, {sensitivity})
-      </div>
-
-      <div className="controls">
-        <select
-          value={deviceType}
-          onChange={(e) => setDeviceType(e.target.value)}
-        >
-          <option value="desktop">Desktop</option>
-          <option value="mobile">Mobile</option>
-        </select>
-
-        <select
-          value={sensitivity}
-          onChange={(e) => setSensitivity(e.target.value)}
-        >
-          <option value="low">Low</option>
-          <option value="normal">Normal</option>
-          <option value="high">High</option>
-        </select>
-      </div>
-
-      <p>Current: {getCurrentSettings()}</p>
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<script setup>
-import { ref, computed } from 'vue';
-import { threshold, vDraggable, useCompartment } from '@neodrag/vue';
-
-const deviceType = ref('desktop');
-const sensitivity = ref('normal');
-
-const thresholdComp = useCompartment(() => {
-  if (deviceType.value === 'mobile') {
-    return threshold({
-      distance: sensitivity.value === 'high' ? 8 : 12,
-      delay: sensitivity.value === 'high' ? 50 : 100,
-    });
-  } else {
-    return threshold({
-      distance: sensitivity.value === 'high' ? 3 : 5,
-      delay: 0,
-    });
-  }
-}, [deviceType, sensitivity]);
-
-const currentSettings = computed(() => {
-  if (deviceType.value === 'mobile') {
-    return sensitivity.value === 'high' ? '8px, 50ms' : '12px, 100ms';
-  } else {
-    return sensitivity.value === 'high' ? '3px, 0ms' : '5px, 0ms';
-  }
-});
-</script>
-
-<template>
-  <div>
-    <div v-draggable="[thresholdComp]">
-      Adaptive threshold ({{ deviceType }}, {{ sensitivity }})
-    </div>
-
-    <div class="controls">
-      <select v-model="deviceType">
-        <option value="desktop">Desktop</option>
-        <option value="mobile">Mobile</option>
-      </select>
-
-      <select v-model="sensitivity">
-        <option value="low">Low</option>
-        <option value="normal">Normal</option>
-        <option value="high">High</option>
-      </select>
-    </div>
-
-    <p>Current: {{ currentSettings }}</p>
-  </div>
-</template>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-import { createSignal } from 'solid-js';
-import {
-  threshold,
-  createDraggable,
-  createCompartment,
-} from '@neodrag/solid';
-
-function DynamicThreshold() {
-  const [deviceType, setDeviceType] = createSignal('desktop');
-  const [sensitivity, setSensitivity] = createSignal('normal');
-
-  const thresholdComp = createCompartment(() => {
-    if (deviceType() === 'mobile') {
-      return threshold({
-        distance: sensitivity() === 'high' ? 8 : 12,
-        delay: sensitivity() === 'high' ? 50 : 100,
-      });
-    } else {
-      return threshold({
-        distance: sensitivity() === 'high' ? 3 : 5,
-        delay: 0,
-      });
-    }
-  });
-
-  const { as: draggableDiv } = createDraggable(() => [thresholdComp]);
-
-  const getCurrentSettings = () => {
-    if (deviceType() === 'mobile') {
-      return sensitivity() === 'high' ? '8px, 50ms' : '12px, 100ms';
-    } else {
-      return sensitivity() === 'high' ? '3px, 0ms' : '5px, 0ms';
-    }
-  };
-
-  return (
-    <div>
-      <draggableDiv>
-        Adaptive threshold ({deviceType()}, {sensitivity()})
-      </draggableDiv>
-
-      <div class="controls">
-        <select
-          value={deviceType()}
-          onChange={(e) => setDeviceType(e.target.value)}
-        >
-          <option value="desktop">Desktop</option>
-          <option value="mobile">Mobile</option>
-        </select>
-
-        <select
-          value={sensitivity()}
-          onChange={(e) => setSensitivity(e.target.value)}
-        >
-          <option value="low">Low</option>
-          <option value="normal">Normal</option>
-          <option value="high">High</option>
-        </select>
-      </div>
-
-      <p>Current: {getCurrentSettings()}</p>
-    </div>
-  );
-}
-```
-
-</div>
-
 <div slot="vanilla">
 
-```typescript
-import { draggable, threshold, Compartment } from '@neodrag/vanilla';
+```javascript
+import { Draggable, threshold, Compartment } from '@neodrag/vanilla';
 
-const element = document.getElementById('draggable');
+let deviceType = 'desktop';
+let sensitivity = 'normal';
+
+const element = document.getElementById('adaptive-threshold');
 const deviceSelect = document.getElementById('device-select');
 const sensitivitySelect = document.getElementById(
   'sensitivity-select',
 );
-const settingsDisplay = document.getElementById('settings');
-
-let deviceType = 'desktop';
-let sensitivity = 'normal';
+const settingsDisplay = document.getElementById('settings-display');
 
 const thresholdComp = new Compartment(() => {
   if (deviceType === 'mobile') {
@@ -457,17 +252,47 @@ function updateSettings() {
   settingsDisplay.textContent = `Current: ${settings}`;
 }
 
-draggable(element, [thresholdComp]);
+new Draggable(element, () => [thresholdComp]);
 
 deviceSelect.addEventListener('change', (e) => {
   deviceType = e.target.value;
-  thresholdComp.current = thresholdComp.current; // Trigger update
+  thresholdComp.current = threshold({
+    distance:
+      deviceType === 'mobile'
+        ? sensitivity === 'high'
+          ? 8
+          : 12
+        : sensitivity === 'high'
+          ? 3
+          : 5,
+    delay:
+      deviceType === 'mobile'
+        ? sensitivity === 'high'
+          ? 50
+          : 100
+        : 0,
+  });
   updateSettings();
 });
 
 sensitivitySelect.addEventListener('change', (e) => {
   sensitivity = e.target.value;
-  thresholdComp.current = thresholdComp.current; // Trigger update
+  thresholdComp.current = threshold({
+    distance:
+      deviceType === 'mobile'
+        ? sensitivity === 'high'
+          ? 8
+          : 12
+        : sensitivity === 'high'
+          ? 3
+          : 5,
+    delay:
+      deviceType === 'mobile'
+        ? sensitivity === 'high'
+          ? 50
+          : 100
+        : 0,
+  });
   updateSettings();
 });
 
