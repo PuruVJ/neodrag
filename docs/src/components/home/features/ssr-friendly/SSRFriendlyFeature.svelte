@@ -14,9 +14,7 @@
 	<img src="/home/metaframeworks-{theme.current}.webp" loading="lazy" alt="Metaframeworks" />
 </div>
 
-<style lang="scss">
-	@import '../feature-box';
-
+<style>
 	img {
 		width: clamp(10rem, 80%, 25rem);
 	}
@@ -27,6 +25,7 @@
 	}
 
 	p {
-		@include paragraph();
+		font-size: clamp(1rem, 2vw, 1.3rem);
+		/* max-width: clamp(20ch, 80vw, 100ch); */
 	}
 </style>

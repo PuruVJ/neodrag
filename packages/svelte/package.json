@@ -1,34 +1,47 @@
 {
 	"name": "@neodrag/svelte",
-	"version": "2.3.3",
+	"version": "3.0.0-next.2",
 	"description": "Svelte Action to add dragging to your apps 😉",
-	"main": "./dist/index.js",
-	"module": "./dist/index.js",
 	"type": "module",
-	"types": "./dist/index.d.ts",
 	"files": [
 		"dist/*"
 	],
 	"sideEffects": false,
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"import": {
-				"production": "./dist/min/index.js",
-				"development": "./dist/index.js"
-			},
-			"default": "./dist/min/index.js",
-			"svelte": "./dist/min/index.js"
+			"types": "./src/index.svelte.ts",
+			"svelte": "./src/index.svelte.ts",
+			"import": "./src/index.svelte.ts",
+			"default": "./src/index.svelte.ts"
+		},
+		"./legacy": {
+			"types": "./src/legacy.ts",
+			"svelte": "./src/legacy.ts",
+			"import": "./src/legacy.ts",
+			"default": "./src/legacy.ts"
 		},
 		"./package.json": "./package.json"
 	},
+	"publishConfig": {
+		"exports": {
+			".": {
+				"types": "./dist/index.svelte.d.ts",
+				"svelte": "./dist/index.svelte.js",
+				"import": "./dist/index.svelte.js",
+				"default": "./dist/index.svelte.js"
+			},
+			"./legacy": {
+				"types": "./dist/legacy.d.ts",
+				"svelte": "./dist/legacy.js",
+				"import": "./dist/legacy.js",
+				"default": "./dist/legacy.js"
+			},
+			"./package.json": "./package.json"
+		}
+	},
 	"scripts": {
-		"test": "vitest run test",
-		"test:watch": "vitest test",
-		"compile:watch": "tsup --watch",
-		"compile": "tsup ",
-		"pub": "pnpm compile && pnpm publish --no-git-checks --access public",
-		"pub:dry": "pnpm compile && pnpm publish --dry-run --no-git-checks --access public"
+		"compile": "tsup",
+		"prepublishOnly": "turbo compile"
 	},
 	"repository": {
 		"type": "git",
@@ -50,11 +63,14 @@
 	"bugs": {
 		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"devDependencies": {
+	"dependencies": {
 		"@neodrag/core": "workspace:*"
 	},
 	"peerDependencies": {
-		"svelte": "^3.0.0 || ^4.0.0 || ^5.0.0"
+		"svelte": "^3 || ^4 || ^5"
 	},
-	"homepage": "https://neodrag.dev/docs/svelte"
+	"homepage": "https://neodrag.dev/docs/svelte",
+	"devDependencies": {
+		"svelte": "^5.33.1"
+	}
 }

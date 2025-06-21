@@ -1,0 +1,251 @@
+/* Modern CSS Reset with Sensible Defaults */
+
+/* Box sizing reset */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+/* Remove default margin and padding */
+* {
+	margin: 0;
+	padding: 0;
+}
+
+/* Root and body setup */
+html {
+	font-size: 16px;
+	line-height: 1.5;
+	-webkit-text-size-adjust: 100%;
+	-moz-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	scroll-behavior: smooth;
+}
+
+body {
+	font-family:
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		Roboto,
+		Helvetica,
+		Arial,
+		sans-serif;
+	color: #333;
+	background-color: #fff;
+	line-height: inherit;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography improvements */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-weight: 600;
+	line-height: 1.25;
+	margin-bottom: 0.5em;
+}
+
+p {
+	margin-bottom: 1rem;
+}
+
+a {
+	color: #0066cc;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+/* Lists */
+ul,
+ol {
+	padding-left: 1.5rem;
+	margin-bottom: 1rem;
+}
+
+li {
+	margin-bottom: 0.25rem;
+}
+
+/* Form elements */
+input,
+button,
+textarea,
+select {
+	font: inherit;
+	color: inherit;
+}
+
+input,
+textarea,
+select {
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 0.5rem;
+	background-color: #fff;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+	outline: 2px solid #0066cc;
+	outline-offset: 2px;
+	border-color: #0066cc;
+}
+
+button {
+	color: white;
+	border: none;
+	border-radius: 4px;
+	padding: 0.5rem 1rem;
+	cursor: pointer;
+	font-weight: 500;
+}
+
+button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+/* Media elements */
+img,
+picture,
+video,
+canvas,
+svg {
+	display: block;
+	max-width: 100%;
+	height: auto;
+}
+
+/* Tables */
+table {
+	border-collapse: collapse;
+	width: 100%;
+	margin-bottom: 1rem;
+}
+
+th,
+td {
+	text-align: left;
+	padding: 0.5rem;
+	border-bottom: 1px solid #eee;
+}
+
+th {
+	font-weight: 600;
+	background-color: #f8f9fa;
+}
+
+/* Code elements */
+code,
+kbd,
+samp,
+pre {
+	font-family:
+		'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+	font-size: 0.9em;
+}
+
+code {
+	background-color: #f1f3f4;
+	padding: 0.125rem 0.25rem;
+	border-radius: 3px;
+}
+
+pre {
+	background-color: #f8f9fa;
+	padding: 1rem;
+	border-radius: 6px;
+	overflow-x: auto;
+	margin-bottom: 1rem;
+}
+
+pre code {
+	background-color: transparent;
+	padding: 0;
+}
+
+/* Utility classes */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Remove default button styles for custom buttons */
+.btn-reset {
+	background: none;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+	color: inherit;
+}
+
+/* Print styles */
+@media print {
+	*,
+	*::before,
+	*::after {
+		background: transparent !important;
+		color: black !important;
+		box-shadow: none !important;
+		text-shadow: none !important;
+	}
+
+	a,
+	a:visited {
+		text-decoration: underline;
+	}
+
+	abbr[title]::after {
+		content: ' (' attr(title) ')';
+	}
+
+	pre {
+		white-space: pre-wrap !important;
+	}
+
+	pre,
+	blockquote {
+		border: 1px solid #999;
+		page-break-inside: avoid;
+	}
+
+	thead {
+		display: table-header-group;
+	}
+
+	tr,
+	img {
+		page-break-inside: avoid;
+	}
+
+	p,
+	h2,
+	h3 {
+		orphans: 3;
+		widows: 3;
+	}
+
+	h2,
+	h3 {
+		page-break-after: avoid;
+	}
+}

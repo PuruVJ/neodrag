@@ -1,0 +1,769 @@
+---
+title: 'grid'
+tagline: 'Snap movement to a grid pattern'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+The `grid` plugin snaps draggable movement to a grid pattern. Instead of smooth, continuous movement, elements jump between grid points - perfect for alignment, layout tools, or pixel-perfect positioning.
+
+```typescript
+grid([20, 20]); // 20px square grid
+grid([50, 25]); // 50px wide, 25px tall rectangles
+grid([10, null]); // Only snap horizontally every 10px
+grid([null, 15]); // Only snap vertically every 15px
+```
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { grid } from '@neodrag/svelte';
+</script>
+
+<!-- Square 20px grid -->
+<div {@attach draggable([grid([20, 20])])}>Snaps to 20px squares</div>
+
+<!-- Rectangular grid -->
+<div {@attach draggable([grid([50, 30])])}>
+  Snaps to 50x30px rectangles
+</div>
+
+<!-- Horizontal-only snapping -->
+<div {@attach draggable([grid([25, null])])}>
+  Only snaps horizontally
+</div>
+
+<!-- Vertical-only snapping -->
+<div {@attach draggable([grid([null, 20])])}>
+  Only snaps vertically
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { grid, useDraggable } from '@neodrag/react';
+
+function GridExamples() {
+  const squareRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<HTMLDivElement>(null);
+  const horizontalRef = useRef<HTMLDivElement>(null);
+  const verticalRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(squareRef, [grid([20, 20])]);
+  useDraggable(rectRef, [grid([50, 30])]);
+  useDraggable(horizontalRef, [grid([25, null])]);
+  useDraggable(verticalRef, [grid([null, 20])]);
+
+  return (
+    <div>
+      <div ref={squareRef}>Snaps to 20px squares</div>
+      <div ref={rectRef}>Snaps to 50x30px rectangles</div>
+      <div ref={horizontalRef}>Only snaps horizontally</div>
+      <div ref={verticalRef}>Only snaps vertically</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { grid, vDraggable } from '@neodrag/vue';
+</script>
+
+<template>
+  <div>
+    <div v-draggable="[grid([20, 20])]">Snaps to 20px squares</div>
+    <div v-draggable="[grid([50, 30])]">
+      Snaps to 50x30px rectangles
+    </div>
+    <div v-draggable="[grid([25, null])]">
+      Only snaps horizontally
+    </div>
+    <div v-draggable="[grid([null, 20])]">Only snaps vertically</div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { grid, useDraggable } from '@neodrag/solid';
+
+function GridExamples() {
+  const [square, setSquare] = createSignal<HTMLElement | null>(null);
+  const [rect, setRect] = createSignal<HTMLElement | null>(null);
+  const [horizontal, setHorizontal] =
+    createSignal<HTMLElement | null>(null);
+  const [vertical, setVertical] = createSignal<HTMLElement | null>(
+    null,
+  );
+
+  useDraggable(square, [grid([20, 20])]);
+  useDraggable(rect, [grid([50, 30])]);
+  useDraggable(horizontal, [grid([25, null])]);
+  useDraggable(vertical, [grid([null, 20])]);
+
+  return (
+    <div>
+      <div ref={setSquare}>Snaps to 20px squares</div>
+      <div ref={setRect}>Snaps to 50x30px rectangles</div>
+      <div ref={setHorizontal}>Only snaps horizontally</div>
+      <div ref={setVertical}>Only snaps vertically</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { grid, Draggable } from '@neodrag/vanilla';
+
+const square = document.getElementById('square');
+const rect = document.getElementById('rect');
+const horizontal = document.getElementById('horizontal');
+const vertical = document.getElementById('vertical');
+
+new Draggable(square, [grid([20, 20])]);
+new Draggable(rect, [grid([50, 30])]);
+new Draggable(horizontal, [grid([25, null])]);
+new Draggable(vertical, [grid([null, 20])]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Dynamic Grid Sizing
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { grid, Compartment } from '@neodrag/svelte';
+
+  let gridSize = $state(20);
+  let enableSnap = $state(true);
+
+  const gridComp = Compartment.of(() =>
+    enableSnap ? grid([gridSize, gridSize]) : grid([null, null]),
+  );
+</script>
+
+<div {@attach draggable(() => [gridComp])}>
+  Grid: {enableSnap ? `${gridSize}px` : 'disabled'}
+</div>
+
+<label>
+  Grid Size: {gridSize}px
+  <input
+    type="range"
+    bind:value={gridSize}
+    min="5"
+    max="50"
+    step="5"
+  />
+</label>
+
+<label>
+  <input type="checkbox" bind:checked={enableSnap} />
+  Enable Grid Snap
+</label>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useState, useRef } from 'react';
+import { grid, useDraggable, useCompartment } from '@neodrag/react';
+
+function DynamicGrid() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [gridSize, setGridSize] = useState(20);
+  const [enableSnap, setEnableSnap] = useState(true);
+
+  const gridComp = useCompartment(
+    () =>
+      enableSnap ? grid([gridSize, gridSize]) : grid([null, null]),
+    [gridSize, enableSnap],
+  );
+
+  useDraggable(ref, () => [gridComp]);
+
+  return (
+    <div>
+      <div ref={ref}>
+        Grid: {enableSnap ? `${gridSize}px` : 'disabled'}
+      </div>
+
+      <label>
+        Grid Size: {gridSize}px
+        <input
+          type="range"
+          value={gridSize}
+          onChange={(e) => setGridSize(Number(e.target.value))}
+          min="5"
+          max="50"
+          step="5"
+        />
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          checked={enableSnap}
+          onChange={(e) => setEnableSnap(e.target.checked)}
+        />
+        Enable Grid Snap
+      </label>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { grid, vDraggable, useCompartment } from '@neodrag/vue';
+
+const gridSize = ref(20);
+const enableSnap = ref(true);
+
+const gridComp = useCompartment(() =>
+  enableSnap.value
+    ? grid([gridSize.value, gridSize.value])
+    : grid([null, null]),
+);
+</script>
+
+<template>
+  <div>
+    <div v-draggable="() => [gridComp]">
+      Grid: {{ enableSnap ? `${gridSize}px` : 'disabled' }}
+    </div>
+
+    <label>
+      Grid Size: {{ gridSize }}px
+      <input
+        v-model.number="gridSize"
+        type="range"
+        min="5"
+        max="50"
+        step="5"
+      />
+    </label>
+
+    <label>
+      <input v-model="enableSnap" type="checkbox" />
+      Enable Grid Snap
+    </label>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  grid,
+  useDraggable,
+  createCompartment,
+} from '@neodrag/solid';
+
+function DynamicGrid() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [gridSize, setGridSize] = createSignal(20);
+  const [enableSnap, setEnableSnap] = createSignal(true);
+
+  const gridComp = createCompartment(() =>
+    enableSnap()
+      ? grid([gridSize(), gridSize()])
+      : grid([null, null]),
+  );
+
+  useDraggable(element, [gridComp]);
+
+  return (
+    <div>
+      <div ref={setElement}>
+        Grid: {enableSnap() ? `${gridSize()}px` : 'disabled'}
+      </div>
+
+      <label>
+        Grid Size: {gridSize()}px
+        <input
+          type="range"
+          value={gridSize()}
+          onInput={(e) => setGridSize(Number(e.target.value))}
+          min="5"
+          max="50"
+          step="5"
+        />
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          checked={enableSnap()}
+          onChange={(e) => setEnableSnap(e.target.checked)}
+        />
+        Enable Grid Snap
+      </label>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { grid, Draggable, Compartment } from '@neodrag/vanilla';
+
+let gridSize = 20;
+let enableSnap = true;
+
+const gridComp = new Compartment(() =>
+  enableSnap ? grid([gridSize, gridSize]) : grid([null, null]),
+);
+
+const element = document.getElementById('element');
+const sizeSlider = document.getElementById('size-slider');
+const snapToggle = document.getElementById('snap-toggle');
+const statusEl = document.getElementById('status');
+
+new Draggable(element, () => [gridComp]);
+
+function updateStatus() {
+  statusEl.textContent = enableSnap ? `${gridSize}px` : 'disabled';
+  gridComp.current = enableSnap
+    ? grid([gridSize, gridSize])
+    : grid([null, null]);
+}
+
+sizeSlider.addEventListener('input', (e) => {
+  gridSize = Number(e.target.value);
+  updateStatus();
+});
+
+snapToggle.addEventListener('change', (e) => {
+  enableSnap = e.target.checked;
+  updateStatus();
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+## Advanced Grid Patterns
+
+### Asymmetric Grids
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { grid } from '@neodrag/svelte';
+</script>
+
+<!-- Wide columns, short rows -->
+<div {@attach draggable([grid([100, 20])])}>100x20px grid</div>
+
+<!-- Timeline-style: hourly columns -->
+<div {@attach draggable([grid([60, null])])}>
+  60px intervals (hourly)
+</div>
+
+<!-- Calendar-style: daily columns, weekly rows -->
+<div {@attach draggable([grid([80, 120])])}>Daily x Weekly</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { grid, useDraggable } from '@neodrag/react';
+
+function AsymmetricGrids() {
+  const wideRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(wideRef, [grid([100, 20])]);
+  useDraggable(timelineRef, [grid([60, null])]);
+  useDraggable(calendarRef, [grid([80, 120])]);
+
+  return (
+    <div>
+      <div ref={wideRef}>100x20px grid</div>
+      <div ref={timelineRef}>60px intervals (hourly)</div>
+      <div ref={calendarRef}>Daily x Weekly</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { grid, vDraggable } from '@neodrag/vue';
+</script>
+
+<template>
+  <div>
+    <div v-draggable="[grid([100, 20])]">100x20px grid</div>
+    <div v-draggable="[grid([60, null])]">
+      60px intervals (hourly)
+    </div>
+    <div v-draggable="[grid([80, 120])]">Daily x Weekly</div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { grid, useDraggable } from '@neodrag/solid';
+
+function AsymmetricGrids() {
+  const [wide, setWide] = createSignal<HTMLElement | null>(null);
+  const [timeline, setTimeline] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [calendar, setCalendar] = createSignal<HTMLElement | null>(
+    null,
+  );
+
+  useDraggable(wide, [grid([100, 20])]);
+  useDraggable(timeline, [grid([60, null])]);
+  useDraggable(calendar, [grid([80, 120])]);
+
+  return (
+    <div>
+      <div ref={setWide}>100x20px grid</div>
+      <div ref={setTimeline}>60px intervals (hourly)</div>
+      <div ref={setCalendar}>Daily x Weekly</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { grid, Draggable } from '@neodrag/vanilla';
+
+const wide = document.getElementById('wide');
+const timeline = document.getElementById('timeline');
+const calendar = document.getElementById('calendar');
+
+new Draggable(wide, [grid([100, 20])]);
+new Draggable(timeline, [grid([60, null])]);
+new Draggable(calendar, [grid([80, 120])]);
+```
+
+</div>
+</FrameworkSwitch>
+
+### Responsive Grid System
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { grid, Compartment } from '@neodrag/svelte';
+
+  let screenWidth = $state(window.innerWidth);
+
+  // 12-column responsive grid
+  const columnWidth = $derived(screenWidth / 12);
+  const responsiveGrid = Compartment.of(() =>
+    grid([columnWidth, 40]),
+  );
+
+  function handleResize() {
+    screenWidth = window.innerWidth;
+  }
+</script>
+
+<svelte:window on:resize={handleResize} />
+
+<div {@attach draggable(() => [responsiveGrid])}>
+  Responsive 12-column grid
+  <br />
+  Column: {Math.round(columnWidth)}px
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useState, useEffect, useRef } from 'react';
+import { grid, useDraggable, useCompartment } from '@neodrag/react';
+
+function ResponsiveGrid() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+  // 12-column responsive grid
+  const columnWidth = screenWidth / 12;
+  const responsiveGrid = useCompartment(
+    () => grid([columnWidth, 40]),
+    [columnWidth],
+  );
+
+  useEffect(() => {
+    const handleResize = () => setScreenWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useDraggable(ref, () => [responsiveGrid]);
+
+  return (
+    <div ref={ref}>
+      Responsive 12-column grid
+      <br />
+      Column: {Math.round(columnWidth)}px
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { grid, vDraggable, useCompartment } from '@neodrag/vue';
+
+const screenWidth = ref(window.innerWidth);
+
+// 12-column responsive grid
+const columnWidth = computed(() => screenWidth.value / 12);
+const responsiveGrid = useCompartment(() =>
+  grid([columnWidth.value, 40]),
+);
+
+function handleResize() {
+  screenWidth.value = window.innerWidth;
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
+</script>
+
+<template>
+  <div v-draggable="() => [responsiveGrid]">
+    Responsive 12-column grid
+    <br />
+    Column: {{ Math.round(columnWidth) }}px
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal, onMount, onCleanup } from 'solid-js';
+import {
+  grid,
+  useDraggable,
+  createCompartment,
+} from '@neodrag/solid';
+
+function ResponsiveGrid() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [screenWidth, setScreenWidth] = createSignal(
+    window.innerWidth,
+  );
+
+  // 12-column responsive grid
+  const columnWidth = () => screenWidth() / 12;
+  const responsiveGrid = createCompartment(() =>
+    grid([columnWidth(), 40]),
+  );
+
+  const handleResize = () => setScreenWidth(window.innerWidth);
+
+  onMount(() => {
+    window.addEventListener('resize', handleResize);
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('resize', handleResize);
+  });
+
+  useDraggable(element, [responsiveGrid]);
+
+  return (
+    <div ref={setElement}>
+      Responsive 12-column grid
+      <br />
+      Column: {Math.round(columnWidth())}px
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { grid, Draggable, Compartment } from '@neodrag/vanilla';
+
+let screenWidth = window.innerWidth;
+
+const getColumnWidth = () => screenWidth / 12;
+const responsiveGrid = new Compartment(() =>
+  grid([getColumnWidth(), 40]),
+);
+
+const element = document.getElementById('element');
+const statusEl = document.getElementById('status');
+
+new Draggable(element, () => [responsiveGrid]);
+
+function handleResize() {
+  screenWidth = window.innerWidth;
+  responsiveGrid.current = grid([getColumnWidth(), 40]);
+  statusEl.textContent = `Column: ${Math.round(getColumnWidth())}px`;
+}
+
+window.addEventListener('resize', handleResize);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Real-World Examples
+
+### Pixel Art Editor
+
+```typescript
+// Precise 1px grid for pixel-perfect editing
+const pixelGrid = [grid([1, 1]), bounds(BoundsFrom.element(canvas))];
+```
+
+### Card Layout System
+
+```typescript
+// Cards snap to a 12-column grid system
+const containerWidth = 1200;
+const columnWidth = containerWidth / 12;
+const cardGrid = [
+  grid([columnWidth, 40]), // 12-column, 40px row height
+  bounds(BoundsFrom.parent()),
+];
+```
+
+### Timeline Editor
+
+```typescript
+// Timeline with 15-minute intervals
+const minutesPerPixel = 0.25; // 15 minutes = 60 pixels
+const timelineGrid = [
+  grid([60, null]), // 15-minute intervals horizontally
+  bounds(BoundsFrom.element(timelineContainer)),
+];
+```
+
+### Icon Grid Layout
+
+```typescript
+// Desktop-style icon grid
+const iconSize = 64;
+const iconSpacing = 80;
+const iconGrid = [
+  grid([iconSpacing, iconSpacing]),
+  bounds(BoundsFrom.viewport({ top: 100, bottom: 50 })),
+];
+```
+
+## How It Works
+
+The grid plugin modifies movement by snapping to grid points:
+
+1. **Calculate grid position** - Uses `Math.ceil(value / gridSize) * gridSize` to find the next grid point
+2. **Apply to proposed movement** - Modifies `ctx.proposed.x` and `ctx.proposed.y`
+3. **Null values skip snapping** - `null` means free movement on that axis
+4. **Runs during drag** - Continuously snaps while dragging
+
+The snapping formula ensures elements always move forward to the next grid intersection, creating predictable, aligned positioning.
+
+## API Reference
+
+```typescript
+function grid(size: [number | null, number | null]): Plugin;
+```
+
+**Parameters:**
+
+- `size` - Array with `[x, y]` grid dimensions
+  - `number` - Grid size in pixels for that axis
+  - `null` - No grid snapping for that axis
+
+**Usage patterns:**
+
+- `grid([20, 20])` - Square 20px grid
+- `grid([50, 30])` - Rectangular 50x30px grid
+- `grid([25, null])` - Horizontal snapping only
+- `grid([null, 15])` - Vertical snapping only
+- `grid([null, null])` - No snapping (effectively disabled)
+
+**Returns:** A plugin object for use with draggable.

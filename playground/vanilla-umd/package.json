@@ -1,0 +1,10 @@
+{
+	"name": "@neodrag/playground-vanilla-umd",
+	"private": true,
+	"version": "0.0.1-next.2",
+	"scripts": {},
+	"devDependencies": {},
+	"dependencies": {
+		"@neodrag/vanilla": "workspace:*"
+	}
+}

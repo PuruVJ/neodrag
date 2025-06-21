@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://www.neodrag.dev"><img src="https://www.neodrag.dev/logo.svg" height="150" /></a>
+<a href="https://next.neodrag.dev"><img src="https://next.neodrag.dev/logo.svg" height="150" /></a>
 </p>
 
 <h1 align="center">
@@ -10,32 +10,26 @@
 One draggable to rule em all
 </h2>
 
-<p align="center">A lightweight SolidJS directive to make your elements draggable.</p>
+<p align="center">A lightweight SolidJS library to make your elements draggable.</p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@neodrag/solid"><img src="https://img.shields.io/npm/v/@neodrag/solid?color=2c4f7d&label="></a>
+  <a href="https://www.npmjs.com/package/@neodrag/solid"><img src="https://img.shields.io/npm/v/@neodrag/solid?color=e63900&label="></a>
 <p>
 
-<p align="center"><a href="https://www.neodrag.dev/docs/solid">Getting Started</a></p>
+<p align="center"><a href="https://next.neodrag.dev/docs/solid">Getting Started</a></p>
 
 # Features
 
-- 🤏 Tiny - Only 1.75KB min+brotli.
-- 🐇 Simple - Quite simple to use, and effectively no-config required!
-- 🧙‍♀️ Elegant - SolidJS directive, to keep the usage simple, elegant and straightforward.
-- 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
-- ⚛️ Reactive - Change options passed to it on the fly, it will **just work 🙂**
+- 🤏 **Small in size** - ~5KB, plugin architecture enables tree-shaking
+- 🧩 **Plugin-based** - Mix and match only what you need
+- ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
+- 🎯 **SolidJS Native** - Built for SolidJS with `useDraggable` hook
+- 🔄 **Reactive** - `createCompartment` for reactive plugin updates
 
 # Installing
 
 ```bash
-pnpm add @neodrag/solid
-
-# npm
-npm install @neodrag/solid
-
-# yarn
-yarn add @neodrag/solid
+npm install @neodrag/solid@next
 ```
 
 # Usage
@@ -43,62 +37,93 @@ yarn add @neodrag/solid
 Basic usage
 
 ```tsx
-import { createDraggable } from '@neodrag/solid';
+import { useDraggable } from '@neodrag/solid';
 
 export const App: Component = () => {
-	const { draggable } = createDraggable();
+	const [draggableRef, setDraggableRef] = createSignal<HTMLElement | null>(null);
 
-	return <div use:draggable>You can drag me</div>;
+	useDraggable(draggableRef);
+
+	return <div ref={setDraggableRef}>You can drag me</div>;
 };
 ```
 
-With options
+With plugins
 
 ```tsx
-import { createDraggable } from '@neodrag/solid';
+import { useDraggable, axis, grid } from '@neodrag/solid';
 
-const { draggable } = createDraggable();
+export const App: Component = () => {
+	const [draggableRef, setDraggableRef] = createSignal<HTMLElement | null>(null);
 
-<div use:draggable={{ axis: 'x', grid: [10, 10] }}>I am draggable</div>;
-```
+	useDraggable(draggableRef, [axis('x'), grid([10, 10])]);
 
-Defining options elsewhere with typescript
-
-```tsx
-import { createDraggable, type DragOptions } from '@neodrag/solid';
-
-const options: DragOptions = {
-	axis: 'y',
-	bounds: 'parent',
+	return <div ref={setDraggableRef}>Horizontal grid snapping</div>;
 };
-
-const { draggable } = createDraggable();
-
-<div use:draggable={options}>I am draggable</div>;
 ```
 
-Reactive options:
+Defining plugins elsewhere with TypeScript
+
+```tsx
+import { useDraggable, axis, bounds, BoundsFrom, type Plugin } from '@neodrag/solid';
+
+export const App: Component = () => {
+	const [draggableRef, setDraggableRef] = createSignal<HTMLElement | null>(null);
+
+	const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
+	useDraggable(draggableRef, plugins);
+
+	return <div ref={setDraggableRef}>Type-safe dragging</div>;
+};
+```
+
+Getting drag state
+
+```tsx
+import { useDraggable } from '@neodrag/solid';
+
+export const App: Component = () => {
+	const [draggableRef, setDraggableRef] = createSignal<HTMLElement | null>(null);
+	const dragState = useDraggable(draggableRef);
+
+	createEffect(() => {
+		console.log('Position:', dragState().offset);
+		console.log('Is dragging:', dragState().isDragging);
+	});
+
+	return <div ref={setDraggableRef}>Check console while dragging</div>;
+};
+```
+
+Reactive plugins with createCompartment
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { createDraggable } from '@neodrag/solid';
+import { useDraggable, axis, createCompartment } from '@neodrag/solid';
 
-const [options, setOptions] = createSignal({
-	axis: 'y',
-	bounds: 'parent',
-});
+export const App: Component = () => {
+	const [draggableRef, setDraggableRef] = createSignal<HTMLElement | null>(null);
+	const [currentAxis, setCurrentAxis] = createSignal<'x' | 'y'>('x');
 
-<div use:draggable={options()}>I am draggable</div>;
+	const axisCompartment = createCompartment(() => axis(currentAxis()));
 
-// You can update `options` with `setOptions` anytime and it'll change. Neodrag will automatically update to the new options 😉
+	useDraggable(draggableRef, [axisCompartment]);
+
+	return (
+		<div>
+			<div ref={setDraggableRef}>Current axis: {currentAxis()}</div>
+			<button onClick={() => setCurrentAxis(currentAxis() === 'x' ? 'y' : 'x')}>Switch Axis</button>
+		</div>
+	);
+};
 ```
 
-<a href="https://www.neodrag.dev/docs/solid" style="font-size: 2rem">Read the docs</a>
+<a href="https://next.neodrag.dev/docs/solid" style="font-size: 2rem">Read the docs</a>
 
 ## Credits
 
-Inspired from the amazing [react-draggable](https://github.com/react-grid-layout/react-draggable) library, and implements even more features with a similar API, but 3.7x smaller.
+Inspired by [react-draggable](https://github.com/react-grid-layout/react-draggable), but with a modern plugin architecture and optimized for performance.
 
 # License
 
-MIT License &copy; Puru Vijay
+MIT License © Puru Vijay

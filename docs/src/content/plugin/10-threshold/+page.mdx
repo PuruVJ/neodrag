@@ -1,0 +1,480 @@
+---
+title: 'threshold'
+tagline: 'Require minimum time or distance before dragging starts'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+The `threshold` plugin prevents accidental dragging by requiring minimum time delay or distance movement before dragging begins. Essential for touch interfaces and clickable elements to distinguish between taps and drags.
+
+```typescript
+threshold({ distance: 10 }); // Move 10px before dragging starts
+threshold({ delay: 200 }); // Wait 200ms before dragging starts
+threshold({ distance: 5, delay: 100 }); // Both conditions required
+threshold(null); // Disable threshold completely
+```
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { threshold } from '@neodrag/svelte';
+</script>
+
+<!-- Distance threshold -->
+<div {@attach draggable([threshold({ distance: 10 })])}>
+  Drag after moving 10px
+</div>
+
+<!-- Time threshold -->
+<div {@attach draggable([threshold({ delay: 300 })])}>
+  Hold for 300ms to drag
+</div>
+
+<!-- Combined threshold -->
+<div {@attach draggable([threshold({ distance: 8, delay: 150 })])}>
+  Move 8px AND wait 150ms
+</div>
+
+<!-- Disable threshold -->
+<div {@attach draggable([threshold(null)])}>Immediate dragging</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { threshold, useDraggable } from '@neodrag/react';
+
+function ThresholdExamples() {
+  const distanceRef = useRef<HTMLDivElement>(null);
+  const delayRef = useRef<HTMLDivElement>(null);
+  const bothRef = useRef<HTMLDivElement>(null);
+  const disabledRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(distanceRef, [threshold({ distance: 10 })]);
+  useDraggable(delayRef, [threshold({ delay: 300 })]);
+  useDraggable(bothRef, [threshold({ distance: 8, delay: 150 })]);
+  useDraggable(disabledRef, [threshold(null)]);
+
+  return (
+    <div>
+      <div ref={distanceRef}>Drag after moving 10px</div>
+      <div ref={delayRef}>Hold for 300ms to drag</div>
+      <div ref={bothRef}>Move 8px AND wait 150ms</div>
+      <div ref={disabledRef}>Immediate dragging</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { vDraggable, threshold } from '@neodrag/vue';
+</script>
+
+<template>
+  <div>
+    <div v-draggable="[threshold({ distance: 10 })]">
+      Drag after moving 10px
+    </div>
+
+    <div v-draggable="[threshold({ delay: 300 })]">
+      Hold for 300ms to drag
+    </div>
+
+    <div v-draggable="[threshold({ distance: 8, delay: 150 })]">
+      Move 8px AND wait 150ms
+    </div>
+
+    <div v-draggable="[threshold(null)]">Immediate dragging</div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { threshold, useDraggable } from '@neodrag/solid';
+
+function ThresholdExamples() {
+  const [distanceRef, setDistanceRef] = createSignal();
+  const [delayRef, setDelayRef] = createSignal();
+  const [bothRef, setBothRef] = createSignal();
+  const [disabledRef, setDisabledRef] = createSignal();
+
+  useDraggable(distanceRef, [threshold({ distance: 10 })]);
+  useDraggable(delayRef, [threshold({ delay: 300 })]);
+  useDraggable(bothRef, [threshold({ distance: 8, delay: 150 })]);
+  useDraggable(disabledRef, [threshold(null)]);
+
+  return (
+    <div>
+      <div ref={setDistanceRef}>Drag after moving 10px</div>
+      <div ref={setDelayRef}>Hold for 300ms to drag</div>
+      <div ref={setBothRef}>Move 8px AND wait 150ms</div>
+      <div ref={setDisabledRef}>Immediate dragging</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { Draggable, threshold } from '@neodrag/vanilla';
+
+const distance = document.getElementById('distance');
+const delay = document.getElementById('delay');
+const both = document.getElementById('both');
+const disabled = document.getElementById('disabled');
+
+new Draggable(distance, [threshold({ distance: 10 })]);
+new Draggable(delay, [threshold({ delay: 300 })]);
+new Draggable(both, [threshold({ distance: 8, delay: 150 })]);
+new Draggable(disabled, [threshold(null)]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Dynamic Thresholds
+
+Adjust thresholds based on device or user preferences:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { threshold, Compartment } from '@neodrag/svelte';
+
+  let deviceType = $state('desktop');
+  let sensitivity = $state('normal');
+
+  const thresholdComp = Compartment.of(() => {
+    if (deviceType === 'mobile') {
+      return threshold({
+        distance: sensitivity === 'high' ? 8 : 12,
+        delay: sensitivity === 'high' ? 50 : 100,
+      });
+    } else {
+      return threshold({
+        distance: sensitivity === 'high' ? 3 : 5,
+        delay: 0,
+      });
+    }
+  });
+</script>
+
+<div {@attach draggable(() => [thresholdComp])}>
+  Adaptive threshold ({deviceType}, {sensitivity})
+</div>
+
+<div class="controls">
+  <select bind:value={deviceType}>
+    <option value="desktop">Desktop</option>
+    <option value="mobile">Mobile</option>
+  </select>
+
+  <select bind:value={sensitivity}>
+    <option value="low">Low</option>
+    <option value="normal">Normal</option>
+    <option value="high">High</option>
+  </select>
+</div>
+
+<p>
+  Current: {deviceType === 'mobile'
+    ? sensitivity === 'high'
+      ? '8px, 50ms'
+      : '12px, 100ms'
+    : sensitivity === 'high'
+      ? '3px, 0ms'
+      : '5px, 0ms'}
+</p>
+```
+
+</div>
+
+<div slot="vanilla">
+
+```javascript
+import { Draggable, threshold, Compartment } from '@neodrag/vanilla';
+
+let deviceType = 'desktop';
+let sensitivity = 'normal';
+
+const element = document.getElementById('adaptive-threshold');
+const deviceSelect = document.getElementById('device-select');
+const sensitivitySelect = document.getElementById(
+  'sensitivity-select',
+);
+const settingsDisplay = document.getElementById('settings-display');
+
+const thresholdComp = new Compartment(() => {
+  if (deviceType === 'mobile') {
+    return threshold({
+      distance: sensitivity === 'high' ? 8 : 12,
+      delay: sensitivity === 'high' ? 50 : 100,
+    });
+  } else {
+    return threshold({
+      distance: sensitivity === 'high' ? 3 : 5,
+      delay: 0,
+    });
+  }
+});
+
+function updateSettings() {
+  const settings =
+    deviceType === 'mobile'
+      ? sensitivity === 'high'
+        ? '8px, 50ms'
+        : '12px, 100ms'
+      : sensitivity === 'high'
+        ? '3px, 0ms'
+        : '5px, 0ms';
+  settingsDisplay.textContent = `Current: ${settings}`;
+}
+
+new Draggable(element, () => [thresholdComp]);
+
+deviceSelect.addEventListener('change', (e) => {
+  deviceType = e.target.value;
+  thresholdComp.current = threshold({
+    distance:
+      deviceType === 'mobile'
+        ? sensitivity === 'high'
+          ? 8
+          : 12
+        : sensitivity === 'high'
+          ? 3
+          : 5,
+    delay:
+      deviceType === 'mobile'
+        ? sensitivity === 'high'
+          ? 50
+          : 100
+        : 0,
+  });
+  updateSettings();
+});
+
+sensitivitySelect.addEventListener('change', (e) => {
+  sensitivity = e.target.value;
+  thresholdComp.current = threshold({
+    distance:
+      deviceType === 'mobile'
+        ? sensitivity === 'high'
+          ? 8
+          : 12
+        : sensitivity === 'high'
+          ? 3
+          : 5,
+    delay:
+      deviceType === 'mobile'
+        ? sensitivity === 'high'
+          ? 50
+          : 100
+        : 0,
+  });
+  updateSettings();
+});
+
+updateSettings();
+```
+
+</div>
+</FrameworkSwitch>
+
+## Common Use Cases
+
+### Touch-Friendly Buttons
+
+```typescript
+// Distinguish between taps and drags on touch devices
+threshold({
+  distance: 10, // Allow some finger movement
+  delay: 0, // Start immediately once threshold met
+});
+```
+
+### Clickable Cards
+
+```typescript
+// Prevent accidental drags when clicking links/buttons
+threshold({
+  distance: 8, // Require intentional movement
+  delay: 100, // Brief hold period
+});
+```
+
+### Precision Drawing Tools
+
+```typescript
+// High precision for drawing/design apps
+threshold({
+  distance: 2, // Very sensitive
+  delay: 0, // Immediate response
+});
+```
+
+### Long-Press Drag
+
+```typescript
+// Require long press before dragging (like mobile context menus)
+threshold({
+  distance: 5, // Small movement tolerance
+  delay: 500, // Half-second hold required
+});
+```
+
+## Device-Specific Recommendations
+
+### Mobile/Touch Devices
+
+```typescript
+// Recommended for touch interfaces
+threshold({
+  distance: 8, // Account for finger imprecision
+  delay: 50, // Brief delay helps differentiate from taps
+});
+```
+
+### Desktop/Mouse
+
+```typescript
+// Recommended for mouse interfaces
+threshold({
+  distance: 3, // Mice are more precise
+  delay: 0, // No delay needed
+});
+```
+
+### Auto-Detection
+
+```typescript
+// Detect touch capability and adjust accordingly
+const isTouchDevice =
+  'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+threshold(
+  isTouchDevice
+    ? { distance: 10, delay: 100 }
+    : { distance: 3, delay: 0 },
+);
+```
+
+## Combining with Other Plugins
+
+### Mobile-Optimized Setup
+
+```typescript
+const plugins = [
+  threshold({ distance: 10, delay: 50 }), // Prevent accidents
+  scrollLock({ lockAxis: 'both' }), // Prevent scroll interference
+  touchAction('none'), // Disable browser gestures
+];
+```
+
+### With Events
+
+```typescript
+const plugins = [
+  threshold({ distance: 8, delay: 200 }),
+  events({
+    onDragStart: () =>
+      console.log('Threshold met - dragging started'),
+    // Note: onDrag won't fire until threshold is met
+  }),
+];
+```
+
+### Conditional Threshold
+
+```typescript
+// Only apply threshold in certain modes
+const plugins = [
+  isEditMode
+    ? threshold({ distance: 15, delay: 300 })
+    : threshold(null),
+  bounds(BoundsFrom.parent()),
+];
+```
+
+## How It Works
+
+The threshold plugin prevents dragging until conditions are met:
+
+1. **On pointer down** (`shouldStart`):
+
+   - Records start time and position
+   - Always returns `true` (allows interaction)
+
+2. **During movement** (`drag`):
+
+   - Checks if currently dragging (if yes, does nothing)
+   - Verifies pointer is still over the draggable element
+   - Tests distance: `√((currentX - startX)² + (currentY - startY)²)`
+   - Tests delay: `currentTime - startTime`
+   - Calls `ctx.preventStart()` if thresholds not met
+
+3. **Both conditions** must be satisfied (AND logic):
+   - Distance moved ≥ required distance
+   - Time elapsed ≥ required delay
+
+**Distance calculation:**
+
+```typescript
+const deltaX = event.clientX - startPosition.x;
+const deltaY = event.clientY - startPosition.y;
+const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+```
+
+**Edge case handling:**
+
+- Moving outside the draggable element prevents dragging
+- Invalid values (negative) throw errors during setup
+- `null` options disable the plugin entirely
+
+## API Reference
+
+```typescript
+function threshold(
+  options?: {
+    distance?: number;
+    delay?: number;
+  } | null,
+): Plugin;
+```
+
+**Options:**
+
+- `distance` - Minimum pixels to move before dragging starts (default: `3`)
+- `delay` - Minimum milliseconds to wait before dragging starts (default: `0`)
+- `null` - Disable threshold checking entirely
+
+**Behavior:**
+
+- Both conditions must be met (AND logic)
+- Distance uses Euclidean distance (straight line)
+- Negative values throw errors
+- Empty object `{}` uses defaults
+- Moving outside element prevents dragging
+
+**Returns:** A plugin object for use with draggable.

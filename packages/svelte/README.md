@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://www.neodrag.dev"><img src="https://www.neodrag.dev/logo.svg" height="150" /></a>
+<a href="https://next.neodrag.dev"><img src="https://next.neodrag.dev/logo.svg" height="150" /></a>
 </p>
 
 <h1 align="center">
@@ -10,41 +10,32 @@
 One draggable to rule em all
 </h2>
 
-<p align="center">A lightweight Svelte action to make your elements draggable.</p>
+<p align="center">A lightweight Svelte attachment to make your elements draggable.</p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@neodrag/svelte"><img src="https://img.shields.io/npm/v/@neodrag/svelte?color=e63900&label="></a>
 <p>
 
-<p align="center"><a href="https://www.neodrag.dev/docs/svelte">Getting Started</a></p>
+<p align="center"><a href="https://next.neodrag.dev/docs/svelte">Getting Started</a></p>
 
 # Features
 
-- 🤏 Tiny - Only 1.68KB min+brotli.
-- 🐇 Simple - Quite simple to use, and effectively no-config required!
-- 🧙‍♀️ Elegant - Svelte Action, to keep the usage simple, elegant and expressive.
-- 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
-- ⚛️ Reactive - Change options passed to it on the fly, it will **just work 🙂**
-
-[Try it in Svelte REPL](https://svelte.dev/repl/fc972f90450c4945b6f2481d13eafa00?version=3.38.3)
+- 🤏 **Small in size** - ~5KB, plugin architecture enables tree-shaking
+- 🧩 **Plugin-based** - Mix and match only what you need
+- ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
+- 🎯 **Svelte 5 Native** - Built for attachments with `{@attach}` syntax
+- 🔄 **Reactive** - Change options on the fly with compartments
+- 🗃️ **Highly customizable** - Tons of plugins available
 
 # Installing
 
 ```bash
-pnpm add @neodrag/svelte
-
-# npm
-npm install @neodrag/svelte
-
-# yarn
-yarn add @neodrag/svelte
+npm install @neodrag/svelte@next
 ```
 
-# Migrating from svelte-drag
-
-svelte-drag is the predecessor of this package. To migrate, follow this short guide: [svelte-drag to @neodrag/svelte migration guide](https://www.neodrag.dev/docs/migrating/svelte-drag)
-
 # Usage
+
+## Svelte 5 (Recommended)
 
 Basic usage
 
@@ -53,40 +44,73 @@ Basic usage
   import { draggable } from '@neodrag/svelte';
 </script>
 
-<div use:draggable>Hello</div>
+<div {@attach draggable()}>Hello</div>
 ```
 
-With options
+With plugins
 
 ```svelte
 <script>
-  import { draggable } from '@neodrag/svelte';
+  import { draggable, axis, grid } from '@neodrag/svelte';
 </script>
 
-<div use:draggable={{ axis: 'x', grid: [10, 10] }}>Hello</div>
+<div {@attach draggable([axis('x'), grid([10, 10])])}>
+  Hello
+</div>
 ```
 
-Defining options elsewhere with typescript
+Defining plugins elsewhere with TypeScript
 
 ```svelte
 <script lang="ts">
-  import { draggable, type DragOptions } from '@neodrag/svelte';
+  import { draggable, axis, bounds, BoundsFrom, type Plugin } from '@neodrag/svelte';
 
-  let options: DragOptions = {
-    axis: 'y',
-    bounds: 'parent',
-  };
+  let plugins: Plugin[] = [
+    axis('y'),
+    bounds(BoundsFrom.viewport()),
+  ];
 </script>
 
-<div use:draggable={options}>Hello</div>
+<div {@attach draggable(plugins)}>Hello</div>
 ```
 
-<a href="https://www.neodrag.dev/docs/svelte" style="font-size: 2rem">Read the docs</a>
+Reactive plugins with compartments
+
+```svelte
+<script>
+  import { draggable, axis, createCompartment } from '@neodrag/svelte';
+
+  let currentAxis = $state('x');
+  const axisComp = createCompartment(() => axis(currentAxis));
+</script>
+
+<div {@attach draggable([axisComp])}>
+  Current axis: {currentAxis}
+</div>
+
+<button onclick={() => currentAxis = currentAxis === 'x' ? 'y' : 'x'}>
+  Switch Axis
+</button>
+```
+
+## Svelte 4 (Legacy Support)
+
+```svelte
+<script>
+  import { legacyDraggable, axis } from '@neodrag/svelte/legacy';
+</script>
+
+<div use:legacyDraggable={[axis('x')]}>Hello</div>
+```
+
+> **Note:** Legacy actions are deprecated and will be removed in v4. Migrate to Svelte 5 for better performance.
+
+<a href="https://next.neodrag.dev/docs/svelte" style="font-size: 2rem">Read the docs</a>
 
 ## Credits
 
-Inspired from the amazing [react-draggable](https://github.com/react-grid-layout/react-draggable) library, and implements a similar API, but 3x smaller.
+Inspired by [react-draggable](https://github.com/react-grid-layout/react-draggable), but with a modern plugin architecture and optimized for performance.
 
 # License
 
-MIT License &copy; Puru Vijay
+MIT License © Puru Vijay

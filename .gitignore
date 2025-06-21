@@ -3,3 +3,5 @@ dist/
 .DS_Store
 .env
 .pnpm-store/
+.turbo
+llm.md

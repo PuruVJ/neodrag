@@ -1,0 +1,1105 @@
+---
+title: 'stateMarker'
+tagline: 'Add data attributes to track drag state'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+The `stateMarker` plugin adds data attributes that track drag state. These attributes enable CSS styling based on drag status and provide hooks for debugging and analytics.
+
+```typescript
+stateMarker(); // Adds data-neodrag-state and data-neodrag-count attributes
+```
+
+**Attributes added:**
+
+- `data-neodrag=""` - Marks element as draggable
+- `data-neodrag-state="idle|dragging"` - Current drag state
+- `data-neodrag-count="0"` - Number of completed drags
+
+> **Note:** StateMarker is included by default and is non-cancelable, so it always runs regardless of other plugin cancellations.
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { stateMarker } from '@neodrag/svelte';
+</script>
+
+<div {@attach draggable([stateMarker()])}>
+  Drag me - watch the data attributes change
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { stateMarker, useDraggable } from '@neodrag/react';
+
+function StateMarkerExample() {
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(elementRef, [stateMarker()]);
+
+  return (
+    <div ref={elementRef}>
+      Drag me - watch the data attributes change
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { stateMarker, vDraggable } from '@neodrag/vue';
+</script>
+
+<template>
+  <div v-draggable="[stateMarker()]">
+    Drag me - watch the data attributes change
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { stateMarker, useDraggable } from '@neodrag/solid';
+
+function StateMarkerExample() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+
+  useDraggable(element, [stateMarker()]);
+
+  return (
+    <div ref={setElement}>
+      Drag me - watch the data attributes change
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { stateMarker, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('draggable');
+
+new Draggable(element, [stateMarker()]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Reading State Attributes
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { stateMarker, events } from '@neodrag/svelte';
+
+  let dragElement;
+  let currentState = $state('idle');
+  let dragCount = $state(0);
+
+  function updateStateInfo() {
+    if (dragElement) {
+      currentState =
+        dragElement.getAttribute('data-neodrag-state') || 'idle';
+      dragCount = parseInt(
+        dragElement.getAttribute('data-neodrag-count') || '0',
+      );
+    }
+  }
+
+  const plugins = [
+    stateMarker(),
+    events({
+      onDragStart: updateStateInfo,
+      onDrag: updateStateInfo,
+      onDragEnd: updateStateInfo,
+    }),
+  ];
+</script>
+
+<div bind:this={dragElement} {@attach draggable(plugins)}>
+  State: {currentState}
+  <br />
+  Drag Count: {dragCount}
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import { stateMarker, events, useDraggable } from '@neodrag/react';
+
+function StateReader() {
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [currentState, setCurrentState] = useState('idle');
+  const [dragCount, setDragCount] = useState(0);
+
+  const updateStateInfo = () => {
+    if (elementRef.current) {
+      const state =
+        elementRef.current.getAttribute('data-neodrag-state') ||
+        'idle';
+      const count = parseInt(
+        elementRef.current.getAttribute('data-neodrag-count') || '0',
+      );
+      setCurrentState(state);
+      setDragCount(count);
+    }
+  };
+
+  useDraggable(elementRef, [
+    stateMarker(),
+    events({
+      onDragStart: updateStateInfo,
+      onDrag: updateStateInfo,
+      onDragEnd: updateStateInfo,
+    }),
+  ]);
+
+  return (
+    <div ref={elementRef}>
+      State: {currentState}
+      <br />
+      Drag Count: {dragCount}
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { stateMarker, events, vDraggable } from '@neodrag/vue';
+
+const dragElement = ref();
+const currentState = ref('idle');
+const dragCount = ref(0);
+
+function updateStateInfo() {
+  if (dragElement.value) {
+    currentState.value =
+      dragElement.value.getAttribute('data-neodrag-state') || 'idle';
+    dragCount.value = parseInt(
+      dragElement.value.getAttribute('data-neodrag-count') || '0',
+    );
+  }
+}
+
+const plugins = [
+  stateMarker(),
+  events({
+    onDragStart: updateStateInfo,
+    onDrag: updateStateInfo,
+    onDragEnd: updateStateInfo,
+  }),
+];
+</script>
+
+<template>
+  <div ref="dragElement" v-draggable="plugins">
+    State: {{ currentState }}
+    <br />
+    Drag Count: {{ dragCount }}
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { stateMarker, events, useDraggable } from '@neodrag/solid';
+
+function StateReader() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [currentState, setCurrentState] = createSignal('idle');
+  const [dragCount, setDragCount] = createSignal(0);
+
+  const updateStateInfo = () => {
+    const el = element();
+    if (el) {
+      const state = el.getAttribute('data-neodrag-state') || 'idle';
+      const count = parseInt(
+        el.getAttribute('data-neodrag-count') || '0',
+      );
+      setCurrentState(state);
+      setDragCount(count);
+    }
+  };
+
+  useDraggable(element, [
+    stateMarker(),
+    events({
+      onDragStart: updateStateInfo,
+      onDrag: updateStateInfo,
+      onDragEnd: updateStateInfo,
+    }),
+  ]);
+
+  return (
+    <div ref={setElement}>
+      State: {currentState()}
+      <br />
+      Drag Count: {dragCount()}
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { stateMarker, events, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('draggable');
+const stateDisplay = document.getElementById('state-display');
+const countDisplay = document.getElementById('count-display');
+
+function updateStateInfo() {
+  const state = element.getAttribute('data-neodrag-state') || 'idle';
+  const count = element.getAttribute('data-neodrag-count') || '0';
+
+  stateDisplay.textContent = `State: ${state}`;
+  countDisplay.textContent = `Drag Count: ${count}`;
+}
+
+new Draggable(element, [
+  stateMarker(),
+  events({
+    onDragStart: updateStateInfo,
+    onDrag: updateStateInfo,
+    onDragEnd: updateStateInfo,
+  }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Monitoring State Changes
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { stateMarker, events } from '@neodrag/svelte';
+
+  let notifications = $state([]);
+
+  function addNotification(message) {
+    notifications = [
+      ...notifications,
+      {
+        id: Date.now(),
+        message,
+        timestamp: new Date().toLocaleTimeString(),
+      },
+    ];
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      notifications = notifications.filter(
+        (n) => n.id !== notifications[0]?.id,
+      );
+    }, 3000);
+  }
+
+  const plugins = [
+    stateMarker(),
+    events({
+      onDragStart: () => addNotification('Drag started'),
+      onDragEnd: (data) => {
+        const count = data.rootNode.getAttribute(
+          'data-neodrag-count',
+        );
+        addNotification(`Drag ended (Total: ${count})`);
+      },
+    }),
+  ];
+</script>
+
+<div {@attach draggable(plugins)}>Drag me for notifications</div>
+
+<div class="notifications">
+  {#each notifications as notification (notification.id)}
+    <div>{notification.timestamp}: {notification.message}</div>
+  {/each}
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import { stateMarker, events, useDraggable } from '@neodrag/react';
+
+interface Notification {
+  id: number;
+  message: string;
+  timestamp: string;
+}
+
+function StateMonitor() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [notifications, setNotifications] = useState<Notification[]>(
+    [],
+  );
+
+  const addNotification = (message: string) => {
+    const notification = {
+      id: Date.now(),
+      message,
+      timestamp: new Date().toLocaleTimeString(),
+    };
+
+    setNotifications((prev) => [...prev, notification]);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      setNotifications((prev) =>
+        prev.filter((n) => n.id !== notification.id),
+      );
+    }, 3000);
+  };
+
+  useDraggable(ref, [
+    stateMarker(),
+    events({
+      onDragStart: () => addNotification('Drag started'),
+      onDragEnd: (data) => {
+        const count = data.rootNode.getAttribute(
+          'data-neodrag-count',
+        );
+        addNotification(`Drag ended (Total: ${count})`);
+      },
+    }),
+  ]);
+
+  return (
+    <div>
+      <div ref={ref}>Drag me for notifications</div>
+
+      <div className="notifications">
+        {notifications.map((notification) => (
+          <div key={notification.id}>
+            {notification.timestamp}: {notification.message}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { stateMarker, events, vDraggable } from '@neodrag/vue';
+
+const notifications = ref([]);
+
+function addNotification(message) {
+  const notification = {
+    id: Date.now(),
+    message,
+    timestamp: new Date().toLocaleTimeString(),
+  };
+
+  notifications.value.push(notification);
+
+  // Remove after 3 seconds
+  setTimeout(() => {
+    const index = notifications.value.findIndex(
+      (n) => n.id === notification.id,
+    );
+    if (index > -1) {
+      notifications.value.splice(index, 1);
+    }
+  }, 3000);
+}
+
+const plugins = [
+  stateMarker(),
+  events({
+    onDragStart: () => addNotification('Drag started'),
+    onDragEnd: (data) => {
+      const count = data.rootNode.getAttribute('data-neodrag-count');
+      addNotification(`Drag ended (Total: ${count})`);
+    },
+  }),
+];
+</script>
+
+<template>
+  <div>
+    <div v-draggable="plugins">Drag me for notifications</div>
+
+    <div class="notifications">
+      <div
+        v-for="notification in notifications"
+        :key="notification.id"
+      >
+        {{ notification.timestamp }}: {{ notification.message }}
+      </div>
+    </div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  stateMarker,
+  events,
+  useDraggable,
+  For,
+} from '@neodrag/solid';
+
+interface Notification {
+  id: number;
+  message: string;
+  timestamp: string;
+}
+
+function StateMonitor() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [notifications, setNotifications] = createSignal<
+    Notification[]
+  >([]);
+
+  const addNotification = (message: string) => {
+    const notification = {
+      id: Date.now(),
+      message,
+      timestamp: new Date().toLocaleTimeString(),
+    };
+
+    setNotifications((prev) => [...prev, notification]);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      setNotifications((prev) =>
+        prev.filter((n) => n.id !== notification.id),
+      );
+    }, 3000);
+  };
+
+  useDraggable(element, [
+    stateMarker(),
+    events({
+      onDragStart: () => addNotification('Drag started'),
+      onDragEnd: (data) => {
+        const count = data.rootNode.getAttribute(
+          'data-neodrag-count',
+        );
+        addNotification(`Drag ended (Total: ${count})`);
+      },
+    }),
+  ]);
+
+  return (
+    <div>
+      <div ref={setElement}>Drag me for notifications</div>
+
+      <div class="notifications">
+        <For each={notifications()}>
+          {(notification) => (
+            <div>
+              {notification.timestamp}: {notification.message}
+            </div>
+          )}
+        </For>
+      </div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { stateMarker, events, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('draggable');
+const notificationsContainer =
+  document.getElementById('notifications');
+
+function addNotification(message) {
+  const notification = document.createElement('div');
+  const timestamp = new Date().toLocaleTimeString();
+  notification.textContent = `${timestamp}: ${message}`;
+
+  notificationsContainer.appendChild(notification);
+
+  // Remove after 3 seconds
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.parentNode.removeChild(notification);
+    }
+  }, 3000);
+}
+
+new Draggable(element, [
+  stateMarker(),
+  events({
+    onDragStart: () => addNotification('Drag started'),
+    onDragEnd: (data) => {
+      const count = data.rootNode.getAttribute('data-neodrag-count');
+      addNotification(`Drag ended (Total: ${count})`);
+    },
+  }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Analytics Integration
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { stateMarker, events } from '@neodrag/svelte';
+
+  function trackDragAnalytics(eventName, data) {
+    // Send to analytics service
+    analytics.track(eventName, {
+      elementId: data.rootNode.id,
+      dragCount: data.rootNode.getAttribute('data-neodrag-count'),
+      position: data.offset,
+      timestamp: Date.now(),
+    });
+  }
+
+  const analyticsPlugins = [
+    stateMarker(),
+    events({
+      onDragStart: (data) => trackDragAnalytics('drag_started', data),
+      onDragEnd: (data) => trackDragAnalytics('drag_completed', data),
+    }),
+  ];
+</script>
+
+<div {@attach draggable(analyticsPlugins)}>
+  Analytics-tracked element
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { stateMarker, events, useDraggable } from '@neodrag/react';
+
+function AnalyticsExample() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const trackDragAnalytics = (eventName: string, data: any) => {
+    // Send to analytics service
+    analytics.track(eventName, {
+      elementId: data.rootNode.id,
+      dragCount: data.rootNode.getAttribute('data-neodrag-count'),
+      position: data.offset,
+      timestamp: Date.now(),
+    });
+  };
+
+  useDraggable(ref, [
+    stateMarker(),
+    events({
+      onDragStart: (data) => trackDragAnalytics('drag_started', data),
+      onDragEnd: (data) => trackDragAnalytics('drag_completed', data),
+    }),
+  ]);
+
+  return <div ref={ref}>Analytics-tracked element</div>;
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { stateMarker, events, vDraggable } from '@neodrag/vue';
+
+function trackDragAnalytics(eventName, data) {
+  // Send to analytics service
+  analytics.track(eventName, {
+    elementId: data.rootNode.id,
+    dragCount: data.rootNode.getAttribute('data-neodrag-count'),
+    position: data.offset,
+    timestamp: Date.now(),
+  });
+}
+
+const analyticsPlugins = [
+  stateMarker(),
+  events({
+    onDragStart: (data) => trackDragAnalytics('drag_started', data),
+    onDragEnd: (data) => trackDragAnalytics('drag_completed', data),
+  }),
+];
+</script>
+
+<template>
+  <div v-draggable="analyticsPlugins">Analytics-tracked element</div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { stateMarker, events, useDraggable } from '@neodrag/solid';
+
+function AnalyticsExample() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+
+  const trackDragAnalytics = (eventName: string, data: any) => {
+    // Send to analytics service
+    analytics.track(eventName, {
+      elementId: data.rootNode.id,
+      dragCount: data.rootNode.getAttribute('data-neodrag-count'),
+      position: data.offset,
+      timestamp: Date.now(),
+    });
+  };
+
+  useDraggable(element, [
+    stateMarker(),
+    events({
+      onDragStart: (data) => trackDragAnalytics('drag_started', data),
+      onDragEnd: (data) => trackDragAnalytics('drag_completed', data),
+    }),
+  ]);
+
+  return <div ref={setElement}>Analytics-tracked element</div>;
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { stateMarker, events, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('draggable');
+
+function trackDragAnalytics(eventName, data) {
+  // Send to analytics service
+  analytics.track(eventName, {
+    elementId: data.rootNode.id,
+    dragCount: data.rootNode.getAttribute('data-neodrag-count'),
+    position: data.offset,
+    timestamp: Date.now(),
+  });
+}
+
+new Draggable(element, [
+  stateMarker(),
+  events({
+    onDragStart: (data) => trackDragAnalytics('drag_started', data),
+    onDragEnd: (data) => trackDragAnalytics('drag_completed', data),
+  }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Debug Inspector
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { stateMarker, events } from '@neodrag/svelte';
+
+  let debugInfo = $state({
+    state: 'idle',
+    count: 0,
+    isDragging: false,
+    lastEventTime: null,
+  });
+
+  function updateDebugInfo(eventType, data) {
+    debugInfo = {
+      state: data.rootNode.getAttribute('data-neodrag-state'),
+      count: parseInt(
+        data.rootNode.getAttribute('data-neodrag-count') || '0',
+      ),
+      isDragging: eventType === 'drag' || eventType === 'dragStart',
+      lastEventTime: new Date().toLocaleTimeString(),
+    };
+  }
+
+  const debugPlugins = [
+    stateMarker(),
+    events({
+      onDragStart: (data) => updateDebugInfo('dragStart', data),
+      onDrag: (data) => updateDebugInfo('drag', data),
+      onDragEnd: (data) => updateDebugInfo('dragEnd', data),
+    }),
+  ];
+</script>
+
+<div {@attach draggable(debugPlugins)}>Drag me to see debug info</div>
+
+<div class="debug-panel">
+  <h3>Debug Information</h3>
+  <p>State: {debugInfo.state}</p>
+  <p>Total Drags: {debugInfo.count}</p>
+  <p>Currently Dragging: {debugInfo.isDragging ? 'Yes' : 'No'}</p>
+  <p>Last Event: {debugInfo.lastEventTime || 'None'}</p>
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import { stateMarker, events, useDraggable } from '@neodrag/react';
+
+interface DebugInfo {
+  state: string;
+  count: number;
+  isDragging: boolean;
+  lastEventTime: string | null;
+}
+
+function DebugInspector() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [debugInfo, setDebugInfo] = useState<DebugInfo>({
+    state: 'idle',
+    count: 0,
+    isDragging: false,
+    lastEventTime: null,
+  });
+
+  const updateDebugInfo = (eventType: string, data: any) => {
+    setDebugInfo({
+      state:
+        data.rootNode.getAttribute('data-neodrag-state') || 'idle',
+      count: parseInt(
+        data.rootNode.getAttribute('data-neodrag-count') || '0',
+      ),
+      isDragging: eventType === 'drag' || eventType === 'dragStart',
+      lastEventTime: new Date().toLocaleTimeString(),
+    });
+  };
+
+  useDraggable(ref, [
+    stateMarker(),
+    events({
+      onDragStart: (data) => updateDebugInfo('dragStart', data),
+      onDrag: (data) => updateDebugInfo('drag', data),
+      onDragEnd: (data) => updateDebugInfo('dragEnd', data),
+    }),
+  ]);
+
+  return (
+    <div>
+      <div ref={ref}>Drag me to see debug info</div>
+
+      <div className="debug-panel">
+        <h3>Debug Information</h3>
+        <p>State: {debugInfo.state}</p>
+        <p>Total Drags: {debugInfo.count}</p>
+        <p>
+          Currently Dragging: {debugInfo.isDragging ? 'Yes' : 'No'}
+        </p>
+        <p>Last Event: {debugInfo.lastEventTime || 'None'}</p>
+      </div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { stateMarker, events, vDraggable } from '@neodrag/vue';
+
+const debugInfo = ref({
+  state: 'idle',
+  count: 0,
+  isDragging: false,
+  lastEventTime: null,
+});
+
+function updateDebugInfo(eventType, data) {
+  debugInfo.value = {
+    state: data.rootNode.getAttribute('data-neodrag-state'),
+    count: parseInt(
+      data.rootNode.getAttribute('data-neodrag-count') || '0',
+    ),
+    isDragging: eventType === 'drag' || eventType === 'dragStart',
+    lastEventTime: new Date().toLocaleTimeString(),
+  };
+}
+
+const debugPlugins = [
+  stateMarker(),
+  events({
+    onDragStart: (data) => updateDebugInfo('dragStart', data),
+    onDrag: (data) => updateDebugInfo('drag', data),
+    onDragEnd: (data) => updateDebugInfo('dragEnd', data),
+  }),
+];
+</script>
+
+<template>
+  <div>
+    <div v-draggable="debugPlugins">Drag me to see debug info</div>
+
+    <div class="debug-panel">
+      <h3>Debug Information</h3>
+      <p>State: {{ debugInfo.state }}</p>
+      <p>Total Drags: {{ debugInfo.count }}</p>
+      <p>
+        Currently Dragging: {{ debugInfo.isDragging ? 'Yes' : 'No' }}
+      </p>
+      <p>Last Event: {{ debugInfo.lastEventTime || 'None' }}</p>
+    </div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { stateMarker, events, useDraggable } from '@neodrag/solid';
+
+interface DebugInfo {
+  state: string;
+  count: number;
+  isDragging: boolean;
+  lastEventTime: string | null;
+}
+
+function DebugInspector() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [debugInfo, setDebugInfo] = createSignal<DebugInfo>({
+    state: 'idle',
+    count: 0,
+    isDragging: false,
+    lastEventTime: null,
+  });
+
+  const updateDebugInfo = (eventType: string, data: any) => {
+    setDebugInfo({
+      state:
+        data.rootNode.getAttribute('data-neodrag-state') || 'idle',
+      count: parseInt(
+        data.rootNode.getAttribute('data-neodrag-count') || '0',
+      ),
+      isDragging: eventType === 'drag' || eventType === 'dragStart',
+      lastEventTime: new Date().toLocaleTimeString(),
+    });
+  };
+
+  useDraggable(element, [
+    stateMarker(),
+    events({
+      onDragStart: (data) => updateDebugInfo('dragStart', data),
+      onDrag: (data) => updateDebugInfo('drag', data),
+      onDragEnd: (data) => updateDebugInfo('dragEnd', data),
+    }),
+  ]);
+
+  return (
+    <div>
+      <div ref={setElement}>Drag me to see debug info</div>
+
+      <div class="debug-panel">
+        <h3>Debug Information</h3>
+        <p>State: {debugInfo().state}</p>
+        <p>Total Drags: {debugInfo().count}</p>
+        <p>
+          Currently Dragging: {debugInfo().isDragging ? 'Yes' : 'No'}
+        </p>
+        <p>Last Event: {debugInfo().lastEventTime || 'None'}</p>
+      </div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { stateMarker, events, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('draggable');
+const stateEl = document.getElementById('state');
+const countEl = document.getElementById('count');
+const draggingEl = document.getElementById('dragging');
+const lastEventEl = document.getElementById('last-event');
+
+function updateDebugInfo(eventType, data) {
+  const state = data.rootNode.getAttribute('data-neodrag-state');
+  const count = data.rootNode.getAttribute('data-neodrag-count');
+  const isDragging =
+    eventType === 'drag' || eventType === 'dragStart';
+  const lastEventTime = new Date().toLocaleTimeString();
+
+  stateEl.textContent = `State: ${state}`;
+  countEl.textContent = `Total Drags: ${count}`;
+  draggingEl.textContent = `Currently Dragging: ${isDragging ? 'Yes' : 'No'}`;
+  lastEventEl.textContent = `Last Event: ${lastEventTime}`;
+}
+
+new Draggable(element, [
+  stateMarker(),
+  events({
+    onDragStart: (data) => updateDebugInfo('dragStart', data),
+    onDrag: (data) => updateDebugInfo('drag', data),
+    onDragEnd: (data) => updateDebugInfo('dragEnd', data),
+  }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## How It Works
+
+The stateMarker plugin manages data attributes through the drag lifecycle:
+
+1. **Setup phase:**
+
+   - Adds `data-neodrag=""` to mark element
+   - Sets `data-neodrag-state="idle"`
+   - Initializes `data-neodrag-count="0"`
+
+2. **Start phase:**
+
+   - Updates `data-neodrag-state="dragging"`
+
+3. **End phase:**
+
+   - Resets `data-neodrag-state="idle"`
+   - Increments `data-neodrag-count`
+
+4. **Non-cancelable:**
+   - Always runs regardless of other plugin cancellations
+   - Ensures consistent state tracking
+
+```typescript
+// Simplified internal implementation
+setup(ctx) {
+  setNodeDataset(ctx.rootNode, 'neodrag', '');
+  setNodeDataset(ctx.rootNode, 'neodrag-state', 'idle');
+  setNodeDataset(ctx.rootNode, 'neodrag-count', '0');
+},
+
+start(ctx) {
+  setNodeDataset(ctx.rootNode, 'neodrag-state', 'dragging');
+},
+
+end(ctx, state) {
+  setNodeDataset(ctx.rootNode, 'neodrag-state', 'idle');
+  setNodeDataset(ctx.rootNode, 'neodrag-count', ++state.count);
+}
+```
+
+## API Reference
+
+```typescript
+function stateMarker(): Plugin;
+```
+
+**Parameters:** None
+
+**Data attributes added:**
+
+- `data-neodrag=""` - Marks element as draggable
+- `data-neodrag-state="idle|dragging"` - Current drag state
+- `data-neodrag-count="0"` - Number of completed drags
+
+**Behavior:**
+
+- Non-cancelable - always runs
+- Updates attributes automatically during drag lifecycle
+- Increments count only on successful drag completion
+- Provides hooks for CSS styling and JavaScript integration
+
+**Returns:** A plugin object for use with draggable.

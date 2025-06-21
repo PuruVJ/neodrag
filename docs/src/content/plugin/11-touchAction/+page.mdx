@@ -1,0 +1,675 @@
+---
+title: 'touchAction'
+tagline: 'Control browser touch gesture handling'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+The `touchAction` plugin controls browser touch gesture handling on draggable elements. Sets the CSS `touch-action` property to prevent conflicts between dragging and browser behaviors like scrolling, zooming, or context menus.
+
+```typescript
+touchAction('manipulation'); // Default - allow basic gestures, disable others
+touchAction('none'); // Disable all browser touch behaviors
+touchAction('pan-y'); // Allow vertical scrolling only
+touchAction(false); // Don't set touch-action (browser default)
+```
+
+> **Note:** TouchAction is included by default with `'manipulation'` mode for optimal touch device compatibility.
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { touchAction } from '@neodrag/svelte';
+</script>
+
+<!-- Default manipulation mode -->
+<div {@attach draggable([touchAction('manipulation')])}>
+  Touch-optimized dragging
+</div>
+
+<!-- Disable all browser touch behaviors -->
+<div {@attach draggable([touchAction('none')])}>Pure drag only</div>
+
+<!-- Allow vertical scrolling while preventing horizontal -->
+<div {@attach draggable([touchAction('pan-y')])}>
+  Vertical scroll + drag
+</div>
+
+<!-- Don't set touch-action property -->
+<div {@attach draggable([touchAction(false)])}>
+  Browser default behavior
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { touchAction, useDraggable } from '@neodrag/react';
+
+function TouchActionExamples() {
+  const manipulationRef = useRef<HTMLDivElement>(null);
+  const noneRef = useRef<HTMLDivElement>(null);
+  const panYRef = useRef<HTMLDivElement>(null);
+  const defaultRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(manipulationRef, [touchAction('manipulation')]);
+  useDraggable(noneRef, [touchAction('none')]);
+  useDraggable(panYRef, [touchAction('pan-y')]);
+  useDraggable(defaultRef, [touchAction(false)]);
+
+  return (
+    <div>
+      <div ref={manipulationRef}>Touch-optimized dragging</div>
+      <div ref={noneRef}>Pure drag only</div>
+      <div ref={panYRef}>Vertical scroll + drag</div>
+      <div ref={defaultRef}>Browser default behavior</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { touchAction } from '@neodrag/vue';
+</script>
+
+<template>
+  <div>
+    <div v-draggable="[touchAction('manipulation')]">
+      Touch-optimized dragging
+    </div>
+
+    <div v-draggable="[touchAction('none')]">Pure drag only</div>
+
+    <div v-draggable="[touchAction('pan-y')]">
+      Vertical scroll + drag
+    </div>
+
+    <div v-draggable="[touchAction(false)]">
+      Browser default behavior
+    </div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { touchAction, useDraggable } from '@neodrag/solid';
+
+function TouchActionExamples() {
+  const [manipulationRef, setManipulationRef] = createSignal();
+  const [noneRef, setNoneRef] = createSignal();
+  const [panYRef, setPanYRef] = createSignal();
+  const [defaultRef, setDefaultRef] = createSignal();
+
+  useDraggable(manipulationRef, [touchAction('manipulation')]);
+  useDraggable(noneRef, [touchAction('none')]);
+  useDraggable(panYRef, [touchAction('pan-y')]);
+  useDraggable(defaultRef, [touchAction(false)]);
+
+  return (
+    <div>
+      <div ref={setManipulationRef}>Touch-optimized dragging</div>
+      <div ref={setNoneRef}>Pure drag only</div>
+      <div ref={setPanYRef}>Vertical scroll + drag</div>
+      <div ref={setDefaultRef}>Browser default behavior</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { Draggable, touchAction } from '@neodrag/vanilla';
+
+const manipulation = document.getElementById('manipulation');
+const none = document.getElementById('none');
+const panY = document.getElementById('pan-y');
+const defaultElement = document.getElementById('default');
+
+new Draggable(manipulation, [touchAction('manipulation')]);
+new Draggable(none, [touchAction('none')]);
+new Draggable(panY, [touchAction('pan-y')]);
+new Draggable(defaultElement, [touchAction(false)]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Touch Action Values
+
+### Recommended Values
+
+```typescript
+touchAction('manipulation'); // Best for most draggable elements
+touchAction('none'); // Complete touch gesture control
+touchAction('pan-y'); // Vertical scrolling allowed
+touchAction('pan-x'); // Horizontal scrolling allowed
+```
+
+### All Available Values
+
+```typescript
+// Basic gestures
+touchAction('auto'); // Browser default behavior
+touchAction('none'); // Disable all touch behaviors
+touchAction('manipulation'); // Allow pan and zoom, disable others
+
+// Directional panning
+touchAction('pan-x'); // Horizontal panning only
+touchAction('pan-y'); // Vertical panning only
+touchAction('pan-left'); // Left panning only
+touchAction('pan-right'); // Right panning only
+touchAction('pan-up'); // Up panning only
+touchAction('pan-down'); // Down panning only
+
+// Zoom control
+touchAction('pinch-zoom'); // Pinch-to-zoom only
+
+// CSS globals
+touchAction('inherit'); // Inherit from parent
+touchAction('initial'); // CSS initial value
+touchAction('unset'); // CSS unset value
+
+// Disable plugin
+touchAction(false); // Don't set touch-action property
+touchAction(null); // Same as false
+```
+
+## Dynamic Configuration
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { touchAction, Compartment } from '@neodrag/svelte';
+
+  let mode = $state('manipulation');
+  let allowScroll = $state(false);
+
+  const touchActionComp = Compartment.of(() => {
+    if (mode === 'disabled') return touchAction(false);
+    if (allowScroll) return touchAction('pan-y');
+    return touchAction(mode);
+  });
+</script>
+
+<div {@attach draggable(() => [touchActionComp])}>
+  Current mode: {mode}
+  {allowScroll ? ' (scroll enabled)' : ''}
+</div>
+
+<div class="controls">
+  <select bind:value={mode}>
+    <option value="manipulation">Manipulation</option>
+    <option value="none">None</option>
+    <option value="auto">Auto</option>
+    <option value="disabled">Disabled</option>
+  </select>
+
+  <label>
+    <input type="checkbox" bind:checked={allowScroll} />
+    Force vertical scroll
+  </label>
+</div>
+
+<p>
+  CSS: touch-action: {mode === 'disabled'
+    ? 'not set'
+    : allowScroll
+      ? 'pan-y'
+      : mode}
+</p>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import {
+  touchAction,
+  useDraggable,
+  useCompartment,
+} from '@neodrag/react';
+
+function DynamicTouchAction() {
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [mode, setMode] = useState('manipulation');
+  const [allowScroll, setAllowScroll] = useState(false);
+
+  const touchActionComp = useCompartment(() => {
+    if (mode === 'disabled') return touchAction(false);
+    if (allowScroll) return touchAction('pan-y');
+    return touchAction(mode);
+  }, [mode, allowScroll]);
+
+  useDraggable(elementRef, [touchActionComp]);
+
+  const getCurrentValue = () => {
+    if (mode === 'disabled') return 'not set';
+    if (allowScroll) return 'pan-y';
+    return mode;
+  };
+
+  return (
+    <div>
+      <div ref={elementRef}>
+        Current mode: {mode}
+        {allowScroll ? ' (scroll enabled)' : ''}
+      </div>
+
+      <div className="controls">
+        <select
+          value={mode}
+          onChange={(e) => setMode(e.target.value)}
+        >
+          <option value="manipulation">Manipulation</option>
+          <option value="none">None</option>
+          <option value="auto">Auto</option>
+          <option value="disabled">Disabled</option>
+        </select>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={allowScroll}
+            onChange={(e) => setAllowScroll(e.target.checked)}
+          />
+          Force vertical scroll
+        </label>
+      </div>
+
+      <p>CSS: touch-action: {getCurrentValue()}</p>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref, computed } from 'vue';
+import { touchAction, useCompartment } from '@neodrag/vue';
+
+const mode = ref('manipulation');
+const allowScroll = ref(false);
+
+const touchActionComp = useCompartment(() => {
+  if (mode.value === 'disabled') return touchAction(false);
+  if (allowScroll.value) return touchAction('pan-y');
+  return touchAction(mode.value);
+}, [mode, allowScroll]);
+
+const currentValue = computed(() => {
+  if (mode.value === 'disabled') return 'not set';
+  if (allowScroll.value) return 'pan-y';
+  return mode.value;
+});
+</script>
+
+<template>
+  <div>
+    <div v-draggable="[touchActionComp]">
+      Current mode: {{ mode }}
+      {{ allowScroll ? ' (scroll enabled)' : '' }}
+    </div>
+
+    <div class="controls">
+      <select v-model="mode">
+        <option value="manipulation">Manipulation</option>
+        <option value="none">None</option>
+        <option value="auto">Auto</option>
+        <option value="disabled">Disabled</option>
+      </select>
+
+      <label>
+        <input type="checkbox" v-model="allowScroll" />
+        Force vertical scroll
+      </label>
+    </div>
+
+    <p>CSS: touch-action: {{ currentValue }}</p>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  touchAction,
+  useDraggable,
+  createCompartment,
+} from '@neodrag/solid';
+
+function DynamicTouchAction() {
+  const [mode, setMode] = createSignal('manipulation');
+  const [allowScroll, setAllowScroll] = createSignal(false);
+  const [elementRef, setElementRef] = createSignal();
+
+  const touchActionComp = createCompartment(() => {
+    if (mode() === 'disabled') return touchAction(false);
+    if (allowScroll()) return touchAction('pan-y');
+    return touchAction(mode());
+  });
+
+  useDraggable(elementRef, [touchActionComp]);
+
+  const getCurrentValue = () => {
+    if (mode() === 'disabled') return 'not set';
+    if (allowScroll()) return 'pan-y';
+    return mode();
+  };
+
+  return (
+    <div>
+      <div ref={setElementRef}>
+        Current mode: {mode()}
+        {allowScroll() ? ' (scroll enabled)' : ''}
+      </div>
+
+      <div class="controls">
+        <select
+          value={mode()}
+          onChange={(e) => setMode(e.target.value)}
+        >
+          <option value="manipulation">Manipulation</option>
+          <option value="none">None</option>
+          <option value="auto">Auto</option>
+          <option value="disabled">Disabled</option>
+        </select>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={allowScroll()}
+            onChange={(e) => setAllowScroll(e.target.checked)}
+          />
+          Force vertical scroll
+        </label>
+      </div>
+
+      <p>CSS: touch-action: {getCurrentValue()}</p>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import {
+  Draggable,
+  touchAction,
+  Compartment,
+} from '@neodrag/vanilla';
+
+const element = document.getElementById('draggable');
+const modeSelect = document.getElementById('mode-select');
+const scrollToggle = document.getElementById('scroll-toggle');
+const valueDisplay = document.getElementById('value-display');
+
+let mode = 'manipulation';
+let allowScroll = false;
+
+const touchActionComp = new Compartment(() => {
+  if (mode === 'disabled') return touchAction(false);
+  if (allowScroll) return touchAction('pan-y');
+  return touchAction(mode);
+});
+
+function updateDisplay() {
+  let value;
+  if (mode === 'disabled') value = 'not set';
+  else if (allowScroll) value = 'pan-y';
+  else value = mode;
+
+  valueDisplay.textContent = `CSS: touch-action: ${value}`;
+}
+
+new Draggable(element, () => [touchActionComp]);
+
+modeSelect.addEventListener('change', (e) => {
+  mode = e.target.value;
+  touchActionComp.current = touchAction(
+    mode === 'disabled' ? false : allowScroll ? 'pan-y' : mode,
+  );
+  updateDisplay();
+});
+
+scrollToggle.addEventListener('change', (e) => {
+  allowScroll = e.target.checked;
+  touchActionComp.current = touchAction(
+    mode === 'disabled' ? false : allowScroll ? 'pan-y' : mode,
+  );
+  updateDisplay();
+});
+
+updateDisplay();
+```
+
+</div>
+</FrameworkSwitch>
+
+## Device-Specific Usage
+
+### Mobile Phones
+
+```typescript
+// Recommended for mobile drag interfaces
+touchAction('manipulation'); // Allows pinch-zoom, prevents conflicts
+
+// For full-screen drag experiences
+touchAction('none'); // Complete gesture control
+```
+
+### Tablets
+
+```typescript
+// Allow some scrolling while dragging
+touchAction('pan-y'); // Vertical scrolling + drag
+
+// General purpose
+touchAction('manipulation'); // Good default
+```
+
+### Desktop with Touch
+
+```typescript
+// Usually less restrictive
+touchAction('auto'); // Browser default often works
+
+// For precision drag tools
+touchAction('none'); // Disable browser interference
+```
+
+## Common Use Cases
+
+### Modal/Dialog Dragging
+
+```typescript
+// Allow page interaction while dragging modal
+touchAction('manipulation'); // Keep pinch-zoom, disable pan
+```
+
+### Slider/Range Controls
+
+```typescript
+// Horizontal slider that allows vertical scrolling
+touchAction('pan-y'); // Only vertical page scrolling
+```
+
+### Game/Interactive Elements
+
+```typescript
+// Complete gesture control for games
+touchAction('none'); // Disable all browser behaviors
+```
+
+### Canvas/Drawing Applications
+
+```typescript
+// High precision drawing
+touchAction('none'); // Disable all browser gestures
+```
+
+## Combining with Other Plugins
+
+### Mobile-Optimized Setup
+
+```typescript
+const plugins = [
+  touchAction('none'), // Disable browser gestures
+  threshold({ distance: 8, delay: 50 }), // Prevent accidental drags
+  scrollLock({ lockAxis: 'both' }), // Prevent page scrolling
+];
+```
+
+### Context-Aware Setup
+
+```typescript
+const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+const isFullScreen = document.fullscreenElement !== null;
+
+const plugins = [
+  touchAction(isFullScreen ? 'none' : 'manipulation'),
+  isMobile
+    ? threshold({ distance: 10, delay: 100 })
+    : threshold({ distance: 3, delay: 0 }),
+];
+```
+
+### Canvas/Drawing Setup
+
+```typescript
+const plugins = [
+  touchAction('none'), // Disable all browser gestures
+  threshold({ distance: 1 }), // Very sensitive
+  scrollLock({ lockAxis: 'both' }), // Lock scrolling completely
+];
+```
+
+## Browser Support
+
+### Modern Browsers
+
+All modern browsers support touch-action:
+
+- iOS Safari 9.1+
+- Chrome 36+
+- Firefox 52+
+- Edge 12+
+
+### Legacy Fallbacks
+
+For older browsers, touch-action is ignored gracefully:
+
+```typescript
+// Graceful degradation
+touchAction('manipulation'); // Newer browsers get optimization
+// Older browsers fall back to default behavior
+```
+
+### iOS Considerations
+
+iOS Safari has specific behaviors:
+
+```typescript
+// iOS often requires 'manipulation' for best results
+touchAction('manipulation'); // Works well on iOS
+
+// 'none' can be aggressive on iOS
+touchAction('none'); // Use carefully on iOS
+```
+
+## How It Works
+
+The touchAction plugin sets the CSS `touch-action` property:
+
+1. **Setup phase:** Sets `element.style.touchAction = value`
+2. **Browser behavior:** Browser respects the property for touch gesture handling
+3. **Live updates:** Can change touch-action during drag if needed
+
+**CSS Applied:**
+
+```css
+/* Example results */
+.draggable {
+  touch-action: manipulation;
+}
+.no-gestures {
+  touch-action: none;
+}
+.vertical-scroll {
+  touch-action: pan-y;
+}
+```
+
+**What touch-action controls:**
+
+- Pan gestures (scrolling)
+- Pinch-to-zoom
+- Double-tap to zoom
+- Context menus (long press)
+- Text selection
+- Browser navigation gestures
+
+## API Reference
+
+```typescript
+function touchAction(mode?: TouchActionMode | false | null): Plugin;
+```
+
+**Parameters:**
+
+- `mode` - The touch-action CSS value to apply (default: `'manipulation'`)
+
+**TouchActionMode values:**
+
+- `'auto'` - Browser default behavior
+- `'none'` - Disable all touch behaviors
+- `'manipulation'` - Allow pan and zoom, disable others
+- `'pan-x'` - Horizontal panning only
+- `'pan-y'` - Vertical panning only
+- `'pan-left'`, `'pan-right'`, `'pan-up'`, `'pan-down'` - Directional panning
+- `'pinch-zoom'` - Pinch-to-zoom only
+- `'inherit'`, `'initial'`, `'unset'` - CSS global values
+- `false` or `null` - Don't set touch-action (browser default)
+
+**Behavior:**
+
+- Non-cancelable - always applies the CSS property
+- Supports live updates during drag
+- Only sets CSS property in setup phase
+- Works on all modern browsers with graceful degradation
+
+**Returns:** A plugin object for use with draggable.

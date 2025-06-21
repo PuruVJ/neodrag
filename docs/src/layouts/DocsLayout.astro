@@ -1,90 +1,124 @@
 ---
-import type { MarkdownLayoutProps } from 'astro';
-
+import { get_nav_list } from '$/nav';
 import Nav from '$components/docs/Nav.svelte';
-import MobileNav from '$components/MobileNav.svelte';
-import ToC from '$components/ToC.svelte';
-import Layout from './Layout.astro';
 import MetaThemeColor from '$components/MetaThemeColor.svelte';
+import ToC from '$components/ToC.astro';
+import type { Framework } from '$helpers/constants';
+import type { MarkdownHeading } from 'astro';
+import Layout from './Layout.astro';
 
-type Props =
-	| MarkdownLayoutProps<{
-			title: string;
-	  }>
-	| { title: string };
+type Props = {
+	title: string;
+	headings: MarkdownHeading[];
+	framework: Framework;
+};
 
-// @ts-ignore
-const { frontmatter, title } = Astro.props;
-const { title: frontmatterTitle } = frontmatter || {};
+const { title, headings, framework } = Astro.props;
+const nav_list = get_nav_list(framework as any);
 ---
 
 <MetaThemeColor client:load />
-
-<Layout title={title ?? frontmatterTitle}>
-	<ToC client:only />
-	<div class="mobile-nav">
-		<MobileNav client:media="(max-width: 968px)" />
-	</div>
+<Layout title={title}>
+	<!-- <div class="mobile-nav">
+		<MobileNav client:media="(max-width: 968px)">
+			<Nav framework={framework} />
+		</MobileNav>
+	</div> -->
 
 	<section class="docs-container" id="docs-container">
 		<aside>
-			<Nav client:media="(min-width: 969px)" client:load />
+			<Nav framework={framework} pathname={Astro.url.pathname} nav_list={nav_list} />
 		</aside>
 
 		<main>
 			<article>
 				<slot />
+
+				<footer>
+					<span class="copyright"
+						>&copy; 2021-{new Date().getUTCFullYear()}
+						<a
+							href="https://x.com/puruvjdev"
+							target="blank"
+							rel="noopener noreferrer"
+							class={framework ? 'framework' : ''}
+						>
+							Puru Vijay</a
+						>
+					</span>
+				</footer>
 			</article>
 		</main>
+
+		<aside class="toc">
+			<ToC headings={headings} />
+		</aside>
 	</section>
 </Layout>
 
-<style lang="scss">
-	@import '../css/breakpoints';
-
+<style is:global>
 	.mobile-nav {
 		display: none;
 
-		@include media('<tablet') {
+		@media (max-width: 967px) {
 			display: block;
 		}
 	}
 
 	.docs-container {
-		display: grid;
-		grid-template-columns: 300px auto;
-		gap: 1rem;
-
 		width: 100%;
 		height: auto;
-
-		@include media('<tablet') {
-			grid-template-columns: 1fr;
-
-			aside {
-				display: none;
-			}
-		}
-	}
-
-	aside {
-		height: 100%;
-	}
-
-	main {
-		// Needed for the navigation bar intersection observer
-		position: relative;
-
-		min-width: 0;
-		height: 100vh;
-
-		padding: 0 1rem;
 
 		overflow-y: auto;
 		overflow-x: hidden;
 		scroll-behavior: smooth;
 
-		@include media('<=sm-tablet') {
+		@media (max-width: 967px) {
+			grid-template-columns: 1fr;
+
+			& aside {
+				display: none;
+			}
+
+			main {
+				width: 100%;
+				padding-left: 1rem;
+				padding-top: 2.5rem;
+			}
+		}
+	}
+
+	article {
+		padding-bottom: 3rem;
+	}
+
+	aside {
+		height: 100%;
+		width: 300px;
+		position: fixed;
+
+		z-index: 1;
+	}
+
+	.toc {
+		right: 20px;
+		top: 0;
+		width: 280px;
+	}
+
+	main {
+		/* Needed for the navigation bar intersection observer */
+		position: relative;
+
+		min-width: 0;
+		width: calc(100% - 300px);
+		height: 100vh;
+
+		padding: 1rem;
+
+		padding-left: 332px;
+
+		@media (max-width: 768px) {
 			padding: 4rem 1rem;
 		}
 	}
@@ -94,15 +128,27 @@ const { title: frontmatterTitle } = frontmatter || {};
 	}
 
 	.docs-container {
-		:global(p, pre.astro-code, blockquote) {
+		p,
+		pre.astro-code,
+		blockquote {
 			max-width: clamp(20ch, 100vw, var(--entity-width));
 
-			@include media('<tablet') {
+			@media (max-width: 967px) {
 				max-width: 100%;
 			}
 		}
 
-		:global(p, a) {
+		.astro-code .line {
+			display: inline-block;
+			width: 100%;
+		}
+
+		.astro-code .line.highlighted {
+			background-color: color-mix(in lch, var(--app-color-dark), transparent 40%) !important;
+		}
+
+		p,
+		a {
 			margin: 1.5rem 0;
 
 			font-size: clamp(1.1rem, 2vw, 1.2rem);
@@ -145,76 +191,43 @@ const { title: frontmatterTitle } = frontmatter || {};
 			height: auto;
 		}
 	}
-</style>
 
-<style lang="scss" is:global>
-	@import '../css/breakpoints';
-
-	:root {
-		--entity-width: clamp(400px, 60vw, 800px);
-	}
+	/* Global styles below */
 
 	body {
+		--secondary-color: var(--app-color-primary);
+		--app-color-scrolling-navbar: color-mix(
+			in lch,
+			var(--secondary-color),
+			var(--app-color-mixer) 35%
+		);
+
+		background-image: radial-gradient(
+			ellipse farthest-corner at 95% 2%,
+			color-mix(in lch, var(--secondary-color), transparent 50%) 0%,
+			var(--app-color-shell) 100%
+		);
+
 		overflow: hidden;
 
 		&[data-framework='svelte'] {
-			background-image: var(--app-color-brand-svelte-body-gradient);
 			--secondary-color: var(--app-color-brand-svelte);
-			--secondary-color-hsl: var(--app-color-brand-svelte-hsl);
-			--app-color-scrolling-navbar: var(--app-color-brand-svelte-navbar);
 		}
 
 		&[data-framework='vue'] {
-			background-image: var(--app-color-brand-vue-body-gradient);
 			--secondary-color: var(--app-color-brand-vue);
-			--secondary-color-hsl: var(--app-color-brand-vue-hsl);
-			--app-color-scrolling-navbar: var(--app-color-brand-vue-navbar);
 		}
 
 		&[data-framework='react'] {
-			background-image: var(--app-color-brand-react-body-gradient);
 			--secondary-color: var(--app-color-brand-react);
-			--secondary-color-hsl: var(--app-color-brand-react-hsl);
-			--app-color-scrolling-navbar: var(--app-color-brand-react-navbar);
 		}
 
 		&[data-framework='solid'] {
-			background-image: var(--app-color-brand-solid-body-gradient);
 			--secondary-color: var(--app-color-brand-solid);
-			--secondary-color-hsl: var(--app-color-brand-solid-hsl);
-			--app-color-scrolling-navbar: var(--app-color-brand-solid-navbar);
 		}
 
 		&[data-framework='vanilla'] {
-			background-image: var(--app-color-brand-vanilla-body-gradient);
 			--secondary-color: var(--app-color-brand-vanilla);
-			--secondary-color-hsl: var(--app-color-brand-vanilla-hsl);
-			--app-color-scrolling-navbar: var(--app-color-brand-vanilla-navbar);
-		}
-
-		&:not([data-framework]) {
-			--secondary-color: var(--app-color-primary);
-			--secondary-color-hsl: var(--app-color-primary-hsl);
-
-			&.dark {
-				--app-color-scrolling-navbar: #60383e;
-
-				background-image: radial-gradient(
-					ellipse farthest-corner at 100% 2%,
-					hsla(var(--app-color-primary-hsl), 0.35),
-					var(--app-color-primary-contrast)
-				);
-			}
-
-			&.light {
-				--app-color-scrolling-navbar: #efd3d6;
-
-				background-image: radial-gradient(
-					ellipse farthest-corner at 100% 2%,
-					hsla(var(--app-color-primary-hsl), 0.2),
-					var(--app-color-primary-contrast)
-				);
-			}
 		}
 	}
 
@@ -230,14 +243,33 @@ const { title: frontmatterTitle } = frontmatter || {};
 
 		width: var(--entity-width);
 
-		@include media('<tablet') {
+		@media (max-width: 967px) {
 			width: 100%;
+			--font-size: 0.9rem;
 		}
 
-		code {
+		& code {
 			font-size: var(--font-size) !important;
 
 			background-color: transparent;
+		}
+	}
+
+	.copyright {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 0.5rem;
+		font-family: var(--app-font-mono);
+		font-size: 0.9rem;
+
+		a {
+			font-size: inherit;
+
+			&.framework {
+				--app-color-primary: var(--secondary-color);
+			}
 		}
 	}
 </style>

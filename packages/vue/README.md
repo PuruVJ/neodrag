@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://www.neodrag.dev"><img src="https://www.neodrag.dev/logo.svg" height="150" /></a>
+<a href="https://next.neodrag.dev"><img src="https://next.neodrag.dev/logo.svg" height="150" /></a>
 </p>
 
 <h1 align="center">
@@ -13,34 +13,26 @@ One draggable to rule em all
 <p align="center">A lightweight Vue directive to make your elements draggable.</p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@neodrag/vue"><img src="https://img.shields.io/npm/v/@neodrag/vue?color=42b883&label="></a>
+  <a href="https://www.npmjs.com/package/@neodrag/vue"><img src="https://img.shields.io/npm/v/@neodrag/vue?color=e63900&label="></a>
 <p>
 
-<p align="center"><a href="https://www.neodrag.dev/docs/vue">Getting Started</a></p>
+<p align="center"><a href="https://next.neodrag.dev/docs/vue">Getting Started</a></p>
 
-## Features
+# Features
 
-- 🤏 Tiny - Only 1.77KB min+brotli.
-- 🐇 Simple - Quite simple to use, and effectively no-config required!
-- 🧙‍♀️ Elegant - Vue directive, to keep the usage simple, elegant and straightforward.
-- 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
-- ⚛️ Reactive - Change options passed to it on the fly, it will **just work 🙂**
+- 🤏 **Small in size** - ~5KB, plugin architecture enables tree-shaking
+- 🧩 **Plugin-based** - Mix and match only what you need
+- ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
+- 🎯 **Vue 3 Native** - Built for Vue 3 composition API with `v-draggable` directive
+- 🔄 **Reactive** - `useCompartment` for reactive plugin updates
 
-[Try it in Stackblitz](https://stackblitz.com/edit/vitejs-vite-2pg1r1?file=src%2FApp.jsx)
-
-## Installing
+# Installing
 
 ```bash
-pnpm add @neodrag/vue
-
-# npm
-npm install @neodrag/vue
-
-# yarn
-yarn add @neodrag/vue
+npm install @neodrag/vue@next
 ```
 
-## Usage
+# Usage
 
 Basic usage
 
@@ -54,41 +46,59 @@ import { vDraggable } from '@neodrag/vue';
 </template>
 ```
 
-With options
+With plugins
 
 ```vue
 <script setup>
-import { vDraggable } from '@neodrag/vue';
+import { vDraggable, axis, grid } from '@neodrag/vue';
 </script>
 
 <template>
-	<div v-draggable="{ axis: 'x', grid: [10, 10] }">I am draggable</div>
+	<div v-draggable="[axis('x'), grid([10, 10])]">I am draggable</div>
 </template>
 ```
 
-Defining options elsewhere with typescript
+Defining plugins elsewhere with TypeScript
 
 ```vue
 <script setup lang="ts">
-import { vDraggable, type DragOptions } from '@neodrag/vue';
+import { vDraggable, axis, grid, type Plugin } from '@neodrag/vue';
 
-const options: DragOptions = {
-	axis: 'y',
-	bounds: 'parent',
-};
+const plugins: Plugin[] = [axis('y'), grid([10, 10])];
 </script>
 
 <template>
-	<div v-draggable="options">I am draggable</div>
+	<div v-draggable="plugins">I am draggable</div>
 </template>
 ```
 
-<a href="https://www.neodrag.dev/docs/vue" style="font-size: 2rem">Read the docs</a>
+Reactive plugins with useCompartment
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { vDraggable, axis, useCompartment } from '@neodrag/vue';
+
+const currentAxis = ref('x');
+const axisComp = useCompartment(() => axis(currentAxis.value));
+
+const plugins = () => [axisComp];
+</script>
+
+<template>
+	<div>
+		<div v-draggable="plugins">Current axis: {{ currentAxis }}</div>
+		<button @click="currentAxis = currentAxis === 'x' ? 'y' : 'x'">Switch Axis</button>
+	</div>
+</template>
+```
+
+<a href="https://next.neodrag.dev/docs/vue" style="font-size: 2rem">Read the docs</a>
 
 ## Credits
 
-Inspired from the amazing [react-draggable](https://github.com/react-grid-layout/react-draggable) library, and implements a similar API, but 3x smaller.
+Inspired by [react-draggable](https://github.com/react-grid-layout/react-draggable), but with a modern plugin architecture and optimized for performance.
 
 # License
 
-MIT License &copy; Puru Vijay
+MIT License © Puru Vijay

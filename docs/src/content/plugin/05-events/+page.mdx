@@ -1,0 +1,834 @@
+---
+title: 'events'
+tagline: 'Listen to drag start, drag, and drag end events'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+The `events` plugin provides callbacks that fire during different phases of dragging. Get notified when dragging starts, during movement, and when it ends - perfect for updating UI state, logging, or triggering animations.
+
+```typescript
+events({
+  onDragStart: (data) => console.log('Started dragging'),
+  onDrag: (data) => console.log('Moving:', data.offset),
+  onDragEnd: (data) => console.log('Finished dragging'),
+});
+```
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { events } from '@neodrag/svelte';
+
+  let dragStatus = $state('idle');
+  let position = $state({ x: 0, y: 0 });
+
+  const eventHandlers = events({
+    onDragStart: () => {
+      dragStatus = 'dragging';
+    },
+
+    onDrag: (data) => {
+      position = { x: data.offset.x, y: data.offset.y };
+    },
+
+    onDragEnd: () => {
+      dragStatus = 'idle';
+    },
+  });
+</script>
+
+<div {@attach draggable([eventHandlers])}>
+  Status: {dragStatus}
+  <br />
+  Position: {position.x}, {position.y}
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import { events, useDraggable } from '@neodrag/react';
+
+function EventExample() {
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [dragStatus, setDragStatus] = useState('idle');
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  useDraggable(elementRef, [
+    events({
+      onDragStart: () => {
+        setDragStatus('dragging');
+      },
+
+      onDrag: (data) => {
+        setPosition({ x: data.offset.x, y: data.offset.y });
+      },
+
+      onDragEnd: () => {
+        setDragStatus('idle');
+      },
+    }),
+  ]);
+
+  return (
+    <div ref={elementRef}>
+      Status: {dragStatus}
+      <br />
+      Position: {position.x}, {position.y}
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { events, vDraggable } from '@neodrag/vue';
+
+const dragStatus = ref('idle');
+const position = ref({ x: 0, y: 0 });
+
+const eventHandlers = [
+  events({
+    onDragStart: () => {
+      dragStatus.value = 'dragging';
+    },
+
+    onDrag: (data) => {
+      position.value = { x: data.offset.x, y: data.offset.y };
+    },
+
+    onDragEnd: () => {
+      dragStatus.value = 'idle';
+    },
+  }),
+];
+</script>
+
+<template>
+  <div v-draggable="eventHandlers">
+    Status: {{ dragStatus }}
+    <br />
+    Position: {{ position.x }}, {{ position.y }}
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { events, useDraggable } from '@neodrag/solid';
+
+function EventExample() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [dragStatus, setDragStatus] = createSignal('idle');
+  const [position, setPosition] = createSignal({ x: 0, y: 0 });
+
+  useDraggable(element, [
+    events({
+      onDragStart: () => {
+        setDragStatus('dragging');
+      },
+
+      onDrag: (data) => {
+        setPosition({ x: data.offset.x, y: data.offset.y });
+      },
+
+      onDragEnd: () => {
+        setDragStatus('idle');
+      },
+    }),
+  ]);
+
+  return (
+    <div ref={setElement}>
+      Status: {dragStatus()}
+      <br />
+      Position: {position().x}, {position().y}
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { events, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('element');
+const statusEl = document.getElementById('status');
+const positionEl = document.getElementById('position');
+
+new Draggable(element, [
+  events({
+    onDragStart: () => {
+      statusEl.textContent = 'dragging';
+    },
+
+    onDrag: (data) => {
+      positionEl.textContent = `${data.offset.x}, ${data.offset.y}`;
+    },
+
+    onDragEnd: () => {
+      statusEl.textContent = 'idle';
+    },
+  }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Event Data
+
+All event callbacks receive a `DragEventData` object with:
+
+- `offset` - Current position `{ x: number, y: number }`
+- `rootNode` - Element with draggable applied
+- `currentNode` - Element being dragged (can change mid-drag)
+- `event` - The pointer event that triggered this callback
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { events } from '@neodrag/svelte';
+
+  function logEventData(data) {
+    console.log('Position:', data.offset);
+    console.log('Root element:', data.rootNode);
+    console.log('Current element:', data.currentNode);
+    console.log('Pointer event:', data.event);
+  }
+
+  const eventHandlers = events({
+    onDragStart: logEventData,
+    onDrag: logEventData,
+    onDragEnd: logEventData,
+  });
+</script>
+
+<div {@attach draggable([eventHandlers])}>
+  Check console for event data
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { events, useDraggable } from '@neodrag/react';
+
+function EventDataExample() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const logEventData = (data) => {
+    console.log('Position:', data.offset);
+    console.log('Root element:', data.rootNode);
+    console.log('Current element:', data.currentNode);
+    console.log('Pointer event:', data.event);
+  };
+
+  useDraggable(ref, [
+    events({
+      onDragStart: logEventData,
+      onDrag: logEventData,
+      onDragEnd: logEventData,
+    }),
+  ]);
+
+  return <div ref={ref}>Check console for event data</div>;
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { events, vDraggable } from '@neodrag/vue';
+
+function logEventData(data) {
+  console.log('Position:', data.offset);
+  console.log('Root element:', data.rootNode);
+  console.log('Current element:', data.currentNode);
+  console.log('Pointer event:', data.event);
+}
+
+const eventHandlers = [
+  events({
+    onDragStart: logEventData,
+    onDrag: logEventData,
+    onDragEnd: logEventData,
+  }),
+];
+</script>
+
+<template>
+  <div v-draggable="eventHandlers">Check console for event data</div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { events, useDraggable } from '@neodrag/solid';
+
+function EventDataExample() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+
+  const logEventData = (data) => {
+    console.log('Position:', data.offset);
+    console.log('Root element:', data.rootNode);
+    console.log('Current element:', data.currentNode);
+    console.log('Pointer event:', data.event);
+  };
+
+  useDraggable(element, [
+    events({
+      onDragStart: logEventData,
+      onDrag: logEventData,
+      onDragEnd: logEventData,
+    }),
+  ]);
+
+  return <div ref={setElement}>Check console for event data</div>;
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { events, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('element');
+
+function logEventData(data) {
+  console.log('Position:', data.offset);
+  console.log('Root element:', data.rootNode);
+  console.log('Current element:', data.currentNode);
+  console.log('Pointer event:', data.event);
+}
+
+new Draggable(element, [
+  events({
+    onDragStart: logEventData,
+    onDrag: logEventData,
+    onDragEnd: logEventData,
+  }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Real-World Examples
+
+### Position Tracking with Velocity
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { events } from '@neodrag/svelte';
+
+  let position = $state({ x: 0, y: 0 });
+  let velocity = $state({ x: 0, y: 0 });
+  let lastTime = 0;
+  let lastPosition = { x: 0, y: 0 };
+
+  const trackingHandler = events({
+    onDrag: (data) => {
+      const now = Date.now();
+      const deltaTime = now - lastTime;
+
+      if (deltaTime > 0) {
+        velocity = {
+          x: Math.round(
+            ((data.offset.x - lastPosition.x) / deltaTime) * 1000,
+          ),
+          y: Math.round(
+            ((data.offset.y - lastPosition.y) / deltaTime) * 1000,
+          ),
+        };
+      }
+
+      position = { ...data.offset };
+      lastPosition = { ...data.offset };
+      lastTime = now;
+    },
+  });
+</script>
+
+<div {@attach draggable([trackingHandler])}>
+  Position: ({position.x}, {position.y})
+  <br />
+  Velocity: ({velocity.x}px/s, {velocity.y}px/s)
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import { events, useDraggable } from '@neodrag/react';
+
+function VelocityTracker() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [velocity, setVelocity] = useState({ x: 0, y: 0 });
+
+  let lastTime = useRef(0);
+  let lastPosition = useRef({ x: 0, y: 0 });
+
+  useDraggable(ref, [
+    events({
+      onDrag: (data) => {
+        const now = Date.now();
+        const deltaTime = now - lastTime.current;
+
+        if (deltaTime > 0) {
+          const velocityX = Math.round(
+            ((data.offset.x - lastPosition.current.x) / deltaTime) *
+              1000,
+          );
+          const velocityY = Math.round(
+            ((data.offset.y - lastPosition.current.y) / deltaTime) *
+              1000,
+          );
+          setVelocity({ x: velocityX, y: velocityY });
+        }
+
+        setPosition({ ...data.offset });
+        lastPosition.current = { ...data.offset };
+        lastTime.current = now;
+      },
+    }),
+  ]);
+
+  return (
+    <div ref={ref}>
+      Position: ({position.x}, {position.y})
+      <br />
+      Velocity: ({velocity.x}px/s, {velocity.y}px/s)
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { events, vDraggable } from '@neodrag/vue';
+
+const position = ref({ x: 0, y: 0 });
+const velocity = ref({ x: 0, y: 0 });
+let lastTime = 0;
+let lastPosition = { x: 0, y: 0 };
+
+const trackingHandler = [
+  events({
+    onDrag: (data) => {
+      const now = Date.now();
+      const deltaTime = now - lastTime;
+
+      if (deltaTime > 0) {
+        velocity.value = {
+          x: Math.round(
+            ((data.offset.x - lastPosition.x) / deltaTime) * 1000,
+          ),
+          y: Math.round(
+            ((data.offset.y - lastPosition.y) / deltaTime) * 1000,
+          ),
+        };
+      }
+
+      position.value = { ...data.offset };
+      lastPosition = { ...data.offset };
+      lastTime = now;
+    },
+  }),
+];
+</script>
+
+<template>
+  <div v-draggable="trackingHandler">
+    Position: ({{ position.x }}, {{ position.y }})
+    <br />
+    Velocity: ({{ velocity.x }}px/s, {{ velocity.y }}px/s)
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { events, useDraggable } from '@neodrag/solid';
+
+function VelocityTracker() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [position, setPosition] = createSignal({ x: 0, y: 0 });
+  const [velocity, setVelocity] = createSignal({ x: 0, y: 0 });
+
+  let lastTime = 0;
+  let lastPosition = { x: 0, y: 0 };
+
+  useDraggable(element, [
+    events({
+      onDrag: (data) => {
+        const now = Date.now();
+        const deltaTime = now - lastTime;
+
+        if (deltaTime > 0) {
+          const velocityX = Math.round(
+            ((data.offset.x - lastPosition.x) / deltaTime) * 1000,
+          );
+          const velocityY = Math.round(
+            ((data.offset.y - lastPosition.y) / deltaTime) * 1000,
+          );
+          setVelocity({ x: velocityX, y: velocityY });
+        }
+
+        setPosition({ ...data.offset });
+        lastPosition = { ...data.offset };
+        lastTime = now;
+      },
+    }),
+  ]);
+
+  return (
+    <div ref={setElement}>
+      Position: ({position().x}, {position().y})
+      <br />
+      Velocity: ({velocity().x}px/s, {velocity().y}px/s)
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { events, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('tracker');
+const positionEl = document.getElementById('position');
+const velocityEl = document.getElementById('velocity');
+
+let lastTime = 0;
+let lastPosition = { x: 0, y: 0 };
+
+new Draggable(element, [
+  events({
+    onDrag: (data) => {
+      const now = Date.now();
+      const deltaTime = now - lastTime;
+
+      let velocityX = 0,
+        velocityY = 0;
+      if (deltaTime > 0) {
+        velocityX = Math.round(
+          ((data.offset.x - lastPosition.x) / deltaTime) * 1000,
+        );
+        velocityY = Math.round(
+          ((data.offset.y - lastPosition.y) / deltaTime) * 1000,
+        );
+      }
+
+      positionEl.textContent = `(${data.offset.x}, ${data.offset.y})`;
+      velocityEl.textContent = `(${velocityX}px/s, ${velocityY}px/s)`;
+
+      lastPosition = { ...data.offset };
+      lastTime = now;
+    },
+  }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+### Save Position to Storage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { events } from '@neodrag/svelte';
+
+  const saveHandler = events({
+    onDragEnd: (data) => {
+      localStorage.setItem(
+        'elementPosition',
+        JSON.stringify({
+          x: data.offset.x,
+          y: data.offset.y,
+          timestamp: Date.now(),
+        }),
+      );
+      console.log('Position saved!');
+    },
+  });
+</script>
+
+<div {@attach draggable([saveHandler])}>
+  Position saves when you stop dragging
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { events, useDraggable } from '@neodrag/react';
+
+function SavePosition() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useDraggable(ref, [
+    events({
+      onDragEnd: (data) => {
+        localStorage.setItem(
+          'elementPosition',
+          JSON.stringify({
+            x: data.offset.x,
+            y: data.offset.y,
+            timestamp: Date.now(),
+          }),
+        );
+        console.log('Position saved!');
+      },
+    }),
+  ]);
+
+  return <div ref={ref}>Position saves when you stop dragging</div>;
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { events, vDraggable } from '@neodrag/vue';
+
+const saveHandler = [
+  events({
+    onDragEnd: (data) => {
+      localStorage.setItem(
+        'elementPosition',
+        JSON.stringify({
+          x: data.offset.x,
+          y: data.offset.y,
+          timestamp: Date.now(),
+        }),
+      );
+      console.log('Position saved!');
+    },
+  }),
+];
+</script>
+
+<template>
+  <div v-draggable="saveHandler">
+    Position saves when you stop dragging
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { events, useDraggable } from '@neodrag/solid';
+
+function SavePosition() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+
+  useDraggable(element, [
+    events({
+      onDragEnd: (data) => {
+        localStorage.setItem(
+          'elementPosition',
+          JSON.stringify({
+            x: data.offset.x,
+            y: data.offset.y,
+            timestamp: Date.now(),
+          }),
+        );
+        console.log('Position saved!');
+      },
+    }),
+  ]);
+
+  return (
+    <div ref={setElement}>Position saves when you stop dragging</div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { events, Draggable } from '@neodrag/vanilla';
+
+const element = document.getElementById('element');
+
+new Draggable(element, [
+  events({
+    onDragEnd: (data) => {
+      localStorage.setItem(
+        'elementPosition',
+        JSON.stringify({
+          x: data.offset.x,
+          y: data.offset.y,
+          timestamp: Date.now(),
+        }),
+      );
+      console.log('Position saved!');
+    },
+  }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+### Analytics Tracking
+
+```typescript
+// Track user interactions for analytics
+events({
+  onDragStart: (data) => {
+    analytics.track('drag_started', {
+      element: data.rootNode.id,
+      timestamp: Date.now(),
+    });
+  },
+
+  onDragEnd: (data) => {
+    analytics.track('drag_completed', {
+      element: data.rootNode.id,
+      finalPosition: data.offset,
+      timestamp: Date.now(),
+    });
+  },
+});
+```
+
+### Progress Indicator
+
+```typescript
+// Show progress based on how far element has moved
+const maxDistance = 300;
+
+events({
+  onDragStart: () => {
+    progressBar.style.display = 'block';
+  },
+
+  onDrag: (data) => {
+    const distance = Math.sqrt(
+      data.offset.x ** 2 + data.offset.y ** 2,
+    );
+    const progress = Math.min((distance / maxDistance) * 100, 100);
+    progressBar.style.width = `${progress}%`;
+  },
+
+  onDragEnd: () => {
+    progressBar.style.display = 'none';
+  },
+});
+```
+
+## How It Works
+
+The events plugin:
+
+1. **Stores event data** in its state during each hook
+2. **Schedules callbacks** using `ctx.effect.immediate()` for fast execution
+3. **Provides consistent data** across all three event types
+4. **Non-cancelable** - Always runs regardless of other plugin cancellations
+
+The callbacks fire in this order:
+
+- `onDragStart` → `onDrag` (repeatedly) → `onDragEnd`
+
+## API Reference
+
+```typescript
+function events(options?: {
+  onDragStart?: (data: DragEventData) => void;
+  onDrag?: (data: DragEventData) => void;
+  onDragEnd?: (data: DragEventData) => void;
+}): Plugin;
+```
+
+**Options:**
+
+- `onDragStart` - Called when dragging begins
+- `onDrag` - Called repeatedly during dragging
+- `onDragEnd` - Called when dragging ends
+
+**DragEventData:**
+
+- `offset` - Current position `{ x: number, y: number }`
+- `rootNode` - Element with draggable applied
+- `currentNode` - Element being dragged
+- `event` - The pointer event that triggered this callback
+
+**Returns:** A plugin object for use with draggable.

@@ -1,0 +1,26 @@
+{
+	"name": "@neodrag/playground-svelte",
+	"private": true,
+	"version": "0.0.2-next.2",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+	},
+	"dependencies": {
+		"@neodrag/svelte": "workspace:*"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^3.0.0",
+		"@sveltejs/kit": "^2.9.0",
+		"@sveltejs/vite-plugin-svelte": "^5.0.0",
+		"prettier-plugin-svelte": "^3.4.0",
+		"svelte": "^5.33.1",
+		"svelte-check": "^4.0.0",
+		"typescript": "catalog:",
+		"vite": "catalog:"
+	}
+}

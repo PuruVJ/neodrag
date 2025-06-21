@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://www.neodrag.dev"><img src="https://www.neodrag.dev/logo.svg" height="150" /></a>
+<a href="https://next.neodrag.dev"><img src="https://next.neodrag.dev/logo.svg" height="150" /></a>
 </p>
 
 <h1 align="center">
@@ -10,125 +10,134 @@
 One draggable to rule em all
 </h2>
 
-<p align="center">A lightweight vanillaJS library to make your elements draggable.</p>
+<p align="center">A lightweight library to make your elements draggable.</p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@neodrag/vanilla"><img src="https://img.shields.io/npm/v/@neodrag/vanilla?color=fff&label="></a>
+  <a href="https://www.npmjs.com/package/@neodrag/vanilla"><img src="https://img.shields.io/npm/v/@neodrag/vanilla?color=e63900&label="></a>
 <p>
 
-<p align="center"><a href="https://www.neodrag.dev/docs/vanilla">Getting Started</a></p>
+<p align="center"><a href="https://next.neodrag.dev/docs/vanilla">Getting Started</a></p>
 
 # Features
 
-- 🤏 Tiny - Only 1.79KB min+brotli.
-- 🐇 Simple - Quite simple to use, and effectively no-config required!
-- 🧙‍♀️ Elegant - Single class, very easy to use.
-- 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
-- ⚛️ Reactive - Change options passed to it on the fly, it will **just work 🙂**
+- 🤏 **Small in size** - ~5KB, plugin architecture enables tree-shaking
+- 🧩 **Plugin-based** - Mix and match only what you need
+- ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
+- 🎯 **Framework agnostic** - Works with any JavaScript environment
+- 🔄 **Reactive** - `Compartment` for reactive plugin updates
 
 # Installing
 
 ```bash
-pnpm add @neodrag/vanilla
-
-# npm
-npm install @neodrag/vanilla
-
-# yarn
-yarn add @neodrag/vanilla
+npm install @neodrag/vanilla@next
 ```
 
 # Usage
 
 Basic usage
 
-```tsx
+```typescript
 import { Draggable } from '@neodrag/vanilla';
 
 const dragInstance = new Draggable(document.querySelector('#drag'));
 ```
 
-With options
+With plugins
 
-```tsx
-import { Draggable } from '@neodrag/vanilla';
+```typescript
+import { Draggable, axis, grid } from '@neodrag/vanilla';
 
-const dragInstance = new Draggable(document.querySelector('#drag'), {
-	axis: 'x',
-	grid: [10, 10],
-});
+const dragInstance = new Draggable(document.querySelector('#drag'), [axis('x'), grid([10, 10])]);
 ```
 
-Defining options elsewhere with typescript
+Defining plugins elsewhere with TypeScript
 
-```tsx
-import { type Draggable } from '@neodrag/vanilla';
+```typescript
+import { Draggable, axis, bounds, BoundsFrom, type Plugin } from '@neodrag/vanilla';
 
-const options: DragOptions = {
-	axis: 'y',
-	bounds: 'parent',
-};
+const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
 
-const dragInstance = new Draggable(document.querySelector('#drag'), options);
+const dragInstance = new Draggable(document.querySelector('#drag'), plugins);
 ```
 
-Update options:
+Reactive plugins with Compartments
 
-```ts
-import { Draggable } from '@neodrag/vanilla';
+```typescript
+import { Draggable, axis, Compartment } from '@neodrag/vanilla';
 
-const dragInstance = new Draggable(document.querySelector('#drag'), {
-	axis: 'x',
-	grid: [10, 10],
-});
+const axisCompartment = new Compartment(() => axis('x'));
+const dragInstance = new Draggable(document.querySelector('#drag'), () => [axisCompartment]);
 
-// Update the specific options. Will be merged with the existing options.
-dragInstance.update({
-	axis: 'y',
-});
-
-// Completely overrides existing options, in this case, the `grid` property is removed
-dragInstance.options = {
-	axis: 'y',
-};
+// Update the axisCompartment. Automatically applies to the drag instance
+axisCompartment.current = axis('y');
 ```
 
-Using via CDN
+Cleanup
 
-For users who prefer not to install the package and instead use it directly in their projects via a CDN, you can include `@neodrag/vanilla` directly in your HTML files. This is particularly useful for quick prototyping or projects where you want to avoid a build step. Here’s how to include it using different CDNs:
+```typescript
+// Clean up when done
+dragInstance.destroy();
+```
 
-Using Unpkg
+## Using via CDN
 
-Include the library in your HTML using the following `<script>` tag. This will load the latest version of `@neodrag/vanilla` directly from unpkg:
+For quick prototyping or projects without build tools:
+
+### Basic CDN Usage
 
 ```html
-<script src="https://unpkg.com/@neodrag/vanilla@latest/dist/umd/index.js"> </script>
+<script src="https://unpkg.com/@neodrag/vanilla@next/dist/umd/index.js"></script>
+
+<div id="drag">Drag me!</div>
+<script>
+	var dragInstance = new NeoDrag.Draggable(document.getElementById('drag'));
+</script>
 ```
 
-Using jsDelivr
-
-Alternatively, you can use jsDelivr as a CDN to load `@neodrag/vanilla`. Include the following line in your HTML:
+### CDN with Plugins
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@neodrag/vanilla@latest/dist/umd/index.js"> </script>
+<script src="https://unpkg.com/@neodrag/vanilla@next/dist/umd/index.js"></script>
+
+<div id="constrained-drag">Constrained dragging</div>
+<script>
+	var constrainedInstance = new NeoDrag.Draggable(document.getElementById('constrained-drag'), [
+		NeoDrag.axis('x'),
+		NeoDrag.bounds(NeoDrag.BoundsFrom.parent()),
+		NeoDrag.grid([20, 20]),
+	]);
+</script>
 ```
 
-Usage with CDN
-
-After including the library via a CDN, `@neodrag/vanilla` will be available as a global variable `NeoDrag`. Here’s how you can use it to make an element draggable:
+### CDN with Reactive Compartments
 
 ```html
-<div id="drag">Drag me!</div> <script>   var dragInstance = new NeoDrag.Draggable(document.getElementById('drag')); </script>
+<script src="https://unpkg.com/@neodrag/vanilla@next/dist/umd/index.js"></script>
+
+<div id="reactive-drag">Reactive dragging</div>
+<button onclick="switchAxis()">Switch Axis</button>
+
+<script>
+	var currentAxis = 'x';
+	var axisCompartment = new NeoDrag.Compartment(() => NeoDrag.axis(currentAxis));
+
+	var reactiveInstance = new NeoDrag.Draggable(document.getElementById('reactive-drag'), () => [
+		axisCompartment,
+	]);
+
+	function switchAxis() {
+		currentAxis = currentAxis === 'x' ? 'y' : 'x';
+		axisCompartment.current = NeoDrag.axis(currentAxis);
+	}
+</script>
 ```
 
-This method allows you to use `@neodrag/vanilla` without any build tools or npm installations, directly in your browser.
-
-<a href="https://www.neodrag.dev/docs/vanilla" style="font-size: 2rem">Read the docs</a>
+<a href="https://next.neodrag.dev/docs/vanilla" style="font-size: 2rem">Read the docs</a>
 
 ## Credits
 
-Inspired from the amazing [react-draggable](https://github.com/react-grid-layout/react-draggable) library, and implements even more features with a similar API, but 3.7x smaller.
+Inspired by [react-draggable](https://github.com/react-grid-layout/react-draggable), but with a modern plugin architecture and optimized for performance.
 
 # License
 
-MIT License &copy; Puru Vijay
+MIT License © Puru Vijay

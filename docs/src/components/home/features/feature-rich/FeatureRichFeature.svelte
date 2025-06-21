@@ -10,7 +10,7 @@
 	<AllExamples />
 </div>
 
-<style lang="scss">
+<style>
 	.demo {
 		display: grid;
 		place-items: center;

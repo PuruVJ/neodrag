@@ -11,7 +11,7 @@
 	<div class="dot"></div>
 </a>
 
-<style lang="scss">
+<style>
 	.scroll-down {
 		display: flex;
 		justify-content: center;

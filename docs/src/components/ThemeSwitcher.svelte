@@ -1,157 +1,157 @@
 <script lang="ts">
-	import { theme } from '$state/user-preferences.svelte.ts';
-	import { draggable } from '@neodrag/svelte';
-	import { IsMounted } from 'runed';
-	import { expoOut } from 'svelte/easing';
-	import { Tween } from 'svelte/motion';
-	import SunnyIcon from '~icons/ion/sunny-outline';
-	import MoonIcon from '~icons/ph/moon-fill';
+	import { theme } from '$state/user-preferences.svelte';
+	import SunIcon from '~icons/material-symbols-light/wb-sunny-rounded';
+	import SystemIcon from '~icons/heroicons/computer-desktop-20-solid';
+	import MoonIcon from '~icons/solar/moon-bold';
 
-	let container_width = $state(0);
-	let theme_switcher_container = $state<HTMLDivElement>();
+	type Props = {
+		thumbnail?: boolean;
+		onclick?: () => void;
+		embedded?: boolean;
+	};
 
-	let draggable_el = $state<HTMLDivElement>();
+	const { thumbnail = false, onclick, embedded = false }: Props = $props();
 
-	const position_x = new Tween(0, { duration: 400, easing: expoOut });
-
-	const mounted = new IsMounted();
-
-	function change_theme() {
-		if (position_x.current / container_width >= 0.5) {
-			theme.current = 'dark';
-		} else {
-			theme.current = 'light';
-		}
-	}
-
-	$effect(() => {
-		if (mounted.current && draggable_el)
-			position_x.target =
-				theme.current === 'dark' ? container_width - draggable_el.getBoundingClientRect().width : 0;
-	});
+	const ICONS = {
+		light: SunIcon,
+		dark: MoonIcon,
+		system: SystemIcon,
+	};
+	const SelectedIcon = $derived(ICONS[theme.preference]);
 </script>
 
-<div
-	class="theme-switcher"
-	onpointerdown={(e) => {
-		const { clientX } = e;
+<div class={['theme-switcher', thumbnail && 'thumbnail', embedded && 'embedded']}>
+	{#if thumbnail}
+		<button class="theme-button" {onclick}>
+			<SelectedIcon />
+		</button>
+	{:else}
+		<!-- Sliding indicator with conditional classes -->
+		<div
+			class="indicator"
+			class:indicator-light={theme.preference === 'light'}
+			class:indicator-system={theme.preference === 'system'}
+			class:indicator-dark={theme.preference === 'dark'}
+		></div>
 
-		// Get difference
-		position_x.target =
-			clientX -
-			theme_switcher_container!.getBoundingClientRect().left -
-			draggable_el!.getBoundingClientRect().width / 2;
-
-		if (position_x.current / container_width >= 0.5) {
-			position_x.target = container_width - draggable_el!.getBoundingClientRect().width;
-		} else {
-			position_x.target = 0;
-		}
-
-		change_theme();
-	}}
-	bind:clientWidth={container_width}
-	bind:this={theme_switcher_container}
->
-	<button
-		class="theme-button light"
-		class:selected={theme.current === 'light'}
-		data-paw-cursor="true"
-		onclick={() => {
-			position_x.target = 0;
-			change_theme();
-		}}
-	>
-		<SunnyIcon />
-	</button>
-
-	<div
-		class="draggable"
-		data-paw-cursor="true"
-		bind:this={draggable_el}
-		use:draggable={{
-			axis: 'x',
-			bounds: 'parent',
-			position: { x: position_x.current, y: 0 },
-			onDrag: ({ offsetX }) => {
-				position_x.set(offsetX, { duration: 0 });
-				change_theme();
-			},
-			onDragEnd: ({ offsetX, rootNode }) => {
-				if (offsetX / container_width > 0.3) {
-					position_x.target = container_width - rootNode.getBoundingClientRect().width;
-				} else {
-					position_x.target = 0;
-				}
-
-				change_theme();
-			},
-		}}
-	></div>
-
-	<button
-		class="theme-button dark"
-		class:selected={theme.current === 'dark'}
-		data-paw-cursor="true"
-		onclick={() => {
-			position_x.target = container_width - draggable_el!.getBoundingClientRect().width;
-			change_theme();
-		}}
-	>
-		<MoonIcon />
-	</button>
+		<button
+			class="theme-button light"
+			class:active={theme.preference === 'light'}
+			onclick={() => {
+				theme.preference = 'light';
+				onclick?.();
+			}}
+		>
+			<SunIcon width="1.6rem" height="1.6rem" fill="currentColor" />
+		</button>
+		<button
+			class="theme-button system"
+			class:active={theme.preference === 'system'}
+			onclick={() => {
+				theme.preference = 'system';
+				onclick?.();
+			}}
+		>
+			<SystemIcon width="1.6rem" height="1.6rem" fill="currentColor" />
+		</button>
+		<button
+			class="theme-button dark"
+			class:active={theme.preference === 'dark'}
+			onclick={() => {
+				theme.preference = 'dark';
+				onclick?.();
+			}}
+		>
+			<MoonIcon width="1.6rem" height="1.6rem" fill="currentColor" />
+		</button>
+	{/if}
 </div>
 
-<style lang="scss">
+<style>
 	.theme-switcher {
 		position: relative;
+		display: flex;
+		height: 3rem;
+		padding: 0 0.28rem;
+		margin: 0.2rem;
 
-		width: 50%;
-		height: 2rem;
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 95%);
+		border-radius: 0.5rem;
 
-		padding: 0;
+		&.embedded {
+			/* Remove margins and adjust padding */
+			margin: 0;
+			padding: 0 0.28rem 0.2rem 0.28rem; /* Move margin into padding */
 
-		border-radius: 24px;
-
-		background-color: hsla(var(--secondary-color-hsl), 0.05);
-	}
-
-	.draggable {
-		width: 2rem;
-		height: 2rem;
-
-		// Natural box shadow
-		box-shadow: 0 1px 4px 1px hsla(0, 0%, 13%, 0.3);
-		border-radius: 50%;
-
-		background-color: var(--secondary-color);
-	}
-
-	.theme-button {
-		position: absolute;
-		top: 50%;
-
-		transform: translateY(-50%);
-
-		z-index: 2;
-
-		pointer-events: none;
-
-		font-size: 0.8em;
-		color: var(--secondary-color-contrast);
-
-		padding: 0;
-
-		&.light {
-			left: 0.2em;
-
-			&.selected :global(svg) {
-				color: var(--app-color-light);
+			.theme-button {
+				/* Remove margin from buttons in embedded mode */
+				margin: 0;
+				padding: 0.75rem 0.5rem; /* Compensate with padding */
 			}
 		}
 
-		&.dark {
-			right: 0.2em;
+		&.thumbnail {
+			background-color: transparent;
 		}
+	}
+
+	.indicator {
+		position: absolute;
+		top: 0.25rem;
+		left: 0.28rem;
+		width: calc(33.333% - 0.187rem);
+		height: calc(100% - 0.5rem);
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 85%);
+		border-radius: 0.25rem;
+		pointer-events: none;
+		z-index: 1;
+		transform: translateX(0);
+		transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	/* Indicator position classes */
+	.indicator-light {
+		transform: translateX(0);
+	}
+
+	.indicator-system {
+		transform: translateX(100%);
+	}
+
+	.indicator-dark {
+		transform: translateX(200%);
+	}
+
+	.theme-button {
+		position: relative;
+		z-index: 2;
+		flex: 1;
+		padding: 0.5rem;
+		border-radius: 0.25rem;
+		margin: 0.25rem 0;
+		background: transparent;
+		border: none;
+		display: flex;
+		justify-content: center;
+		cursor: pointer;
+
+		color: color-mix(in lch, var(--app-color-dark), transparent 90%);
+		transition: color 0.2s ease;
+
+		:global {
+			svg {
+				width: 1.6rem !important;
+				flex-shrink: 0;
+				display: block;
+			}
+		}
+	}
+
+	.theme-button:hover {
+		color: color-mix(in lch, var(--app-color-dark), transparent 70%);
+	}
+
+	.theme-button.active {
+		color: color-mix(in lch, var(--app-color-dark), transparent 50%);
 	}
 </style>

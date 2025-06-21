@@ -8,11 +8,9 @@
 	</div>
 </div>
 
-<style lang="scss">
-	@import '../../css/breakpoints';
-
+<style>
 	.container {
-		// For parent component
+		/* For parent component */
 		scroll-snap-align: start;
 
 		display: grid;
@@ -23,7 +21,7 @@
 		box-shadow: 0 0 0 1px hsla(var(--app-color-dark-hsl), 0.3);
 		border-radius: 1rem;
 
-		@include media('<=sm-tablet') {
+		@media (max-width: 768px) {
 			min-width: 80vw;
 			width: 100%;
 		}

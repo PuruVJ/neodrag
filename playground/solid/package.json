@@ -1,0 +1,21 @@
+{
+	"name": "@neodrag/playground-solid",
+	"version": "0.0.1-next.2",
+	"private": true,
+	"scripts": {
+		"start": "vite",
+		"dev": "vite",
+		"build": "vite build",
+		"serve": "vite preview"
+	},
+	"license": "MIT",
+	"devDependencies": {
+		"typescript": "catalog:",
+		"vite": "catalog:",
+		"vite-plugin-solid": "^2.11.0"
+	},
+	"dependencies": {
+		"@neodrag/solid": "workspace:*",
+		"solid-js": "^1.8.7"
+	}
+}

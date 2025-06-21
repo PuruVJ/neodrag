@@ -1,0 +1,391 @@
+---
+title: '@neodrag/core'
+nav_title: 'core'
+tagline: 'A lightweight library to make your elements draggable.'
+---
+
+The core engine that powers all Neodrag framework implementations. This package provides the foundational drag functionality through a plugin-based architecture and the `DraggableFactory` class.
+
+## Installation
+
+```sh
+npm i @neodrag/core@next
+```
+
+## Overview
+
+`@neodrag/core` is the heart of Neodrag v3, implementing a plugin-based architecture that enables tree-shaking, better performance, and extensibility. All framework-specific packages (`@neodrag/svelte`, `@neodrag/react`, etc.) are built on top of this core.
+
+## Architecture
+
+The core consists of several key components:
+
+- **DraggableFactory**: The main class that creates and manages draggable instances
+- **Plugin System**: A modular architecture where drag behaviors are implemented as plugins
+- **Event Delegation**: Efficient event handling with only 3 global listeners regardless of draggable count
+- **Compartments**: Reactive containers for managing plugin updates
+
+## DraggableFactory
+
+The `DraggableFactory` is the main entry point for creating draggable elements.
+
+### Constructor
+
+```typescript
+new DraggableFactory({
+  plugins?: Plugin[],      // Default plugins applied to all instances
+  delegate?: () => HTMLElement,  // Event delegation target (default: document.documentElement)
+  onError?: (error: ErrorInfo) => void  // Error handler
+})
+```
+
+### Methods
+
+#### `draggable(node, plugins)`
+
+Creates a draggable instance on the specified element.
+
+```typescript
+const factory = new DraggableFactory();
+const cleanup = factory.draggable(element, [
+  axis('x'),
+  grid([10, 10]),
+]);
+
+// Call cleanup when done
+cleanup();
+```
+
+**Parameters:**
+
+- `node`: `HTMLElement | SVGElement` - The element to make draggable
+- `plugins`: `PluginInput` - Array of plugins or a function returning plugins
+
+**Returns:** A cleanup function to destroy the draggable instance
+
+#### `instances`
+
+Access all active draggable instances:
+
+```typescript
+const factory = new DraggableFactory();
+console.log(factory.instances); // Map<HTMLElement | SVGElement, DraggableInstance>
+```
+
+#### `dispose()`
+
+Destroys all draggable instances and cleans up global event listeners:
+
+```typescript
+const factory = new DraggableFactory();
+// ... create multiple draggable instances
+
+// Clean up everything at once
+factory.dispose();
+```
+
+**Note:** After calling `dispose()`, the factory instance cannot be reused. Create a new factory if needed.
+
+## Event Delegation
+
+Neodrag v3 uses event delegation for optimal performance. Instead of attaching event listeners to each draggable element, it uses only 3 global listeners on the delegate element (default: `document.documentElement`):
+
+- `pointerdown` - Detects drag initiation
+- `pointermove` - Handles drag movement
+- `pointerup` - Handles drag completion
+
+This approach provides several benefits:
+
+- **Performance**: Constant memory usage regardless of draggable count
+- **Dynamic Elements**: Works with elements added/removed after initialization
+- **Event Capture**: Uses pointer capture to prevent losing drag over iframes
+
+```typescript
+// Custom delegate element
+const factory = new DraggableFactory({
+  delegate: () => document.getElementById('drag-container'),
+});
+```
+
+## Important Notes
+
+### Single Factory Per Page
+
+Avoid creating multiple `DraggableFactory` instances on the same page. Each factory sets up its own global event listeners, which can cause conflicts and performance issues.
+
+```typescript
+// ❌ Don't do this
+const factory1 = new DraggableFactory();
+const factory2 = new DraggableFactory();
+
+// ✅ Do this instead
+const factory = new DraggableFactory();
+// Use the same factory for all draggable elements
+```
+
+### Delegate Element Lifecycle
+
+If the delegate element is removed from the DOM, the library will fail silently. Ensure the delegate element remains in the DOM for the lifetime of the factory.
+
+```typescript
+const container = document.getElementById('app');
+
+const factory = new DraggableFactory({
+  delegate: () => container,
+});
+
+// ❌ This will break drag functionality
+container.remove();
+
+// ✅ Dispose the factory before removing the delegate
+factory.dispose();
+container.remove();
+```
+
+## Plugin System
+
+Plugins are the building blocks of drag behavior. The core includes several default plugins:
+
+### Default Plugins
+
+These plugins are automatically included:
+
+- **ignoreMultitouch()**: Prevents multi-touch interference
+- **stateMarker()**: Manages drag state classes and attributes
+- **applyUserSelectHack()**: Disables text selection during drag
+- **transform()**: Applies CSS transforms for positioning
+- **threshold()**: Implements distance/time thresholds before dragging starts
+- **touchAction()**: Sets appropriate touch-action CSS properties
+
+### Built-in Plugins
+
+Additional plugins you can import and use:
+
+- **axis()**: Constrains movement to x, y, or both axes
+- **bounds()**: Constrains movement within boundaries
+- **grid()**: Snaps movement to a grid
+- **events()**: Provides drag event callbacks
+
+## Usage Examples
+
+### Basic Usage
+
+```typescript
+import { DraggableFactory } from '@neodrag/core';
+import { axis, grid } from '@neodrag/core/plugins';
+
+const factory = new DraggableFactory();
+const element = document.querySelector('#draggable');
+
+const cleanup = factory.draggable(element, [
+  axis('x'), // Only horizontal movement
+  grid([20, 20]), // Snap to 20px grid
+]);
+```
+
+### With Custom Configuration
+
+```typescript
+import { DraggableFactory } from '@neodrag/core';
+import { bounds, BoundsFrom, events } from '@neodrag/core/plugins';
+
+const factory = new DraggableFactory({
+  onError: (error) => console.error('Drag error:', error),
+  delegate: () => document.getElementById('drag-container'),
+});
+
+const cleanup = factory.draggable(element, [
+  bounds(BoundsFrom.viewport()),
+  events({
+    onDragStart: (data) => console.log('Drag started', data),
+    onDrag: (data) => console.log('Dragging', data),
+    onDragEnd: (data) => console.log('Drag ended', data),
+  }),
+]);
+```
+
+### Reactive Plugins with Compartments
+
+```typescript
+import { DraggableFactory, Compartment } from '@neodrag/core';
+import { axis } from '@neodrag/core/plugins';
+
+const factory = new DraggableFactory();
+let currentAxis = 'x';
+
+const axisCompartment = new Compartment(() => axis(currentAxis));
+
+const cleanup = factory.draggable(element, () => [axisCompartment]);
+
+// Update the axis - the draggable will automatically reconfigure
+currentAxis = 'y';
+axisCompartment.current = axis(currentAxis);
+```
+
+## Framework Integration
+
+While you can use `@neodrag/core` directly, it is designed to be wrapped by framework-specific packages. Here is how the core integrates with each framework wrapper:
+
+### Svelte
+
+```bash
+npm i @neodrag/svelte@next
+```
+
+```svelte
+<script>
+  import { DraggableFactory } from '@neodrag/core';
+  import { axis, grid } from '@neodrag/core/plugins';
+  import { wrapper } from '@neodrag/svelte';
+
+  const factory = new DraggableFactory();
+  const draggable = wrapper(factory);
+</script>
+
+<div use:draggable={[axis('x'), grid([10, 10])]}>
+  Drag me horizontally!
+</div>
+```
+
+### React
+
+```bash
+npm i @neodrag/react@next
+```
+
+```tsx
+import { useRef } from 'react';
+import { DraggableFactory } from '@neodrag/core';
+import { axis, grid } from '@neodrag/core/plugins';
+import { wrapper } from '@neodrag/react';
+
+const factory = new DraggableFactory();
+const useDraggable = wrapper(factory);
+
+function App() {
+  const ref = useRef(null);
+  useDraggable(ref, [axis('x'), grid([10, 10])]);
+
+  return <div ref={ref}>Drag me horizontally!</div>;
+}
+```
+
+### Vue
+
+```bash
+npm i @neodrag/vue@next
+```
+
+```vue
+<script setup>
+import { DraggableFactory } from '@neodrag/core';
+import { axis, grid } from '@neodrag/core/plugins';
+import { wrapper } from '@neodrag/vue';
+
+const factory = new DraggableFactory();
+const vDraggable = wrapper(factory);
+</script>
+
+<template>
+  <div v-draggable="[axis('x'), grid([10, 10])]">
+    Drag me horizontally!
+  </div>
+</template>
+```
+
+### Solid
+
+```bash
+npm i @neodrag/solid@next
+```
+
+```tsx
+import { createSignal } from 'solid-js';
+import { DraggableFactory } from '@neodrag/core';
+import { axis, grid } from '@neodrag/core/plugins';
+import { wrapper } from '@neodrag/solid';
+
+const factory = new DraggableFactory();
+const useDraggable = wrapper(factory);
+
+function App() {
+  const [ref, setRef] = createSignal();
+  useDraggable(ref, [axis('x'), grid([10, 10])]);
+
+  return <div ref={setRef}>Drag me horizontally!</div>;
+}
+```
+
+### Vanilla JavaScript
+
+```bash
+npm i @neodrag/vanilla@next
+```
+
+```typescript
+import { DraggableFactory } from '@neodrag/core';
+import { axis, grid } from '@neodrag/core/plugins';
+import { Wrapper } from '@neodrag/vanilla';
+
+const factory = new DraggableFactory();
+
+class MyDraggable extends Wrapper {
+  constructor(node, plugins) {
+    super(factory, node, plugins);
+  }
+}
+// Clean up when done
+dragInstance.destroy();
+```
+
+#### CDN Usage
+
+```html
+<script src="https://unpkg.com/@neodrag/vanilla@next/dist/umd/index.js"></script>
+<script>
+  const factory = new NeoDrag.DraggableFactory();
+
+  class MyDraggable extends NeoDrag.Wrapper {
+    constructor(node, plugins) {
+      super(factory, node, plugins);
+    }
+  }
+
+  const dragInstance = new MyDraggable(
+    document.getElementById('drag'),
+    [NeoDrag.axis('x'), NeoDrag.grid([10, 10])],
+  );
+</script>
+```
+
+## Error Handling
+
+The core provides comprehensive error handling:
+
+```typescript
+const factory = new DraggableFactory({
+  onError: (error: ErrorInfo) => {
+    console.error(`Error in ${error.phase} phase:`, error.error);
+    if (error.plugin) {
+      console.error(
+        `Plugin: ${error.plugin.name}, Hook: ${error.plugin.hook}`,
+      );
+    }
+  },
+});
+```
+
+**ErrorInfo Interface:**
+
+- `phase`: `'setup'` | `'start'` | `'drag'` | `'end'` | `'shouldStart'`
+- `plugin?`: `{ name: string, hook: string }`
+- `node`: `HTMLElement | SVGElement`
+- `error`: `unknown`
+
+## Browser Support
+
+The core supports all modern browsers with:
+
+- Pointer Events API
+- ES2022+ features
+- CSS Custom Properties

@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { copy } from '$attachments/copy';
 	import type { Framework } from '$helpers/constants';
-	import { copy } from 'svelte-copy';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
 	import IconCopyToClipboard from '~icons/material-symbols/content-copy-outline-rounded';
@@ -31,7 +31,7 @@
 		>
 	</p>
 
-	<br /><br />
+	<div style="height: 2rem"></div>
 
 	<code>
 		npm install @neodrag/
@@ -50,10 +50,10 @@
 			class="copy-button"
 			class:copied
 			disabled={copied}
-			use:copy={{
+			{@attach copy({
 				text: `npm install @neodrag/${selected_framework}`,
 				onCopy: () => (copied = true),
-			}}
+			})}
 		>
 			<!-- {#key copied} -->
 			<div>
@@ -76,9 +76,7 @@
 	<FrameworkPolygon onselect={({ framework }) => (selected_framework = framework)} />
 </div>
 
-<style lang="scss">
-	@import '../feature-box';
-
+<style>
 	.intro {
 		display: grid;
 		align-content: center;
@@ -89,19 +87,18 @@
 	}
 
 	p {
-		@include paragraph();
+		font-size: clamp(1rem, 2vw, 1.3rem);
+		/* max-width: clamp(20ch, 80vw, 100ch); */
 	}
 
 	code {
+		--color: color-mix(in lch, var(--app-color-dark), transparent 20%);
+
 		position: relative;
-
 		background-color: transparent;
-
 		font-size: clamp(1.1rem, 3vw, 2rem);
-		color: hsla(var(--app-color-dark-hsl), 0.8);
-
-		border: 1px solid hsla(var(--app-color-dark-hsl), 0.2);
-
+		color: var(--color);
+		border: 1px solid var(--color);
 		width: max-content;
 		padding-right: 7em;
 	}
@@ -110,22 +107,17 @@
 		position: absolute;
 		top: 0;
 		right: 0;
-
 		display: grid;
 		place-items: center;
-
 		background-color: transparent;
-
 		height: 100%;
-
-		--svg-opacity: 0.5;
+		--svg-transparency: 50%;
 
 		div {
 			display: grid;
 			place-items: center;
 			grid-template-columns: 1fr;
 			grid-template-rows: 1fr;
-
 			height: 100%;
 			width: 1.1em;
 
@@ -141,17 +133,16 @@
 		}
 
 		:global(svg path) {
-			fill: hsla(var(--app-color-dark-hsl), var(--svg-opacity));
-
+			fill: color-mix(in lch, var(--app-color-dark), transparent var(--svg-transparency));
 			transition: fill 200ms ease;
 		}
 
 		&:active {
-			--svg-opacity: 0.8;
+			--svg-transparency: 20%;
 		}
 
 		&.copied {
-			--svg-opacity: 1;
+			--svg-transparency: 0%;
 		}
 	}
 </style>

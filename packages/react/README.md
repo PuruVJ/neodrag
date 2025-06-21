@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://www.neodrag.dev"><img src="https://www.neodrag.dev/logo.svg" height="150" /></a>
+<a href="https://next.neodrag.dev"><img src="https://next.neodrag.dev/logo.svg" height="150" /></a>
 </p>
 
 <h1 align="center">
@@ -13,29 +13,23 @@ One draggable to rule em all
 <p align="center">A lightweight React hook to make your elements draggable.</p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@neodrag/react"><img src="https://img.shields.io/npm/v/@neodrag/react?color=0098b3&label="></a>
+  <a href="https://www.npmjs.com/package/@neodrag/react"><img src="https://img.shields.io/npm/v/@neodrag/react?color=e63900&label="></a>
 <p>
 
-<p align="center"><a href="https://www.neodrag.dev/docs/react">Getting Started</a></p>
+<p align="center"><a href="https://next.neodrag.dev/docs/react">Getting Started</a></p>
 
 # Features
 
-- 🤏 Tiny - Only 1.95KB min+brotli.
-- 🐇 Simple - Quite simple to use, and effectively no-config required!
-- 🧙‍♀️ Elegant - React hook, to keep the usage simple, elegant and expressive.
-- 🗃️ Highly customizable - Offers tons of options that you can modify to get different behavior.
-- ⚛️ Reactive - Change options passed to it on the fly, it will **just work 🙂**
+- 🤏 **Small in size** - ~5KB, plugin architecture enables tree-shaking
+- 🧩 **Plugin-based** - Mix and match only what you need
+- ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
+- 🎯 **React Native** - Built for React hooks with `useDraggable`
+- 🔄 **Reactive** - `useCompartment` for reactive plugin updates
 
 # Installing
 
 ```bash
-pnpm add @neodrag/react
-
-# npm
-npm install @neodrag/react
-
-# yarn
-yarn add @neodrag/react
+npm install @neodrag/react@next
 ```
 
 # Usage
@@ -43,87 +37,96 @@ yarn add @neodrag/react
 Basic usage
 
 ```tsx
+import { useRef } from 'react';
 import { useDraggable } from '@neodrag/react';
 
 function App() {
-	const draggableRef = useRef(null);
+	const draggableRef = useRef<HTMLDivElement>(null);
 	useDraggable(draggableRef);
 
 	return <div ref={draggableRef}>Hello</div>;
 }
 ```
 
-With options
+With plugins
 
 ```tsx
-import { useDraggable } from '@neodrag/react';
+import { useRef } from 'react';
+import { useDraggable, axis, grid } from '@neodrag/react';
 
 function App() {
-	const draggableRef = useRef(null);
-	useDraggable(draggableRef, { axis: 'x', grid: [10, 10] });
+	const draggableRef = useRef<HTMLDivElement>(null);
+
+	useDraggable(draggableRef, [axis('x'), grid([10, 10])]);
 
 	return <div ref={draggableRef}>Hello</div>;
 }
 ```
 
-Defining options elsewhere with typescript
+Defining plugins elsewhere with TypeScript
 
 ```tsx
-import { useDraggable, type DragOptions } from '@neodrag/react';
+import { useRef } from 'react';
+import { useDraggable, axis, bounds, BoundsFrom, type Plugin } from '@neodrag/react';
 
 function App() {
-	const draggableRef = useRef(null);
+	const draggableRef = useRef<HTMLDivElement>(null);
 
-	const options: DragOptions = {
-		axis: 'y',
-		bounds: 'parent',
-	};
-
-	useDraggable(draggableRef, options);
+	const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
+	useDraggable(draggableRef, plugins);
 
 	return <div ref={draggableRef}>Hello</div>;
 }
 ```
 
-Getting state
+Getting drag state
 
 ```tsx
+import { useRef, useEffect } from 'react';
 import { useDraggable } from '@neodrag/react';
 
 function App() {
-	const draggableRef = useRef(null);
-
-	const { isDragging, dragState } = useDraggable(draggableRef);
+	const draggableRef = useRef<HTMLDivElement>(null);
+	const dragState = useDraggable(draggableRef);
 
 	useEffect(() => {
-		console.log({ isDragging, dragState });
-	}, [isDragging, dragState]);
+		console.log('Position:', dragState.offset);
+		console.log('Is dragging:', dragState.isDragging);
+	}, [dragState]);
 
 	return <div ref={draggableRef}>Hello</div>;
 }
 ```
 
-`dragState` is of type:
+Reactive plugins with useCompartment
 
-```ts
-{
-  /** Distance of element from original position on x-axis */
-  offsetX: number,
+```tsx
+import { useRef, useState } from 'react';
+import { useDraggable, axis, useCompartment } from '@neodrag/react';
 
-  /** Distance of element from original position on y-axis */
-  offsetY: number,
+function App() {
+	const elementRef = useRef<HTMLDivElement>(null);
+	const [currentAxis, setCurrentAxis] = useState<'x' | 'y'>('x');
 
-  /** element.getBoundingClientRect() result */
-  domRect: DOMRect,
+	const axisCompartment = useCompartment(() => axis(currentAxis), [currentAxis]);
+
+	useDraggable(elementRef, () => [axisCompartment]);
+
+	return (
+		<div>
+			<div ref={elementRef}>Current axis: {currentAxis}</div>
+			<button onClick={() => setCurrentAxis(currentAxis === 'x' ? 'y' : 'x')}>Switch Axis</button>
+		</div>
+	);
 }
 ```
 
-<a href="https://www.neodrag.dev/docs/react" style="font-size: 2rem">Read the docs</a>
+<a href="https://next.neodrag.dev/docs/react" style="font-size: 2rem">Read the docs</a>
 
 ## Credits
 
-Inspired from the amazing [react-draggable](https://github.com/react-grid-layout/react-draggable) library, and implements even more features with similar API, but 3.7x smaller.
+Inspired by [react-draggable](https://github.com/react-grid-layout/react-draggable), but with a modern plugin architecture and optimized for performance.
 
 # License
 
-MIT License &copy; Puru Vijay
+MIT License © Puru Vijay

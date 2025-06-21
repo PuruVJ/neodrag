@@ -1,751 +1,739 @@
-export type DragBoundsCoords = {
-	/** Number of pixels from left of the document */
-	left: number;
+import {
+	applyUserSelectHack,
+	Compartment,
+	ignoreMultitouch,
+	stateMarker,
+	threshold,
+	touchAction,
+	transform,
+	type Plugin,
+	type PluginContext,
+	type PluginInput,
+	type PluginResolver,
+} from './plugins.ts';
+import { is_svg_element, is_svg_svg_element, listen, type DeepMutable } from './utils.ts';
 
-	/** Number of pixels from top of the document */
-	top: number;
-
-	/** Number of pixels from the right side of document */
-	right: number;
-
-	/** Number of pixels from the bottom of the document */
-	bottom: number;
-};
-
-export type DragAxis = 'both' | 'x' | 'y' | 'none';
-
-export type DragBounds =
-	| HTMLElement
-	| Partial<DragBoundsCoords>
-	| 'parent'
-	| 'body'
-	| (string & Record<never, never>);
-
-export type DragEventData = {
-	/** How much element moved from its original position horizontally */
-	offsetX: number;
-
-	/** How much element moved from its original position vertically */
-	offsetY: number;
-
-	/** The node on which the draggable is applied */
-	rootNode: HTMLElement;
-
-	/** The element being dragged */
-	currentNode: HTMLElement;
-
-	/** The pointer event that triggered the drag */
-	event: PointerEvent;
-};
-
-export type DragOptions = {
-	/**
-	 * Optionally limit the drag area
-	 *
-	 * Accepts `parent` as prefixed value, and limits it to its parent.
-	 *
-	 * Or, you can specify any selector and it will be bound to that.
-	 *
-	 * **Note**: We don't check whether the selector is bigger than the node element.
-	 * You yourself will have to make sure of that, or it may lead to strange behavior
-	 *
-	 * Or, finally, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
-	 * These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right` from right of window.
-	 * If any of these properties are unspecified, they are assumed to be `0`.
-	 */
-	bounds?: DragBounds;
-
-	/**
-	 * When to recalculate the dimensions of the `bounds` element.
-	 *
-	 * By default, bounds are recomputed only on dragStart. Use this options to change that behavior.
-	 *
-	 * @default '{ dragStart: true, drag: false, dragEnd: false }'
-	 */
-	recomputeBounds?: {
-		dragStart?: boolean;
-		drag?: boolean;
-		dragEnd?: boolean;
+export interface ErrorInfo {
+	phase: 'setup' | 'start' | 'drag' | 'end' | 'shouldStart';
+	plugin?: {
+		name: string;
+		hook: string;
 	};
-
-	/**
-	 * Axis on which the element can be dragged on. Valid values: `both`, `x`, `y`, `none`.
-	 *
-	 * - `both` - Element can move in any direction
-	 * - `x` - Only horizontal movement possible
-	 * - `y` - Only vertical movement possible
-	 * - `none` - No movement at all
-	 *
-	 * @default 'both'
-	 */
-	axis?: DragAxis;
-
-	/**
-	 * If false, uses the new translate property instead of transform: translate(); to move the element around.
-	 *
-	 * At present this is true by default, but will be changed to false in a future major version.
-	 *
-	 * @default false
-	 * @deprecated Use `transform` option instead for transform: translate() or any other custom transform. Will be removed in v3.
-	 */
-	legacyTranslate?: boolean;
-
-	/**
-	 * If true, uses `translate3d` instead of `translate` to move the element around, and the hardware acceleration kicks in.
-	 *
-	 * `true` by default, but can be set to `false` if [blurry text issue](https://developpaper.com/question/why-does-the-use-of-css3-translate3d-result-in-blurred-display/) occur
-	 *
-	 * @default true
-	 * @deprecated Use `transform` option instead with translate(x, y, 1px). 1px forces some browsers to use GPU acceleration. Will be removed in v3
-	 */
-	gpuAcceleration?: boolean;
-
-	/**
-	 * Custom transform function. If provided, this function will be used to apply the DOM transformations to the root node to move it.
-	 * Existing transform logic, including `gpuAcceleration` and `legacyTranslate`, will be ignored.
-	 *
-	 * You can return a string to apply to a `transform` property, or not return anything and apply your transformations using `rootNode.style.transform = VALUE`
-	 *
-	 * @default undefined
-	 */
-	transform?: ({
-		offsetX,
-		offsetY,
-		rootNode,
-	}: {
-		offsetX: number;
-		offsetY: number;
-		rootNode: HTMLElement;
-	}) => string | undefined | void;
-
-	/**
-	 * Applies `user-select: none` on `<body />` element when dragging,
-	 * to prevent the irritating effect where dragging doesn't happen and the text is selected.
-	 * Applied when dragging starts and removed when it stops.
-	 *
-	 * Can be disabled using this option
-	 *
-	 * @default true
-	 */
-	applyUserSelectHack?: boolean;
-
-	/**
-	 * Ignores touch events with more than 1 touch.
-	 * This helps when you have multiple elements on a canvas where you want to implement
-	 * pinch-to-zoom behaviour.
-	 *
-	 * @default false
-	 *
-	 */
-	ignoreMultitouch?: boolean;
-
-	/**
-	 * Disables dragging altogether.
-	 *
-	 * @default false
-	 */
-	disabled?: boolean;
-
-	/**
-	 * Applies a grid on the page to which the element snaps to when dragging, rather than the default continuous grid.
-	 *
-	 * `Note`: If you're programmatically creating the grid, do not set it to [0, 0] ever, that will stop drag at all. Set it to `undefined`.
-	 *
-	 * @default undefined
-	 */
-	grid?: [number, number];
-
-	/**
-	 * Threshold for dragging to start. If the user moves the mouse/finger less than this distance, the dragging won't start.
-	 *
-	 * @default { delay: 0, distance: 3 }
-	 */
-	threshold?: {
-		/**
-		 * Threshold in milliseconds for a pointer movement to be considered a drag
-		 *
-		 * @default 0
-		 */
-		delay?: number;
-
-		/**
-		 * Threshold in pixels for movement to be considered a drag
-		 *
-		 * @default 3
-		 */
-		distance?: number;
-	};
-
-	/**
-	 * Control the position manually with your own state
-	 *
-	 * By default, the element will be draggable by mouse/finger, and all options will work as default while dragging.
-	 *
-	 * But changing the `position` option will also move the draggable around. These parameters are reactive,
-	 * so using Svelte's reactive variables as values for position will work like a charm.
-	 *
-	 *
-	 * Note: If you set `disabled: true`, you'll still be able to move the draggable through state variables. Only the user interactions won't work
-	 *
-	 */
-	position?: { x: number; y: number };
-
-	/**
-	 * CSS Selector of an element or multiple elements inside the parent node(on which `use:draggable` is applied).
-	 *
-	 * Can be an element or elements too. If it is provided, Trying to drag inside the `cancel` element(s) will prevent dragging.
-	 *
-	 * @default undefined
-	 */
-	cancel?: string | HTMLElement | HTMLElement[];
-
-	/**
-	 * CSS Selector of an element or multiple elements inside the parent node(on which `use:draggable` is applied). Can be an element or elements too.
-	 *
-	 * If it is provided, Only clicking and dragging on this element will allow the parent to drag, anywhere else on the parent won't work.
-	 *
-	 * @default undefined
-	 */
-	handle?: string | HTMLElement | HTMLElement[];
-
-	/**
-	 * Class to apply on the element on which `use:draggable` is applied.
-	 * Note that if `handle` is provided, it will still apply class on the element to which this action is applied, **NOT** the handle
-	 *
-	 */
-	defaultClass?: string;
-
-	/**
-	 * Class to apply on the element when it is dragging
-	 *
-	 * @default 'neodrag-dragging'
-	 */
-	defaultClassDragging?: string;
-
-	/**
-	 * Class to apply on the element if it has been dragged at least once.
-	 *
-	 * @default 'neodrag-dragged'
-	 */
-	defaultClassDragged?: string;
-
-	/**
-	 * Offsets your element to the position you specify in the very beginning.
-	 * `x` and `y` should be in pixels
-	 *
-	 */
-	defaultPosition?: { x: number; y: number };
-
-	/**
-	 * Fires when dragging start
-	 */
-	onDragStart?: (data: DragEventData) => void;
-
-	/**
-	 * Fires when dragging is going on
-	 */
-	onDrag?: (data: DragEventData) => void;
-
-	/**
-	 * Fires when dragging ends
-	 */
-	onDragEnd?: (data: DragEventData) => void;
-};
-
-const enum DEFAULT_CLASS {
-	MAIN = 'neodrag',
-	DRAGGING = 'neodrag-dragging',
-	DRAGGED = 'neodrag-dragged',
+	node: HTMLElement | SVGElement;
+	error: unknown;
 }
 
-const DEFAULT_RECOMPUTE_BOUNDS: Exclude<DragOptions['recomputeBounds'], undefined> = {
-	dragStart: true,
-};
-
-const enum DEFAULT_DRAG_THRESHOLD_VALUES {
-	DELAY = 0,
-	DISTANCE = 3,
+export interface DraggableInstance {
+	ctx: DeepMutable<PluginContext>;
+	root_node: HTMLElement | SVGElement;
+	plugins: Plugin[];
+	states: Map<string, any>;
+	dragstart_prevented: boolean;
+	current_drag_hook_cancelled: boolean;
+	failed_plugins: Set<string>;
+	pointer_captured_id: number | null;
+	effects: {
+		paint: Set<() => void>;
+		immediate: Set<() => void>;
+	};
+	controller: AbortController;
+	compartments: {
+		map: Map<Compartment, Plugin | undefined>;
+		pending: Set<Compartment>;
+		is_flushing: boolean;
+	};
+	resolver?: PluginResolver;
+	is_processing_external_update: boolean;
 }
 
-const DEFAULT_DRAG_THRESHOLD: Exclude<DragOptions['threshold'], undefined> = {
-	delay: DEFAULT_DRAG_THRESHOLD_VALUES.DELAY,
-	distance: DEFAULT_DRAG_THRESHOLD_VALUES.DISTANCE,
+type Result<T> = { ok: true; value: T } | { ok: false; error: unknown };
+
+export const DEFAULTS = {
+	plugins: [
+		ignoreMultitouch(),
+		stateMarker(),
+		applyUserSelectHack(),
+		transform(),
+		threshold(),
+		touchAction(),
+	],
+
+	onError: (error: ErrorInfo) => {
+		console.error(error);
+	},
+
+	delegate: () => document.documentElement,
 };
 
-export function draggable(node: HTMLElement, options: DragOptions = {}) {
-	let {
-		bounds,
-		axis = 'both',
-		gpuAcceleration = true,
-		legacyTranslate = false,
-		transform,
-		applyUserSelectHack = true,
-		disabled = false,
-		ignoreMultitouch = false,
-		recomputeBounds = DEFAULT_RECOMPUTE_BOUNDS,
-		grid,
-		threshold = DEFAULT_DRAG_THRESHOLD,
-		position,
-		cancel,
-		handle,
-		defaultClass = DEFAULT_CLASS.MAIN,
-		defaultClassDragging = DEFAULT_CLASS.DRAGGING,
-		defaultClassDragged = DEFAULT_CLASS.DRAGGED,
-		defaultPosition = { x: 0, y: 0 },
-		onDragStart,
-		onDrag,
-		onDragEnd,
-	} = options;
+export class DraggableFactory {
+	#instances = new Map<HTMLElement | SVGElement, DraggableInstance>();
+	#listeners_initialized = false;
+	#active_nodes = new Map<number, HTMLElement | SVGElement>();
 
-	/** Make sure user is interacting(clicking, tapping, trying to move) the `node` */
-	let is_interacting = false;
-	/** Whether we should allow for dragging */
-	let is_dragging = false;
+	#initial_plugins: Plugin[];
+	#delegateTargetFn: () => HTMLElement;
+	#onError?: (error: ErrorInfo) => void;
 
-	let start_time = 0;
-	let meets_time_threshold = false;
-	let meets_distance_threshold = false;
-
-	let translate_x = 0,
-		translate_y = 0;
-
-	let initial_x = 0,
-		initial_y = 0;
-
-	// The offset of the client position relative to the node's top-left corner
-	let client_to_node_offsetX = 0,
-		client_to_node_offsetY = 0;
-
-	let { x: x_offset, y: y_offset } = position
-		? { x: position?.x ?? 0, y: position?.y ?? 0 }
-		: defaultPosition;
-
-	set_translate(x_offset, y_offset);
-
-	let can_move_in_x: boolean;
-	let can_move_in_y: boolean;
-
-	let body_original_user_select_val = '';
-
-	let computed_bounds: DragBoundsCoords | undefined;
-	let node_rect: DOMRect;
-
-	let drag_els: HTMLElement[];
-	let cancel_els: HTMLElement[];
-
-	let currently_dragged_el: HTMLElement;
-
-	let is_controlled = !!position;
-
-	// Set proper defaults for recomputeBounds
-	recomputeBounds = { ...DEFAULT_RECOMPUTE_BOUNDS, ...recomputeBounds };
-
-	// Proper defaults for threshold
-	threshold = { ...DEFAULT_DRAG_THRESHOLD, ...(threshold ?? {}) };
-
-	let active_pointers = new Set<number>();
-
-	function try_start_drag(event: PointerEvent) {
-		if (
-			is_interacting &&
-			!is_dragging &&
-			meets_distance_threshold &&
-			meets_time_threshold &&
-			currently_dragged_el
-		) {
-			is_dragging = true;
-			fire_svelte_drag_start_event(event);
-			node_class_list.add(defaultClassDragging);
-
-			if (applyUserSelectHack) {
-				// Apply user-select: none on body to prevent misbehavior
-				body_original_user_select_val = body_style.userSelect;
-				body_style.userSelect = 'none';
-			}
-		}
+	constructor({ plugins, delegate, onError }: typeof DEFAULTS) {
+		this.#initial_plugins = plugins;
+		this.#delegateTargetFn = delegate;
+		this.#onError = onError;
 	}
 
-	function reset_state() {
-		is_dragging = false;
-		meets_time_threshold = false;
-		meets_distance_threshold = false;
+	get instances() {
+		return this.#instances;
 	}
 
-	// Arbitrary constants for better minification
-	const body_style = document.body.style;
-	const node_class_list = node.classList;
-
-	function set_translate(x_pos = translate_x, y_pos = translate_y) {
-		if (!transform) {
-			if (legacyTranslate) {
-				let common = `${+x_pos}px, ${+y_pos}px`;
-				return set_style(
-					node,
-					'transform',
-					gpuAcceleration ? `translate3d(${common}, 0)` : `translate(${common})`,
-				);
-			}
-
-			return set_style(node, 'translate', `${+x_pos}px ${+y_pos}px`);
+	draggable(node: HTMLElement | SVGElement, plugins: PluginInput = []) {
+		if (is_svg_svg_element(node)) {
+			throw new Error(
+				'Dragging the root SVG element directly is not recommended. ' +
+					'Instead, either:\n' +
+					'1. Wrap your SVG in a div and make the div draggable\n' +
+					'2. Use viewBox manipulation if you want to pan the SVG canvas\n' +
+					'3. Or if you really need to transform the SVG element, use CSS transforms',
+			);
 		}
 
-		// Call transform function if provided
-		const transform_called = transform({ offsetX: x_pos, offsetY: y_pos, rootNode: node });
-		if (is_string(transform_called)) {
-			set_style(node, 'transform', transform_called);
-		}
-	}
+		this.#initialize_listeners();
 
-	function get_event_data(event: PointerEvent) {
-		return {
-			offsetX: translate_x,
-			offsetY: translate_y,
-			rootNode: node,
-			currentNode: currently_dragged_el,
-			event
+		const instance = this.#create_instance(node, plugins);
+		this.#instances.set(node, instance);
+
+		const cleanup_subscriptions = this.#setup_plugins(instance, plugins);
+
+		return () => {
+			cleanup_subscriptions();
+			this.#destroy_instance(instance);
 		};
 	}
 
-	function call_event(eventName: 'neodrag:start' | 'neodrag' | 'neodrag:end', fn: typeof onDrag, event: PointerEvent) {
-		const data = get_event_data(event);
-		node.dispatchEvent(new CustomEvent(eventName, { detail: data }));
-		fn?.(data);
+	dispose() {
+		for (const instance of this.#instances.values()) {
+			this.#destroy_instance(instance);
+		}
 	}
 
-	function fire_svelte_drag_start_event(event: PointerEvent) {
-		call_event('neodrag:start', onDragStart, event);
+	#resultify<T>(fn: () => T, errorInfo: Omit<ErrorInfo, 'error'>): Result<T> {
+		try {
+			return { ok: true, value: fn() };
+		} catch (error) {
+			this.#report_error(errorInfo, error);
+			return { ok: false, error };
+		}
 	}
 
-	function fire_svelte_drag_end_event(event: PointerEvent) {
-		call_event('neodrag:end', onDragEnd, event);
+	#report_error(info: Omit<ErrorInfo, 'error'>, error: unknown) {
+		if (this.#onError) {
+			this.#onError({ ...info, error });
+		}
 	}
 
-	function fire_svelte_drag_event(event: PointerEvent) {
-		call_event('neodrag', onDrag, event);
+	#initialize_listeners() {
+		if (this.#listeners_initialized) return;
+
+		const delegateTarget = this.#delegateTargetFn();
+
+		listen(delegateTarget, 'pointerdown', this.#handle_pointer_down.bind(this), {
+			passive: true,
+			capture: false,
+		});
+		listen(delegateTarget, 'pointermove', this.#handle_pointer_move.bind(this), {
+			passive: false,
+			capture: false,
+		});
+		listen(delegateTarget, 'pointerup', this.#handle_pointer_up.bind(this), {
+			passive: true,
+			capture: false,
+		});
+		listen(delegateTarget, 'pointercancel', this.#handle_pointer_up.bind(this), {
+			passive: true,
+			capture: false,
+		});
+
+		this.#listeners_initialized = true;
 	}
 
-	const listen = addEventListener;
-	const controller = new AbortController();
-	const event_options = { signal: controller.signal, capture: false };
+	#create_instance(node: HTMLElement | SVGElement, plugins: PluginInput) {
+		const instance: DraggableInstance = {
+			ctx: {} as DeepMutable<PluginContext>,
+			root_node: node,
+			plugins: [],
+			states: new Map<string, any>(),
+			controller: new AbortController(),
+			failed_plugins: new Set<string>(),
+			dragstart_prevented: false,
+			current_drag_hook_cancelled: false,
+			pointer_captured_id: null,
+			effects: {
+				immediate: new Set<() => void>(),
+				paint: new Set<() => void>(),
+			},
+			compartments: {
+				map: new Map(),
+				pending: new Set(),
+				is_flushing: false,
+			},
+			resolver: typeof plugins === 'function' ? plugins : undefined,
 
-	// On mobile, touch can become extremely janky without it
-	set_style(node, 'touch-action', 'none');
+			is_processing_external_update: false,
+		};
 
-	listen(
-		'pointerdown',
-		(e) => {
-			if (disabled) return;
-			if (e.button === 2) return;
+		let currently_dragged_element = node;
 
-			active_pointers.add(e.pointerId);
+		instance.ctx = {
+			proposed: { x: 0, y: 0 },
+			delta: { x: 0, y: 0 },
+			offset: { x: 0, y: 0 },
+			initial: { x: 0, y: 0 },
+			isDragging: false,
+			isInteracting: false,
+			rootNode: node,
+			cachedRootNodeRect: node.getBoundingClientRect(),
+			lastEvent: null,
+			get currentlyDraggedNode() {
+				return currently_dragged_element;
+			},
+			set currentlyDraggedNode(val) {
+				//  In case a plugin switches currentDraggedElement through the pointermove
+				if (
+					instance.pointer_captured_id &&
+					currently_dragged_element.hasPointerCapture(instance.pointer_captured_id)
+				) {
+					currently_dragged_element.releasePointerCapture(instance.pointer_captured_id);
+					val.setPointerCapture(instance.pointer_captured_id);
+				}
 
-			if (ignoreMultitouch && active_pointers.size > 1) return e.preventDefault();
+				currently_dragged_element = val;
+			},
 
-			// Compute bounds
-			if (recomputeBounds.dragStart) computed_bounds = compute_bound_rect(bounds, node);
+			effect: {
+				immediate: (func) => {
+					instance.effects.immediate.add(func);
+				},
 
-			if (is_string(handle) && is_string(cancel) && handle === cancel)
-				throw new Error("`handle` selector can't be same as `cancel` selector");
+				paint: (func) => {
+					instance.effects.paint.add(func);
+				},
+			},
 
-			node_class_list.add(defaultClass);
+			propose(x: number | null, y: number | null) {
+				this.proposed.x = x;
+				this.proposed.y = y;
+			},
 
-			drag_els = get_handle_els(handle, node);
-			cancel_els = get_cancel_elements(cancel, node);
+			cancel() {
+				instance.current_drag_hook_cancelled = true;
+			},
 
-			can_move_in_x = /(both|x)/.test(axis);
-			can_move_in_y = /(both|y)/.test(axis);
+			preventStart() {
+				instance.dragstart_prevented = true;
+			},
 
-			if (cancel_element_contains(cancel_els, drag_els))
-				throw new Error(
-					"Element being dragged can't be a child of the element on which `cancel` is applied",
+			setForcedPosition(x, y) {
+				this.offset.x = x;
+				this.offset.y = y;
+			},
+		};
+
+		return instance;
+	}
+
+	#setup_plugins(instance: DraggableInstance, plugins: PluginInput) {
+		const subscriptions = new Set<() => void>();
+
+		if (typeof plugins === 'function') {
+			// Manual mode
+			const resolved = plugins();
+			const resolved_plugins = this.#resolve_plugins(resolved, instance.compartments.map);
+			instance.plugins = this.#initialize_plugins(resolved_plugins);
+
+			// Set up compartment subscriptions
+			for (const item of resolved)
+				if (item instanceof Compartment) {
+					subscriptions.add(
+						item.subscribe(() => {
+							instance.compartments.pending.add(item);
+							this.#process_pending_compartment_updates(instance, true);
+						}),
+					);
+				}
+		} else {
+			// Automatic mode
+			instance.plugins = this.#initialize_plugins(plugins);
+		}
+
+		// Initialize plugin states
+		for (const plugin of instance.plugins) {
+			const result = this.#resultify(
+				() => {
+					const value = plugin.setup?.(instance.ctx);
+					if (value) instance.states.set(plugin.name, value);
+					this.#flush_effects(instance);
+				},
+				{
+					phase: 'setup',
+					plugin: { name: plugin.name, hook: 'setup' },
+					node: instance.root_node,
+				},
+			);
+
+			if (!result.ok) {
+				instance.failed_plugins.add(plugin.name);
+			}
+		}
+
+		// Return cleanup function for subscriptions
+		return () => {
+			subscriptions.forEach((unsubscribe) => unsubscribe());
+			subscriptions.clear();
+		};
+	}
+
+	#initialize_plugins(new_plugins: Plugin[]) {
+		const combined = new_plugins.concat(this.#initial_plugins);
+
+		return Array.from(
+			combined
+				.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+				.reduce((map, plugin) => {
+					if (!map.has(plugin.name)) {
+						map.set(plugin.name, plugin);
+					}
+					return map;
+				}, new Map<string, Plugin>())
+				.values(),
+		) as Plugin[];
+	}
+
+	#resolve_plugins(
+		items: (Plugin | Compartment)[],
+		compartments: Map<Compartment, Plugin | undefined>,
+	): Plugin[] {
+		return items
+			.map((item) => {
+				if (item instanceof Compartment) {
+					const current = item.current;
+					compartments.set(item, current);
+					return current;
+				}
+				return item;
+			})
+			.filter((plugin): plugin is Plugin => plugin !== undefined); // Filter out undefined
+	}
+
+	#run_plugins(instance: DraggableInstance, hook: ErrorInfo['phase'], event: PointerEvent) {
+		let should_run = true;
+		instance.dragstart_prevented = false;
+
+		for (const plugin of instance.plugins) {
+			if (instance.failed_plugins.has(plugin.name)) {
+				continue;
+			}
+
+			const handler = plugin[hook];
+			if (!handler) continue;
+
+			if (instance.current_drag_hook_cancelled && plugin.cancelable) continue;
+
+			const result = this.#resultify(
+				() => handler.call(plugin, instance.ctx, instance.states.get(plugin.name), event),
+				{
+					phase: hook,
+					plugin: { name: plugin.name, hook },
+					node: instance.ctx.rootNode,
+				},
+			);
+
+			if (!result.ok) {
+				instance.failed_plugins.add(plugin.name);
+				should_run = false;
+				break;
+			}
+
+			if (result.value === false) {
+				should_run = false;
+				break;
+			}
+		}
+
+		return should_run;
+	}
+
+	#flush_effects(instance: DraggableInstance) {
+		const paint_effects = new Set(instance.effects.paint);
+		const immediate_effects = new Set(instance.effects.immediate);
+
+		this.#clear_effects(instance);
+
+		queueMicrotask(() => {
+			// Add all effects to the batcher
+			for (const effect of immediate_effects) {
+				effect();
+			}
+		});
+
+		requestAnimationFrame(() => {
+			for (const effect of paint_effects) {
+				effect();
+			}
+		});
+	}
+
+	#clear_effects(instance: DraggableInstance) {
+		instance.effects.immediate.clear();
+		instance.effects.paint.clear();
+	}
+
+	#handle_pointer_down(e: PointerEvent) {
+		if (e.button === 2) return;
+
+		const draggable_node = this.#find_draggable_node(e);
+		if (!draggable_node) return;
+
+		const instance = this.#instances.get(draggable_node);
+		if (!instance) return;
+
+		instance.ctx.cachedRootNodeRect = draggable_node.getBoundingClientRect();
+
+		const inverse_scale = this.#calculate_inverse_scale(instance);
+		instance.ctx.initial.x = e.clientX - instance.ctx.offset.x / inverse_scale;
+		instance.ctx.initial.y = e.clientY - instance.ctx.offset.y / inverse_scale;
+
+		const should_drag = this.#run_plugins(instance, 'shouldStart', e);
+		if (!should_drag) return;
+
+		instance.ctx.isInteracting = true;
+		this.#active_nodes.set(e.pointerId, draggable_node);
+	}
+
+	#handle_pointer_move(e: PointerEvent, sync_only = false) {
+		const draggable_node = this.#active_nodes.get(e.pointerId);
+		if (!draggable_node) return;
+
+		const instance = this.#instances.get(draggable_node)!;
+		if (!instance.ctx.isInteracting) return;
+
+		if (instance.is_processing_external_update && instance.ctx.lastEvent === e) {
+			// console.warn('Preventing recursive handle_pointer_move during external update');
+			return;
+		}
+
+		instance.ctx.lastEvent = e;
+
+		if (!instance.ctx.isDragging) {
+			instance.dragstart_prevented = false;
+			this.#run_plugins(instance, 'drag', e);
+
+			if (!instance.dragstart_prevented) {
+				const start_drag = this.#run_plugins(instance, 'start', e);
+				if (!start_drag) return this.#clear_effects(instance);
+				else this.#flush_effects(instance);
+
+				const capture_result = this.#resultify(
+					() => {
+						instance.pointer_captured_id = e.pointerId;
+						instance.ctx.currentlyDraggedNode.setPointerCapture(instance.pointer_captured_id);
+					},
+					{
+						phase: 'start',
+						node: instance.ctx.currentlyDraggedNode,
+					},
 				);
 
-			const event_target = e.composedPath()[0] as HTMLElement;
+				if (!capture_result.ok) {
+					this.#cleanup_active_node(e.pointerId);
+				}
+
+				instance.ctx.isDragging = true;
+			}
+
+			if (!instance.ctx.isDragging) return;
+		}
+
+		e.preventDefault();
+
+		if (!sync_only) {
+			instance.ctx.delta.x = e.clientX - instance.ctx.initial.x - instance.ctx.offset.x;
+			instance.ctx.delta.y = e.clientY - instance.ctx.initial.y - instance.ctx.offset.y;
+
+			instance.ctx.proposed.x = instance.ctx.delta.x;
+			instance.ctx.proposed.y = instance.ctx.delta.y;
+		}
+
+		const run_result = this.#run_plugins(instance, 'drag', e);
+
+		if (run_result) this.#flush_effects(instance);
+		else return this.#clear_effects(instance);
+
+		if (!sync_only) {
+			instance.ctx.offset.x += instance.ctx.proposed.x ?? 0;
+			instance.ctx.offset.y += instance.ctx.proposed.y ?? 0;
+		}
+	}
+
+	#handle_pointer_up(e: PointerEvent) {
+		const draggable_node = this.#active_nodes.get(e.pointerId);
+		if (!draggable_node) return;
+
+		const instance = this.#instances.get(draggable_node)!;
+		if (!instance.ctx.isInteracting) return;
+
+		if (instance.ctx.isDragging) {
+			listen(draggable_node as HTMLElement, 'click', (e) => e.stopPropagation(), {
+				once: true,
+				signal: instance.controller.signal,
+				capture: true,
+			});
+		}
+
+		if (
+			instance.pointer_captured_id &&
+			instance.ctx.currentlyDraggedNode.hasPointerCapture(instance.pointer_captured_id)
+		) {
+			instance.ctx.currentlyDraggedNode.releasePointerCapture(instance.pointer_captured_id);
+		}
+
+		this.#run_plugins(instance, 'end', e);
+		this.#flush_effects(instance);
+
+		if (instance.ctx.proposed.x) instance.ctx.initial.x = instance.ctx.offset.x;
+		if (instance.ctx.proposed.y) instance.ctx.initial.y = instance.ctx.offset.y;
+
+		instance.ctx.proposed.x = 0;
+		instance.ctx.proposed.y = 0;
+		instance.ctx.isInteracting = false;
+		instance.ctx.isDragging = false;
+		instance.dragstart_prevented = false;
+		instance.pointer_captured_id = null;
+		this.#clear_effects(instance);
+	}
+
+	#find_draggable_node(e: PointerEvent): HTMLElement | SVGElement | null {
+		const path = e.composedPath();
+		for (const el of path) {
 			if (
-				drag_els.some((el) => el.contains(event_target) || el.shadowRoot?.contains(event_target)) &&
-				!cancel_element_contains(cancel_els, [event_target])
+				(el instanceof HTMLElement || (is_svg_element(el) && !is_svg_svg_element(el))) &&
+				this.#instances.has(el)
 			) {
-				currently_dragged_el =
-					drag_els.length === 1 ? node : drag_els.find((el) => el.contains(event_target))!;
-				is_interacting = true;
-				start_time = Date.now();
-
-				// If no delay, immediately set time threshold
-				if (!threshold.delay) {
-					meets_time_threshold = true;
-				}
-			} else return;
-
-			// Compute current node's bounding client Rectangle
-			node_rect = node.getBoundingClientRect();
-
-			const { clientX, clientY } = e;
-			const inverse_scale = calculate_inverse_scale();
-
-			if (can_move_in_x) initial_x = clientX - x_offset / inverse_scale;
-			if (can_move_in_y) initial_y = clientY - y_offset / inverse_scale;
-
-			// Only the bounds uses these properties at the moment,
-			// may open up in the future if others need it
-			if (computed_bounds) {
-				client_to_node_offsetX = clientX - node_rect.left;
-				client_to_node_offsetY = clientY - node_rect.top;
+				return el;
 			}
-		},
-		event_options,
-	);
+		}
+		return null;
+	}
 
-	listen(
-		'pointermove',
-		(e) => {
-			if (!is_interacting || (ignoreMultitouch && active_pointers.size > 1)) return;
+	#cleanup_active_node(pointer_id: number) {
+		const node = this.#active_nodes.get(pointer_id);
+		if (!node) return;
 
-			if (!is_dragging) {
-				// Time threshold
-				if (!meets_time_threshold) {
-					const elapsed = Date.now() - start_time;
-					if (elapsed >= threshold.delay!) {
-						meets_time_threshold = true;
-						try_start_drag(e);
-					}
-				}
+		const instance = this.#instances.get(node);
+		if (!instance) return;
 
-				// Distance threshold
-				if (!meets_distance_threshold) {
-					const delta_x = e.clientX - initial_x;
-					const delta_y = e.clientY - initial_y;
-					const distance = Math.sqrt(delta_x ** 2 + delta_y ** 2);
+		if (
+			instance.pointer_captured_id &&
+			instance.ctx.currentlyDraggedNode.hasPointerCapture(instance.pointer_captured_id)
+		) {
+			this.#resultify(
+				() => {
+					instance.ctx.currentlyDraggedNode.releasePointerCapture(instance.pointer_captured_id!);
+				},
+				{
+					phase: 'end',
+					node,
+				},
+			);
+		}
 
-					if (distance >= threshold.distance!) {
-						meets_distance_threshold = true;
-						try_start_drag(e);
-					}
-				}
+		instance.ctx.isInteracting = false;
+		instance.ctx.isDragging = false;
+		instance.dragstart_prevented = false;
+		instance.pointer_captured_id = null;
+		this.#active_nodes.delete(pointer_id);
+		this.#clear_effects(instance);
+	}
 
-				if (!is_dragging) return;
+	#calculate_inverse_scale(instance: DraggableInstance) {
+		const draggable_node = instance.ctx.rootNode;
+		let inverse_scale = 1;
+
+		if (draggable_node instanceof SVGElement) {
+			const bbox = (draggable_node as SVGGraphicsElement).getBBox();
+			const rect = instance.ctx.cachedRootNodeRect;
+			if (bbox.width && rect.width) {
+				inverse_scale = bbox.width / rect.width;
 			}
+		} else {
+			// @ts-ignore
+			inverse_scale = draggable_node.offsetWidth / instance.ctx.cachedRootNodeRect.width;
+		}
 
-			if (recomputeBounds.drag) computed_bounds = compute_bound_rect(bounds, node);
+		if (isNaN(inverse_scale) || inverse_scale <= 0) {
+			inverse_scale = 1;
+		}
 
-			e.preventDefault();
-
-			node_rect = node.getBoundingClientRect();
-
-			// Get final values for clamping
-			let final_x = e.clientX,
-				final_y = e.clientY;
-
-			const inverse_scale = calculate_inverse_scale();
-
-			if (computed_bounds) {
-				// Client position is limited to this virtual boundary to prevent node going out of bounds
-				const virtual_client_bounds: DragBoundsCoords = {
-					left: computed_bounds.left + client_to_node_offsetX,
-					top: computed_bounds.top + client_to_node_offsetY,
-					right: computed_bounds.right + client_to_node_offsetX - node_rect.width,
-					bottom: computed_bounds.bottom + client_to_node_offsetY - node_rect.height,
-				};
-
-				final_x = clamp(final_x, virtual_client_bounds.left, virtual_client_bounds.right);
-				final_y = clamp(final_y, virtual_client_bounds.top, virtual_client_bounds.bottom);
-			}
-
-			if (Array.isArray(grid)) {
-				let [x_snap, y_snap] = grid;
-
-				if (isNaN(+x_snap) || x_snap < 0)
-					throw new Error('1st argument of `grid` must be a valid positive number');
-
-				if (isNaN(+y_snap) || y_snap < 0)
-					throw new Error('2nd argument of `grid` must be a valid positive number');
-
-				let delta_x = final_x - initial_x,
-					delta_y = final_y - initial_y;
-
-				[delta_x, delta_y] = snap_to_grid(
-					[x_snap / inverse_scale, y_snap / inverse_scale],
-					delta_x,
-					delta_y,
-				);
-
-				final_x = initial_x + delta_x;
-				final_y = initial_y + delta_y;
-			}
-
-			if (can_move_in_x) translate_x = Math.round((final_x - initial_x) * inverse_scale);
-			if (can_move_in_y) translate_y = Math.round((final_y - initial_y) * inverse_scale);
-
-			x_offset = translate_x;
-			y_offset = translate_y;
-
-			fire_svelte_drag_event(e);
-
-			set_translate();
-		},
-		event_options,
-	);
-
-	listen(
-		'pointerup',
-		(e) => {
-			active_pointers.delete(e.pointerId);
-
-			if (!is_interacting) return;
-
-			if (is_dragging) {
-				// Listen for click handler and cancel it
-				listen('click', (e) => e.stopPropagation(), {
-					once: true,
-					signal: controller.signal,
-					capture: true,
-				});
-
-				if (recomputeBounds.dragEnd) computed_bounds = compute_bound_rect(bounds, node);
-
-				// Apply class defaultClassDragged
-				node_class_list.remove(defaultClassDragging);
-				node_class_list.add(defaultClassDragged);
-
-				if (applyUserSelectHack) body_style.userSelect = body_original_user_select_val;
-
-				fire_svelte_drag_end_event(e);
-
-				if (can_move_in_x) initial_x = translate_x;
-				if (can_move_in_y) initial_y = translate_y;
-			}
-
-			is_interacting = false;
-			reset_state();
-		},
-		event_options,
-	);
-
-	function calculate_inverse_scale() {
-		// Calculate the current scale of the node
-		let inverse_scale = node.offsetWidth / node_rect.width;
-		if (isNaN(inverse_scale)) inverse_scale = 1;
 		return inverse_scale;
 	}
 
-	return {
-		destroy: (): void => controller.abort(),
-		update: (options: DragOptions): void => {
-			// Update all the values that need to be changed
-			axis = options.axis || 'both';
-			disabled = options.disabled ?? false;
-			ignoreMultitouch = options.ignoreMultitouch ?? false;
-			handle = options.handle;
-			bounds = options.bounds;
-			recomputeBounds = options.recomputeBounds ?? DEFAULT_RECOMPUTE_BOUNDS;
-			cancel = options.cancel;
-			applyUserSelectHack = options.applyUserSelectHack ?? true;
-			grid = options.grid;
-			gpuAcceleration = options.gpuAcceleration ?? true;
-			legacyTranslate = options.legacyTranslate ?? false;
-			transform = options.transform;
-			threshold = { ...DEFAULT_DRAG_THRESHOLD, ...(options.threshold ?? {}) };
-
-			const dragged = node_class_list.contains(defaultClassDragged);
-
-			node_class_list.remove(defaultClass, defaultClassDragged);
-
-			defaultClass = options.defaultClass ?? DEFAULT_CLASS.MAIN;
-			defaultClassDragging = options.defaultClassDragging ?? DEFAULT_CLASS.DRAGGING;
-			defaultClassDragged = options.defaultClassDragged ?? DEFAULT_CLASS.DRAGGED;
-
-			node_class_list.add(defaultClass);
-
-			if (dragged) node_class_list.add(defaultClassDragged);
-
-			if (is_controlled) {
-				x_offset = translate_x = options.position?.x ?? translate_x;
-				y_offset = translate_y = options.position?.y ?? translate_y;
-
-				set_translate();
+	#destroy_instance(instance: DraggableInstance) {
+		for (const [pointer_id, active_node] of this.#active_nodes) {
+			if (active_node === instance.root_node) {
+				this.#cleanup_active_node(pointer_id);
 			}
-		},
-	};
-}
+		}
 
-const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max);
+		for (const plugin of instance.plugins) {
+			plugin.cleanup?.(instance.ctx, instance.states.get(plugin.name));
+		}
 
-const is_string = (val: unknown): val is string => typeof val === 'string';
+		instance.controller.abort();
 
-const snap_to_grid = (
-	[x_snap, y_snap]: [number, number],
-	pending_x: number,
-	pending_y: number,
-): [number, number] => {
-	const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
-
-	const x = calc(pending_x, x_snap);
-	const y = calc(pending_y, y_snap);
-
-	return [x, y];
-};
-
-function get_handle_els(handle: DragOptions['handle'], node: HTMLElement): HTMLElement[] {
-	if (!handle) return [node];
-
-	if (is_HTMLElement(handle)) return [handle];
-	if (Array.isArray(handle)) return handle;
-
-	// Valid!! Let's check if this selector exists or not
-	const handle_els = node.querySelectorAll<HTMLElement>(handle);
-	if (handle_els === null)
-		throw new Error(
-			'Selector passed for `handle` option should be child of the element on which the action is applied',
-		);
-
-	return Array.from(handle_els.values());
-}
-
-function get_cancel_elements(cancel: DragOptions['cancel'], node: HTMLElement): HTMLElement[] {
-	if (!cancel) return [];
-
-	if (is_HTMLElement(cancel)) return [cancel];
-	if (Array.isArray(cancel)) return cancel;
-
-	const cancel_els = node.querySelectorAll<HTMLElement>(cancel);
-
-	if (cancel_els === null)
-		throw new Error(
-			'Selector passed for `cancel` option should be child of the element on which the action is applied',
-		);
-
-	return Array.from(cancel_els.values());
-}
-
-const cancel_element_contains = (cancel_elements: HTMLElement[], drag_elements: HTMLElement[]) =>
-	cancel_elements.some((cancelEl) => drag_elements.some((el) => cancelEl.contains(el)));
-
-function compute_bound_rect(bounds: DragOptions['bounds'], rootNode: HTMLElement) {
-	if (bounds === undefined) return;
-
-	if (is_HTMLElement(bounds)) return bounds.getBoundingClientRect();
-
-	if (typeof bounds === 'object') {
-		// we have the left right etc
-
-		const { top = 0, left = 0, right = 0, bottom = 0 } = bounds;
-
-		const computed_right = window.innerWidth - right;
-		const computed_bottom = window.innerHeight - bottom;
-
-		return { top, right: computed_right, bottom: computed_bottom, left };
+		this.instances.delete(instance.root_node);
 	}
 
-	// It's a string
-	if (bounds === 'parent') return (<HTMLElement>rootNode.parentNode).getBoundingClientRect();
+	#process_pending_compartment_updates(instance: DraggableInstance, is_external = false) {
+		if (instance.compartments.is_flushing || instance.compartments.pending.size === 0) {
+			return;
+		}
 
-	const node = document.querySelector<HTMLElement>(<string>bounds);
-	if (node === null)
-		throw new Error("The selector provided for bound doesn't exists in the document.");
+		// ✅ CRITICAL FIX: Block recursive internal updates
+		if (!is_external && instance.is_processing_external_update) {
+			// console.warn('Blocking recursive compartment update to prevent infinite loop');
+			return;
+		}
 
-	return node.getBoundingClientRect();
+		instance.compartments.is_flushing = true;
+
+		// ✅ Mark external updates and assign unique cycle ID
+		if (is_external) {
+			instance.is_processing_external_update = true;
+		}
+
+		queueMicrotask(() => {
+			// Store reference to pending items and clear for next batch
+			const pending = new Set(instance.compartments.pending);
+			instance.compartments.pending.clear();
+			instance.compartments.is_flushing = false;
+
+			let has_changes = false;
+
+			// Process all pending compartment updates
+			for (const compartment of pending) {
+				const new_plugin = compartment.current;
+				const old_plugin = instance.plugins.find(
+					(p) => p === instance.compartments.map.get(compartment),
+				);
+
+				if (old_plugin) {
+					if (new_plugin === undefined) {
+						// Remove the plugin
+						const plugin_index = instance.plugins.indexOf(old_plugin);
+						old_plugin.cleanup?.(instance.ctx, instance.states.get(old_plugin.name));
+						instance.states.delete(old_plugin.name);
+						instance.plugins.splice(plugin_index, 1);
+						instance.compartments.map.set(compartment, undefined);
+						has_changes = true;
+					} else {
+						// Skip if same instance and not live-updateable
+						if (old_plugin === new_plugin && !new_plugin.liveUpdate) {
+							continue;
+						}
+
+						// Update plugin reference
+						instance.plugins[instance.plugins.indexOf(old_plugin)] = new_plugin;
+						instance.compartments.map.set(compartment, new_plugin);
+
+						// Update all plugins that have liveUpdate enabled
+						for (const plugin of instance.plugins) {
+							if (plugin.liveUpdate) {
+								const old = instance.plugins.find((p) => p.name === plugin.name);
+								if (this.#update_plugin_if_needed(instance, old, plugin)) {
+									has_changes = true;
+								}
+							}
+						}
+					}
+				} else if (new_plugin !== undefined) {
+					// Add new plugin when compartment was empty
+					instance.plugins.push(new_plugin);
+					instance.compartments.map.set(compartment, new_plugin);
+
+					const setup_result = this.#resultify(
+						() => {
+							const state = new_plugin.setup?.(instance.ctx);
+							if (state) {
+								instance.states.set(new_plugin.name, state);
+							}
+							return state;
+						},
+						{
+							phase: 'setup',
+							plugin: { name: new_plugin.name, hook: 'setup' },
+							node: instance.root_node,
+						},
+					);
+
+					if (!setup_result.ok) {
+						instance.failed_plugins.add(new_plugin.name);
+					}
+
+					// Use the same update logic as replacement case
+					for (const plugin of instance.plugins) {
+						if (plugin.liveUpdate && plugin !== new_plugin) {
+							const old = instance.plugins.find((p) => p.name === plugin.name);
+							if (this.#update_plugin_if_needed(instance, old, plugin)) {
+								has_changes = true;
+							}
+						}
+					}
+
+					has_changes = true;
+				}
+			}
+
+			// If changes occurred and we have a last event, rerun drag
+			if (is_external && !instance.ctx.isDragging && has_changes && instance.ctx.lastEvent) {
+				this.#handle_pointer_move(instance.ctx.lastEvent, true);
+			}
+
+			// ✅ Reset flags AFTER processing
+			instance.compartments.is_flushing = false;
+			if (is_external) {
+				instance.is_processing_external_update = false;
+			}
+
+			this.#flush_effects(instance);
+
+			// Check if new updates came in while we were processing
+			if (instance.compartments.pending.size > 0) {
+				setTimeout(() => {
+					this.#process_pending_compartment_updates(instance, false);
+				}, 0);
+			}
+		});
+	}
+
+	#update_plugin_if_needed(
+		instance: DraggableInstance,
+		old_plugin: Plugin | undefined,
+		new_plugin: Plugin,
+	): boolean {
+		// Skip if same instance and not live-updateable
+		if (old_plugin === new_plugin && !new_plugin.liveUpdate) {
+			return false;
+		}
+
+		// Clean up old instance if different
+		if (old_plugin && old_plugin !== new_plugin) {
+			old_plugin.cleanup?.(instance.ctx, instance.states.get(old_plugin.name));
+			instance.states.delete(old_plugin.name);
+		}
+
+		// Setup new plugin
+		const state = new_plugin.setup?.(instance.ctx);
+		if (state) {
+			instance.states.set(new_plugin.name, state);
+		}
+
+		return true;
+	}
 }
-
-const set_style = (el: HTMLElement, style: string, value: string) =>
-	el.style.setProperty(style, value);
-
-const is_HTMLElement = (obj: unknown): obj is HTMLElement => obj instanceof HTMLElement;

@@ -1,12 +1,10 @@
 ---
-import ExploreFrameworks from '$components/home/ExploreFrameworks.svelte';
-import BundleSizeFeature from '$components/home/features/bundle-sizes/BundleSizeFeature.svelte';
 import FeatureRichFeature from '$components/home/features/feature-rich/FeatureRichFeature.svelte';
 import MultipleFrameworksFeature from '$components/home/features/multiple-frameworks/MultipleFrameworksFeature.svelte';
 import SSRFriendlyFeature from '$components/home/features/ssr-friendly/SSRFriendlyFeature.svelte';
 import HeroExample from '$components/home/HeroExample.svelte';
+import BundleSizeBuilderFeature from '$components/home/features/bundle-size/BundleSizeBuilderFeature.svelte';
 import Layout from '$layouts/Layout.astro';
-import LogosGithubIcon from '~icons/logos/github-icon';
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
@@ -20,9 +18,7 @@ import LogosGithubIcon from '~icons/logos/github-icon';
 
 				<div class="group">
 					<a href="/docs/svelte">Getting Started</a>
-					<a href="https://github.com/puruvj/neodrag">
-						<LogosGithubIcon /> Github
-					</a>
+					<a href="https://github.com/puruvj/neodrag"> Github </a>
 				</div>
 			</div>
 
@@ -39,8 +35,8 @@ import LogosGithubIcon from '~icons/logos/github-icon';
 			<MultipleFrameworksFeature client:visible />
 		</section>
 
-		<section class="feature-bundle-sizes two-col">
-			<BundleSizeFeature client:visible />
+		<section class="feature-transparent two-col">
+			<BundleSizeBuilderFeature client:visible />
 		</section>
 
 		<section class="feature-ssr-friendly two-col">
@@ -50,26 +46,17 @@ import LogosGithubIcon from '~icons/logos/github-icon';
 		<section class="feature-feature-rich">
 			<FeatureRichFeature client:visible />
 		</section>
-
-		<section class="explore-frameworks">
-			<ExploreFrameworks client:visible />
-		</section>
 	</main>
 </Layout>
 
-<style lang="scss">
-	@import '../css/breakpoints';
-
+<style scoped>
 	.tagline {
 		display: grid;
 		grid-template-columns: auto 1fr;
 		align-items: center;
 		gap: 5rem;
-
 		margin-bottom: 6rem;
-
 		padding: 1rem 0;
-
 		min-height: 100vh;
 		width: 100% !important;
 
@@ -77,9 +64,9 @@ import LogosGithubIcon from '~icons/logos/github-icon';
 			height: 100%;
 		}
 
-		@include media('<desktop') {
+		@media (max-width: 1223px) {
 			grid-template-columns: 1fr;
-			// gap: 1rem;
+			/* gap: 1rem; */
 		}
 
 		h1,
@@ -91,54 +78,40 @@ import LogosGithubIcon from '~icons/logos/github-icon';
 			background-image: var(--app-color-primary-gradient);
 			background-clip: text;
 			-webkit-text-fill-color: transparent;
-
 			font-size: clamp(3rem, 20vw, 8rem);
 			line-height: 1.28;
-
 			width: max-content;
 		}
 
 		p {
 			font-size: clamp(1rem, 5vw, 2rem);
 		}
+	}
 
-		.group {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
+	.group {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		margin-top: 1rem;
+
+		a[href] {
+			display: flex;
+			justify-content: center;
+			align-items: center;
 			gap: 1rem;
+			padding: 1rem 2rem;
+			border-radius: 1rem !important;
+			font-size: 1.4rem;
+			text-align: center;
+			color: var(--app-color-primary);
 
-			margin-top: 1rem;
+			&:hover {
+				color: var(--app-color-primary-contrast);
+			}
 
-			a[href] {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				gap: 1rem;
-
-				padding: 1rem 2rem;
-
-				border-radius: 1rem !important;
-
-				font-size: 1.4rem;
-				text-align: center;
-
-				@include media('<sm-tablet') {
-					font-size: 1rem;
-
-					padding: 0.5rem 1rem;
-				}
-
-				:global(svg path) {
-					fill: var(--app-color-primary);
-
-					transition: fill 150ms ease-in;
-				}
-
-				&:hover {
-					:global(svg path) {
-						fill: var(--app-color-primary-light);
-					}
-				}
+			@media (max-width: 768px) {
+				font-size: 1rem;
+				padding: 0.5rem 1rem;
 			}
 		}
 	}
@@ -148,30 +121,25 @@ import LogosGithubIcon from '~icons/logos/github-icon';
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-
 		z-index: 2;
-
 		padding: 0 1rem;
-
 		width: 100%;
 	}
 
 	.two-col {
 		display: flex;
 		flex: 1 1 auto;
-
 		width: 80%;
-
 		margin-bottom: clamp(3rem, 100vw, 10rem);
 
 		&:nth-of-type(2n + 1) {
 			flex-direction: row-reverse;
 		}
 
-		@include media('<desktop') {
+		@media (max-width: 1223px) {
 			grid-template-columns: 1fr;
 			gap: 2rem;
-
+			width: 100%;
 			flex-direction: column !important;
 		}
 
@@ -182,7 +150,6 @@ import LogosGithubIcon from '~icons/logos/github-icon';
 
 	.feature-feature-rich {
 		grid-template-columns: 1fr;
-
 		margin-bottom: clamp(3rem, 100vw, 10rem);
 	}
 
@@ -191,7 +158,6 @@ import LogosGithubIcon from '~icons/logos/github-icon';
 		flex-direction: column;
 		align-items: center;
 		gap: 4rem;
-
 		padding-bottom: clamp(3rem, 100vw, 10rem);
 	}
 </style>

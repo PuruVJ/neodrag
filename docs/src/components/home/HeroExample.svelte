@@ -1,12 +1,16 @@
 <script lang="ts">
 	import squircle from '$/worklet/squircle.js?url';
-	import { typingEffect } from '$actions/typingEffect';
+	import { typingEffect } from '$attachments/typingEffect.svelte';
 	import { browser } from '$helpers/utils';
-	import { draggable } from '@neodrag/svelte';
+	import { theme } from '$state/user-preferences.svelte';
+	import { bounds, BoundsFrom, Compartment, draggable, events, position } from '@neodrag/svelte';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import PawIcon from '~icons/mdi/paw';
+
+	// This is here so that it gets triggered on homepage
+	theme.current;
 
 	let heading_text = 'Try dragging the box below';
 
@@ -20,6 +24,8 @@
 	});
 
 	let drag_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
+
+	const position_compartment = Compartment.of(() => position({ current: drag_position.current }));
 
 	function handle_mouse_move(e: MouseEvent) {
 		coords_cursor ??= { x: 0, y: 0 };
@@ -40,7 +46,7 @@
 
 <div class="container">
 	{#key heading_text}
-		<p class="h3" class:hidden={false} use:typingEffect={60}>
+		<p class="h3" class:hidden={false} {@attach typingEffect(60)}>
 			{browser ? heading_text : ''}
 		</p>
 	{/key}
@@ -48,18 +54,22 @@
 	<div
 		class="box"
 		class:wiggles={box_wiggles}
-		use:draggable={{
-			bounds: 'parent',
-			position: drag_position.current,
-			onDragStart: () => {
-				box_wiggles = false;
-			},
-			onDrag: ({ offsetX, offsetY }) =>
-				drag_position.set({ x: offsetX, y: offsetY }, { duration: 0 }),
-			onDragEnd: () => {
-				drag_position.target = { x: 0, y: 0 };
-			},
-		}}
+		{@attach draggable(() => [
+			bounds(BoundsFrom.parent()),
+			position_compartment,
+			events({
+				onDragStart: () => {
+					box_wiggles = false;
+				},
+				onDrag: ({ offset }) => {
+					console.log(offset);
+					drag_position.set({ x: offset.x, y: offset.y }, { duration: 0 });
+				},
+				onDragEnd: () => {
+					drag_position.target = { x: 0, y: 0 };
+				},
+			}),
+		])}
 	>
 		<div class="paw">
 			<PawIcon />
@@ -68,24 +78,22 @@
 
 	<div
 		class="cursor"
-		style:transform="translate3d(calc({coords_cursor?.x ?? 0}px - 50%), calc({coords_cursor?.y ??
-			0}px - 50%), 0)"
+		style:translate="calc({coords_cursor?.x ?? 0}px - 50%) calc({coords_cursor?.y ?? 0}px - 50%)
+		0.000001px"
 		style:--opacity={show_custom_cursor && coords_cursor ? 1 : 0}
 	>
 		<PawIcon style="font-size: 2rem;" />
 	</div>
 </div>
 
-<style lang="scss">
-	@import '../../css/breakpoints';
-
+<style>
 	.container {
 		position: relative;
 
 		width: auto;
 		height: 100%;
 
-		background-color: hsla(var(--app-color-dark-hsl), 0.1);
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 90%);
 
 		border-radius: 1rem;
 		box-shadow: var(--inner-shadow-4);
@@ -95,7 +103,7 @@
 		place-content: center;
 		gap: 2rem;
 
-		@include media('<desktop') {
+		@media (max-width: 1223px) {
 			height: 80vh;
 		}
 
@@ -118,7 +126,7 @@
 		top: 25%;
 
 		font-family: var(--app-font-mono);
-		color: hsla(var(--app-color-dark-hsl), 0.6);
+		color: color-mix(in lch, var(--app-color-dark), transparent 40%);
 		word-spacing: 4px;
 		font-size: clamp(1rem, 2vw, 2.5rem);
 
@@ -224,9 +232,9 @@
 			right: calc(0.03 * var(--size));
 			bottom: calc(0.03 * var(--size));
 
-			// width: 61%;
+			/* width: 61%; */
 			min-width: clamp(calc(0.61 * 4rem), calc(0.61 * 20vw), calc(0.61 * 12rem));
-			// height: auto;
+			/* height: auto; */
 		}
 
 		:global(svg path) {

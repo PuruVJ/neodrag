@@ -3,22 +3,41 @@ name: Continuous Releases
 on: [push, pull_request]
 
 jobs:
-  test:
+  release:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            */node_modules
+            **/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
           run_install: true
 
       - name: Compile
         run: pnpm compile
 
       - name: Release
-        run: pnpm dlx pkg-pr-new publish './packages/*'
+        run: pnpm dlx pkg-pr-new publish './packages/*' --compact

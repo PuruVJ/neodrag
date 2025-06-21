@@ -1,100 +1,88 @@
-import { DragEventData, draggable, DragOptions } from '@neodrag/core';
-import React, { useEffect, useRef, useState } from 'react';
+import { DEFAULTS, DraggableFactory } from '@neodrag/core';
+import {
+	Compartment,
+	DragEventData,
+	PluginContext,
+	PluginInput,
+	unstable_definePlugin,
+	type Plugin,
+} from '@neodrag/core/plugins';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-type DragState = DragEventData;
+const factory = new DraggableFactory(DEFAULTS);
 
-type HandleCancelType =
-	| string
-	| HTMLElement
-	| React.RefObject<HTMLElement>
-	| (React.RefObject<HTMLElement> | HTMLElement)[]
-	| undefined;
-
-function unwrap_handle_cancel(
-	val: HandleCancelType,
-): string | HTMLElement | HTMLElement[] | undefined {
-	if (val == undefined || typeof val === 'string' || val instanceof HTMLElement) return val;
-	if ('current' in val) return val.current!;
-
-	if (Array.isArray(val)) {
-		// It can only be an array now
-		return val.map((v) => (v instanceof HTMLElement ? v : v.current!));
-	}
+interface DragState extends DragEventData {
+	isDragging: boolean;
 }
 
-type ReactDragOptions = Omit<DragOptions, 'handle' | 'cancel'> & {
-	handle?: HandleCancelType;
-	cancel?: HandleCancelType;
+const defaultState: DragState = {
+	offset: { x: 0, y: 0 },
+	rootNode: null as unknown as HTMLElement,
+	currentNode: null as unknown as HTMLElement,
+	isDragging: false,
+	event: null as unknown as PointerEvent,
 };
 
-export function useDraggable<RefType extends HTMLElement = HTMLDivElement>(
-	nodeRef: React.RefObject<RefType>,
-	options: ReactDragOptions = {},
-) {
-	const update_ref = useRef<(options: DragOptions) => void>();
+const create_sync_plugin = (setState: React.Dispatch<React.SetStateAction<DragState>>) => {
+	const update_state = (
+		ctx: PluginContext,
+		event: PointerEvent,
+		overrides: Partial<DragState> = {},
+	) =>
+		ctx.effect.immediate(() =>
+			setState((prev) => ({
+				...prev,
+				offset: { ...ctx.offset },
+				rootNode: ctx.rootNode,
+				currentNode: ctx.currentlyDraggedNode,
+				event,
+				...overrides,
+			})),
+		);
 
-	const [isDragging, set_is_dragging] = useState(false);
-	const [dragState, set_drag_state] = useState<DragState>();
+	return unstable_definePlugin(() => ({
+		name: 'rss', // react-state-sync
+		priority: -1000,
+		cancelable: false,
+		liveUpdate: true,
+		start: (ctx, _, event) => update_state(ctx, event, { isDragging: true }),
+		drag: (ctx, _, event) => update_state(ctx, event),
+		end: (ctx, _, event) => update_state(ctx, event, { isDragging: false }),
+	}));
+};
 
-	let { onDragStart, onDrag, onDragEnd, handle, cancel } = options;
+const resolve_plugins = (plugins: PluginInput, sync_plugin: Plugin) =>
+	typeof plugins === 'function' ? () => plugins().concat(sync_plugin) : plugins.concat(sync_plugin);
 
-	let new_handle = unwrap_handle_cancel(handle);
-	let new_cancel = unwrap_handle_cancel(cancel);
+export const wrapper =
+	(draggableFactory: DraggableFactory) =>
+	(ref: React.RefObject<HTMLElement | SVGElement | null>, plugins: PluginInput = []) => {
+		const [state, set_state] = useState<DragState>(defaultState);
+		const sync_plugin = useRef(create_sync_plugin(set_state));
+		const resolvedPlugins = useRef(resolve_plugins(plugins, sync_plugin.current));
 
-	function call_event(arg: DragState, cb: DragOptions['onDrag']) {
-		set_drag_state(arg);
-		cb?.(arg);
+		useEffect(() => {
+			if (!ref.current) return;
+			return draggableFactory.draggable(ref.current, resolvedPlugins.current);
+		}, []);
+
+		return state;
+	};
+
+export function useCompartment(reactive: () => Plugin, deps?: React.DependencyList) {
+	const compartment = useRef<Compartment>();
+
+	if (!compartment.current) {
+		compartment.current = new Compartment(reactive);
 	}
 
-	function custom_on_drag_start(arg: DragState) {
-		set_is_dragging(true);
-		call_event(arg, onDragStart);
-	}
+	useLayoutEffect(() => {
+		compartment.current!.current = reactive();
+	}, deps);
 
-	function custom_on_drag(arg: DragState) {
-		call_event(arg, onDrag);
-	}
-
-	function custom_on_drag_end(arg: DragState) {
-		set_is_dragging(false);
-		call_event(arg, onDragEnd);
-	}
-
-	useEffect(() => {
-		if (typeof window === 'undefined') return;
-		const node = nodeRef.current;
-		if (!node) return;
-
-		// Update callbacks
-		({ onDragStart, onDrag, onDragEnd } = options);
-
-		const { update, destroy } = draggable(node, {
-			...options,
-			handle: new_handle,
-			cancel: new_cancel,
-			onDragStart: custom_on_drag_start,
-			onDrag: custom_on_drag,
-			onDragEnd: custom_on_drag_end,
-		});
-
-		update_ref.current = update;
-
-		return destroy;
-	}, []);
-
-	useEffect(() => {
-		update_ref.current?.({
-			...options,
-			handle: unwrap_handle_cancel(handle),
-			cancel: unwrap_handle_cancel(cancel),
-			onDragStart: custom_on_drag_start,
-			onDrag: custom_on_drag,
-			onDragEnd: custom_on_drag_end,
-		});
-	}, [options]);
-
-	return { isDragging, dragState };
+	return compartment.current;
 }
 
-export type { DragAxis, DragBounds, DragBoundsCoords, DragEventData } from '@neodrag/core';
-export type { ReactDragOptions as DragOptions };
+export const useDraggable = wrapper(factory);
+export * from '@neodrag/core/plugins';
+export const instances = factory.instances;

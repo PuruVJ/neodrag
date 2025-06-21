@@ -1,13 +1,19 @@
 <script lang="ts">
-	import { portal } from '$actions/portal';
+	import { portal } from '$attachments/portal.svelte';
 	import { theme } from '$state/user-preferences.svelte.ts';
+	import type { Snippet } from 'svelte';
 	import { inview } from 'svelte-inview';
 	import { expoOut } from 'svelte/easing';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { fade, slide } from 'svelte/transition';
 	import CloseIcon from '~icons/material-symbols/close-rounded';
 	import MenuIcon from '~icons/ri/menu-3-fill';
-	import Nav from './docs/Nav.svelte';
+
+	let {
+		children,
+	}: {
+		children: Snippet;
+	} = $props();
 
 	let shadow = $state(false);
 	let is_nav_open = $state(false);
@@ -17,7 +23,7 @@
 
 <div
 	class="view-judge"
-	use:portal={'#docs-container main'}
+	{@attach portal('#docs-container main')}
 	use:inview={{ threshold: 0.1 }}
 	oninview_change={() => (shadow = false)}
 	oninview_leave={() => (shadow = true)}
@@ -46,11 +52,12 @@
 		<button class="close-button" onclick={() => (is_nav_open = false)}>
 			<CloseIcon />
 		</button>
-		<Nav />
+
+		{@render children?.()}
 	</nav>
 {/if}
 
-<style lang="scss">
+<style>
 	.view-judge {
 		position: absolute;
 		top: 0;

@@ -134,7 +134,7 @@
 	</button>
 </section>
 
-<style lang="scss">
+<style>
 	.container {
 		isolation: isolate;
 
