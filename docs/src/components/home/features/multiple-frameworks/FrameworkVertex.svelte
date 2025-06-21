@@ -59,7 +59,7 @@
 		button: { left: 0, top: 0, width: 0, height: 0, timestamp: 0 },
 	};
 
-	// Flags to control when to recalculate
+	// FIXED: Event-driven RAF instead of continuous loop
 	let needs_position_update = true;
 	let is_dragging = false;
 	let raf_id: number | null = null;
@@ -115,67 +115,41 @@
 		};
 	}
 
-	function raf_update() {
-		// Only update if dragging or if we explicitly need an update
-		if (is_dragging || needs_position_update) {
-			calculate_line_properties();
-			needs_position_update = false;
-		}
+	// FIXED: Only RAF when needed - this prevents Chrome Android interference
+	function schedule_raf_update() {
+		if (raf_id !== null) return; // Already scheduled
 
-		// Continue the loop
-		raf_id = requestAnimationFrame(raf_update);
-	}
+		raf_id = requestAnimationFrame(() => {
+			// Only update if dragging or if we explicitly need an update
+			if (is_dragging || needs_position_update) {
+				calculate_line_properties();
+				needs_position_update = false;
+			}
 
-	function start_raf_loop() {
-		if (raf_id === null) {
-			raf_id = requestAnimationFrame(raf_update);
-		}
-	}
-
-	function stop_raf_loop() {
-		if (raf_id !== null) {
-			cancelAnimationFrame(raf_id);
 			raf_id = null;
-		}
+
+			// Continue the loop ONLY while dragging
+			if (is_dragging) {
+				schedule_raf_update();
+			}
+		});
 	}
 
 	function mark_for_update() {
 		needs_position_update = true;
+		schedule_raf_update();
 	}
 
-	// function connect(node: HTMLElement, root_el: HTMLElement) {
-	// const handle_resize = () => {
-	// 	// Invalidate cache and mark for update
-	// 	cached_positions.logo.timestamp = 0;
-	// 	cached_positions.button.timestamp = 0;
-	// 	mark_for_update();
-	// };
-
-	// window.addEventListener('resize', handle_resize);
-
-	// // Initial update
-	// mark_for_update();
-
-	// return {
-	// 	update(newRootEl: HTMLElement) {
-	// 		root_el = newRootEl;
-	// 		mark_for_update();
-	// 	},
-	// 	destroy: () => {
-	// 		window.removeEventListener('resize', handle_resize);
-	// 	},
-	// };
-	// }
+	function invalidate_cache() {
+		cached_positions.logo.timestamp = 0;
+		cached_positions.button.timestamp = 0;
+		mark_for_update();
+	}
 
 	const connect =
 		(root_el: HTMLElement): Attachment =>
 		(_node) => {
-			const unsub = on(window, 'resize', () => {
-				// Invalidate cache and mark for update
-				cached_positions.logo.timestamp = 0;
-				cached_positions.button.timestamp = 0;
-				mark_for_update();
-			});
+			const unsub = on(window, 'resize', invalidate_cache);
 
 			$effect(() => {
 				root_el;
@@ -198,19 +172,19 @@
 
 		return () => {
 			resetFns[framework] = () => {};
+			// FIXED: Clean up RAF on destroy
+			if (raf_id !== null) {
+				cancelAnimationFrame(raf_id);
+				raf_id = null;
+			}
 		};
 	});
 
 	// Start RAF loop when elements are available
 	$effect(() => {
 		if (button_el && logoEl) {
-			start_raf_loop();
 			mark_for_update();
 		}
-
-		return () => {
-			stop_raf_loop();
-		};
 	});
 
 	$effect(() => {
@@ -227,20 +201,20 @@
 		position_compartment,
 		events({
 			onDragStart: (data) => {
+				// FIXED: Start continuous RAF only when dragging starts
 				is_dragging = true;
-				mark_for_update();
+				invalidate_cache();
 				on_drag_start?.(data);
 			},
 			onDrag: (data) => {
 				on_drag?.(data);
 				draggable_position.set({ x: data.offset.x, y: data.offset.y }, { duration: 0 });
-				// Position will be updated in RAF loop
+				// Position will be updated smoothly by RAF loop
 			},
 			onDragEnd: (data) => {
+				// FIXED: Stop continuous RAF when dragging ends
 				is_dragging = false;
-				// Invalidate cache for final position
-				cached_positions.button.timestamp = 0;
-				mark_for_update();
+				invalidate_cache();
 				on_drag_end?.(data);
 			},
 		}),
@@ -271,12 +245,15 @@
 <style>
 	button {
 		background-color: transparent;
-
 		height: max-content;
+
+		/* FIXED: Add touch optimizations for Chrome Android */
+		touch-action: none;
+		-webkit-user-select: none;
+		user-select: none;
 
 		:global(svg) {
 			min-width: clamp(2rem, 5vw, 2.5rem);
-
 			transition: transform 0.2s ease;
 
 			&:hover {
@@ -289,18 +266,17 @@
 		position: absolute;
 		top: var(--top);
 		left: var(--left);
-
 		padding: 0px;
 		margin: 0px;
-
 		background-color: color-mix(in lch, var(--app-color-dark), transparent 50%);
 		line-height: 1px;
-
 		height: var(--thickness);
 		width: var(--length);
-
 		transform: rotate(var(--angle));
-
 		will-change: width;
+
+		/* FIXED: Add GPU acceleration hints */
+		transform-style: preserve-3d;
+		backface-visibility: hidden;
 	}
 </style>
