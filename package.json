@@ -21,6 +21,7 @@
 		"@types/react-dom": "^18.3.7",
 		"@vitest/browser": "^3.2.4",
 		"playwright": "^1.53.1",
+		"prettier-plugin-astro": "^0.14.1",
 		"prettier-plugin-svelte": "^3.4.0",
 		"svelte": "^5.34.7",
 		"tsup": "^8.5.0",
