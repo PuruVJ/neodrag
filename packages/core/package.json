@@ -35,7 +35,8 @@
 		"compile:watch": "tsup --watch",
 		"compile": "tsup",
 		"prepublishOnly": "npm run compile",
-		"test": "vitest"
+		"test": "vitest",
+		"test:coverage": "vitest run --coverage --browser=chromium"
 	},
 	"repository": {
 		"type": "git",
