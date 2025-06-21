@@ -30,6 +30,12 @@
 
 - [#182](https://github.com/PuruVJ/neodrag/pull/182) [`4c5b86b`](https://github.com/PuruVJ/neodrag/commit/4c5b86b0c0ed461a142d4919d59e0d062da6936a) Thanks [@PuruVJ](https://github.com/PuruVJ)! - fix: apply neodrag class on action init, not pointerdown
 
+## 2.3.1
+
+### Patch Changes
+
+- [#200](https://github.com/PuruVJ/neodrag/pull/200) [`1061842`](https://github.com/PuruVJ/neodrag/commit/1061842aac696335fc6c0d8e9e57c764c4a5b005) Thanks [@Wiblz](https://github.com/Wiblz)! - fix: ensure consistent legacyTranslate defaults to prevent double translate application
+
 ## 2.3.0
 
 ### Minor Changes
