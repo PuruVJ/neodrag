@@ -37,7 +37,7 @@
 		draggable_position.target = { x: 0, y: 0 };
 	};
 
-	let button_el = $state<HTMLButtonElement>();
+	let button_el = $state<HTMLDivElement>();
 
 	let line_properties = $state({
 		thickness: 2,
@@ -194,7 +194,7 @@
 	});
 </script>
 
-<button
+<div
 	data-paw-cursor="true"
 	bind:this={button_el}
 	{@attach draggable(() => [
@@ -220,12 +220,13 @@
 		}),
 	])}
 	{@attach connect(logoEl)}
-	onclick={selectFramework}
 >
-	<span>
-		{@render children?.()}
-	</span>
-</button>
+	<button onclick={selectFramework}>
+		<span>
+			{@render children?.()}
+		</span>
+	</button>
+</div>
 
 {#if logoEl}
 	<div
