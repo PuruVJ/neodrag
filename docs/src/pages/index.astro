@@ -1,68 +1,11 @@
 ---
+import BundleSizeBuilderFeature from '$components/home/features/bundle-size/BundleSizeBuilderFeature.svelte';
 import FeatureRichFeature from '$components/home/features/feature-rich/FeatureRichFeature.svelte';
 import MultipleFrameworksFeature from '$components/home/features/multiple-frameworks/MultipleFrameworksFeature.svelte';
 import SSRFriendlyFeature from '$components/home/features/ssr-friendly/SSRFriendlyFeature.svelte';
 import HeroExample from '$components/home/HeroExample.svelte';
-import BundleSizeBuilderFeature from '$components/home/features/bundle-size/BundleSizeBuilderFeature.svelte';
 import Layout from '$layouts/Layout.astro';
 import { Code } from 'astro/components';
-
-/**
- * Removes common leading whitespace from a multi-line string.
- * The least indented line becomes the baseline (no indentation).
- */
-function dedent(str: string): string;
-function dedent(strings: TemplateStringsArray, ...values: unknown[]): string;
-function dedent(input: string | TemplateStringsArray, ...values: unknown[]): string {
-	let str: string;
-
-	// Handle template literal case
-	if (Array.isArray(input)) {
-		str = input.reduce((result, string, i) => {
-			return result + string + (values[i] ?? '');
-		}, '');
-	} else {
-		str = input.toString();
-	}
-
-	// Split into lines
-	const lines = str.split('\n');
-
-	// Remove first and last lines if they're empty
-	if (lines[0]?.trim() === '') lines.shift();
-	if (lines[lines.length - 1]?.trim() === '') lines.pop();
-
-	if (lines.length === 0) return '';
-
-	// Find the minimum indentation among non-empty lines
-	let minIndent = Infinity;
-
-	for (const line of lines) {
-		if (line.trim() === '') continue; // Skip empty lines
-
-		const leadingWhitespace = line.match(/^(\s*)/)?.[1] || '';
-		minIndent = Math.min(minIndent, leadingWhitespace.length);
-
-		// If we find a line with no indentation, we can stop
-		if (minIndent === 0) break;
-	}
-
-	// If no non-empty lines found or already at zero indentation
-	if (minIndent === Infinity || minIndent === 0) {
-		return lines.join('\n');
-	}
-
-	// Remove the minimum indentation from all lines
-	const dedentedLines = lines.map((line) => {
-		// Keep empty lines as-is
-		if (line.trim() === '') return line;
-
-		// Remove the minimum indentation
-		return line.startsWith(' '.repeat(minIndent)) ? line.slice(minIndent) : line; // Fallback for lines with less indentation than expected
-	});
-
-	return dedentedLines.join('\n');
-}
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
