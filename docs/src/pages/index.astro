@@ -5,6 +5,64 @@ import SSRFriendlyFeature from '$components/home/features/ssr-friendly/SSRFriend
 import HeroExample from '$components/home/HeroExample.svelte';
 import BundleSizeBuilderFeature from '$components/home/features/bundle-size/BundleSizeBuilderFeature.svelte';
 import Layout from '$layouts/Layout.astro';
+import { Code } from 'astro/components';
+
+/**
+ * Removes common leading whitespace from a multi-line string.
+ * The least indented line becomes the baseline (no indentation).
+ */
+function dedent(str: string): string;
+function dedent(strings: TemplateStringsArray, ...values: unknown[]): string;
+function dedent(input: string | TemplateStringsArray, ...values: unknown[]): string {
+	let str: string;
+
+	// Handle template literal case
+	if (Array.isArray(input)) {
+		str = input.reduce((result, string, i) => {
+			return result + string + (values[i] ?? '');
+		}, '');
+	} else {
+		str = input.toString();
+	}
+
+	// Split into lines
+	const lines = str.split('\n');
+
+	// Remove first and last lines if they're empty
+	if (lines[0]?.trim() === '') lines.shift();
+	if (lines[lines.length - 1]?.trim() === '') lines.pop();
+
+	if (lines.length === 0) return '';
+
+	// Find the minimum indentation among non-empty lines
+	let minIndent = Infinity;
+
+	for (const line of lines) {
+		if (line.trim() === '') continue; // Skip empty lines
+
+		const leadingWhitespace = line.match(/^(\s*)/)?.[1] || '';
+		minIndent = Math.min(minIndent, leadingWhitespace.length);
+
+		// If we find a line with no indentation, we can stop
+		if (minIndent === 0) break;
+	}
+
+	// If no non-empty lines found or already at zero indentation
+	if (minIndent === Infinity || minIndent === 0) {
+		return lines.join('\n');
+	}
+
+	// Remove the minimum indentation from all lines
+	const dedentedLines = lines.map((line) => {
+		// Keep empty lines as-is
+		if (line.trim() === '') return line;
+
+		// Remove the minimum indentation
+		return line.startsWith(' '.repeat(minIndent)) ? line.slice(minIndent) : line; // Fallback for lines with less indentation than expected
+	});
+
+	return dedentedLines.join('\n');
+}
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
@@ -18,7 +76,7 @@ import Layout from '$layouts/Layout.astro';
 
 				<div class="group">
 					<a href="/docs/svelte">Getting Started</a>
-					<a href="https://github.com/puruvj/neodrag"> Github </a>
+					<a href="https://github.com/puruvj/neodrag" target="_blank" rel="external"> Github </a>
 				</div>
 			</div>
 
@@ -27,38 +85,221 @@ import Layout from '$layouts/Layout.astro';
 			</div>
 		</section>
 
-		<h2 class="h1" style="text-align: center; width: 100%">Features</h2>
+		<section class="feature feature-multi-frameworks">
+			<div>
+				<MultipleFrameworksFeature client:visible>
+					<div class="svelte">
+						<Code
+							code={`<script>
+  import { draggable } from '@neodrag/svelte';
+</script>
 
-		<br /><br /><br />
+<div {@attach draggable()}>I can drag</div>`}
+							lang="svelte"
+							themes={{
+								light: 'github-light',
+								dark: 'github-dark',
+							}}
+							theme={'github-light'}
+							wrap={true}
+						/>
+					</div>
 
-		<section class="feature-multi-frameworks two-col">
-			<MultipleFrameworksFeature client:visible />
+					<div class="react">
+						<Code
+							code={`import { useDraggable } from '@neodrag/react';
+
+function App() {
+  const ref = useRef();
+  useDraggable(ref)
+
+  <div ref={ref}>I can drag</div>
+}`}
+							lang="tsx"
+							themes={{
+								light: 'github-light',
+								dark: 'github-dark',
+							}}
+							theme={'github-light'}
+							wrap={true}
+						/>
+					</div>
+
+					<div class="solid">
+						<Code
+							code={`import { useDraggable } from '@neodrag/solid';
+
+function App() {
+  const [ref, setRef] = createSignal();
+  useDraggable(ref)
+
+  <div ref={setRef}>I can drag</div>
+}`}
+							lang="tsx"
+							themes={{
+								light: 'github-light',
+								dark: 'github-dark',
+							}}
+							theme={'github-light'}
+							wrap={true}
+						/>
+					</div>
+
+					<div class="vanilla">
+						<Code
+							code={`import { Draggable } from '@neodrag/vanilla';
+							
+const element = document.querySelector('.draggable');
+const draggable = new Draggable(element);`}
+							lang="tsx"
+							themes={{
+								light: 'github-light',
+								dark: 'github-dark',
+							}}
+							theme={'github-light'}
+							wrap={true}
+						/>
+					</div>
+
+					<div class="vue">
+						<Code
+							code={`<script>
+  import { vDraggable } from '@neodrag/svelte';
+</script>
+
+<div v-draggable>I can drag</div>`}
+							lang="vue"
+							themes={{
+								light: 'github-light',
+								dark: 'github-dark',
+							}}
+							theme={'github-light'}
+							wrap={true}
+						/>
+					</div>
+				</MultipleFrameworksFeature>
+			</div>
 		</section>
 
-		<section class="feature-transparent two-col">
-			<BundleSizeBuilderFeature client:visible />
+		<section class="feature">
+			<div>
+				<h2>Works With Mouse And Touch</h2>
+			</div>
 		</section>
 
-		<section class="feature-ssr-friendly two-col">
-			<SSRFriendlyFeature client:visible />
+		<section class="feature">
+			<div>
+				<h2>Keep Elements Inside Boundaries</h2>
+			</div>
 		</section>
 
-		<section class="feature-feature-rich">
-			<FeatureRichFeature client:visible />
+		<section class="feature">
+			<div>
+				<h2>Lock Movement To Specific Directions</h2>
+			</div>
+		</section>
+
+		<section class="feature">
+			<div>
+				<h2>Snap Elements To Perfect Grids</h2>
+			</div>
+		</section>
+
+		<section class="feature">
+			<div>
+				<h2>Mix And Match Drag Behaviors</h2>
+			</div>
+		</section>
+
+		<section class="feature">
+			<div>
+				<h2>Handle Thousands With 3 Event Listeners</h2>
+			</div>
+		</section>
+
+		<section class="feature">
+			<div>
+				<h2>Never Lose Drag Over iframes</h2>
+			</div>
+		</section>
+
+		<section class="feature">
+			<div>
+				<h2>Production Ready With Zero Dependencies</h2>
+			</div>
+		</section>
+
+		<section class="feature feature-transparent two-col">
+			<div>
+				<BundleSizeBuilderFeature client:visible />
+			</div>
+		</section>
+
+		<section class="feature feature-ssr-friendly two-col">
+			<div>
+				<SSRFriendlyFeature client:visible />
+			</div>
+		</section>
+
+		<section class="feature feature-feature-rich">
+			<div>
+				<FeatureRichFeature client:visible />
+			</div>
+		</section>
+
+		<section class="feature feature-feature-rich">
+			<div>
+				<h2>Astro: How many frameworks?</h2>
+				<h3 class="h2">Neodrag: Yes</h3>
+			</div>
 		</section>
 	</main>
 </Layout>
 
+<script>
+	const thresholds = Array.from({ length: 101 }, (_, i) => i * 0.01);
+
+	const instance = new IntersectionObserver(
+		(entries) => {
+			entries.forEach((entry) => {
+				const target = entry.target.children[0] as HTMLDivElement;
+				if (entry.isIntersecting) {
+					target.style.scale = `${0.8 + 0.2 * entry.intersectionRatio} ${0.8 + 0.2 * entry.intersectionRatio}`;
+					target.style.opacity = `${0.6 + 0.4 * entry.intersectionRatio}`;
+				} else {
+					// Reset when not intersecting
+					target.style.scale = '0.8 0.8';
+					target.style.opacity = '0.6';
+				}
+			});
+		},
+		{ threshold: thresholds },
+	);
+
+	document.querySelectorAll('.feature').forEach((el) => {
+		instance.observe(el);
+	});
+</script>
+
+<style is:global>
+	html {
+		overflow: hidden;
+	}
+</style>
+
 <style scoped>
 	.tagline {
 		display: grid;
+		box-sizing: border-box;
 		grid-template-columns: auto 1fr;
 		align-items: center;
 		gap: 5rem;
-		margin-bottom: 6rem;
+		/* margin-bottom: 6rem; */
 		padding: 1rem 0;
-		min-height: 100vh;
+		min-height: 85vh;
 		width: 100% !important;
+		scroll-snap-align: start;
+		scroll-snap-stop: always;
 
 		.demo {
 			height: 100%;
@@ -67,6 +308,7 @@ import Layout from '$layouts/Layout.astro';
 		@media (max-width: 1223px) {
 			grid-template-columns: 1fr;
 			/* gap: 1rem; */
+			margin-bottom: 35rem;
 		}
 
 		h1,
@@ -116,21 +358,59 @@ import Layout from '$layouts/Layout.astro';
 		}
 	}
 
+	h2 {
+		margin: 0;
+	}
+
 	main {
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
+		/* align-items: center; */
 		z-index: 2;
 		padding: 0 1rem;
 		width: 100%;
+		height: 100%;
+		max-height: 100vh;
+
+		overflow: auto;
+		overflow-x: hidden;
+
+		scroll-snap-type: y mandatory;
+		scroll-padding-top: 1.25rem;
+
+		padding-bottom: 20rem;
+	}
+
+	.feature {
+		min-height: calc(85vh);
+		display: flex;
+		box-sizing: border-box;
+		/* height: 100%; */
+		width: 100%;
+
+		scroll-snap-align: start;
+		scroll-snap-stop: always;
+		/* scroll-margin-top: 1.25rem; */
+
+		& > div {
+			flex: 1;
+			background-color: color-mix(in lch, var(--app-color-dark), transparent 98%);
+			padding: 2rem;
+			border-radius: 1rem;
+
+			border: solid 1px color-mix(in lch, var(--app-color-dark), transparent 80%);
+
+			scale: 0.8 0.8;
+			opacity: 0.7;
+		}
 	}
 
 	.two-col {
 		display: flex;
 		flex: 1 1 auto;
-		width: 80%;
-		margin-bottom: clamp(3rem, 100vw, 10rem);
+		/* width: 80%; */
+		/* margin-bottom: clamp(3rem, 100vw, 10rem); */
 
 		&:nth-of-type(2n + 1) {
 			flex-direction: row-reverse;
@@ -150,7 +430,7 @@ import Layout from '$layouts/Layout.astro';
 
 	.feature-feature-rich {
 		grid-template-columns: 1fr;
-		margin-bottom: clamp(3rem, 100vw, 10rem);
+		/* margin-bottom: clamp(3rem, 100vw, 10rem); */
 	}
 
 	.explore-frameworks {

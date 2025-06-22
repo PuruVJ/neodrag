@@ -54,6 +54,7 @@
 	<div
 		class="box"
 		class:wiggles={box_wiggles}
+		data-paw-cursor="true"
 		{@attach draggable(() => [
 			bounds(BoundsFrom.parent()),
 			position_compartment,
@@ -183,8 +184,8 @@
 
 		&:hover {
 			.paw {
-				opacity: 1;
-				transform: scale(1);
+				/* opacity: 1;
+				transform: scale(1); */
 			}
 
 			& ~ .cursor {
