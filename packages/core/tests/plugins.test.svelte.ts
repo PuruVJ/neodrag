@@ -1187,7 +1187,7 @@ describe('transform', () => {
 				draggable = comp.getByTestId('draggable');
 			});
 
-			it('has translate', async () => {
+			it('has worked', async () => {
 				expect(proof_fn_worked).toBe(false);
 				await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
 				expect(proof_fn_worked).toBe(true);

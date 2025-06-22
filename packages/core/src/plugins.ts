@@ -219,7 +219,7 @@ function apply_transform(
 ) {
 	const is_svg = ctx.rootNode instanceof SVGElement;
 
-	ctx.effect.immediate(() => {
+	ctx.effect.paint(() => {
 		if (func) {
 			return func({
 				offset: { ...ctx.offset },
