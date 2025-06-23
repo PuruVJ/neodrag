@@ -63,11 +63,9 @@
 	"bugs": {
 		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"dependencies": {
-		"@neodrag/core": "workspace:*"
-	},
 	"peerDependencies": {
-		"svelte": "^3 || ^4 || ^5"
+		"svelte": "^3 || ^4 || ^5",
+		"@neodrag/core": "workspace:*"
 	},
 	"homepage": "https://neodrag.dev/docs/svelte",
 	"devDependencies": {

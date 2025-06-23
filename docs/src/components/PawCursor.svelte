@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { Theme } from '$state/user-preferences.svelte.ts';
+	import type { ThemeValue } from '$state/user-preferences.svelte.ts';
 	import { onMount } from 'svelte';
 	import { on } from 'svelte/events';
 	import { get, type Writable, writable } from 'svelte/store';
 	import PawIcon from '~icons/mdi/paw';
 
 	let showCustomCursor = $state(false);
-	let cursorColor: Theme | undefined = $state('dark');
+	let cursorColor: ThemeValue['current'] | undefined = $state('dark');
 
 	let coordsCursor = $state({ x: 0, y: 0 });
 
@@ -71,7 +71,7 @@
 						showCustomCursor = true;
 
 						if (el.dataset.pawColor) {
-							cursorColor = el.dataset.pawColor as Theme;
+							cursorColor = el.dataset.pawColor as ThemeValue['current'];
 						}
 
 						initialCursor = getComputedStyle(el).cursor;

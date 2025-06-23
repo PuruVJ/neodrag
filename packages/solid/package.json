@@ -50,10 +50,8 @@
 		"compile": "tsup",
 		"prepublishOnly": "turbo compile"
 	},
-	"dependencies": {
-		"@neodrag/core": "workspace:*"
-	},
 	"peerDependencies": {
-		"solid-js": "^1.0.0"
+		"solid-js": "^1.0.0",
+		"@neodrag/core": "workspace:*"
 	}
 }

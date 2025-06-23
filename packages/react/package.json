@@ -51,7 +51,7 @@
 		"compile": "tsup",
 		"prepublishOnly": "turbo compile"
 	},
-	"dependencies": {
+	"peerDependencies": {
 		"@neodrag/core": "workspace:*"
 	}
 }
