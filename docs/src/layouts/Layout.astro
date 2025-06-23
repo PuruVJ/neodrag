@@ -6,6 +6,7 @@ import '@fontsource/plus-jakarta-sans/400.css';
 import '@fontsource/plus-jakarta-sans/500.css';
 import '../css/globals.scss';
 
+import RightArrow from '~icons/material-symbols/arrow-right-alt-rounded';
 import PawCursor from '$components/PawCursor.svelte';
 import { SEO } from 'astro-seo';
 import { ClientRouter } from 'astro:transitions';
@@ -30,27 +31,6 @@ const body_class = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.p
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 
 		<ClientRouter />
-
-		<!-- <script>
-			import { theme } from '$state/user-preferences.store';
-
-			const themeLocal = JSON.parse(localStorage.getItem('neodrag:theme')!);
-
-			if (!themeLocal) {
-				if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-					theme.set('dark');
-				} else {
-					theme.set('light');
-				}
-			} else {
-				theme.set(themeLocal);
-			}
-
-			theme.subscribe(($theme) => {
-				document.body.classList.remove('dark', 'light');
-				document.body.classList.add($theme);
-			});
-		</script> -->
 
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
@@ -93,11 +73,23 @@ const body_class = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.p
 	<body data-framework={body_class}>
 		<ThemeWatcher client:load />
 
+		<div>
+			<a href="https://next.neodrag.dev" class="banner unstyled">
+				<div class="desktop">Neodrag v3 alpha is out. Modular, faster, extensible. Try now</div>
+
+				<div class="mobile">Neodrag v3 alpha is out</div>
+
+				<div class="arrow">
+					<!-- @ts-ignore -->
+					<RightArrow />
+				</div>
+			</a>
+		</div>
 		<slot />
 
 		<PawCursor client:only="svelte" />
 
-		<script type="text/javascript">
+		<script type="text/javascript" is:inline>
 			(function (c, l, a, r, i, t, y) {
 				c[a] =
 					c[a] ||
@@ -113,3 +105,54 @@ const body_class = /\/docs\/(svelte|react|solid|vanilla|vue)/gi.exec(Astro.url.p
 		</script>
 	</body>
 </html>
+
+<style scoped>
+	.banner {
+		display: flex;
+		justify-content: center;
+		gap: 0.6rem;
+
+		background-color: hsla(var(--app-color-dark-hsl), 0.1);
+		backdrop-filter: blur(200px);
+
+		padding: 0.5rem 1rem;
+		margin: 0;
+		width: 100%;
+
+		.desktop {
+			display: block;
+		}
+
+		.mobile {
+			display: none;
+		}
+
+		.arrow {
+			display: flex;
+
+			transition: translate 0.2s ease-in-out;
+		}
+
+		&:hover .arrow {
+			translate: 6px;
+		}
+	}
+
+	@media (max-width: 968px) {
+		.banner {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			z-index: 100;
+			width: 100%;
+
+			.desktop {
+				display: none;
+			}
+
+			.mobile {
+				display: block;
+			}
+		}
+	}
+</style>

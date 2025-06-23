@@ -68,7 +68,7 @@ const { title: frontmatterTitle } = frontmatter || {};
 	}
 
 	aside {
-		height: 100%;
+		height: calc(100% - 1.5rem);
 	}
 
 	main {
@@ -79,6 +79,7 @@ const { title: frontmatterTitle } = frontmatter || {};
 		height: 100vh;
 
 		padding: 0 1rem;
+		padding-bottom: 3rem;
 
 		overflow-y: auto;
 		overflow-x: hidden;
@@ -152,6 +153,10 @@ const { title: frontmatterTitle } = frontmatter || {};
 
 	:root {
 		--entity-width: clamp(400px, 60vw, 800px);
+	}
+
+	html {
+		overflow: hidden;
 	}
 
 	body {
