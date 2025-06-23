@@ -1,5 +1,11 @@
 # @neodrag/core
 
+## 3.0.0-next.3
+
+### Patch Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`a9946a9`](https://github.com/PuruVJ/neodrag/commit/a9946a93688b55f0125d35484be6dd7ac46d6ed7) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Use @neodrag/core as peer
+
 ## 3.0.0-next.2
 
 ### Patch Changes
