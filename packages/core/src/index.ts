@@ -69,6 +69,8 @@ export class DraggableFactory {
 	#instances = new Map<HTMLElement | SVGElement, DraggableInstance>();
 	#listeners_initialized = false;
 	#active_nodes = new Map<number, HTMLElement | SVGElement>();
+	#last_target: Element | null = null;
+	#last_result: HTMLElement | SVGElement | null = null;
 
 	#initial_plugins: Plugin[];
 	#delegateTargetFn: () => HTMLElement;
@@ -510,15 +512,33 @@ export class DraggableFactory {
 	}
 
 	#find_draggable_node(e: PointerEvent): HTMLElement | SVGElement | null {
+		const target = e.target as Element;
+
+		if (target === this.#last_target) {
+			return this.#last_result;
+		}
+
 		const path = e.composedPath();
-		for (const el of path) {
+		const max_depth = Math.min(path.length, 20);
+
+		for (let i = 0; i < max_depth; i++) {
+			const el = path[i];
+
 			if (
 				(el instanceof HTMLElement || (is_svg_element(el) && !is_svg_svg_element(el))) &&
-				this.#instances.has(el)
+				this.#instances.has(el as HTMLElement | SVGElement)
 			) {
-				return el;
+				this.#last_target = target;
+				this.#last_result = el as HTMLElement | SVGElement;
+				return this.#last_result;
 			}
+
+			if (el === document || el === document.body) break;
 		}
+
+		// Cache negative result
+		this.#last_target = target;
+		this.#last_result = null;
 		return null;
 	}
 
