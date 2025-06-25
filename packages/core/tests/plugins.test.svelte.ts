@@ -1,6 +1,16 @@
 import { Locator } from '@vitest/browser/context';
-import { afterEach, beforeEach, describe, expect, it, MockInstance, test, vi } from 'vitest';
-import { render } from 'vitest-browser-svelte';
+import {
+	afterAll,
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	MockInstance,
+	test,
+	vi,
+} from 'vitest';
+import { cleanup, render } from 'vitest-browser-svelte';
 import { Compartment } from '../../svelte/src/index.svelte';
 import {
 	applyUserSelectHack,
@@ -17,10 +27,7 @@ import {
 	touchAction,
 	transform,
 } from '../src/plugins';
-import Bounds from './components/Bounds.svelte';
-import Box from './components/Box.svelte';
-import Controls from './components/Controls.svelte';
-import Position from './components/Position.svelte';
+import { Bounds, Box, Controls, Position, Transform } from './components';
 import {
 	dragAndDrop,
 	mouseDown,
@@ -30,7 +37,6 @@ import {
 	stopCursorTracking,
 } from './mouse';
 import { sleepAndWaitForEffects, translate } from './utils';
-import Transform from './components/Transform.svelte';
 
 beforeEach(() => {
 	startCursorTracking();
@@ -39,6 +45,8 @@ beforeEach(() => {
 afterEach(() => {
 	stopCursorTracking();
 });
+
+afterAll(cleanup);
 
 describe('applyUserSelectHack', () => {
 	let draggable: Locator;

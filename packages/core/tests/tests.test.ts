@@ -2,8 +2,7 @@ import { type Locator } from '@vitest/browser/context';
 import { afterEach, beforeEach, describe, expect, it, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { axis, Compartment, position } from '../../svelte/src/index.svelte';
-import Box from './components/Box.svelte';
-import CompartmentComp from './components/Compartment.svelte';
+import { Box, Compartment as CompartmentComp } from './components';
 import { dragAndDrop, startCursorTracking, stopCursorTracking } from './mouse';
 import { sleepAndWaitForEffects, translate } from './utils';
 
