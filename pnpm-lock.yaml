@@ -178,6 +178,12 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@vitest/browser@3.2.4)(vitest@3.2.4)
 
+  packages/plugin-dropzone:
+    dependencies:
+      '@neodrag/core':
+        specifier: workspace:*
+        version: link:../core
+
   packages/react:
     dependencies:
       '@neodrag/core':
