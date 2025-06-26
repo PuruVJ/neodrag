@@ -1,0 +1,194 @@
+/* optional imports that use the props */
+/* @import 'open-props/normalize.min.css'; */
+@import './normalize.css';
+@import './themes.css';
+
+/* @import './include-media'; */
+* {
+	color: var(--app-color-dark);
+}
+
+*:focus-visible {
+	box-shadow: 0 0 0 4px
+		color-mix(in lch, var(--secondary-color, var(--app-color-primary)), transparent 75%);
+}
+
+button {
+	all: unset;
+}
+
+html {
+	width: 100%;
+}
+
+html,
+body {
+	height: 100%;
+	width: 100%;
+	background-color: var(--app-color-shell);
+	scroll-behavior: smooth;
+	overflow-x: hidden;
+	font-family: var(--app-font-main);
+}
+
+body {
+	height: auto !important;
+	accent-color: var(--app-color-primary);
+}
+
+:is(h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5) {
+	width: max-content;
+	color: var(--app-color-dark);
+	font-family: var(--app-font-heading);
+	text-transform: balanced;
+	margin: 0.75em 0 0.25em;
+	max-width: 100%;
+
+	&:has(.heading-anchor) {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+
+		.heading-anchor {
+			line-height: 1;
+			margin: 0;
+		}
+	}
+}
+
+code {
+	color: var(--app-color-dark);
+	background-color: var(--app-color-dark-contrast);
+	font-family: var(--app-font-mono);
+}
+
+h1,
+.h1 {
+	margin-top: 0;
+	font-size: clamp(2rem, 8.5vw, 3.4rem);
+}
+
+h2,
+.h2 {
+	font-size: clamp(1.5rem, 4.25vw, 2.4rem);
+}
+
+h3,
+.h3 {
+	font-size: clamp(1.13rem, 2.1vw, 1.7rem);
+}
+
+h4,
+.h4 {
+	font-size: clamp(0.85rem, 1.05vw, 1.2rem);
+}
+
+pre code {
+	color: initial;
+	background-color: initial;
+}
+
+blockquote {
+	border-left: 0.25rem solid var(--app-color-dark);
+	background-color: color-mix(in lch, var(--app-color-dark), transparent 95%);
+	border-radius: 0 0.5rem 0.5rem 0;
+	padding: 0.51rem;
+	padding-left: 1rem;
+}
+
+kbd {
+	font-family: var(--app-font-mono);
+	font-weight: 400;
+}
+
+:is(a[href], a[href]:visited):where(:not(.unstyled)) {
+	--distance: calc(50% - 0.375rem);
+	--transparency: 65%;
+	--duration: 150ms;
+	--easing: ease-in-out;
+	color: var(--app-color-primary);
+	font-weight: 600 !important;
+	text-decoration: none;
+	padding: 0 0.25rem;
+	background-image: linear-gradient(
+		transparent 0%,
+		transparent var(--distance),
+		color-mix(in lch, var(--app-color-primary), transparent var(--transparency)) var(--distance),
+		color-mix(in lch, var(--app-color-primary), transparent var(--transparency)) 100%
+	);
+	background-size: 100% 200%;
+	background-position: 0 0;
+	transition: var(--duration) var(--easing);
+	transition-property: color, background-position, background-image, border-radius;
+
+	&:hover,
+	&:focus-visible {
+		background-position: 0 100%;
+		color: var(--app-color-primary-contrast);
+		font-weight: 600 !important;
+		border-radius: 0.25rem;
+		--transparency: 0%;
+	}
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}
+
+::selection {
+	background-color: color-mix(
+		in lch,
+		var(--secondary-color, var(--app-color-primary)),
+		transparent 70%
+	);
+}
+
+p {
+	word-wrap: normal;
+}
+
+button {
+	background-color: transparent;
+}
+
+.font-mono {
+	font-family: var(--app-font-mono);
+}
+
+@media (pointer: fine) {
+	::-webkit-scrollbar {
+		background-color: transparent;
+		width: 1rem;
+	}
+
+	::-webkit-scrollbar-track {
+		border-radius: 10px;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background-color: color-mix(
+			in lch,
+			var(--app-color-scrolling-navbar, var(--app-color-primary)),
+			var(--app-color-anti-mixer) 20%
+		);
+		border-radius: 10px;
+		border: 5px solid rgba(0, 0, 0, 0);
+		background-clip: padding-box;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background-color: color-mix(
+			in lch,
+			var(--app-color-scrolling-navbar),
+			var(--app-color-anti-mixer) 30%
+		);
+	}
+}

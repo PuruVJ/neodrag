@@ -7,7 +7,7 @@
 
 	let { pathname }: Props = $props();
 
-	const ariaCurrentVal = (path: string) => (pathname.endsWith(path) ? 'page' : 'false');
+	const aria_current_val = (path: string) => (pathname.endsWith(path) ? 'page' : 'false');
 </script>
 
 <section class="footer container">
@@ -17,7 +17,7 @@
 
 			{#each FRAMEWORKS as { name }}
 				<li>
-					<a href="/docs/{name}" aria-current={ariaCurrentVal(name)}>
+					<a href="/docs/{name}" aria-current={aria_current_val(name)}>
 						{name}
 					</a>
 				</li>
@@ -32,7 +32,7 @@
 	</div>
 </section>
 
-<style lang="scss">
+<style>
 	.footer {
 		width: 100%;
 		padding: 2rem 0.5rem;

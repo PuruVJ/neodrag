@@ -1,0 +1,90 @@
+:root {
+	--gray-1: #f1f3f5;
+	--gray-9: #212529;
+
+	--app-font-mono: 'Jetbrains mono Variable', monospace;
+	--app-font-main:
+		system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+		'Open Sans', 'Helvetica Neue', sans-serif;
+	--app-font-heading:
+		'EB Garamond Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+		Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+body,
+body[data-theme='light'] {
+	--app-color-mixer: white;
+	--app-color-anti-mixer: black;
+
+	--app-color-primary: lch(34.59% 59.96 26.65);
+	--app-color-primary-contrast: color-mix(in lch, var(--app-color-primary), white 95%);
+
+	--brand: var(--app-color-primary);
+
+	--app-color-primary-gradient: radial-gradient(
+		circle farthest-corner at 10% 20%,
+		lch(73.78% 63.16 323.51) 0%,
+		lch(59.26% 65.43 19.41) 100%
+	);
+	--app-color-primary-gradient-contrast: lch(9.26% 0 296.81);
+
+	--app-color-dark: lch(9.26% 0 296.81);
+	--app-color-dark-contrast: var(--app-color-light);
+
+	--app-color-light: var(--gray-1);
+	--app-color-light-contrast: var(--app-color-dark);
+
+	--app-color-shell: hsl(200, 8%, 100%);
+	--app-color-shell-contrast: color-mix(in lch, var(--app-color-shell), black 10%);
+
+	--app-color-brand-svelte: color-mix(
+		in lch,
+		lch(51.55% 90.27 44.76),
+		var(--app-color-anti-mixer) 15%
+	);
+	--app-color-brand-react: color-mix(
+		in lch,
+		lch(57.76% 33.42 224.77),
+		var(--app-color-anti-mixer) 15%
+	);
+	--app-color-brand-vue: color-mix(
+		in lch,
+		lch(61.2% 45.16 159.22),
+		var(--app-color-anti-mixer) 15%
+	);
+	--app-color-brand-solid: color-mix(
+		in lch,
+		lch(33.15% 29.98 275.63),
+		var(--app-color-anti-mixer) 15%
+	);
+	--app-color-brand-vanilla: color-mix(
+		in lch,
+		lch(79.75% 80.99 94.66),
+		var(--app-color-anti-mixer) 15%
+	);
+}
+
+body[data-theme='dark'] {
+	/* Keep it in word only */
+	--app-color-mixer: black;
+	--app-color-anti-mixer: white;
+
+	--app-color-light: var(--gray-9);
+	--app-color-dark: hsl(210, 17%, 95%);
+
+	--app-color-shell: #101213;
+	--app-color-shell-contrast: var(--gray-1);
+
+	--app-color-primary: lch(68.02% 48.05 14.68);
+	--app-color-primary-contrast: color-mix(in lch, var(--app-color-primary), black 95%);
+}
+
+body[data-theme='dark'] .astro-code,
+body[data-theme='dark'] .astro-code span {
+	color: var(--shiki-dark) !important;
+	background-color: var(--shiki-dark-bg) !important;
+	/* Optional, if you also want font styles */
+	font-style: var(--shiki-dark-font-style);
+	font-weight: var(--shiki-dark-font-weight);
+	text-decoration: var(--shiki-dark-text-decoration);
+}

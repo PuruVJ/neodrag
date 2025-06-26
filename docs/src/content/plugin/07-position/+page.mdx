@@ -1,0 +1,621 @@
+---
+title: 'position'
+tagline: 'Control element position programmatically'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+The `position` plugin controls where draggable elements are positioned. Set initial positions, move elements programmatically, or create two-way binding between app state and element position.
+
+```typescript
+position({ current: { x: 100, y: 50 } }); // Force to position
+position({ default: { x: 0, y: 0 } }); // Set initial position
+```
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { draggable, position, Compartment } from '@neodrag/svelte';
+
+  let currentPos = $state({ x: 100, y: 50 });
+  let defaultPos = $state({ x: 0, y: 0 });
+
+  // Reactive compartments for changing values
+  const currentPosComp = Compartment.of(() =>
+    position({ current: currentPos }),
+  );
+  const defaultPosComp = Compartment.of(() =>
+    position({ default: defaultPos }),
+  );
+</script>
+
+<!-- Force element to specific position -->
+<div {@attach draggable(() => [currentPosComp])}>
+  Controlled position
+</div>
+
+<!-- Set initial position only -->
+<div {@attach draggable(() => [defaultPosComp])}>
+  Initial position, then user controls
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import {
+  position,
+  useDraggable,
+  useCompartment,
+} from '@neodrag/react';
+
+function PositionExample() {
+  const controlledRef = useRef<HTMLDivElement>(null);
+  const initialRef = useRef<HTMLDivElement>(null);
+
+  const [currentPos, setCurrentPos] = useState({ x: 100, y: 50 });
+
+  // Reactive compartments for changing values
+  const currentPosComp = useCompartment(
+    () => position({ current: currentPos }),
+    [currentPos],
+  );
+
+  // Static position can be used directly
+  const defaultPosComp = useCompartment(
+    () => position({ default: { x: 0, y: 0 } }),
+    [],
+  );
+
+  useDraggable(controlledRef, () => [currentPosComp]);
+  useDraggable(initialRef, () => [defaultPosComp]);
+
+  return (
+    <div>
+      <div ref={controlledRef}>Controlled position</div>
+      <div ref={initialRef}>Initial position, then user controls</div>
+      <button onClick={() => setCurrentPos({ x: 200, y: 100 })}>
+        Move to (200, 100)
+      </button>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { position, vDraggable, useCompartment } from '@neodrag/vue';
+
+const currentPos = ref({ x: 100, y: 50 });
+const defaultPos = ref({ x: 0, y: 0 });
+
+// Reactive compartments for changing values
+const currentPosComp = useCompartment(() =>
+  position({ current: currentPos.value }),
+);
+const defaultPosComp = useCompartment(() =>
+  position({ default: defaultPos.value }),
+);
+
+function moveElement() {
+  currentPos.value = { x: 200, y: 100 };
+}
+</script>
+
+<template>
+  <div v-draggable="() => [currentPosComp]">Controlled position</div>
+
+  <div v-draggable="() => [defaultPosComp]">
+    Initial position, then user controls
+  </div>
+
+  <button @click="moveElement">Move to (200, 100)</button>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  position,
+  useDraggable,
+  createCompartment,
+} from '@neodrag/solid';
+
+function PositionExample() {
+  const [controlledRef, setControlledRef] =
+    createSignal<HTMLElement | null>(null);
+  const [initialRef, setInitialRef] =
+    createSignal<HTMLElement | null>(null);
+  const [currentPos, setCurrentPos] = createSignal({ x: 100, y: 50 });
+
+  // Reactive compartments for changing values
+  const currentPosComp = createCompartment(() =>
+    position({ current: currentPos() }),
+  );
+  const defaultPosComp = createCompartment(() =>
+    position({ default: { x: 0, y: 0 } }),
+  );
+
+  // Note: Solid uses array format, not function format
+  useDraggable(controlledRef, [currentPosComp]);
+  useDraggable(initialRef, [defaultPosComp]);
+
+  return (
+    <div>
+      <div ref={setControlledRef}>Controlled position</div>
+      <div ref={setInitialRef}>
+        Initial position, then user controls
+      </div>
+      <button onClick={() => setCurrentPos({ x: 200, y: 100 })}>
+        Move to (200, 100)
+      </button>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { Draggable, position, Compartment } from '@neodrag/vanilla';
+
+const element = document.querySelector('#draggable');
+let currentPos = { x: 100, y: 50 };
+
+// Reactive compartment for changing values
+const currentPosComp = new Compartment(() =>
+  position({ current: currentPos }),
+);
+
+// Controlled position
+const controlled = new Draggable(element, () => [currentPosComp]);
+
+// Move programmatically
+function moveElement() {
+  currentPos = { x: 200, y: 100 };
+  currentPosComp.current = position({ current: currentPos });
+}
+
+// Static initial position can be used directly
+const initial = new Draggable(element, [
+  position({ default: { x: 0, y: 0 } }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Two-Way Binding
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import {
+    draggable,
+    position,
+    events,
+    Compartment,
+  } from '@neodrag/svelte';
+
+  let elementPosition = $state({ x: 50, y: 50 });
+
+  // Reactive compartments for changing values
+  const positionComp = Compartment.of(() =>
+    position({ current: elementPosition }),
+  );
+  const eventsComp = Compartment.of(() =>
+    events({
+      onDrag: (data) => {
+        elementPosition = data.offset;
+        savePosition(elementPosition);
+      },
+    }),
+  );
+
+  // Save position to localStorage
+  function savePosition(pos) {
+    localStorage.setItem('elementPosition', JSON.stringify(pos));
+  }
+</script>
+
+<div {@attach draggable(() => [positionComp, eventsComp])}>
+  Position synced with state
+</div>
+
+<p>Current position: {elementPosition.x}, {elementPosition.y}</p>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useState, useRef } from 'react';
+import {
+  position,
+  events,
+  useDraggable,
+  useCompartment,
+} from '@neodrag/react';
+
+function SyncedPosition() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [elementPosition, setElementPosition] = useState({
+    x: 50,
+    y: 50,
+  });
+
+  // Reactive compartments for changing values
+  const positionComp = useCompartment(
+    () => position({ current: elementPosition }),
+    [elementPosition],
+  );
+
+  const eventsComp = useCompartment(
+    () =>
+      events({
+        onDrag: (data) => {
+          setElementPosition(data.offset);
+          localStorage.setItem(
+            'elementPosition',
+            JSON.stringify(data.offset),
+          );
+        },
+      }),
+    [setElementPosition],
+  );
+
+  useDraggable(ref, () => [positionComp, eventsComp]);
+
+  return (
+    <div>
+      <div ref={ref}>Position synced with state</div>
+      <p>
+        Current position: {elementPosition.x}, {elementPosition.y}
+      </p>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import {
+  position,
+  events,
+  vDraggable,
+  useCompartment,
+} from '@neodrag/vue';
+
+const elementPosition = ref({ x: 50, y: 50 });
+
+function updatePosition(data) {
+  elementPosition.value = data.offset;
+  localStorage.setItem(
+    'elementPosition',
+    JSON.stringify(data.offset),
+  );
+}
+
+// Reactive compartments for changing values
+const positionComp = useCompartment(() =>
+  position({ current: elementPosition.value }),
+);
+const eventsComp = useCompartment(() =>
+  events({ onDrag: updatePosition }),
+);
+</script>
+
+<template>
+  <div v-draggable="() => [positionComp, eventsComp]">
+    Position synced with state
+  </div>
+
+  <p>
+    Current position: {{ elementPosition.x }}, {{ elementPosition.y }}
+  </p>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  position,
+  events,
+  useDraggable,
+  createCompartment,
+} from '@neodrag/solid';
+
+function SyncedPosition() {
+  const [divRef, setDivRef] = createSignal<HTMLElement | null>(null);
+  const [elementPosition, setElementPosition] = createSignal({
+    x: 50,
+    y: 50,
+  });
+
+  // Reactive compartments for changing values
+  const positionComp = createCompartment(() =>
+    position({ current: elementPosition() }),
+  );
+  const eventsComp = createCompartment(() =>
+    events({
+      onDrag: (data) => {
+        setElementPosition(data.offset);
+        localStorage.setItem(
+          'elementPosition',
+          JSON.stringify(data.offset),
+        );
+      },
+    }),
+  );
+
+  // Note: Solid uses array format, not function format
+  useDraggable(divRef, [positionComp, eventsComp]);
+
+  return (
+    <div>
+      <div ref={setDivRef}>Position synced with state</div>
+      <p>
+        Current position: {elementPosition().x}, {elementPosition().y}
+      </p>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import {
+  Draggable,
+  position,
+  events,
+  Compartment,
+} from '@neodrag/vanilla';
+
+let elementPosition = { x: 50, y: 50 };
+
+// Reactive compartments for changing values
+const positionComp = new Compartment(() =>
+  position({ current: elementPosition }),
+);
+const eventsComp = new Compartment(() =>
+  events({
+    onDrag: (data) => {
+      elementPosition = data.offset;
+      localStorage.setItem(
+        'elementPosition',
+        JSON.stringify(data.offset),
+      );
+      updateDisplay();
+
+      // Update position compartment to reflect new position
+      positionComp.current = position({ current: elementPosition });
+    },
+  }),
+);
+
+const instance = new Draggable(element, () => [
+  positionComp,
+  eventsComp,
+]);
+
+function updateDisplay() {
+  document.querySelector('#position-display').textContent =
+    `Current position: ${elementPosition.x}, ${elementPosition.y}`;
+}
+```
+
+</div>
+</FrameworkSwitch>
+
+## Common Use Cases
+
+### Animated Positioning
+
+```typescript
+function animateToPosition(targetX, targetY, duration = 500) {
+  const startPos = getCurrentPosition();
+  const startTime = Date.now();
+
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+
+    const currentX = startPos.x + (targetX - startPos.x) * ease;
+    const currentY = startPos.y + (targetY - startPos.y) * ease;
+
+    // Update compartment with new position
+    positionComp.current = position({
+      current: { x: currentX, y: currentY },
+    });
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  animate();
+}
+```
+
+### Multi-Element Coordination
+
+```typescript
+const formation = [
+  { id: 'leader', offset: { x: 0, y: 0 } },
+  { id: 'follower1', offset: { x: 50, y: 0 } },
+  { id: 'follower2', offset: { x: 25, y: 50 } },
+];
+
+// Use compartments for each element's position
+const leaderPosComp = new Compartment(() =>
+  position({ current: leaderPos }),
+);
+const follower1PosComp = new Compartment(() =>
+  position({ current: follower1Pos }),
+);
+const follower2PosComp = new Compartment(() =>
+  position({ current: follower2Pos }),
+);
+
+const leaderEventsComp = new Compartment(() =>
+  events({
+    onDrag: (data) => {
+      leaderPos = data.offset;
+
+      // Update followers
+      formation.forEach((item) => {
+        if (item.id !== 'leader') {
+          const followerPos = {
+            x: data.offset.x + item.offset.x,
+            y: data.offset.y + item.offset.y,
+          };
+          updateElementPosition(item.id, followerPos);
+        }
+      });
+    },
+  }),
+);
+```
+
+### Snap to Targets
+
+```typescript
+const targets = [
+  { x: 100, y: 100 },
+  { x: 200, y: 150 },
+  { x: 300, y: 50 },
+];
+
+const snapEventsComp = new Compartment(() =>
+  events({
+    onDragEnd: (data) => {
+      const snapDistance = 20;
+      const nearest = targets.find((target) => {
+        const distance = Math.sqrt(
+          Math.pow(data.offset.x - target.x, 2) +
+            Math.pow(data.offset.y - target.y, 2),
+        );
+        return distance <= snapDistance;
+      });
+
+      if (nearest) {
+        // Update position compartment to snap to target
+        positionComp.current = position({ current: nearest });
+      }
+    },
+  }),
+);
+```
+
+## Combining with Other Plugins
+
+```typescript
+// Position runs first, then other plugins modify
+// Static plugins can be used directly
+const staticPlugins = [
+  grid([20, 20]), // Grid snapping
+  bounds(BoundsFrom.parent()), // Bounds checking
+];
+
+// Reactive position needs compartment
+const positionComp = new Compartment(() =>
+  position({ current: { x: 100, y: 50 } }),
+);
+
+// Combine in plugins array
+const plugins = () => [
+  positionComp, // High priority - runs first
+  ...staticPlugins,
+];
+```
+
+Position plugin has high priority (1000) ensuring it sets the base position before other plugins modify movement.
+
+## How It Works
+
+The position plugin:
+
+1. **Runs in setup** when not currently interacting
+2. **Uses `setForcedPosition()`** to immediately jump to coordinates
+3. **Checks for changes** - only updates if position actually changed
+4. **High priority** - runs before other position-modifying plugins
+5. **Live updates** - can change position during active drags
+
+```typescript
+setup(ctx) {
+  if (!ctx.isInteracting) {
+    const x = options?.current?.x ?? options?.default?.x ?? ctx.offset.x;
+    const y = options?.current?.y ?? options?.default?.y ?? ctx.offset.y;
+
+    if (x !== ctx.offset.x || y !== ctx.offset.y) {
+      ctx.setForcedPosition(x, y);
+    }
+  }
+}
+```
+
+## API Reference
+
+```typescript
+function position(
+  options?: {
+    current?: { x: number; y: number } | null;
+    default?: { x: number; y: number } | null;
+  } | null,
+): Plugin;
+```
+
+**Options:**
+
+- `current` - Force element to this position (overrides dragging)
+- `default` - Set initial position (user can still drag normally)
+
+**Behavior:**
+
+- `current` takes precedence over `default`
+- Only updates if position actually changed
+- Runs with high priority (1000)
+- Supports live updates during dragging
+
+**Returns:** A plugin object for use with draggable.
+
+## Important Notes
+
+- **Use compartments for reactive values**: When position values change, wrap the position plugin in a compartment
+- **Solid.js array format**: Solid uses `[compartment]` while other frameworks use `() => [compartment]`
+- **Manual updates in vanilla**: Don't forget to update compartments manually in vanilla JavaScript
+- **Static positions**: For positions that never change, you can use the plugin directly without compartments

@@ -5,33 +5,40 @@
 	"type": "module",
 	"scripts": {
 		"changeset": "changeset",
-		"compile": "pnpm -r compile",
-		"docs:build": "pnpm compile && pnpm sizes && cd docs && pnpm build",
+		"compile": "turbo run compile",
+		"docs:build": "turbo run docs#build",
 		"ci:version": "changeset version",
 		"ci:release": "changeset publish",
-		"sizes": "tsx scripts/gather-sizes.ts"
+		"test": "cd packages/core && pnpm test"
 	},
 	"devDependencies": {
-		"@changesets/changelog-github": "^0.5.0",
-		"@changesets/cli": "^2.27.1",
-		"@sveltejs/vite-plugin-svelte": "3.1.0",
-		"@testing-library/jest-dom": "^6.1.5",
-		"@testing-library/svelte": "^4.0.5",
-		"@types/react": "^18.2.79",
-		"@types/react-dom": "^18.2.25",
-		"brotli-size": "^4.0.0",
-		"fast-glob": "^3.3.2",
-		"jsdom": "^24.0.0",
-		"react": "^18.2.0",
-		"react-dom": "^18.2.0",
-		"solid-js": "^1.8.7",
-		"svelte": "^4.2.14",
-		"terser": "^5.26.0",
-		"tsup": "^8.0.1",
-		"tsx": "^4.6.2",
-		"typescript": "^5.4.5",
-		"vite": "^5.2.9",
-		"vitest": "^1.5.0",
-		"vue": "^3.4.23"
-	}
+		"@changesets/changelog-github": "^0.5.1",
+		"@changesets/cli": "^2.29.5",
+		"@sveltejs/vite-plugin-svelte": "5.1.0",
+		"@types/react": "^18.3.23",
+		"@types/react-dom": "^18.3.7",
+		"@vitest/browser": "^3.2.4",
+		"playwright": "^1.53.1",
+		"prettier-plugin-astro": "^0.14.1",
+		"prettier-plugin-svelte": "^3.4.0",
+		"svelte": "^5.34.7",
+		"tsup": "^8.5.0",
+		"tsx": "^4.20.3",
+		"turbo": "^2.5.4",
+		"typescript": "catalog:",
+		"vitest": "^3.2.4",
+		"vitest-browser-svelte": "^0.1.0"
+	},
+	"pnpm": {
+		"overrides": {
+			"vite": "catalog:"
+		},
+		"onlyBuiltDependencies": [
+			"@parcel/watcher",
+			"@sveltejs/kit",
+			"esbuild",
+			"sharp"
+		]
+	},
+	"packageManager": "pnpm@10.12.0"
 }

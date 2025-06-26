@@ -1,10 +1,11 @@
-// @ts-check
 import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import svelte from '@astrojs/svelte';
 import { defineConfig } from 'astro/config';
+import browserslist from 'browserslist';
 import { h } from 'hastscript';
+import { browserslistToTargets } from 'lightningcss';
 import rehypeAutolinkHeadings, { type Options } from 'rehype-autolink-headings';
 import container from 'remark-custom-container/dist/esm/index.js';
 import UnpluginIcons from 'unplugin-icons/vite';
@@ -30,8 +31,13 @@ export default defineConfig({
 	site: 'https://neodrag.dev',
 	integrations: [svelte(), mdx(), sitemap()],
 
+	prefetch: {
+		prefetchAll: true,
+		defaultStrategy: 'hover',
+	},
+
 	markdown: {
-		extendDefaultPlugins: true,
+		// extendDefaultPlugins: true,
 		shikiConfig: {
 			themes: {
 				light: 'github-light',
@@ -39,7 +45,7 @@ export default defineConfig({
 			},
 		},
 		// @ts-ignore
-		remarkPlugins: [container],
+		// remarkPlugins: [container],
 		rehypePlugins: [
 			rehypeHeadingIds,
 			[
@@ -67,7 +73,29 @@ export default defineConfig({
 	},
 
 	vite: {
-		// @ts-ignore
 		plugins: [UnpluginIcons({ autoInstall: true, compiler: 'svelte' })],
+
+		optimizeDeps: {
+			exclude: ['@neodrag/*'],
+		},
+
+		css: {
+			transformer: 'lightningcss',
+			lightningcss: {
+				targets: browserslistToTargets(browserslist(['defaults'])),
+				drafts: {
+					customMedia: true,
+				},
+			},
+		},
+
+		build: {
+			minify: 'terser',
+			cssMinify: 'lightningcss',
+
+			rollupOptions: {
+				output: {},
+			},
+		},
 	},
 });

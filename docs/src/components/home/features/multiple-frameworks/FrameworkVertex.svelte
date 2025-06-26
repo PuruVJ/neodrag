@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { portal } from '$actions/portal';
-	import { draggable, type DragEventData } from '@neodrag/svelte';
+	import { portal } from '$attachments/portal.svelte';
 	import type { Framework } from '$helpers/constants';
+	import { Compartment, draggable, events, position, type DragEventData } from '@neodrag/svelte';
+	import type { Attachment } from 'svelte/attachments';
 	import { expoOut } from 'svelte/easing';
+	import { on } from 'svelte/events';
 	import { Tween } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
-	import { untrack } from 'svelte';
 
 	type Props = {
 		logoEl: HTMLImageElement;
@@ -36,7 +37,7 @@
 		draggable_position.target = { x: 0, y: 0 };
 	};
 
-	let button_el = $state<HTMLButtonElement>();
+	let button_el = $state<HTMLDivElement>();
 
 	let line_properties = $state({
 		thickness: 2,
@@ -48,36 +49,61 @@
 
 	let draggable_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
 
-	function get_offset(el: HTMLElement) {
-		const rect = el.getBoundingClientRect();
+	const position_compartment = Compartment.of(() =>
+		position({ current: draggable_position.current }),
+	);
 
-		return {
+	// Cache for element positions to avoid repeated getBoundingClientRect calls
+	let cached_positions = {
+		logo: { left: 0, top: 0, width: 0, height: 0, timestamp: 0 },
+		button: { left: 0, top: 0, width: 0, height: 0, timestamp: 0 },
+	};
+
+	// FIXED: Event-driven RAF instead of continuous loop
+	let needs_position_update = true;
+	let is_dragging = false;
+	let raf_id: number | null = null;
+
+	const CACHE_DURATION = 16; // ~1 frame at 60fps
+	const THICKNESS = 2;
+
+	function get_cached_offset(el: HTMLElement, cache_key: 'logo' | 'button') {
+		const now = performance.now();
+		const cached = cached_positions[cache_key];
+
+		// Return cached position if it's recent and we don't need an update
+		if (!needs_position_update && now - cached.timestamp < CACHE_DURATION) {
+			return cached;
+		}
+
+		// Recalculate and cache
+		const rect = el.getBoundingClientRect();
+		const position = {
 			left: rect.left + window.scrollX,
 			top: rect.top + window.scrollY,
 			width: rect.width || el.offsetWidth,
 			height: rect.height || el.offsetHeight,
+			timestamp: now,
 		};
+
+		cached_positions[cache_key] = position;
+		return position;
 	}
 
-	const THICKNESS = 2;
+	function calculate_line_properties() {
+		if (!button_el || !logoEl) return;
 
-	function update_line_position(node: HTMLElement, rootEl: HTMLElement) {
-		if (!rootEl) return;
-
-		const root_rect = get_offset(rootEl);
-		const node_rect = get_offset(node);
+		const root_rect = get_cached_offset(logoEl, 'logo');
+		const node_rect = get_cached_offset(button_el, 'button');
 
 		const x1 = root_rect.left + root_rect.width / 2;
 		const y1 = root_rect.top + root_rect.height / 2;
-		// top right
 		const x2 = node_rect.left + node_rect.width / 2;
 		const y2 = node_rect.top + node_rect.height / 2;
-		// distance
-		const length = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 
+		const length = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 		const cx = (x1 + x2) / 2 - length / 2;
 		const cy = (y1 + y2) / 2 - THICKNESS / 2;
-		// angle
 		const angle = Math.atan2(y1 - y2, x1 - x2) * (180 / Math.PI);
 
 		line_properties = {
@@ -89,34 +115,56 @@
 		};
 	}
 
-	function connect(node: HTMLElement, root_el: HTMLElement) {
-		// TODO: Investigate replacing with resizeobserver
-		window.addEventListener('resize', () => update_line_position(node, root_el));
+	// FIXED: Only RAF when needed - this prevents Chrome Android interference
+	function schedule_raf_update() {
+		if (raf_id !== null) return; // Already scheduled
 
-		return {
-			update(newRootEl: HTMLElement) {
-				root_el = newRootEl;
-				update_line_position(node, root_el);
-			},
-			destroy: () => {
-				window.removeEventListener('resize', () => update_line_position(node, root_el));
-			},
-		};
+		raf_id = requestAnimationFrame(() => {
+			// Only update if dragging or if we explicitly need an update
+			if (is_dragging || needs_position_update) {
+				calculate_line_properties();
+				needs_position_update = false;
+			}
+
+			raf_id = null;
+
+			// Continue the loop ONLY while dragging
+			if (is_dragging) {
+				schedule_raf_update();
+			}
+		});
 	}
+
+	function mark_for_update() {
+		needs_position_update = true;
+		schedule_raf_update();
+	}
+
+	function invalidate_cache() {
+		cached_positions.logo.timestamp = 0;
+		cached_positions.button.timestamp = 0;
+		mark_for_update();
+	}
+
+	const connect =
+		(root_el: HTMLElement): Attachment =>
+		(_node) => {
+			const unsub = on(window, 'resize', invalidate_cache);
+
+			$effect(() => {
+				root_el;
+				mark_for_update();
+			});
+
+			return unsub;
+		};
 
 	function selectFramework() {
 		const fn = () => onselect?.({ framework });
-
-		// TODO
-		// if (lastDraggingTime === null) return fn();
-
-		// console.log(+new Date() - +lastDraggingTime);
-
-		// if (+new Date() - +lastDraggingTime > 300) return fn();
-
 		fn();
 	}
 
+	// Lifecycle management
 	$effect(() => {
 		if (framework) {
 			resetFns[framework] = reset;
@@ -124,40 +172,61 @@
 
 		return () => {
 			resetFns[framework] = () => {};
+			// FIXED: Clean up RAF on destroy
+			if (raf_id !== null) {
+				cancelAnimationFrame(raf_id);
+				raf_id = null;
+			}
 		};
+	});
+
+	// Start RAF loop when elements are available
+	$effect(() => {
+		if (button_el && logoEl) {
+			mark_for_update();
+		}
 	});
 
 	$effect(() => {
 		draggable_position.current;
-
-		if (button_el && logoEl) untrack(() => update_line_position(button_el!, logoEl));
+		// Mark for update when position changes
+		mark_for_update();
 	});
 </script>
 
-<button
+<div
 	data-paw-cursor="true"
 	bind:this={button_el}
-	use:draggable={{
-		position: draggable_position.current,
-		onDragStart: (data) => {
-			on_drag_start?.(data);
-		},
-		onDrag: (data) => {
-			on_drag?.(data);
-			draggable_position.set({ x: data.offsetX, y: data.offsetY }, { duration: 0 });
-		},
-		onDragEnd: (data) => {
-			on_drag_end?.(data);
-			update_line_position(button_el!, logoEl);
-		},
-	}}
-	use:connect={logoEl}
-	onclick={selectFramework}
+	{@attach draggable(() => [
+		position_compartment,
+		events({
+			onDragStart: (data) => {
+				// FIXED: Start continuous RAF only when dragging starts
+				is_dragging = true;
+				invalidate_cache();
+				on_drag_start?.(data);
+			},
+			onDrag: (data) => {
+				on_drag?.(data);
+				draggable_position.set({ x: data.offset.x, y: data.offset.y }, { duration: 0 });
+				// Position will be updated smoothly by RAF loop
+			},
+			onDragEnd: (data) => {
+				// FIXED: Stop continuous RAF when dragging ends
+				is_dragging = false;
+				invalidate_cache();
+				on_drag_end?.(data);
+			},
+		}),
+	])}
+	{@attach connect(logoEl)}
 >
-	<span>
-		{@render children?.()}
-	</span>
-</button>
+	<button onclick={selectFramework}>
+		<span>
+			{@render children?.()}
+		</span>
+	</button>
+</div>
 
 {#if logoEl}
 	<div
@@ -169,20 +238,23 @@
 		style:--length="{line_properties.width}px"
 		style:--thickness="{line_properties.thickness}px"
 		style:--angle="{line_properties.angle}deg"
-		use:portal={'body'}
+		{@attach portal('body')}
 		in:fade={{ delay: 1000 }}
 	></div>
 {/if}
 
-<style lang="scss">
+<style>
 	button {
 		background-color: transparent;
-
 		height: max-content;
+
+		/* FIXED: Add touch optimizations for Chrome Android */
+		touch-action: none;
+		-webkit-user-select: none;
+		user-select: none;
 
 		:global(svg) {
 			min-width: clamp(2rem, 5vw, 2.5rem);
-
 			transition: transform 0.2s ease;
 
 			&:hover {
@@ -195,18 +267,17 @@
 		position: absolute;
 		top: var(--top);
 		left: var(--left);
-
 		padding: 0px;
 		margin: 0px;
-
-		background-color: hsla(var(--app-color-dark-hsl), 0.5);
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 50%);
 		line-height: 1px;
-
 		height: var(--thickness);
 		width: var(--length);
-
 		transform: rotate(var(--angle));
-
 		will-change: width;
+
+		/* FIXED: Add GPU acceleration hints */
+		transform-style: preserve-3d;
+		backface-visibility: hidden;
 	}
 </style>

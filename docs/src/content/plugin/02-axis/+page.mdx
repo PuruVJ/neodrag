@@ -1,0 +1,523 @@
+---
+title: 'axis'
+tagline: 'Restrict movement to a single axis (x or y)'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+The `axis` plugin locks movement to horizontal (`x`) or vertical (`y`) direction. Perfect for sliders, scrollbars, or any UI requiring one-dimensional dragging.
+
+```typescript
+axis('x'); // Only horizontal movement
+axis('y'); // Only vertical movement
+axis(null); // Free movement (removes constraint)
+```
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { axis } from '@neodrag/svelte';
+</script>
+
+<!-- Horizontal slider -->
+<div {@attach draggable([axis('x')])}>Horizontal only</div>
+
+<!-- Vertical scrollbar -->
+<div {@attach draggable([axis('y')])}>Vertical only</div>
+
+<!-- Free movement -->
+<div {@attach draggable([axis(null)])}>Any direction</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { axis, useDraggable } from '@neodrag/react';
+
+function AxisExamples() {
+  const horizontalRef = useRef<HTMLDivElement>(null);
+  const verticalRef = useRef<HTMLDivElement>(null);
+  const freeRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(horizontalRef, [axis('x')]);
+  useDraggable(verticalRef, [axis('y')]);
+  useDraggable(freeRef, [axis(null)]);
+
+  return (
+    <div>
+      <div ref={horizontalRef}>Horizontal only</div>
+      <div ref={verticalRef}>Vertical only</div>
+      <div ref={freeRef}>Any direction</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { axis, vDraggable } from '@neodrag/vue';
+</script>
+
+<template>
+  <div>
+    <div v-draggable="[axis('x')]">Horizontal only</div>
+    <div v-draggable="[axis('y')]">Vertical only</div>
+    <div v-draggable="[axis(null)]">Any direction</div>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { axis, useDraggable } from '@neodrag/solid';
+
+function AxisExamples() {
+  const [horizontalRef, setHorizontalRef] =
+    createSignal<HTMLElement | null>(null);
+  const [verticalRef, setVerticalRef] =
+    createSignal<HTMLElement | null>(null);
+  const [freeRef, setFreeRef] = createSignal<HTMLElement | null>(
+    null,
+  );
+
+  useDraggable(horizontalRef, [axis('x')]);
+  useDraggable(verticalRef, [axis('y')]);
+  useDraggable(freeRef, [axis(null)]);
+
+  return (
+    <div>
+      <div ref={setHorizontalRef}>Horizontal only</div>
+      <div ref={setVerticalRef}>Vertical only</div>
+      <div ref={setFreeRef}>Any direction</div>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { axis, Draggable } from '@neodrag/vanilla';
+
+const horizontal = document.getElementById('horizontal');
+const vertical = document.getElementById('vertical');
+const free = document.getElementById('free');
+
+new Draggable(horizontal, [axis('x')]);
+new Draggable(vertical, [axis('y')]);
+new Draggable(free, [axis(null)]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Dynamic Axis Switching
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { draggable, axis, Compartment } from '@neodrag/svelte';
+
+  let currentAxis = $state('x');
+  const axisComp = Compartment.of(() => axis(currentAxis));
+</script>
+
+<div {@attach draggable(() => [axisComp])}>
+  Currently locked to: {currentAxis} axis
+</div>
+
+<button
+  onclick={() => (currentAxis = currentAxis === 'x' ? 'y' : 'x')}
+>
+  Switch to {currentAxis === 'x' ? 'Y' : 'X'} axis
+</button>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useState, useRef } from 'react';
+import { axis, useDraggable, useCompartment } from '@neodrag/react';
+
+function DynamicAxis() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [currentAxis, setCurrentAxis] = useState<'x' | 'y'>('x');
+
+  const axisComp = useCompartment(
+    () => axis(currentAxis),
+    [currentAxis],
+  );
+
+  useDraggable(ref, () => [axisComp]);
+
+  return (
+    <div>
+      <div ref={ref}>Currently locked to: {currentAxis} axis</div>
+      <button
+        onClick={() =>
+          setCurrentAxis(currentAxis === 'x' ? 'y' : 'x')
+        }
+      >
+        Switch to {currentAxis === 'x' ? 'Y' : 'X'} axis
+      </button>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { axis, vDraggable, useCompartment } from '@neodrag/vue';
+
+const currentAxis = ref('x');
+const axisComp = useCompartment(() => axis(currentAxis.value));
+
+function switchAxis() {
+  currentAxis.value = currentAxis.value === 'x' ? 'y' : 'x';
+}
+</script>
+
+<template>
+  <div>
+    <div v-draggable="() => [axisComp]">
+      Currently locked to: {{ currentAxis }} axis
+    </div>
+    <button @click="switchAxis">
+      Switch to {{ currentAxis === 'x' ? 'Y' : 'X' }} axis
+    </button>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  axis,
+  useDraggable,
+  createCompartment,
+} from '@neodrag/solid';
+
+function DynamicAxis() {
+  const [ref, setRef] = createSignal<HTMLElement | null>(null);
+  const [currentAxis, setCurrentAxis] = createSignal<'x' | 'y'>('x');
+
+  const axisComp = createCompartment(() => axis(currentAxis()));
+
+  useDraggable(ref, [axisComp]);
+
+  function switchAxis() {
+    setCurrentAxis(currentAxis() === 'x' ? 'y' : 'x');
+  }
+
+  return (
+    <div>
+      <div ref={setRef}>
+        Currently locked to: {currentAxis()} axis
+      </div>
+      <button onClick={switchAxis}>
+        Switch to {currentAxis() === 'x' ? 'Y' : 'X'} axis
+      </button>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { axis, Draggable, Compartment } from '@neodrag/vanilla';
+
+let currentAxis = 'x';
+const axisComp = new Compartment(() => axis(currentAxis));
+
+const element = document.getElementById('draggable');
+const button = document.getElementById('switch-button');
+const display = document.getElementById('axis-display');
+
+new Draggable(element, () => [axisComp]);
+
+button.addEventListener('click', () => {
+  currentAxis = currentAxis === 'x' ? 'y' : 'x';
+  axisComp.current = axis(currentAxis);
+  display.textContent = `Currently locked to: ${currentAxis} axis`;
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+## Real-World Examples
+
+### Horizontal Slider Component
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import {
+    draggable,
+    axis,
+    bounds,
+    BoundsFrom,
+    events,
+  } from '@neodrag/svelte';
+
+  let track;
+  let handle;
+  let value = $state(50);
+
+  function handleDrag(data) {
+    if (track) {
+      const trackWidth = track.offsetWidth;
+      value = Math.round((data.offset.x / trackWidth) * 100);
+    }
+  }
+</script>
+
+<div bind:this={track} class="track">
+  <div
+    bind:this={handle}
+    class="handle"
+    {@attach draggable([
+      axis('x'),
+      bounds(() => BoundsFrom.element(track)),
+      events({ onDrag: handleDrag }),
+    ])}
+  />
+</div>
+<p>Value: {value}%</p>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import {
+  axis,
+  bounds,
+  BoundsFrom,
+  events,
+  useDraggable,
+} from '@neodrag/react';
+
+function Slider() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
+  const [value, setValue] = useState(50);
+
+  const handleDrag = (data) => {
+    if (trackRef.current) {
+      const trackWidth = trackRef.current.offsetWidth;
+      setValue(Math.round((data.offset.x / trackWidth) * 100));
+    }
+  };
+
+  useDraggable(handleRef, [
+    axis('x'),
+    bounds(() => BoundsFrom.element(trackRef.current)),
+    events({ onDrag: handleDrag }),
+  ]);
+
+  return (
+    <div>
+      <div ref={trackRef} className="track">
+        <div ref={handleRef} className="handle" />
+      </div>
+      <p>Value: {value}%</p>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import {
+  axis,
+  bounds,
+  BoundsFrom,
+  events,
+  vDraggable,
+} from '@neodrag/vue';
+
+const track = ref();
+const value = ref(50);
+
+function handleDrag(data) {
+  if (track.value) {
+    const trackWidth = track.value.offsetWidth;
+    value.value = Math.round((data.offset.x / trackWidth) * 100);
+  }
+}
+
+const plugins = [
+  axis('x'),
+  bounds(() => BoundsFrom.element(track.value)),
+  events({ onDrag: handleDrag }),
+];
+</script>
+
+<template>
+  <div>
+    <div ref="track" class="track">
+      <div v-draggable="plugins" class="handle" />
+    </div>
+    <p>Value: {{ value }}%</p>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  axis,
+  bounds,
+  BoundsFrom,
+  events,
+  useDraggable,
+} from '@neodrag/solid';
+
+function Slider() {
+  const [track, setTrack] = createSignal<HTMLElement | null>(null);
+  const [handle, setHandle] = createSignal<HTMLElement | null>(null);
+  const [value, setValue] = createSignal(50);
+
+  const handleDrag = (data) => {
+    if (track()) {
+      const trackWidth = track()!.offsetWidth;
+      setValue(Math.round((data.offset.x / trackWidth) * 100));
+    }
+  };
+
+  useDraggable(handle, [
+    axis('x'),
+    bounds(() => BoundsFrom.element(track()!)),
+    events({ onDrag: handleDrag }),
+  ]);
+
+  return (
+    <div>
+      <div ref={setTrack} class="track">
+        <div ref={setHandle} class="handle" />
+      </div>
+      <p>Value: {value()}%</p>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import {
+  axis,
+  bounds,
+  BoundsFrom,
+  events,
+  Draggable,
+} from '@neodrag/vanilla';
+
+const track = document.getElementById('track');
+const handle = document.getElementById('handle');
+const valueDisplay = document.getElementById('value');
+
+function handleDrag(data) {
+  const trackWidth = track.offsetWidth;
+  const value = Math.round((data.offset.x / trackWidth) * 100);
+  valueDisplay.textContent = `${value}%`;
+}
+
+new Draggable(handle, [
+  axis('x'),
+  bounds(BoundsFrom.element(track)),
+  events({ onDrag: handleDrag }),
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+### Split Pane Resizer
+
+```typescript
+// Vertical divider for horizontal split
+const plugins = [
+  axis('x'),
+  bounds(
+    BoundsFrom.parent({
+      left: 100, // Min pane width
+      right: 100, // Min pane width
+    }),
+  ),
+];
+```
+
+## How It Works
+
+The axis plugin modifies the `proposed` movement during dragging:
+
+- **`axis('x')`**: Sets `proposed.y = null` (no vertical movement)
+- **`axis('y')`**: Sets `proposed.x = null` (no horizontal movement)
+- **`axis(null)`**: No changes (free movement)
+
+This happens in the plugin's `drag` hook, so other plugins receive the constrained movement values.
+
+## API Reference
+
+```typescript
+function axis(value?: 'x' | 'y' | null | undefined): Plugin;
+```
+
+**Parameters:**
+
+- `value` - The axis to constrain movement to
+  - `'x'` - Horizontal only
+  - `'y'` - Vertical only
+  - `null` or `undefined` - No constraint
+
+**Returns:** A plugin object for use with draggable.

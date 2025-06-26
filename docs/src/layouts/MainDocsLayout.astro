@@ -1,51 +1,71 @@
 ---
-import type { MarkdownLayoutProps } from 'astro';
-
+import { type Framework } from '$helpers/constants';
+import type { MarkdownHeading } from 'astro';
 import DocsLayout from './DocsLayout.astro';
+import core_package_json from '../../../packages/core/package.json';
+import react_package_json from '../../../packages/react/package.json';
+import solid_package_json from '../../../packages/solid/package.json';
+import vue_package_json from '../../../packages/vue/package.json';
+import vanilla_package_json from '../../../packages/vanilla/package.json';
+import svelte_package_json from '../../../packages/svelte/package.json';
 
-import type { Framework } from '$helpers/constants';
-import SIZES from '../data/sizes.json';
-
-type Props = MarkdownLayoutProps<{
+type Props = {
 	title: string;
 	tagline: string;
-}>;
+	framework: Framework;
+	headings: MarkdownHeading[];
+};
 
-const { frontmatter } = Astro.props;
-const { tagline, title, url } = frontmatter;
+const is_framework_only_page = /\/docs\/(svelte|react|solid|vanilla|vue|core)$/gi.test(
+	Astro.url.pathname,
+);
 
-const framework = url?.split('/').at(-1) as Framework;
-const { size, version } = SIZES[framework];
+const { tagline, title, framework, headings } = Astro.props;
+
+const version = {
+	core: core_package_json.version,
+	react: react_package_json.version,
+	solid: solid_package_json.version,
+	vue: vue_package_json.version,
+	vanilla: vanilla_package_json.version,
+	svelte: svelte_package_json.version,
+}[framework];
 ---
 
-<DocsLayout title={title}>
+<DocsLayout title={title} headings={headings} framework={framework}>
 	<h1>
-		@neodrag/<span style={`color: var(--app-color-brand-${framework})`}>{framework}</span>
+		{
+			is_framework_only_page ? (
+				<>
+					@neodrag/<span style={`color: var(--app-color-brand-${framework})`}>{framework}</span>
+				</>
+			) : (
+				title
+			)
+		}
 	</h1>
 
-	<div class="tags">
-		<span class="tag">
-			{version}
-		</span>
-
-		<span class="tag">
-			{size}KB
-		</span>
-	</div>
+	{
+		is_framework_only_page ? (
+			<div class="tags">
+				<span class="tag">{version}</span>
+			</div>
+		) : null
+	}
 
 	<p>{tagline}</p>
 
 	<slot />
 
-	<h2>Credits</h2>
+	<!-- <h2>Credits</h2>
 	<p>
 		Inspired from the amazing
 		<a href="https://github.com/react-grid-layout/react-draggable"> react-draggable </a>
 		library, and implements the same API.
-	</p>
+	</p> -->
 </DocsLayout>
 
-<style lang="scss">
+<style>
 	.tags {
 		display: flex;
 		flex-wrap: wrap;
@@ -54,9 +74,9 @@ const { size, version } = SIZES[framework];
 	}
 
 	.tag {
-		background: hsla(var(--secondary-color-hsl), 0.1);
+		background: color-mix(in lch, var(--secondary-color), transparent 90%);
 		border-radius: 24px;
-		color: var(--secondary-color);
+		color: color-mix(in lch, var(--secondary-color), var(--app-color-anti-mixer) 40%);
 		display: inline-block;
 		font-size: 0.9rem;
 		font-weight: 600;

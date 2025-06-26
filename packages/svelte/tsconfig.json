@@ -4,11 +4,10 @@
 		"target": "ESNext",
 		"declaration": true,
 		"emitDeclarationOnly": true,
-		"declarationDir": "dist/",
+		"declarationDir": "dist",
 		"strict": true,
 		"esModuleInterop": true,
-		"moduleResolution": "Bundler",
-		"types": ["vitest/globals", "svelte"]
+		"moduleResolution": "Bundler"
 	},
-	"files": ["./src/index.ts"]
+	"files": ["./src/index.svelte.ts"]
 }

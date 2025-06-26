@@ -1,0 +1,33 @@
+---
+import { FRAMEWORKS } from '$helpers/constants';
+import MainDocsLayout from '$layouts/MainDocsLayout.astro';
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+
+const { plugin, framework } = Astro.params;
+
+const plugin_collection = await getCollection('plugin');
+const plugin_entry = plugin_collection.find((f) => f.id.includes(plugin));
+
+if (!plugin_entry) {
+	return;
+}
+
+const { Content, headings } = await render(plugin_entry);
+
+export const getStaticPaths = (async () => {
+	const plugin_collection = await getCollection('plugin');
+
+	return plugin_collection
+		.map((f) =>
+			FRAMEWORKS.map(({ name }) => ({
+				params: { plugin: f.id.replace(/\d{2}-(.+)\/page/, '$1'), framework: name },
+			}))
+		)
+		.flat();
+}) satisfies GetStaticPaths;
+---
+
+<MainDocsLayout {...plugin_entry.data} headings={headings} framework={framework}>
+	<Content />
+</MainDocsLayout>

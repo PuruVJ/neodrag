@@ -1,0 +1,232 @@
+---
+title: '@neodrag/react'
+nav_title: 'react'
+tagline: 'A lightweight react hook to make your elements draggable.'
+---
+
+```sh
+npm i @neodrag/react@next
+```
+
+## Usage
+
+Basic usage
+
+```tsx
+import { useRef } from 'react';
+import { useDraggable } from '@neodrag/react';
+
+function App() {
+  const draggableRef = useRef<HTMLDivElement>(null);
+  useDraggable(draggableRef);
+
+  return <div ref={draggableRef}>Hello</div>;
+}
+```
+
+With plugins
+
+```tsx
+import { useRef } from 'react';
+import { useDraggable, axis, grid } from '@neodrag/react';
+
+function App() {
+  const draggableRef = useRef<HTMLDivElement>(null);
+  useDraggable(draggableRef, [axis('x'), grid([10, 10])]);
+
+  return <div ref={draggableRef}>Hello</div>;
+}
+```
+
+Defining plugins elsewhere with TypeScript
+
+```tsx
+import { useRef } from 'react';
+import {
+  useDraggable,
+  axis,
+  bounds,
+  BoundsFrom,
+  type Plugin,
+} from '@neodrag/react';
+
+function App() {
+  const draggableRef = useRef<HTMLDivElement>(null);
+
+  const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
+  useDraggable(draggableRef, plugins);
+
+  return <div ref={draggableRef}>Hello</div>;
+}
+```
+
+Getting drag state
+
+```tsx
+import { useRef, useEffect } from 'react';
+import { useDraggable } from '@neodrag/react';
+
+function App() {
+  const draggableRef = useRef<HTMLDivElement>(null);
+  const dragState = useDraggable(draggableRef);
+
+  useEffect(() => {
+    console.log('Position:', dragState.offset);
+    console.log('Is dragging:', dragState.isDragging);
+  }, [dragState]);
+
+  return <div ref={draggableRef}>Hello</div>;
+}
+```
+
+## Reactive Plugins with useCompartment
+
+For dynamic behavior that changes during runtime:
+
+```tsx
+import { useRef, useState } from 'react';
+import { useDraggable, axis, useCompartment } from '@neodrag/react';
+
+function App() {
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [currentAxis, setCurrentAxis] = useState<'x' | 'y'>('x');
+
+  const axisCompartment = useCompartment(
+    () => axis(currentAxis),
+    [currentAxis],
+  );
+
+  useDraggable(elementRef, () => [axisCompartment]);
+
+  return (
+    <div>
+      <div ref={elementRef}>Current axis: {currentAxis}</div>
+      <button
+        onClick={() =>
+          setCurrentAxis(currentAxis === 'x' ? 'y' : 'x')
+        }
+      >
+        Switch Axis
+      </button>
+    </div>
+  );
+}
+```
+
+Multiple reactive compartments
+
+```tsx
+import { useRef, useState } from 'react';
+import {
+  useDraggable,
+  axis,
+  bounds,
+  BoundsFrom,
+  grid,
+  useCompartment,
+} from '@neodrag/react';
+
+function App() {
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [currentAxis, setCurrentAxis] = useState<'x' | 'y'>('x');
+  const [gridSize, setGridSize] = useState(20);
+  const [enableBounds, setEnableBounds] = useState(false);
+
+  const axisComp = useCompartment(
+    () => axis(currentAxis),
+    [currentAxis],
+  );
+  const gridComp = useCompartment(
+    () => grid([gridSize, gridSize]),
+    [gridSize],
+  );
+  const boundsComp = useCompartment(
+    () => (enableBounds ? bounds(BoundsFrom.parent()) : null),
+    [enableBounds],
+  );
+
+  useDraggable(elementRef, () => [axisComp, gridComp, boundsComp]);
+
+  return (
+    <div>
+      <div ref={elementRef}>Reactive draggable</div>
+
+      <div>
+        <select
+          value={currentAxis}
+          onChange={(e) =>
+            setCurrentAxis(e.target.value as 'x' | 'y')
+          }
+        >
+          <option value="x">X</option>
+          <option value="y">Y</option>
+        </select>
+
+        <input
+          type="range"
+          min="10"
+          max="50"
+          value={gridSize}
+          onChange={(e) => setGridSize(Number(e.target.value))}
+        />
+
+        <label>
+          <input
+            type="checkbox"
+            checked={enableBounds}
+            onChange={(e) => setEnableBounds(e.target.checked)}
+          />
+          Enable bounds
+        </label>
+      </div>
+    </div>
+  );
+}
+```
+
+## Event Handling
+
+```tsx
+import { useRef } from 'react';
+import { useDraggable, events } from '@neodrag/react';
+
+function App() {
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(elementRef, [
+    events({
+      onDragStart: (data) => console.log('Started:', data.offset),
+      onDrag: (data) => console.log('Dragging:', data.offset),
+      onDragEnd: (data) => console.log('Ended:', data.offset),
+    }),
+  ]);
+
+  return <div ref={elementRef}>Check console while dragging</div>;
+}
+```
+
+## Drag Controls
+
+```tsx
+import { useRef } from 'react';
+import { useDraggable, controls, ControlFrom } from '@neodrag/react';
+
+function App() {
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useDraggable(elementRef, [
+    controls({
+      allow: ControlFrom.selector('.drag-handle'),
+      block: ControlFrom.selector('.no-drag'),
+    }),
+  ]);
+
+  return (
+    <div ref={elementRef}>
+      <div className="drag-handle">🔸 Drag from here</div>
+      <div>Content area</div>
+      <div className="no-drag">❌ Can't drag from here</div>
+    </div>
+  );
+}
+```

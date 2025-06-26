@@ -1,0 +1,717 @@
+---
+title: 'Compartment'
+tagline: 'Using compartments to create isolated plugin environments'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+Compartments are Neodrag v3's solution for reactive plugin updates. They provide manual, predictable control over when your draggable behavior changes.
+
+## What Are Compartments?
+
+Compartments are reactive containers that hold a single plugin (or null) and update when their dependencies change.
+
+**Key Rule**: One plugin per compartment - they don't hold arrays of plugins.
+
+## How They Work
+
+Compartments wrap your framework's reactive system:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+**Svelte**: Uses `$effect.pre` under the hood
+
+</div>
+
+<div slot="react">
+
+**React**: Uses `useMemo` with dependency tracking
+
+</div>
+
+<div slot="vue">
+
+**Vue**: Uses `watchEffect` with immediate execution
+
+</div>
+
+<div slot="solid">
+
+**Solid**: Uses `createMemo` with automatic tracking
+
+</div>
+
+<div slot="vanilla">
+
+**Vanilla**: Manual state management with explicit updates
+
+</div>
+</FrameworkSwitch>
+
+## Why Compartments?
+
+V2 had automatic reactivity but caused problems:
+
+- **Performance Issues**: Entire plugin arrays recreated on every change
+- **Memory Leaks**: Old plugin instances weren't properly cleaned up
+- **Unpredictable Updates**: Hard to control when updates happened
+- **Over-Engineering**: Simple static configs got reactive treatment they didn't need
+
+**Compartments solve this** with manual control, predictable updates, and better performance.
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { draggable, axis, Compartment } from '@neodrag/svelte';
+
+  let currentAxis = $state('x');
+  const axisComp = Compartment.of(() => axis(currentAxis));
+</script>
+
+<div {@attach draggable(() => [axisComp])}>Drag me</div>
+<button onclick={() => (currentAxis = 'y')}>Switch Axis</button>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import { useDraggable, axis, useCompartment } from '@neodrag/react';
+
+function App() {
+  const ref = useRef(null);
+  const [currentAxis, setCurrentAxis] = useState('x');
+
+  const axisComp = useCompartment(
+    () => axis(currentAxis),
+    [currentAxis],
+  );
+  useDraggable(ref, () => [axisComp]);
+
+  return (
+    <div>
+      <div ref={ref}>Drag me</div>
+      <button onClick={() => setCurrentAxis('y')}>Switch Axis</button>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { vDraggable, axis, useCompartment } from '@neodrag/vue';
+
+const currentAxis = ref('x');
+const axisComp = useCompartment(() => axis(currentAxis.value));
+</script>
+
+<template>
+  <div>
+    <div v-draggable="() => [axisComp]">Drag me</div>
+    <button @click="currentAxis = 'y'">Switch Axis</button>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  useDraggable,
+  axis,
+  createCompartment,
+} from '@neodrag/solid';
+
+function App() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [currentAxis, setCurrentAxis] = createSignal('x');
+
+  const axisComp = createCompartment(() => axis(currentAxis()));
+  useDraggable(element, [axisComp]);
+
+  return (
+    <div>
+      <div ref={setElement}>Drag me</div>
+      <button onClick={() => setCurrentAxis('y')}>Switch Axis</button>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { Draggable, axis, Compartment } from '@neodrag/vanilla';
+
+let currentAxis = 'x';
+const axisComp = new Compartment(() => axis(currentAxis));
+const instance = new Draggable(element, () => [axisComp]);
+
+// Manual update required
+function switchAxis() {
+  currentAxis = 'y';
+  axisComp.current = axis(currentAxis);
+}
+```
+
+</div>
+</FrameworkSwitch>
+
+## Multiple Compartments
+
+Mix static plugins with reactive compartments:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  let currentAxis = $state('x');
+  let gridSize = $state(20);
+  let enableBounds = $state(false);
+
+  // Reactive compartments
+  const axisComp = Compartment.of(() => axis(currentAxis));
+  const gridComp = Compartment.of(() => grid([gridSize, gridSize]));
+  const boundsComp = Compartment.of(() =>
+    enableBounds ? bounds(BoundsFrom.parent()) : null,
+  );
+
+  // Static plugins (never change)
+  const staticPlugins = [events({ onDrag: console.log })];
+</script>
+
+<div
+  {@attach draggable(() => [
+    ...staticPlugins,
+    axisComp,
+    gridComp,
+    boundsComp,
+  ])}
+>
+  Drag me
+</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import {
+  useDraggable,
+  axis,
+  grid,
+  bounds,
+  BoundsFrom,
+  events,
+  useCompartment,
+} from '@neodrag/react';
+
+function App() {
+  const ref = useRef(null);
+  const [currentAxis, setCurrentAxis] = useState('x');
+  const [gridSize, setGridSize] = useState(20);
+  const [enableBounds, setEnableBounds] = useState(false);
+
+  // Reactive compartments
+  const axisComp = useCompartment(
+    () => axis(currentAxis),
+    [currentAxis],
+  );
+  const gridComp = useCompartment(
+    () => grid([gridSize, gridSize]),
+    [gridSize],
+  );
+  const boundsComp = useCompartment(
+    () => (enableBounds ? bounds(BoundsFrom.parent()) : null),
+    [enableBounds],
+  );
+
+  // Static plugins (never change)
+  const staticPlugins = [events({ onDrag: console.log })];
+
+  useDraggable(ref, () => [
+    ...staticPlugins,
+    axisComp,
+    gridComp,
+    boundsComp,
+  ]);
+
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import {
+  vDraggable,
+  axis,
+  grid,
+  bounds,
+  BoundsFrom,
+  events,
+  useCompartment,
+} from '@neodrag/vue';
+
+const currentAxis = ref('x');
+const gridSize = ref(20);
+const enableBounds = ref(false);
+
+// Reactive compartments
+const axisComp = useCompartment(() => axis(currentAxis.value));
+const gridComp = useCompartment(() =>
+  grid([gridSize.value, gridSize.value]),
+);
+const boundsComp = useCompartment(() =>
+  enableBounds.value ? bounds(BoundsFrom.parent()) : null,
+);
+
+// Static plugins (never change)
+const staticPlugins = [events({ onDrag: console.log })];
+</script>
+
+<template>
+  <div
+    v-draggable="
+      () => [...staticPlugins, axisComp, gridComp, boundsComp]
+    "
+  >
+    Drag me
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  useDraggable,
+  axis,
+  grid,
+  bounds,
+  BoundsFrom,
+  events,
+  createCompartment,
+} from '@neodrag/solid';
+
+function App() {
+  const [element, setElement] = createSignal<HTMLElement | null>(
+    null,
+  );
+  const [currentAxis, setCurrentAxis] = createSignal('x');
+  const [gridSize, setGridSize] = createSignal(20);
+  const [enableBounds, setEnableBounds] = createSignal(false);
+
+  // Reactive compartments
+  const axisComp = createCompartment(() => axis(currentAxis()));
+  const gridComp = createCompartment(() =>
+    grid([gridSize(), gridSize()]),
+  );
+  const boundsComp = createCompartment(() =>
+    enableBounds() ? bounds(BoundsFrom.parent()) : null,
+  );
+
+  // Static plugins (never change)
+  const staticPlugins = [events({ onDrag: console.log })];
+
+  useDraggable(element, [
+    ...staticPlugins,
+    axisComp,
+    gridComp,
+    boundsComp,
+  ]);
+
+  return <div ref={setElement}>Drag me</div>;
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+let currentAxis = 'x';
+let gridSize = 20;
+let enableBounds = false;
+
+// Reactive compartments
+const axisComp = new Compartment(() => axis(currentAxis));
+const gridComp = new Compartment(() => grid([gridSize, gridSize]));
+const boundsComp = new Compartment(() =>
+  enableBounds ? bounds(BoundsFrom.parent()) : null,
+);
+
+// Static plugins (never change)
+const staticPlugins = [events({ onDrag: console.log })];
+const instance = new Draggable(element, () => [
+  ...staticPlugins,
+  axisComp,
+  gridComp,
+  boundsComp,
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## When to Use Compartments
+
+### Use Compartments For:
+
+- **Dynamic values** that change from user interaction (sliders, dropdowns, toggles)
+- **Conditional plugin logic** (enable/disable features based on state)
+- **Complex computed values** with multiple dependencies
+
+### Don't Use Compartments For:
+
+- **Static values** that never change (just use direct plugin arrays)
+- **Simple boolean toggles** (use direct conditionals instead)
+
+### Examples:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  // ✅ Good - dynamic values
+  let userChoice = $state('x');
+  let gridSize = $state(20);
+  const axisComp = Compartment.of(() => axis(userChoice));
+  const gridComp = Compartment.of(() => grid([gridSize, gridSize]));
+
+  // ❌ Bad - static values
+  const staticComp = Compartment.of(() =>
+    bounds(BoundsFrom.parent()),
+  );
+
+  // ✅ Better - direct usage
+  const staticPlugins = [bounds(BoundsFrom.parent())];
+
+  // ❌ Bad - simple boolean
+  let showGrid = $state(false);
+  const simpleComp = Compartment.of(() =>
+    showGrid ? grid([10, 10]) : null,
+  );
+
+  // ✅ Better - direct conditional
+  const plugins = () => [
+    axis('x'),
+    ...(showGrid ? [grid([10, 10])] : []),
+  ];
+</script>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+// ✅ Good - dynamic values
+const [userChoice, setUserChoice] = useState('x');
+const [gridSize, setGridSize] = useState(20);
+const axisComp = useCompartment(() => axis(userChoice), [userChoice]);
+const gridComp = useCompartment(
+  () => grid([gridSize, gridSize]),
+  [gridSize],
+);
+
+// ❌ Bad - static values
+const staticComp = useCompartment(
+  () => bounds(BoundsFrom.parent()),
+  [],
+);
+
+// ✅ Better - direct usage
+const staticPlugins = [bounds(BoundsFrom.parent())];
+
+// ❌ Bad - simple boolean
+const [showGrid, setShowGrid] = useState(false);
+const simpleComp = useCompartment(
+  () => (showGrid ? grid([10, 10]) : null),
+  [showGrid],
+);
+
+// ✅ Better - direct conditional
+const plugins = () => [
+  axis('x'),
+  ...(showGrid ? [grid([10, 10])] : []),
+];
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+// ✅ Good - dynamic values
+const userChoice = ref('x');
+const gridSize = ref(20);
+const axisComp = useCompartment(() => axis(userChoice.value));
+const gridComp = useCompartment(() =>
+  grid([gridSize.value, gridSize.value]),
+);
+
+// ❌ Bad - static values
+const staticComp = useCompartment(() => bounds(BoundsFrom.parent()));
+
+// ✅ Better - direct usage
+const staticPlugins = [bounds(BoundsFrom.parent())];
+
+// ❌ Bad - simple boolean
+const showGrid = ref(false);
+const simpleComp = useCompartment(() =>
+  showGrid.value ? grid([10, 10]) : null,
+);
+
+// ✅ Better - direct conditional
+const plugins = () => [
+  axis('x'),
+  ...(showGrid.value ? [grid([10, 10])] : []),
+];
+</script>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+// ✅ Good - dynamic values
+const [userChoice, setUserChoice] = createSignal('x');
+const [gridSize, setGridSize] = createSignal(20);
+const axisComp = createCompartment(() => axis(userChoice()));
+const gridComp = createCompartment(() =>
+  grid([gridSize(), gridSize()]),
+);
+
+// ❌ Bad - static values
+const staticComp = createCompartment(() =>
+  bounds(BoundsFrom.parent()),
+);
+
+// ✅ Better - direct usage
+const staticPlugins = [bounds(BoundsFrom.parent())];
+
+// ❌ Bad - simple boolean
+const [showGrid, setShowGrid] = createSignal(false);
+const simpleComp = createCompartment(() =>
+  showGrid() ? grid([10, 10]) : null,
+);
+
+// ✅ Better - direct conditional
+const plugins = [axis('x'), ...(showGrid() ? [grid([10, 10])] : [])];
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+// ✅ Good - dynamic values
+let userChoice = 'x';
+let gridSize = 20;
+const axisComp = new Compartment(() => axis(userChoice));
+const gridComp = new Compartment(() => grid([gridSize, gridSize]));
+
+// ❌ Bad - static values
+const staticComp = new Compartment(() => bounds(BoundsFrom.parent()));
+
+// ✅ Better - direct usage
+const staticPlugins = [bounds(BoundsFrom.parent())];
+
+// Manual updates required for vanilla
+function updateUserChoice(newChoice) {
+  userChoice = newChoice;
+  axisComp.current = axis(userChoice);
+}
+```
+
+</div>
+</FrameworkSwitch>
+
+## Debugging Compartments
+
+### Common Issues
+
+**Compartment not updating:**
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  let currentAxis = $state('x');
+
+  // ❌ Wrong - captures initial value
+  const axisComp = Compartment.of(() => axis('x'));
+
+  // ✅ Correct - reactive reference
+  const axisComp = Compartment.of(() => axis(currentAxis));
+</script>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+// ❌ Wrong - missing dependency
+const axisComp = useCompartment(() => axis(currentAxis), []);
+
+// ✅ Correct - include dependency
+const axisComp = useCompartment(
+  () => axis(currentAxis),
+  [currentAxis],
+);
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+const currentAxis = ref('x');
+
+// ❌ Wrong - not reactive
+const axisComp = useCompartment(() => axis('x'));
+
+// ✅ Correct - reactive reference
+const axisComp = useCompartment(() => axis(currentAxis.value));
+</script>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+// ❌ Wrong - captures initial value
+const axisComp = createCompartment(() => axis('x'));
+
+// ✅ Correct - reactive reference
+const axisComp = createCompartment(() => axis(currentAxis()));
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+// ❌ Wrong - forgot to update
+function changeAxis(newAxis) {
+  currentAxis = newAxis;
+  // Missing: axisComp.current = axis(currentAxis);
+}
+
+// ✅ Correct - manual update
+function changeAxis(newAxis) {
+  currentAxis = newAxis;
+  axisComp.current = axis(currentAxis);
+}
+```
+
+</div>
+</FrameworkSwitch>
+
+### Debug Logging
+
+Add logging to see when compartments update:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  const axisComp = Compartment.of(() => {
+    console.log('Axis compartment updating:', currentAxis);
+    return axis(currentAxis);
+  });
+</script>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+const axisComp = useCompartment(() => {
+  console.log('Axis compartment updating:', currentAxis);
+  return axis(currentAxis);
+}, [currentAxis]);
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+const axisComp = useCompartment(() => {
+  console.log('Axis compartment updating:', currentAxis.value);
+  return axis(currentAxis.value);
+});
+</script>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+const axisComp = createCompartment(() => {
+  console.log('Axis compartment updating:', currentAxis());
+  return axis(currentAxis());
+});
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+const axisComp = new Compartment(() => {
+  console.log('Axis compartment updating:', currentAxis);
+  return axis(currentAxis);
+});
+
+// Don't forget manual updates
+function changeAxis(newAxis) {
+  currentAxis = newAxis;
+  axisComp.current = axis(currentAxis);
+}
+```
+
+</div>
+</FrameworkSwitch>

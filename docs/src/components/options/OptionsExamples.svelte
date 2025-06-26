@@ -84,9 +84,7 @@
 	<!-- {/if} -->
 </section>
 
-<style lang="scss">
-	@import '../../css/breakpoints';
-
+<style>
 	.container {
 		position: relative;
 
@@ -115,7 +113,7 @@
 		scroll-padding-left: 4rem;
 		scroll-snap-stop: always;
 
-		@include media('<=sm-tablet') {
+		@media (max-width: 768px) {
 			scroll-padding-left: 1rem;
 		}
 	}
@@ -177,7 +175,7 @@
 			right: 1rem;
 		}
 
-		@include media('<=sm-tablet') {
+		@media (max-width: 768px) {
 			display: none;
 		}
 

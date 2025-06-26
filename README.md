@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://www.neodrag.dev"><img src="https://www.neodrag.dev/logo.svg" height="150" /></a>
+<a href="https://next.neodrag.dev"><img src="https://next.neodrag.dev/logo.svg" height="150" /></a>
 </p>
 
 <h1 align="center">
@@ -20,7 +20,7 @@ One draggable to rule em all
   <a href="https://www.npmjs.com/package/@neodrag/vanilla"><img src="https://img.shields.io/npm/v/@neodrag/vanilla?color=fff&label=vanilla"></a>
 <p>
 
-<p align="center"><a href="https://www.neodrag.dev">Getting Started</a></p>
+<p align="center"><a href="https://next.neodrag.dev">Getting Started</a></p>
 
 This is a monorepo containing the following packages:
 

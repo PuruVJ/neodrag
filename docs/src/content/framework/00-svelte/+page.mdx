@@ -1,0 +1,329 @@
+---
+title: '@neodrag/svelte'
+nav_title: 'svelte'
+tagline: 'A lightweight Svelte Attachment to make your elements draggable.'
+---
+
+A lightweight Svelte library to make your elements draggable using Svelte 5 attachments or legacy actions.
+
+## Installation
+
+```sh
+npm i @neodrag/svelte@next
+```
+
+## Svelte 5 Usage (Recommended)
+
+Neodrag for Svelte 5 uses the new **attachments** feature with the `{@attach}` syntax for better performance and reactivity.
+
+### Basic Usage
+
+```svelte
+<script>
+  import { draggable } from '@neodrag/svelte';
+</script>
+
+<div {@attach draggable()}>Drag me around!</div>
+```
+
+### With Plugins
+
+```svelte
+<script>
+  import {
+    draggable,
+    axis,
+    grid,
+    bounds,
+    BoundsFrom,
+  } from '@neodrag/svelte';
+</script>
+
+<div {@attach draggable([axis('x'), grid([20, 20])])}>
+  Horizontal only, snapped to 20px grid
+</div>
+
+<div {@attach draggable([bounds(BoundsFrom.parent())])}>
+  Constrained to parent element
+</div>
+```
+
+### Reactive Plugins with Compartments
+
+Svelte 5's reactivity integrates seamlessly with Neodrag's compartments:
+
+```svelte
+<script>
+  import { draggable, axis, Compartment } from '@neodrag/svelte';
+
+  let currentAxis = $state('x');
+
+  // Compartment automatically updates when currentAxis changes
+  const axisCompartment = Compartment.of(() => axis(currentAxis));
+</script>
+
+<div {@attach draggable(() => [axisCompartment])}>
+  Currently draggable on: {currentAxis} axis
+</div>
+
+<button
+  onclick={() => (currentAxis = currentAxis === 'x' ? 'y' : 'x')}
+>
+  Switch to {currentAxis === 'x' ? 'Y' : 'X'} axis
+</button>
+```
+
+> NOTE: Compartment.of is reactive, its function body is run inside a `$effect.pre`.
+
+## Advanced Examples
+
+### Draggable Modal with Handle
+
+```svelte
+<script>
+  import {
+    draggable,
+    controls,
+    ControlFrom,
+    bounds,
+    BoundsFrom,
+    events,
+  } from '@neodrag/svelte';
+
+  let dragPosition = $state({ x: 0, y: 0 });
+</script>
+
+<div
+  {@attach draggable([
+    controls({ allow: ControlFrom.selector('.drag-handle') }),
+    bounds(BoundsFrom.viewport()),
+    events({
+      onDrag: (data) => {
+        dragPosition = data.offset;
+      },
+    }),
+  ])}
+>
+  <div class="drag-handle">⋮⋮ Drag Handle</div>
+  <div>Modal Content</div>
+  <div>
+    Position: x:{dragPosition.x.toFixed(0)}, y:{dragPosition.y.toFixed(
+      0,
+    )}
+  </div>
+</div>
+```
+
+### Dynamic Grid Snapping
+
+```svelte
+<script>
+  import {
+    draggable,
+    grid,
+    axis,
+    Compartment,
+  } from '@neodrag/svelte';
+
+  let gridSize = $state(20);
+  let lockAxis = $state('both');
+
+  const gridCompartment = Compartment.of(() =>
+    grid([gridSize, gridSize]),
+  );
+  const axisCompartment = Compartment.of(() => axis(lockAxis));
+</script>
+
+<label>
+  Grid size: {gridSize}px
+  <input
+    type="range"
+    bind:value={gridSize}
+    min="10"
+    max="50"
+    step="5"
+  />
+</label>
+
+<label>
+  Movement axis:
+  <select bind:value={lockAxis}>
+    <option value="both">Both X & Y</option>
+    <option value="x">X only</option>
+    <option value="y">Y only</option>
+  </select>
+</label>
+
+<div {@attach draggable(() => [gridCompartment, axisCompartment])}>
+  Grid: {gridSize}px, Axis: {lockAxis}
+</div>
+```
+
+### Card Stack with Events
+
+```svelte
+<script>
+  import {
+    draggable,
+    events,
+    bounds,
+    BoundsFrom,
+  } from '@neodrag/svelte';
+
+  let cards = $state([
+    { id: 1, title: 'Task 1' },
+    { id: 2, title: 'Task 2' },
+    { id: 3, title: 'Task 3' },
+  ]);
+
+  let dragState = $state(null);
+</script>
+
+{#each cards as card (card.id)}
+  <div
+    {@attach draggable([
+      bounds(BoundsFrom.parent()),
+      events({
+        onDragStart: () => {
+          dragState = { cardId: card.id, isDragging: true };
+        },
+        onDrag: (data) => {
+          dragState = {
+            cardId: card.id,
+            position: data.offset,
+          };
+        },
+        onDragEnd: () => {
+          dragState = null;
+        },
+      }),
+    ])}
+  >
+    {card.title}
+    {#if dragState?.cardId === card.id}
+      - Dragging at ({dragState.position?.x.toFixed(0)}, {dragState.position?.y.toFixed(
+        0,
+      )})
+    {/if}
+  </div>
+{/each}
+
+{#if dragState}
+  <p>Currently dragging card {dragState.cardId}</p>
+{/if}
+```
+
+## TypeScript Support
+
+Neodrag provides full TypeScript support for Svelte:
+
+```svelte
+<script lang="ts">
+  import {
+    draggable,
+    axis,
+    bounds,
+    BoundsFrom,
+    type Plugin,
+    type DragEventData,
+  } from '@neodrag/svelte';
+
+  let dragData = $state<DragEventData | null>(null);
+
+  const plugins: Plugin[] = [
+    axis('x'),
+    bounds(BoundsFrom.viewport()),
+    events({
+      onDrag: (data: DragEventData) => {
+        dragData = data;
+      },
+    }),
+  ];
+</script>
+
+<div {@attach draggable(plugins)}>TypeScript-enabled dragging</div>
+```
+
+## Legacy Svelte 3/4 Support
+
+For projects still using Svelte 4, import the legacy action:
+
+### Basic Legacy Usage
+
+```svelte
+<script>
+  import {
+    legacyDraggable,
+    axis,
+    grid,
+  } from '@neodrag/svelte/legacy';
+</script>
+
+<!-- ⚠️ Legacy action syntax for Svelte 4 -->
+<div use:legacyDraggable={[axis('x'), grid([10, 10])]}>
+  Drag me (Svelte 4)
+</div>
+```
+
+### Legacy with Events
+
+```svelte
+<script>
+  import { legacyDraggable, events } from '@neodrag/svelte';
+
+  let position = { x: 0, y: 0 };
+</script>
+
+<div
+  use:legacyDraggable={[
+    events({
+      onDrag: (data) => {
+        position = data.offset;
+      },
+    }),
+  ]}
+>
+  Position: {position.x}, {position.y}
+</div>
+```
+
+### Compartments
+
+`Compartment.of` is not available in the legacy action, you must manually mutate the compartment
+
+```ts
+import { legacyDraggable, Compartment } from '@neodrag/svelte/legacy';
+
+let currentAxis = 'x';
+const axisCompartment = new Compartment(() => axis(currentAxis));
+
+$: axisCompartment.current = axis(currentAxis);
+
+function toggleAxis() {
+  currentAxis = currentAxis === 'x' ? 'y' : 'x';
+}
+```
+
+### Deprecation Notice
+
+The `legacyDraggable` action is **deprecated** and will be removed in **Neodrag v4**. Please migrate to Svelte 5 and use the new `{@attach draggable()}` syntax for:
+
+- Better performance
+- Improved reactivity
+- Conditional application support
+- Component spreading support
+- Future-proof compatibility
+
+## Migration from Legacy
+
+**Svelte 4 (Legacy):**
+
+```svelte
+<div use:legacyDraggable={[axis('x')]}>Drag me</div>
+```
+
+**Svelte 5 (Recommended):**
+
+```svelte
+<div {@attach draggable([axis('x')])}>Drag me</div>
+```

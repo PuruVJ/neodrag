@@ -1,24 +1,34 @@
-import { type Directive } from 'vue';
-import { draggable, type DragOptions } from '@neodrag/core';
+import { DEFAULTS, DraggableFactory } from '@neodrag/core';
+import { Compartment, Plugin, type PluginInput } from '@neodrag/core/plugins';
+import { onUnmounted, watchEffect, type Directive } from 'vue';
 
-const draggable_map = new WeakMap<HTMLElement, ReturnType<typeof draggable>>();
+const factory = new DraggableFactory(DEFAULTS);
+const CLEANUP = Symbol();
 
-export const vDraggable: Directive<HTMLElement, DragOptions | undefined> = {
-	mounted: (el, { value = {} }) =>
-		!draggable_map.has(el) && draggable_map.set(el, draggable(el, value)),
+export const wrapper = (
+	factory: DraggableFactory,
+): Directive<HTMLElement | SVGElement, PluginInput | undefined> => {
+	return {
+		mounted: (el, { value = [] }) => {
+			(el as any)[CLEANUP] = factory.draggable(el, value);
+		},
 
-	updated: (el, { value = {} }) => draggable_map.get(el)!.update(value),
-
-	unmounted: (el) => {
-		draggable_map.get(el)!.destroy();
-		draggable_map.delete(el);
-	},
+		unmounted: (el) => (el as any)[CLEANUP](),
+	};
 };
 
-export type {
-	DragAxis,
-	DragBounds,
-	DragBoundsCoords,
-	DragOptions,
-	DragEventData,
-} from '@neodrag/core';
+export function useCompartment<T extends Plugin>(reactive: () => T) {
+	const compartment = new Compartment(reactive);
+
+	const stop_watcher = watchEffect(() => (compartment.current = reactive()), {
+		flush: 'pre',
+	});
+
+	onUnmounted(stop_watcher);
+
+	return compartment;
+}
+
+export const vDraggable = wrapper(factory);
+export const instances = factory.instances;
+export * from '@neodrag/core/plugins';
