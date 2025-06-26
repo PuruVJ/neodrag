@@ -1,5 +1,12 @@
 # scripts
 
+## 1.0.1-next.3
+
+### Patch Changes
+
+- Updated dependencies [[`c7fcd3b`](https://github.com/PuruVJ/neodrag/commit/c7fcd3b398a391bee1849f167b9aadd15f7ed289)]:
+  - @neodrag/core@3.0.0-next.4
+
 ## 1.0.1-next.2
 
 ### Patch Changes
