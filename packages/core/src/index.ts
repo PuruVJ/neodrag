@@ -293,15 +293,13 @@ export class DraggableFactory {
 	}
 
 	#initialize_plugins(new_plugins: Plugin[]) {
-		const combined = new_plugins.concat(this.#initial_plugins);
+		const combined = this.#initial_plugins.concat(new_plugins);
 
 		return Array.from(
 			combined
 				.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
 				.reduce((map, plugin) => {
-					if (!map.has(plugin.name)) {
-						map.set(plugin.name, plugin);
-					}
+					map.set(plugin.name, plugin);
 					return map;
 				}, new Map<string, Plugin>())
 				.values(),
