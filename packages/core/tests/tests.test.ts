@@ -124,3 +124,7 @@ describe('compartment', () => {
 		});
 	});
 });
+
+describe.todo('plugins order and overriding');
+
+describe.todo('plugin-priority');
