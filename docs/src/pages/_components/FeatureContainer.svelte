@@ -35,10 +35,19 @@
 		unscaled?: boolean;
 
 		heading?: Snippet;
+		subheading?: Snippet;
 		children?: Snippet;
 	};
 
-	const { title, heading, children, unstyled = false, unscaled = false }: Props = $props();
+	const {
+		title,
+		unstyled = false,
+		unscaled = false,
+
+		heading,
+		subheading,
+		children,
+	}: Props = $props();
 
 	const INITIAL_SCALE = unscaled ? 1 : 0.8;
 	const INITIAL_OPACITY = unscaled ? 1 : 0.7;
@@ -62,6 +71,8 @@
 		{:else}
 			{@render heading?.()}
 		{/if}
+
+		{@render subheading?.()}
 
 		<div class="content">
 			{@render children?.()}

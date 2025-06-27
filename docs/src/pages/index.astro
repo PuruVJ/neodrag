@@ -7,31 +7,18 @@ import HeroExample from '$components/home/HeroExample.svelte';
 import Layout from '$layouts/Layout.astro';
 import { Code } from 'astro/components';
 import FeatureContainer from './_components/FeatureContainer.svelte';
+import Hero from './_components/Hero.svelte';
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
 	<main id="main-content">
-		<FeatureContainer client:visible unstyled unscaled>
-			<section class="tagline">
-				<div class="intro">
-					<div class="top">
-						<h1>Neodrag</h1>
-						<p class="h4">One draggable to rule them all</p>
-					</div>
-
-					<div class="group">
-						<a href="/docs/svelte">Getting Started</a>
-						<a href="https://github.com/puruvj/neodrag" target="_blank" rel="external"> Github </a>
-					</div>
-				</div>
-
-				<div class="demo">
-					<HeroExample client:load />
-				</div>
-			</section>
-		</FeatureContainer>
+		<Hero client:visible />
 
 		<FeatureContainer client:visible title="Write Once Run Everywhere">
+			<p slot="subheading">
+				Solid core, lean framework adapters ensure same behavior no matter which framework
+			</p>
+
 			<MultipleFrameworksFeature client:visible>
 				<div class="svelte">
 					<Code
@@ -125,7 +112,9 @@ const draggable = new Draggable(element);`}
 			</MultipleFrameworksFeature>
 		</FeatureContainer>
 
-		<FeatureContainer client:visible title="Everything's a plugin!" />
+		<FeatureContainer client:visible title="Everything's a plugin!">
+			<p slot="subheading">Pick, Mix and Match plugins to create your own drag behaviors</p>
+		</FeatureContainer>
 
 		<FeatureContainer client:visible title="Keep Elements Inside Boundaries" />
 
@@ -166,88 +155,6 @@ const draggable = new Draggable(element);`}
 </style>
 
 <style scoped>
-	.tagline {
-		display: grid;
-		box-sizing: border-box;
-		grid-template-columns: auto 1fr;
-		align-items: center;
-		gap: 5rem;
-		/* margin-bottom: 6rem; */
-		padding: 1rem 0;
-		min-height: 85dvh;
-		width: 100% !important;
-		scroll-snap-align: start;
-		scroll-snap-stop: always;
-
-		.demo {
-			height: 100%;
-		}
-
-		@media (max-width: 1223px) {
-			grid-template-columns: 1fr;
-			grid-template-rows: auto 1fr;
-			gap: 3rem;
-			/* gap: 1rem; */
-			/* margin-bottom: 35rem; */
-			align-items: initial;
-		}
-
-		h1,
-		p {
-			margin: 0;
-		}
-
-		h1 {
-			background-image: var(--app-color-primary-gradient);
-			background-clip: text;
-			-webkit-text-fill-color: transparent;
-			font-size: clamp(3rem, 20vw, 8rem);
-			line-height: 1.28;
-			width: max-content;
-		}
-
-		p {
-			font-size: clamp(1rem, 5vw, 2rem);
-		}
-	}
-
-	.intro {
-		display: grid;
-		gap: 4rem;
-
-		@media (max-width: 1223px) {
-			gap: 1rem;
-		}
-	}
-
-	.group {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 1rem;
-		margin-top: 1rem;
-
-		a[href] {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			gap: 1rem;
-			padding: 1rem 2rem;
-			border-radius: 1rem !important;
-			font-size: 1.4rem;
-			text-align: center;
-			color: var(--app-color-primary);
-
-			&:hover {
-				color: var(--app-color-primary-contrast);
-			}
-
-			@media (max-width: 768px) {
-				font-size: 1rem;
-				padding: 0.5rem 1rem;
-			}
-		}
-	}
-
 	h2 {
 		margin: 0;
 	}

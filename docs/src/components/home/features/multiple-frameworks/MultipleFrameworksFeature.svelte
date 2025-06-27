@@ -9,14 +9,6 @@
 </script>
 
 <div class="intro">
-	<p>
-		Neodrag provides integration for all the major frameworks <br /><br />
-		<span style="color: hsla(var(--app-color-dark-hsl), 0.8)"
-			>Core logic is implemented only once, so you can use Neodrag in different frameworks, and get
-			the same predictible behavior</span
-		>
-	</p>
-
 	<!-- <div style="height: 2rem"></div>
 
 	<code>
