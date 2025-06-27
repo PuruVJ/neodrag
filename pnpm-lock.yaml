@@ -204,7 +204,7 @@ importers:
         version: 5.34.7
 
   packages/vanilla:
-    devDependencies:
+    dependencies:
       '@neodrag/core':
         specifier: workspace:*
         version: link:../core

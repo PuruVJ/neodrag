@@ -63,7 +63,6 @@
 					box_wiggles = false;
 				},
 				onDrag: ({ offset }) => {
-					console.log(offset);
 					drag_position.set({ x: offset.x, y: offset.y }, { duration: 0 });
 				},
 				onDragEnd: () => {

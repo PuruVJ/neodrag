@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/vanilla",
-	"version": "3.0.0-next.2",
+	"version": "3.0.0-next.4",
 	"description": "JS library to add dragging to your apps 😉",
 	"unpkg": "./dist/umd/index.js",
 	"jsdelivr": "./dist/umd/index.js",
@@ -60,7 +60,7 @@
 		"pub": "pnpm compile && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm compile && pnpm publish --dry-run --no-git-checks --access public"
 	},
-	"devDependencies": {
+	"peerDependencies": {
 		"@neodrag/core": "workspace:*"
 	}
 }

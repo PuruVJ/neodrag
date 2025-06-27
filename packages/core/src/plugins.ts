@@ -241,7 +241,11 @@ function apply_transform(
 			transform.appendItem(translation);
 			// debugger;
 		} else {
-			ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px 0.000000001px`;
+			set_node_key_style(
+				ctx.rootNode,
+				'translate',
+				`${ctx.offset.x}px ${ctx.offset.y}px 0.000000001px`,
+			);
 		}
 	});
 }

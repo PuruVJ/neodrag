@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/svelte",
-	"version": "3.0.0-next.2",
+	"version": "3.0.0-next.4",
 	"description": "Svelte Action to add dragging to your apps 😉",
 	"type": "module",
 	"files": [
@@ -63,11 +63,9 @@
 	"bugs": {
 		"url": "https://github.com/PuruVJ/neodrag/issues"
 	},
-	"dependencies": {
-		"@neodrag/core": "workspace:*"
-	},
 	"peerDependencies": {
-		"svelte": "^3 || ^4 || ^5"
+		"svelte": "^3 || ^4 || ^5",
+		"@neodrag/core": "workspace:*"
 	},
 	"homepage": "https://neodrag.dev/docs/svelte",
 	"devDependencies": {
