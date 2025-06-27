@@ -573,14 +573,11 @@ export function createDropZone(options: CreateDropZoneOptions = {}) {
 				should_handle_positioning: options.handlePositioning !== false,
 				drag_data: dragOptions.data,
 				drag_type: dragOptions.type,
-				start_rect: null as DOMRect | null,
 				ghost_offset: dragOptions.ghostOffset || { x: 0, y: 0 },
 			};
 		},
 
 		start(ctx, state, event) {
-			state.start_rect = state.original_element.getBoundingClientRect();
-
 			// Create ghost if configured
 			if (state.is_ghosting) {
 				const ghost = dragOptions.createGhost
@@ -588,7 +585,7 @@ export function createDropZone(options: CreateDropZoneOptions = {}) {
 					: create_default_ghost(state.original_element);
 
 				// Position ghost at cursor with offset
-				position_ghost_at_cursor(ghost, event, state.start_rect, state.ghost_offset);
+				position_ghost_at_cursor(ghost, event, ctx.cachedRootNodeRect, state.ghost_offset);
 
 				// Add to DOM
 				document.body.appendChild(ghost);
@@ -615,7 +612,12 @@ export function createDropZone(options: CreateDropZoneOptions = {}) {
 		drag(ctx, state, event) {
 			// Update ghost position
 			if (state.ghost_element) {
-				position_ghost_at_cursor(state.ghost_element, event, state.start_rect!, state.ghost_offset);
+				position_ghost_at_cursor(
+					state.ghost_element,
+					event,
+					ctx.cachedRootNodeRect,
+					state.ghost_offset,
+				);
 
 				// Don't move original if using ghost
 				if (!state.should_handle_positioning) {
