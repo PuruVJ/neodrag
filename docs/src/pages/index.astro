@@ -6,51 +6,53 @@ import SSRFriendlyFeature from '$components/home/features/ssr-friendly/SSRFriend
 import HeroExample from '$components/home/HeroExample.svelte';
 import Layout from '$layouts/Layout.astro';
 import { Code } from 'astro/components';
+import FeatureContainer from './_components/FeatureContainer.svelte';
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
 	<main id="main-content">
-		<section class="tagline">
-			<div class="intro">
-				<div class="top">
-					<h1>Neodrag</h1>
-					<p class="h4">One draggable to rule them all</p>
+		<FeatureContainer client:visible unstyled unscaled>
+			<section class="tagline">
+				<div class="intro">
+					<div class="top">
+						<h1>Neodrag</h1>
+						<p class="h4">One draggable to rule them all</p>
+					</div>
+
+					<div class="group">
+						<a href="/docs/svelte">Getting Started</a>
+						<a href="https://github.com/puruvj/neodrag" target="_blank" rel="external"> Github </a>
+					</div>
 				</div>
 
-				<div class="group">
-					<a href="/docs/svelte">Getting Started</a>
-					<a href="https://github.com/puruvj/neodrag" target="_blank" rel="external"> Github </a>
+				<div class="demo">
+					<HeroExample client:load />
 				</div>
-			</div>
+			</section>
+		</FeatureContainer>
 
-			<div class="demo">
-				<HeroExample client:load />
-			</div>
-		</section>
-
-		<section class="feature feature-multi-frameworks">
-			<div>
-				<MultipleFrameworksFeature client:visible>
-					<div class="svelte">
-						<Code
-							code={`<script>
+		<FeatureContainer client:visible title="Write Once Run Everywhere">
+			<MultipleFrameworksFeature client:visible>
+				<div class="svelte">
+					<Code
+						code={`<script>
   import { draggable } from '@neodrag/svelte';
 </script>
 
 <div {@attach draggable()}>I can drag</div>`}
-							lang="svelte"
-							themes={{
-								light: 'github-light',
-								dark: 'github-dark',
-							}}
-							theme={'github-light'}
-							wrap={true}
-						/>
-					</div>
+						lang="svelte"
+						themes={{
+							light: 'github-light',
+							dark: 'github-dark',
+						}}
+						theme={'github-light'}
+						wrap={true}
+					/>
+				</div>
 
-					<div class="react">
-						<Code
-							code={`import { useDraggable } from '@neodrag/react';
+				<div class="react">
+					<Code
+						code={`import { useDraggable } from '@neodrag/react';
 
 function App() {
   const ref = useRef();
@@ -58,19 +60,19 @@ function App() {
 
   <div ref={ref}>I can drag</div>
 }`}
-							lang="tsx"
-							themes={{
-								light: 'github-light',
-								dark: 'github-dark',
-							}}
-							theme={'github-light'}
-							wrap={true}
-						/>
-					</div>
+						lang="tsx"
+						themes={{
+							light: 'github-light',
+							dark: 'github-dark',
+						}}
+						theme={'github-light'}
+						wrap={true}
+					/>
+				</div>
 
-					<div class="solid">
-						<Code
-							code={`import { useDraggable } from '@neodrag/solid';
+				<div class="solid">
+					<Code
+						code={`import { useDraggable } from '@neodrag/solid';
 
 function App() {
   const [ref, setRef] = createSignal();
@@ -78,153 +80,84 @@ function App() {
 
   <div ref={setRef}>I can drag</div>
 }`}
-							lang="tsx"
-							themes={{
-								light: 'github-light',
-								dark: 'github-dark',
-							}}
-							theme={'github-light'}
-							wrap={true}
-						/>
-					</div>
+						lang="tsx"
+						themes={{
+							light: 'github-light',
+							dark: 'github-dark',
+						}}
+						theme={'github-light'}
+						wrap={true}
+					/>
+				</div>
 
-					<div class="vanilla">
-						<Code
-							code={`import { Draggable } from '@neodrag/vanilla';
+				<div class="vanilla">
+					<Code
+						code={`import { Draggable } from '@neodrag/vanilla';
 							
 const element = document.querySelector('.draggable');
 const draggable = new Draggable(element);`}
-							lang="tsx"
-							themes={{
-								light: 'github-light',
-								dark: 'github-dark',
-							}}
-							theme={'github-light'}
-							wrap={true}
-						/>
-					</div>
+						lang="tsx"
+						themes={{
+							light: 'github-light',
+							dark: 'github-dark',
+						}}
+						theme={'github-light'}
+						wrap={true}
+					/>
+				</div>
 
-					<div class="vue">
-						<Code
-							code={`<script>
+				<div class="vue">
+					<Code
+						code={`<script>
   import { vDraggable } from '@neodrag/svelte';
 </script>
 
 <div v-draggable>I can drag</div>`}
-							lang="vue"
-							themes={{
-								light: 'github-light',
-								dark: 'github-dark',
-							}}
-							theme={'github-light'}
-							wrap={true}
-						/>
-					</div>
-				</MultipleFrameworksFeature>
-			</div>
-		</section>
+						lang="vue"
+						themes={{
+							light: 'github-light',
+							dark: 'github-dark',
+						}}
+						theme={'github-light'}
+						wrap={true}
+					/>
+				</div>
+			</MultipleFrameworksFeature>
+		</FeatureContainer>
 
-		<section class="feature">
-			<div>
-				<h2>Everything's a plugin!</h2>
-			</div>
-		</section>
+		<FeatureContainer client:visible title="Everything's a plugin!" />
 
-		<section class="feature">
-			<div>
-				<h2>Keep Elements Inside Boundaries</h2>
-			</div>
-		</section>
+		<FeatureContainer client:visible title="Keep Elements Inside Boundaries" />
 
-		<section class="feature">
-			<div>
-				<h2>Lock Movement To Specific Directions</h2>
-			</div>
-		</section>
+		<FeatureContainer client:visible title="Lock Movement To Specific Directions" />
 
-		<section class="feature">
-			<div>
-				<h2>Snap Elements To Perfect Grids</h2>
-			</div>
-		</section>
+		<FeatureContainer client:visible title="Snap Elements To Perfect Grids" />
 
-		<section class="feature">
-			<div>
-				<h2>Mix And Match Drag Behaviors</h2>
-			</div>
-		</section>
+		<FeatureContainer client:visible title="Mix And Match Drag Behaviors" />
 
-		<section class="feature">
-			<div>
-				<h2>Handle Thousands With 3 Event Listeners</h2>
-			</div>
-		</section>
+		<FeatureContainer client:visible title="Handle Thousands With 3 Event Listeners" />
 
-		<section class="feature">
-			<div>
-				<h2>Never Lose Drag Over iframes</h2>
-			</div>
-		</section>
+		<FeatureContainer client:visible title="Never Lose Drag Over iframes" />
 
-		<section class="feature">
-			<div>
-				<h2>Production Ready With Zero Dependencies</h2>
-			</div>
-		</section>
+		<FeatureContainer client:visible title="Production Ready With Zero Dependencies" />
 
-		<section class="feature feature-transparent two-col">
-			<div>
-				<BundleSizeBuilderFeature client:visible />
-			</div>
-		</section>
+		<FeatureContainer client:visible>
+			<BundleSizeBuilderFeature client:visible />
+		</FeatureContainer>
 
-		<section class="feature feature-ssr-friendly two-col">
-			<div>
-				<SSRFriendlyFeature client:visible />
-			</div>
-		</section>
+		<FeatureContainer client:visible>
+			<SSRFriendlyFeature client:visible />
+		</FeatureContainer>
 
-		<section class="feature feature-feature-rich">
-			<div>
-				<FeatureRichFeature client:visible />
-			</div>
-		</section>
+		<FeatureContainer client:visible>
+			<FeatureRichFeature client:visible />
+		</FeatureContainer>
 
-		<section class="feature feature-feature-rich">
-			<div>
-				<h2>Astro: How many frameworks?</h2>
-				<h3 class="h2">Neodrag: Yes</h3>
-			</div>
-		</section>
+		<FeatureContainer client:visible title="Astro: How many frameworks?">
+			<h3 class="h2">Neodrag: Yes</h3>
+		</FeatureContainer>
 	</main>
 </Layout>
-
-<script>
-	const thresholds = Array.from({ length: 101 }, (_, i) => i * 0.01);
-
-	const instance = new IntersectionObserver(
-		(entries) => {
-			entries.forEach((entry) => {
-				const target = entry.target.children[0] as HTMLDivElement;
-				if (entry.isIntersecting) {
-					target.style.scale = `${0.8 + 0.2 * entry.intersectionRatio} ${0.8 + 0.2 * entry.intersectionRatio}`;
-					target.style.opacity = `${0.6 + 0.4 * entry.intersectionRatio}`;
-				} else {
-					// Reset when not intersecting
-					target.style.scale = '0.8 0.8';
-					target.style.opacity = '0.6';
-				}
-			});
-		},
-		{ threshold: thresholds },
-	);
-
-	document.querySelectorAll('.feature').forEach((el) => {
-		instance.observe(el);
-	});
-
-	document.addEventListener('astro:after-swap', () => instance.disconnect());
-</script>
 
 <style is:global>
 	html {
@@ -340,36 +273,6 @@ const draggable = new Draggable(element);`}
 
 		@media (max-width: 1223px) {
 			scroll-padding-top: 1rem;
-		}
-	}
-
-	.feature {
-		min-height: calc(85dvh);
-		display: flex;
-		box-sizing: border-box;
-		/* height: 100%; */
-		max-width: 100dvw;
-
-		scroll-snap-align: start;
-		scroll-snap-stop: always;
-		/* scroll-margin-top: 1.25rem; */
-
-		& > div {
-			flex: 1;
-			background-color: color-mix(in lch, var(--app-color-dark), transparent 98%);
-			padding: 2rem;
-			border-radius: 1rem;
-
-			width: 100%;
-
-			border: solid 1px color-mix(in lch, var(--app-color-dark), transparent 80%);
-
-			scale: 0.8 0.8;
-			opacity: 0.7;
-
-			@media (max-width: 1223px) {
-				padding: 1rem;
-			}
 		}
 	}
 

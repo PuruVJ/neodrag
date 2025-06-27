@@ -9,7 +9,6 @@
 </script>
 
 <div class="intro">
-	<h2>Write Once Run Everywhere</h2>
 	<p>
 		Neodrag provides integration for all the major frameworks <br /><br />
 		<span style="color: hsla(var(--app-color-dark-hsl), 0.8)"
@@ -85,10 +84,6 @@
 
 			background-color: var(--app-color-primary);
 		}
-	}
-
-	h2 {
-		margin-top: 0;
 	}
 
 	p {
