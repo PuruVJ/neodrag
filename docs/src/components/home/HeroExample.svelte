@@ -103,10 +103,6 @@
 		place-content: center;
 		gap: 2rem;
 
-		@media (max-width: 1223px) {
-			height: 80vh;
-		}
-
 		&,
 		& * {
 			cursor: none;
@@ -140,6 +136,10 @@
 
 		&.hidden {
 			opacity: 0;
+		}
+
+		@media (max-height: 900px) {
+			top: 10%;
 		}
 	}
 
@@ -182,11 +182,6 @@
 		}
 
 		&:hover {
-			.paw {
-				/* opacity: 1;
-				transform: scale(1); */
-			}
-
 			& ~ .cursor {
 				display: none;
 			}
