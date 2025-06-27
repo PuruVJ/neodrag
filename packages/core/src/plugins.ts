@@ -246,8 +246,6 @@ function apply_transform(
 				'translate',
 				`${ctx.offset.x}px ${ctx.offset.y}px 0.000000001px`,
 			);
-			// ctx.rootNode.style.translate = `${ctx.offset.x}px ${ctx.offset.y}px 0.000000001px`;
-			// ctx.rootNode.style.transform = `translate3d(${ctx.offset.x}px, ${ctx.offset.y}px, 1px)`;
 		}
 	});
 }
