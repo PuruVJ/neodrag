@@ -310,6 +310,7 @@
 		--structure-offset: clamp(-10rem, calc(100vw - 1267px), 0rem);
 		/* Keep right margin separate - not affected by structure offset */
 		--right-margin: clamp(2%, calc((100vw - 800px) / 20), 10%);
+		--everything-offset: 10vw;
 
 		/* Arc positioning with offset */
 		--arc-radius: 14rem;
@@ -330,6 +331,7 @@
 		}
 
 		@media (max-width: 1037px) {
+			--everything-offset: 0;
 			min-height: 100vh;
 			padding: 2rem 1rem;
 		}
@@ -416,6 +418,8 @@
 		position: relative;
 		width: 30rem;
 		height: 30rem;
+
+		translate: calc(-1 * var(--everything-offset)) 0;
 
 		@media (max-width: 1037px) {
 			width: 32rem;
@@ -570,7 +574,7 @@
 	.logo-section {
 		position: absolute;
 		top: 50%;
-		left: calc(50% + var(--structure-offset));
+		left: calc(50% - var(--everything-offset) + var(--structure-offset));
 		transform: translate(-50%, -50%);
 		z-index: 2;
 
@@ -605,7 +609,7 @@
 	.empty-section {
 		position: absolute;
 		top: 50%;
-		right: var(--right-margin);
+		right: calc(var(--right-margin) + var(--everything-offset));
 		transform: translateY(-50%);
 
 		@media (max-width: 1037px) {
