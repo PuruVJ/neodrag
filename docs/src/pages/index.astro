@@ -222,6 +222,8 @@ const draggable = new Draggable(element);`}
 	document.querySelectorAll('.feature').forEach((el) => {
 		instance.observe(el);
 	});
+
+	document.addEventListener('astro:after-swap', () => instance.disconnect());
 </script>
 
 <style is:global>
