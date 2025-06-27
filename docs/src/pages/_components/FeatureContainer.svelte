@@ -12,9 +12,7 @@
 			);
 
 			instance ??= new IntersectionObserver(
-				(entries) => {
-					entries.forEach((entry) => callbacks.get(entry.target)?.(entry));
-				},
+				(entries) => entries.forEach((entry) => callbacks.get(entry.target)?.(entry)),
 				{ threshold: thresholds },
 			);
 
