@@ -54,6 +54,13 @@
 
 	let scale = $state(INITIAL_SCALE);
 	let opacity = $state(INITIAL_OPACITY);
+
+	function slugify(str: string) {
+		return str
+			.toLowerCase()
+			.replace(/\s/g, '-')
+			.replace(/[^a-z0-9-]/g, '');
+	}
 </script>
 
 <section
@@ -67,7 +74,7 @@
 >
 	<div style:scale style:opacity>
 		{#if title}
-			<h2>{title}</h2>
+			<h2 id={slugify(title)}>{title}</h2>
 		{:else}
 			{@render heading?.()}
 		{/if}

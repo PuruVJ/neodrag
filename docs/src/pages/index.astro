@@ -1,45 +1,66 @@
 ---
+import { plugins_list } from '$/nav';
 import BundleSizeBuilderFeature from '$components/home/features/bundle-size/BundleSizeBuilderFeature.svelte';
-import FeatureRichFeature from '$components/home/features/feature-rich/FeatureRichFeature.svelte';
 import MultipleFrameworksFeature from '$components/home/features/multiple-frameworks/MultipleFrameworksFeature.svelte';
-import SSRFriendlyFeature from '$components/home/features/ssr-friendly/SSRFriendlyFeature.svelte';
-import HeroExample from '$components/home/HeroExample.svelte';
 import Layout from '$layouts/Layout.astro';
 import { Code } from 'astro/components';
+import EverythingIsPlugin from './_components/EverythingIsPlugin.svelte';
 import FeatureContainer from './_components/FeatureContainer.svelte';
 import Hero from './_components/Hero.svelte';
+
+type Keys =
+	| 'HERO'
+	| 'WRITE_ONCE_RUN_EVERYWHERE'
+	| 'EVERYTHING_IS_PLUGIN'
+	| 'BOUNDS'
+	| 'AXES'
+	| 'SNAP_TO_GRID'
+	| 'EVENT_DELEGATION'
+	| 'IFRAME_PROOF'
+	| 'FEATURES'
+	| 'BUNDLE_SIZE'
+	| 'WINDOWS_XP'
+	| 'DEDUPED';
+
+const SINGLE: Keys | null = null;
+
+function show_single(key: Keys) {
+	return SINGLE == null || SINGLE === key;
+}
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
 	<main id="main-content">
-		<Hero client:visible />
+		{show_single('HERO') && <Hero client:visible />}
 
-		<FeatureContainer client:visible title="Write Once Run Everywhere">
-			<p slot="subheading">
-				Solid core, lean framework adapters ensure same behavior no matter which framework
-			</p>
+		{
+			show_single('WRITE_ONCE_RUN_EVERYWHERE') && (
+				<FeatureContainer client:visible title="Write Once Run Everywhere">
+					<p slot="subheading">
+						Solid core, lean framework adapters ensure same behavior no matter which framework
+					</p>
 
-			<MultipleFrameworksFeature client:visible>
-				<div class="svelte">
-					<Code
-						code={`<script>
+					<MultipleFrameworksFeature client:visible>
+						<div class="svelte">
+							<Code
+								code={`<script>
   import { draggable } from '@neodrag/svelte';
 </script>
 
 <div {@attach draggable()}>I can drag</div>`}
-						lang="svelte"
-						themes={{
-							light: 'github-light',
-							dark: 'github-dark',
-						}}
-						theme={'github-light'}
-						wrap={true}
-					/>
-				</div>
+								lang="svelte"
+								themes={{
+									light: 'github-light',
+									dark: 'github-dark',
+								}}
+								theme={'github-light'}
+								wrap={true}
+							/>
+						</div>
 
-				<div class="react">
-					<Code
-						code={`import { useDraggable } from '@neodrag/react';
+						<div class="react">
+							<Code
+								code={`import { useDraggable } from '@neodrag/react';
 
 function App() {
   const ref = useRef();
@@ -47,19 +68,19 @@ function App() {
 
   <div ref={ref}>I can drag</div>
 }`}
-						lang="tsx"
-						themes={{
-							light: 'github-light',
-							dark: 'github-dark',
-						}}
-						theme={'github-light'}
-						wrap={true}
-					/>
-				</div>
+								lang="tsx"
+								themes={{
+									light: 'github-light',
+									dark: 'github-dark',
+								}}
+								theme={'github-light'}
+								wrap={true}
+							/>
+						</div>
 
-				<div class="solid">
-					<Code
-						code={`import { useDraggable } from '@neodrag/solid';
+						<div class="solid">
+							<Code
+								code={`import { useDraggable } from '@neodrag/solid';
 
 function App() {
   const [ref, setRef] = createSignal();
@@ -67,84 +88,121 @@ function App() {
 
   <div ref={setRef}>I can drag</div>
 }`}
-						lang="tsx"
-						themes={{
-							light: 'github-light',
-							dark: 'github-dark',
-						}}
-						theme={'github-light'}
-						wrap={true}
-					/>
-				</div>
+								lang="tsx"
+								themes={{
+									light: 'github-light',
+									dark: 'github-dark',
+								}}
+								theme={'github-light'}
+								wrap={true}
+							/>
+						</div>
 
-				<div class="vanilla">
-					<Code
-						code={`import { Draggable } from '@neodrag/vanilla';
+						<div class="vanilla">
+							<Code
+								code={`import { Draggable } from '@neodrag/vanilla';
 							
 const element = document.querySelector('.draggable');
 const draggable = new Draggable(element);`}
-						lang="tsx"
-						themes={{
-							light: 'github-light',
-							dark: 'github-dark',
-						}}
-						theme={'github-light'}
-						wrap={true}
-					/>
-				</div>
+								lang="tsx"
+								themes={{
+									light: 'github-light',
+									dark: 'github-dark',
+								}}
+								theme={'github-light'}
+								wrap={true}
+							/>
+						</div>
 
-				<div class="vue">
-					<Code
-						code={`<script>
+						<div class="vue">
+							<Code
+								code={`<script>
   import { vDraggable } from '@neodrag/svelte';
 </script>
 
 <div v-draggable>I can drag</div>`}
-						lang="vue"
-						themes={{
-							light: 'github-light',
-							dark: 'github-dark',
-						}}
-						theme={'github-light'}
-						wrap={true}
-					/>
-				</div>
-			</MultipleFrameworksFeature>
-		</FeatureContainer>
+								lang="vue"
+								themes={{
+									light: 'github-light',
+									dark: 'github-dark',
+								}}
+								theme={'github-light'}
+								wrap={true}
+							/>
+						</div>
+					</MultipleFrameworksFeature>
+				</FeatureContainer>
+			)
+		}
 
-		<FeatureContainer client:visible title="Everything's a plugin!">
-			<p slot="subheading">Pick, Mix and Match plugins to create your own drag behaviors</p>
-		</FeatureContainer>
+		{
+			show_single('EVERYTHING_IS_PLUGIN') && (
+				<EverythingIsPlugin plugins={plugins_list} client:visible />
+			)
+		}
 
-		<FeatureContainer client:visible title="Keep Elements Inside Boundaries" />
+		{
+			show_single('BOUNDS') && (
+				<FeatureContainer client:visible title="Keep Elements Inside Boundaries" />
+			)
+		}
 
-		<FeatureContainer client:visible title="Lock Movement To Specific Directions" />
+		{
+			show_single('AXES') && (
+				<FeatureContainer client:visible title="Lock Movement To Specific Directions" />
+			)
+		}
 
-		<FeatureContainer client:visible title="Snap Elements To Perfect Grids" />
+		{
+			show_single('SNAP_TO_GRID') && (
+				<FeatureContainer client:visible title="Snap Elements To Perfect Grids" />
+			)
+		}
 
-		<FeatureContainer client:visible title="Mix And Match Drag Behaviors" />
+		{
+			show_single('EVENT_DELEGATION') && (
+				<FeatureContainer client:visible title="Handle Thousands With 3 Event Listeners" />
+			)
+		}
 
-		<FeatureContainer client:visible title="Handle Thousands With 3 Event Listeners" />
+		{
+			show_single('IFRAME_PROOF') && (
+				<FeatureContainer client:visible title="Never Lose Drag Over iframes" />
+			)
+		}
 
-		<FeatureContainer client:visible title="Never Lose Drag Over iframes" />
+		{
+			show_single('BUNDLE_SIZE') && (
+				<FeatureContainer client:visible>
+					<BundleSizeBuilderFeature client:visible />
+				</FeatureContainer>
+			)
+		}
 
-		<FeatureContainer client:visible title="Production Ready With Zero Dependencies" />
+		<!-- TODO: And more features: This bit just lists other features in this page, including SSR Proof, zero dependencies, etc. Actually list eveyrthing in svelte.dev like style -->
+		{
+			show_single('FEATURES') && (
+				<FeatureContainer client:visible title="Production Ready With Zero Dependencies" />
+			)
+		}
 
-		<FeatureContainer client:visible>
-			<BundleSizeBuilderFeature client:visible />
-		</FeatureContainer>
-
-		<FeatureContainer client:visible>
-			<SSRFriendlyFeature client:visible />
-		</FeatureContainer>
-
-		<FeatureContainer client:visible>
+		<!-- This is to open multiple windows in windows Xp style and to show its all super fast -->
+		{
+			show_single('WINDOWS_XP') && (
+				<FeatureContainer client:visible title="Go ahead, enjoy the OS" />
+			)
+		}
+		<!-- <FeatureContainer client:visible>
 			<FeatureRichFeature client:visible />
-		</FeatureContainer>
+		</FeatureContainer> -->
 
-		<FeatureContainer client:visible title="Astro: How many frameworks?">
-			<h3 class="h2">Neodrag: Yes</h3>
-		</FeatureContainer>
+		{
+			show_single('DEDUPED') && (
+				<FeatureContainer client:visible title="Astro: How many frameworks?">
+					<h3 class="h2">Neodrag: Yes</h3>
+				</FeatureContainer>
+			)
+		}
 	</main>
 </Layout>
 

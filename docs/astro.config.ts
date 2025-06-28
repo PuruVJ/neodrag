@@ -7,7 +7,6 @@ import browserslist from 'browserslist';
 import { h } from 'hastscript';
 import { browserslistToTargets } from 'lightningcss';
 import rehypeAutolinkHeadings, { type Options } from 'rehype-autolink-headings';
-import container from 'remark-custom-container/dist/esm/index.js';
 import UnpluginIcons from 'unplugin-icons/vite';
 
 const AnchorLinkIcon = h(
