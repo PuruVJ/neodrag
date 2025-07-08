@@ -1,5 +1,18 @@
 # @neodrag/react
 
+## 3.0.0-next.5
+
+### Minor Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`8c1ad10`](https://github.com/PuruVJ/neodrag/commit/8c1ad10c857078d4b82d14b01ba3e2c5954792da) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Add shouldRecompute to controls
+
+### Patch Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`8c1ad10`](https://github.com/PuruVJ/neodrag/commit/8c1ad10c857078d4b82d14b01ba3e2c5954792da) Thanks [@PuruVJ](https://github.com/PuruVJ)! - redo shouldRecompute to incldue setup, and rename to start, drag and end
+
+- Updated dependencies [[`8c1ad10`](https://github.com/PuruVJ/neodrag/commit/8c1ad10c857078d4b82d14b01ba3e2c5954792da), [`8c1ad10`](https://github.com/PuruVJ/neodrag/commit/8c1ad10c857078d4b82d14b01ba3e2c5954792da)]:
+  - @neodrag/core@3.0.0-next.5
+
 ## 3.0.0-next.4
 
 ### Minor Changes
