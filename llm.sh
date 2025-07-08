@@ -4,8 +4,15 @@
 input_dir="${1:-.}"  # Default to current directory if not provided
 output_file="${2:-llm.md}"  # Default to llm.md if not provided
 
-# Convert to absolute paths
+# Convert input directory to absolute path
 input_dir=$(realpath "$input_dir")
+
+# Handle output file path - create directory if needed and get absolute path
+output_dir=$(dirname "$output_file")
+mkdir -p "$output_dir"
+
+# Get absolute path for output file (create it first if it doesn't exist)
+touch "$output_file"
 output_file=$(realpath "$output_file")
 
 # Create or clear the output file

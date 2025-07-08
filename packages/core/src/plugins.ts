@@ -361,31 +361,47 @@ export const BoundsFrom = {
 };
 
 const clamp = (val: number, min: number, max: number) => Math.min(max, Math.max(min, val));
+// Helper function to validate bounds dimensions
+function validateBounds(
+	bounds: [[number, number], [number, number]],
+	element_width: number,
+	element_height: number,
+): void {
+	if (bounds[1][0] - bounds[0][0] < element_width || bounds[1][1] - bounds[0][1] < element_height) {
+		throw new Error('Bounds dimensions cannot be smaller than the draggable element dimensions');
+	}
+}
+
 export const bounds = unstable_definePlugin(
 	(
 		value: BoundFromFunction = () => [
 			[0, 0],
 			[0, 0],
 		],
-		shouldRecompute: (ctx: { readonly hook: 'dragStart' | 'drag' | 'dragEnd' }) => boolean = (
+		shouldRecompute: (ctx: { readonly hook: 'setup' | 'start' | 'drag' | 'end' }) => boolean = (
 			ctx,
-		) => ctx.hook === 'dragStart',
+		) => ctx.hook === 'start',
 	) => ({
 		name: 'neodrag:bounds',
 
 		setup(ctx) {
-			const bounds = value({ root_node: ctx.rootNode });
+			let bounds: [[number, number], [number, number]];
+
+			if (shouldRecompute?.({ hook: 'setup' })) {
+				bounds = value({ root_node: ctx.rootNode });
+			} else {
+				// Fallback to default bounds when shouldRecompute returns false for setup
+				bounds = [
+					[0, 0],
+					[window.innerWidth, window.innerHeight],
+				];
+			}
+
 			const element_width = ctx.cachedRootNodeRect.width;
 			const element_height = ctx.cachedRootNodeRect.height;
 
-			if (
-				bounds[1][0] - bounds[0][0] < element_width ||
-				bounds[1][1] - bounds[0][1] < element_height
-			) {
-				throw new Error(
-					'Bounds dimensions cannot be smaller than the draggable element dimensions',
-				);
-			}
+			// Validate bounds dimensions
+			validateBounds(bounds, element_width, element_height);
 
 			return {
 				bounds,
@@ -397,8 +413,15 @@ export const bounds = unstable_definePlugin(
 		},
 
 		start(ctx, state) {
-			if (shouldRecompute?.({ hook: 'dragStart' })) {
-				state.bounds = value({ root_node: ctx.rootNode });
+			if (shouldRecompute?.({ hook: 'start' })) {
+				const newBounds = value({ root_node: ctx.rootNode });
+
+				// Validate the new bounds
+				const element_width = ctx.cachedRootNodeRect.width;
+				const element_height = ctx.cachedRootNodeRect.height;
+				validateBounds(newBounds, element_width, element_height);
+
+				state.bounds = newBounds;
 
 				// Update the initial position on drag start
 				state.initialElementPosition = {
@@ -411,7 +434,14 @@ export const bounds = unstable_definePlugin(
 		drag(ctx, state) {
 			if (!ctx.isDragging) return;
 			if (shouldRecompute?.({ hook: 'drag' })) {
-				state.bounds = value({ root_node: ctx.rootNode });
+				const newBounds = value({ root_node: ctx.rootNode });
+
+				// Validate the new bounds
+				const element_width = ctx.cachedRootNodeRect.width;
+				const element_height = ctx.cachedRootNodeRect.height;
+				validateBounds(newBounds, element_width, element_height);
+
+				state.bounds = newBounds;
 			}
 
 			const bound_coords = state.bounds;
@@ -454,8 +484,15 @@ export const bounds = unstable_definePlugin(
 		},
 
 		end(context, state) {
-			if (shouldRecompute?.({ hook: 'dragEnd' })) {
-				state.bounds = value({ root_node: context.rootNode });
+			if (shouldRecompute?.({ hook: 'end' })) {
+				const newBounds = value({ root_node: context.rootNode });
+
+				// Validate the new bounds
+				const element_width = context.cachedRootNodeRect.width;
+				const element_height = context.cachedRootNodeRect.height;
+				validateBounds(newBounds, element_width, element_height);
+
+				state.bounds = newBounds;
 			}
 		},
 	}),
@@ -683,16 +720,56 @@ export const controls = unstable_definePlugin(
 			block?: ReturnType<(typeof ControlFrom)[keyof typeof ControlFrom]>;
 			priority?: 'allow' | 'block';
 		} | null,
+		shouldRecompute: (ctx: { readonly hook: 'setup' | 'start' | 'drag' | 'end' }) => boolean = (
+			ctx,
+		) => ctx.hook === 'setup',
 	) => ({
 		name: 'neodrag:controls',
 
 		setup(ctx) {
-			// Sort zones by area (smallest to largest) to handle nesting properly
-			return {
-				allow_zones: (options?.allow?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area),
-				block_zones: (options?.block?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area),
-				priority: options?.priority ?? 'allow',
+			// Helper function to compute zones
+			const compute_zones = () => {
+				const allow_zones = (options?.allow?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area);
+				const block_zones = (options?.block?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area);
+				return { allow_zones, block_zones };
 			};
+
+			const { allow_zones, block_zones } = compute_zones();
+
+			return {
+				allow_zones,
+				block_zones,
+				priority: options?.priority ?? 'allow',
+				// Store the original functions for recomputation
+				allow_fn: options?.allow,
+				block_fn: options?.block,
+				compute_zones: compute_zones, // Store the helper for reuse
+			};
+		},
+
+		start(_ctx, state) {
+			if (shouldRecompute({ hook: 'start' })) {
+				const { allow_zones, block_zones } = state.compute_zones();
+				state.allow_zones = allow_zones;
+				state.block_zones = block_zones;
+			}
+		},
+
+		drag(ctx, state) {
+			if (!ctx.isDragging) return;
+			if (shouldRecompute({ hook: 'drag' })) {
+				const { allow_zones, block_zones } = state.compute_zones();
+				state.allow_zones = allow_zones;
+				state.block_zones = block_zones;
+			}
+		},
+
+		end(_ctx, state) {
+			if (shouldRecompute({ hook: 'end' })) {
+				const { allow_zones, block_zones } = state.compute_zones();
+				state.allow_zones = allow_zones;
+				state.block_zones = block_zones;
+			}
 		},
 
 		shouldStart(ctx, state, event) {
@@ -706,9 +783,9 @@ export const controls = unstable_definePlugin(
 			}
 
 			// If no zones contain the point and no allow zones are defined,
-			// default behavior based on priority
+			// allow dragging (default behavior)
 			if (containing_allow_zones.length === 0 && containing_block_zones.length === 0) {
-				return state.allow_zones.length === 0 && state.priority === 'allow';
+				return state.allow_zones.length === 0;
 			}
 
 			// Find the most specific (smallest) zone that should determine the behavior
@@ -768,8 +845,8 @@ export const controls = unstable_definePlugin(
 				return false;
 			}
 
-			// Default to priority if no zones were found, but only if no allow zones are defined
-			return state.allow_zones.length === 0 && state.priority === 'allow';
+			// Default to allowing if no allow zones are defined
+			return state.allow_zones.length === 0;
 		},
 	}),
 );

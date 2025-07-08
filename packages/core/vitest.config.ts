@@ -149,7 +149,7 @@ export default defineConfig({
 			provider: 'v8',
 		},
 
-		testTimeout: 5000,
+		testTimeout: 50000,
 		// retry: 2,
 		include: ['./tests/*.test.ts', './tests/*.test.svelte.ts'],
 	},

@@ -4,42 +4,15 @@
 
 	type Props = {
 		plugins: PluginInput;
-		priority_type?: 'allow-block' | 'allow-block-allow' | 'block-allow-block';
+		priority_type?:
+			| 'allow-block'
+			| 'allow-block-allow'
+			| 'block-allow-block'
+			| 'allow-only-bug-test'
+			| 'allow-with-priority-block-bug-test';
 	};
 
 	const { plugins, priority_type }: Props = $props();
-
-	// const plugin_args = $derived.by<Parameters<typeof controls>[0]>(() => {
-	// 	if (data.type === 'undefined,null') {
-	// 		return undefined;
-	// 	} else if (data.type === 'allow-only') {
-	// 		return { allow: ControlFrom.selector('.handle') };
-	// 	} else if (data.type === 'block-only') {
-	// 		return { block: ControlFrom.selector('.cancel') };
-	// 	} else if (data.type === 'allow-block') {
-	// 		return {
-	// 			allow: ControlFrom.selector('.handle'),
-	// 			block: ControlFrom.selector('.cancel'),
-	// 		};
-	// 	} else if (data.type === 'allow-block-allow') {
-	// 		return {
-	// 			allow: ControlFrom.selector('.handle, .handle2'),
-	// 			block: ControlFrom.selector('.cancel'),
-	// 			priority: 'allow',
-	// 		};
-	// 	} else if (data.type === 'block-allow-block') {
-	// 		return {
-	// 			allow: ControlFrom.selector('.middle-handle'),
-	// 			block: ControlFrom.selector('.outer-handle, .inner-handle'),
-	// 			priority: 'block',
-	// 		};
-	// 	}
-	// });
-
-	// let is_mounted = $state(false);
-	// $effect(() => {
-	// 	is_mounted = true;
-	// });
 </script>
 
 <Box {plugins}>
@@ -70,6 +43,13 @@
 					<span data-testid="inner-text">Inner Block</span>
 				</div>
 			</div>
+		</div>
+	{:else if priority_type === 'allow-only-bug-test' || priority_type === 'allow-with-priority-block-bug-test'}
+		<!-- Layout for testing the specific bug scenarios -->
+		<div data-testid="container">
+			<div data-testid="handle">Handle (should be draggable)</div>
+			<div data-testid="content">Content (should NOT be draggable)</div>
+			<div data-testid="footer">Footer (should NOT be draggable)</div>
 		</div>
 	{:else}
 		<div data-testid="handle">Handle</div>

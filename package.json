@@ -27,7 +27,7 @@
 		"turbo": "^2.5.4",
 		"typescript": "catalog:",
 		"vitest": "^3.2.4",
-		"vitest-browser-svelte": "^0.1.0"
+		"vitest-browser-svelte": "^1.0.0"
 	},
 	"pnpm": {
 		"overrides": {

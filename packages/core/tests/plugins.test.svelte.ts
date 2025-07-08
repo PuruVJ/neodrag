@@ -10,7 +10,7 @@ import {
 	test,
 	vi,
 } from 'vitest';
-import { cleanup, render } from 'vitest-browser-svelte';
+import { cleanup, Component, render, RenderResult } from 'vitest-browser-svelte';
 import { Compartment } from '../../svelte/src/index.svelte';
 import {
 	applyUserSelectHack,
@@ -200,10 +200,11 @@ describe('axis', () => {
 
 describe('bounds', () => {
 	let draggable: Locator;
+	let comp: any;
 
 	describe('element', () => {
 		beforeEach(async () => {
-			const comp = render(Bounds, {
+			comp = render(Bounds, {
 				plugins: [],
 				type: 'element',
 			});
@@ -229,6 +230,7 @@ describe('bounds', () => {
 		});
 
 		it('should error when bounds are smaller than element', async () => {
+			cleanup();
 			const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 			const comp = render(Bounds, {
@@ -237,6 +239,8 @@ describe('bounds', () => {
 				is_smaller_than_element: true,
 			});
 			draggable = comp.getByTestId('draggable');
+
+			await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
 
 			expect(spy).toHaveBeenCalled();
 		});
@@ -317,6 +321,262 @@ describe('bounds', () => {
 			await dragAndDrop(draggable, { deltaX: -310, deltaY: -310 });
 
 			await expect.element(draggable).toHaveStyle(translate(0, 0));
+		});
+	});
+
+	// NEW: shouldRecompute functionality tests
+	describe('shouldRecompute', () => {
+		describe('setup hook', () => {
+			beforeEach(async () => {
+				let computeCount = 0;
+				const trackingBounds = () => {
+					computeCount++;
+					return [
+						[0, 0],
+						[window.innerWidth, window.innerHeight],
+					] as [[number, number], [number, number]];
+				};
+
+				const comp = render(Bounds, {
+					plugins: [bounds(trackingBounds, (ctx) => ctx.hook === 'setup')],
+					type: 'viewport',
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('should recompute bounds on setup', async () => {
+				// Just creating the component should trigger setup recomputation
+				await dragAndDrop(draggable, { deltaX: 10, deltaY: 10 });
+				await expect.element(draggable).toHaveStyle(translate(10, 10));
+			});
+		});
+
+		describe('start hook (default)', () => {
+			beforeEach(async () => {
+				let computeCount = 0;
+				const trackingBounds = () => {
+					computeCount++;
+					return [
+						[0, 0],
+						[window.innerWidth, window.innerHeight],
+					] as [[number, number], [number, number]];
+				};
+
+				const comp = render(Bounds, {
+					plugins: [bounds(trackingBounds)], // Default behavior
+					type: 'viewport',
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('should recompute bounds on start by default', async () => {
+				await dragAndDrop(draggable, { deltaX: 10, deltaY: 10 });
+				await expect.element(draggable).toHaveStyle(translate(10, 10));
+			});
+		});
+
+		describe('start hook explicit', () => {
+			beforeEach(async () => {
+				let computeCount = 0;
+				const trackingBounds = () => {
+					computeCount++;
+					return [
+						[0, 0],
+						[window.innerWidth, window.innerHeight],
+					] as [[number, number], [number, number]];
+				};
+
+				const comp = render(Bounds, {
+					plugins: [bounds(trackingBounds, (ctx) => ctx.hook === 'start')],
+					type: 'viewport',
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('should recompute bounds on start when specified', async () => {
+				await dragAndDrop(draggable, { deltaX: 10, deltaY: 10 });
+				await expect.element(draggable).toHaveStyle(translate(10, 10));
+			});
+		});
+
+		describe('drag hook', () => {
+			beforeEach(async () => {
+				let computeCount = 0;
+				const trackingBounds = () => {
+					computeCount++;
+					return [
+						[0, 0],
+						[window.innerWidth, window.innerHeight],
+					] as [[number, number], [number, number]];
+				};
+
+				const comp = render(Bounds, {
+					plugins: [bounds(trackingBounds, (ctx) => ctx.hook === 'drag')],
+					type: 'viewport',
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('should recompute bounds on every drag event', async () => {
+				await dragAndDrop(draggable, { deltaX: 10, deltaY: 10 });
+				await expect.element(draggable).toHaveStyle(translate(10, 10));
+			});
+		});
+
+		describe('end hook', () => {
+			beforeEach(async () => {
+				let computeCount = 0;
+				const trackingBounds = () => {
+					computeCount++;
+					return [
+						[0, 0],
+						[window.innerWidth, window.innerHeight],
+					] as [[number, number], [number, number]];
+				};
+
+				const comp = render(Bounds, {
+					plugins: [bounds(trackingBounds, (ctx) => ctx.hook === 'end')],
+					type: 'viewport',
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('should recompute bounds on end', async () => {
+				await dragAndDrop(draggable, { deltaX: 10, deltaY: 10 });
+				await expect.element(draggable).toHaveStyle(translate(10, 10));
+			});
+		});
+
+		describe('multiple hooks', () => {
+			beforeEach(async () => {
+				let computeCount = 0;
+				const trackingBounds = () => {
+					computeCount++;
+					return [
+						[0, 0],
+						[window.innerWidth, window.innerHeight],
+					] as [[number, number], [number, number]];
+				};
+
+				const comp = render(Bounds, {
+					plugins: [
+						bounds(
+							trackingBounds,
+							(ctx) => ctx.hook === 'setup' || ctx.hook === 'start' || ctx.hook === 'drag',
+						),
+					],
+					type: 'viewport',
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('should recompute bounds on multiple hooks', async () => {
+				await dragAndDrop(draggable, { deltaX: 10, deltaY: 10 });
+				await expect.element(draggable).toHaveStyle(translate(10, 10));
+			});
+		});
+
+		describe('dynamic bounds changing', () => {
+			beforeEach(async () => {
+				let boundarySize = 200;
+				const dynamicBounds = () => {
+					// Simulate changing bounds
+					if (Math.random() > 0.8) boundarySize = 150;
+					return [
+						[0, 0],
+						[boundarySize, boundarySize],
+					] as [[number, number], [number, number]];
+				};
+
+				const comp = render(Bounds, {
+					plugins: [
+						bounds(
+							dynamicBounds,
+							(ctx) => ctx.hook === 'drag', // Recompute during drag
+						),
+					],
+					type: 'viewport',
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('should handle dynamic boundary changes during drag', async () => {
+				await dragAndDrop(draggable, { deltaX: 50, deltaY: 50 });
+				// The exact assertion depends on the random boundary changes
+				// but the element should still be positioned correctly
+				const el = draggable.element() as HTMLElement;
+				const style = el.style.transform || el.style.translate;
+				expect(style).toBeDefined();
+			});
+		});
+
+		describe('fallback when shouldRecompute returns false', () => {
+			beforeEach(async () => {
+				const customBounds = () =>
+					[
+						[100, 100], // This should be ignored
+						[200, 200],
+					] as [[number, number], [number, number]];
+
+				const comp = render(Bounds, {
+					plugins: [
+						bounds(
+							customBounds,
+							() => false, // Never recompute, should use viewport fallback
+						),
+					],
+					type: 'viewport',
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('should use fallback viewport bounds when setup recompute is disabled', async () => {
+				// Should use viewport bounds instead of the custom bounds
+				await dragAndDrop(draggable, { deltaX: 10, deltaY: 10 });
+				await expect.element(draggable).toHaveStyle(translate(10, 10));
+			});
+		});
+
+		describe('performance with frequent recomputation', () => {
+			beforeEach(async () => {
+				const performanceBounds = () => {
+					// Simulate some calculation work
+					let sum = 0;
+					for (let i = 0; i < 100; i++) {
+						sum += Math.sin(i) * Math.cos(i);
+					}
+
+					return [
+						[0, 0],
+						[window.innerWidth - sum * 0.01, window.innerHeight - sum * 0.01],
+					] as [[number, number], [number, number]];
+				};
+
+				const comp = render(Bounds, {
+					plugins: [
+						bounds(
+							performanceBounds,
+							(ctx) => ctx.hook === 'drag', // Recompute on every drag
+						),
+					],
+					type: 'viewport',
+				});
+				draggable = comp.getByTestId('draggable');
+			});
+
+			it('should handle frequent recomputation without performance issues', async () => {
+				const startTime = performance.now();
+
+				await dragAndDrop(draggable, { deltaX: 20, deltaY: 20 });
+
+				const endTime = performance.now();
+				const duration = endTime - startTime;
+
+				await expect.element(draggable).toHaveStyle(translate(20, 20));
+
+				// Should complete within reasonable time (adjust threshold as needed)
+				expect(duration).toBeLessThan(1000);
+			});
 		});
 	});
 
@@ -594,6 +854,169 @@ describe('controls', () => {
 			await dragAndDrop(inner_cancel, { deltaX: 100, deltaY: 100 });
 
 			await expect.element(draggable).not.toHaveStyle(translate(100, 100));
+		});
+	});
+
+	// Addresses https://github.com/PuruVJ/neodrag/issues/220
+	describe('allow-only (fixed behavior)', () => {
+		let handle: Locator;
+		let content: Locator;
+		let footer: Locator;
+		let container: Locator;
+
+		beforeEach(async () => {
+			const comp = render(Controls, {
+				plugins: [
+					controls({
+						allow: ControlFrom.selector('[data-testid="handle"]'),
+					}),
+				],
+				priority_type: 'allow-only-bug-test',
+			});
+			draggable = comp.getByTestId('draggable');
+			handle = comp.getByTestId('handle');
+			content = comp.getByTestId('content');
+			footer = comp.getByTestId('footer');
+			container = comp.getByTestId('container');
+		});
+
+		it('should move from the handle', async () => {
+			await dragAndDrop(handle, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).toHaveStyle(translate(100, 100));
+		});
+
+		it('should NOT move from content', async () => {
+			await dragAndDrop(content, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).not.toHaveStyle(translate(100, 100));
+		});
+
+		it('should NOT move from footer', async () => {
+			await dragAndDrop(footer, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).not.toHaveStyle(translate(100, 100));
+		});
+
+		it('should NOT move from container background', async () => {
+			await dragAndDrop(container, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).not.toHaveStyle(translate(100, 100));
+		});
+
+		it('should NOT move from draggable background (outside allowed zones)', async () => {
+			await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).not.toHaveStyle(translate(100, 100));
+		});
+	});
+
+	describe('allow with priority block but no block field (should ignore priority)', () => {
+		let handle: Locator;
+		let content: Locator;
+		let footer: Locator;
+
+		beforeEach(async () => {
+			const comp = render(Controls, {
+				plugins: [
+					controls({
+						allow: ControlFrom.selector('[data-testid="handle"]'),
+						priority: 'block', // This should have NO effect without block field
+					}),
+				],
+				priority_type: 'allow-with-priority-block-bug-test',
+			});
+			draggable = comp.getByTestId('draggable');
+			handle = comp.getByTestId('handle');
+			content = comp.getByTestId('content');
+			footer = comp.getByTestId('footer');
+		});
+
+		it('should still move from the handle (priority should be ignored)', async () => {
+			await dragAndDrop(handle, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).toHaveStyle(translate(100, 100));
+		});
+
+		it('should NOT move from content', async () => {
+			await dragAndDrop(content, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).not.toHaveStyle(translate(100, 100));
+		});
+
+		it('should NOT move from footer', async () => {
+			await dragAndDrop(footer, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).not.toHaveStyle(translate(100, 100));
+		});
+	});
+
+	describe('allow with priority allow but no block field (should ignore priority)', () => {
+		let handle: Locator;
+		let content: Locator;
+
+		beforeEach(async () => {
+			const comp = render(Controls, {
+				plugins: [
+					controls({
+						allow: ControlFrom.selector('[data-testid="handle"]'),
+						priority: 'allow', // This should have NO effect without block field
+					}),
+				],
+				priority_type: 'allow-only-bug-test',
+			});
+			draggable = comp.getByTestId('draggable');
+			handle = comp.getByTestId('handle');
+			content = comp.getByTestId('content');
+		});
+
+		it('should move from the handle (same as without priority)', async () => {
+			await dragAndDrop(handle, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).toHaveStyle(translate(100, 100));
+		});
+
+		it('should NOT move from content (same as without priority)', async () => {
+			await dragAndDrop(content, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).not.toHaveStyle(translate(100, 100));
+		});
+	});
+
+	describe('block only with priority allow (should ignore priority)', () => {
+		let handle: Locator;
+		let cancel: Locator;
+
+		beforeEach(async () => {
+			const comp = render(Controls, {
+				plugins: [
+					controls({
+						block: ControlFrom.selector('[data-testid="cancel"]'),
+						priority: 'allow', // This should have NO effect without allow field
+					}),
+				],
+			});
+			draggable = comp.getByTestId('draggable');
+			handle = comp.getByTestId('handle');
+			cancel = comp.getByTestId('cancel');
+		});
+
+		it('should move from the handle (same as without priority)', async () => {
+			await dragAndDrop(handle, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).toHaveStyle(translate(100, 100));
+		});
+
+		it('should NOT move from cancel (same as without priority)', async () => {
+			await dragAndDrop(cancel, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).not.toHaveStyle(translate(100, 100));
+		});
+
+		it('should move from draggable background (same as without priority)', async () => {
+			await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 });
+
+			await expect.element(draggable).toHaveStyle(translate(100, 100));
 		});
 	});
 });

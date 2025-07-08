@@ -665,7 +665,7 @@ bounds(boundaryFunction, (ctx) => {
 
 bounds(boundaryFunction, (ctx) => {
   // Only recompute at start and end
-  return ctx.hook === 'dragStart' || ctx.hook === 'dragEnd';
+  return ctx.hook === 'start' || ctx.hook === 'end';
 });
 ```
 
@@ -679,9 +679,10 @@ The bounds plugin calculates the allowed movement area and clamps the proposed p
 
 The boundary function is called:
 
-- On drag start (always)
-- During drag (if `shouldRecompute` returns true)
-- On drag end (if `shouldRecompute` returns true)
+- On setup (if `shouldRecompute` returns true for `'setup'`)
+- On drag start (if `shouldRecompute` returns true for `'start'`)
+- During drag (if `shouldRecompute` returns true for `'drag'`)
+- On drag end (if `shouldRecompute` returns true for `'end'`)
 
 ## API Reference
 
@@ -689,7 +690,7 @@ The boundary function is called:
 function bounds(
   boundsFn: () => [[number, number], [number, number]],
   shouldRecompute?: (ctx: {
-    hook: 'dragStart' | 'drag' | 'dragEnd';
+    hook: 'setup' | 'start' | 'drag' | 'end';
   }) => boolean,
 ): Plugin;
 ```
