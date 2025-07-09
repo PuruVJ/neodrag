@@ -1,5 +1,11 @@
 # @neodrag/core
 
+## 3.0.0-next.6
+
+### Major Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`45e637d`](https://github.com/PuruVJ/neodrag/commit/45e637d2fd0518ebd7b3f6fbf4cf722345b73ee8) Thanks [@PuruVJ](https://github.com/PuruVJ)! - breaking: switch grid from ceil to round
+
 ## 3.0.0-next.5
 
 ### Minor Changes

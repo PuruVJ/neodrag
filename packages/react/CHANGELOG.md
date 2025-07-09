@@ -1,5 +1,12 @@
 # @neodrag/react
 
+## 3.0.0-next.6
+
+### Patch Changes
+
+- Updated dependencies [[`45e637d`](https://github.com/PuruVJ/neodrag/commit/45e637d2fd0518ebd7b3f6fbf4cf722345b73ee8)]:
+  - @neodrag/core@3.0.0-next.6
+
 ## 3.0.0-next.5
 
 ### Minor Changes
