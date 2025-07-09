@@ -1,5 +1,11 @@
 # @neodrag/vue
 
+## 3.0.0-next.6
+
+### Patch Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`2f9d410`](https://github.com/PuruVJ/neodrag/commit/2f9d410b5b3ec7885e8ac67af9e15ca5663052ca) Thanks [@PuruVJ](https://github.com/PuruVJ)! - fix the export
+
 ## 3.0.0-next.5
 
 ### Minor Changes
