@@ -1041,7 +1041,7 @@ describe('grid', () => {
 		it('should move 102,102', async () => {
 			await dragAndDrop(draggable, { deltaX: 102, deltaY: 102 });
 
-			await expect.element(draggable).toHaveStyle(translate(110, 110));
+			await expect.element(draggable).toHaveStyle(translate(100, 100));
 		});
 	});
 
@@ -1056,13 +1056,13 @@ describe('grid', () => {
 		it('should move 94,90', async () => {
 			await dragAndDrop(draggable, { deltaX: 94, deltaY: 90 });
 
-			await expect.element(draggable).toHaveStyle(translate(115, 102));
+			await expect.element(draggable).toHaveStyle(translate(92, 102));
 		});
 
 		it('should move 300,291', async () => {
 			await dragAndDrop(draggable, { deltaX: 300, deltaY: 291 });
 
-			await expect.element(draggable).toHaveStyle(translate(322, 306));
+			await expect.element(draggable).toHaveStyle(translate(299, 306));
 		});
 	});
 
@@ -1098,7 +1098,7 @@ describe('grid', () => {
 		it('should move 94,90', async () => {
 			await dragAndDrop(draggable, { deltaX: 94, deltaY: 90 });
 
-			await expect.element(draggable).toHaveStyle(translate(100, 90));
+			await expect.element(draggable).toHaveStyle(translate(90, 90));
 		});
 
 		it('should move 300,291', async () => {

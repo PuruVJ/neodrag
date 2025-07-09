@@ -739,7 +739,7 @@ const iconGrid = [
 
 The grid plugin modifies movement by snapping to grid points:
 
-1. **Calculate grid position** - Uses `Math.ceil(value / gridSize) * gridSize` to find the next grid point
+1. **Calculate grid position** - Uses `Math.round(value / gridSize) * gridSize` to find the next grid point
 2. **Apply to proposed movement** - Modifies `ctx.proposed.x` and `ctx.proposed.y`
 3. **Null values skip snapping** - `null` means free movement on that axis
 4. **Runs during drag** - Continuously snaps while dragging

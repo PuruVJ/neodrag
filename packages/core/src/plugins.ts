@@ -183,7 +183,7 @@ export const applyUserSelectHack = unstable_definePlugin(
 	}),
 );
 
-const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
+const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.round(val / snap) * snap);
 
 function snap_to_grid(
 	snaps: [number | null | undefined, number | null | undefined] | undefined | null,
