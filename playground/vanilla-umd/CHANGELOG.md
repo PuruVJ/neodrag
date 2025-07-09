@@ -1,5 +1,12 @@
 # @neodrag/playground-vanilla-umd
 
+## 0.0.1-next.6
+
+### Patch Changes
+
+- Updated dependencies [[`2f9d410`](https://github.com/PuruVJ/neodrag/commit/2f9d410b5b3ec7885e8ac67af9e15ca5663052ca)]:
+  - @neodrag/vanilla@3.0.0-next.6
+
 ## 0.0.1-next.5
 
 ### Patch Changes
