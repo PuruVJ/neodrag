@@ -1,5 +1,12 @@
 # docs
 
+## 0.0.15-next.6
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @neodrag/svelte@3.0.0-next.6
+
 ## 0.0.15-next.5
 
 ### Patch Changes

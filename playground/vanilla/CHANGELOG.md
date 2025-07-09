@@ -1,5 +1,12 @@
 # @neodrag/playground-vanilla
 
+## 0.0.1-next.7
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @neodrag/vanilla@3.0.0-next.7
+
 ## 0.0.1-next.6
 
 ### Patch Changes

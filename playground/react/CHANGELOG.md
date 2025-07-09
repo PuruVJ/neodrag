@@ -1,5 +1,12 @@
 # @neodrag/playground-react
 
+## 0.0.1-next.6
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @neodrag/react@3.0.0-next.6
+
 ## 0.0.1-next.5
 
 ### Patch Changes
