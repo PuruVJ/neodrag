@@ -38,7 +38,7 @@ export interface DraggableInstance {
 	};
 	controller: AbortController;
 	compartments: {
-		map: Map<Compartment, Plugin | undefined>;
+		map: Map<Compartment, Plugin | null | undefined>;
 		pending: Set<Compartment>;
 		is_flushing: boolean;
 	};
@@ -308,7 +308,7 @@ export class DraggableFactory {
 
 	#resolve_plugins(
 		items: (Plugin | Compartment)[],
-		compartments: Map<Compartment, Plugin | undefined>,
+		compartments: Map<Compartment, Plugin | null | undefined>,
 	): Plugin[] {
 		return items
 			.map((item) => {
@@ -319,7 +319,7 @@ export class DraggableFactory {
 				}
 				return item;
 			})
-			.filter((plugin): plugin is Plugin => plugin !== undefined); // Filter out undefined
+			.filter((plugin): plugin is Plugin => plugin != undefined); // Filter out undefined
 	}
 
 	#run_plugins(instance: DraggableInstance, hook: ErrorInfo['phase'], event: PointerEvent) {
@@ -642,7 +642,7 @@ export class DraggableFactory {
 				);
 
 				if (old_plugin) {
-					if (new_plugin === undefined) {
+					if (new_plugin == undefined) {
 						// Remove the plugin
 						const plugin_index = instance.plugins.indexOf(old_plugin);
 						old_plugin.cleanup?.(instance.ctx, instance.states.get(old_plugin.name));
@@ -670,7 +670,7 @@ export class DraggableFactory {
 							}
 						}
 					}
-				} else if (new_plugin !== undefined) {
+				} else if (new_plugin != undefined) {
 					// Add new plugin when compartment was empty
 					instance.plugins.push(new_plugin);
 					instance.compartments.map.set(compartment, new_plugin);

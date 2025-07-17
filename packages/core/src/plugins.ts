@@ -39,20 +39,20 @@ export type PluginResolver = () => (Plugin | Compartment)[];
 export type PluginInput = Plugin[] | PluginResolver;
 
 export class Compartment {
-	#current?: Plugin;
-	#subscribers: Set<(plugin: Plugin | undefined) => void>;
+	#current?: Plugin | undefined | null;
+	#subscribers: Set<(plugin: Plugin | null | undefined) => void>;
 	#updating: boolean = false;
 
-	constructor(initial?: () => Plugin) {
+	constructor(initial?: undefined | null | (() => Plugin | undefined | null)) {
 		this.#current = initial ? initial() : undefined;
 		this.#subscribers = new Set();
 	}
 
-	get current(): Plugin | undefined {
+	get current(): Plugin | null | undefined {
 		return this.#current;
 	}
 
-	set current(plugin: Plugin | undefined) {
+	set current(plugin: Plugin | null | undefined) {
 		if (plugin === this.#current) return;
 
 		// Prevent recursive updates
@@ -67,7 +67,7 @@ export class Compartment {
 		this.#updating = false;
 	}
 
-	subscribe(callback: (plugin: Plugin | undefined) => void) {
+	subscribe(callback: (plugin: Plugin | null | undefined) => void) {
 		this.#subscribers.add(callback);
 		return () => this.#subscribers.delete(callback);
 	}

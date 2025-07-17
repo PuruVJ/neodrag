@@ -17,10 +17,10 @@ export const wrapper = (
 	};
 };
 
-export function useCompartment<T extends Plugin>(reactive: () => T) {
+export function useCompartment(reactive: ConstructorParameters<typeof Compartment>[0]) {
 	const compartment = new Compartment(reactive);
 
-	const stop_watcher = watchEffect(() => (compartment.current = reactive()), {
+	const stop_watcher = watchEffect(() => (compartment.current = reactive?.()), {
 		flush: 'pre',
 	});
 

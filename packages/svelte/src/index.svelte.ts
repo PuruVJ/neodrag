@@ -45,13 +45,13 @@ export * from '@neodrag/core/plugins';
 export const instances = factory.instances;
 
 export class Compartment extends CoreCompartment {
-	static of(reactive: () => Plugin) {
+	static of(reactive: ConstructorParameters<typeof CoreCompartment>[0]) {
 		const compartment = new CoreCompartment(reactive);
 
 		auto_destroy_effect_root(() => {
 			// @ts-ignore
 			$effect.pre(() => {
-				compartment.current = reactive();
+				compartment.current = reactive?.();
 			});
 		});
 

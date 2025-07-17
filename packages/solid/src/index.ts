@@ -88,11 +88,11 @@ function wrapper(draggableFactory: DraggableFactory) {
 
 export const useDraggable = wrapper(draggable_factory);
 
-export function createCompartment<T extends Plugin>(reactive: () => T) {
-	const compartment = new Compartment(() => untrack(reactive));
+export function createCompartment(reactive: ConstructorParameters<typeof Compartment>[0]) {
+	const compartment = new Compartment(reactive);
 
 	createRenderEffect(() => {
-		compartment.current = reactive();
+		compartment.current = reactive?.();
 	});
 
 	return compartment;

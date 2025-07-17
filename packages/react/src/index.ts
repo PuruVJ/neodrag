@@ -69,7 +69,10 @@ export const wrapper =
 		return state;
 	};
 
-export function useCompartment(reactive: () => Plugin, deps?: React.DependencyList) {
+export function useCompartment(
+	reactive: ConstructorParameters<typeof Compartment>[0],
+	deps?: React.DependencyList,
+) {
 	const compartment = useRef<Compartment>();
 
 	if (!compartment.current) {
@@ -77,7 +80,7 @@ export function useCompartment(reactive: () => Plugin, deps?: React.DependencyLi
 	}
 
 	useLayoutEffect(() => {
-		compartment.current!.current = reactive();
+		compartment.current!.current = reactive?.();
 	}, deps);
 
 	return compartment.current;
