@@ -1,10 +1,10 @@
 import { type Locator } from '@vitest/browser/context';
 import { afterEach, beforeEach, describe, expect, expectTypeOf, it, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { axis, Compartment, type Plugin, position } from '../../svelte/src/index.svelte';
-import { Box, Compartment as CompartmentComp } from './components';
-import { dragAndDrop, startCursorTracking, stopCursorTracking } from './mouse';
-import { sleepAndWaitForEffects, translate } from './utils';
+import { axis, Compartment, type Plugin, position } from '../../svelte/src/index.svelte.ts';
+import { Box, Compartment as CompartmentComp } from './components/index.ts';
+import { dragAndDrop, startCursorTracking, stopCursorTracking } from './mouse.ts';
+import { sleepAndWaitForEffects, translate } from './utils.ts';
 
 beforeEach(() => {
 	startCursorTracking();

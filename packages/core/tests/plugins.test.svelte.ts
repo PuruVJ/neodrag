@@ -1,4 +1,4 @@
-import { Locator } from '@vitest/browser/context';
+import type { Locator } from '@vitest/browser/context';
 import {
 	afterAll,
 	afterEach,
@@ -6,12 +6,12 @@ import {
 	describe,
 	expect,
 	it,
-	MockInstance,
+	type MockInstance,
 	test,
 	vi,
 } from 'vitest';
-import { cleanup, Component, render, RenderResult } from 'vitest-browser-svelte';
-import { Compartment } from '../../svelte/src/index.svelte';
+import { cleanup, render } from 'vitest-browser-svelte';
+import { Compartment } from '../../svelte/src/index.svelte.ts';
 import {
 	applyUserSelectHack,
 	axis,
@@ -26,8 +26,8 @@ import {
 	threshold,
 	touchAction,
 	transform,
-} from '../src/plugins';
-import { Bounds, Box, Controls, Position, Transform } from './components';
+} from '../src/plugins.ts';
+import { Bounds, Box, Controls, Position, Transform } from './components/index.ts';
 import {
 	dragAndDrop,
 	mouseDown,
@@ -35,8 +35,8 @@ import {
 	mouseUp,
 	startCursorTracking,
 	stopCursorTracking,
-} from './mouse';
-import { sleepAndWaitForEffects, translate } from './utils';
+} from './mouse.ts';
+import { sleepAndWaitForEffects, translate } from './utils.ts';
 
 beforeEach(() => {
 	startCursorTracking();
