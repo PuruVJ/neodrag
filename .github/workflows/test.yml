@@ -46,7 +46,7 @@ jobs:
           run_install: true
 
       - name: Install Playwright Browsers
-        run: pnpx playwright install --with-deps
+        run: pnpm exec playwright install
 
       - name: Test webkit
         run: pnpm test --browser=webkit
