@@ -1,5 +1,14 @@
 # @neodrag/svelte
 
+## 3.0.0-next.7
+
+### Patch Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`a3a20b0`](https://github.com/PuruVJ/neodrag/commit/a3a20b03a5ebcd804ee9c1de7028aaaf424bc5cc) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Fix types of Compartment
+
+- Updated dependencies [[`a3a20b0`](https://github.com/PuruVJ/neodrag/commit/a3a20b03a5ebcd804ee9c1de7028aaaf424bc5cc)]:
+  - @neodrag/core@3.0.0-next.7
+
 ## 3.0.0-next.6
 
 ### Patch Changes
