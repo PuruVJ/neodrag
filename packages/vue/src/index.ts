@@ -1,5 +1,5 @@
 import { DEFAULTS, DraggableFactory } from '@neodrag/core';
-import { Compartment, Plugin, type PluginInput } from '@neodrag/core/plugins';
+import { Compartment, type PluginInput } from '@neodrag/core/plugins';
 import { onUnmounted, watchEffect, type Directive } from 'vue';
 
 const factory = new DraggableFactory(DEFAULTS);

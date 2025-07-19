@@ -1,9 +1,5 @@
 import type { DraggableFactory } from '@neodrag/core';
-import {
-	Compartment as CoreCompartment,
-	type Plugin,
-	type PluginInput,
-} from '@neodrag/core/plugins';
+import { Compartment as CoreCompartment, type PluginInput } from '@neodrag/core/plugins';
 import { onDestroy } from 'svelte';
 import { Attachment } from 'svelte/attachments';
 import { factory } from './shared';
