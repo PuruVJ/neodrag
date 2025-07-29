@@ -28,12 +28,13 @@ import FrameworkSwitch from '$components/FrameworkSwitch.astro';
     </div>
 </div>
 
-The `overlap` plugin helps you detect when a draggable element touches other elements on the page. It tells you when elements overlap and can show visual highlights to help you see what's happening.
+The `overlap` plugin helps you detect when a draggable element touches other elements on the page. It provides real-time overlap detection with visual feedback and event callbacks, optimized for smooth performance.
 
 ```typescript
-overlap(); // Check for overlaps with all elements
-overlap({ targets: '.drop-zone' }); // Only check specific elements
+overlap(); // Check for overlaps with specified targets
+overlap({ targets: '.drop-zone' }); // Only check specific elements  
 overlap({ threshold: 0.5 }); // Need 50% overlap to trigger
+overlap({ showOverlap: { enabled: true } }); // Show visual borders
 ```
 
 ## Basic Usage
@@ -221,27 +222,26 @@ new Draggable(dragElement, [
 ### targets
 
 **Type:** `string | string[] | HTMLElement[]`  
-**Default:** `undefined` (checks all elements)
+**Default:** `undefined` (requires targets to be specified)
 
-Choose which elements to check for overlaps. You can use CSS selectors or actual elements.
+Choose which elements to check for overlaps. You can use CSS selectors, element arrays, or mixed formats.
 
 ```typescript
-// Check all elements on the page
-overlap()
-
-// Check elements with a specific class
+// Single CSS selector
 overlap({ targets: '.drop-zone' })
 
-// Check multiple types of elements
-overlap({ targets: ['.drop-zone', 'div', '#special-box'] })
-overlap({ targets: ['.target', '.draggable', '#container > div'] })
+// Multiple CSS selectors  
+overlap({ targets: ['.drop-zone', '.trash-bin', '#special-area'] })
 
-// Check different types of selectors together
-overlap({ targets: ['.class-name', '#id-name', 'tag-name'] })
+// Mixed selectors and elements
+overlap({ targets: ['.drop-zone', document.getElementById('area1')] })
 
-// Use actual HTML elements
+// Direct HTMLElement array
 const zones = [dropZone1, dropZone2, dropZone3];
 overlap({ targets: zones })
+
+// Complex selectors
+overlap({ targets: ['div.drop-zone:not(.disabled)', '[data-droppable="true"]'] })
 ```
 
 ### threshold
@@ -338,7 +338,7 @@ overlap({
 
 ## Visual Helpers
 
-The overlap plugin can show you visual helpers on the page to see what's happening. This is great for testing and debugging.
+The overlap plugin can show you visual borders to see what's happening during drag operations. This is great for testing and understanding overlap behavior.
 
 ### Basic Visual Helpers
 
@@ -355,64 +355,49 @@ overlap({
 ```typescript
 overlap({
   showOverlap: {
-    enabled: true,
-    alwaysVisible: false, // Only show helpers when dragging
-    
-    // What to show
-    showDragIndicator: true,           // Border around what you're dragging
-    showTargetIndicators: true,        // Borders around drop zones
-    showOverlapIndicators: true,       // Borders around touching elements
-    showIntersectionHighlight: true,   // Highlight where elements touch
-    showOverlapPercentage: true,       // Show how much they overlap
-    
-    // Colors
-    theme: {
-      dragIndicator: '#15ff00',        // Green for dragged element
-      targetIndicator: '#0088ff',      // Blue for drop zones
-      overlapIndicator: '#ff0000',     // Red for touching elements
-      intersectionHighlight: '#ffffffa0', // White highlight where they touch
-      percentageText: '#212121',       // Dark text for percentages
-    },
-    
-    // Styling
-    borderWidth: 2,
-    borderStyle: 'solid',
-    fontSize: '12px',
-    fontFamily: 'monospace',
-    zIndex: 9999,
-    
-    // Show messages in browser console
-    logging: {
-      logOverlapEvents: true,      // Log when overlaps start/end
-      logOverlapPercentages: true, // Log overlap amounts
-      logTargetCount: true,        // Log number of drop zones
-    }
+    enabled: true,           // Turn on visual helpers
+    dragColor: '#00ff88',    // Green for dragged element (default)
+    targetColor: '#0088ff',  // Blue for drop zones (default)
+    overlapColor: '#ff0000', // Red for overlapping areas (default)
+    zIndex: 9999,           // Layer order (default)
   }
 });
 ```
 
-### Simple Visual Modes
+### Custom Color Themes
 
-**Always show drop zones:**
 ```typescript
 overlap({
   showOverlap: {
     enabled: true,
-    alwaysVisible: true, // Show drop zones even when not dragging
+    dragColor: '#ffaa00',    // Orange for drag item
+    targetColor: '#00aaff',  // Light blue for targets
+    overlapColor: '#ff00aa', // Pink for overlaps
+    zIndex: 10000
   }
 });
 ```
 
-**Only show overlaps:**
+**Game-style colors:**
 ```typescript
 overlap({
   showOverlap: {
     enabled: true,
-    showDragIndicator: false,      // Don't show drag border
-    showTargetIndicators: false,   // Don't show drop zone borders
-    showOverlapIndicators: true,   // Only show when touching
-    showIntersectionHighlight: false,
-    showOverlapPercentage: false,
+    dragColor: '#00ff00',    // Bright green for player
+    targetColor: '#ffff00',  // Yellow for collectibles
+    overlapColor: '#ff0000', // Red for danger zones
+  }
+});
+```
+
+**Professional colors:**
+```typescript
+overlap({
+  showOverlap: {
+    enabled: true,
+    dragColor: '#2196f3',    // Material blue
+    targetColor: '#4caf50',  // Material green
+    overlapColor: '#ff9800', // Material orange
   }
 });
 ```
@@ -518,13 +503,25 @@ const proximity = [
 ### Performance Tips
 
 ```typescript
-// For many drop zones, check less often
+// For better performance with many targets
 const optimized = [
   overlap({
     targets: '.many-targets',
-    checkFrequency: 50, // Check every 50ms instead of every frame
-    threshold: 0.1, // Higher threshold
-    oncePerTarget: true, // Less callback calls
+    checkFrequency: 50,     // Check every 50ms instead of every frame
+    threshold: 0.1,         // Higher threshold = fewer false positives
+    oncePerTarget: true,    // Fewer callback calls
+    showOverlap: {
+      enabled: false        // Disable visuals in production
+    }
+  })
+];
+
+// For maximum performance
+const ultraFast = [
+  overlap({
+    targets: document.querySelectorAll('.target'), // Pre-selected elements
+    checkFrequency: 100,    // Slower checking
+    threshold: 0.2,         // Higher threshold
   })
 ];
 ```
@@ -579,18 +576,23 @@ const plugins = [
 
 ### Choosing Drop Zones
 - Use specific CSS selectors instead of checking all elements
-- Cache target elements when possible
-- Use data attributes to identify targets
+- Pre-select elements when possible: `targets: document.querySelectorAll('.zone')`
+- Use data attributes to identify targets: `targets: '[data-droppable="true"]'`
 
 ### Check Frequency
-- Use `'frame'` for smooth visual feedback
-- Use higher numbers (like 50ms) for better performance with many targets
+- Use `'frame'` for smooth visual feedback and games
+- Use higher numbers (like 50-100ms) for better performance with many targets
 - Consider slower checking on mobile devices
 
-### Overlap Amount
-- Higher thresholds reduce false positives and improve performance
-- Lower thresholds provide more sensitive detection
-- Test with different screen sizes
+### Overlap Amount  
+- Higher thresholds (0.3-0.5) reduce false positives and improve performance
+- Lower thresholds (0.01-0.1) provide more sensitive detection
+- Test with different screen sizes and touch interfaces
+
+### Visual Helpers
+- Disable `showOverlap` in production for better performance
+- Use visual helpers only during development and testing
+- Custom colors can help distinguish different interaction zones
 
 ## Real Examples
 
@@ -684,13 +686,11 @@ const gameCollision = [
     },
     showOverlap: {
       enabled: isDevelopment, // Only show during development
-      showIntersectionHighlight: true,
-      theme: {
-        intersectionHighlight: '#ff000050'
-      }
+      dragColor: '#00ff00',
+      overlapColor: '#ff000080' // Semi-transparent red
     }
   })
 ];
 ```
 
-The overlap plugin is perfect for creating drag-and-drop interfaces, collision detection, and proximity-based interactions. The visual helpers make it easy to see and fine-tune overlap behavior while you're building your app.
+The overlap plugin is perfect for creating drag-and-drop interfaces, collision detection, and proximity-based interactions. The visual helpers make it easy to see and debug overlap behavior during development, while the optimized performance ensures smooth operation in production.

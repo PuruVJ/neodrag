@@ -10,29 +10,10 @@ import { unstable_definePlugin } from "./plugins";
 
 export interface ShowOverlapConfig {
     enabled?: boolean;
-    alwaysVisible?: boolean;
-    showDragIndicator?: boolean;
-    showTargetIndicators?: boolean;
-    showOverlapIndicators?: boolean;
-    showIntersectionHighlight?: boolean;
-    showOverlapPercentage?: boolean;
-    theme?: {
-        dragIndicator?: string;
-        targetIndicator?: string;
-        overlapIndicator?: string;
-        intersectionHighlight?: string;
-        percentageText?: string;
-    };
-    borderWidth?: number;
-    borderStyle?: string;
-    fontSize?: string;
-    fontFamily?: string;
+    dragColor?: string;
+    targetColor?: string;
+    overlapColor?: string;
     zIndex?: number;
-    logging?: {
-        logOverlapEvents?: boolean;
-        logOverlapPercentages?: boolean;
-        logTargetCount?: boolean;
-    };
 }
 
 export interface OverlapOptions {
@@ -52,29 +33,10 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
 
     const cfg = {
         enabled: showOverlap.enabled ?? false,
-        alwaysVisible: showOverlap.alwaysVisible ?? false,
-        showDragIndicator: showOverlap.showDragIndicator ?? true,
-        showTargetIndicators: showOverlap.showTargetIndicators ?? true,
-        showOverlapIndicators: showOverlap.showOverlapIndicators ?? true,
-        showIntersectionHighlight: showOverlap.showIntersectionHighlight ?? true,
-        showOverlapPercentage: showOverlap.showOverlapPercentage ?? true,
-        theme: {
-            dragIndicator: showOverlap.theme?.dragIndicator ?? '#15ff00',
-            targetIndicator: showOverlap.theme?.targetIndicator ?? '#0088ff',
-            overlapIndicator: showOverlap.theme?.overlapIndicator ?? '#ff0000',
-            intersectionHighlight: showOverlap.theme?.intersectionHighlight ?? '#f23ea644',
-            percentageText: showOverlap.theme?.percentageText ?? '#212121',
-        },
-        borderWidth: showOverlap.borderWidth ?? 2,
-        borderStyle: showOverlap.borderStyle ?? 'solid',
-        fontSize: showOverlap.fontSize ?? '12px',
-        fontFamily: showOverlap.fontFamily ?? 'monospace',
+        dragColor: showOverlap.dragColor ?? '#00ff88',
+        targetColor: showOverlap.targetColor ?? '#0088ff',
+        overlapColor: showOverlap.overlapColor ?? '#ff0000',
         zIndex: showOverlap.zIndex ?? 9999,
-        logging: {
-            logOverlapEvents: showOverlap.logging?.logOverlapEvents ?? false,
-            logOverlapPercentages: showOverlap.logging?.logOverlapPercentages ?? false,
-            logTargetCount: showOverlap.logging?.logTargetCount ?? false,
-        }
     } as Required<ShowOverlapConfig>;
 
     let lastOverlaps: Set<HTMLElement> = new Set();
@@ -84,6 +46,7 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
     let targetsNeedRefresh = true;
     let debugOverlays: Map<string, HTMLElement> = new Map();
     let debugStyleSheet: HTMLStyleElement | null = null;
+    let overlayPool: HTMLElement[] = []; // Pool for reusing overlay elements
 
     // Observer-based optimization
     let intersectionObserver: IntersectionObserver | null = null;
@@ -101,19 +64,17 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
         debugStyleSheet.id = 'neodrag-overlap-visual-styles';
 
         const z = cfg.zIndex;
-        const bw = cfg.borderWidth;
-        const bs = cfg.borderStyle;
-        const theme = cfg.theme;
-        const fontSize = cfg.fontSize;
-        const fontFamily = cfg.fontFamily;
 
-        debugStyleSheet.textContent = `.neodrag-overlap-indicator{pointer-events:none;position:fixed;box-sizing:border-box;z-index:${z}}.neodrag-overlap-drag{border:${bw}px ${bs} ${theme.dragIndicator}!important}.neodrag-overlap-target{border:${bw}px ${bs} ${theme.targetIndicator}!important}.neodrag-overlap-overlap{border:${bw}px ${bs} ${theme.overlapIndicator}!important}.neodrag-overlap-intersection{background-color:${theme.intersectionHighlight}!important;pointer-events:none;position:fixed;z-index:${z+1}}.neodrag-overlap-percentage{position:fixed;background:rgba(255,255,255,0.9);color:${theme.percentageText};font-family:${fontFamily};font-size:${fontSize};font-weight:bold;padding:2px 6px;border-radius:3px;pointer-events:none;z-index:${z+2};box-shadow:0 1px 3px rgba(0,0,0,0.3);}`;
+        debugStyleSheet.textContent = `.neodrag-overlap-indicator{pointer-events:none;position:fixed;box-sizing:border-box;z-index:${z}}.neodrag-overlap-overlap{border:2px solid ${cfg.overlapColor}!important}.neodrag-overlap-drag{border:2px solid ${cfg.dragColor}!important}.neodrag-overlap-target{border:2px solid ${cfg.targetColor}!important}`;
 
         document.head.appendChild(debugStyleSheet);
     };
 
     const cleanupOverlapVisuals = () => {
-        debugOverlays.forEach(o => o.remove());
+        debugOverlays.forEach(o => {
+            o.remove();
+            overlayPool.push(o); // Return to pool for reuse
+        });
         debugOverlays.clear();
         if (debugStyleSheet?.parentNode) {
             debugStyleSheet.remove();
@@ -121,95 +82,50 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
         }
     };
 
-    const createOverlay = (rect: DOMRect, className: string, content?: string) => {
-        const o = document.createElement('div');
+    const createOverlay = (rect: DOMRect, className: string) => {
+        const o = overlayPool.pop() || document.createElement('div');
         o.className = className;
         o.style.cssText = `left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px`;
-        if (content) o.textContent = content;
-        return o;
-    };
-
-    const createIntersectionOverlay = (draggedRect: DOMRect, targetRect: DOMRect) => {
-        const l = Math.max(draggedRect.left, targetRect.left);
-        const t = Math.max(draggedRect.top, targetRect.top);
-        const r = Math.min(draggedRect.right, targetRect.right);
-        const b = Math.min(draggedRect.bottom, targetRect.bottom);
-        return createOverlay({ left: l, top: t, width: r - l, height: b - t } as DOMRect, 'neodrag-overlap-intersection');
-    };
-
-    const createPercentageOverlay = (draggedRect: DOMRect, targetRect: DOMRect, percentage: number) => {
-        const l = Math.max(draggedRect.left, targetRect.left);
-        const t = Math.max(draggedRect.top, targetRect.top);
-        const r = Math.min(draggedRect.right, targetRect.right);
-        const b = Math.min(draggedRect.bottom, targetRect.bottom);
-        const x = (l + r) * 0.5;
-        const y = (t + b) * 0.5;
-        const o = createOverlay({ left: x, top: y, width: 0, height: 0 } as DOMRect, 'neodrag-overlap-percentage', `${(percentage * 100).toFixed(1)}%`);
-        o.style.transform = 'translate(-50%,-50%)';
         return o;
     };
 
     const updateOverlapVisuals = (draggedEl: HTMLElement | null, targetElements: HTMLElement[], overlappedData: Array<{ element: HTMLElement, percentage: number, draggedRect: DOMRect, targetRect: DOMRect }>) => {
         if (!cfg.enabled) return;
-        
-        try {
-            debugOverlays.forEach(o => {
-                if (o && o.parentNode) {
-                    o.remove();
-                }
-            });
-            debugOverlays.clear();
 
-            if (cfg.showDragIndicator && draggedEl && draggedEl.getBoundingClientRect) {
-                const dragRect = draggedEl.getBoundingClientRect();
-                if (dragRect.width > 0 && dragRect.height > 0) {
-                    const o = createOverlay(dragRect, 'neodrag-overlap-indicator neodrag-overlap-drag');
-                    document.body.appendChild(o);
-                    debugOverlays.set('drag-indicator', o);
-                }
+        debugOverlays.forEach(o => o.remove());
+        debugOverlays.clear();
+
+        // Show border on dragged element - use cached rect only
+        if (draggedEl) {
+            const dragRect = elementRectCache.get(draggedEl);
+            if (dragRect && dragRect.width > 0 && dragRect.height > 0) {
+                const o = createOverlay(dragRect, 'neodrag-overlap-indicator neodrag-overlap-drag');
+                document.body.appendChild(o);
+                debugOverlays.set('drag-indicator', o);
             }
-
-            if (cfg.showTargetIndicators) {
-                targetElements.forEach((el, i) => {
-                    if (el !== draggedEl && el && el.getBoundingClientRect) {
-                        const targetRect = el.getBoundingClientRect();
-                        if (targetRect.width > 0 && targetRect.height > 0) {
-                            const o = createOverlay(targetRect, 'neodrag-overlap-indicator neodrag-overlap-target');
-                            document.body.appendChild(o);
-                            debugOverlays.set(`target-indicator-${i}`, o);
-                        }
-                    }
-                });
-            }
-
-            overlappedData.forEach(({ percentage, draggedRect, targetRect }, i) => {
-                if (cfg.showOverlapIndicators && targetRect.width > 0 && targetRect.height > 0) {
-                    const o = createOverlay(targetRect, 'neodrag-overlap-indicator neodrag-overlap-overlap');
-                    document.body.appendChild(o);
-                    debugOverlays.set(`overlap-indicator-${i}`, o);
-                }
-                if (cfg.showIntersectionHighlight) {
-                    const o = createIntersectionOverlay(draggedRect, targetRect);
-                    document.body.appendChild(o);
-                    debugOverlays.set(`intersection-${i}`, o);
-                }
-                if (cfg.showOverlapPercentage) {
-                    const o = createPercentageOverlay(draggedRect, targetRect, percentage);
-                    document.body.appendChild(o);
-                    debugOverlays.set(`percentage-${i}`, o);
-                }
-            });
-
-            if (cfg.logging.logTargetCount) console.log(`[Show Overlap] Target count: ${targetElements.length}`);
-            if (cfg.logging.logOverlapEvents && overlappedData.length) console.log(`[Show Overlap] Overlapping elements:`, overlappedData.map(d => ({ element: d.element, percentage: d.percentage })));
-            if (cfg.logging.logOverlapPercentages && overlappedData.length) console.log(`[Show Overlap] Percentages:`, overlappedData.map(d => `${(d.percentage * 100).toFixed(1)}%`));
-        } catch (error) {
-            console.error('[NeoDrag Overlap] Error updating visual overlays:', error);
         }
-    };
 
-    const showAlwaysVisibleOverlap = () => {
-        if (cfg.enabled && cfg.alwaysVisible) updateOverlapVisuals(null, getTargetElements(), []);
+        // Show borders on target elements - use cached rects only  
+        for (let i = 0; i < targetElements.length; i++) {
+            const el = targetElements[i];
+            if (el !== draggedEl) {
+                const targetRect = elementRectCache.get(el);
+                if (targetRect && targetRect.width > 0 && targetRect.height > 0) {
+                    const o = createOverlay(targetRect, 'neodrag-overlap-indicator neodrag-overlap-target');
+                    document.body.appendChild(o);
+                    debugOverlays.set(`target-indicator-${i}`, o);
+                }
+            }
+        }
+
+        for (let i = 0; i < overlappedData.length; i++) {
+            const { targetRect } = overlappedData[i];
+            if (targetRect.width > 0 && targetRect.height > 0) {
+                const o = createOverlay(targetRect, 'neodrag-overlap-indicator neodrag-overlap-overlap');
+                document.body.appendChild(o);
+                debugOverlays.set(`overlap-indicator-${i}`, o);
+            }
+        }
     };
 
     const updateElementRectCache = (element: HTMLElement) => {
@@ -221,27 +137,7 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
         }
     };
 
-    const scheduleObserverUpdate = () => {
-        if (observerUpdateScheduled) return;
-        observerUpdateScheduled = true;
-        
-        requestAnimationFrame(() => {
-            if (!observerUpdateScheduled) return;
-            observerUpdateScheduled = false;
-            
-            observedElements.forEach(element => {
-                if (element?.isConnected) updateElementRectCache(element);
-            });
-            
-            if (draggedElement?.isConnected) {
-                updateElementRectCache(draggedElement);
-                runDetection({ rootNode: draggedElement });
-            }
-        });
-    };
-
-    const initObservers = () => {
-        // Clean up existing observers and listeners first
+    const cleanupObservers = () => {
         if (intersectionObserver) {
             intersectionObserver.disconnect();
             intersectionObserver = null;
@@ -254,6 +150,29 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
             window.removeEventListener('scroll', scrollEventListener);
             scrollEventListener = null;
         }
+    };
+
+    const scheduleObserverUpdate = () => {
+        if (observerUpdateScheduled) return;
+        observerUpdateScheduled = true;
+
+        requestAnimationFrame(() => {
+            if (!observerUpdateScheduled) return;
+            observerUpdateScheduled = false;
+
+            observedElements.forEach(element => {
+                if (element?.isConnected) updateElementRectCache(element);
+            });
+
+            if (draggedElement?.isConnected) {
+                updateElementRectCache(draggedElement);
+                runDetection({ rootNode: draggedElement });
+            }
+        });
+    };
+
+    const initObservers = () => {
+        cleanupObservers();
 
         // Intersection Observer to detect when elements enter/leave viewport
         intersectionObserver = new IntersectionObserver((entries) => {
@@ -323,11 +242,10 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
         }
 
         // Add new target elements
-        targetElements.forEach(element => {
-            if (element !== draggedElement) {
-                observeElement(element);
-            }
-        });
+        for (let i = 0; i < targetElements.length; i++) {
+            const element = targetElements[i];
+            if (element !== draggedElement) observeElement(element);
+        }
     };
 
     const getTargetElements = (): HTMLElement[] => {
@@ -335,16 +253,12 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
         let elements: HTMLElement[];
 
         if (!targets) {
-            // If no targets specified, return empty array to avoid performance issues
-            // Users should explicitly specify targets for overlap detection
-            console.warn('[NeoDrag Overlap] No targets specified. Please provide target selectors or elements for better performance.');
             elements = [];
         } else if (typeof targets === 'string') {
             // Single string selector
             try {
                 elements = Array.from(document.querySelectorAll<HTMLElement>(targets));
             } catch (error) {
-                console.error('[NeoDrag Overlap] Invalid selector:', targets, error);
                 elements = [];
             }
         } else if (Array.isArray(targets)) {
@@ -352,23 +266,18 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
             elements = [];
             for (const target of targets) {
                 if (typeof target === 'string') {
-                    // String selector in array
                     try {
                         const found = Array.from(document.querySelectorAll<HTMLElement>(target));
                         elements.push(...found);
                     } catch (error) {
-                        console.error('[NeoDrag Overlap] Invalid selector in array:', target, error);
+                        // Skip invalid selectors
                     }
-                } else if (target instanceof HTMLElement) {
-                    // Direct HTMLElement in array
-                    if (target.isConnected) {
-                        elements.push(target);
-                    }
+                } else if (target instanceof HTMLElement && target.isConnected) {
+                    elements.push(target);
                 }
             }
         } else {
-            // Direct array of HTMLElements (legacy support)
-            elements = (targets as HTMLElement[]).filter((el: HTMLElement) => el instanceof HTMLElement && el.isConnected);
+            elements = [];
         }
 
         // Remove duplicates using Set and filter out disconnected elements
@@ -378,65 +287,49 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
         return uniqueElements;
     };
 
-    // Performance optimization: Fast overlap calculation with early returns
+    // Ultra-fast overlap calculation with minimal operations
     const getOverlapPercentage = (a: DOMRect, b: DOMRect) => {
-        // Early return for non-intersecting rectangles
-        if (a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top) return 0;
-
-        const l = Math.max(a.left, b.left);
-        const t = Math.max(a.top, b.top);
-        const r = Math.min(a.right, b.right);
-        const b2 = Math.min(a.bottom, b.bottom);
-        const intersection = (r - l) * (b2 - t);
-        const areaA = a.width * a.height;
-        return areaA === 0 ? 0 : intersection / areaA;
+        const intersection = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) *
+                           Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+        return intersection / (a.width * a.height || 1);
     };
 
-    // Pre-allocated buffers for better performance
-    let overlappedBuffer: HTMLElement[] = [];
-    let overlappedDataBuffer: Array<{ element: HTMLElement, percentage: number, draggedRect: DOMRect, targetRect: DOMRect }> = [];
+    const runDetection = (ctx: any) => {
+        if (!ctx?.rootNode) return;
 
-    const runDetection = (ctx: any, legacy = false) => {
-        if (!ctx?.rootNode) {
-            console.warn('[NeoDrag Overlap] Invalid context provided');
-            return;
-        }
-        
         const draggedEl = ctx.rootNode as HTMLElement;
-        if (!draggedEl?.getBoundingClientRect) {
-            console.warn('[NeoDrag Overlap] Invalid dragged element');
-            return;
-        }
+        if (!draggedEl) return;
 
-        // Use cached rect if available and not legacy mode
-        const draggedRect = !legacy && intersectionObserver && resizeObserver 
-            ? (() => {
-                draggedElement = draggedEl;
-                updateElementRectCache(draggedElement);
-                return elementRectCache.get(draggedElement);
-            })()
-            : draggedEl.getBoundingClientRect();
-
+        // Always use cached rect for dragged element
+        draggedElement = draggedEl;
+        updateElementRectCache(draggedElement);
+        const draggedRect = elementRectCache.get(draggedElement);
+        
         if (!draggedRect || draggedRect.width === 0 || draggedRect.height === 0) return;
 
-        // Clear buffers efficiently
-        overlappedBuffer.length = 0;
-        overlappedDataBuffer.length = 0;
+        // Create fresh buffers
+        const overlappedBuffer: HTMLElement[] = [];
+        const overlappedDataBuffer: Array<{ element: HTMLElement, percentage: number, draggedRect: DOMRect, targetRect: DOMRect }> = [];
 
         const targetElements = getTargetElements();
         const minThreshold = Math.max(threshold, 0.000001);
 
-        // Optimized detection loop
-        for (const el of targetElements) {
-            if (el === draggedEl || !el?.isConnected) continue;
+        // Optimized detection loop - cache-only
+        for (let i = 0; i < targetElements.length; i++) {
+            const el = targetElements[i];
+            if (el === draggedEl) continue;
 
-            const elRect = !legacy && elementRectCache.has(el) 
-                ? elementRectCache.get(el)! 
-                : el.getBoundingClientRect?.();
+            let elRect = elementRectCache.get(el);
+            if (!elRect) {
+                // Cache miss - update cache
+                updateElementRectCache(el);
+                elRect = elementRectCache.get(el);
+                if (!elRect) continue; // Element disconnected
+            }
             
-            if (!elRect || elRect.width === 0 || elRect.height === 0) continue;
+            if (elRect.width === 0 || elRect.height === 0) continue;
 
-            // Inline intersection check for performance
+            // Fast intersection check
             if (draggedRect.right <= elRect.left || elRect.right <= draggedRect.left ||
                 draggedRect.bottom <= elRect.top || elRect.bottom <= draggedRect.top) continue;
 
@@ -452,19 +345,22 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
             updateOverlapVisuals(draggedEl, targetElements, overlappedDataBuffer);
         }
 
-        // Handle overlap events
+        // Handle overlap events - optimized
         const currentSet = new Set(overlappedBuffer);
-        const newEntries: HTMLElement[] = [];
-        const removedEntries: HTMLElement[] = [];
-
-        for (const el of currentSet) if (!lastOverlaps.has(el)) newEntries.push(el);
-        for (const el of lastOverlaps) if (!currentSet.has(el)) removedEntries.push(el);
-
+        
         if (oncePerTarget) {
-            newEntries.forEach(el => onOverlapStart?.(el));
-            removedEntries.forEach(el => onOverlapEnd?.(el));
+            // Process new overlaps
+            for (const el of currentSet) {
+                if (!lastOverlaps.has(el)) onOverlapStart?.(el);
+            }
+            // Process ended overlaps  
+            for (const el of lastOverlaps) {
+                if (!currentSet.has(el)) onOverlapEnd?.(el);
+            }
         } else {
-            overlappedBuffer.forEach(el => onOverlapStart?.(el));
+            for (let i = 0; i < overlappedBuffer.length; i++) {
+                onOverlapStart?.(overlappedBuffer[i]);
+            }
         }
 
         onOverlapUpdate?.(overlappedBuffer);
@@ -474,6 +370,7 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
     return {
         name: 'overlap-detection',
         liveUpdate: true,
+
         drag(ctx) {
             if (checkFrequency === 'frame') {
                 if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
@@ -481,29 +378,30 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
             }
         },
         start(ctx) {
-            if (!ctx?.rootNode) {
-                console.warn('[NeoDrag Overlap] Invalid context provided');
-                return;
-            }
-            
+            if (!ctx?.rootNode) return;
+
             if (cfg.enabled) initOverlapStyles();
             targetsNeedRefresh = true;
 
             if (!intersectionObserver || !resizeObserver) initObservers();
 
             const rootElement = ctx.rootNode as HTMLElement;
-            if (rootElement && typeof rootElement.getBoundingClientRect === 'function') {
+            if (rootElement) {
                 draggedElement = rootElement;
                 if (resizeObserver) {
                     resizeObserver.observe(draggedElement);
                     updateElementRectCache(draggedElement);
                 }
             } else {
-                console.warn('[NeoDrag Overlap] Invalid root element provided');
                 return;
             }
 
             refreshObservedElements();
+
+            // Show borders when dragging starts
+            if (cfg.enabled) {
+                updateOverlapVisuals(draggedElement, getTargetElements(), []);
+            }
 
             if (checkFrequency !== 'frame' && typeof checkFrequency === 'number' && checkFrequency > 0) {
                 intervalId = window.setInterval(() => runDetection(ctx), checkFrequency);
@@ -521,9 +419,9 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
             for (const el of lastOverlaps) onOverlapEnd?.(el);
             lastOverlaps.clear();
 
+            // Clean up visuals when dragging ends
             if (cfg.enabled) {
-                if (cfg.alwaysVisible) showAlwaysVisibleOverlap();
-                else cleanupOverlapVisuals();
+                cleanupOverlapVisuals();
             }
 
             draggedElement = null;
@@ -532,39 +430,18 @@ export const overlap = unstable_definePlugin((options: OverlapOptions = {}) => {
             if (intervalId !== null) { clearInterval(intervalId); intervalId = null; }
             if (animationFrameId !== null) { cancelAnimationFrame(animationFrameId); animationFrameId = null; }
 
-            if (scrollEventListener) {
-                window.removeEventListener('scroll', scrollEventListener);
-                scrollEventListener = null;
-            }
-
-            if (intersectionObserver) {
-                intersectionObserver.disconnect();
-                intersectionObserver = null;
-            }
-            if (resizeObserver) {
-                resizeObserver.disconnect();
-                resizeObserver = null;
-            }
+            cleanupObservers();
 
             observedElements.clear();
             elementRectCache.clear();
             lastOverlaps.clear();
             cachedTargets = null;
             targetsNeedRefresh = true;
-            overlappedBuffer.length = 0;
-            overlappedDataBuffer.length = 0;
             draggedElement = null;
             observerUpdateScheduled = false;
 
             cleanupOverlapVisuals();
-        },
-        init() {
-            if (cfg.enabled) {
-                initOverlapStyles();
-                if (cfg.alwaysVisible) showAlwaysVisibleOverlap();
-            }
-
-            if (!intersectionObserver || !resizeObserver) initObservers();
+            overlayPool.length = 0; // Clear overlay pool
         },
     };
 });
