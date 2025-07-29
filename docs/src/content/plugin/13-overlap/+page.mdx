@@ -1,0 +1,696 @@
+---
+title: 'overlap'
+tagline: 'Detect when draggable elements overlap with other elements'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+<div style="padding: 1.75rem 1.5rem; border-radius: 14px; box-shadow: 0 4px 24px #0001; backdrop-filter: blur(16px) saturate(180%); background: linear-gradient(120deg, #23272f80 60%, #2e365080 100%); border-top: 1.5px solid #ffffff18; border-right: 1.5px solid #ffffff0a; border-bottom: 1.5px solid #ffffff0a; transition: background 0.3s cubic-bezier(.4,2,.6,1);">
+    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+        <div style="width: 38px; height: 38px; background: #ffffff30; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px #0002;">
+            <img style="width: 26px; height: 26px; object-fit:cover;" src='https://ik.imagekit.io/sheryians/light-logo_lNzGXRRlQ.png' alt="Sheryians Logo"/>
+        </div>
+        <div>
+            <div style="color: #fff; font-weight: 700; font-size: 1.15rem; letter-spacing: 0.01em;">Crafted by Sheryians</div>
+            <div style="color: #e0e7ff; font-size: 0.93rem;">Developed &amp; maintained by <a href="https://github.com/aayushchouhan24" style="color: #e0e7ff; font-size: 0.93rem; background:none; margin:0; text-decoration: underline">Aayush Chouhan</a></div>
+        </div>
+    </div>
+    <div style="color: #c7d2fe; font-size: 0.93rem; display: flex; align-items: center; gap: 0.5rem;">
+        <svg width="26" height="26" fill="none" viewBox="0 0 24 24" style="margin-top:.3rem;"><path fill="#fff" d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48 0-.24-.01-.87-.01-1.7-2.78.6-3.37-1.34-3.37-1.34-.45-1.13-1.11-1.43-1.11-1.43-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02A9.56 9.56 0 0 1 12 6.8c.85.004 1.71.115 2.51.337 1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85 0 1.34-.01 2.42-.01 2.75 0 .27.18.58.69.48A10.01 10.01 0 0 0 22 12c0-5.52-4.48-10-10-10Z"></path></svg>
+        <a 
+            href="https://github.com/sheryianscodingschool" 
+            style="color: #ffffff93; background:none; margin:0; text-decoration: none !important; font-weight: 600; transition: color 0.2s;" 
+            target="_blank" 
+            rel="noopener"
+            onmouseover="this.style.color='#fff'"
+            onmouseout="this.style.color='#ffffff93'"
+        >github.com/sheryianscodingschool</a>
+    </div>
+</div>
+
+The `overlap` plugin helps you detect when a draggable element touches other elements on the page. It tells you when elements overlap and can show visual highlights to help you see what's happening.
+
+```typescript
+overlap(); // Check for overlaps with all elements
+overlap({ targets: '.drop-zone' }); // Only check specific elements
+overlap({ threshold: 0.5 }); // Need 50% overlap to trigger
+```
+
+## Basic Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { overlap } from '@neodrag/svelte';
+  
+  let overlapping = [];
+  
+  const handleOverlapUpdate = (targets) => {
+    overlapping = targets;
+    console.log('Overlapping with:', targets.length, 'elements');
+  };
+</script>
+
+<div {@attach draggable([
+  overlap({
+    targets: ['.drop-zone', '#special-target', 'div.interactive'],
+    onOverlapUpdate: handleOverlapUpdate
+  })
+])}>
+  Drag me over the targets
+</div>
+
+<div class="drop-zone">Drop Zone 1</div>
+<div class="drop-zone">Drop Zone 2</div>
+<div id="special-target">Special Target</div>
+<div class="interactive">Interactive Element</div>
+
+{#if overlapping.length > 0}
+  <p>Currently overlapping with {overlapping.length} elements!</p>
+{/if}
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { useRef, useState } from 'react';
+import { overlap, useDraggable } from '@neodrag/react';
+
+function OverlapDetection() {
+  const dragRef = useRef<HTMLDivElement>(null);
+  const [overlapping, setOverlapping] = useState<HTMLElement[]>([]);
+
+  useDraggable(dragRef, [
+    overlap({
+      targets: ['.drop-zone', '#special-target', 'div.interactive'],
+      onOverlapUpdate: (targets) => {
+        setOverlapping(targets);
+        console.log('Overlapping with:', targets.length, 'elements');
+      }
+    })
+  ]);
+
+  return (
+    <div>
+      <div ref={dragRef}>
+        Drag me over the targets
+      </div>
+      <div className="drop-zone">Drop Zone 1</div>
+      <div className="drop-zone">Drop Zone 2</div>
+      <div id="special-target">Special Target</div>
+      <div className="interactive">Interactive Element</div>
+      {overlapping.length > 0 && (
+        <p>Currently overlapping with {overlapping.length} elements!</p>
+      )}
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { overlap, vDraggable } from '@neodrag/vue';
+
+const overlapping = ref([]);
+
+const handleOverlapUpdate = (targets) => {
+  overlapping.value = targets;
+  console.log('Overlapping with:', targets.length, 'elements');
+};
+</script>
+
+<template>
+  <div>
+    <div v-draggable="[
+      overlap({
+        targets: '.drop-zone',
+        onOverlapUpdate: handleOverlapUpdate
+      })
+    ]">
+      Drag me over the drop zones
+    </div>
+    <div class="drop-zone">Drop Zone 1</div>
+    <div class="drop-zone">Drop Zone 2</div>
+    <p v-if="overlapping.length > 0">
+      Currently overlapping with {{ overlapping.length }} elements!
+    </p>
+  </div>
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { overlap, useDraggable } from '@neodrag/solid';
+
+function OverlapDetection() {
+  const [dragEl, setDragEl] = createSignal<HTMLElement | null>(null);
+  const [overlapping, setOverlapping] = createSignal<HTMLElement[]>([]);
+
+  useDraggable(dragEl, [
+    overlap({
+      targets: '.drop-zone',
+      onOverlapUpdate: (targets) => {
+        setOverlapping(targets);
+        console.log('Overlapping with:', targets.length, 'elements');
+      }
+    })
+  ]);
+
+  return (
+    <div>
+      <div ref={setDragEl}>
+        Drag me over the drop zones
+      </div>
+      <div class="drop-zone">Drop Zone 1</div>
+      <div class="drop-zone">Drop Zone 2</div>
+      <Show when={overlapping().length > 0}>
+        <p>Currently overlapping with {overlapping().length} elements!</p>
+      </Show>
+    </div>
+  );
+}
+```
+
+</div>
+
+<div slot="vanilla">
+
+```typescript
+import { Draggable, overlap } from '@neodrag/vanilla';
+
+const dragElement = document.querySelector('#drag-me') as HTMLElement;
+let overlapping: HTMLElement[] = [];
+
+new Draggable(dragElement, [
+  overlap({
+    targets: '.drop-zone',
+    onOverlapUpdate: (targets) => {
+      overlapping = targets;
+      console.log('Overlapping with:', targets.length, 'elements');
+      
+      // Update UI
+      const status = document.querySelector('#status');
+      if (status) {
+        status.textContent = overlapping.length > 0 
+          ? `Currently overlapping with ${overlapping.length} elements!`
+          : '';
+      }
+    }
+  })
+]);
+```
+
+</div>
+</FrameworkSwitch>
+
+## Settings
+
+### targets
+
+**Type:** `string | string[] | HTMLElement[]`  
+**Default:** `undefined` (checks all elements)
+
+Choose which elements to check for overlaps. You can use CSS selectors or actual elements.
+
+```typescript
+// Check all elements on the page
+overlap()
+
+// Check elements with a specific class
+overlap({ targets: '.drop-zone' })
+
+// Check multiple types of elements
+overlap({ targets: ['.drop-zone', 'div', '#special-box'] })
+overlap({ targets: ['.target', '.draggable', '#container > div'] })
+
+// Check different types of selectors together
+overlap({ targets: ['.class-name', '#id-name', 'tag-name'] })
+
+// Use actual HTML elements
+const zones = [dropZone1, dropZone2, dropZone3];
+overlap({ targets: zones })
+```
+
+### threshold
+
+**Type:** `number`  
+**Default:** `0.01`
+
+How much the elements need to overlap before it counts. `0.01` means 1% overlap, `0.5` means 50% overlap.
+
+```typescript
+overlap({ threshold: 0.1 });  // Need 10% overlap
+overlap({ threshold: 0.5 });  // Need 50% overlap
+overlap({ threshold: 0.01 }); // Need 1% overlap (default)
+```
+
+### oncePerTarget
+
+**Type:** `boolean`  
+**Default:** `true`
+
+When `true`, start and end events only fire once per element. When `false`, they fire continuously.
+
+```typescript
+overlap({
+  oncePerTarget: true,  // Fire start/end once per element
+  oncePerTarget: false, // Fire start/end continuously
+});
+```
+
+### checkFrequency
+
+**Type:** `number | 'frame'`  
+**Default:** `'frame'`
+
+How often to check for overlaps. Use `'frame'` for smooth checking, or a number for milliseconds.
+
+```typescript
+overlap({ checkFrequency: 'frame' }); // Check every animation frame (smooth)
+overlap({ checkFrequency: 16 });      // Check every 16ms (about 60fps)
+overlap({ checkFrequency: 100 });     // Check every 100ms (uses less CPU)
+```
+
+## Events
+
+### onOverlapStart
+
+**Type:** `(target: HTMLElement) => void`
+
+Called when the draggable element starts touching another element.
+
+```typescript
+overlap({
+  onOverlapStart: (target) => {
+    target.classList.add('highlight');
+    console.log('Started touching:', target);
+  }
+});
+```
+
+### onOverlapEnd
+
+**Type:** `(target: HTMLElement) => void`
+
+Called when the draggable element stops touching another element.
+
+```typescript
+overlap({
+  onOverlapEnd: (target) => {
+    target.classList.remove('highlight');
+    console.log('Stopped touching:', target);
+  }
+});
+```
+
+### onOverlapUpdate
+
+**Type:** `(targets: HTMLElement[]) => void`
+
+Called continuously with the current list of overlapping elements.
+
+```typescript
+overlap({
+  onOverlapUpdate: (targets) => {
+    // Update UI based on what you're currently touching
+    updateDropZoneVisuals(targets);
+    
+    // Check if touching a specific element
+    const isTouchingSpecialZone = targets.some(el => 
+      el.classList.contains('special-drop-zone')
+    );
+  }
+});
+```
+
+## Visual Helpers
+
+The overlap plugin can show you visual helpers on the page to see what's happening. This is great for testing and debugging.
+
+### Basic Visual Helpers
+
+```typescript
+overlap({
+  showOverlap: {
+    enabled: true, // Turn on visual helpers
+  }
+});
+```
+
+### All Visual Helper Options
+
+```typescript
+overlap({
+  showOverlap: {
+    enabled: true,
+    alwaysVisible: false, // Only show helpers when dragging
+    
+    // What to show
+    showDragIndicator: true,           // Border around what you're dragging
+    showTargetIndicators: true,        // Borders around drop zones
+    showOverlapIndicators: true,       // Borders around touching elements
+    showIntersectionHighlight: true,   // Highlight where elements touch
+    showOverlapPercentage: true,       // Show how much they overlap
+    
+    // Colors
+    theme: {
+      dragIndicator: '#15ff00',        // Green for dragged element
+      targetIndicator: '#0088ff',      // Blue for drop zones
+      overlapIndicator: '#ff0000',     // Red for touching elements
+      intersectionHighlight: '#ffffffa0', // White highlight where they touch
+      percentageText: '#212121',       // Dark text for percentages
+    },
+    
+    // Styling
+    borderWidth: 2,
+    borderStyle: 'solid',
+    fontSize: '12px',
+    fontFamily: 'monospace',
+    zIndex: 9999,
+    
+    // Show messages in browser console
+    logging: {
+      logOverlapEvents: true,      // Log when overlaps start/end
+      logOverlapPercentages: true, // Log overlap amounts
+      logTargetCount: true,        // Log number of drop zones
+    }
+  }
+});
+```
+
+### Simple Visual Modes
+
+**Always show drop zones:**
+```typescript
+overlap({
+  showOverlap: {
+    enabled: true,
+    alwaysVisible: true, // Show drop zones even when not dragging
+  }
+});
+```
+
+**Only show overlaps:**
+```typescript
+overlap({
+  showOverlap: {
+    enabled: true,
+    showDragIndicator: false,      // Don't show drag border
+    showTargetIndicators: false,   // Don't show drop zone borders
+    showOverlapIndicators: true,   // Only show when touching
+    showIntersectionHighlight: false,
+    showOverlapPercentage: false,
+  }
+});
+```
+
+## Examples
+
+### File Manager with Drop Zones
+
+```typescript
+// File manager with different types of drop zones
+const fileManagerOverlap = [
+  overlap({
+    targets: [
+      '.folder',           // Folder elements
+      '.trash-bin',        // Trash bin
+      '#upload-area',      // Upload area
+      'div[data-zone]'     // Custom data zones
+    ],
+    threshold: 0.4,
+    onOverlapStart: (target) => {
+      if (target.classList.contains('folder')) {
+        target.classList.add('folder-highlight');
+      } else if (target.classList.contains('trash-bin')) {
+        target.classList.add('delete-mode');
+      } else if (target.id === 'upload-area') {
+        target.classList.add('upload-ready');
+      }
+    },
+    onOverlapEnd: (target) => {
+      target.classList.remove('folder-highlight', 'delete-mode', 'upload-ready');
+    }
+  })
+];
+```
+
+### Simple Game Zone Detection
+
+```typescript
+// Game with different interaction zones
+const gameZones = [
+  overlap({
+    targets: [
+      '.enemy',            // Enemy characters
+      '.powerup',          // Power-up items
+      '.checkpoint',       // Save points
+      '.exit-door'         // Level exits
+    ],
+    threshold: 0.01,
+    checkFrequency: 'frame',
+    onOverlapUpdate: (targets) => {
+      // Handle different zone types at the same time
+      const enemies = targets.filter(el => el.classList.contains('enemy'));
+      const powerups = targets.filter(el => el.classList.contains('powerup'));
+      const checkpoints = targets.filter(el => el.classList.contains('checkpoint'));
+      
+      if (enemies.length > 0) handleCombat(enemies);
+      if (powerups.length > 0) collectPowerups(powerups);
+      if (checkpoints.length > 0) showSavePrompt(checkpoints[0]);
+    }
+  })
+];
+```
+
+### Simple Collision Detection
+
+```typescript
+const collision = [
+  overlap({
+    targets: '.obstacle',
+    threshold: 0.01, // Any touch counts
+    onOverlapStart: (obstacle) => {
+      // Handle collision
+      obstacle.classList.add('collision');
+      showCollisionEffect();
+    },
+    onOverlapEnd: (obstacle) => {
+      obstacle.classList.remove('collision');
+    }
+  })
+];
+```
+
+### Close Detection
+
+```typescript
+// Use larger invisible zones to detect when things are close
+const proximity = [
+  overlap({
+    targets: '.proximity-zone', // Larger invisible elements
+    threshold: 0.01,
+    onOverlapStart: (zone) => {
+      const actualTarget = zone.querySelector('.actual-element');
+      actualTarget?.classList.add('nearby');
+    },
+    onOverlapEnd: (zone) => {
+      const actualTarget = zone.querySelector('.actual-element');
+      actualTarget?.classList.remove('nearby');
+    }
+  })
+];
+```
+
+### Performance Tips
+
+```typescript
+// For many drop zones, check less often
+const optimized = [
+  overlap({
+    targets: '.many-targets',
+    checkFrequency: 50, // Check every 50ms instead of every frame
+    threshold: 0.1, // Higher threshold
+    oncePerTarget: true, // Less callback calls
+  })
+];
+```
+
+## Using with Other Plugins
+
+### With Events for Drop Handling
+
+```typescript
+const plugins = [
+  overlap({
+    targets: '.drop-zone',
+    onOverlapUpdate: (targets) => {
+      currentDropTargets = targets;
+    }
+  }),
+  events({
+    onDragEnd: () => {
+      if (currentDropTargets.length > 0) {
+        handleDrop(currentDropTargets[0]);
+      }
+    }
+  })
+];
+```
+
+### With Bounds for Staying Inside Areas
+
+```typescript
+const plugins = [
+  bounds(BoundsFrom.parent()),
+  overlap({
+    targets: '.inner-elements',
+    showOverlap: { enabled: true }
+  })
+];
+```
+
+### With Grid for Snap-to-Grid
+
+```typescript
+const plugins = [
+  grid([20, 20]),
+  overlap({
+    targets: '.grid-cell',
+    threshold: 0.8, // Need mostly overlapping for grid snapping
+  })
+];
+```
+
+## Tips for Better Performance
+
+### Choosing Drop Zones
+- Use specific CSS selectors instead of checking all elements
+- Cache target elements when possible
+- Use data attributes to identify targets
+
+### Check Frequency
+- Use `'frame'` for smooth visual feedback
+- Use higher numbers (like 50ms) for better performance with many targets
+- Consider slower checking on mobile devices
+
+### Overlap Amount
+- Higher thresholds reduce false positives and improve performance
+- Lower thresholds provide more sensitive detection
+- Test with different screen sizes
+
+## Real Examples
+
+### File Manager
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { overlap, events } from '@neodrag/svelte';
+  
+  let folders = ['Documents', 'Images', 'Videos'];
+  let draggedFile = null;
+  let currentDropFolder = null;
+  
+  const handleFileOverlap = (targets) => {
+    currentDropFolder = targets.length > 0 ? targets[0] : null;
+  };
+  
+  const handleFileDrop = () => {
+    if (draggedFile && currentDropFolder) {
+      console.log(`Moving ${draggedFile} to ${currentDropFolder.textContent}`);
+      // Handle file move logic
+    }
+    draggedFile = null;
+    currentDropFolder = null;
+  };
+</script>
+
+{#each folders as folder}
+  <div class="folder" data-folder={folder}>
+    {folder}
+  </div>
+{/each}
+
+<div class="file" 
+     {@attach draggable([
+       overlap({
+         targets: '.folder',
+         threshold: 0.4,
+         onOverlapUpdate: handleFileOverlap
+       }),
+       events({
+         onDragStart: () => draggedFile = 'file.txt',
+         onDragEnd: handleFileDrop
+       })
+     ])}>
+  file.txt
+</div>
+
+<style>
+  .folder {
+    width: 100px;
+    height: 80px;
+    background: #e3f2fd;
+    border: 2px dashed #2196f3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px;
+  }
+  
+  .folder:has(+ .overlapping) {
+    background: #c8e6c9;
+    border-color: #4caf50;
+  }
+</style>
+```
+
+</div>
+</FrameworkSwitch>
+
+### Simple Game Collision
+
+```typescript
+// Game-like collision detection
+const gameCollision = [
+  overlap({
+    targets: '.enemy, .obstacle, .powerup',
+    threshold: 0.01,
+    checkFrequency: 'frame', // Smooth for games
+    onOverlapStart: (target) => {
+      if (target.classList.contains('enemy')) {
+        handleEnemyHit(target);
+      } else if (target.classList.contains('powerup')) {
+        collectPowerup(target);
+      } else if (target.classList.contains('obstacle')) {
+        handleCrash(target);
+      }
+    },
+    showOverlap: {
+      enabled: isDevelopment, // Only show during development
+      showIntersectionHighlight: true,
+      theme: {
+        intersectionHighlight: '#ff000050'
+      }
+    }
+  })
+];
+```
+
+The overlap plugin is perfect for creating drag-and-drop interfaces, collision detection, and proximity-based interactions. The visual helpers make it easy to see and fine-tune overlap behavior while you're building your app.
