@@ -40,12 +40,14 @@ async function setupCoreEnvironment() {
 	mkdirSync(coreTargetPath, { recursive: true });
 
 	if (existsSync(coreDistPath)) {
-		const coreFiles = readdirSync(coreDistPath);
-		for (const file of coreFiles) {
-			const sourcePath = join(coreDistPath, file);
-			const targetPath = join(coreTargetPath, file);
-			const content = readFileSync(sourcePath, 'utf8');
-			writeFileSync(targetPath, content);
+		const coreEntries = readdirSync(coreDistPath, { withFileTypes: true });
+		for (const entry of coreEntries) {
+			if (entry.isFile()) {
+				const sourcePath = join(coreDistPath, entry.name);
+				const targetPath = join(coreTargetPath, entry.name);
+				const content = readFileSync(sourcePath, 'utf8');
+				writeFileSync(targetPath, content);
+			}
 		}
 
 		const corePackageJson = {
