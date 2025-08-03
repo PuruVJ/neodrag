@@ -1,5 +1,18 @@
 # @neodrag/core
 
+## 3.0.0-next.8
+
+### Patch Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`f221917`](https://github.com/PuruVJ/neodrag/commit/f221917bb2c59031384c8667c240fa6aaef2e917) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Fix floating-point precision bug in drag calculations at large coordinates (issue #232)
+
+  This fix addresses a critical precision issue where dragging elements at large coordinates with small movements caused floating-point precision loss, resulting in incorrect element positioning. The delta calculation has been optimized to use inverse scale compensation, and the expensive inverse_scale calculation is now cached as an instance property for improved performance.
+
+  - Fixed precision loss in delta calculations at large coordinates
+  - Optimized performance by caching inverse_scale calculation
+  - Added comprehensive cross-browser tests to detect precision bugs
+  - Tests now properly fail with buggy code and pass with the fix applied
+
 ## 3.0.0-next.7
 
 ### Patch Changes

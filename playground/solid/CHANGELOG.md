@@ -1,5 +1,12 @@
 # @neodrag/playground-solid
 
+## 0.0.1-next.8
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @neodrag/solid@3.0.0-next.8
+
 ## 0.0.1-next.7
 
 ### Patch Changes
