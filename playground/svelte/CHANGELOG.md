@@ -1,5 +1,12 @@
 # @neodrag/playground-svelte
 
+## 0.0.2-next.8
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @neodrag/svelte@3.0.0-next.8
+
 ## 0.0.2-next.7
 
 ### Patch Changes

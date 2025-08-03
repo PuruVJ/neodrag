@@ -1,5 +1,12 @@
 # @neodrag/solid
 
+## 3.0.0-next.8
+
+### Patch Changes
+
+- Updated dependencies [[`f221917`](https://github.com/PuruVJ/neodrag/commit/f221917bb2c59031384c8667c240fa6aaef2e917)]:
+  - @neodrag/core@3.0.0-next.8
+
 ## 3.0.0-next.7
 
 ### Patch Changes

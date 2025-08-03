@@ -1,5 +1,12 @@
 # demo
 
+## 0.0.11-next.9
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @neodrag/vue@3.0.0-next.9
+
 ## 0.0.11-next.8
 
 ### Patch Changes
