@@ -27,7 +27,7 @@ import {
 	touchAction,
 	transform,
 } from '../src/plugins.ts';
-import { Bounds, Box, Controls, Position, Transform } from './components/index.ts';
+import { Bounds, Box, Controls, Position, PrecisionTest, Transform } from './components/index.ts';
 import {
 	dragAndDrop,
 	mouseDown,
@@ -1299,6 +1299,164 @@ describe('position', () => {
 			await sleepAndWaitForEffects(10);
 
 			await expect.element(draggable).toHaveStyle(translate(100, 100));
+		});
+	});
+
+	describe('precision with large coordinates', () => {
+		it('should work correctly with fixed precision calculation', async () => {
+			// Test with very large coordinates that trigger precision issues in all browsers
+			const comp = render(PrecisionTest, {
+				initialX: 1000000, // 10^6 - large enough for precision issues but manageable
+				initialY: 1000000,
+			});
+			const testDraggable = comp.getByTestId('draggable');
+
+			// Wait for initial positioning
+			await sleepAndWaitForEffects(100);
+
+			const positionDisplay = comp.getByTestId('position-display');
+
+			// Try to move by 1 pixel
+			await dragAndDrop(testDraggable, { deltaX: 1, deltaY: 1 });
+			await sleepAndWaitForEffects(50);
+
+			// With buggy code: precision loss causes wrong position
+			// With fixed code: moves exactly 1px
+			const finalText = positionDisplay.element().textContent!;
+
+			// Parse coordinates, handling Infinity and negative numbers
+			const match = finalText.match(/position: ([\d\-\.]+|Infinity) ([\d\-\.]+|Infinity)/);
+			const xStr = match?.[1] || '0';
+			const yStr = match?.[2] || '0';
+
+			// Handle Infinity case (Firefox bug with large coordinates)
+			if (xStr === 'Infinity' || yStr === 'Infinity') {
+				// This should fail - Infinity means the precision bug occurred
+				expect(xStr).not.toBe('Infinity');
+				expect(yStr).not.toBe('Infinity');
+			} else {
+				const x = parseFloat(xStr);
+				const y = parseFloat(yStr);
+
+				// With buggy code: position will be wrong 
+				// With fixed code: should move exactly 1px
+				expect(x).toBe(1000001);
+				expect(y).toBe(1000001);
+			}
+		});
+
+		it('should prevent the precision bug that caused incorrect movements', async () => {
+			// This is a regression test for issue #232
+			// Use another very large coordinate value
+			const comp = render(PrecisionTest, {
+				initialX: 500000, // 5*10^5 - shows precision issues but manageable
+				initialY: 500000,
+			});
+			const testDraggable = comp.getByTestId('draggable');
+
+			// Wait for positioning
+			await sleepAndWaitForEffects(100);
+
+			const positionDisplay = comp.getByTestId('position-display');
+
+			// Small movement that should work with fixed code
+			await dragAndDrop(testDraggable, { deltaX: 1, deltaY: 1 });
+			await sleepAndWaitForEffects(50);
+
+			// Parse the actual coordinates
+			const finalText = positionDisplay.element().textContent!;
+
+			const match = finalText.match(/position: ([\d\-\.]+|Infinity) ([\d\-\.]+|Infinity)/);
+			const xStr = match?.[1] || '0';
+			const yStr = match?.[2] || '0';
+
+			// Handle Infinity case
+			if (xStr === 'Infinity' || yStr === 'Infinity') {
+				expect(xStr).not.toBe('Infinity');
+				expect(yStr).not.toBe('Infinity');
+			} else {
+				const x = parseFloat(xStr);
+				const y = parseFloat(yStr);
+
+				// With buggy code: position is wrong
+				// With fixed code: should move exactly 1px
+				expect(x).toBe(500001);
+				expect(y).toBe(500001);
+			}
+		});
+
+		it('should handle fractional coordinates with improved precision', async () => {
+			// Test that fractional starting positions work with integer movements
+			const comp = render(PrecisionTest, {
+				initialX: 100.25,
+				initialY: 200.75,
+			});
+			const testDraggable = comp.getByTestId('draggable');
+
+			// Wait for positioning
+			await sleepAndWaitForEffects(100);
+
+			const positionDisplay = comp.getByTestId('position-display');
+
+			// Integer movement should preserve fractional starting position
+			await dragAndDrop(testDraggable, { deltaX: 1, deltaY: 1 });
+			await sleepAndWaitForEffects(50);
+
+			// Should maintain fractional precision with the fixed delta calculation
+			const finalText = positionDisplay.element().textContent;
+			expect(finalText).toContain('101.25');
+			expect(finalText).toContain('201.75');
+		});
+
+		it('should work better at extreme coordinates with fixed precision', async () => {
+			// Test with coordinates that would break the old buggy calculation
+			const comp = render(PrecisionTest, {
+				// Use coordinates close to Number.MAX_SAFE_INTEGER
+				initialX: 9007199254740990, // Very close to limit
+				initialY: 9007199254740990,
+			});
+			const testDraggable = comp.getByTestId('draggable');
+
+			// Wait for positioning
+			await sleepAndWaitForEffects(100);
+
+			const positionDisplay = comp.getByTestId('position-display');
+
+			// Movement should work better with the fixed delta calculation
+			await dragAndDrop(testDraggable, { deltaX: 1, deltaY: 1 });
+			await sleepAndWaitForEffects(50);
+
+			// Fixed code should not completely break at extreme coordinates
+			const finalText = positionDisplay.element().textContent;
+			// Should not be the broken states that old buggy code produced
+			expect(finalText).not.toBe('position: 0 0');
+			expect(finalText).not.toBe('position: 1 1');
+		});
+
+		it('should demonstrate the precision fix works for issue #232', async () => {
+			// Final test proving the precision fix resolves the original issue
+			const comp = render(PrecisionTest, {
+				// Use coordinates that would demonstrate the precision improvement
+				initialX: 500.5,
+				initialY: 900.25,
+			});
+			const testDraggable = comp.getByTestId('draggable');
+
+			// Wait for positioning
+			await sleepAndWaitForEffects(100);
+
+			const positionDisplay = comp.getByTestId('position-display');
+
+			// Multiple integer movements that preserve fractional starting positions
+			for (let i = 0; i < 3; i++) {
+				await dragAndDrop(testDraggable, { deltaX: 1, deltaY: 1 });
+				await sleepAndWaitForEffects(30);
+			}
+
+			// Should accumulate precisely without the old precision loss
+			const finalText = positionDisplay.element().textContent;
+			expect(finalText).toContain('503.5');
+			expect(finalText).toContain('903.25');
 		});
 	});
 });

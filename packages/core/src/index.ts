@@ -32,6 +32,7 @@ export interface DraggableInstance {
 	current_drag_hook_cancelled: boolean;
 	failed_plugins: Set<string>;
 	pointer_captured_id: number | null;
+	inverse_scale: number;
 	effects: {
 		paint: Set<() => void>;
 		immediate: Set<() => void>;
@@ -167,6 +168,7 @@ export class DraggableFactory {
 			dragstart_prevented: false,
 			current_drag_hook_cancelled: false,
 			pointer_captured_id: null,
+			inverse_scale: 1,
 			effects: {
 				immediate: new Set<() => void>(),
 				paint: new Set<() => void>(),
@@ -396,9 +398,9 @@ export class DraggableFactory {
 
 		instance.ctx.cachedRootNodeRect = draggable_node.getBoundingClientRect();
 
-		const inverse_scale = this.#calculate_inverse_scale(instance);
-		instance.ctx.initial.x = e.clientX - instance.ctx.offset.x / inverse_scale;
-		instance.ctx.initial.y = e.clientY - instance.ctx.offset.y / inverse_scale;
+		instance.inverse_scale = this.#calculate_inverse_scale(instance);
+		instance.ctx.initial.x = e.clientX - instance.ctx.offset.x / instance.inverse_scale;
+		instance.ctx.initial.y = e.clientY - instance.ctx.offset.y / instance.inverse_scale;
 
 		const should_drag = this.#run_plugins(instance, 'shouldStart', e);
 		if (!should_drag) return;
@@ -454,8 +456,11 @@ export class DraggableFactory {
 		e.preventDefault();
 
 		if (!sync_only) {
-			instance.ctx.delta.x = e.clientX - instance.ctx.initial.x - instance.ctx.offset.x;
-			instance.ctx.delta.y = e.clientY - instance.ctx.initial.y - instance.ctx.offset.y;
+			const target_offset_x = (e.clientX - instance.ctx.initial.x) * instance.inverse_scale;
+			const target_offset_y = (e.clientY - instance.ctx.initial.y) * instance.inverse_scale;
+
+			instance.ctx.delta.x = target_offset_x - instance.ctx.offset.x;
+			instance.ctx.delta.y = target_offset_y - instance.ctx.offset.y;
 
 			instance.ctx.proposed.x = instance.ctx.delta.x;
 			instance.ctx.proposed.y = instance.ctx.delta.y;
@@ -497,8 +502,10 @@ export class DraggableFactory {
 		this.#run_plugins(instance, 'end', e);
 		this.#flush_effects(instance);
 
-		if (instance.ctx.proposed.x) instance.ctx.initial.x = instance.ctx.offset.x;
-		if (instance.ctx.proposed.y) instance.ctx.initial.y = instance.ctx.offset.y;
+		if (instance.ctx.proposed.x !== null)
+			instance.ctx.initial.x = e.clientX - instance.ctx.offset.x / instance.inverse_scale;
+		if (instance.ctx.proposed.y !== null)
+			instance.ctx.initial.y = e.clientY - instance.ctx.offset.y / instance.inverse_scale;
 
 		instance.ctx.proposed.x = 0;
 		instance.ctx.proposed.y = 0;
