@@ -3,7 +3,7 @@
 	import { Compartment, draggable, events, position, threshold } from '@neodrag/svelte';
 
 	let x = $state(0);
-	let y = $state(30);
+	let y = $state(300);
 
 	const positionComp = Compartment.of(() => position({ current: { x, y } }));
 

@@ -446,7 +446,7 @@ export class DraggableFactory {
 		const should_drag = this.#run_plugins(instance, 'shouldStart', e);
 		if (!should_drag) return;
 
-		instance.isInteracting = true;
+		instance[$.is_interacting] = true;
 		this.#active_nodes.set(e.pointerId, draggable_node);
 	}
 
@@ -500,11 +500,11 @@ export class DraggableFactory {
 			const target_offset_x = (e.clientX - instance.initial.x) * instance[$.inverse_scale];
 			const target_offset_y = (e.clientY - instance.initial.y) * instance[$.inverse_scale];
 
-			instance.delta.x = target_offset_x - instance.offset.x;
-			instance.delta.y = target_offset_y - instance.offset.y;
+			instance[$.delta_x] = target_offset_x - instance[$.offset_x];
+			instance[$.delta_y] = target_offset_y - instance[$.offset_y];
 
-			instance.proposed.x = instance.delta.x;
-			instance.proposed.y = instance.delta.y;
+			instance[$.proposed_x] = instance[$.delta_x];
+			instance[$.proposed_y] = instance[$.delta_y];
 		}
 
 		const run_result = this.#run_plugins(instance, 'drag', e);
@@ -513,8 +513,8 @@ export class DraggableFactory {
 		else return this.#clear_effects(instance);
 
 		if (!sync_only) {
-			instance.offset.x += instance.proposed.x ?? 0;
-			instance.offset.y += instance.proposed.y ?? 0;
+			instance[$.offset_x] += instance[$.proposed_x] ?? 0;
+			instance[$.offset_y] += instance[$.proposed_y] ?? 0;
 		}
 	}
 
@@ -543,15 +543,15 @@ export class DraggableFactory {
 		this.#run_plugins(instance, 'end', e);
 		this.#flush_effects(instance);
 
-		if (instance.proposed.x !== null)
-			instance.initial.x = e.clientX - instance.offset.x / instance[$.inverse_scale];
-		if (instance.proposed.y !== null)
-			instance.initial.y = e.clientY - instance.offset.y / instance[$.inverse_scale];
+		if (instance[$.proposed_x] !== null)
+			instance[$.initial_x] = e.clientX - instance[$.offset_x] / instance[$.inverse_scale];
+		if (instance[$.proposed_y] !== null)
+			instance[$.initial_y] = e.clientY - instance[$.offset_y] / instance[$.inverse_scale];
 
-		instance.proposed.x = 0;
-		instance.proposed.y = 0;
-		instance.isInteracting = false;
-		instance.isDragging = false;
+		instance[$.proposed_x] = 0;
+		instance[$.proposed_y] = 0;
+		instance[$.is_interacting] = false;
+		instance[$.is_dragging] = false;
 		instance[$.dragstart_prevented] = false;
 		instance[$.pointer_captured_id] = null;
 		this.#clear_effects(instance);
@@ -610,8 +610,8 @@ export class DraggableFactory {
 			);
 		}
 
-		instance.isInteracting = false;
-		instance.isDragging = false;
+		instance[$.is_interacting] = false;
+		instance[$.is_dragging] = false;
 		instance[$.dragstart_prevented] = false;
 		instance[$.pointer_captured_id] = null;
 		this.#active_nodes.delete(pointer_id);
