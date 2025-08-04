@@ -79,6 +79,8 @@ export function unstable_definePlugin<State, Args extends unknown[]>(
 	return fn;
 }
 
+export { overlap } from './overlap.ts';
+
 export const ignoreMultitouch = unstable_definePlugin((value: boolean = true) => ({
 	name: 'neodrag:ignoreMultitouch',
 
@@ -652,35 +654,35 @@ export const ControlFrom = {
 
 	elements:
 		(elements: NodeListOf<Element> | (Element | null | undefined)[]) =>
-		(root: Element): ControlZone[] => {
-			const root_rect = root.getBoundingClientRect();
+			(root: Element): ControlZone[] => {
+				const root_rect = root.getBoundingClientRect();
 
-			const data: {
-				element: Element;
-				top: number;
-				right: number;
-				bottom: number;
-				left: number;
-				area: number;
-			}[] = [];
+				const data: {
+					element: Element;
+					top: number;
+					right: number;
+					bottom: number;
+					left: number;
+					area: number;
+				}[] = [];
 
-			for (const el of Array.from(elements)) {
-				if (!el) continue;
+				for (const el of Array.from(elements)) {
+					if (!el) continue;
 
-				const rect = el.getBoundingClientRect();
+					const rect = el.getBoundingClientRect();
 
-				data.push({
-					element: el,
-					top: rect.top - root_rect.top,
-					right: rect.right - root_rect.left,
-					bottom: rect.bottom - root_rect.top,
-					left: rect.left - root_rect.left,
-					area: rect.width * rect.height,
-				});
-			}
+					data.push({
+						element: el,
+						top: rect.top - root_rect.top,
+						right: rect.right - root_rect.left,
+						bottom: rect.bottom - root_rect.top,
+						left: rect.left - root_rect.left,
+						area: rect.width * rect.height,
+					});
+				}
 
-			return data;
-		},
+				return data;
+			},
 };
 
 // Helper to check if a zone is nested within another zone

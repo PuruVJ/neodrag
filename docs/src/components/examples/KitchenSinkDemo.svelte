@@ -12,6 +12,7 @@
 		draggable,
 		events,
 		grid,
+		overlap,
 		position,
 		scrollLock,
 	} from '@neodrag/svelte';
@@ -48,7 +49,7 @@
 
 	let is_backdrop_visible = $state(false);
 
-	let z_indices = $state(Array.from<number>({ length: 15 }).fill(0));
+	let z_indices = $state(Array.from<number>({ length: 17 }).fill(0));
 
 	function get_node_index(node: HTMLElement) {
 		return Array.from(node.parentNode?.children!).indexOf(node);
@@ -89,6 +90,24 @@
 			}, 200);
 		},
 	};
+
+	// Overlap demo handlers without backdrop blur
+	const overlap_drag_handlers: Parameters<typeof events>[0] = {
+		onDrag: ({ rootNode }) => {
+			// No backdrop blur for overlap demo
+			rootNode.style.zIndex = '20';
+		},
+		onDragEnd: ({ rootNode }) => {
+			setTimeout(() => {
+				update_z_index(rootNode);
+			}, 200);
+		},
+	};
+
+	// ===== OVERLAP PLUGIN DEMO - START =====
+	let overlap_count = $state(0);
+	let show_overlap_enabled = $state(true);
+	// ===== OVERLAP PLUGIN DEMO - END =====
 
 	let return_to_position_val = $state({
 		x: 0,
@@ -385,10 +404,38 @@
 			I will return to my position on drop, but with style! 😉
 		</div>
 
+		<!-- ===== OVERLAP PLUGIN DEMO ===== -->
 		<div
 			class="box"
 			data-paw-cursor="true"
+			data-overlap-demo="true"
 			style:z-index={z_indices[15]}
+			{@attach draggable([
+				overlap({
+					targets: '.box:not([data-overlap-demo])',
+					threshold: 0.1,
+					onOverlapUpdate: (targets) =>  overlap_count = targets.length,
+					showOverlap: {
+					    enabled: show_overlap_enabled,
+					}
+				}),
+				events(overlap_drag_handlers),
+			])}
+		>			
+			Overlap detection
+			<br />
+			Overlapping: {overlap_count}
+			<br />
+			<label style="font-size: 0.8em; display: flex; align-items: center; justify-content: center; gap: 0.3rem; margin-top: 0.5rem;">
+				<input type="checkbox" bind:checked={show_overlap_enabled} style="margin: 0;" />
+				Show overlap
+			</label>
+		</div>
+
+		<div
+			class="box"
+			data-paw-cursor="true"
+			style:z-index={z_indices[16]}
 			{@attach draggable([disabled(), events(drag_handlers)])}
 		>
 			<code>disabled: true</code>
