@@ -36,8 +36,11 @@ export function useDraggable<RefType extends HTMLElement = HTMLDivElement>(
 	const [isDragging, set_is_dragging] = useState(false);
 	const [dragState, set_drag_state] = useState<DragState>();
 
-	let { onDragStart, onDrag, onDragEnd, handle, cancel } = options;
+	const onDragStartRef = useRef(options.onDragStart);
+	const onDragRef = useRef(options.onDrag);
+	const onDragEndRef = useRef(options.onDragEnd);
 
+	let { handle, cancel } = options;
 	let new_handle = unwrap_handle_cancel(handle);
 	let new_cancel = unwrap_handle_cancel(cancel);
 
@@ -48,25 +51,22 @@ export function useDraggable<RefType extends HTMLElement = HTMLDivElement>(
 
 	function custom_on_drag_start(arg: DragState) {
 		set_is_dragging(true);
-		call_event(arg, onDragStart);
+		call_event(arg, onDragStartRef.current);
 	}
 
 	function custom_on_drag(arg: DragState) {
-		call_event(arg, onDrag);
+		call_event(arg, onDragRef.current);
 	}
 
 	function custom_on_drag_end(arg: DragState) {
 		set_is_dragging(false);
-		call_event(arg, onDragEnd);
+		call_event(arg, onDragEndRef.current);
 	}
 
 	useEffect(() => {
 		if (typeof window === 'undefined') return;
 		const node = nodeRef.current;
 		if (!node) return;
-
-		// Update callbacks
-		({ onDragStart, onDrag, onDragEnd } = options);
 
 		const { update, destroy } = draggable(node, {
 			...options,
@@ -83,6 +83,12 @@ export function useDraggable<RefType extends HTMLElement = HTMLDivElement>(
 	}, []);
 
 	useEffect(() => {
+		// Update refs with latest options callbacks
+		onDragStartRef.current = options.onDragStart;
+		onDragRef.current = options.onDrag;
+		onDragEndRef.current = options.onDragEnd;
+
+		// Update draggable instance
 		update_ref.current?.({
 			...options,
 			handle: unwrap_handle_cancel(handle),
