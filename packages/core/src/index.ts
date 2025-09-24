@@ -14,9 +14,17 @@ export type DragBoundsCoords = {
 
 export type DragAxis = 'both' | 'x' | 'y' | 'none';
 
+export type DragBoundsWithOffset = {
+	/** Element selector or HTMLElement to use as bounds container */
+	element: string | HTMLElement;
+	/** Offset values to apply to the element bounds */
+	offsets?: Partial<DragBoundsCoords>;
+};
+
 export type DragBounds =
 	| HTMLElement
 	| Partial<DragBoundsCoords>
+	| DragBoundsWithOffset
 	| 'parent'
 	| 'body'
 	| (string & Record<never, never>);
@@ -49,9 +57,13 @@ export type DragOptions = {
 	 * **Note**: We don't check whether the selector is bigger than the node element.
 	 * You yourself will have to make sure of that, or it may lead to strange behavior
 	 *
-	 * Or, finally, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
+	 * Or, you can pass an object of type `{ top: number; right: number; bottom: number; left: number }`.
 	 * These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right` from right of window.
 	 * If any of these properties are unspecified, they are assumed to be `0`.
+	 *
+	 * You can also pass an object of type `DragBoundsWithOffset` with `{ element: string | HTMLElement, offsets?: { top?: number; right?: number; bottom?: number; left?: number } }`.
+	 * This allows you to specify an element as bounds container with optional offset values applied to its boundaries.
+	 * Example: `{ element: '.container', offsets: { top: 10, right: -200, bottom: 10, left: -200 } }`
 	 */
 	bounds?: DragBounds;
 
@@ -725,8 +737,37 @@ function compute_bound_rect(bounds: DragOptions['bounds'], rootNode: HTMLElement
 	if (is_HTMLElement(bounds)) return bounds.getBoundingClientRect();
 
 	if (typeof bounds === 'object') {
-		// we have the left right etc
+		// Check if it's a DragBoundsWithOffset object (has 'element' property)
+		if ('element' in bounds) {
+			const { element, offsets = {} } = bounds as DragBoundsWithOffset;
 
+			// Get the element's bounds
+			let elementBounds: DOMRect;
+			if (typeof element === 'string') {
+				if (element === 'parent') {
+					elementBounds = (<HTMLElement>rootNode.parentNode).getBoundingClientRect();
+				} else {
+					const el = document.querySelector<HTMLElement>(element);
+					if (!el) throw new Error(`No element found with selector: ${element}`);
+					elementBounds = el.getBoundingClientRect();
+				}
+			} else {
+				elementBounds = element.getBoundingClientRect();
+			}
+
+			// Apply offsets
+			const { top = 0, right = 0, bottom = 0, left = 0 } = offsets;
+			return {
+				top: elementBounds.top + top,
+				right: elementBounds.right - right,
+				bottom: elementBounds.bottom - bottom,
+				left: elementBounds.left + left,
+				width: elementBounds.width,
+				height: elementBounds.height
+			} as DOMRect;
+		}
+
+		// Original coordinate bounds logic
 		const { top = 0, left = 0, right = 0, bottom = 0 } = bounds;
 
 		const computed_right = window.innerWidth - right;

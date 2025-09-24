@@ -96,5 +96,5 @@ export function useDraggable<RefType extends HTMLElement = HTMLDivElement>(
 	return { isDragging, dragState };
 }
 
-export type { DragAxis, DragBounds, DragBoundsCoords, DragEventData } from '@neodrag/core';
+export type { DragAxis, DragBounds, DragBoundsCoords, DragBoundsWithOffset, DragEventData } from '@neodrag/core';
 export type { ReactDragOptions as DragOptions };
