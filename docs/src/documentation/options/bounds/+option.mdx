@@ -1,6 +1,6 @@
 ---
 title: bounds
-type: "HTMLElement | 'parent' | string | Partial<DragBoundsCoords>"
+type: "HTMLElement | 'parent' | string | Partial<DragBoundsCoords> | DragBoundsWithOffset"
 defaultValue: 'undefined'
 ---
 
@@ -11,6 +11,7 @@ import Examples from '$components/options/OptionsExamples.svelte';
 import ParentBoundsExample from './ParentBounds.example.svelte';
 import BodyBoundsExample from './BodyBounds.example.svelte';
 import CoordinateBoundsExample from './CoordinateBounds.example.svelte';
+import OffsetBoundsExample from './OffsetBounds.example.svelte';
 
 export const shortDescription = 'Optionally limit the drag area';
 
@@ -23,9 +24,11 @@ Or, you can specify any selector and it will be bound to that.
 **Note**: This library doesn't check whether the selector is bigger than the node element.
 You yourself will have to make sure of that, or it may lead to unexpected behavior.
 
-Or, finally, you can pass an object of type `DragBoundsCoords`.
+You can pass an object of type `DragBoundsCoords`.
 These mimic the css `top`, `right`, `bottom` and `left`, in the sense that `bottom` starts from the bottom of the window, and `right` from right of window.
 If any of these properties are unspecified, they are assumed to be `0`.
+
+You can also pass an object of type `DragBoundsWithOffset` to specify an element as bounds container with optional offset values applied to its boundaries.
 
 ```ts
 export type DragBoundsCoords = {
@@ -40,6 +43,13 @@ export type DragBoundsCoords = {
 
   /** Number of pixels from the bottom of the document */
   bottom: number;
+};
+
+export type DragBoundsWithOffset = {
+  /** Element selector or HTMLElement to use as bounds container */
+  element: string | HTMLElement;
+  /** Offset values to apply to the element bounds */
+  offsets?: Partial<DragBoundsCoords>;
 };
 ```
 
@@ -195,6 +205,60 @@ export type DragBoundsCoords = {
       <div slot="vanilla">
         ```js
         new Draggable(el, { bounds: { top: 60, left: 20, bottom: 35, right: 30 } });
+        ```
+      </div>
+
+    </Code>
+
+  </Example>
+
+  <Example>
+    <OffsetBoundsExample client:visible slot="demo" />
+
+    <Code slot="codes">
+      <div slot="svelte">
+        ```svelte
+        <div
+          use:draggable={{
+            bounds: { element: 'parent', offsets: { top: -30, left: -30, bottom: -30, right: -30 } },
+          }}
+        >
+          Can overflow outside parent by 30px
+        </div>
+        ```
+      </div>
+
+      <div slot="vue">
+        ```vue
+        <template>
+          <div v-draggable="{{ bounds: { element: 'parent', offsets: { top: -30, left: -30, bottom: -30, right: -30 } } }}">
+            Can overflow outside parent by 30px
+          </div>
+        </template>
+        ```
+      </div>
+
+      <div slot="solid">
+        ```jsx
+        <div use:draggable={{ bounds: { element: 'parent', offsets: { top: -30, left: -30, bottom: -30, right: -30 } } }}>
+          Can overflow outside parent by 30px
+        </div>
+        ```
+      </div>
+
+      <div slot="react">
+        ```ts
+        useDraggable(draggableRef, {
+          bounds: { element: 'parent', offsets: { top: -30, left: -30, bottom: -30, right: -30 } }
+        });
+        ```
+      </div>
+
+      <div slot="vanilla">
+        ```js
+        new Draggable(el, {
+          bounds: { element: 'parent', offsets: { top: -30, left: -30, bottom: -30, right: -30 } }
+        });
         ```
       </div>
 
