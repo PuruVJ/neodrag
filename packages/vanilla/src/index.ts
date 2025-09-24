@@ -32,6 +32,7 @@ export type {
 	DragAxis,
 	DragBounds,
 	DragBoundsCoords,
+	DragBoundsWithOffset,
 	DragEventData,
 	DragOptions,
 } from '@neodrag/core';

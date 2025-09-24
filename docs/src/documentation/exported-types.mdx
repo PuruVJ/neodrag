@@ -10,6 +10,7 @@ This package exports these types you can use:
   DragAxis,
   DragBounds,
   DragBoundsCoords,
+  DragBoundsWithOffset,
   DragOptions,
   DragEventData,
 } from '@neodrag/${props.framework}';`}
@@ -19,16 +20,18 @@ This package exports these types you can use:
 
 `DragAxis` is the type of `axis` option, and is equal to `'both' | 'x' | 'y' | 'none'`.
 
-`DragBounds` is `'parent' | string | Partial<DragBoundsCoords>`, the complete type of `bounds` option.
+`DragBounds` is `'parent' | string | Partial<DragBoundsCoords> | DragBoundsWithOffset`, the complete type of `bounds` option.
 
-`DragBoundsCoords` is when you're specifying the `bounds` field using an object, this is the type needed for that.
+`DragBoundsCoords` is when you're specifying the `bounds` field using coordinate values.
+
+`DragBoundsWithOffset` is when you're specifying the `bounds` field using an element with optional offset values.
 
 `DragEventData` is the data provided during the [events](#events)
 
 ```ts
 export type DragAxis = 'both' | 'x' | 'y' | 'none';
 
-export type DragBounds = 'parent' | string | Partial<DragBoundsCoords>;
+export type DragBounds = 'parent' | string | Partial<DragBoundsCoords> | DragBoundsWithOffset;
 
 export type DragEventData = {
   /** How much element moved from its original position horizontally */
@@ -59,5 +62,12 @@ export type DragBoundsCoords = {
 
   /** Number of pixels from the bottom of the window */
   bottom: number;
+};
+
+export type DragBoundsWithOffset = {
+  /** Element selector or HTMLElement to use as bounds container */
+  element: string | HTMLElement;
+  /** Offset values to apply to the element bounds */
+  offsets?: Partial<DragBoundsCoords>;
 };
 ```
