@@ -11,8 +11,9 @@ import {
 	type PluginInput,
 	type PluginResolver,
 } from './plugins.ts';
+import { DragInstance } from './drag-instance.ts';
+import { NEODRAG_EVENT } from './symbols.ts';
 import { is_svg_element, is_svg_svg_element, listen, type DeepMutable } from './utils.ts';
-import * as $ from './symbols.ts';
 
 export interface ErrorInfo {
 	phase: 'setup' | 'start' | 'drag' | 'end' | 'shouldStart';
@@ -26,40 +27,8 @@ export interface ErrorInfo {
 
 type PublicInstance = DeepMutable<PluginContext>;
 
-export interface DraggableInstance extends PublicInstance {
-	[$.root_node]: HTMLElement | SVGElement;
-	[$.plugins]: Plugin[];
-	[$.controller]: AbortController;
-	[$.resolver]: PluginResolver | undefined;
-	[$.plugin_states]: Map<string, any>;
-	[$.dragstart_prevented]: boolean;
-	[$.current_drag_hook_cancelled]: boolean;
-	[$.failed_plugins]: Set<string>;
-	[$.pointer_captured_id]: number | null;
-	[$.inverse_scale]: number;
-	[$.paint_effects]: Set<() => void>;
-	[$.immediate_effects]: Set<() => void>;
-	[$.compartment_map]: Map<Compartment, Plugin | null | undefined>;
-	[$.pending_compartments]: Set<Compartment>;
-	[$.is_flushing_compartments]: boolean;
-	[$.is_processing_external_update]: boolean;
-	[$.proposed_x]: number | null;
-	[$.proposed_y]: number | null;
-	[$.delta_x]: number;
-	[$.delta_y]: number;
-	[$.offset_x]: number;
-	[$.offset_y]: number;
-	[$.initial_x]: number;
-	[$.initial_y]: number;
-	[$.is_dragging]: boolean;
-	[$.is_interacting]: boolean;
-	[$.last_event]: PointerEvent | null;
-	[$.cached_root_node_rect]: DOMRect;
-	[$.currently_dragged_node]: HTMLElement | SVGElement;
-	[$.drag_target]: HTMLElement | SVGElement | null;
-	[$.original_node]: HTMLElement | SVGElement;
-	[$.proxy_intent]: boolean;
-}
+export type DraggableInstance = DragInstance;
+export { DragInstance } from './drag-instance.ts';
 
 type Result<T> = { ok: true; value: T } | { ok: false; error: unknown };
 
@@ -81,7 +50,7 @@ export const DEFAULTS = {
 };
 
 export class DraggableFactory {
-	#instances = new Map<HTMLElement | SVGElement, DraggableInstance>();
+	#instances = new Map<HTMLElement | SVGElement, DragInstance>();
 	#listeners_initialized = false;
 	#active_nodes = new Map<number, HTMLElement | SVGElement>();
 	#last_target: Element | null = null;
@@ -172,206 +141,46 @@ export class DraggableFactory {
 	}
 
 	#create_instance(node: HTMLElement | SVGElement, plugins: PluginInput) {
-		const instance: DraggableInstance = {
-			[$.root_node]: node,
-			[$.plugins]: [],
-			[$.controller]: new AbortController(),
-			[$.resolver]: typeof plugins === 'function' ? plugins : undefined,
-			[$.plugin_states]: new Map<string, any>(),
-			[$.failed_plugins]: new Set<string>(),
-			[$.dragstart_prevented]: false,
-			[$.current_drag_hook_cancelled]: false,
-			[$.pointer_captured_id]: null,
-			[$.inverse_scale]: 1,
-			[$.paint_effects]: new Set<() => void>(),
-			[$.immediate_effects]: new Set<() => void>(),
-			[$.compartment_map]: new Map(),
-			[$.pending_compartments]: new Set(),
-			[$.is_flushing_compartments]: false,
-			[$.is_processing_external_update]: false,
-			[$.proposed_x]: 0,
-			[$.proposed_y]: 0,
-			[$.delta_x]: 0,
-			[$.delta_y]: 0,
-			[$.offset_x]: 0,
-			[$.offset_y]: 0,
-			[$.initial_x]: 0,
-			[$.initial_y]: 0,
-			[$.is_dragging]: false,
-			[$.is_interacting]: false,
-			[$.last_event]: null,
-			[$.cached_root_node_rect]: node.getBoundingClientRect(),
-			[$.currently_dragged_node]: node,
-			[$.drag_target]: null,
-			[$.original_node]: node,
-			[$.proxy_intent]: false,
-
-			// PluginContext properties
-			get proposed() {
-				return { x: instance[$.proposed_x], y: instance[$.proposed_y] };
-			},
-			get delta() {
-				return { x: instance[$.delta_x], y: instance[$.delta_y] };
-			},
-			get offset() {
-				return { x: instance[$.offset_x], y: instance[$.offset_y] };
-			},
-			get initial() {
-				return { x: instance[$.initial_x], y: instance[$.initial_y] };
-			},
-			get isDragging() {
-				return instance[$.is_dragging];
-			},
-			set isDragging(val) {
-				instance[$.is_dragging] = val;
-			},
-			get isInteracting() {
-				return instance[$.is_interacting];
-			},
-			set isInteracting(val) {
-				instance[$.is_interacting] = val;
-			},
-			rootNode: node,
-			get cachedRootNodeRect() {
-				return instance[$.cached_root_node_rect];
-			},
-			set cachedRootNodeRect(val) {
-				instance[$.cached_root_node_rect] = val;
-			},
-			get lastEvent() {
-				return instance[$.last_event];
-			},
-			set lastEvent(val) {
-				instance[$.last_event] = val;
-			},
-			get currentlyDraggedNode() {
-				return instance[$.currently_dragged_node];
-			},
-			set currentlyDraggedNode(val) {
-				if (
-					instance[$.pointer_captured_id] &&
-					instance[$.currently_dragged_node].hasPointerCapture(instance[$.pointer_captured_id])
-				) {
-					instance[$.currently_dragged_node].releasePointerCapture(instance[$.pointer_captured_id]);
-					val.setPointerCapture(instance[$.pointer_captured_id]);
-				}
-				instance[$.currently_dragged_node] = val;
-			},
-			effect: {
-				immediate: (func) => {
-					instance[$.immediate_effects].add(func);
-				},
-				paint: (func) => {
-					instance[$.paint_effects].add(func);
-				},
-			},
-			propose(x: number | null, y: number | null) {
-				instance[$.proposed_x] = x;
-				instance[$.proposed_y] = y;
-			},
-			cancel() {
-				instance[$.current_drag_hook_cancelled] = true;
-			},
-			preventStart() {
-				instance[$.dragstart_prevented] = true;
-			},
-			setForcedPosition(x, y) {
-				instance[$.offset_x] = x;
-				instance[$.offset_y] = y;
-			},
-			get visualElement() {
-				// The element that visually moves during drag (could be original or ghost)
-				return instance[$.drag_target] || instance[$.root_node];
-			},
-			get sourceElement() {
-				// The original element that initiated the drag (never changes)
-				return instance[$.root_node];
-			},
-			proxy: {
-				get isActive() {
-					// True when we're dragging a proxy/ghost instead of the original
-					return instance[$.drag_target] !== null;
-				},
-				get hasIntent() {
-					// True when a plugin (like ghost) has registered intent to use a proxy
-					return instance[$.proxy_intent];
-				},
-				set(proxyNode: HTMLElement | SVGElement | null) {
-					if (proxyNode === null) {
-						// No proxy - drag the original element directly
-						instance[$.drag_target] = null;
-						instance[$.currently_dragged_node] = instance[$.root_node];
-					} else {
-						// Use proxy - original element is completely isolated from drag
-						instance[$.drag_target] = proxyNode;
-						instance[$.currently_dragged_node] = proxyNode;
-					}
-				},
-				end() {
-					// Clean end to proxy drag - original element never gets touched
-					if (instance[$.drag_target]) {
-						// Remove proxy from DOM if it exists
-						if (document.body.contains(instance[$.drag_target])) {
-							document.body.removeChild(instance[$.drag_target]);
-						}
-						
-						// CRITICAL: Reset offset state ONLY for proxy drags
-						// Regular drags should keep their offsets
-						instance[$.offset_x] = 0;
-						instance[$.offset_y] = 0;
-						
-						instance[$.drag_target] = null;
-						// Don't switch back to original - just end the drag cleanly
-						instance[$.currently_dragged_node] = instance[$.root_node];
-					}
-				},
-				registerIntent() {
-					// Ghost plugin calls this in setup to indicate it will create a proxy
-					instance[$.proxy_intent] = true;
-				},
-			},
-		};
-
-		return instance;
+		return new DragInstance(node, typeof plugins === 'function' ? plugins : undefined);
 	}
 
-	#setup_plugins(instance: DraggableInstance, plugins: PluginInput) {
+	#setup_plugins(instance: DragInstance, plugins: PluginInput) {
 		const subscriptions = new Set<() => void>();
 
 		if (typeof plugins === 'function') {
 			const resolved = plugins();
-			const resolved_plugins = this.#resolve_plugins(resolved, instance[$.compartment_map]);
-			instance[$.plugins] = this.#initialize_plugins(resolved_plugins);
+			const resolved_plugins = this.#resolve_plugins(resolved, instance.compartmentMap);
+			instance.plugins = this.#initialize_plugins(resolved_plugins);
 
 			for (const item of resolved)
 				if (item instanceof Compartment) {
 					subscriptions.add(
 						item.subscribe(() => {
-							instance[$.pending_compartments].add(item);
+							instance.pendingCompartments.add(item);
 							this.#process_pending_compartment_updates(instance, true);
 						}),
 					);
 				}
 		} else {
-			instance[$.plugins] = this.#initialize_plugins(plugins);
+			instance.plugins = this.#initialize_plugins(plugins);
 		}
 
-		for (const plugin of instance[$.plugins]) {
+		for (const plugin of instance.plugins) {
 			const result = this.#resultify(
 				() => {
 					const value = plugin.setup?.(instance as PublicInstance);
-					if (value) instance[$.plugin_states].set(plugin.name, value);
+					if (value) instance.pluginStates.set(plugin.name, value);
 					this.#flush_effects(instance);
 				},
 				{
 					phase: 'setup',
 					plugin: { name: plugin.name, hook: 'setup' },
-					node: instance[$.root_node],
+					node: instance.rootNode,
 				},
 			);
 
 			if (!result.ok) {
-				instance[$.failed_plugins].add(plugin.name);
+				instance.failedPlugins.add(plugin.name);
 			}
 		}
 
@@ -411,26 +220,28 @@ export class DraggableFactory {
 			.filter((plugin): plugin is Plugin => plugin != undefined); // Filter out undefined
 	}
 
-	#run_plugins(instance: DraggableInstance, hook: ErrorInfo['phase'], event: PointerEvent) {
+	#run_plugins(instance: DragInstance, hook: ErrorInfo['phase'], event: PointerEvent) {
 		let should_run = true;
-		instance[$.dragstart_prevented] = false;
+		instance.currentDragHookCancelled = false;
+		instance.dragstartPrevented = false;
+		instance.syncCoords();
 
-		for (const plugin of instance[$.plugins]) {
-			if (instance[$.failed_plugins].has(plugin.name)) {
+		for (const plugin of instance.plugins) {
+			if (instance.failedPlugins.has(plugin.name)) {
 				continue;
 			}
 
 			const handler = plugin[hook];
 			if (!handler) continue;
 
-			if (instance[$.current_drag_hook_cancelled] && plugin.cancelable) continue;
+			if (instance.currentDragHookCancelled && plugin.cancelable) continue;
 
 			const result = this.#resultify(
 				() =>
 					handler.call(
 						plugin,
 						instance as PublicInstance,
-						instance[$.plugin_states].get(plugin.name),
+						instance.pluginStates.get(plugin.name),
 						event,
 					),
 				{
@@ -441,7 +252,7 @@ export class DraggableFactory {
 			);
 
 			if (!result.ok) {
-				instance[$.failed_plugins].add(plugin.name);
+				instance.failedPlugins.add(plugin.name);
 				should_run = false;
 				break;
 			}
@@ -455,9 +266,9 @@ export class DraggableFactory {
 		return should_run;
 	}
 
-	#flush_effects(instance: DraggableInstance) {
-		const paint_effects = new Set(instance[$.paint_effects]);
-		const immediate_effects = new Set(instance[$.immediate_effects]);
+	#flush_effects(instance: DragInstance) {
+		const paint_effects = new Set(instance.paintEffects);
+		const immediate_effects = new Set(instance.immediateEffects);
 
 		this.#clear_effects(instance);
 
@@ -475,9 +286,9 @@ export class DraggableFactory {
 		});
 	}
 
-	#clear_effects(instance: DraggableInstance) {
-		instance[$.immediate_effects].clear();
-		instance[$.paint_effects].clear();
+	#clear_effects(instance: DragInstance) {
+		instance.immediateEffects.clear();
+		instance.paintEffects.clear();
 	}
 
 	#handle_pointer_down(e: PointerEvent) {
@@ -491,14 +302,15 @@ export class DraggableFactory {
 
 		instance.cachedRootNodeRect = draggable_node.getBoundingClientRect();
 
-		instance[$.inverse_scale] = this.#calculate_inverse_scale(instance);
-		instance[$.initial_x] = e.clientX - instance.offset.x / instance[$.inverse_scale];
-		instance[$.initial_y] = e.clientY - instance.offset.y / instance[$.inverse_scale];
+		instance.inverseScale = this.#calculate_inverse_scale(instance);
+		instance.initialX = e.clientX - instance.offsetX / instance.inverseScale;
+		instance.initialY = e.clientY - instance.offsetY / instance.inverseScale;
+		instance.syncCoords();
 
 		const should_drag = this.#run_plugins(instance, 'shouldStart', e);
 		if (!should_drag) return;
 
-		instance[$.is_interacting] = true;
+		instance.isInteracting = true;
 		this.#active_nodes.set(e.pointerId, draggable_node);
 	}
 
@@ -509,25 +321,25 @@ export class DraggableFactory {
 		const instance = this.#instances.get(draggable_node)!;
 		if (!instance.isInteracting) return;
 
-		if (instance[$.is_processing_external_update] && instance.lastEvent === e) {
+		if (instance.isProcessingExternalUpdate && instance.lastEvent === e) {
 			return;
 		}
 
 		instance.lastEvent = e;
 
 		if (!instance.isDragging) {
-			instance[$.dragstart_prevented] = false;
+			instance.dragstartPrevented = false;
 			this.#run_plugins(instance, 'drag', e);
 
-			if (!instance[$.dragstart_prevented]) {
+			if (!instance.dragstartPrevented) {
 				const start_drag = this.#run_plugins(instance, 'start', e);
 				if (!start_drag) return this.#clear_effects(instance);
 				else this.#flush_effects(instance);
 
 				const capture_result = this.#resultify(
 					() => {
-						instance[$.pointer_captured_id] = e.pointerId;
-						instance.currentlyDraggedNode.setPointerCapture(instance[$.pointer_captured_id]);
+						instance.pointerCapturedId = e.pointerId;
+						instance.currentlyDraggedNode.setPointerCapture(instance.pointerCapturedId);
 					},
 					{
 						phase: 'start',
@@ -547,20 +359,21 @@ export class DraggableFactory {
 
 		// Mark event as neodrag event for drop zone detection
 		if (instance.isDragging) {
-			(e as any)[$.NEODRAG_EVENT] = instance.currentlyDraggedNode;
+			(e as PointerEvent & { [NEODRAG_EVENT]?: HTMLElement | SVGElement })[NEODRAG_EVENT] = instance.currentlyDraggedNode;
 		}
 
 		e.preventDefault();
 
 		if (!sync_only) {
-			const target_offset_x = (e.clientX - instance.initial.x) * instance[$.inverse_scale];
-			const target_offset_y = (e.clientY - instance.initial.y) * instance[$.inverse_scale];
+			const target_offset_x = (e.clientX - instance.initialX) * instance.inverseScale;
+			const target_offset_y = (e.clientY - instance.initialY) * instance.inverseScale;
 
-			instance[$.delta_x] = target_offset_x - instance[$.offset_x];
-			instance[$.delta_y] = target_offset_y - instance[$.offset_y];
+			instance.deltaX = target_offset_x - instance.offsetX;
+			instance.deltaY = target_offset_y - instance.offsetY;
 
-			instance[$.proposed_x] = instance[$.delta_x];
-			instance[$.proposed_y] = instance[$.delta_y];
+			instance.proposedX = instance.deltaX;
+			instance.proposedY = instance.deltaY;
+			instance.syncCoords();
 		}
 
 		const run_result = this.#run_plugins(instance, 'drag', e);
@@ -569,8 +382,9 @@ export class DraggableFactory {
 		else return this.#clear_effects(instance);
 
 		if (!sync_only) {
-			instance[$.offset_x] += instance[$.proposed_x] ?? 0;
-			instance[$.offset_y] += instance[$.proposed_y] ?? 0;
+			instance.offsetX += instance.proposedX ?? 0;
+			instance.offsetY += instance.proposedY ?? 0;
+			instance.syncCoords();
 		}
 	}
 
@@ -583,38 +397,38 @@ export class DraggableFactory {
 
 		// Mark event for drop zone detection if dragging
 		if (instance.isDragging) {
-			(e as any)[$.NEODRAG_EVENT] = instance.currentlyDraggedNode;
+			(e as PointerEvent & { [NEODRAG_EVENT]?: HTMLElement | SVGElement })[NEODRAG_EVENT] = instance.currentlyDraggedNode;
 		}
 
 		if (instance.isDragging) {
 			listen(draggable_node as HTMLElement, 'click', (e) => e.stopPropagation(), {
 				once: true,
-				signal: instance[$.controller].signal,
+				signal: instance.controller.signal,
 				capture: true,
 			});
 		}
 
 		if (
-			instance[$.pointer_captured_id] &&
-			instance.currentlyDraggedNode.hasPointerCapture(instance[$.pointer_captured_id])
+			instance.pointerCapturedId &&
+			instance.currentlyDraggedNode.hasPointerCapture(instance.pointerCapturedId)
 		) {
-			instance.currentlyDraggedNode.releasePointerCapture(instance[$.pointer_captured_id]);
+			instance.currentlyDraggedNode.releasePointerCapture(instance.pointerCapturedId);
 		}
 
 		this.#run_plugins(instance, 'end', e);
 		this.#flush_effects(instance);
 
-		if (instance[$.proposed_x] !== null)
-			instance[$.initial_x] = e.clientX - instance[$.offset_x] / instance[$.inverse_scale];
-		if (instance[$.proposed_y] !== null)
-			instance[$.initial_y] = e.clientY - instance[$.offset_y] / instance[$.inverse_scale];
+		if (instance.proposedX !== null)
+			instance.initialX = e.clientX - instance.offsetX / instance.inverseScale;
+		if (instance.proposedY !== null)
+			instance.initialY = e.clientY - instance.offsetY / instance.inverseScale;
 
-		instance[$.proposed_x] = 0;
-		instance[$.proposed_y] = 0;
-		instance[$.is_interacting] = false;
-		instance[$.is_dragging] = false;
-		instance[$.dragstart_prevented] = false;
-		instance[$.pointer_captured_id] = null;
+		instance.proposedX = 0;
+		instance.proposedY = 0;
+		instance.isInteracting = false;
+		instance.isDragging = false;
+		instance.dragstartPrevented = false;
+		instance.pointerCapturedId = null;
 		this.#clear_effects(instance);
 	}
 
@@ -657,12 +471,12 @@ export class DraggableFactory {
 		if (!instance) return;
 
 		if (
-			instance[$.pointer_captured_id] &&
-			instance.currentlyDraggedNode.hasPointerCapture(instance[$.pointer_captured_id])
+			instance.pointerCapturedId &&
+			instance.currentlyDraggedNode.hasPointerCapture(instance.pointerCapturedId)
 		) {
 			this.#resultify(
 				() => {
-					instance.currentlyDraggedNode.releasePointerCapture(instance[$.pointer_captured_id]!);
+					instance.currentlyDraggedNode.releasePointerCapture(instance.pointerCapturedId!);
 				},
 				{
 					phase: 'end',
@@ -671,15 +485,15 @@ export class DraggableFactory {
 			);
 		}
 
-		instance[$.is_interacting] = false;
-		instance[$.is_dragging] = false;
-		instance[$.dragstart_prevented] = false;
-		instance[$.pointer_captured_id] = null;
+		instance.isInteracting = false;
+		instance.isDragging = false;
+		instance.dragstartPrevented = false;
+		instance.pointerCapturedId = null;
 		this.#active_nodes.delete(pointer_id);
 		this.#clear_effects(instance);
 	}
 
-	#calculate_inverse_scale(instance: DraggableInstance) {
+	#calculate_inverse_scale(instance: DragInstance) {
 		const draggable_node = instance.rootNode;
 		let inverse_scale = 1;
 
@@ -701,65 +515,65 @@ export class DraggableFactory {
 		return inverse_scale;
 	}
 
-	#destroy_instance(instance: DraggableInstance) {
+	#destroy_instance(instance: DragInstance) {
 		for (const [pointer_id, active_node] of this.#active_nodes) {
-			if (active_node === instance[$.root_node]) {
+			if (active_node === instance.rootNode) {
 				this.#cleanup_active_node(pointer_id);
 			}
 		}
 
-		for (const plugin of instance[$.plugins]) {
-			plugin.cleanup?.(instance as PublicInstance, instance[$.plugin_states].get(plugin.name));
+		for (const plugin of instance.plugins) {
+			plugin.cleanup?.(instance as PublicInstance, instance.pluginStates.get(plugin.name));
 		}
 
-		instance[$.controller].abort();
+		instance.controller.abort();
 
-		this.instances.delete(instance[$.root_node]);
+		this.instances.delete(instance.rootNode);
 	}
 
-	#process_pending_compartment_updates(instance: DraggableInstance, is_external = false) {
-		if (instance[$.is_flushing_compartments] || instance[$.pending_compartments].size === 0) {
+	#process_pending_compartment_updates(instance: DragInstance, is_external = false) {
+		if (instance.isFlushingCompartments || instance.pendingCompartments.size === 0) {
 			return;
 		}
 
 		// ✅ CRITICAL FIX: Block recursive internal updates
-		if (!is_external && instance[$.is_processing_external_update]) {
+		if (!is_external && instance.isProcessingExternalUpdate) {
 			return;
 		}
 
-		instance[$.is_flushing_compartments] = true;
+		instance.isFlushingCompartments = true;
 
 		// ✅ Mark external updates and assign unique cycle ID
 		if (is_external) {
-			instance[$.is_processing_external_update] = true;
+			instance.isProcessingExternalUpdate = true;
 		}
 
 		queueMicrotask(() => {
 			// Store reference to pending items and clear for next batch
-			const pending = new Set(instance[$.pending_compartments]);
-			instance[$.pending_compartments].clear();
-			instance[$.is_flushing_compartments] = false;
+			const pending = new Set(instance.pendingCompartments);
+			instance.pendingCompartments.clear();
+			instance.isFlushingCompartments = false;
 
 			let has_changes = false;
 
 			// Process all pending compartment updates
 			for (const compartment of pending) {
 				const new_plugin = compartment.current;
-				const old_plugin = instance[$.plugins].find(
-					(p: Plugin) => p === instance[$.compartment_map].get(compartment),
+				const old_plugin = instance.plugins.find(
+					(p: Plugin) => p === instance.compartmentMap.get(compartment),
 				);
 
 				if (old_plugin) {
 					if (new_plugin == undefined) {
 						// Remove the plugin
-						const plugin_index = instance[$.plugins].indexOf(old_plugin);
+						const plugin_index = instance.plugins.indexOf(old_plugin);
 						old_plugin.cleanup?.(
 							instance as PublicInstance,
-							instance[$.plugin_states].get(old_plugin.name),
+							instance.pluginStates.get(old_plugin.name),
 						);
-						instance[$.plugin_states].delete(old_plugin.name);
-						instance[$.plugins].splice(plugin_index, 1);
-						instance[$.compartment_map].set(compartment, undefined);
+						instance.pluginStates.delete(old_plugin.name);
+						instance.plugins.splice(plugin_index, 1);
+						instance.compartmentMap.set(compartment, undefined);
 						has_changes = true;
 					} else {
 						// Skip if same instance and not live-updateable
@@ -768,13 +582,13 @@ export class DraggableFactory {
 						}
 
 						// Update plugin reference
-						instance[$.plugins][instance[$.plugins].indexOf(old_plugin)] = new_plugin;
-						instance[$.compartment_map].set(compartment, new_plugin);
+						instance.plugins[instance.plugins.indexOf(old_plugin)] = new_plugin;
+						instance.compartmentMap.set(compartment, new_plugin);
 
 						// Update all plugins that have liveUpdate enabled
-						for (const plugin of instance[$.plugins]) {
+						for (const plugin of instance.plugins) {
 							if (plugin.liveUpdate) {
-								const old = instance[$.plugins].find((p: Plugin) => p.name === plugin.name);
+								const old = instance.plugins.find((p: Plugin) => p.name === plugin.name);
 								if (this.#update_plugin_if_needed(instance, old, plugin)) {
 									has_changes = true;
 								}
@@ -783,32 +597,32 @@ export class DraggableFactory {
 					}
 				} else if (new_plugin != undefined) {
 					// Add new plugin when compartment was empty
-					instance[$.plugins].push(new_plugin);
-					instance[$.compartment_map].set(compartment, new_plugin);
+					instance.plugins.push(new_plugin);
+					instance.compartmentMap.set(compartment, new_plugin);
 
 					const setup_result = this.#resultify(
 						() => {
 							const state = new_plugin.setup?.(instance as PublicInstance);
 							if (state) {
-								instance[$.plugin_states].set(new_plugin.name, state);
+								instance.pluginStates.set(new_plugin.name, state);
 							}
 							return state;
 						},
 						{
 							phase: 'setup',
 							plugin: { name: new_plugin.name, hook: 'setup' },
-							node: instance[$.root_node],
+							node: instance.rootNode,
 						},
 					);
 
 					if (!setup_result.ok) {
-						instance[$.failed_plugins].add(new_plugin.name);
+						instance.failedPlugins.add(new_plugin.name);
 					}
 
 					// Use the same update logic as replacement case
-					for (const plugin of instance[$.plugins]) {
+					for (const plugin of instance.plugins) {
 						if (plugin.liveUpdate && plugin !== new_plugin) {
-							const old = instance[$.plugins].find((p: Plugin) => p.name === plugin.name);
+							const old = instance.plugins.find((p: Plugin) => p.name === plugin.name);
 							if (this.#update_plugin_if_needed(instance, old, plugin)) {
 								has_changes = true;
 							}
@@ -825,15 +639,15 @@ export class DraggableFactory {
 			}
 
 			// ✅ Reset flags AFTER processing
-			instance[$.is_flushing_compartments] = false;
+			instance.isFlushingCompartments = false;
 			if (is_external) {
-				instance[$.is_processing_external_update] = false;
+				instance.isProcessingExternalUpdate = false;
 			}
 
 			this.#flush_effects(instance);
 
 			// Check if new updates came in while we were processing
-			if (instance[$.pending_compartments].size > 0) {
+			if (instance.pendingCompartments.size > 0) {
 				setTimeout(() => {
 					this.#process_pending_compartment_updates(instance, false);
 				}, 0);
@@ -842,7 +656,7 @@ export class DraggableFactory {
 	}
 
 	#update_plugin_if_needed(
-		instance: DraggableInstance,
+		instance: DragInstance,
 		old_plugin: Plugin | undefined,
 		new_plugin: Plugin,
 	): boolean {
@@ -855,15 +669,15 @@ export class DraggableFactory {
 		if (old_plugin && old_plugin !== new_plugin) {
 			old_plugin.cleanup?.(
 				instance as PublicInstance,
-				instance[$.plugin_states].get(old_plugin.name),
+				instance.pluginStates.get(old_plugin.name),
 			);
-			instance[$.plugin_states].delete(old_plugin.name);
+			instance.pluginStates.delete(old_plugin.name);
 		}
 
 		// Setup new plugin
 		const state = new_plugin.setup?.(instance as PublicInstance);
 		if (state) {
-			instance[$.plugin_states].set(new_plugin.name, state);
+			instance.pluginStates.set(new_plugin.name, state);
 		}
 
 		return true;
