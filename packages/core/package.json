@@ -23,6 +23,10 @@
 			"types": "./src/drop/plugins.ts",
 			"import": "./src/drop/plugins.ts"
 		},
+		"./interactions": {
+			"types": "./src/interactions/index.ts",
+			"import": "./src/interactions/index.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {

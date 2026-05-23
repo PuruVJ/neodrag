@@ -42,6 +42,7 @@ export interface ActiveSession {
 	propagationStopped: boolean;
 	pointerId: number;
 	startedAt: number;
+	cancel(): void;
 }
 
 export class DragInstance {
@@ -144,7 +145,7 @@ export class DragInstance {
 			},
 			cancel() {
 				inst.cancelled = true;
-				session?.cancel();
+				if (session) session.cancel();
 			},
 			setForcedPosition(x, y) {
 				inst.offsetX = x;

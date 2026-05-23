@@ -151,6 +151,11 @@ export default defineConfig({
 
 		// testTimeout: 5000,
 		// retry: 2,
-		include: ['./tests/*.test.ts', './tests/*.test.svelte.ts'],
+		include: [
+			'./tests/*.test.ts',
+			'./tests/*.test.svelte.ts',
+			'./tests/interactions/*.test.ts',
+			'./tests/interactions/*.test.svelte.ts',
+		],
 	},
 });

@@ -1,0 +1,11 @@
+export const TRANSFORM_KEY = Symbol('neodrag.transform');
+export const THRESHOLD_KEY = Symbol('neodrag.threshold');
+export const STATE_MARKER_KEY = Symbol('neodrag.stateMarker');
+export const IGNORE_MULTITOUCH_KEY = Symbol('neodrag.ignoreMultitouch');
+export const APPLY_USER_SELECT_KEY = Symbol('neodrag.applyUserSelectHack');
+export const TOUCH_ACTION_KEY = Symbol('neodrag.touchAction');
+export const AXIS_KEY = Symbol('neodrag.axis');
+export const GRID_KEY = Symbol('neodrag.grid');
+export const BOUNDS_KEY = Symbol('neodrag.bounds');
+export const POSITION_KEY = Symbol('neodrag.position');
+export const DISABLED_KEY = Symbol('neodrag.disabled');

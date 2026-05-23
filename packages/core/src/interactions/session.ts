@@ -44,42 +44,6 @@ export function createDragSession(
 	};
 }
 
-export function createEmptySession(): DragSession {
-	const idle: ActiveSession = {
-		state: 'idle',
-		sourceNode: document.body,
-		visualNode: document.body,
-		sourceRect: new DOMRect(),
-		visualRect: new DOMRect(),
-		pointerX: 0,
-		pointerY: 0,
-		deltaX: 0,
-		deltaY: 0,
-		data: undefined,
-		overTargets: [],
-		private: activePrivate(),
-		propagationStopped: false,
-		pointerId: -1,
-		startedAt: 0,
-	};
-
-	return createDragSession(idle, () => {});
-}
-
-function activePrivate() {
-	return new (class {
-		#store = new Map<symbol, unknown>();
-		get(key: { id: symbol }) {
-			return this.#store.get(key.id);
-		}
-		set(key: { id: symbol }, value: unknown) {
-			this.#store.set(key.id, value);
-		}
-		has(key: { id: symbol }) {
-			return this.#store.has(key.id);
-		}
-	})();
-}
 
 export function resolveEndReason(active: ActiveSession | null, cancelled: boolean): EndReason {
 	if (cancelled || active?.state === 'cancelled') return 'cancel';
