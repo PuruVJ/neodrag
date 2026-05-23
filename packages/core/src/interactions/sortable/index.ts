@@ -16,7 +16,7 @@ export interface SortableOptions<T> {
 
 interface SortableContext<T> {
 	opts: SortableOptions<T>;
-	indexByKey: Map<string, number>;
+	nodesByKey: Map<string, HTMLElement | SVGElement>;
 }
 
 function computeIndex<T>(
@@ -34,7 +34,7 @@ function computeIndex<T>(
 	for (let i = 0; i < len; i++) {
 		const key = ctx.opts.keyBy(items[i]!);
 		if (key === excludeKey) continue;
-		const el = document.querySelector(`[data-sortable-key="${key}"]`);
+		const el = ctx.nodesByKey.get(key);
 		if (!el) continue;
 		const rect = el.getBoundingClientRect();
 		const mid =
@@ -51,7 +51,7 @@ function computeIndex<T>(
 export function sortable<T>(opts: SortableOptions<T>) {
 	const ctx: SortableContext<T> = {
 		opts,
-		indexByKey: new Map(),
+		nodesByKey: new Map(),
 	};
 	const itemKeys = new Map<string, symbol>();
 	const itemKey = (id: string) => {
@@ -116,9 +116,11 @@ export function sortable<T>(opts: SortableOptions<T>) {
 
 					init(dragCtx) {
 						dragCtx.rootNode.setAttribute('data-sortable-key', key);
+						ctx.nodesByKey.set(key, dragCtx.rootNode);
 					},
 
 					destroy(dragCtx) {
+						ctx.nodesByKey.delete(key);
 						dragCtx.rootNode.removeAttribute('data-sortable-key');
 					},
 				}))(),
