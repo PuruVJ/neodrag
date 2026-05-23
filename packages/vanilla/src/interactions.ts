@@ -1,5 +1,5 @@
 import {
-	InteractionEngine,
+	Neodrag,
 	type DragPlugin,
 	type DragPluginInput,
 	type DropPlugin,
@@ -9,8 +9,6 @@ import {
 
 export type { EngineOptions, DragPlugin, DropPlugin, DragPluginInput, DropPluginInput };
 
-export class Engine extends InteractionEngine {}
-
 export class Draggable {
 	readonly node: HTMLElement | SVGElement;
 	readonly #handle: import('@neodrag/core/interactions').DragHandle;
@@ -18,7 +16,7 @@ export class Draggable {
 	constructor(
 		node: HTMLElement | SVGElement,
 		plugins: DragPluginInput = [],
-		engine: Engine = Engine.shared,
+		engine: Neodrag = Neodrag.shared,
 	) {
 		this.node = node;
 		this.#handle = engine.draggable(node, plugins);
@@ -40,7 +38,7 @@ export class Droppable {
 	constructor(
 		node: HTMLElement | SVGElement,
 		plugins: DropPluginInput = [],
-		engine: Engine = Engine.shared,
+		engine: Neodrag = Neodrag.shared,
 	) {
 		this.node = node;
 		this.#handle = engine.droppable(node, plugins);
@@ -55,7 +53,6 @@ export {
 	Neodrag,
 	DragHandle,
 	DropHandle,
-	createEngine,
 	defineDragPlugin,
 	defineDropPlugin,
 	DragPluginBase,

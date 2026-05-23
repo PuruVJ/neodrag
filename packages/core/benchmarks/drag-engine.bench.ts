@@ -4,7 +4,7 @@
 import { bench, describe } from 'vitest';
 import { DraggableFactory, DEFAULTS } from '../src/index.ts';
 import { threshold, transform } from '../src/plugins.ts';
-import { createEngine, position, transform as iTransform } from '../src/interactions/index.ts';
+import { Neodrag, position, transform as iTransform } from '../src/interactions/index.ts';
 import { createDraggableNode, resetBody } from './helpers/dom.ts';
 import { simulateDragSteps } from './helpers/pointer.ts';
 
@@ -33,11 +33,11 @@ describe('drag loop (default plugin stacks)', () => {
 	);
 
 	bench(
-		'v4 InteractionEngine — 12-step drag',
+		'v4 Neodrag — 12-step drag',
 		() => {
 			resetBody();
 			const node = createDraggableNode();
-			const engine = createEngine();
+			const engine = new Neodrag();
 			const handle = engine.draggable(node, []);
 			simulateDragSteps(node, {
 				fromX: 120,
@@ -79,7 +79,7 @@ describe('drag loop (minimal plugins, threshold off)', () => {
 		() => {
 			resetBody();
 			const node = createDraggableNode();
-			const engine = createEngine({ plugins: MINIMAL_V4 });
+			const engine = new Neodrag({ plugins: MINIMAL_V4 });
 			const handle = engine.draggable(node, []);
 			simulateDragSteps(node, {
 				fromX: 120,

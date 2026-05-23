@@ -36,8 +36,8 @@ export interface EngineOptions {
 	dev?: boolean;
 }
 
-export class InteractionEngine {
-	static readonly shared = new InteractionEngine({ dev: false });
+export class Neodrag {
+	static readonly shared = new Neodrag({ dev: false });
 	#dragSources = new Map<HTMLElement | SVGElement, DragInstance>();
 	#dropTargets = new Map<HTMLElement | SVGElement, DropInstance>();
 	#dropCount = 0;
@@ -823,9 +823,3 @@ export class InteractionEngine {
 	}
 }
 
-/** @deprecated Prefer `new InteractionEngine(options)` */
-export function createEngine(options?: EngineOptions) {
-	return new InteractionEngine(options);
-}
-
-export { InteractionEngine as Neodrag };

@@ -81,15 +81,11 @@ export function auto_destroy_effect_root(fn: () => void | VoidFunction) {
 	return destroy;
 }
 
-/** Svelte attachment shorthand — prefer `new Draggable(plugins).attachment()` */
 export function draggable(plugins?: PluginInput): Attachment<HTMLElement | SVGElement> {
 	return new Draggable(Neodrag.shared, plugins).attachment();
 }
 
 export * from '@neodrag/core/plugins';
-
-/** @deprecated Use `Neodrag.shared.instances` */
-export const instances = Neodrag.shared.instances;
 
 export class Compartment extends CoreCompartment {
 	static of(reactive: ConstructorParameters<typeof CoreCompartment>[0]) {

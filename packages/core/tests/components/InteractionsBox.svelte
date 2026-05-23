@@ -1,20 +1,17 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import {
-		InteractionEngine,
-		type DragPlugin,
-	} from '../../src/interactions/index.ts';
+	import { Neodrag, type DragPlugin } from '../../src/interactions/index.ts';
 
 	const {
 		testid = 'draggable',
 		children,
 		plugins = [],
-		engine = new InteractionEngine(),
+		engine = new Neodrag(),
 	}: {
 		plugins?: DragPlugin[] | (() => DragPlugin[]);
 		testid?: string;
 		children?: Snippet;
-		engine?: InteractionEngine;
+		engine?: Neodrag;
 	} = $props();
 
 	function attach(node: HTMLElement) {

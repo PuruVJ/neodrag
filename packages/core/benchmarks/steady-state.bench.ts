@@ -4,7 +4,7 @@
  */
 import { bench, describe } from 'vitest';
 import { DraggableFactory, DEFAULTS } from '../src/index.ts';
-import { createEngine } from '../src/interactions/index.ts';
+import { Neodrag } from '../src/interactions/index.ts';
 import { createDraggableNode, resetBody } from './helpers/dom.ts';
 import { simulateDragSteps } from './helpers/pointer.ts';
 
@@ -14,7 +14,7 @@ describe('steady-state drag (amortized setup)', () => {
 	const v3Dispose = v3Factory.draggable(v3Node, []);
 
 	const v4Node = createDraggableNode();
-	const v4Engine = createEngine();
+	const v4Engine = new Neodrag();
 	const _v4Handle = v4Engine.draggable(v4Node, []);
 
 	bench(

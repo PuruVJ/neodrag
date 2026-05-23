@@ -1,15 +1,15 @@
 import type { DragPlugin, DragPluginInput } from './types.ts';
 
-export interface DragEngineHost {
+export interface NeodragHost {
 	update(node: HTMLElement | SVGElement, plugins: DragPlugin[]): void;
 }
 
 export class DragHandle {
 	readonly node: HTMLElement | SVGElement;
 	readonly #dispose: () => void;
-	readonly #engine: DragEngineHost;
+	readonly #engine: NeodragHost;
 
-	constructor(engine: DragEngineHost, node: HTMLElement | SVGElement, dispose: () => void) {
+	constructor(engine: NeodragHost, node: HTMLElement | SVGElement, dispose: () => void) {
 		this.#engine = engine;
 		this.node = node;
 		this.#dispose = dispose;

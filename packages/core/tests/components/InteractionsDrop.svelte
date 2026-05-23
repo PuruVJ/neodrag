@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { createEngine, type DragPlugin, type DropPlugin } from '../../src/interactions/index.ts';
+	import { Neodrag, type DragPlugin, type DropPlugin } from '../../src/interactions/index.ts';
 
 	const {
 		dragPlugins = [],
@@ -16,7 +16,7 @@
 		dragTestId?: string;
 	} = $props();
 
-	const engine = createEngine();
+	const engine = new Neodrag();
 
 	const bindDrop = (n: HTMLElement) => {
 		const h = engine.droppable(n, dropPlugins);

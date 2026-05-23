@@ -7,7 +7,7 @@
 import { bench, describe } from 'vitest';
 import { DraggableFactory, DEFAULTS } from '../src/index.ts';
 import { threshold, transform } from '../src/plugins.ts';
-import { createEngine, position, transform as iTransform } from '../src/interactions/index.ts';
+import { Neodrag, position, transform as iTransform } from '../src/interactions/index.ts';
 import { assertOffset, assertTranslate } from './helpers/behavioral.ts';
 import { createDraggableNode, flushEffects, parseTranslate, resetBody } from './helpers/dom.ts';
 import { simulateDragSteps } from './helpers/pointer.ts';
@@ -48,7 +48,7 @@ describe('behavioral — transform after drag', () => {
 		async () => {
 			resetBody();
 			const node = createDraggableNode();
-			const engine = createEngine();
+			const engine = new Neodrag();
 			const handle = engine.draggable(node, []);
 			simulateDragSteps(node, DRAG);
 			await flushEffects();
@@ -69,7 +69,7 @@ describe('behavioral — transform after drag', () => {
 			v4Node.style.top = v3Node.style.top;
 
 			const v3Factory = new DraggableFactory({ ...DEFAULTS, plugins: MINIMAL_V3 });
-			const v4Engine = createEngine({ plugins: MINIMAL_V4 });
+			const v4Engine = new Neodrag({ plugins: MINIMAL_V4 });
 
 			const d1 = v3Factory.draggable(v3Node, []);
 			const d2 = v4Engine.draggable(v4Node, []);
@@ -121,7 +121,7 @@ describe('behavioral — repeated drag stability', () => {
 		async () => {
 			resetBody();
 			const node = createDraggableNode();
-			const engine = createEngine({ plugins: MINIMAL_V4 });
+			const engine = new Neodrag({ plugins: MINIMAL_V4 });
 			let inits = 0;
 			const pos = position({ current: { x: 0, y: 0 } });
 			const origInit = pos.init!;

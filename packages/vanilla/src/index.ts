@@ -63,6 +63,3 @@ export class Droppable {
 }
 
 export * from '@neodrag/core/plugins';
-
-/** @deprecated Use `Neodrag.shared.instances` */
-export const instances = Neodrag.shared.instances;

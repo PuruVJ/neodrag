@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEngine, sortable, transform } from '../../src/interactions/index.ts';
+	import { Neodrag, sortable, transform } from '../../src/interactions/index.ts';
 
 	let items = $state([
 		{ id: '1', text: 'One' },
@@ -7,7 +7,7 @@
 		{ id: '3', text: 'Three' },
 	]);
 
-	const engine = createEngine();
+	const engine = new Neodrag();
 	const list = sortable({
 		items: () => items,
 		keyBy: (i) => i.id,

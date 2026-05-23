@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { DraggableFactory, DEFAULTS } from '../../src/index.ts';
-import { createEngine } from '../../src/interactions/index.ts';
+import { Neodrag } from '../../src/interactions/index.ts';
 
 function createBox() {
 	const box = document.createElement('div');
@@ -122,7 +122,7 @@ describe('Chromium drag performance', () => {
 		const box = createBox();
 		box.dataset.benchBox = '1';
 
-		const engine = createEngine({ dev: false });
+		const engine = new Neodrag({ dev: false });
 		const handle = engine.draggable(box, []);
 
 		const stats = benchDrag('v4', () => () => {
@@ -144,7 +144,7 @@ describe('Chromium drag performance', () => {
 
 		const v3f = new DraggableFactory(DEFAULTS);
 		const v3d = v3f.draggable(v3box, []);
-		const v4e = createEngine({ dev: false });
+		const v4e = new Neodrag({ dev: false });
 		const v4d = v4e.draggable(v4box, []);
 
 		drag12(v3box, 120, 120, 220, 220);

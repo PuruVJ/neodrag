@@ -70,7 +70,4 @@ export function droppable(plugins?: DropPlugin[]): Attachment<HTMLElement | SVGE
 
 export * from '@neodrag/core/drop/plugins';
 
-/** @deprecated Use `NeodragDrop.shared.instances` */
-export const dropInstances = NeodragDrop.shared.instances;
-
 export { sortableItem, sortableItemBySelector } from './sortable.svelte';

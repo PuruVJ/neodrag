@@ -1,5 +1,5 @@
 import {
-	InteractionEngine,
+	Neodrag,
 	type DragPlugin,
 	type DragPluginInput,
 	type DropPlugin,
@@ -10,16 +10,12 @@ import { Attachment } from 'svelte/attachments';
 
 export type { EngineOptions, DragPlugin, DropPlugin, DragPluginInput, DropPluginInput };
 
-export class Engine extends InteractionEngine {
-	static readonly shared = new Engine({ dev: false });
-}
-
 export class Draggable {
-	readonly #engine: Engine;
+	readonly #engine: Neodrag;
 	readonly #plugins: DragPluginInput;
 	#handle?: import('@neodrag/core/interactions').DragHandle;
 
-	constructor(engine: Engine = Engine.shared, plugins: DragPluginInput = []) {
+	constructor(engine: Neodrag = Neodrag.shared, plugins: DragPluginInput = []) {
 		this.#engine = engine;
 		this.#plugins = plugins;
 	}
@@ -45,11 +41,11 @@ export class Draggable {
 }
 
 export class Droppable {
-	readonly #engine: Engine;
+	readonly #engine: Neodrag;
 	readonly #plugins: DropPluginInput;
 	#handle?: import('@neodrag/core/interactions').DropHandle;
 
-	constructor(engine: Engine = Engine.shared, plugins: DropPluginInput = []) {
+	constructor(engine: Neodrag = Neodrag.shared, plugins: DropPluginInput = []) {
 		this.#engine = engine;
 		this.#plugins = plugins;
 	}
@@ -71,18 +67,17 @@ export class Droppable {
 }
 
 export function draggable(plugins?: DragPluginInput): Attachment<HTMLElement | SVGElement> {
-	return new Draggable(Engine.shared, plugins ?? []).attachment();
+	return new Draggable(Neodrag.shared, plugins ?? []).attachment();
 }
 
 export function droppable(plugins?: DropPluginInput): Attachment<HTMLElement | SVGElement> {
-	return new Droppable(Engine.shared, plugins ?? []).attachment();
+	return new Droppable(Neodrag.shared, plugins ?? []).attachment();
 }
 
 export {
 	Neodrag,
 	DragHandle,
 	DropHandle,
-	createEngine,
 	defineDragPlugin,
 	defineDropPlugin,
 	DEFAULT_DRAG_PLUGINS,

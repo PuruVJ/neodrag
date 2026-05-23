@@ -14,12 +14,6 @@
 			"import": "./src/index.svelte.ts",
 			"default": "./src/index.svelte.ts"
 		},
-		"./legacy": {
-			"types": "./src/legacy.ts",
-			"svelte": "./src/legacy.ts",
-			"import": "./src/legacy.ts",
-			"default": "./src/legacy.ts"
-		},
 		"./drop": {
 			"types": "./src/drop/index.svelte.ts",
 			"svelte": "./src/drop/index.svelte.ts",
@@ -41,12 +35,6 @@
 				"svelte": "./dist/index.svelte.js",
 				"import": "./dist/index.svelte.js",
 				"default": "./dist/index.svelte.js"
-			},
-			"./legacy": {
-				"types": "./dist/legacy.d.ts",
-				"svelte": "./dist/legacy.js",
-				"import": "./dist/legacy.js",
-				"default": "./dist/legacy.js"
 			},
 			"./package.json": "./package.json"
 		}

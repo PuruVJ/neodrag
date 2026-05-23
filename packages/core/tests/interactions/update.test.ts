@@ -2,11 +2,11 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { createEngine, position, transform } from '../../src/interactions/index.ts';
+import { Neodrag, position, transform } from '../../src/interactions/index.ts';
 
 describe('engine.update symbol-keyed diff', () => {
 	it('does not re-init when same plugin key gets new options object', () => {
-		const engine = createEngine();
+		const engine = new Neodrag();
 		let initCalls = 0;
 		const node = document.createElement('div');
 		document.body.appendChild(node);
@@ -26,7 +26,7 @@ describe('engine.update symbol-keyed diff', () => {
 	});
 
 	it('no-ops when plugin array reference unchanged', () => {
-		const engine = createEngine();
+		const engine = new Neodrag();
 		const node = document.createElement('div');
 		document.body.appendChild(node);
 		const plugins = [transform, position({ current: { x: 0, y: 0 } })];

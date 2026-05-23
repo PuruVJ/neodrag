@@ -6,7 +6,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { DraggableFactory, DEFAULTS } from '../src/index.ts';
 import { threshold, transform } from '../src/plugins.ts';
-import { createEngine, position, transform as iTransform } from '../src/interactions/index.ts';
+import { Neodrag, position, transform as iTransform } from '../src/interactions/index.ts';
 import { assertTranslate } from './helpers/behavioral.ts';
 import { createDraggableNode, flushEffects, parseTranslate, resetBody } from './helpers/dom.ts';
 import { simulateDragSteps } from './helpers/pointer.ts';
@@ -38,7 +38,7 @@ describe('benchmark behavioral guards', () => {
 
 	it('v4 default drag reaches expected translate', async () => {
 		const node = createDraggableNode();
-		const engine = createEngine();
+		const engine = new Neodrag();
 		const handle = engine.draggable(node, []);
 		simulateDragSteps(node, DRAG);
 		await flushEffects();
@@ -55,7 +55,7 @@ describe('benchmark behavioral guards', () => {
 			...DEFAULTS,
 			plugins: [transform(), threshold(null)],
 		});
-		const v4Engine = createEngine({
+		const v4Engine = new Neodrag({
 			plugins: [iTransform, position({ current: { x: 0, y: 0 } })],
 		});
 

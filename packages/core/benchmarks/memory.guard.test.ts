@@ -6,7 +6,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { DraggableFactory, DEFAULTS } from '../src/index.ts';
 import { threshold, transform } from '../src/plugins.ts';
-import { createEngine, position, transform as iTransform } from '../src/interactions/index.ts';
+import { Neodrag, position, transform as iTransform } from '../src/interactions/index.ts';
 import { createDraggableNode, resetBody } from './helpers/dom.ts';
 import { simulateDragSteps } from './helpers/pointer.ts';
 
@@ -58,7 +58,7 @@ describe('memory snapshots', () => {
 
 	it('v4 default: peak and cleanup', () => {
 		const before = snapshot();
-		const engine = createEngine();
+		const engine = new Neodrag();
 		const nodes: HTMLDivElement[] = [];
 		const disposers: Array<() => void> = [];
 
