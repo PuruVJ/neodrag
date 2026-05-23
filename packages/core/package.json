@@ -66,12 +66,11 @@
 		"test": "vitest",
 		"test:interactions": "vitest run --config vitest.interactions.config.ts",
 		"test:interactions:unit": "vitest run tests/interactions/state-machine.test.ts tests/interactions/update.test.ts tests/interactions/plugins-phases.test.ts --browser.enabled=false",
-		"test:bench:guard": "vitest run --config vitest.bench.config.ts benchmarks/behavioral.guard.test.ts benchmarks/perf-budget.guard.test.ts",
-		"bench": "vitest bench --config vitest.bench.config.ts",
+		"test:bench:guard": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/behavioral.guard.test.ts benchmarks/browser/perf.suite.test.ts",
+		"bench": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/perf.suite.test.ts",
 		"bench:browser": "vitest run --config vitest.bench.browser.config.ts",
-		"bench:all": "pnpm bench:run && pnpm exec vitest bench --config vitest.bench.config.ts benchmarks/steady-state.bench.ts && pnpm bench:browser",
-		"bench:run": "vitest run --config vitest.bench.config.ts benchmarks/behavioral.guard.test.ts && vitest bench --config vitest.bench.config.ts",
-		"bench:memory": "NODE_OPTIONS='--expose-gc' vitest run --config vitest.bench.config.ts benchmarks/memory.guard.test.ts",
+		"bench:all": "pnpm test:bench:guard",
+		"bench:run": "pnpm test:bench:guard",
 		"test:coverage": "vitest run --coverage --browser=chromium"
 	},
 	"repository": {

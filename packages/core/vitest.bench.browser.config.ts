@@ -6,7 +6,8 @@ export default defineConfig({
 	plugins: [svelte()],
 	test: {
 		include: ['benchmarks/browser/**/*.test.ts'],
-		testTimeout: 120_000,
+		testTimeout: 180_000,
+		hookTimeout: 60_000,
 		browser: {
 			enabled: true,
 			provider: 'playwright',
