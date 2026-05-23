@@ -56,12 +56,11 @@ Svelte 5 reactivity integrates with Neodrag compartments:
 
 ```svelte
 <script>
-  import { draggable, axis, Compartment } from '@neodrag/svelte';
+  import { draggable, axis } from '@neodrag/svelte';
 
   let currentAxis = $state('x');
 
-  const axisCompartment = Compartment.of(() => axis(currentAxis));
-</script>
+  </script>
 
 <div {@attach draggable(() => [axisCompartment])}>
   Currently draggable on: {currentAxis} axis
@@ -123,17 +122,12 @@ Svelte 5 reactivity integrates with Neodrag compartments:
     draggable,
     grid,
     axis,
-    Compartment,
   } from '@neodrag/svelte';
 
   let gridSize = $state(20);
   let lockAxis = $state('both');
 
-  const gridCompartment = Compartment.of(() =>
-    grid([gridSize, gridSize]),
-  );
-  const axisCompartment = Compartment.of(() => axis(lockAxis));
-</script>
+    </script>
 
 <label>
   Grid size: {gridSize}px

@@ -94,7 +94,6 @@ import { createSignal } from 'solid-js';
 import {
   useDraggable,
   axis,
-  createCompartment,
 } from '@neodrag/solid';
 
 export const App: Component = () => {
@@ -102,10 +101,7 @@ export const App: Component = () => {
     createSignal<HTMLElement | null>(null);
   const [currentAxis, setCurrentAxis] = createSignal<'x' | 'y'>('x');
 
-  const axisCompartment = createCompartment(() =>
-    axis(currentAxis()),
-  );
-
+  
   useDraggable(draggableRef, [axisCompartment]);
 
   return (
@@ -133,7 +129,6 @@ import {
   bounds,
   BoundsFrom,
   grid,
-  createCompartment,
 } from '@neodrag/solid';
 
 export const App: Component = () => {
@@ -143,14 +138,7 @@ export const App: Component = () => {
   const [gridSize, setGridSize] = createSignal(20);
   const [enableBounds, setEnableBounds] = createSignal(false);
 
-  const axisComp = createCompartment(() => axis(currentAxis()));
-  const gridComp = createCompartment(() =>
-    grid([gridSize(), gridSize()]),
-  );
-  const boundsComp = createCompartment(() =>
-    enableBounds() ? bounds(BoundsFrom.parent()) : null,
-  );
-
+      
   useDraggable(draggableRef, [axisComp, gridComp, boundsComp]);
 
   return (

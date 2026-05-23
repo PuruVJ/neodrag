@@ -85,17 +85,13 @@ For dynamic behavior that changes during runtime:
 
 ```tsx
 import { useRef, useState } from 'react';
-import { useDraggable, axis, useCompartment } from '@neodrag/react';
+import { useDraggable, axis } from '@neodrag/react';
 
 function App() {
   const elementRef = useRef<HTMLDivElement>(null);
   const [currentAxis, setCurrentAxis] = useState<'x' | 'y'>('x');
 
-  const axisCompartment = useCompartment(
-    () => axis(currentAxis),
-    [currentAxis],
-  );
-
+  
   useDraggable(elementRef, () => [axisCompartment]);
 
   return (
@@ -123,7 +119,6 @@ import {
   bounds,
   BoundsFrom,
   grid,
-  useCompartment,
 } from '@neodrag/react';
 
 function App() {
@@ -132,19 +127,7 @@ function App() {
   const [gridSize, setGridSize] = useState(20);
   const [enableBounds, setEnableBounds] = useState(false);
 
-  const axisComp = useCompartment(
-    () => axis(currentAxis),
-    [currentAxis],
-  );
-  const gridComp = useCompartment(
-    () => grid([gridSize, gridSize]),
-    [gridSize],
-  );
-  const boundsComp = useCompartment(
-    () => (enableBounds ? bounds(BoundsFrom.parent()) : null),
-    [enableBounds],
-  );
-
+      
   useDraggable(elementRef, () => [axisComp, gridComp, boundsComp]);
 
   return (

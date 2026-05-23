@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { portal } from '$attachments/portal.svelte';
 	import type { Framework } from '$helpers/constants';
-	import { Compartment, draggable, events, position, type DragEventData } from '@neodrag/svelte';
+	import { draggable, events, position, type DragEventData } from '@neodrag/svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { expoOut } from 'svelte/easing';
 	import { on } from 'svelte/events';
@@ -49,9 +49,7 @@
 
 	let draggable_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
 
-	const position_compartment = Compartment.of(() =>
-		position({ current: draggable_position.current }),
-	);
+	
 
 	// Cache for element positions to avoid repeated getBoundingClientRect calls
 	let cached_positions = {
@@ -198,7 +196,7 @@
 	data-paw-cursor="true"
 	bind:this={button_el}
 	{@attach draggable(() => [
-		position_compartment,
+		position({ current: draggable_position.current }),
 		events({
 			onDragStart: (data) => {
 				// FIXED: Start continuous RAF only when dragging starts

@@ -135,11 +135,10 @@ Neodrag.shared.draggable(free, [axis(null)]);
 
 ```svelte
 <script>
-  import { draggable, axis, Compartment } from '@neodrag/svelte';
+  import { draggable, axis } from '@neodrag/svelte';
 
   let currentAxis = $state('x');
-  const axisComp = Compartment.of(() => axis(currentAxis));
-</script>
+  </script>
 
 <div {@attach draggable(() => [axisComp])}>
   Currently locked to: {currentAxis} axis
@@ -158,17 +157,13 @@ Neodrag.shared.draggable(free, [axis(null)]);
 
 ```tsx
 import { useState, useRef } from 'react';
-import { axis, useDraggable, useCompartment } from '@neodrag/react';
+import { axis, useDraggable } from '@neodrag/react';
 
 function DynamicAxis() {
   const ref = useRef<HTMLDivElement>(null);
   const [currentAxis, setCurrentAxis] = useState<'x' | 'y'>('x');
 
-  const axisComp = useCompartment(
-    () => axis(currentAxis),
-    [currentAxis],
-  );
-
+  
   useDraggable(ref, () => [axisComp]);
 
   return (
@@ -193,10 +188,9 @@ function DynamicAxis() {
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { axis, vDraggable, useCompartment } from '@neodrag/vue';
+import { axis, vDraggable } from '@neodrag/vue';
 
 const currentAxis = ref('x');
-const axisComp = useCompartment(() => axis(currentAxis.value));
 
 function switchAxis() {
   currentAxis.value = currentAxis.value === 'x' ? 'y' : 'x';
@@ -224,15 +218,13 @@ import { createSignal } from 'solid-js';
 import {
   axis,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function DynamicAxis() {
   const [ref, setRef] = createSignal<HTMLElement | null>(null);
   const [currentAxis, setCurrentAxis] = createSignal<'x' | 'y'>('x');
 
-  const axisComp = createCompartment(() => axis(currentAxis()));
-
+  
   useDraggable(ref, [axisComp]);
 
   function switchAxis() {
@@ -257,10 +249,9 @@ function DynamicAxis() {
 <div slot="vanilla">
 
 ```typescript
-import { axis, Neodrag, Compartment } from '@neodrag/vanilla';
+import { axis, Neodrag } from '@neodrag/vanilla';
 
 let currentAxis = 'x';
-const axisComp = new Compartment(() => axis(currentAxis));
 
 const element = document.getElementById('draggable');
 const button = document.getElementById('switch-button');

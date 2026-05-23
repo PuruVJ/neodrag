@@ -42,7 +42,7 @@ neodrag/
    - Drop plugins: `init`, `enter`, `over`, `leave`, `drop`, `update`, `destroy`
    - Built-in plugins: `transform`, `bounds`, `controls`, `grid`, `threshold`, `sortable`, etc.
 
-3. **Compartment System**: Dynamic plugin management
+3. **Reactive reconcile**: Framework wrappers call `engine.update` when plugin inputs change
    - Allows runtime plugin swapping
    - Reactive updates with Svelte 5 integration
    - Live plugin updates during drag operations
@@ -111,7 +111,7 @@ packages/core/tests/
 - **Position Verification**: CSS transform checking
 - **Plugin Testing**: Isolated plugin behavior verification
 - **Precision Testing**: Large coordinate precision edge cases
-- **State Management**: Compartment and plugin lifecycle testing
+- **State Management**: Plugin lifecycle and reactive update testing
 
 ## Plugin System Deep Dive
 
@@ -156,7 +156,7 @@ export const myPlugin = defineDragPlugin((options = {}) => ({
 ### Svelte Integration
 - **Actions**: `use:draggable` action with plugin array
 - **Reactivity**: Svelte 5 runes integration with `$state` and `$effect`
-- **Compartments**: `Compartment.of()` for reactive plugin management
+- **Reactive plugins**: `draggable(() => [...])` reconciles on dependency changes
 - **Legacy Support**: Separate legacy export for Svelte < 5
 
 ### React Integration

@@ -143,20 +143,19 @@ const instance = Neodrag.shared.draggable(element, [
 - `scrollLock()` - Prevent page scrolling while dragging
 - `events()` - Handle drag lifecycle events
 
-## Dynamic Plugins with Compartments
+## Reactive plugin lists
 
-For plugins that change based on user interaction, use Compartments:
+For plugins that change based on user interaction, pass a reactive factory:
 
 <FrameworkSwitch>
 <div slot="svelte">
 
 ```svelte
 <script>
-  import { draggable, axis, Compartment } from '@neodrag/svelte';
+  import { draggable, axis } from '@neodrag/svelte';
 
   let currentAxis = $state('x');
-  const axisComp = Compartment.of(() => axis(currentAxis));
-</script>
+  </script>
 
 <div {@attach draggable(() => [axisComp])}>Drag me</div>
 <button onclick={() => (currentAxis = 'y')}>Switch to Y axis</button>
@@ -167,16 +166,12 @@ For plugins that change based on user interaction, use Compartments:
 <div slot="react">
 
 ```tsx
-import { useCompartment, useDraggable, axis } from '@neodrag/react';
+import { useDraggable, axis } from '@neodrag/react';
 
 function DynamicAxis() {
   const [currentAxis, setCurrentAxis] = useState('x');
   const ref = useRef(null);
-  const axisComp = useCompartment(
-    () => axis(currentAxis),
-    [currentAxis],
-  );
-
+  
   useDraggable(ref, () => [axisComp]);
 
   return (
@@ -197,10 +192,9 @@ function DynamicAxis() {
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { vDraggable, axis, useCompartment } from '@neodrag/vue';
+import { vDraggable, axis } from '@neodrag/vue';
 
 const currentAxis = ref('x');
-const axisComp = useCompartment(() => axis(currentAxis.value));
 </script>
 
 <template>
@@ -218,7 +212,6 @@ import { createSignal } from 'solid-js';
 import {
   useDraggable,
   axis,
-  createCompartment,
 } from '@neodrag/solid';
 
 function DynamicAxis() {
@@ -226,8 +219,7 @@ function DynamicAxis() {
     null,
   );
   const [currentAxis, setCurrentAxis] = createSignal('x');
-  const axisComp = createCompartment(() => axis(currentAxis()));
-
+  
   useDraggable(element, [axisComp]);
 
   return (
@@ -246,10 +238,9 @@ function DynamicAxis() {
 <div slot="vanilla">
 
 ```typescript
-import { Neodrag, axis, Compartment } from '@neodrag/vanilla';
+import { Neodrag, axis } from '@neodrag/vanilla';
 
 let currentAxis = 'x';
-const axisComp = new Compartment(() => axis(currentAxis));
 const instance = Neodrag.shared.draggable(element, () => [axisComp]);
 
 function switchAxis() {
@@ -261,7 +252,7 @@ function switchAxis() {
 </div>
 </FrameworkSwitch>
 
-> **Important:** v3 requires Compartments for dynamic behavior. Simply changing plugin options or recreating arrays won't update the draggable.
+> **Important:** v3 wrappers call `engine.update` when your `() => plugins` factory re-runs. Simply changing plugin options or recreating arrays won't update the draggable.
 
 ## Writing Custom Plugins
 

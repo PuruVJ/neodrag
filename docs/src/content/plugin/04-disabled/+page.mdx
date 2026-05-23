@@ -103,11 +103,10 @@ The real power comes from dynamically enabling/disabling with compartments:
 
 ```svelte
 <script>
-  import { draggable, disabled, Compartment } from '@neodrag/svelte';
+  import { draggable, disabled } from '@neodrag/svelte';
 
   let isDragDisabled = $state(false);
-  const disabledComp = Compartment.of(() => disabled(isDragDisabled));
-</script>
+  </script>
 
 <div {@attach draggable(() => [disabledComp])}>
   Dragging is {isDragDisabled ? 'disabled' : 'enabled'}
@@ -127,18 +126,13 @@ import { useState, useRef } from 'react';
 import {
   disabled,
   useDraggable,
-  useCompartment,
 } from '@neodrag/react';
 
 function ToggleDisabled() {
   const ref = useRef<HTMLDivElement>(null);
   const [isDragDisabled, setIsDragDisabled] = useState(false);
 
-  const disabledComp = useCompartment(
-    () => disabled(isDragDisabled),
-    [isDragDisabled],
-  );
-
+  
   useDraggable(ref, () => [disabledComp]);
 
   return (
@@ -161,12 +155,9 @@ function ToggleDisabled() {
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { disabled, vDraggable, useCompartment } from '@neodrag/vue';
+import { disabled, vDraggable } from '@neodrag/vue';
 
 const isDragDisabled = ref(false);
-const disabledComp = useCompartment(() =>
-  disabled(isDragDisabled.value),
-);
 
 function toggleDragging() {
   isDragDisabled.value = !isDragDisabled.value;
@@ -194,7 +185,6 @@ import { createSignal } from 'solid-js';
 import {
   disabled,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function ToggleDisabled() {
@@ -203,10 +193,7 @@ function ToggleDisabled() {
   );
   const [isDragDisabled, setIsDragDisabled] = createSignal(false);
 
-  const disabledComp = createCompartment(() =>
-    disabled(isDragDisabled()),
-  );
-
+  
   useDraggable(element, [disabledComp]);
 
   function toggleDragging() {
@@ -231,10 +218,9 @@ function ToggleDisabled() {
 <div slot="vanilla">
 
 ```typescript
-import { disabled, Neodrag, Compartment } from '@neodrag/vanilla';
+import { disabled, Neodrag } from '@neodrag/vanilla';
 
 let isDragDisabled = false;
-const disabledComp = new Compartment(() => disabled(isDragDisabled));
 
 const element = document.getElementById('element');
 const button = document.getElementById('toggle-button');
@@ -261,16 +247,13 @@ button.addEventListener('click', () => {
 
 ```svelte
 <script>
-  import { draggable, disabled, Compartment } from '@neodrag/svelte';
+  import { draggable, disabled } from '@neodrag/svelte';
 
   let isFormValid = $state(true);
   let isLoading = $state(false);
 
   // Disable dragging when form is invalid or loading
-  const disabledComp = Compartment.of(() =>
-    disabled(!isFormValid || isLoading),
-  );
-</script>
+  </script>
 
 <div {@attach draggable(() => [disabledComp])}>
   {#if isLoading}
@@ -302,7 +285,6 @@ import { useState, useRef } from 'react';
 import {
   disabled,
   useDraggable,
-  useCompartment,
 } from '@neodrag/react';
 
 function ConditionalDisabled() {
@@ -311,11 +293,7 @@ function ConditionalDisabled() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Disable dragging when form is invalid or loading
-  const disabledComp = useCompartment(
-    () => disabled(!isFormValid || isLoading),
-    [isFormValid, isLoading],
-  );
-
+  
   useDraggable(ref, () => [disabledComp]);
 
   return (
@@ -357,15 +335,12 @@ function ConditionalDisabled() {
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { disabled, vDraggable, useCompartment } from '@neodrag/vue';
+import { disabled, vDraggable } from '@neodrag/vue';
 
 const isFormValid = ref(true);
 const isLoading = ref(false);
 
 // Disable dragging when form is invalid or loading
-const disabledComp = useCompartment(() =>
-  disabled(!isFormValid.value || isLoading.value),
-);
 </script>
 
 <template>
@@ -398,7 +373,6 @@ import { createSignal } from 'solid-js';
 import {
   disabled,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function ConditionalDisabled() {
@@ -409,10 +383,7 @@ function ConditionalDisabled() {
   const [isLoading, setIsLoading] = createSignal(false);
 
   // Disable dragging when form is invalid or loading
-  const disabledComp = createCompartment(() =>
-    disabled(!isFormValid() || isLoading()),
-  );
-
+  
   useDraggable(element, [disabledComp]);
 
   return (
@@ -452,14 +423,11 @@ function ConditionalDisabled() {
 <div slot="vanilla">
 
 ```typescript
-import { disabled, Neodrag, Compartment } from '@neodrag/vanilla';
+import { disabled, Neodrag } from '@neodrag/vanilla';
 
 let isFormValid = true;
 let isLoading = false;
 
-const disabledComp = new Compartment(() =>
-  disabled(!isFormValid || isLoading),
-);
 
 const element = document.getElementById('element');
 const formValidCheckbox = document.getElementById('form-valid');
@@ -501,29 +469,19 @@ loadingCheckbox.addEventListener('change', (e) => {
 
 ```typescript
 // Disable dragging until all required fields are filled
-const isFormComplete = computed(
-  () => name.length > 0 && email.includes('@') && message.length > 10,
-);
 
-const disabledComp = useCompartment(() =>
-  disabled(!isFormComplete.value),
-);
 ```
 
 ### Loading States
 
 ```typescript
 // Disable during API calls
-const disabledComp = useCompartment(() =>
-  disabled(isSubmitting || isLoading),
-);
 ```
 
 ### User Permissions
 
 ```typescript
 // Only allow dragging for admin users
-const disabledComp = useCompartment(() => disabled(!user.isAdmin));
 ```
 
 ## How It Works

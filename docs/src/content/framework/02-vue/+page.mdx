@@ -55,11 +55,10 @@ For dynamic behavior that changes during runtime:
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { vDraggable, axis, useCompartment } from '@neodrag/vue';
+import { vDraggable, axis } from '@neodrag/vue';
 
 const currentAxis = ref('x');
 
-const axisComp = useCompartment(() => axis(currentAxis.value));
 
 const plugins = () => [axisComp];
 </script>
@@ -85,20 +84,12 @@ import {
   bounds,
   BoundsFrom,
   grid,
-  useCompartment,
 } from '@neodrag/vue';
 
 const currentAxis = ref('x');
 const gridSize = ref(20);
 const enableBounds = ref(false);
 
-const axisComp = useCompartment(() => axis(currentAxis.value));
-const gridComp = useCompartment(() =>
-  grid([gridSize.value, gridSize.value]),
-);
-const boundsComp = useCompartment(() =>
-  enableBounds.value ? bounds(BoundsFrom.parent()) : null,
-);
 
 const plugins = () => [axisComp, gridComp, boundsComp];
 </script>

@@ -78,11 +78,10 @@ Reactive plugins with compartments
 
 ```svelte
 <script>
-  import { draggable, axis, Compartment } from '@neodrag/svelte';
+  import { draggable, axis } from '@neodrag/svelte';
 
   let currentAxis = $state('x');
-  const axisComp = Compartment.of(() => axis(currentAxis));
-</script>
+  </script>
 
 <div {@attach draggable(() => [axisComp])}>
   Current axis: {currentAxis}

@@ -3,7 +3,7 @@
 	import { typingEffect } from '$attachments/typingEffect.svelte';
 	import { browser } from '$helpers/utils';
 	import { theme } from '$state/user-preferences.svelte';
-	import { bounds, BoundsFrom, Compartment, draggable, events, position } from '@neodrag/svelte';
+	import { bounds, BoundsFrom, draggable, events, position } from '@neodrag/svelte';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
@@ -24,8 +24,6 @@
 	});
 
 	let drag_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
-
-	const position_compartment = Compartment.of(() => position({ current: drag_position.current }));
 
 	function handle_mouse_move(e: MouseEvent) {
 		coords_cursor ??= { x: 0, y: 0 };
@@ -56,7 +54,7 @@
 		class:wiggles={box_wiggles}
 		{@attach draggable(() => [
 			bounds(BoundsFrom.parent()),
-			position_compartment,
+			position({ current: drag_position.current }),
 			events({
 				onDragStart: () => {
 					box_wiggles = false;

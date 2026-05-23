@@ -2,7 +2,7 @@
  * Behavioral correctness guards in real Chromium.
  */
 import { describe, expect, it } from 'vitest';
-import { DEFAULTS, Neodrag, position, threshold, transform } from '../../src/index.ts';
+import { DEFAULTS, events, Neodrag, position, threshold, transform } from '../../src/index.ts';
 import {
 	assertTranslate,
 	createBox,
@@ -68,6 +68,53 @@ describe('Chromium behavioral guards', () => {
 
 		h1.destroy();
 		h2.destroy();
+		engine.dispose();
+	});
+
+	it('two-way position binding reaches expected translate after drag', async () => {
+		resetBody();
+		const box = createBox('100px', '360px');
+		const engine = new Neodrag({ dev: false });
+		const pos = { x: 0, y: 0 };
+		const build = () => [
+			transform,
+			position({ current: { x: pos.x, y: pos.y } }),
+			events({
+				onDrag(data) {
+					pos.x = data.offset.x;
+					pos.y = data.offset.y;
+				},
+			}),
+		];
+		const handle = engine.draggable(box, build());
+
+		dragSteps(box, DRAG.fromX, DRAG.fromY, DRAG.toX, DRAG.toY, DRAG.steps);
+		handle.update(build());
+		await flushEffects();
+
+		assertTranslate(box, DRAG.expected, 8);
+		expect(Math.abs(pos.x - DRAG.expected.x)).toBeLessThan(8);
+		expect(Math.abs(pos.y - DRAG.expected.y)).toBeLessThan(8);
+
+		handle.destroy();
+		engine.dispose();
+	});
+
+	it('external position update applies while idle', async () => {
+		resetBody();
+		const box = createBox('300px', '360px');
+		const engine = new Neodrag({ dev: false });
+		const handle = engine.draggable(box, [
+			transform,
+			position({ current: { x: 0, y: 0 } }),
+		]);
+
+		handle.update([transform, position({ current: { x: 55, y: 77 } })]);
+		await flushEffects();
+
+		assertTranslate(box, { x: 55, y: 77 }, 2);
+
+		handle.destroy();
 		engine.dispose();
 	});
 });

@@ -55,9 +55,8 @@ const drag = Neodrag.shared.draggable(
 ## Reactive plugins with compartments
 
 ```typescript
-import { Neodrag, axis, grid, Compartment } from '@neodrag/vanilla';
+import { Neodrag, axis, grid } from '@neodrag/vanilla';
 
-const axisCompartment = new Compartment(() => axis('x'));
 const drag = Neodrag.shared.draggable(
   document.querySelector('#drag')!,
   () => [axisCompartment, grid([10, 10])],
@@ -75,18 +74,12 @@ import {
   bounds,
   BoundsFrom,
   grid,
-  Compartment,
 } from '@neodrag/vanilla';
 
 let currentAxis = 'x';
 let gridSize = 20;
 let enableBounds = false;
 
-const axisComp = new Compartment(() => axis(currentAxis));
-const gridComp = new Compartment(() => grid([gridSize, gridSize]));
-const boundsComp = new Compartment(() =>
-  enableBounds ? bounds(BoundsFrom.parent()) : null,
-);
 
 const drag = Neodrag.shared.draggable(
   document.querySelector('#drag')!,

@@ -24,7 +24,7 @@ One draggable to rule em all
 - 🧩 **Plugin-based** - Mix and match only what you need
 - ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
 - 🎯 **React Native** - Built for React hooks with `useDraggable`
-- 🔄 **Reactive** - `useCompartment` for reactive plugin updates
+- 🔄 **Reactive** - pass `() => plugins`; the wrapper reconciles automatically
 
 # Installing
 
@@ -98,19 +98,18 @@ function App() {
 }
 ```
 
-Reactive plugins with useCompartment
+Reactive plugins with reactive plugin factories
 
 ```tsx
 import { useRef, useState } from 'react';
-import { useDraggable, axis, useCompartment } from '@neodrag/react';
+import { useDraggable, axis } from '@neodrag/react';
 
 function App() {
 	const elementRef = useRef<HTMLDivElement>(null);
 	const [currentAxis, setCurrentAxis] = useState<'x' | 'y'>('x');
 
-	const axisCompartment = useCompartment(() => axis(currentAxis), [currentAxis]);
-
-	useDraggable(elementRef, () => [axisCompartment]);
+	
+	useDraggable(elementRef, () => [axisreactive plugin factories]);
 
 	return (
 		<div>

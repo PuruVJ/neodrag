@@ -182,15 +182,13 @@ Neodrag.shared.draggable(container, [
 
 ```svelte
 <script>
-  import { draggable, scrollLock, Compartment } from '@neodrag/svelte';
+  import { draggable, scrollLock } from '@neodrag/svelte';
 
   let lockMode = $state('both');
   let allowScrollbar = $state(false);
   let targetContainer = $state(null);
 
-  const scrollLockComp = Compartment.of(() => {
-    if (lockMode === 'none') return null;
-
+  
     return scrollLock({
       lockAxis: lockMode,
       allowScrollbar: allowScrollbar,
@@ -234,7 +232,6 @@ import { useState, useRef } from 'react';
 import {
   scrollLock,
   useDraggable,
-  useCompartment,
 } from '@neodrag/react';
 
 function DynamicScrollLock() {
@@ -245,9 +242,7 @@ function DynamicScrollLock() {
   >('both');
   const [allowScrollbar, setAllowScrollbar] = useState(false);
 
-  const scrollLockComp = useCompartment(() => {
-    if (lockMode === 'none') return null;
-
+  
     return scrollLock({
       lockAxis: lockMode,
       allowScrollbar: allowScrollbar,
@@ -302,14 +297,12 @@ function DynamicScrollLock() {
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { scrollLock, vDraggable, useCompartment } from '@neodrag/vue';
+import { scrollLock, vDraggable } from '@neodrag/vue';
 
 const lockMode = ref('both');
 const allowScrollbar = ref(false);
 const targetContainer = ref();
 
-const scrollLockComp = useCompartment(() => {
-  if (lockMode.value === 'none') return null;
 
   return scrollLock({
     lockAxis: lockMode.value,
@@ -358,7 +351,6 @@ import { createSignal } from 'solid-js';
 import {
   scrollLock,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function DynamicScrollLock() {
@@ -372,9 +364,7 @@ function DynamicScrollLock() {
   >('both');
   const [allowScrollbar, setAllowScrollbar] = createSignal(false);
 
-  const scrollLockComp = createCompartment(() => {
-    if (lockMode() === 'none') return null;
-
+  
     return scrollLock({
       lockAxis: lockMode(),
       allowScrollbar: allowScrollbar(),
@@ -427,7 +417,7 @@ function DynamicScrollLock() {
 <div slot="vanilla">
 
 ```typescript
-import { scrollLock, Neodrag, Compartment } from '@neodrag/vanilla';
+import { scrollLock, Neodrag } from '@neodrag/vanilla';
 
 const element = document.getElementById('draggable');
 const container = document.getElementById('container');
@@ -438,8 +428,6 @@ const statusEl = document.getElementById('status');
 let lockMode = 'both';
 let allowScrollbar = false;
 
-const scrollLockComp = new Compartment(() => {
-  if (lockMode === 'none') return null;
 
   return scrollLock({
     lockAxis: lockMode,

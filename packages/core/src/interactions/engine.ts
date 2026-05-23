@@ -10,6 +10,7 @@ import {
 import { DragHandle, DropHandle } from './handles.ts';
 import { resolveDragPlugins } from './resolve-plugins.ts';
 import { DEFAULT_DRAG_PLUGINS } from './plugins/index.ts';
+import { TRANSFORM_KEY } from './plugins/keys.ts';
 import { createDragSession, resolveEndReason } from './session.ts';
 import { isTerminal, transitionSession } from './state-machine.ts';
 import type {
@@ -722,6 +723,22 @@ export class Neodrag {
 		inst.flat = next;
 		inst.rebuildBuckets();
 		inst.isProcessingExternalUpdate = false;
+		this.#syncTransformAfterPluginDiff(inst);
+	}
+
+	#syncTransformAfterPluginDiff(inst: DragInstance) {
+		const transformPlugin = inst.byKey.get(TRANSFORM_KEY);
+		if (!transformPlugin?.update) {
+			inst.effects.flush();
+			return;
+		}
+		this.#pluginVoid(
+			inst,
+			transformPlugin.key,
+			{ phase: 'update', plugin: { name: transformPlugin.name, hook: 'update' }, node: inst.rootNode },
+			() => transformPlugin.update!(inst.dragCtx, inst.states.get(transformPlugin.key)),
+		);
+		inst.effects.flush();
 	}
 
 	#initDragPlugins(inst: DragInstance) {

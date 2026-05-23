@@ -201,14 +201,12 @@ touchAction(null); // Same as false
 
 ```svelte
 <script>
-  import { draggable, touchAction, Compartment } from '@neodrag/svelte';
+  import { draggable, touchAction } from '@neodrag/svelte';
 
   let mode = $state('manipulation');
   let allowScroll = $state(false);
 
-  const touchActionComp = Compartment.of(() => {
-    if (mode === 'disabled') return touchAction(false);
-    if (allowScroll) return touchAction('pan-y');
+      if (allowScroll) return touchAction('pan-y');
     return touchAction(mode);
   });
 </script>
@@ -250,7 +248,6 @@ import { useRef, useState } from 'react';
 import {
   touchAction,
   useDraggable,
-  useCompartment,
 } from '@neodrag/react';
 
 function DynamicTouchAction() {
@@ -258,9 +255,7 @@ function DynamicTouchAction() {
   const [mode, setMode] = useState('manipulation');
   const [allowScroll, setAllowScroll] = useState(false);
 
-  const touchActionComp = useCompartment(() => {
-    if (mode === 'disabled') return touchAction(false);
-    if (allowScroll) return touchAction('pan-y');
+      if (allowScroll) return touchAction('pan-y');
     return touchAction(mode);
   }, [mode, allowScroll]);
 
@@ -313,13 +308,11 @@ function DynamicTouchAction() {
 ```vue
 <script setup>
 import { ref, computed } from 'vue';
-import { touchAction, useCompartment } from '@neodrag/vue';
+import { touchAction } from '@neodrag/vue';
 
 const mode = ref('manipulation');
 const allowScroll = ref(false);
 
-const touchActionComp = useCompartment(() => {
-  if (mode.value === 'disabled') return touchAction(false);
   if (allowScroll.value) return touchAction('pan-y');
   return touchAction(mode.value);
 }, [mode, allowScroll]);
@@ -366,7 +359,6 @@ import { createSignal } from 'solid-js';
 import {
   touchAction,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function DynamicTouchAction() {
@@ -374,9 +366,7 @@ function DynamicTouchAction() {
   const [allowScroll, setAllowScroll] = createSignal(false);
   const [elementRef, setElementRef] = createSignal();
 
-  const touchActionComp = createCompartment(() => {
-    if (mode() === 'disabled') return touchAction(false);
-    if (allowScroll()) return touchAction('pan-y');
+      if (allowScroll()) return touchAction('pan-y');
     return touchAction(mode());
   });
 
@@ -430,7 +420,6 @@ function DynamicTouchAction() {
 import {
   Neodrag,
   touchAction,
-  Compartment,
 } from '@neodrag/vanilla';
 
 const element = document.getElementById('draggable');
@@ -441,8 +430,6 @@ const valueDisplay = document.getElementById('value-display');
 let mode = 'manipulation';
 let allowScroll = false;
 
-const touchActionComp = new Compartment(() => {
-  if (mode === 'disabled') return touchAction(false);
   if (allowScroll) return touchAction('pan-y');
   return touchAction(mode);
 });

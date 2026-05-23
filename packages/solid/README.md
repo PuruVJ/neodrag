@@ -24,7 +24,7 @@ One draggable to rule em all
 - 🧩 **Plugin-based** - Mix and match only what you need
 - ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
 - 🎯 **SolidJS Native** - Built for SolidJS with `useDraggable` hook
-- 🔄 **Reactive** - `createCompartment` for reactive plugin updates
+- 🔄 **Reactive** - pass `() => plugins`; the wrapper reconciles automatically
 
 # Installing
 
@@ -95,19 +95,18 @@ export const App: Component = () => {
 };
 ```
 
-Reactive plugins with createCompartment
+Reactive plugins with reactive plugin factories
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { useDraggable, axis, createCompartment } from '@neodrag/solid';
+import { useDraggable, axis } from '@neodrag/solid';
 
 export const App: Component = () => {
 	const [draggableRef, setDraggableRef] = createSignal<HTMLElement | null>(null);
 	const [currentAxis, setCurrentAxis] = createSignal<'x' | 'y'>('x');
 
-	const axisCompartment = createCompartment(() => axis(currentAxis()));
-
-	useDraggable(draggableRef, [axisCompartment]);
+	
+	useDraggable(draggableRef, [axisreactive plugin factories]);
 
 	return (
 		<div>

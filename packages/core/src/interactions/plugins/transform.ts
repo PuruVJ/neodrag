@@ -40,6 +40,10 @@ export const transform: DragPlugin = {
 		writeTransform(ctx);
 	},
 
+	update(ctx) {
+		writeTransform(ctx);
+	},
+
 	drag(ctx) {
 		ctx.effect(() => writeTransform(ctx));
 	},
@@ -55,6 +59,9 @@ export const transformWith = (
 	key: Symbol('neodrag.transform.custom'),
 	name: 'transform-custom',
 	init(ctx) {
+		writeTransform(ctx, func);
+	},
+	update(ctx) {
 		writeTransform(ctx, func);
 	},
 	drag(ctx) {

@@ -169,3 +169,69 @@ export function ratioLabel(a: BenchStats, b: BenchStats) {
 	const mult = slower.meanMs / faster.meanMs;
 	return `${faster.name} is ${mult.toFixed(2)}× faster than ${slower.name} (mean)`;
 }
+
+export type TwoWayBindingBench = {
+	engine: import('../../src/index.ts').Neodrag;
+	box: HTMLElement;
+	handle: import('../../src/index.ts').DragHandle;
+	pos: { x: number; y: number };
+	build: () => import('../../src/index.ts').DragPlugin[];
+};
+
+export function setupTwoWayBinding(
+	Neodrag: typeof import('../../src/index.ts').Neodrag,
+	position: typeof import('../../src/index.ts').position,
+	transform: typeof import('../../src/index.ts').transform,
+	events: typeof import('../../src/index.ts').events,
+	left?: string,
+	top?: string,
+): TwoWayBindingBench {
+	const leftPos = left ?? '100px';
+	const topPos = top ?? '100px';
+	const engine = new Neodrag({ dev: false });
+	const box = createBox(leftPos, topPos);
+	const pos = { x: 0, y: 0 };
+	const build = () => [
+		transform,
+		position({ current: { x: pos.x, y: pos.y } }),
+		events({
+			onDrag(data) {
+				pos.x = data.offset.x;
+				pos.y = data.offset.y;
+			},
+		}),
+	];
+	const handle = engine.draggable(box, build());
+	return { engine, box, handle, pos, build };
+}
+
+export function setupManyDraggables(
+	count: number,
+	engine: import('../../src/index.ts').Neodrag,
+	plugins: import('../../src/index.ts').DragPlugin[] = [],
+) {
+	const handles: import('../../src/index.ts').DragHandle[] = [];
+	const root = document.createElement('div');
+	root.style.cssText =
+		'position:absolute;left:20px;top:20px;display:grid;grid-template-columns:repeat(10,72px);gap:8px';
+	document.body.appendChild(root);
+
+	for (let i = 0; i < count; i++) {
+		const el = document.createElement('div');
+		el.style.cssText = 'width:64px;height:48px;background:#7ec8e3;touch-action:none';
+		root.appendChild(el);
+		handles.push(engine.draggable(el, plugins));
+	}
+
+	return { root, handles, first: root.firstElementChild as HTMLElement };
+}
+
+export function printBenchReport(title: string, results: BenchStats[], comparisons: [BenchStats, BenchStats][] = []) {
+	console.log(`\n=== ${title} ===\n`);
+	console.table(formatComparison(results));
+	if (comparisons.length) {
+		console.log('\nComparisons:');
+		for (const [a, b] of comparisons) console.log(' ·', ratioLabel(a, b));
+	}
+	console.log('\nJSON:', JSON.stringify(results, null, 2));
+}

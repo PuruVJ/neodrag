@@ -21,7 +21,7 @@ npm i @neodrag/core@next
 - **`Neodrag`**: Main engine — `draggable()`, `droppable()`, `dispose()`
 - **Plugins**: `defineDragPlugin` / `defineDropPlugin` with lifecycle hooks
 - **Event delegation**: Three global pointer listeners on the delegate element
-- **`Compartment`**: Reactive plugin slot for dynamic plugin lists
+- **Reactive reconcile**: wrappers call `engine.update` when plugin inputs change
 - **`DragHandle`**: Per-element binding with `.update()` and `.destroy()`
 
 ## Neodrag
@@ -52,7 +52,7 @@ Use `Neodrag.shared` when you do not need a custom default plugin stack.
 
 ### `draggable(node, plugins?)`
 
-Returns a `DragHandle`. Plugins may be a static array, a resolver function, or include `Compartment` entries.
+Returns a `DragHandle`. Plugins are a `DragPlugin[]` array; framework wrappers reconcile changes.
 
 ### `droppable(node, plugins?)`
 
@@ -82,15 +82,9 @@ export const myPlugin = defineDragPlugin(() => ({
 }));
 ```
 
-## Compartments
+## Reactive updates
 
-```typescript
-import { Compartment, axis } from '@neodrag/core';
-
-const axisComp = new Compartment(() => axis('x'));
-engine.draggable(node, [axisComp]);
-axisComp.current = axis('y');
-```
+Framework packages accept `() => plugins` and call `Neodrag#update` internally. Vanilla callers invoke `handle.update(plugins)` when options change.
 
 ## Inspecting instances
 

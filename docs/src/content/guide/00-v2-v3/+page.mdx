@@ -621,19 +621,12 @@ Neodrag.shared.draggable(element, [
     axis,
     bounds,
     BoundsFrom,
-    Compartment,
   } from '@neodrag/svelte';
 
   let currentAxis = $state('x');
   let isConstrained = $state(false);
 
-  const axisComp = Compartment.of(() =>
-    currentAxis === 'both' ? null : axis(currentAxis),
-  );
-  const boundsComp = Compartment.of(() =>
-    isConstrained ? bounds(BoundsFrom.parent()) : null,
-  );
-</script>
+    </script>
 
 <div
   {@attach draggable(() => [axisComp, boundsComp].filter(Boolean))}
@@ -683,15 +676,7 @@ function App() {
   const [currentAxis, setCurrentAxis] = useState('x');
   const [isConstrained, setIsConstrained] = useState(false);
 
-  const axisComp = useCompartment(
-    () => (currentAxis === 'both' ? null : axis(currentAxis)),
-    [currentAxis],
-  );
-  const boundsComp = useCompartment(
-    () => (isConstrained ? bounds(BoundsFrom.parent()) : null),
-    [isConstrained],
-  );
-
+    
   useDraggable(ref, () => [axisComp, boundsComp].filter(Boolean));
 
   return (
@@ -746,12 +731,6 @@ import { useCompartment } from '@neodrag/vue';
 const currentAxis = ref('x');
 const isConstrained = ref(false);
 
-const axisComp = useCompartment(() =>
-  currentAxis.value === 'both' ? null : axis(currentAxis.value),
-);
-const boundsComp = useCompartment(() =>
-  isConstrained.value ? bounds(BoundsFrom.parent()) : null,
-);
 
 const plugins = () => [axisComp, boundsComp].filter(Boolean);
 </script>
@@ -805,13 +784,7 @@ function App() {
   const [currentAxis, setCurrentAxis] = createSignal('x');
   const [isConstrained, setIsConstrained] = createSignal(false);
 
-  const axisComp = createCompartment(() =>
-    currentAxis() === 'both' ? null : axis(currentAxis()),
-  );
-  const boundsComp = createCompartment(() =>
-    isConstrained() ? bounds(BoundsFrom.parent()) : null,
-  );
-
+    
   useDraggable(element, [axisComp, boundsComp]);
 
   return (
@@ -862,12 +835,6 @@ import { Compartment } from '@neodrag/vanilla';
 let currentAxis = 'x';
 let isConstrained = false;
 
-const axisComp = new Compartment(() =>
-  currentAxis === 'both' ? null : axis(currentAxis),
-);
-const boundsComp = new Compartment(() =>
-  isConstrained ? bounds(BoundsFrom.parent()) : null,
-);
 
 const instance = Neodrag.shared.draggable(element, () =>
   [axisComp, boundsComp].filter(Boolean),

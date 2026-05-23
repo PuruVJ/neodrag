@@ -157,15 +157,12 @@ Neodrag.shared.draggable(vertical, [grid([null, 20])]);
 
 ```svelte
 <script>
-  import { draggable, grid, Compartment } from '@neodrag/svelte';
+  import { draggable, grid } from '@neodrag/svelte';
 
   let gridSize = $state(20);
   let enableSnap = $state(true);
 
-  const gridComp = Compartment.of(() =>
-    enableSnap ? grid([gridSize, gridSize]) : grid([null, null]),
-  );
-</script>
+  </script>
 
 <div {@attach draggable(() => [gridComp])}>
   Grid: {enableSnap ? `${gridSize}px` : 'disabled'}
@@ -194,19 +191,14 @@ Neodrag.shared.draggable(vertical, [grid([null, 20])]);
 
 ```tsx
 import { useState, useRef } from 'react';
-import { grid, useDraggable, useCompartment } from '@neodrag/react';
+import { grid, useDraggable } from '@neodrag/react';
 
 function DynamicGrid() {
   const ref = useRef<HTMLDivElement>(null);
   const [gridSize, setGridSize] = useState(20);
   const [enableSnap, setEnableSnap] = useState(true);
 
-  const gridComp = useCompartment(
-    () =>
-      enableSnap ? grid([gridSize, gridSize]) : grid([null, null]),
-    [gridSize, enableSnap],
-  );
-
+  
   useDraggable(ref, () => [gridComp]);
 
   return (
@@ -247,16 +239,11 @@ function DynamicGrid() {
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { grid, vDraggable, useCompartment } from '@neodrag/vue';
+import { grid, vDraggable } from '@neodrag/vue';
 
 const gridSize = ref(20);
 const enableSnap = ref(true);
 
-const gridComp = useCompartment(() =>
-  enableSnap.value
-    ? grid([gridSize.value, gridSize.value])
-    : grid([null, null]),
-);
 </script>
 
 <template>
@@ -293,7 +280,6 @@ import { createSignal } from 'solid-js';
 import {
   grid,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function DynamicGrid() {
@@ -303,12 +289,7 @@ function DynamicGrid() {
   const [gridSize, setGridSize] = createSignal(20);
   const [enableSnap, setEnableSnap] = createSignal(true);
 
-  const gridComp = createCompartment(() =>
-    enableSnap()
-      ? grid([gridSize(), gridSize()])
-      : grid([null, null]),
-  );
-
+  
   useDraggable(element, [gridComp]);
 
   return (
@@ -347,14 +328,11 @@ function DynamicGrid() {
 <div slot="vanilla">
 
 ```typescript
-import { grid, Neodrag, Compartment } from '@neodrag/vanilla';
+import { grid, Neodrag } from '@neodrag/vanilla';
 
 let gridSize = 20;
 let enableSnap = true;
 
-const gridComp = new Compartment(() =>
-  enableSnap ? grid([gridSize, gridSize]) : grid([null, null]),
-);
 
 const element = document.getElementById('element');
 const sizeSlider = document.getElementById('size-slider');
@@ -512,14 +490,13 @@ Neodrag.shared.draggable(calendar, [grid([80, 120])]);
 
 ```svelte
 <script>
-  import { draggable, grid, Compartment } from '@neodrag/svelte';
+  import { draggable, grid } from '@neodrag/svelte';
 
   let screenWidth = $state(window.innerWidth);
 
   // 12-column responsive grid
   const columnWidth = $derived(screenWidth / 12);
-  const responsiveGrid = Compartment.of(() =>
-    grid([columnWidth, 40]),
+  const responsiveGrid = grid([columnWidth, 40]),
   );
 
   function handleResize() {
@@ -542,7 +519,7 @@ Neodrag.shared.draggable(calendar, [grid([80, 120])]);
 
 ```tsx
 import { useState, useEffect, useRef } from 'react';
-import { grid, useDraggable, useCompartment } from '@neodrag/react';
+import { grid, useDraggable } from '@neodrag/react';
 
 function ResponsiveGrid() {
   const ref = useRef<HTMLDivElement>(null);
@@ -580,14 +557,13 @@ function ResponsiveGrid() {
 ```vue
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { grid, vDraggable, useCompartment } from '@neodrag/vue';
+import { grid, vDraggable } from '@neodrag/vue';
 
 const screenWidth = ref(window.innerWidth);
 
 // 12-column responsive grid
 const columnWidth = computed(() => screenWidth.value / 12);
-const responsiveGrid = useCompartment(() =>
-  grid([columnWidth.value, 40]),
+const responsiveGrid = grid([columnWidth.value, 40]),
 );
 
 function handleResize() {
@@ -621,7 +597,6 @@ import { createSignal, onMount, onCleanup } from 'solid-js';
 import {
   grid,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function ResponsiveGrid() {
@@ -634,8 +609,7 @@ function ResponsiveGrid() {
 
   // 12-column responsive grid
   const columnWidth = () => screenWidth() / 12;
-  const responsiveGrid = createCompartment(() =>
-    grid([columnWidth(), 40]),
+  const responsiveGrid = grid([columnWidth(), 40]),
   );
 
   const handleResize = () => setScreenWidth(window.innerWidth);
@@ -665,13 +639,12 @@ function ResponsiveGrid() {
 <div slot="vanilla">
 
 ```typescript
-import { grid, Neodrag, Compartment } from '@neodrag/vanilla';
+import { grid, Neodrag } from '@neodrag/vanilla';
 
 let screenWidth = window.innerWidth;
 
 const getColumnWidth = () => screenWidth / 12;
-const responsiveGrid = new Compartment(() =>
-  grid([getColumnWidth(), 40]),
+const responsiveGrid = grid([getColumnWidth(), 40]),
 );
 
 const element = document.getElementById('element');

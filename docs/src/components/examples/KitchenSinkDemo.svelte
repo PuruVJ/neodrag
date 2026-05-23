@@ -7,7 +7,6 @@
 		BoundsFrom,
 		ControlFrom,
 		controls,
-		Compartment,
 		disabled,
 		draggable,
 		events,
@@ -94,10 +93,6 @@
 		x: 0,
 		y: 0,
 	});
-	const return_to_position_compartment = Compartment.of(() => {
-		return position({ current: $state.snapshot(return_to_position_val) });
-	});
-
 	let return_to_position_transition_val = new Tween(
 		{
 			x: 0,
@@ -105,9 +100,7 @@
 		},
 		{ easing: expoOut, duration: 1200 },
 	);
-	const return_to_position_transition_compartment = Compartment.of(() =>
-		position({ current: $state.snapshot(return_to_position_transition_val.current) }),
-	);
+	
 
 	if (browser)
 		if ('paintWorklet' in CSS) {
@@ -345,7 +338,7 @@
 			data-paw-cursor="true"
 			style:z-index={z_indices[13]}
 			{@attach draggable(() => [
-				return_to_position_compartment,
+				position({ current: return_to_position_val }),
 				events({
 					onDrag: (data) => {
 						drag_handlers.onDrag?.(data);
