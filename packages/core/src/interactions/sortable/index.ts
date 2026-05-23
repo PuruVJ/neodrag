@@ -47,20 +47,29 @@ function computeIndex<T>(
 				strategy === 'horizontal' ? rect.left + rect.width / 2 : rect.top + rect.height / 2;
 			mids.push({ key, mid, index: i });
 		}
+		mids.sort((a, b) => a.mid - b.mid);
 		ctx.midsCache = { mids, itemsLen: len };
 	}
 
-	let index = len;
 	const pos = strategy === 'horizontal' ? pointerX : pointerY;
-	for (let i = 0; i < mids!.length; i++) {
-		const entry = mids![i]!;
-		if (entry.key === excludeKey) continue;
-		if (pos < entry.mid) {
-			index = entry.index;
-			break;
-		}
+	const list = mids!;
+	const n = list.length;
+	if (n === 0) return 0;
+
+	let lo = 0;
+	let hi = n;
+	while (lo < hi) {
+		const mid = (lo + hi) >> 1;
+		if (list[mid]!.mid < pos) lo = mid + 1;
+		else hi = mid;
 	}
-	return index;
+
+	for (let i = lo; i < n; i++) {
+		const entry = list[i]!;
+		if (entry.key === excludeKey) continue;
+		if (pos < entry.mid) return entry.index;
+	}
+	return len;
 }
 
 export function sortable<T>(opts: SortableOptions<T>) {
@@ -86,19 +95,40 @@ export function sortable<T>(opts: SortableOptions<T>) {
 
 		init(dropCtx) {
 			dropCtx.session.private.set(SORTABLE_CTX_KEY, ctx as SortableContext<unknown>);
-			return { hoverIndex: -1, dragKey: '' };
+			return {
+				hoverIndex: -1,
+				dragKey: '',
+				lastX: NaN,
+				lastY: NaN,
+				lastIndex: -1,
+			};
 		},
 
 		over(dropCtx, state, e) {
+			const x = e.clientX;
+			const y = e.clientY;
+			if (x === state.lastX && y === state.lastY) return;
+
 			const dragKey = (dropCtx.session.data as { key?: string } | undefined)?.key ?? '';
-			state.dragKey = dragKey;
-			state.hoverIndex = computeIndex(
+			const nextIndex = computeIndex(
 				ctx,
-				e.clientX,
-				e.clientY,
+				x,
+				y,
 				opts.strategy ?? 'vertical',
 				dragKey,
 			);
+
+			if (dragKey === state.dragKey && nextIndex === state.lastIndex) {
+				state.lastX = x;
+				state.lastY = y;
+				return;
+			}
+
+			state.dragKey = dragKey;
+			state.hoverIndex = nextIndex;
+			state.lastIndex = nextIndex;
+			state.lastX = x;
+			state.lastY = y;
 		},
 
 		drop(dropCtx, state) {

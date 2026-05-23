@@ -73,6 +73,11 @@ export class Neodrag {
 
 	#overStack: DropInstance[] = [];
 	#overStackScratch: DropInstance[] = [];
+	#soleDrop: DropInstance | null = null;
+	#lastDropEvent: PointerEvent | null = null;
+	#lastDropPointerX = NaN;
+	#lastDropPointerY = NaN;
+	#dropRafId = 0;
 
 	#idleSession: import('./types.ts').DragSession;
 	#activeSessionView: import('./types.ts').DragSession | null = null;
@@ -161,11 +166,13 @@ export class Neodrag {
 		this.#initDropPlugins(inst);
 		this.#dropTargets.set(node, inst);
 		this.#dropCount++;
+		if (this.#dropCount === 1) this.#soleDrop = inst;
 
 		return new DropHandle(node, () => {
 			this.#destroyDrop(inst);
 			this.#dropTargets.delete(node);
 			this.#dropCount--;
+			if (this.#soleDrop === inst) this.#soleDrop = null;
 		});
 	}
 
@@ -342,6 +349,8 @@ export class Neodrag {
 		inst.cancelled = false;
 		inst.lastEvent = e;
 		this.#dropHost.lastEvent = e;
+		this.#lastDropPointerX = NaN;
+		this.#lastDropPointerY = NaN;
 		this.#beginSession(inst, e);
 		this.#armPointerSession();
 	}
@@ -399,7 +408,7 @@ export class Neodrag {
 		inst.proposedY = 0;
 		inst.effects.flush();
 
-		if (this.#dropCount > 0) this.#updateDropTargets(e);
+		if (this.#dropCount > 0) this.#queueDropTargetUpdate(e);
 	}
 
 	#onPointerUp(e: PointerEvent) {
@@ -407,7 +416,7 @@ export class Neodrag {
 		if (!inst?.isInteracting) return;
 
 		if (inst.isDragging && this.#dropCount > 0) {
-			this.#updateDropTargets(e);
+			this.#flushDropTargetUpdate(e);
 		}
 
 		const reason = resolveEndReason(this.#active, inst.cancelled);
@@ -465,6 +474,7 @@ export class Neodrag {
 		this.#dropHost.session = this.#idleSession;
 		inst.bindSession(this.#idleSession);
 		this.#disarmPointerSession();
+		this.#resetDropTracking();
 	}
 
 	#cleanupPointer(_pointerId: number) {
@@ -479,6 +489,45 @@ export class Neodrag {
 		this.#dropHost.session = this.#idleSession;
 		inst.bindSession(this.#idleSession);
 		this.#disarmPointerSession();
+		this.#resetDropTracking();
+	}
+
+	#resetDropTracking() {
+		if (this.#dropRafId) {
+			cancelAnimationFrame(this.#dropRafId);
+			this.#dropRafId = 0;
+		}
+		this.#lastDropEvent = null;
+		this.#lastDropPointerX = NaN;
+		this.#lastDropPointerY = NaN;
+	}
+
+	#queueDropTargetUpdate(e: PointerEvent) {
+		this.#lastDropEvent = e;
+		if (this.#dropRafId) return;
+		this.#dropRafId = requestAnimationFrame(() => {
+			this.#dropRafId = 0;
+			const ev = this.#lastDropEvent;
+			if (!ev || !this.#activeSource?.isDragging || this.#dropCount <= 0) return;
+			this.#runDropTargetUpdate(ev);
+		});
+	}
+
+	#flushDropTargetUpdate(e: PointerEvent) {
+		if (this.#dropRafId) {
+			cancelAnimationFrame(this.#dropRafId);
+			this.#dropRafId = 0;
+		}
+		this.#lastDropEvent = e;
+		if (this.#dropCount > 0) this.#runDropTargetUpdate(e, true);
+	}
+
+	#runDropTargetUpdate(e: PointerEvent, force = false) {
+		if (this.#soleDrop) {
+			this.#updateDropTargetsSole(this.#soleDrop, e, force);
+			return;
+		}
+		this.#updateDropTargets(e, force);
 	}
 
 	#runStart(inst: DragInstance, ctx: DragCtx, e: PointerEvent): boolean {
@@ -543,8 +592,57 @@ export class Neodrag {
 		}
 	}
 
-	#updateDropTargets(e: PointerEvent) {
-		const targets = this.#hitTest(e.clientX, e.clientY);
+	#updateDropTargetsSole(drop: DropInstance, e: PointerEvent, force = false) {
+		const x = e.clientX;
+		const y = e.clientY;
+		if (
+			!force &&
+			x === this.#lastDropPointerX &&
+			y === this.#lastDropPointerY
+		) {
+			return;
+		}
+		this.#lastDropPointerX = x;
+		this.#lastDropPointerY = y;
+
+		const over = this.#dropContainsPointer(drop, x, y);
+		const stack = this.#active?.overTargets;
+		if (stack) {
+			stack.length = 0;
+			if (over) stack.push(this.#lazyDropTarget(drop.rootNode));
+		}
+
+		const overStack = this.#overStack;
+		overStack.length = 0;
+		if (over) overStack.push(drop);
+
+		if (over) {
+			if (!drop.isOver) {
+				const accepted = this.#runDropHook(drop, 'enter', e);
+				drop.isOver = accepted !== false;
+			}
+			if (drop.isOver) this.#runDropHook(drop, 'over', e);
+		} else if (drop.isOver) {
+			this.#runDropHook(drop, 'leave', e);
+			drop.isOver = false;
+		}
+		drop.effects.flush();
+	}
+
+	#updateDropTargets(e: PointerEvent, force = false) {
+		const x = e.clientX;
+		const y = e.clientY;
+		if (
+			!force &&
+			x === this.#lastDropPointerX &&
+			y === this.#lastDropPointerY
+		) {
+			return;
+		}
+		this.#lastDropPointerX = x;
+		this.#lastDropPointerY = y;
+
+		const targets = this.#hitTest(x, y);
 		const next = this.#overStackScratch;
 		next.length = 0;
 
@@ -554,16 +652,10 @@ export class Neodrag {
 			next.push(drop);
 		}
 
+		const nextSet = new Set(next);
 		for (let i = 0; i < this.#overStack.length; i++) {
 			const drop = this.#overStack[i]!;
-			let still = false;
-			for (let j = 0; j < next.length; j++) {
-				if (next[j] === drop) {
-					still = true;
-					break;
-				}
-			}
-			if (!still && drop.isOver) {
+			if (!nextSet.has(drop) && drop.isOver) {
 				this.#runDropHook(drop, 'leave', e);
 				drop.isOver = false;
 			}
@@ -580,9 +672,34 @@ export class Neodrag {
 			} else {
 				this.#runDropHook(drop, 'over', e);
 			}
-			drop.effects.flush();
 			if (this.#active?.propagationStopped) break;
 		}
+
+		for (let i = 0; i < stack.length; i++) {
+			stack[i]!.effects.flush();
+			if (this.#active?.propagationStopped) break;
+		}
+	}
+
+	#lazyDropTarget(node: HTMLElement | SVGElement): DropTargetInfo {
+		return {
+			node,
+			get rect() {
+				return node.getBoundingClientRect();
+			},
+		};
+	}
+
+	#dropContainsPointer(drop: DropInstance, x: number, y: number) {
+		const el = document.elementFromPoint(x, y);
+		if (!el) return false;
+		let current: Element | null = el;
+		const root = drop.rootNode;
+		while (current && current !== document.documentElement) {
+			if (current === root) return true;
+			current = current.parentElement;
+		}
+		return false;
 	}
 
 	#hitTest(x: number, y: number): DropTargetInfo[] {
@@ -598,10 +715,7 @@ export class Neodrag {
 				(current instanceof HTMLElement || is_svg_element(current)) &&
 				this.#dropTargets.has(current as HTMLElement | SVGElement)
 			) {
-				stack.push({
-					node: current as HTMLElement | SVGElement,
-					rect: current.getBoundingClientRect(),
-				});
+				stack.push(this.#lazyDropTarget(current as HTMLElement | SVGElement));
 			}
 			current = current.parentElement;
 		}

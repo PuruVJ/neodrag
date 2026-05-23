@@ -189,8 +189,8 @@ describe('Chromium perf suite', () => {
 		expect(mapIndex.meanMs).toBeLessThan(legacyIndex.meanMs);
 
 		const sortableOver = results[6]!;
-		expect(sortableOver.meanMs).toBeLessThan(3.5);
-		expect(sortableOver.p99Ms).toBeLessThan(12);
+		expect(sortableOver.meanMs).toBeLessThan(2.2);
+		expect(sortableOver.p99Ms).toBeLessThan(10);
 
 		defaultEngine.dispose();
 		minimalEngine.dispose();
