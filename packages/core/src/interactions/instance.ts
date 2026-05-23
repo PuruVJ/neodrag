@@ -97,9 +97,8 @@ export class DragInstance {
 
 	isProcessingExternalUpdate = false;
 	isUpdating = false;
+	updateDepth = 0;
 	pendingUpdate: DragPlugin[] | null = null;
-	pluginInput: import('./types.ts').DragPluginInput = [];
-	compartmentUnsubs: (() => void)[] = [];
 
 	constructor(node: HTMLElement | SVGElement, idleSession: DragSession) {
 		this.rootNode = node;

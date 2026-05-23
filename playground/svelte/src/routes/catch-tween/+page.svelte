@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { Compartment, draggable, events, position } from '@neodrag/svelte';
+	import { draggable, events, position } from '@neodrag/svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 
 	const pos = new Tween({ x: 0, y: 0 }, { duration: 2000, easing: expoOut });
-
-	const position_compartment = Compartment.of(() => position({ current: pos.current }));
 
 	// $inspect(pos.current);
 
@@ -37,8 +35,7 @@
 
 <div
 	{@attach draggable(() => [
-		// position({ current: $state.snapshot(pos.current) }),
-		position_compartment,
+		position({ current: pos.current }),
 		events({
 			onDragStart({ offset }) {
 				pos.set({ x: offset.x, y: offset.y }, { duration: 0 });

@@ -1,31 +1,39 @@
-import { Neodrag, Compartment, type DragPluginInput } from '@neodrag/core';
-import { onUnmounted, watchEffect, type Directive } from 'vue';
+import { Neodrag, type DragPluginInput } from '@neodrag/core';
+import { type Directive } from 'vue';
 
 const engine = Neodrag.shared;
 const CLEANUP = Symbol('neodrag.cleanup');
+const HANDLE = Symbol('neodrag.handle');
 
-export const vDraggable: Directive<HTMLElement | SVGElement, DragPluginInput | undefined> = {
-	mounted(el, { value = [] }) {
-		const handle = engine.draggable(el, value);
-		(el as HTMLElement & { [CLEANUP]?: () => void })[CLEANUP] = () => handle.destroy();
+export type ReactiveDragPluginInput = DragPluginInput | (() => DragPluginInput);
+
+function resolvePlugins(plugins: ReactiveDragPluginInput | undefined): DragPluginInput {
+	if (!plugins) return [];
+	return typeof plugins === 'function' ? plugins() : plugins;
+}
+
+type ElementState = HTMLElement & {
+	[CLEANUP]?: () => void;
+	[HANDLE]?: ReturnType<typeof engine.draggable>;
+};
+
+export const vDraggable: Directive<ElementState, ReactiveDragPluginInput | undefined> = {
+	mounted(el, { value }) {
+		const handle = engine.draggable(el, resolvePlugins(value));
+		el[HANDLE] = handle;
+		el[CLEANUP] = () => handle.destroy();
+	},
+
+	updated(el, { value }) {
+		el[HANDLE]?.update(resolvePlugins(value));
 	},
 
 	unmounted(el) {
-		(el as HTMLElement & { [CLEANUP]?: () => void })[CLEANUP]?.();
+		el[CLEANUP]?.();
+		el[HANDLE] = undefined;
+		el[CLEANUP] = undefined;
 	},
 };
 
-export function useCompartment(reactive: ConstructorParameters<typeof Compartment>[0]) {
-	const compartment = new Compartment(reactive);
-
-	const stop = watchEffect(() => {
-		compartment.current = reactive?.();
-	}, { flush: 'pre' });
-
-	onUnmounted(stop);
-
-	return compartment;
-}
-
 export * from '@neodrag/core/plugins';
-export { Compartment, Neodrag };
+export { Neodrag };

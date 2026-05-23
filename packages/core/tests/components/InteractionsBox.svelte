@@ -19,7 +19,9 @@
 		const handle = engine.draggable(node, list);
 		if (typeof plugins === 'function') {
 			return $effect.root(() => {
-				$effect(() => handle.update(plugins()));
+				$effect.pre(() => {
+					handle.update(plugins());
+				});
 				return () => handle.destroy();
 			});
 		}

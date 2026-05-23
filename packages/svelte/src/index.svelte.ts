@@ -1,64 +1,36 @@
 import {
 	Neodrag,
-	Compartment as CoreCompartment,
-	type EngineOptions,
+	type DragPlugin,
 	type DragPluginInput,
+	type EngineOptions,
 } from '@neodrag/core';
-import { onDestroy } from 'svelte';
 import { Attachment } from 'svelte/attachments';
 
 export type NeodragOptions = EngineOptions;
+export type ReactiveDragPluginInput = DragPluginInput | (() => DragPluginInput);
 
 export { Neodrag };
 
-export class Draggable {
-	readonly #engine: Neodrag;
-	readonly #plugins: DragPluginInput;
-	#handle?: import('@neodrag/core').DragHandle;
-
-	constructor(engine: Neodrag = Neodrag.shared, plugins: DragPluginInput = []) {
-		this.#engine = engine;
-		this.#plugins = plugins;
-	}
-
-	attach(element: HTMLElement | SVGElement) {
-		this.detach();
-		this.#handle = this.#engine.draggable(element, this.#plugins);
-		return () => this.detach();
-	}
-
-	attachment(): Attachment<HTMLElement | SVGElement> {
-		return (element) => this.attach(element);
-	}
-
-	update(plugins: DragPluginInput) {
-		this.#handle?.update(plugins);
-	}
-
-	detach() {
-		this.#handle?.destroy();
-		this.#handle = undefined;
-	}
+function resolvePlugins(plugins: ReactiveDragPluginInput): DragPluginInput {
+	return typeof plugins === 'function' ? plugins() : plugins;
 }
 
-export function auto_destroy_effect_root(fn: () => void | VoidFunction) {
-	let cleanup: VoidFunction | null = $effect.root(fn);
+export function draggable(plugins: ReactiveDragPluginInput = []): Attachment<HTMLElement | SVGElement> {
+	return (element) => {
+		const engine = Neodrag.shared;
+		const handle = engine.draggable(element, resolvePlugins(plugins));
 
-	function destroy() {
-		if (cleanup === null) return;
-		cleanup();
-		cleanup = null;
-	}
+		if (typeof plugins !== 'function') {
+			return () => handle.destroy();
+		}
 
-	try {
-		onDestroy(destroy);
-	} catch {}
-
-	return destroy;
-}
-
-export function draggable(plugins?: DragPluginInput): Attachment<HTMLElement | SVGElement> {
-	return new Draggable(Neodrag.shared, plugins ?? []).attachment();
+		return $effect.root(() => {
+			$effect.pre(() => {
+				handle.update(resolvePlugins(plugins));
+			});
+			return () => handle.destroy();
+		});
+	};
 }
 
 export * from '@neodrag/core/plugins';
@@ -72,17 +44,3 @@ export {
 	onDrop,
 	sortable,
 } from '@neodrag/core';
-
-export class Compartment extends CoreCompartment {
-	static of(reactive: ConstructorParameters<typeof CoreCompartment>[0]) {
-		const compartment = new CoreCompartment(reactive);
-
-		auto_destroy_effect_root(() => {
-			$effect.pre(() => {
-				compartment.current = reactive?.();
-			});
-		});
-
-		return compartment;
-	}
-}

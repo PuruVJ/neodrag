@@ -1,14 +1,11 @@
 <script lang="ts">
-	// https://github.com/PuruVJ/neodrag/discussions/232#discussioncomment-13958150
-	import { Compartment, draggable, events, position, threshold } from '@neodrag/svelte';
+	import { draggable, events, position, threshold } from '@neodrag/svelte';
 
 	let x = $state(0);
 	let y = $state(300);
 
-	const positionComp = Compartment.of(() => position({ current: { x, y } }));
-
 	const dragAttachment = draggable(() => [
-		positionComp,
+		position({ current: { x, y } }),
 		threshold({
 			distance: 0,
 			delay: 0,
@@ -39,36 +36,18 @@
 		position: relative;
 	}
 
-	div {
-		cursor: default;
+	.drag {
+		width: 100px;
+		height: 100px;
+		background-color: cyan;
 		position: absolute;
-		z-index: 1;
-		background: white;
-
-		&::after {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-		}
+		top: 0;
+		left: 0;
 	}
 
-	p {
-		margin: 0;
-	}
-
-	p.drag {
-		font-weight: bold;
-		color: red;
-	}
-
-	p.bottom-right {
-		position: fixed;
+	.bottom-right {
+		position: absolute;
 		bottom: 0;
-		right: 15px;
-		width: 200px;
-		text-align: right;
+		right: 0;
 	}
 </style>

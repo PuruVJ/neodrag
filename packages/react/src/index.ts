@@ -1,15 +1,15 @@
 import {
 	Neodrag,
 	defineDragPlugin,
-	resolveDragPlugins,
 	type DragEventData,
 	type DragPlugin,
 	type DragPluginInput,
-	Compartment,
 } from '@neodrag/core';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const engine = Neodrag.shared;
+
+export type ReactiveDragPluginInput = DragPluginInput | (() => DragPluginInput);
 
 export interface DragState extends DragEventData {
 	isDragging: boolean;
@@ -22,6 +22,10 @@ const defaultState: DragState = {
 	isDragging: false,
 	event: null as unknown as PointerEvent,
 };
+
+function resolvePlugins(plugins: ReactiveDragPluginInput): DragPluginInput {
+	return typeof plugins === 'function' ? plugins() : plugins;
+}
 
 const createSyncPlugin = (setState: React.Dispatch<React.SetStateAction<DragState>>) =>
 	defineDragPlugin(() => ({
@@ -61,47 +65,40 @@ const createSyncPlugin = (setState: React.Dispatch<React.SetStateAction<DragStat
 		},
 	}))();
 
-function withSync(plugins: DragPluginInput, sync: DragPlugin): DragPluginInput {
-	if (typeof plugins === 'function') {
-		return () => [...resolveDragPlugins(plugins()), sync];
-	}
-	return [...plugins, sync];
+function withSync(plugins: ReactiveDragPluginInput, sync: DragPlugin): DragPluginInput {
+	return [...resolvePlugins(plugins), sync];
 }
 
 export function useDraggable(
 	ref: React.RefObject<HTMLElement | SVGElement | null>,
-	plugins: DragPluginInput = [],
+	plugins: ReactiveDragPluginInput = [],
 ) {
 	const [state, setState] = useState<DragState>(defaultState);
 	const sync = useRef(createSyncPlugin(setState));
-	const input = useRef(withSync(plugins, sync.current));
-
-	input.current = withSync(plugins, sync.current);
+	const handleRef = useRef<ReturnType<typeof engine.draggable> | null>(null);
+	const pluginsRef = useRef(plugins);
+	pluginsRef.current = plugins;
 
 	useEffect(() => {
 		const node = ref.current;
 		if (!node) return;
-		const handle = engine.draggable(node, input.current);
-		return () => handle.destroy();
-	}, [ref, plugins]);
-}
 
-export function useCompartment(
-	reactive: ConstructorParameters<typeof Compartment>[0],
-	deps?: React.DependencyList,
-) {
-	const compartment = useRef<Compartment>();
+		const handle = engine.draggable(node, withSync(pluginsRef.current, sync.current));
+		handleRef.current = handle;
 
-	if (!compartment.current) {
-		compartment.current = new Compartment(reactive);
-	}
+		return () => {
+			handle.destroy();
+			handleRef.current = null;
+		};
+	}, [ref]);
 
 	useLayoutEffect(() => {
-		compartment.current!.current = reactive?.();
-	}, deps);
-
-	return compartment.current;
+		const node = ref.current;
+		const handle = handleRef.current;
+		if (!node || !handle) return;
+		handle.update(withSync(plugins, sync.current));
+	});
 }
 
 export * from '@neodrag/core/plugins';
-export { Compartment, Neodrag };
+export { Neodrag };

@@ -1,5 +1,5 @@
 import './style.css';
-import { Compartment, Draggable, events, position } from '@neodrag/vanilla';
+import { Draggable, events, position } from '@neodrag/vanilla';
 
 const draggableEl = document.querySelector<HTMLDivElement>('.box')!;
 const xSlider = document.querySelector<HTMLInputElement>('#x')!;
@@ -7,31 +7,29 @@ const ySlider = document.querySelector<HTMLInputElement>('#y')!;
 
 let pos = { x: 0, y: 0 };
 
-const positionCompartment = new Compartment(() => position({ current: pos }));
-const eventsCompartment = new Compartment(() =>
+const build = () => [
+	position({ current: pos }),
 	events({
 		onDrag: ({ offset }) => {
-			pos = { ...offset };
-
+			pos = { x: offset.x, y: offset.y };
 			xSlider.value = offset.x.toString();
 			ySlider.value = offset.y.toString();
 		},
-		onDragEnd() {
-			positionCompartment.current = position({ current: pos });
-		},
 	}),
-);
+];
 
-const dragInstance = new Draggable(draggableEl, () => [positionCompartment, eventsCompartment]);
+const dragInstance = new Draggable(draggableEl, build());
+
+function sync() {
+	dragInstance.update(build());
+}
 
 xSlider.addEventListener('input', (e: Event) => {
-	// @ts-ignore
-	pos.x = +e.target.value;
-	positionCompartment.current = position({ current: pos });
+	pos.x = +(e.target as HTMLInputElement).value;
+	sync();
 });
 
 ySlider.addEventListener('input', (e: Event) => {
-	// @ts-ignore
-	pos.y = +e.target.value;
-	positionCompartment.current = position({ current: pos });
+	pos.y = +(e.target as HTMLInputElement).value;
+	sync();
 });

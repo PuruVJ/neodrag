@@ -100,7 +100,7 @@ pnpm ci:release  # Publish packages
 ```
 packages/core/tests/
 ├── components/          # Test components (Svelte)
-├── plugins.test.svelte.ts    # Plugin behavior tests
+├── tests/interactions/       # Interaction engine tests
 ├── tests.test.ts        # Core functionality tests
 ├── mouse.ts             # Mouse simulation utilities
 └── utils.ts             # Test helpers
@@ -264,12 +264,11 @@ pnpm ci:release            # Publish to npm
 
 ### Framework Wrappers
 - `packages/svelte/src/index.svelte.ts` - Svelte 5 integration
-- `packages/svelte/src/legacy.ts` - Svelte < 5 support
 - `packages/react/src/index.ts` - React hooks
 - `packages/vue/src/index.ts` - Vue composables
 
 ### Testing
-- `packages/core/tests/plugins.test.svelte.ts` - Comprehensive plugin tests
+- `packages/core/tests/interactions/` - Interaction engine tests
 - `packages/core/vitest.config.ts` - Test configuration
 - `packages/core/tests/components/` - Test components
 

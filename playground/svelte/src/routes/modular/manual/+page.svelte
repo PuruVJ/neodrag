@@ -1,9 +1,7 @@
 <script>
-	import { draggable, events, position, Compartment } from '@neodrag/svelte';
+	import { draggable, events, position } from '@neodrag/svelte';
 
 	let pos = $state({ x: 0, y: 0 });
-
-	const position_compartment = Compartment.of(() => position({ current: $state.snapshot(pos) }));
 </script>
 
 <div
@@ -14,7 +12,7 @@
 				pos.y = offset.y;
 			},
 		}),
-		position_compartment,
+		position({ current: pos }),
 	])}
 >
 	I can be moved with the slider too

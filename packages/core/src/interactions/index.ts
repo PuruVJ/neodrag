@@ -1,6 +1,5 @@
 export { Neodrag, type EngineOptions } from './engine.ts';
-export { Compartment } from './compartment.ts';
-export { resolveDragPlugins, collectCompartments } from './resolve-plugins.ts';
+export { resolveDragPlugins } from './resolve-plugins.ts';
 export { DragHandle, DropHandle, type NeodragHost } from './handles.ts';
 export { createSessionKey } from './session-key.ts';
 export { transitionSession, isTerminal } from './state-machine.ts';
@@ -11,7 +10,6 @@ export {
 	DropPluginBase,
 	type DragCtx,
 	type DragPlugin,
-	type DragPluginEntry,
 	type DragPluginInput,
 	type DragSession,
 	type DropCtx,

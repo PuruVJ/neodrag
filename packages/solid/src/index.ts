@@ -1,15 +1,16 @@
 import {
 	Neodrag,
-	Compartment,
 	defineDragPlugin,
-	resolveDragPlugins,
 	type DragEventData,
+	type DragPlugin,
 	type DragPluginInput,
 } from '@neodrag/core';
 import type { Accessor } from 'solid-js';
-import { createEffect, createRenderEffect, createSignal, untrack } from 'solid-js';
+import { createEffect, createSignal, onCleanup, untrack } from 'solid-js';
 
 const engine = Neodrag.shared;
+
+export type ReactiveDragPluginInput = DragPluginInput | (() => DragPluginInput);
 
 export interface DragState extends DragEventData {
 	isDragging: boolean;
@@ -22,6 +23,10 @@ const defaultDragState: DragState = {
 	isDragging: false,
 	event: null as unknown as PointerEvent,
 };
+
+function resolvePlugins(plugins: ReactiveDragPluginInput): DragPluginInput {
+	return typeof plugins === 'function' ? plugins() : plugins;
+}
 
 const createSyncPlugin = (setState: (state: DragState) => void) =>
 	defineDragPlugin(() => ({
@@ -61,41 +66,41 @@ const createSyncPlugin = (setState: (state: DragState) => void) =>
 		},
 	}))();
 
-function withSync(plugins: DragPluginInput, sync: ReturnType<typeof createSyncPlugin>): DragPluginInput {
-	if (typeof plugins === 'function') {
-		return () => [...resolveDragPlugins(plugins()), sync];
-	}
-	return [...plugins, sync];
+function withSync(plugins: ReactiveDragPluginInput, sync: DragPlugin): DragPluginInput {
+	return [...resolvePlugins(plugins), sync];
 }
 
 export function useDraggable(
 	element: Accessor<HTMLElement | SVGElement | null | undefined>,
-	plugins: Accessor<DragPluginInput> = () => [],
+	plugins: Accessor<ReactiveDragPluginInput> = () => [],
 ) {
 	const [dragState, setDragState] = createSignal<DragState>(defaultDragState);
 	const sync = createSyncPlugin(setDragState);
 
+	let handle: ReturnType<typeof engine.draggable> | undefined;
+
 	createEffect(() => {
 		const node = element();
-		if (!node) return;
+		if (!node) {
+			handle = undefined;
+			return;
+		}
 
-		const input = untrack(() => withSync(plugins(), sync));
-		const handle = engine.draggable(node, input);
-		return () => handle.destroy();
+		handle = engine.draggable(node, untrack(() => withSync(plugins(), sync)));
+
+		onCleanup(() => {
+			handle?.destroy();
+			handle = undefined;
+		});
+	});
+
+	createEffect(() => {
+		if (!handle) return;
+		handle.update(withSync(plugins(), sync));
 	});
 
 	return dragState;
 }
 
-export function createCompartment(reactive: ConstructorParameters<typeof Compartment>[0]) {
-	const compartment = new Compartment(reactive);
-
-	createRenderEffect(() => {
-		compartment.current = reactive?.();
-	});
-
-	return compartment;
-}
-
 export * from '@neodrag/core/plugins';
-export { Compartment, Neodrag };
+export { Neodrag };
