@@ -26,7 +26,12 @@ import type {
 
 const DEV = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production';
 
-type Result<T> = { ok: true; value: T } | { ok: false; error: unknown };
+const PLUGIN_FAILED = Symbol('neodrag.pluginFailed');
+
+type PluginHost = {
+	failed: Set<symbol>;
+	rootNode: HTMLElement | SVGElement;
+};
 
 export interface EngineOptions {
 	plugins?: DragPlugin[];
@@ -449,14 +454,14 @@ export class Neodrag {
 			const plugin = chain[i]!;
 			if (inst.failed.has(plugin.key) || !plugin.start) continue;
 			const state = inst.states.get(plugin.key);
-			const result = this.#resultify(
-				() => plugin.start!(ctx, state, e),
-				{ phase: 'start', plugin: { name: plugin.name, hook: 'start' }, node: inst.rootNode },
+			const out = this.#pluginCall(
 				inst,
 				plugin.key,
+				{ phase: 'start', plugin: { name: plugin.name, hook: 'start' }, node: inst.rootNode },
+				() => plugin.start!(ctx, state, e),
 			);
-			if (!result.ok) return false;
-			if (result.value === false) return false;
+			if (out === PLUGIN_FAILED) return false;
+			if (out === false) return false;
 			if (inst.cancelled) return false;
 		}
 		return true;
@@ -472,26 +477,13 @@ export class Neodrag {
 			if (inst.cancelled && plugin.skipOnCancel) continue;
 
 			const state = inst.states.get(plugin.key);
-			let patch: import('./types.ts').DeltaPatch | void;
-
-			if (this.#dev) {
-				const result = this.#resultify(
-					() => plugin.drag!(ctx, state, e),
-					{ ...info, plugin: { name: plugin.name, hook: 'drag' } },
-					inst,
-					plugin.key,
-				);
-				if (!result.ok) continue;
-				patch = result.value;
-			} else {
-				try {
-					patch = plugin.drag(ctx, state, e);
-				} catch (error) {
-					this.#onError?.({ ...info, plugin: { name: plugin.name, hook: 'drag' }, error });
-					inst.failed.add(plugin.key);
-					continue;
-				}
-			}
+			const patch = this.#pluginCall(
+				inst,
+				plugin.key,
+				{ ...info, plugin: { name: plugin.name, hook: 'drag' } },
+				() => plugin.drag!(ctx, state, e),
+			);
+			if (patch === PLUGIN_FAILED) continue;
 
 			if (patch) {
 				if (patch.x !== undefined) inst.proposedX = patch.x;
@@ -509,11 +501,11 @@ export class Neodrag {
 			if (inst.failed.has(plugin.key) || !plugin.end) continue;
 			if (inst.cancelled && plugin.skipOnCancel) continue;
 			const state = inst.states.get(plugin.key);
-			this.#resultify(
-				() => plugin.end!(ctx, state, e, reason),
-				{ phase: 'end', plugin: { name: plugin.name, hook: 'end' }, node: inst.rootNode },
+			this.#pluginVoid(
 				inst,
 				plugin.key,
+				{ phase: 'end', plugin: { name: plugin.name, hook: 'end' }, node: inst.rootNode },
+				() => plugin.end!(ctx, state, e, reason),
 			);
 		}
 	}
@@ -612,24 +604,14 @@ export class Neodrag {
 			if (!handler) continue;
 			const state = inst.states.get(plugin.key);
 
-			if (this.#dev) {
-				const result = this.#resultifyDrop(
-					() => handler(ctx, state, e),
-					{ ...info, plugin: { name: plugin.name, hook } },
-					inst,
-					plugin.key,
-				);
-				if (!result.ok) continue;
-				if (hook === 'enter' && result.value === false) return false;
-			} else {
-				try {
-					const value = handler(ctx, state, e);
-					if (hook === 'enter' && value === false) return false;
-				} catch (error) {
-					this.#onError?.({ ...info, plugin: { name: plugin.name, hook }, error });
-					inst.failed.add(plugin.key);
-				}
-			}
+			const out = this.#pluginCall(
+				inst,
+				plugin.key,
+				{ ...info, plugin: { name: plugin.name, hook } },
+				() => handler(ctx, state, e),
+			);
+			if (out === PLUGIN_FAILED) continue;
+			if (hook === 'enter' && out === false) return false;
 		}
 		return true;
 	}
@@ -725,16 +707,15 @@ export class Neodrag {
 
 	#initOneDragPlugin(inst: DragInstance, plugin: DragPlugin) {
 		if (!plugin.init) return;
-		const result = this.#resultify(
+		this.#pluginVoid(
+			inst,
+			plugin.key,
+			{ phase: 'init', plugin: { name: plugin.name, hook: 'init' }, node: inst.rootNode },
 			() => {
 				const state = plugin.init!(inst.dragCtx);
 				if (state !== undefined) inst.states.set(plugin.key, state);
 			},
-			{ phase: 'init', plugin: { name: plugin.name, hook: 'init' }, node: inst.rootNode },
-			inst,
-			plugin.key,
 		);
-		if (!result.ok) inst.failed.add(plugin.key);
 	}
 
 	#destroyOneDragPlugin(inst: DragInstance, plugin: DragPlugin) {
@@ -742,11 +723,11 @@ export class Neodrag {
 			inst.states.delete(plugin.key);
 			return;
 		}
-		this.#resultify(
-			() => plugin.destroy!(inst.dragCtx, inst.states.get(plugin.key)),
-			{ phase: 'destroy', plugin: { name: plugin.name, hook: 'destroy' }, node: inst.rootNode },
+		this.#pluginVoid(
 			inst,
 			plugin.key,
+			{ phase: 'destroy', plugin: { name: plugin.name, hook: 'destroy' }, node: inst.rootNode },
+			() => plugin.destroy!(inst.dragCtx, inst.states.get(plugin.key)),
 		);
 		inst.states.delete(plugin.key);
 	}
@@ -755,16 +736,15 @@ export class Neodrag {
 		const ctx = inst.dropCtx;
 		for (const plugin of inst.flat) {
 			if (!plugin.init) continue;
-			const result = this.#resultifyDrop(
+			this.#pluginVoid(
+				inst,
+				plugin.key,
+				{ phase: 'init', plugin: { name: plugin.name, hook: 'init' }, node: inst.rootNode },
 				() => {
 					const state = plugin.init!(ctx);
 					if (state !== undefined) inst.states.set(plugin.key, state);
 				},
-				{ phase: 'init', plugin: { name: plugin.name, hook: 'init' }, node: inst.rootNode },
-				inst,
-				plugin.key,
 			);
-			if (!result.ok) inst.failed.add(plugin.key);
 		}
 		inst.effects.flush();
 	}
@@ -778,11 +758,11 @@ export class Neodrag {
 	#destroyDrop(inst: DropInstance) {
 		for (const plugin of inst.flat) {
 			if (plugin.destroy) {
-				this.#resultifyDrop(
-					() => plugin.destroy!(inst.dropCtx, inst.states.get(plugin.key)),
-					{ phase: 'destroy', plugin: { name: plugin.name, hook: 'destroy' }, node: inst.rootNode },
+				this.#pluginVoid(
 					inst,
 					plugin.key,
+					{ phase: 'destroy', plugin: { name: plugin.name, hook: 'destroy' }, node: inst.rootNode },
+					() => plugin.destroy!(inst.dropCtx, inst.states.get(plugin.key)),
 				);
 			}
 		}
@@ -790,35 +770,36 @@ export class Neodrag {
 		inst.effects.clear();
 	}
 
-	#resultify<T>(
-		fn: () => T,
-		info: Omit<ErrorInfo, 'error'>,
-		inst: DragInstance,
+	#pluginError(info: Omit<ErrorInfo, 'error'>, inst: PluginHost, key: symbol, error: unknown) {
+		this.#onError?.({ ...info, error });
+		if (this.#dev) throw error;
+		inst.failed.add(key);
+	}
+
+	#pluginCall<T>(
+		inst: PluginHost,
 		key: symbol,
-	): Result<T> {
+		info: Omit<ErrorInfo, 'error'>,
+		fn: () => T,
+	): T | typeof PLUGIN_FAILED {
 		try {
-			return { ok: true, value: fn() };
+			return fn();
 		} catch (error) {
-			this.#onError?.({ ...info, error });
-			if (this.#dev) throw error;
-			inst.failed.add(key);
-			return { ok: false, error };
+			this.#pluginError(info, inst, key, error);
+			return PLUGIN_FAILED;
 		}
 	}
 
-	#resultifyDrop<T>(
-		fn: () => T,
-		info: Omit<ErrorInfo, 'error'>,
-		inst: DropInstance,
+	#pluginVoid(
+		inst: PluginHost,
 		key: symbol,
-	): Result<T> {
+		info: Omit<ErrorInfo, 'error'>,
+		fn: () => void,
+	) {
 		try {
-			return { ok: true, value: fn() };
+			fn();
 		} catch (error) {
-			this.#onError?.({ ...info, error });
-			if (this.#dev) throw error;
-			inst.failed.add(key);
-			return { ok: false, error };
+			this.#pluginError(info, inst, key, error);
 		}
 	}
 }
