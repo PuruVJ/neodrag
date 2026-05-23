@@ -27,6 +27,14 @@
 			"types": "./src/interactions/index.ts",
 			"import": "./src/interactions/index.ts"
 		},
+		"./interactions/drop": {
+			"types": "./src/interactions/drop/index.ts",
+			"import": "./src/interactions/drop/index.ts"
+		},
+		"./interactions/sortable": {
+			"types": "./src/interactions/sortable/index.ts",
+			"import": "./src/interactions/sortable/index.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -56,6 +64,8 @@
 		"compile": "tsup",
 		"prepublishOnly": "npm run compile",
 		"test": "vitest",
+		"test:interactions": "vitest run --config vitest.interactions.config.ts",
+		"test:interactions:unit": "vitest run tests/interactions/state-machine.test.ts tests/interactions/update.test.ts tests/interactions/plugins-phases.test.ts --browser.enabled=false",
 		"test:coverage": "vitest run --coverage --browser=chromium"
 	},
 	"repository": {
@@ -65,6 +75,7 @@
 	"author": "Puru Vijay",
 	"license": "MIT",
 	"devDependencies": {
-		"@vitest/coverage-v8": "3.2.4"
+		"@vitest/coverage-v8": "3.2.4",
+		"jsdom": "^29.1.1"
 	}
 }

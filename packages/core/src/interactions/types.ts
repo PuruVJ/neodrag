@@ -35,7 +35,7 @@ export interface DragSession<T = unknown> {
 	readonly visual: DragSourceInfo;
 	readonly pointer: { readonly x: number; readonly y: number };
 	readonly delta: { readonly x: number; readonly y: number };
-	readonly data: T;
+	data: T;
 	readonly overTargets: ReadonlyArray<DropTargetInfo>;
 	readonly private: SessionPrivateStore;
 	setVisual(node: HTMLElement | SVGElement): void;
@@ -65,6 +65,7 @@ export interface DropCtx {
 	readonly rootNode: HTMLElement | SVGElement;
 	readonly cachedRootNodeRect: DOMRect;
 	readonly lastEvent: PointerEvent | null;
+	readonly isOver: boolean;
 	effect(fn: () => void): void;
 }
 

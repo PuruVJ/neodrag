@@ -1,0 +1,46 @@
+<script lang="ts">
+	import { createEngine, sortable, transform } from '../../src/interactions/index.ts';
+
+	let items = $state([
+		{ id: '1', text: 'One' },
+		{ id: '2', text: 'Two' },
+		{ id: '3', text: 'Three' },
+	]);
+
+	const engine = createEngine();
+	const list = sortable({
+		items: () => items,
+		keyBy: (i) => i.id,
+		onReorder: (next) => {
+			items = next;
+		},
+		strategy: 'vertical',
+	});
+</script>
+
+<ul class="list" data-testid="list" {@attach (n) => engine.droppable(n, list.container())}>
+	{#each items as item (item.id)}
+		<li
+			data-testid="item-{item.id}"
+			data-sortable-key={item.id}
+			{@attach (n) => engine.draggable(n, [transform, ...list.item(item.id)])}
+		>
+			{item.text}
+		</li>
+	{/each}
+</ul>
+
+<style>
+	.list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		width: 200px;
+	}
+	li {
+		padding: 12px;
+		margin: 4px 0;
+		background: #b8e0ff;
+		cursor: grab;
+	}
+</style>

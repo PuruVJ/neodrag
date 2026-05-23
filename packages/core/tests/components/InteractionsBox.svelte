@@ -1,21 +1,29 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { createEngine, type DragPlugin } from '../../src/interactions/index.ts';
+	import { createEngine, type DragPlugin, type InteractionEngine } from '../../src/interactions/index.ts';
 
 	const {
 		testid = 'draggable',
 		children,
 		plugins = [],
+		engine = createEngine(),
 	}: {
-		plugins?: DragPlugin[];
+		plugins?: DragPlugin[] | (() => DragPlugin[]);
 		testid?: string;
 		children?: Snippet;
+		engine?: InteractionEngine;
 	} = $props();
 
-	const engine = createEngine();
-
 	function attach(node: HTMLElement) {
-		return engine.draggable(node, plugins);
+		const list = typeof plugins === 'function' ? plugins() : plugins;
+		const dispose = engine.draggable(node, list);
+		if (typeof plugins === 'function') {
+			return $effect.root(() => {
+				$effect(() => engine.update(node, plugins()));
+				return dispose;
+			});
+		}
+		return dispose;
 	}
 </script>
 

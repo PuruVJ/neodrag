@@ -7,7 +7,11 @@ import {
 	TOUCH_ACTION_KEY,
 } from './keys.ts';
 
-export const ignoreMultitouch: DragPlugin = {
+type MultitouchState = { active_pointers: Set<number> };
+type StateMarkerState = { count: number };
+type UserSelectState = { body_user_select_val: string };
+
+export const ignoreMultitouch: DragPlugin<MultitouchState> = {
 	key: IGNORE_MULTITOUCH_KEY,
 	name: 'ignoreMultitouch',
 
@@ -31,7 +35,7 @@ export const ignoreMultitouch: DragPlugin = {
 	},
 };
 
-export const stateMarker: DragPlugin = {
+export const stateMarker: DragPlugin<StateMarkerState> = {
 	key: STATE_MARKER_KEY,
 	name: 'stateMarker',
 	phase: 'post',
@@ -54,7 +58,7 @@ export const stateMarker: DragPlugin = {
 	},
 };
 
-export const applyUserSelectHack: DragPlugin = {
+export const applyUserSelectHack: DragPlugin<UserSelectState> = {
 	key: APPLY_USER_SELECT_KEY,
 	name: 'applyUserSelectHack',
 	phase: 'post',

@@ -24,6 +24,9 @@ export function createDragSession(
 		get data() {
 			return active.data;
 		},
+		set data(value) {
+			active.data = value;
+		},
 		get overTargets() {
 			return active.overTargets;
 		},

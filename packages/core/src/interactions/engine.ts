@@ -57,6 +57,7 @@ export class InteractionEngine {
 	#dev: boolean;
 
 	#overStack: DropInstance[] = [];
+	#overStackScratch: DropInstance[] = [];
 
 	constructor(options: EngineOptions = {}) {
 		this.#defaultDragPlugins = options.plugins ?? DEFAULT_DRAG_PLUGINS;
@@ -104,8 +105,12 @@ export class InteractionEngine {
 
 		const inst = new DropInstance(node);
 		const resolved = typeof plugins === 'function' ? plugins() : plugins;
-		inst.flat = [...this.#defaultDropPlugins, ...resolved];
-		for (const p of inst.flat) inst.byKey.set(p.key, p);
+		const combined = [...this.#defaultDropPlugins, ...resolved];
+		const byKey = new Map<symbol, DropPlugin>();
+		for (const p of combined) byKey.set(p.key, p);
+		inst.flat = [...byKey.values()];
+		inst.byKey = byKey;
+		inst.rebuildBuckets();
 		this.#initDropPlugins(inst);
 		this.#dropTargets.set(node, inst);
 		this.#dropCount++;
@@ -245,10 +250,15 @@ export class InteractionEngine {
 		if (this.#listenersInitialized) return;
 		const target = this.#delegate();
 
-		listen(target, 'pointerdown', this.#onPointerDown.bind(this), { passive: true });
-		listen(target, 'pointermove', this.#onPointerMove.bind(this), { passive: false });
-		listen(target, 'pointerup', this.#onPointerUp.bind(this), { passive: true });
-		listen(target, 'pointercancel', this.#onPointerUp.bind(this), { passive: true });
+		const onDown = this.#onPointerDown.bind(this);
+		const onMove = this.#onPointerMove.bind(this);
+		const onUp = this.#onPointerUp.bind(this);
+
+		listen(target, 'pointerdown', onDown, { passive: true, capture: true });
+		listen(target, 'pointermove', onMove, { passive: false, capture: true });
+		listen(target, 'pointerup', onUp, { passive: true, capture: true });
+		listen(target, 'pointercancel', onUp, { passive: true, capture: true });
+
 		listen(target, 'keydown', this.#onKeyDown.bind(this), { passive: true });
 
 		this.#listenersInitialized = true;
@@ -267,6 +277,8 @@ export class InteractionEngine {
 		if (!node) return;
 
 		const inst = this.#dragSources.get(node)!;
+		if (inst.isInteracting) return;
+
 		inst.cachedRootNodeRect = node.getBoundingClientRect();
 		inst.inverseScale = this.#inverseScale(inst);
 		inst.initialX = e.clientX - inst.offsetX / inst.inverseScale;
@@ -280,8 +292,6 @@ export class InteractionEngine {
 	}
 
 	#onPointerMove(e: PointerEvent) {
-		if (this.#activePointerId !== null && e.pointerId !== this.#activePointerId) return;
-
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
 
@@ -339,9 +349,12 @@ export class InteractionEngine {
 	}
 
 	#onPointerUp(e: PointerEvent) {
-		if (this.#activePointerId !== null && e.pointerId !== this.#activePointerId) return;
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
+
+		if (inst.isDragging && this.#dropCount > 0) {
+			this.#updateDropTargets(e);
+		}
 
 		const reason = resolveEndReason(this.#active, inst.cancelled);
 		this.#finishInteraction(reason, e);
@@ -490,22 +503,35 @@ export class InteractionEngine {
 
 	#updateDropTargets(e: PointerEvent) {
 		const targets = this.#hitTest(e.clientX, e.clientY);
-		if (this.#active) this.#active.overTargets = targets;
+		const next = this.#overStackScratch;
+		next.length = 0;
 
-		const nextSet = new Set(targets.map((t) => this.#dropTargets.get(t.node)!));
+		for (let i = 0; i < targets.length; i++) {
+			const drop = this.#dropTargets.get(targets[i]!.node);
+			if (!drop) continue;
+			next.push(drop);
+		}
 
-		for (const drop of this.#overStack) {
-			if (!nextSet.has(drop)) {
+		for (let i = 0; i < this.#overStack.length; i++) {
+			const drop = this.#overStack[i]!;
+			let still = false;
+			for (let j = 0; j < next.length; j++) {
+				if (next[j] === drop) {
+					still = true;
+					break;
+				}
+			}
+			if (!still && drop.isOver) {
 				this.#runDropHook(drop, 'leave', e);
 				drop.isOver = false;
 			}
 		}
 
-		this.#overStack = [];
-		for (const info of targets) {
-			const drop = this.#dropTargets.get(info.node);
-			if (!drop) continue;
-			this.#overStack.push(drop);
+		const stack = this.#overStack;
+		stack.length = 0;
+		for (let i = 0; i < next.length; i++) {
+			const drop = next[i]!;
+			stack.push(drop);
 			if (!drop.isOver) {
 				const accepted = this.#runDropHook(drop, 'enter', e);
 				drop.isOver = accepted !== false;
@@ -518,12 +544,13 @@ export class InteractionEngine {
 	}
 
 	#hitTest(x: number, y: number): DropTargetInfo[] {
+		const stack = this.#active?.overTargets ?? [];
+		stack.length = 0;
+
 		const el = document.elementFromPoint(x, y);
-		if (!el) return [];
+		if (!el) return stack;
 
-		const stack: DropTargetInfo[] = [];
 		let current: Element | null = el;
-
 		while (current && current !== document.documentElement) {
 			if (
 				(current instanceof HTMLElement || is_svg_element(current)) &&
@@ -536,8 +563,23 @@ export class InteractionEngine {
 			}
 			current = current.parentElement;
 		}
-
 		return stack;
+	}
+
+	#dropBuckets(
+		inst: DropInstance,
+		hook: 'enter' | 'over' | 'leave' | 'drop',
+	): DropPlugin[][] {
+		switch (hook) {
+			case 'enter':
+				return [inst.preEnter, inst.resolveEnter, inst.postEnter];
+			case 'over':
+				return [inst.preOver, inst.resolveOver, inst.postOver];
+			case 'leave':
+				return [inst.preLeave, inst.resolveLeave, inst.postLeave];
+			default:
+				return [inst.preDrop, inst.resolveDrop, inst.postDrop];
+		}
 	}
 
 	#runDropHook(
@@ -546,19 +588,23 @@ export class InteractionEngine {
 		e: PointerEvent,
 	): boolean | void {
 		const ctx = this.#createDropCtx(inst);
-		for (const plugin of inst.flat) {
-			if (inst.failed.has(plugin.key)) continue;
-			const handler = plugin[hook];
-			if (!handler) continue;
-			const state = inst.states.get(plugin.key);
-			const result = this.#resultifyDrop(
-				() => handler(ctx, state, e),
-				{ phase: hook, plugin: { name: plugin.name, hook }, node: inst.rootNode },
-				inst,
-				plugin.key,
-			);
-			if (!result.ok) continue;
-			if (hook === 'enter' && result.value === false) return false;
+		const buckets = this.#dropBuckets(inst, hook);
+		for (const bucket of buckets) {
+			for (let i = 0; i < bucket.length; i++) {
+				const plugin = bucket[i]!;
+				if (inst.failed.has(plugin.key)) continue;
+				const handler = plugin[hook];
+				if (!handler) continue;
+				const state = inst.states.get(plugin.key);
+				const result = this.#resultifyDrop(
+					() => handler(ctx, state, e),
+					{ phase: hook, plugin: { name: plugin.name, hook }, node: inst.rootNode },
+					inst,
+					plugin.key,
+				);
+				if (!result.ok) continue;
+				if (hook === 'enter' && result.value === false) return false;
+			}
 		}
 		return true;
 	}
@@ -580,7 +626,10 @@ export class InteractionEngine {
 				return inst.cachedRootNodeRect;
 			},
 			get lastEvent() {
-				return inst.rootNode === engine.#activeSource?.rootNode ? engine.#activeSource?.lastEvent ?? null : null;
+				return engine.#activeSource?.lastEvent ?? null;
+			},
+			get isOver() {
+				return inst.isOver;
 			},
 			effect(fn) {
 				inst.effects.schedule(fn);
@@ -665,9 +714,16 @@ export class InteractionEngine {
 	}
 
 	#initDragPlugins(inst: DragInstance) {
-		const ctx = inst.createDragCtx(null, () => this.#getSession());
-		for (const plugin of inst.flat) this.#initOneDragPlugin(inst, plugin);
+		for (const plugin of this.#pluginsByPhase(inst)) this.#initOneDragPlugin(inst, plugin);
 		inst.effects.flush();
+	}
+
+	#pluginsByPhase(inst: DragInstance): DragPlugin[] {
+		const order = { pre: 0, resolve: 1, post: 2 } as const;
+		return [...inst.flat].sort(
+			(a, b) =>
+				(order[a.phase ?? 'resolve'] ?? 1) - (order[b.phase ?? 'resolve'] ?? 1),
+		);
 	}
 
 	#initOneDragPlugin(inst: DragInstance, plugin: DragPlugin) {

@@ -206,14 +206,85 @@ export class DropInstance {
 	cachedRootNodeRect: DOMRect;
 
 	flat: import('./types.ts').DropPlugin[] = [];
-	lastList: import('./types.ts').DropPlugin[] | null = null;
 	byKey = new Map<symbol, import('./types.ts').DropPlugin>();
 	states = new Map<symbol, unknown>();
 	failed = new Set<symbol>();
 	isOver = false;
 
+	preEnter: import('./types.ts').DropPlugin[] = [];
+	resolveEnter: import('./types.ts').DropPlugin[] = [];
+	postEnter: import('./types.ts').DropPlugin[] = [];
+	preOver: import('./types.ts').DropPlugin[] = [];
+	resolveOver: import('./types.ts').DropPlugin[] = [];
+	postOver: import('./types.ts').DropPlugin[] = [];
+	preLeave: import('./types.ts').DropPlugin[] = [];
+	resolveLeave: import('./types.ts').DropPlugin[] = [];
+	postLeave: import('./types.ts').DropPlugin[] = [];
+	preDrop: import('./types.ts').DropPlugin[] = [];
+	resolveDrop: import('./types.ts').DropPlugin[] = [];
+	postDrop: import('./types.ts').DropPlugin[] = [];
+
 	constructor(node: HTMLElement | SVGElement) {
 		this.rootNode = node;
 		this.cachedRootNodeRect = node.getBoundingClientRect();
+	}
+
+	rebuildBuckets() {
+		this.preEnter = [];
+		this.resolveEnter = [];
+		this.postEnter = [];
+		this.preOver = [];
+		this.resolveOver = [];
+		this.postOver = [];
+		this.preLeave = [];
+		this.resolveLeave = [];
+		this.postLeave = [];
+		this.preDrop = [];
+		this.resolveDrop = [];
+		this.postDrop = [];
+
+		for (const plugin of this.flat) {
+			if (this.failed.has(plugin.key)) continue;
+			const phase = plugin.phase ?? 'resolve';
+			if (plugin.enter) this.#bucket(phase, 'enter', plugin);
+			if (plugin.over) this.#bucket(phase, 'over', plugin);
+			if (plugin.leave) this.#bucket(phase, 'leave', plugin);
+			if (plugin.drop) this.#bucket(phase, 'drop', plugin);
+		}
+	}
+
+	#bucket(
+		phase: NonNullable<import('./types.ts').DropPlugin['phase']>,
+		hook: 'enter' | 'over' | 'leave' | 'drop',
+		plugin: import('./types.ts').DropPlugin,
+	) {
+		const pre =
+			hook === 'enter'
+				? this.preEnter
+				: hook === 'over'
+					? this.preOver
+					: hook === 'leave'
+						? this.preLeave
+						: this.preDrop;
+		const resolve =
+			hook === 'enter'
+				? this.resolveEnter
+				: hook === 'over'
+					? this.resolveOver
+					: hook === 'leave'
+						? this.resolveLeave
+						: this.resolveDrop;
+		const post =
+			hook === 'enter'
+				? this.postEnter
+				: hook === 'over'
+					? this.postOver
+					: hook === 'leave'
+						? this.postLeave
+						: this.postDrop;
+
+		if (phase === 'pre') pre.push(plugin);
+		else if (phase === 'post') post.push(plugin);
+		else resolve.push(plugin);
 	}
 }

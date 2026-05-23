@@ -63,5 +63,9 @@ export const threshold = defineDragPlugin((options?: { delay?: number; distance?
 				ctx.cancel();
 			}
 		},
+
+		end(_ctx, state) {
+			state.started = false;
+		},
 	};
 });

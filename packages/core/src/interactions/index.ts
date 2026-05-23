@@ -28,4 +28,18 @@ export {
 	stateMarker,
 	applyUserSelectHack,
 	touchAction,
+	axis,
+	grid,
+	bounds,
+	BoundsFrom,
+	position,
+	events,
+	disabled,
+	controls,
+	ControlFrom,
+	dragData,
+	type PositionOptions,
+	type DragEventData,
 } from './plugins/index.ts';
+export { accepts, highlight, onDrop } from './drop/index.ts';
+export { sortable, type SortableOptions, type SortableStrategy } from './sortable/index.ts';
