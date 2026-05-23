@@ -4,6 +4,7 @@ import {
 	ActiveSession,
 	DragInstance,
 	DropInstance,
+	type DropCtxHost,
 	SessionPrivate,
 } from './instance.ts';
 import { DEFAULT_DRAG_PLUGINS } from './plugins/index.ts';
@@ -59,12 +60,43 @@ export class InteractionEngine {
 	#overStack: DropInstance[] = [];
 	#overStackScratch: DropInstance[] = [];
 
+	#idleSession: import('./types.ts').DragSession;
+	#activeSessionView: import('./types.ts').DragSession | null = null;
+
+	readonly #dropHost: DropCtxHost = {
+		pointerX: 0,
+		pointerY: 0,
+		lastEvent: null,
+		session: null!,
+	};
+
 	constructor(options: EngineOptions = {}) {
 		this.#defaultDragPlugins = options.plugins ?? DEFAULT_DRAG_PLUGINS;
 		this.#defaultDropPlugins = options.dropPlugins ?? [];
 		this.#delegate = options.delegate ?? (() => document.documentElement);
 		this.#onError = options.onError;
 		this.#dev = options.dev ?? DEV;
+
+		const idleActive: ActiveSession = {
+			state: 'idle',
+			sourceNode: document.documentElement,
+			visualNode: document.documentElement,
+			sourceRect: new DOMRect(),
+			visualRect: new DOMRect(),
+			pointerX: 0,
+			pointerY: 0,
+			deltaX: 0,
+			deltaY: 0,
+			data: undefined,
+			overTargets: [],
+			private: new SessionPrivate(),
+			propagationStopped: false,
+			pointerId: -1,
+			startedAt: 0,
+			cancel() {},
+		};
+		this.#idleSession = createDragSession(idleActive, () => {});
+		this.#dropHost.session = this.#idleSession;
 	}
 
 	get dev() {
@@ -89,7 +121,7 @@ export class InteractionEngine {
 
 		this.#initListeners();
 
-		const inst = new DragInstance(node);
+		const inst = new DragInstance(node, this.#idleSession);
 		const resolved = typeof plugins === 'function' ? plugins() : plugins;
 		this.#installDragPlugins(inst, resolved);
 		this.#dragSources.set(node, inst);
@@ -103,7 +135,7 @@ export class InteractionEngine {
 	droppable(node: HTMLElement | SVGElement, plugins: DropPluginInput = []) {
 		this.#initListeners();
 
-		const inst = new DropInstance(node);
+		const inst = new DropInstance(node, this.#dropHost);
 		const resolved = typeof plugins === 'function' ? plugins() : plugins;
 		const combined = [...this.#defaultDropPlugins, ...resolved];
 		const byKey = new Map<symbol, DropPlugin>();
@@ -169,34 +201,8 @@ export class InteractionEngine {
 		this.#cancelSession('cancel');
 	}
 
-	#idleSession: import('./types.ts').DragSession | null = null;
-
 	#getSession(): import('./types.ts').DragSession {
-		if (!this.#active) {
-			if (!this.#idleSession) {
-				const idle: ActiveSession = {
-					state: 'idle',
-					sourceNode: document.documentElement,
-					visualNode: document.documentElement,
-					sourceRect: new DOMRect(),
-					visualRect: new DOMRect(),
-					pointerX: 0,
-					pointerY: 0,
-					deltaX: 0,
-					deltaY: 0,
-					data: undefined,
-					overTargets: [],
-					private: new SessionPrivate(),
-					propagationStopped: false,
-					pointerId: -1,
-					startedAt: 0,
-					cancel() {},
-				};
-				this.#idleSession = createDragSession(idle, () => {});
-			}
-			return this.#idleSession;
-		}
-		return createDragSession(this.#active, (node) => this.#activeSource?.setVisual(node));
+		return this.#activeSessionView ?? this.#idleSession;
 	}
 
 	#beginSession(source: DragInstance, e: PointerEvent) {
@@ -223,6 +229,13 @@ export class InteractionEngine {
 		};
 		this.#activeSource = source;
 		this.#activePointerId = e.pointerId;
+
+		this.#activeSessionView = createDragSession(this.#active, (node) => this.#activeSource?.setVisual(node));
+		source.bindSession(this.#activeSessionView, () => {
+			if (this.#active) this.#active.state = 'cancelled';
+		});
+		this.#dropHost.session = this.#activeSessionView;
+
 		this.#notifySessionListeners();
 	}
 
@@ -286,6 +299,7 @@ export class InteractionEngine {
 		inst.isInteracting = true;
 		inst.cancelled = false;
 		inst.lastEvent = e;
+		this.#dropHost.lastEvent = e;
 		inst.syncContext();
 
 		this.#beginSession(inst, e);
@@ -296,14 +310,17 @@ export class InteractionEngine {
 		if (!inst?.isInteracting) return;
 
 		inst.lastEvent = e;
+		this.#dropHost.lastEvent = e;
 		if (this.#active) {
 			this.#active.pointerX = e.clientX;
 			this.#active.pointerY = e.clientY;
+			this.#dropHost.pointerX = e.clientX;
+			this.#dropHost.pointerY = e.clientY;
 		}
 
 		if (!inst.isDragging) {
-			const ctx = inst.createDragCtx(this.#active, () => this.#getSession());
-			const startOk = this.#runStart(inst, ctx, e);
+			inst.syncContext();
+			const startOk = this.#runStart(inst, inst.dragCtx, e);
 			inst.effects.flush();
 			if (!startOk || inst.cancelled) return;
 
@@ -329,15 +346,14 @@ export class InteractionEngine {
 		inst.deltaY = target_offset_y - inst.offsetY;
 		inst.proposedX = inst.deltaX;
 		inst.proposedY = inst.deltaY;
-		inst.syncContext();
 
 		if (this.#active) {
 			this.#active.deltaX = inst.deltaX;
 			this.#active.deltaY = inst.deltaY;
 		}
 
-		const ctx = inst.createDragCtx(this.#active, () => this.#getSession());
-		this.#runDrag(inst, ctx, e);
+		inst.syncContext();
+		this.#runDrag(inst, inst.dragCtx, e);
 		inst.offsetX += inst.proposedX;
 		inst.offsetY += inst.proposedY;
 		inst.proposedX = 0;
@@ -376,8 +392,7 @@ export class InteractionEngine {
 			inst.visualNode.releasePointerCapture(inst.pointerCapturedId);
 		}
 
-		const ctx = inst.createDragCtx(this.#active, () => this.#getSession());
-		this.#runEnd(inst, ctx, e, reason);
+		this.#runEnd(inst, inst.dragCtx, e, reason);
 		inst.effects.flush();
 
 		if (reason === 'drop' && this.#overStack.length > 0) {
@@ -408,9 +423,12 @@ export class InteractionEngine {
 		this.#active = null;
 		this.#activeSource = null;
 		this.#activePointerId = null;
+		this.#activeSessionView = null;
+		this.#dropHost.session = this.#idleSession;
+		inst.bindSession(this.#idleSession);
 	}
 
-	#cleanupPointer(pointerId: number) {
+	#cleanupPointer(_pointerId: number) {
 		const inst = this.#activeSource;
 		if (!inst) return;
 		inst.isInteracting = false;
@@ -418,87 +436,84 @@ export class InteractionEngine {
 		this.#active = null;
 		this.#activeSource = null;
 		this.#activePointerId = null;
+		this.#activeSessionView = null;
+		this.#dropHost.session = this.#idleSession;
+		inst.bindSession(this.#idleSession);
 	}
 
 	#runStart(inst: DragInstance, ctx: DragCtx, e: PointerEvent): boolean {
-		return this.#runHookBuckets(
-			inst,
-			ctx,
-			e,
-			[inst.preStart, inst.resolveStart, inst.postStart],
-			'start',
-		);
+		const chain = inst.startChain;
+		for (let i = 0; i < chain.length; i++) {
+			const plugin = chain[i]!;
+			if (inst.failed.has(plugin.key) || !plugin.start) continue;
+			const state = inst.states.get(plugin.key);
+			const result = this.#resultify(
+				() => plugin.start!(ctx, state, e),
+				{ phase: 'start', plugin: { name: plugin.name, hook: 'start' }, node: inst.rootNode },
+				inst,
+				plugin.key,
+			);
+			if (!result.ok) return false;
+			if (result.value === false) return false;
+			if (inst.cancelled) return false;
+		}
+		return true;
 	}
 
 	#runDrag(inst: DragInstance, ctx: DragCtx, e: PointerEvent) {
-		const buckets = [inst.preDrag, inst.resolveDrag, inst.postDrag];
-		outer: for (const bucket of buckets) {
-			for (const plugin of bucket) {
-				if (inst.failed.has(plugin.key) || !plugin.drag) continue;
-				if (inst.cancelled && plugin.skipOnCancel) continue;
+		const chain = inst.dragChain;
+		const info = { phase: 'drag' as const, node: inst.rootNode };
 
-				const state = inst.states.get(plugin.key);
+		for (let i = 0; i < chain.length; i++) {
+			const plugin = chain[i]!;
+			if (inst.failed.has(plugin.key) || !plugin.drag) continue;
+			if (inst.cancelled && plugin.skipOnCancel) continue;
+
+			const state = inst.states.get(plugin.key);
+			let patch: import('./types.ts').DeltaPatch | void;
+
+			if (this.#dev) {
 				const result = this.#resultify(
 					() => plugin.drag!(ctx, state, e),
-					{ phase: 'drag', plugin: { name: plugin.name, hook: 'drag' }, node: inst.rootNode },
+					{ ...info, plugin: { name: plugin.name, hook: 'drag' } },
 					inst,
 					plugin.key,
 				);
-
 				if (!result.ok) continue;
-
-				const patch = result.value;
-				if (patch) {
-					if (patch.x !== undefined) inst.proposedX = patch.x;
-					if (patch.y !== undefined) inst.proposedY = patch.y;
-					inst.syncContext();
+				patch = result.value;
+			} else {
+				try {
+					patch = plugin.drag(ctx, state, e);
+				} catch (error) {
+					this.#onError?.({ ...info, plugin: { name: plugin.name, hook: 'drag' }, error });
+					inst.failed.add(plugin.key);
+					continue;
 				}
-
-				if (inst.cancelled) break outer;
 			}
+
+			if (patch) {
+				if (patch.x !== undefined) inst.proposedX = patch.x;
+				if (patch.y !== undefined) inst.proposedY = patch.y;
+			}
+
+			if (inst.cancelled) break;
 		}
 	}
 
 	#runEnd(inst: DragInstance, ctx: DragCtx, e: PointerEvent, reason: EndReason) {
-		const buckets = [inst.preEnd, inst.resolveEnd, inst.postEnd];
-		for (const bucket of buckets) {
-			for (const plugin of bucket) {
-				if (inst.failed.has(plugin.key) || !plugin.end) continue;
-				if (inst.cancelled && plugin.skipOnCancel) continue;
-				const state = inst.states.get(plugin.key);
-				this.#resultify(
-					() => plugin.end!(ctx, state, e, reason),
-					{ phase: 'end', plugin: { name: plugin.name, hook: 'end' }, node: inst.rootNode },
-					inst,
-					plugin.key,
-				);
-			}
+		const chain = inst.endChain;
+		for (let i = 0; i < chain.length; i++) {
+			const plugin = chain[i]!;
+			if (inst.failed.has(plugin.key) || !plugin.end) continue;
+			if (inst.cancelled && plugin.skipOnCancel) continue;
+			const state = inst.states.get(plugin.key);
+			this.#resultify(
+				() => plugin.end!(ctx, state, e, reason),
+				{ phase: 'end', plugin: { name: plugin.name, hook: 'end' }, node: inst.rootNode },
+				inst,
+				plugin.key,
+			);
 		}
-	}
-
-	#runHookBuckets(
-		inst: DragInstance,
-		ctx: DragCtx,
-		e: PointerEvent,
-		buckets: DragPlugin[][],
-		hook: 'start',
-	): boolean {
-		for (const bucket of buckets) {
-			for (const plugin of bucket) {
-				if (inst.failed.has(plugin.key) || !plugin.start) continue;
-				const state = inst.states.get(plugin.key);
-				const result = this.#resultify(
-					() => plugin.start!(ctx, state, e),
-					{ phase: 'start', plugin: { name: plugin.name, hook: 'start' }, node: inst.rootNode },
-					inst,
-					plugin.key,
-				);
-				if (!result.ok) return false;
-				if (result.value === false) return false;
-				if (inst.cancelled) return false;
-			}
-		}
-		return true;
 	}
 
 	#updateDropTargets(e: PointerEvent) {
@@ -566,19 +581,16 @@ export class InteractionEngine {
 		return stack;
 	}
 
-	#dropBuckets(
-		inst: DropInstance,
-		hook: 'enter' | 'over' | 'leave' | 'drop',
-	): DropPlugin[][] {
+	#dropChain(inst: DropInstance, hook: 'enter' | 'over' | 'leave' | 'drop') {
 		switch (hook) {
 			case 'enter':
-				return [inst.preEnter, inst.resolveEnter, inst.postEnter];
+				return inst.enterChain;
 			case 'over':
-				return [inst.preOver, inst.resolveOver, inst.postOver];
+				return inst.overChain;
 			case 'leave':
-				return [inst.preLeave, inst.resolveLeave, inst.postLeave];
+				return inst.leaveChain;
 			default:
-				return [inst.preDrop, inst.resolveDrop, inst.postDrop];
+				return inst.dropChain;
 		}
 	}
 
@@ -587,54 +599,37 @@ export class InteractionEngine {
 		hook: 'enter' | 'over' | 'leave' | 'drop',
 		e: PointerEvent,
 	): boolean | void {
-		const ctx = this.#createDropCtx(inst);
-		const buckets = this.#dropBuckets(inst, hook);
-		for (const bucket of buckets) {
-			for (let i = 0; i < bucket.length; i++) {
-				const plugin = bucket[i]!;
-				if (inst.failed.has(plugin.key)) continue;
-				const handler = plugin[hook];
-				if (!handler) continue;
-				const state = inst.states.get(plugin.key);
+		const ctx = inst.dropCtx;
+		const chain = this.#dropChain(inst, hook);
+		const info = { phase: hook, node: inst.rootNode };
+
+		for (let i = 0; i < chain.length; i++) {
+			const plugin = chain[i]!;
+			if (inst.failed.has(plugin.key)) continue;
+			const handler = plugin[hook];
+			if (!handler) continue;
+			const state = inst.states.get(plugin.key);
+
+			if (this.#dev) {
 				const result = this.#resultifyDrop(
 					() => handler(ctx, state, e),
-					{ phase: hook, plugin: { name: plugin.name, hook }, node: inst.rootNode },
+					{ ...info, plugin: { name: plugin.name, hook } },
 					inst,
 					plugin.key,
 				);
 				if (!result.ok) continue;
 				if (hook === 'enter' && result.value === false) return false;
+			} else {
+				try {
+					const value = handler(ctx, state, e);
+					if (hook === 'enter' && value === false) return false;
+				} catch (error) {
+					this.#onError?.({ ...info, plugin: { name: plugin.name, hook }, error });
+					inst.failed.add(plugin.key);
+				}
 			}
 		}
 		return true;
-	}
-
-	#createDropCtx(inst: DropInstance): DropCtx {
-		const engine = this;
-		return {
-			get pointer() {
-				return {
-					x: engine.#active?.pointerX ?? 0,
-					y: engine.#active?.pointerY ?? 0,
-				};
-			},
-			get session() {
-				return engine.#getSession();
-			},
-			rootNode: inst.rootNode,
-			get cachedRootNodeRect() {
-				return inst.cachedRootNodeRect;
-			},
-			get lastEvent() {
-				return engine.#activeSource?.lastEvent ?? null;
-			},
-			get isOver() {
-				return inst.isOver;
-			},
-			effect(fn) {
-				inst.effects.schedule(fn);
-			},
-		};
 	}
 
 	#findDragSource(e: PointerEvent): HTMLElement | SVGElement | null {
@@ -697,7 +692,7 @@ export class InteractionEngine {
 				inst.byKey.set(plugin.key, plugin);
 				this.#initOneDragPlugin(inst, plugin);
 			} else if (prev !== plugin) {
-				plugin.update?.(inst.createDragCtx(this.#active, () => this.#getSession()), inst.states.get(plugin.key));
+				plugin.update?.(inst.dragCtx, inst.states.get(plugin.key));
 				inst.byKey.set(plugin.key, plugin);
 			}
 			prevByKey.delete(plugin.key);
@@ -728,10 +723,9 @@ export class InteractionEngine {
 
 	#initOneDragPlugin(inst: DragInstance, plugin: DragPlugin) {
 		if (!plugin.init) return;
-		const ctx = inst.createDragCtx(this.#active, () => this.#getSession());
 		const result = this.#resultify(
 			() => {
-				const state = plugin.init!(ctx);
+				const state = plugin.init!(inst.dragCtx);
 				if (state !== undefined) inst.states.set(plugin.key, state);
 			},
 			{ phase: 'init', plugin: { name: plugin.name, hook: 'init' }, node: inst.rootNode },
@@ -746,9 +740,8 @@ export class InteractionEngine {
 			inst.states.delete(plugin.key);
 			return;
 		}
-		const ctx = inst.createDragCtx(this.#active, () => this.#getSession());
 		this.#resultify(
-			() => plugin.destroy!(ctx, inst.states.get(plugin.key)),
+			() => plugin.destroy!(inst.dragCtx, inst.states.get(plugin.key)),
 			{ phase: 'destroy', plugin: { name: plugin.name, hook: 'destroy' }, node: inst.rootNode },
 			inst,
 			plugin.key,
@@ -757,7 +750,7 @@ export class InteractionEngine {
 	}
 
 	#initDropPlugins(inst: DropInstance) {
-		const ctx = this.#createDropCtx(inst);
+		const ctx = inst.dropCtx;
 		for (const plugin of inst.flat) {
 			if (!plugin.init) continue;
 			const result = this.#resultifyDrop(
@@ -783,9 +776,8 @@ export class InteractionEngine {
 	#destroyDrop(inst: DropInstance) {
 		for (const plugin of inst.flat) {
 			if (plugin.destroy) {
-				const ctx = this.#createDropCtx(inst);
 				this.#resultifyDrop(
-					() => plugin.destroy!(ctx, inst.states.get(plugin.key)),
+					() => plugin.destroy!(inst.dropCtx, inst.states.get(plugin.key)),
 					{ phase: 'destroy', plugin: { name: plugin.name, hook: 'destroy' }, node: inst.rootNode },
 					inst,
 					plugin.key,

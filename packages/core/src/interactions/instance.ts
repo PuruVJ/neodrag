@@ -3,8 +3,7 @@ import type {
 	DragCtx,
 	DragPlugin,
 	DragSession,
-	DropTargetInfo,
-	EndReason,
+	DropCtx,
 	SessionKey,
 	SessionPrivateStore,
 } from './types.ts';
@@ -78,6 +77,10 @@ export class DragInstance {
 	states = new Map<symbol, unknown>();
 	failed = new Set<symbol>();
 
+	dragChain: DragPlugin[] = [];
+	startChain: DragPlugin[] = [];
+	endChain: DragPlugin[] = [];
+
 	preDrag: DragPlugin[] = [];
 	resolveDrag: DragPlugin[] = [];
 	postDrag: DragPlugin[] = [];
@@ -88,30 +91,23 @@ export class DragInstance {
 	resolveEnd: DragPlugin[] = [];
 	postEnd: DragPlugin[] = [];
 
+	readonly dragCtx: DragCtx;
+
+	#session: DragSession;
+	#sessionCancel: (() => void) | null = null;
+
 	isProcessingExternalUpdate = false;
 	isUpdating = false;
 	pendingUpdate: DragPlugin[] | null = null;
 
-	constructor(node: HTMLElement | SVGElement) {
+	constructor(node: HTMLElement | SVGElement, idleSession: DragSession) {
 		this.rootNode = node;
 		this.visualNode = node;
 		this.cachedRootNodeRect = node.getBoundingClientRect();
-	}
+		this.#session = idleSession;
 
-	syncContext() {
-		this.delta.x = this.deltaX;
-		this.delta.y = this.deltaY;
-		this.proposed.x = this.proposedX;
-		this.proposed.y = this.proposedY;
-		this.offset.x = this.offsetX;
-		this.offset.y = this.offsetY;
-		this.initial.x = this.initialX;
-		this.initial.y = this.initialY;
-	}
-
-	createDragCtx(session: ActiveSession | null, getSession: () => DragSession): DragCtx {
 		const inst = this;
-		return {
+		this.dragCtx = {
 			get delta() {
 				return inst.delta;
 			},
@@ -138,14 +134,14 @@ export class DragInstance {
 				return inst.cachedRootNodeRect;
 			},
 			get session() {
-				return getSession();
+				return inst.#session;
 			},
 			effect(fn) {
 				inst.effects.schedule(fn);
 			},
 			cancel() {
 				inst.cancelled = true;
-				if (session) session.cancel();
+				inst.#sessionCancel?.();
 			},
 			setForcedPosition(x, y) {
 				inst.offsetX = x;
@@ -153,6 +149,22 @@ export class DragInstance {
 				inst.syncContext();
 			},
 		};
+	}
+
+	bindSession(session: DragSession, onCancel?: () => void) {
+		this.#session = session;
+		this.#sessionCancel = onCancel ?? null;
+	}
+
+	syncContext() {
+		this.delta.x = this.deltaX;
+		this.delta.y = this.deltaY;
+		this.proposed.x = this.proposedX;
+		this.proposed.y = this.proposedY;
+		this.offset.x = this.offsetX;
+		this.offset.y = this.offsetY;
+		this.initial.x = this.initialX;
+		this.initial.y = this.initialY;
 	}
 
 	setVisual(node: HTMLElement | SVGElement) {
@@ -176,13 +188,16 @@ export class DragInstance {
 		this.preEnd = [];
 		this.resolveEnd = [];
 		this.postEnd = [];
+		this.dragChain = [];
+		this.startChain = [];
+		this.endChain = [];
 
 		for (const plugin of this.flat) {
 			if (this.failed.has(plugin.key)) continue;
 			const phase = plugin.phase ?? 'resolve';
-			if (plugin.start) this.#pushPhase(this.preStart, this.resolveStart, this.postStart, phase, plugin);
-			if (plugin.drag) this.#pushPhase(this.preDrag, this.resolveDrag, this.postDrag, phase, plugin);
-			if (plugin.end) this.#pushPhase(this.preEnd, this.resolveEnd, this.postEnd, phase, plugin);
+			if (plugin.start) this.#pushPhase(this.preStart, this.resolveStart, this.postStart, phase, plugin, this.startChain);
+			if (plugin.drag) this.#pushPhase(this.preDrag, this.resolveDrag, this.postDrag, phase, plugin, this.dragChain);
+			if (plugin.end) this.#pushPhase(this.preEnd, this.resolveEnd, this.postEnd, phase, plugin, this.endChain);
 		}
 	}
 
@@ -192,12 +207,27 @@ export class DragInstance {
 		post: DragPlugin[],
 		phase: NonNullable<DragPlugin['phase']>,
 		plugin: DragPlugin,
+		chain: DragPlugin[],
 	) {
-		if (phase === 'pre') pre.push(plugin);
-		else if (phase === 'post') post.push(plugin);
-		else resolve.push(plugin);
+		if (phase === 'pre') {
+			pre.push(plugin);
+			chain.push(plugin);
+		} else if (phase === 'post') {
+			post.push(plugin);
+			chain.push(plugin);
+		} else {
+			resolve.push(plugin);
+			chain.push(plugin);
+		}
 	}
 }
+
+export type DropCtxHost = {
+	pointerX: number;
+	pointerY: number;
+	lastEvent: PointerEvent | null;
+	session: DragSession;
+};
 
 export class DropInstance {
 	rootNode: HTMLElement | SVGElement;
@@ -205,11 +235,19 @@ export class DropInstance {
 	effects = new EffectScheduler();
 	cachedRootNodeRect: DOMRect;
 
+	readonly dropCtx: DropCtx;
+	#host: DropCtxHost;
+
 	flat: import('./types.ts').DropPlugin[] = [];
 	byKey = new Map<symbol, import('./types.ts').DropPlugin>();
 	states = new Map<symbol, unknown>();
 	failed = new Set<symbol>();
 	isOver = false;
+
+	enterChain: import('./types.ts').DropPlugin[] = [];
+	overChain: import('./types.ts').DropPlugin[] = [];
+	leaveChain: import('./types.ts').DropPlugin[] = [];
+	dropChain: import('./types.ts').DropPlugin[] = [];
 
 	preEnter: import('./types.ts').DropPlugin[] = [];
 	resolveEnter: import('./types.ts').DropPlugin[] = [];
@@ -224,9 +262,37 @@ export class DropInstance {
 	resolveDrop: import('./types.ts').DropPlugin[] = [];
 	postDrop: import('./types.ts').DropPlugin[] = [];
 
-	constructor(node: HTMLElement | SVGElement) {
+	constructor(node: HTMLElement | SVGElement, host: DropCtxHost) {
 		this.rootNode = node;
 		this.cachedRootNodeRect = node.getBoundingClientRect();
+		this.#host = host;
+
+		const inst = this;
+		this.dropCtx = {
+			get pointer() {
+				return { x: inst.#host.pointerX, y: inst.#host.pointerY };
+			},
+			get session() {
+				return inst.#host.session;
+			},
+			rootNode: inst.rootNode,
+			get cachedRootNodeRect() {
+				return inst.cachedRootNodeRect;
+			},
+			get lastEvent() {
+				return inst.#host.lastEvent;
+			},
+			get isOver() {
+				return inst.isOver;
+			},
+			effect(fn) {
+				inst.effects.schedule(fn);
+			},
+		};
+	}
+
+	bindHost(host: DropCtxHost) {
+		this.#host = host;
 	}
 
 	rebuildBuckets() {
@@ -242,6 +308,10 @@ export class DropInstance {
 		this.preDrop = [];
 		this.resolveDrop = [];
 		this.postDrop = [];
+		this.enterChain = [];
+		this.overChain = [];
+		this.leaveChain = [];
+		this.dropChain = [];
 
 		for (const plugin of this.flat) {
 			if (this.failed.has(plugin.key)) continue;
@@ -282,9 +352,24 @@ export class DropInstance {
 					: hook === 'leave'
 						? this.postLeave
 						: this.postDrop;
+		const chain =
+			hook === 'enter'
+				? this.enterChain
+				: hook === 'over'
+					? this.overChain
+					: hook === 'leave'
+						? this.leaveChain
+						: this.dropChain;
 
-		if (phase === 'pre') pre.push(plugin);
-		else if (phase === 'post') post.push(plugin);
-		else resolve.push(plugin);
+		if (phase === 'pre') {
+			pre.push(plugin);
+			chain.push(plugin);
+		} else if (phase === 'post') {
+			post.push(plugin);
+			chain.push(plugin);
+		} else {
+			resolve.push(plugin);
+			chain.push(plugin);
+		}
 	}
 }
