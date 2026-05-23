@@ -326,8 +326,6 @@ export class Neodrag {
 		inst.cancelled = false;
 		inst.lastEvent = e;
 		this.#dropHost.lastEvent = e;
-		inst.syncContext();
-
 		this.#beginSession(inst, e);
 		this.#armPointerSession();
 	}
@@ -346,7 +344,6 @@ export class Neodrag {
 		}
 
 		if (!inst.isDragging) {
-			inst.syncContext();
 			const startOk = this.#runStart(inst, inst.dragCtx, e);
 			inst.effects.flush();
 			if (!startOk || inst.cancelled) return;
@@ -379,13 +376,11 @@ export class Neodrag {
 			this.#active.deltaY = inst.deltaY;
 		}
 
-		inst.syncContext();
 		this.#runDrag(inst, inst.dragCtx, e);
 		inst.offsetX += inst.proposedX;
 		inst.offsetY += inst.proposedY;
 		inst.proposedX = 0;
 		inst.proposedY = 0;
-		inst.syncContext();
 		inst.effects.flush();
 
 		if (this.#dropCount > 0) this.#updateDropTargets(e);

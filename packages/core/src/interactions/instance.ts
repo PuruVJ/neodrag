@@ -7,7 +7,6 @@ import type {
 	SessionKey,
 	SessionPrivateStore,
 } from './types.ts';
-import { Vec2 } from './vec2.ts';
 
 export class SessionPrivate implements SessionPrivateStore {
 	#store = new Map<symbol, unknown>();
@@ -66,10 +65,10 @@ export class DragInstance {
 	visualNode: HTMLElement | SVGElement;
 	pointerCapturedId: number | null = null;
 
-	readonly delta = new Vec2();
-	readonly proposed = new Vec2();
-	readonly offset = new Vec2();
-	readonly initial = new Vec2();
+	readonly #liveDelta: { readonly x: number; readonly y: number };
+	readonly #liveProposed: { readonly x: number; readonly y: number };
+	readonly #liveOffset: { readonly x: number; readonly y: number };
+	readonly #liveInitial: { readonly x: number; readonly y: number };
 
 	flat: DragPlugin[] = [];
 	lastList: DragPlugin[] | null = null;
@@ -109,18 +108,50 @@ export class DragInstance {
 		this.#session = idleSession;
 
 		const inst = this;
+		this.#liveDelta = {
+			get x() {
+				return inst.deltaX;
+			},
+			get y() {
+				return inst.deltaY;
+			},
+		};
+		this.#liveProposed = {
+			get x() {
+				return inst.proposedX;
+			},
+			get y() {
+				return inst.proposedY;
+			},
+		};
+		this.#liveOffset = {
+			get x() {
+				return inst.offsetX;
+			},
+			get y() {
+				return inst.offsetY;
+			},
+		};
+		this.#liveInitial = {
+			get x() {
+				return inst.initialX;
+			},
+			get y() {
+				return inst.initialY;
+			},
+		};
 		this.dragCtx = {
 			get delta() {
-				return inst.delta;
+				return inst.#liveDelta;
 			},
 			get proposed() {
-				return inst.proposed;
+				return inst.#liveProposed;
 			},
 			get offset() {
-				return inst.offset;
+				return inst.#liveOffset;
 			},
 			get initial() {
-				return inst.initial;
+				return inst.#liveInitial;
 			},
 			get isDragging() {
 				return inst.isDragging;
@@ -148,7 +179,6 @@ export class DragInstance {
 			setForcedPosition(x, y) {
 				inst.offsetX = x;
 				inst.offsetY = y;
-				inst.syncContext();
 			},
 			setVisual(node) {
 				inst.setVisual(node);
@@ -159,17 +189,6 @@ export class DragInstance {
 	bindSession(session: DragSession, onCancel?: () => void) {
 		this.#session = session;
 		this.#sessionCancel = onCancel ?? null;
-	}
-
-	syncContext() {
-		this.delta.x = this.deltaX;
-		this.delta.y = this.deltaY;
-		this.proposed.x = this.proposedX;
-		this.proposed.y = this.proposedY;
-		this.offset.x = this.offsetX;
-		this.offset.y = this.offsetY;
-		this.initial.x = this.initialX;
-		this.initial.y = this.initialY;
 	}
 
 	setVisual(node: HTMLElement | SVGElement) {
