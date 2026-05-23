@@ -15,6 +15,11 @@
 			"import": "./src/index.ts",
 			"default": "./src/index.ts"
 		},
+		"./plugins": {
+			"types": "./src/plugins.ts",
+			"import": "./src/plugins.ts",
+			"default": "./src/plugins.ts"
+		},
 		"./drop": {
 			"types": "./src/drop.ts",
 			"import": "./src/drop.ts"

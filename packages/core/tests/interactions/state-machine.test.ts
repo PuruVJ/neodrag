@@ -17,6 +17,16 @@ describe('interactions state machine', () => {
 		expect(transitionSession('pending', { type: 'cancel' })).toBe('cancelled');
 	});
 
+	it('pending → cancelled on start-abort', () => {
+		expect(transitionSession('pending', { type: 'start-abort' })).toBe('cancelled');
+	});
+
+	it('pending → completed on pointerup with no-target', () => {
+		expect(transitionSession('pending', { type: 'pointerup', reason: 'no-target' })).toBe(
+			'completed',
+		);
+	});
+
 	it('active → completed on drop pointerup', () => {
 		expect(transitionSession('active', { type: 'pointerup', reason: 'drop' })).toBe('completed');
 	});

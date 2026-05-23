@@ -14,6 +14,12 @@
 			"import": "./src/index.svelte.ts",
 			"default": "./src/index.svelte.ts"
 		},
+		"./plugins": {
+			"types": "./src/plugins.ts",
+			"svelte": "./src/plugins.ts",
+			"import": "./src/plugins.ts",
+			"default": "./src/plugins.ts"
+		},
 		"./drop": {
 			"types": "./src/drop/index.svelte.ts",
 			"svelte": "./src/drop/index.svelte.ts",

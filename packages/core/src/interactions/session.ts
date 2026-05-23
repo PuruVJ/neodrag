@@ -1,5 +1,5 @@
 import type { ActiveSession } from './instance.ts';
-import type { DragSession, DropTargetInfo, EndReason, SessionState } from './types.ts';
+import type { DragSession, EndReason } from './types.ts';
 
 export function createDragSession(
 	active: ActiveSession,
@@ -52,16 +52,4 @@ export function resolveEndReason(active: ActiveSession | null, cancelled: boolea
 	if (cancelled || active?.state === 'cancelled') return 'cancel';
 	if (active && active.overTargets.length > 0) return 'drop';
 	return 'no-target';
-}
-
-export function updateOverTargets(
-	active: ActiveSession,
-	targets: DropTargetInfo[],
-): DropTargetInfo[] {
-	active.overTargets = targets;
-	return targets;
-}
-
-export function setSessionState(active: ActiveSession, state: SessionState) {
-	active.state = state;
 }

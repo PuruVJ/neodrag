@@ -35,5 +35,4 @@ export const vDraggable: Directive<ElementState, ReactiveDragPluginInput | undef
 	},
 };
 
-export * from '@neodrag/core/plugins';
 export { Neodrag };

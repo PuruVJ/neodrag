@@ -32,15 +32,3 @@ export function draggable(plugins: ReactiveDragPluginInput = []): Attachment<HTM
 		});
 	};
 }
-
-export * from '@neodrag/core/plugins';
-export {
-	DragHandle,
-	DropHandle,
-	defineDropPlugin,
-	DropPluginBase,
-	accepts,
-	highlight,
-	onDrop,
-	sortable,
-} from '@neodrag/core';

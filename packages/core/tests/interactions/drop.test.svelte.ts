@@ -47,7 +47,7 @@ describe('interactions drop', () => {
 		);
 		await sleepAndWaitForEffects();
 
-		expect(drops.length).toBeGreaterThanOrEqual(1);
+		expect(drops.length).toBe(1);
 		expect(drops[0]?.kind).toBe('card');
 	});
 });

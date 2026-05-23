@@ -11,7 +11,8 @@ npm install @neodrag/core@next
 ## Usage
 
 ```typescript
-import { Neodrag, axis, grid } from '@neodrag/core';
+import { Neodrag } from '@neodrag/core';
+import { axis, grid } from '@neodrag/core/plugins';
 
 const engine = Neodrag.shared;
 const handle = engine.draggable(document.querySelector('#box')!, [

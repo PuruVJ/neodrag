@@ -1,10 +1,5 @@
-import {
-	Neodrag,
-	defineDragPlugin,
-	type DragEventData,
-	type DragPlugin,
-	type DragPluginInput,
-} from '@neodrag/core';
+import { Neodrag, type DragEventData, type DragPlugin, type DragPluginInput } from '@neodrag/core';
+import { defineDragPlugin } from '@neodrag/core/plugins';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const engine = Neodrag.shared;
@@ -100,5 +95,4 @@ export function useDraggable(
 	});
 }
 
-export * from '@neodrag/core/plugins';
 export { Neodrag };

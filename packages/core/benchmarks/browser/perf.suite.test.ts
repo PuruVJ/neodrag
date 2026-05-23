@@ -2,7 +2,9 @@
  * Chromium performance suite — real layout, compositor, and event pipeline.
  */
 import { describe, expect, it } from 'vitest';
-import { MINIMAL_DRAG_PLUGINS, Neodrag, sortable, transform } from '../../src/index.ts';
+import { MINIMAL_DRAG_PLUGINS, Neodrag } from '../../src/index.ts';
+import { sortable } from '../../src/interactions/sortable/index.ts';
+import { transform } from '../../src/plugins.ts';
 import {
 	createBox,
 	dragSteps,

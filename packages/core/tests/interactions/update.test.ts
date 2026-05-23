@@ -27,11 +27,20 @@ describe('engine.update symbol-keyed diff', () => {
 
 	it('no-ops when plugin array reference unchanged', () => {
 		const engine = new Neodrag();
+		let initCalls = 0;
 		const node = document.createElement('div');
 		document.body.appendChild(node);
-		const plugins = [transform, position({ current: { x: 0, y: 0 } })];
+		const pos = position({ current: { x: 0, y: 0 } });
+		const origInit = pos.init;
+		pos.init = (ctx) => {
+			initCalls++;
+			return origInit?.(ctx);
+		};
+		const plugins = [transform, pos];
 		engine.draggable(node, plugins);
+		initCalls = 0;
 		engine.update(node, plugins);
+		expect(initCalls).toBe(0);
 		node.remove();
 	});
 });

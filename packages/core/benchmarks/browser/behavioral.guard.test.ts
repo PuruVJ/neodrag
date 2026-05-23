@@ -2,7 +2,8 @@
  * Behavioral correctness guards in real Chromium.
  */
 import { describe, expect, it } from 'vitest';
-import { DEFAULTS, events, Neodrag, position, threshold, transform } from '../../src/index.ts';
+import { DEFAULTS, Neodrag } from '../../src/index.ts';
+import { events, position, threshold, transform } from '../../src/plugins.ts';
 import {
 	assertTranslate,
 	createBox,

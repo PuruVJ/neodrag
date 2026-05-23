@@ -3,16 +3,19 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import InteractionsSortable from '../components/InteractionsSortable.svelte';
 import { dragAndDrop, startCursorTracking, stopCursorTracking } from '../mouse.ts';
+import { sleepAndWaitForEffects } from '../utils.ts';
 
 describe('interactions sortable', () => {
 	let item1: Locator;
 	let item3: Locator;
+	let list: Locator;
 
 	beforeEach(() => {
 		startCursorTracking();
 		const comp = render(InteractionsSortable);
 		item1 = comp.getByTestId('item-1');
 		item3 = comp.getByTestId('item-3');
+		list = comp.getByTestId('list');
 	});
 
 	afterEach(() => {
@@ -24,5 +27,29 @@ describe('interactions sortable', () => {
 		const dragEl = await item1.element();
 		const t = getComputedStyle(dragEl).translate;
 		expect(t).not.toBe('none');
+	});
+
+	test('reorders item when dropped on another slot', async () => {
+		const item1El = await item1.element();
+		const item3El = await item3.element();
+		const item1Rect = item1El.getBoundingClientRect();
+		const item3Rect = item3El.getBoundingClientRect();
+
+		await dragAndDrop(
+			item1,
+			{
+				deltaX: 0,
+				deltaY: item3Rect.top + item3Rect.height / 2 - (item1Rect.top + item1Rect.height / 2),
+			},
+			{ steps: 12 },
+		);
+		await sleepAndWaitForEffects();
+
+		const listEl = await list.element();
+		const keys = [...listEl.querySelectorAll('[data-sortable-key]')].map((el) =>
+			el.getAttribute('data-sortable-key'),
+		);
+		expect(keys[0]).not.toBe('1');
+		expect(keys).toContain('1');
 	});
 });

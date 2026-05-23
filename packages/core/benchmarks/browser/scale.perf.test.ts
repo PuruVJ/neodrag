@@ -2,7 +2,8 @@
  * Scale: many draggables on one engine, hit-testing, idle move.
  */
 import { describe, expect, it } from 'vitest';
-import { Neodrag, transform } from '../../src/index.ts';
+import { Neodrag } from '../../src/index.ts';
+import { transform } from '../../src/plugins.ts';
 import {
 	createBox,
 	dragSteps,

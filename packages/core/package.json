@@ -56,6 +56,18 @@
 				"types": "./dist/drop/plugins.d.ts",
 				"import": "./dist/drop/plugins.js"
 			},
+			"./interactions": {
+				"types": "./dist/interactions/index.d.ts",
+				"import": "./dist/interactions/index.js"
+			},
+			"./interactions/drop": {
+				"types": "./dist/interactions/drop/index.d.ts",
+				"import": "./dist/interactions/drop/index.js"
+			},
+			"./interactions/sortable": {
+				"types": "./dist/interactions/sortable/index.d.ts",
+				"import": "./dist/interactions/sortable/index.js"
+			},
 			"./package.json": "./package.json"
 		}
 	},
@@ -65,7 +77,7 @@
 		"prepublishOnly": "npm run compile",
 		"test": "vitest",
 		"test:interactions": "vitest run --config vitest.interactions.config.ts",
-		"test:interactions:unit": "vitest run tests/interactions/state-machine.test.ts tests/interactions/update.test.ts tests/interactions/plugins-phases.test.ts tests/interactions/coalescing.test.ts tests/interactions/transform-update.test.ts tests/interactions/update-defaults.test.ts --browser.enabled=false",
+		"test:interactions:unit": "vitest run tests/interactions/state-machine.test.ts tests/interactions/session.test.ts tests/interactions/update.test.ts tests/interactions/update-pending.test.ts tests/interactions/plugins-phases.test.ts tests/interactions/coalescing.test.ts tests/interactions/drop-raf.test.ts tests/interactions/transform-update.test.ts tests/interactions/update-defaults.test.ts --browser.enabled=false",
 		"test:bench:guard": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/",
 		"bench": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/perf.suite.test.ts",
 		"bench:browser": "vitest run --config vitest.bench.browser.config.ts",

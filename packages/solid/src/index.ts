@@ -1,10 +1,5 @@
-import {
-	Neodrag,
-	defineDragPlugin,
-	type DragEventData,
-	type DragPlugin,
-	type DragPluginInput,
-} from '@neodrag/core';
+import { Neodrag, type DragEventData, type DragPlugin, type DragPluginInput } from '@neodrag/core';
+import { defineDragPlugin } from '@neodrag/core/plugins';
 import type { Accessor } from 'solid-js';
 import { createEffect, createSignal, onCleanup, untrack } from 'solid-js';
 
@@ -102,5 +97,4 @@ export function useDraggable(
 	return dragState;
 }
 
-export * from '@neodrag/core/plugins';
 export { Neodrag };

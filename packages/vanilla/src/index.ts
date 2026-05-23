@@ -39,9 +39,11 @@ export class Droppable {
 		this.#handle = engine.droppable(node, plugins);
 	}
 
+	update(plugins: import('@neodrag/core').DropPluginInput) {
+		this.#handle.update(plugins);
+	}
+
 	destroy() {
 		this.#handle.destroy();
 	}
 }
-
-export * from '@neodrag/core/plugins';

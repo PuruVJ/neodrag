@@ -4,6 +4,7 @@ import type {
 	DragPlugin,
 	DragSession,
 	DropCtx,
+	DropTargetInfo,
 	SessionKey,
 	SessionPrivateStore,
 } from './types.ts';
@@ -218,10 +219,24 @@ export class DragInstance {
 		for (const plugin of this.flat) {
 			if (this.failed.has(plugin.key)) continue;
 			const phase = plugin.phase ?? 'resolve';
-			if (plugin.start) this.#pushPhase(this.preStart, this.resolveStart, this.postStart, phase, plugin, this.startChain);
-			if (plugin.drag) this.#pushPhase(this.preDrag, this.resolveDrag, this.postDrag, phase, plugin, this.dragChain);
-			if (plugin.end) this.#pushPhase(this.preEnd, this.resolveEnd, this.postEnd, phase, plugin, this.endChain);
+			if (plugin.start) this.#pushPhase(this.preStart, this.resolveStart, this.postStart, phase, plugin);
+			if (plugin.drag) this.#pushPhase(this.preDrag, this.resolveDrag, this.postDrag, phase, plugin);
+			if (plugin.end) this.#pushPhase(this.preEnd, this.resolveEnd, this.postEnd, phase, plugin);
 		}
+
+		this.startChain = this.#phaseChain(this.preStart, this.resolveStart, this.postStart);
+		this.dragChain = this.#phaseChain(this.preDrag, this.resolveDrag, this.postDrag);
+		this.endChain = this.#phaseChain(this.preEnd, this.resolveEnd, this.postEnd);
+	}
+
+	#phaseChain(
+		pre: DragPlugin[],
+		resolve: DragPlugin[],
+		post: DragPlugin[],
+	): DragPlugin[] {
+		return pre.length + resolve.length + post.length === 0
+			? []
+			: [...pre, ...resolve, ...post];
 	}
 
 	#pushPhase(
@@ -230,18 +245,10 @@ export class DragInstance {
 		post: DragPlugin[],
 		phase: NonNullable<DragPlugin['phase']>,
 		plugin: DragPlugin,
-		chain: DragPlugin[],
 	) {
-		if (phase === 'pre') {
-			pre.push(plugin);
-			chain.push(plugin);
-		} else if (phase === 'post') {
-			post.push(plugin);
-			chain.push(plugin);
-		} else {
-			resolve.push(plugin);
-			chain.push(plugin);
-		}
+		if (phase === 'pre') pre.push(plugin);
+		else if (phase === 'post') post.push(plugin);
+		else resolve.push(plugin);
 	}
 }
 
@@ -344,6 +351,21 @@ export class DropInstance {
 			if (plugin.leave) this.#bucket(phase, 'leave', plugin);
 			if (plugin.drop) this.#bucket(phase, 'drop', plugin);
 		}
+
+		this.enterChain = this.#phaseDropChain(this.preEnter, this.resolveEnter, this.postEnter);
+		this.overChain = this.#phaseDropChain(this.preOver, this.resolveOver, this.postOver);
+		this.leaveChain = this.#phaseDropChain(this.preLeave, this.resolveLeave, this.postLeave);
+		this.dropChain = this.#phaseDropChain(this.preDrop, this.resolveDrop, this.postDrop);
+	}
+
+	#phaseDropChain(
+		pre: import('./types.ts').DropPlugin[],
+		resolve: import('./types.ts').DropPlugin[],
+		post: import('./types.ts').DropPlugin[],
+	): import('./types.ts').DropPlugin[] {
+		return pre.length + resolve.length + post.length === 0
+			? []
+			: [...pre, ...resolve, ...post];
 	}
 
 	#bucket(
@@ -375,24 +397,9 @@ export class DropInstance {
 					: hook === 'leave'
 						? this.postLeave
 						: this.postDrop;
-		const chain =
-			hook === 'enter'
-				? this.enterChain
-				: hook === 'over'
-					? this.overChain
-					: hook === 'leave'
-						? this.leaveChain
-						: this.dropChain;
 
-		if (phase === 'pre') {
-			pre.push(plugin);
-			chain.push(plugin);
-		} else if (phase === 'post') {
-			post.push(plugin);
-			chain.push(plugin);
-		} else {
-			resolve.push(plugin);
-			chain.push(plugin);
-		}
+		if (phase === 'pre') pre.push(plugin);
+		else if (phase === 'post') post.push(plugin);
+		else resolve.push(plugin);
 	}
 }

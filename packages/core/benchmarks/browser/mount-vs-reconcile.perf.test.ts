@@ -2,7 +2,8 @@
  * Compare destroy+remount vs in-place engine.update (wrapper reconcile path).
  */
 import { describe, expect, it } from 'vitest';
-import { Neodrag, position, transform } from '../../src/index.ts';
+import { Neodrag } from '../../src/index.ts';
+import { position, transform } from '../../src/plugins.ts';
 import {
 	createBox,
 	printBenchReport,

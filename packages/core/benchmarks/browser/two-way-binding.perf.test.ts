@@ -2,7 +2,8 @@
  * Two-way position binding: idle reconcile, drag+sync churn, long drag.
  */
 import { describe, expect, it } from 'vitest';
-import { events, Neodrag, position, transform } from '../../src/index.ts';
+import { Neodrag } from '../../src/index.ts';
+import { events, position, transform } from '../../src/plugins.ts';
 import {
 	createBox,
 	dragSteps,

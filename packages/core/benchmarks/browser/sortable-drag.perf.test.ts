@@ -2,7 +2,9 @@
  * Focused sortable-over benchmark with CI budget.
  */
 import { describe, expect, it } from 'vitest';
-import { Neodrag, sortable, transform } from '../../src/index.ts';
+import { Neodrag } from '../../src/index.ts';
+import { sortable } from '../../src/interactions/sortable/index.ts';
+import { transform } from '../../src/plugins.ts';
 import { pointer, resetBody, runBench } from './helpers.ts';
 
 const SORTABLE_N = 40;

@@ -2,7 +2,8 @@
  * Simulates framework reconcile: new plugin object refs on every tick.
  */
 import { describe, expect, it } from 'vitest';
-import { Neodrag, position, transform } from '../../src/index.ts';
+import { Neodrag } from '../../src/index.ts';
+import { position, transform } from '../../src/plugins.ts';
 import { createBox, resetBody, runBench } from './helpers.ts';
 
 describe('reactive update churn', () => {

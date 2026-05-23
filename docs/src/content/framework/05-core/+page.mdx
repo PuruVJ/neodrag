@@ -27,7 +27,8 @@ npm i @neodrag/core@next
 ## Neodrag
 
 ```typescript
-import { Neodrag, axis, grid } from '@neodrag/core';
+import { Neodrag } from '@neodrag/core';
+import { axis, grid } from '@neodrag/core/plugins';
 
 const engine = Neodrag.shared;
 const handle = engine.draggable(element, [axis('x'), grid([10, 10])]);
@@ -64,9 +65,9 @@ Destroys all bindings and listeners on this engine.
 
 ## Plugins
 
-Import built-ins from `@neodrag/core` or `@neodrag/core/plugins`:
+Import built-in drag plugins from `@neodrag/core/plugins`. Drop helpers live under `@neodrag/core/drop/plugins`; sortable under `@neodrag/core/interactions/sortable` (or `@neodrag/core/drop` where re-exported).
 
-`transform`, `axis`, `grid`, `bounds`, `position`, `events`, `disabled`, `controls`, `threshold`, `scrollLock`, `ghost`, `dragData`, `accepts`, `highlight`, `onDrop`, `sortable`, …
+The main `@neodrag/core` entry exports the engine, types, and default plugin presets only — optional plugins are not pulled in unless you import them.
 
 Custom plugins:
 
