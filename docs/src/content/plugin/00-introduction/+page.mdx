@@ -16,7 +16,7 @@ Want grid snapping? Add `grid()`. Need movement constraints? Use `bounds()`. Wan
 
 ```svelte
 <script>
-  import { grid, axis, bounds, BoundsFrom } from '@neodrag/svelte';
+  import { draggable, grid, axis, bounds, BoundsFrom } from '@neodrag/svelte';
 </script>
 
 <div
@@ -116,7 +116,7 @@ function MyComponent() {
 
 ```typescript
 import {
-  Draggable,
+  Neodrag,
   grid,
   axis,
   bounds,
@@ -124,7 +124,7 @@ import {
 } from '@neodrag/vanilla';
 
 const element = document.getElementById('drag-me');
-const instance = new Draggable(element, [
+const instance = Neodrag.shared.draggable(element, [
   grid([20, 20]),
   axis('x'),
   bounds(BoundsFrom.viewport()),
@@ -246,11 +246,11 @@ function DynamicAxis() {
 <div slot="vanilla">
 
 ```typescript
-import { Draggable, axis, Compartment } from '@neodrag/vanilla';
+import { Neodrag, axis, Compartment } from '@neodrag/vanilla';
 
 let currentAxis = 'x';
 const axisComp = new Compartment(() => axis(currentAxis));
-const instance = new Draggable(element, () => [axisComp]);
+const instance = Neodrag.shared.draggable(element, () => [axisComp]);
 
 function switchAxis() {
   currentAxis = 'y';
@@ -490,16 +490,19 @@ const debugPlugin = {
 Inspect active instances:
 
 ```typescript
-// Check all active draggable instances
-console.log('Active draggables:', instances.size);
+import { draggable, Neodrag } from '@neodrag/svelte';
 
-// Inspect specific instance
-for (const [element, instance] of instances) {
+// Shared engine used by draggable() in most apps
+const map = Neodrag.shared.instances;
+console.log('Active draggables:', map.size);
+
+for (const [element, instance] of map) {
   console.log('Element:', element);
   console.log(
     'Plugins:',
     instance.plugins.map((p) => p.name),
   );
-  console.log('Current state:', instance.ctx);
 }
 ```
+
+With `@neodrag/core` directly, use `factory.instances` on your `DraggableFactory` instance instead.

@@ -20,7 +20,7 @@ disabled(false); // Enabled (same as not using plugin)
 
 ```svelte
 <script>
-  import { disabled } from '@neodrag/svelte';
+  import { draggable, disabled } from '@neodrag/svelte';
 </script>
 
 <!-- This won't drag at all -->
@@ -85,10 +85,10 @@ function DisabledExample() {
 <div slot="vanilla">
 
 ```typescript
-import { disabled, Draggable } from '@neodrag/vanilla';
+import { disabled, Neodrag } from '@neodrag/vanilla';
 
 const element = document.getElementById('element');
-new Draggable(element, [disabled(true)]);
+Neodrag.shared.draggable(element, [disabled(true)]);
 ```
 
 </div>
@@ -103,7 +103,7 @@ The real power comes from dynamically enabling/disabling with compartments:
 
 ```svelte
 <script>
-  import { disabled, Compartment } from '@neodrag/svelte';
+  import { draggable, disabled, Compartment } from '@neodrag/svelte';
 
   let isDragDisabled = $state(false);
   const disabledComp = Compartment.of(() => disabled(isDragDisabled));
@@ -231,7 +231,7 @@ function ToggleDisabled() {
 <div slot="vanilla">
 
 ```typescript
-import { disabled, Draggable, Compartment } from '@neodrag/vanilla';
+import { disabled, Neodrag, Compartment } from '@neodrag/vanilla';
 
 let isDragDisabled = false;
 const disabledComp = new Compartment(() => disabled(isDragDisabled));
@@ -240,7 +240,7 @@ const element = document.getElementById('element');
 const button = document.getElementById('toggle-button');
 const status = document.getElementById('status');
 
-new Draggable(element, () => [disabledComp]);
+Neodrag.shared.draggable(element, () => [disabledComp]);
 
 button.addEventListener('click', () => {
   isDragDisabled = !isDragDisabled;
@@ -261,7 +261,7 @@ button.addEventListener('click', () => {
 
 ```svelte
 <script>
-  import { disabled, Compartment } from '@neodrag/svelte';
+  import { draggable, disabled, Compartment } from '@neodrag/svelte';
 
   let isFormValid = $state(true);
   let isLoading = $state(false);
@@ -452,7 +452,7 @@ function ConditionalDisabled() {
 <div slot="vanilla">
 
 ```typescript
-import { disabled, Draggable, Compartment } from '@neodrag/vanilla';
+import { disabled, Neodrag, Compartment } from '@neodrag/vanilla';
 
 let isFormValid = true;
 let isLoading = false;
@@ -466,7 +466,7 @@ const formValidCheckbox = document.getElementById('form-valid');
 const loadingCheckbox = document.getElementById('loading');
 const status = document.getElementById('status');
 
-new Draggable(element, () => [disabledComp]);
+Neodrag.shared.draggable(element, () => [disabledComp]);
 
 function updateStatus() {
   const isDragDisabled = !isFormValid || isLoading;

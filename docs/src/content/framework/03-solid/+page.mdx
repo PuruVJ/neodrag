@@ -25,7 +25,7 @@ export const App: Component = () => {
 };
 ```
 
-> Note: Neodrag uses `useDraggable` instead of `createDraggable` because it's built on a shared [DraggableFactory](/docs/core#solid) instance from `@neodrag/core`, providing consistent APIs across all frameworks and better performance through shared event delegation.
+> Note: `@neodrag/solid` uses a shared engine from `@neodrag/core` with one set of delegated pointer listeners for the page, which keeps behavior consistent across frameworks and scales better with many draggables.
 
 With plugins
 

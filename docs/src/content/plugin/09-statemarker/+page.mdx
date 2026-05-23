@@ -26,7 +26,7 @@ stateMarker(); // Adds data-neodrag-state and data-neodrag-count attributes
 
 ```svelte
 <script>
-  import { stateMarker } from '@neodrag/svelte';
+  import { draggable, stateMarker } from '@neodrag/svelte';
 </script>
 
 <div {@attach draggable([stateMarker()])}>
@@ -99,11 +99,11 @@ function StateMarkerExample() {
 <div slot="vanilla">
 
 ```typescript
-import { stateMarker, Draggable } from '@neodrag/vanilla';
+import { stateMarker, Neodrag } from '@neodrag/vanilla';
 
 const element = document.getElementById('draggable');
 
-new Draggable(element, [stateMarker()]);
+Neodrag.shared.draggable(element, [stateMarker()]);
 ```
 
 </div>
@@ -116,7 +116,7 @@ new Draggable(element, [stateMarker()]);
 
 ```svelte
 <script>
-  import { stateMarker, events } from '@neodrag/svelte';
+  import { draggable, stateMarker, events } from '@neodrag/svelte';
 
   let dragElement;
   let currentState = $state('idle');
@@ -287,7 +287,7 @@ function StateReader() {
 <div slot="vanilla">
 
 ```typescript
-import { stateMarker, events, Draggable } from '@neodrag/vanilla';
+import { stateMarker, events, Neodrag } from '@neodrag/vanilla';
 
 const element = document.getElementById('draggable');
 const stateDisplay = document.getElementById('state-display');
@@ -301,7 +301,7 @@ function updateStateInfo() {
   countDisplay.textContent = `Drag Count: ${count}`;
 }
 
-new Draggable(element, [
+Neodrag.shared.draggable(element, [
   stateMarker(),
   events({
     onDragStart: updateStateInfo,
@@ -321,7 +321,7 @@ new Draggable(element, [
 
 ```svelte
 <script>
-  import { stateMarker, events } from '@neodrag/svelte';
+  import { draggable, stateMarker, events } from '@neodrag/svelte';
 
   let notifications = $state([]);
 
@@ -571,7 +571,7 @@ function StateMonitor() {
 <div slot="vanilla">
 
 ```typescript
-import { stateMarker, events, Draggable } from '@neodrag/vanilla';
+import { stateMarker, events, Neodrag } from '@neodrag/vanilla';
 
 const element = document.getElementById('draggable');
 const notificationsContainer =
@@ -592,7 +592,7 @@ function addNotification(message) {
   }, 3000);
 }
 
-new Draggable(element, [
+Neodrag.shared.draggable(element, [
   stateMarker(),
   events({
     onDragStart: () => addNotification('Drag started'),
@@ -614,7 +614,7 @@ new Draggable(element, [
 
 ```svelte
 <script>
-  import { stateMarker, events } from '@neodrag/svelte';
+  import { draggable, stateMarker, events } from '@neodrag/svelte';
 
   function trackDragAnalytics(eventName, data) {
     // Send to analytics service
@@ -745,7 +745,7 @@ function AnalyticsExample() {
 <div slot="vanilla">
 
 ```typescript
-import { stateMarker, events, Draggable } from '@neodrag/vanilla';
+import { stateMarker, events, Neodrag } from '@neodrag/vanilla';
 
 const element = document.getElementById('draggable');
 
@@ -759,7 +759,7 @@ function trackDragAnalytics(eventName, data) {
   });
 }
 
-new Draggable(element, [
+Neodrag.shared.draggable(element, [
   stateMarker(),
   events({
     onDragStart: (data) => trackDragAnalytics('drag_started', data),
@@ -778,7 +778,7 @@ new Draggable(element, [
 
 ```svelte
 <script>
-  import { stateMarker, events } from '@neodrag/svelte';
+  import { draggable, stateMarker, events } from '@neodrag/svelte';
 
   let debugInfo = $state({
     state: 'idle',
@@ -1006,7 +1006,7 @@ function DebugInspector() {
 <div slot="vanilla">
 
 ```typescript
-import { stateMarker, events, Draggable } from '@neodrag/vanilla';
+import { stateMarker, events, Neodrag } from '@neodrag/vanilla';
 
 const element = document.getElementById('draggable');
 const stateEl = document.getElementById('state');
@@ -1027,7 +1027,7 @@ function updateDebugInfo(eventType, data) {
   lastEventEl.textContent = `Last Event: ${lastEventTime}`;
 }
 
-new Draggable(element, [
+Neodrag.shared.draggable(element, [
   stateMarker(),
   events({
     onDragStart: (data) => updateDebugInfo('dragStart', data),

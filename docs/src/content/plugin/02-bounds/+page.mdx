@@ -20,7 +20,7 @@ bounds(BoundsFrom.element(el)); // Stay in specific element
 
 ```svelte
 <script>
-  import { bounds, BoundsFrom } from '@neodrag/svelte';
+  import { draggable, bounds, BoundsFrom } from '@neodrag/svelte';
 </script>
 
 <!-- Stay within viewport -->
@@ -118,13 +118,13 @@ function BoundedElements() {
 <div slot="vanilla">
 
 ```typescript
-import { bounds, BoundsFrom, Draggable } from '@neodrag/vanilla';
+import { bounds, BoundsFrom, Neodrag } from '@neodrag/vanilla';
 
 const viewportElement = document.getElementById('viewport-bound');
 const parentElement = document.getElementById('parent-bound');
 
-new Draggable(viewportElement, [bounds(BoundsFrom.viewport())]);
-new Draggable(parentElement, [bounds(BoundsFrom.parent())]);
+Neodrag.shared.draggable(viewportElement, [bounds(BoundsFrom.viewport())]);
+Neodrag.shared.draggable(parentElement, [bounds(BoundsFrom.parent())]);
 ```
 
 </div>
@@ -139,7 +139,7 @@ new Draggable(parentElement, [bounds(BoundsFrom.parent())]);
 
 ```svelte
 <script>
-  import { bounds, BoundsFrom } from '@neodrag/svelte';
+  import { draggable, bounds, BoundsFrom } from '@neodrag/svelte';
 </script>
 
 <!-- Basic viewport bounds -->
@@ -264,13 +264,13 @@ function ViewportBounds() {
 <div slot="vanilla">
 
 ```typescript
-import { bounds, BoundsFrom, Draggable } from '@neodrag/vanilla';
+import { bounds, BoundsFrom, Neodrag } from '@neodrag/vanilla';
 
 const basic = document.getElementById('basic');
 const padded = document.getElementById('padded');
 
-new Draggable(basic, [bounds(BoundsFrom.viewport())]);
-new Draggable(padded, [
+Neodrag.shared.draggable(basic, [bounds(BoundsFrom.viewport())]);
+Neodrag.shared.draggable(padded, [
   bounds(
     BoundsFrom.viewport({
       top: 20,
@@ -292,7 +292,7 @@ new Draggable(padded, [
 
 ```svelte
 <script>
-  import { bounds, BoundsFrom } from '@neodrag/svelte';
+  import { draggable, bounds, BoundsFrom } from '@neodrag/svelte';
 
   let container;
 </script>
@@ -421,14 +421,14 @@ function ElementBounds() {
 <div slot="vanilla">
 
 ```typescript
-import { bounds, BoundsFrom, Draggable } from '@neodrag/vanilla';
+import { bounds, BoundsFrom, Neodrag } from '@neodrag/vanilla';
 
 const container = document.getElementById('container');
 const bounded = document.getElementById('bounded');
 const selector = document.getElementById('selector');
 
-new Draggable(bounded, [bounds(() => BoundsFrom.element(container))]);
-new Draggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
+Neodrag.shared.draggable(bounded, [bounds(() => BoundsFrom.element(container))]);
+Neodrag.shared.draggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
 ```
 
 </div>
@@ -618,7 +618,7 @@ function CustomBounds() {
 <div slot="vanilla">
 
 ```typescript
-import { bounds, Draggable } from '@neodrag/vanilla';
+import { bounds, Neodrag } from '@neodrag/vanilla';
 
 const circular = document.getElementById('circular');
 const time = document.getElementById('time');
@@ -646,8 +646,8 @@ function timeBounds() {
   ];
 }
 
-new Draggable(circular, [bounds(circularBounds)]);
-new Draggable(time, [bounds(timeBounds)]);
+Neodrag.shared.draggable(circular, [bounds(circularBounds)]);
+Neodrag.shared.draggable(time, [bounds(timeBounds)]);
 ```
 
 </div>

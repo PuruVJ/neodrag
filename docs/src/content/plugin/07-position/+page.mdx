@@ -175,7 +175,7 @@ function PositionExample() {
 <div slot="vanilla">
 
 ```typescript
-import { Draggable, position, Compartment } from '@neodrag/vanilla';
+import { Neodrag, position, Compartment } from '@neodrag/vanilla';
 
 const element = document.querySelector('#draggable');
 let currentPos = { x: 100, y: 50 };
@@ -186,7 +186,7 @@ const currentPosComp = new Compartment(() =>
 );
 
 // Controlled position
-const controlled = new Draggable(element, () => [currentPosComp]);
+const controlled = Neodrag.shared.draggable(element, () => [currentPosComp]);
 
 // Move programmatically
 function moveElement() {
@@ -195,7 +195,7 @@ function moveElement() {
 }
 
 // Static initial position can be used directly
-const initial = new Draggable(element, [
+const initial = Neodrag.shared.draggable(element, [
   position({ default: { x: 0, y: 0 } }),
 ]);
 ```
@@ -398,7 +398,7 @@ function SyncedPosition() {
 
 ```typescript
 import {
-  Draggable,
+  Neodrag,
   position,
   events,
   Compartment,
@@ -426,7 +426,7 @@ const eventsComp = new Compartment(() =>
   }),
 );
 
-const instance = new Draggable(element, () => [
+const instance = Neodrag.shared.draggable(element, () => [
   positionComp,
   eventsComp,
 ]);

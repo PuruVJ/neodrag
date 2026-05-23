@@ -21,7 +21,7 @@ transform(customFunction); // Custom transform implementation
 
 ```svelte
 <script>
-  import { transform } from '@neodrag/svelte';
+  import { draggable, transform } from '@neodrag/svelte';
 </script>
 
 <!-- Default transform (usually automatic) -->
@@ -138,14 +138,14 @@ function TransformExamples() {
 <div slot="vanilla">
 
 ```typescript
-import { Draggable, transform } from '@neodrag/vanilla';
+import { Neodrag, transform } from '@neodrag/vanilla';
 
 const standard = document.getElementById('standard');
 const custom = document.getElementById('custom');
 
-new Draggable(standard, [transform()]);
+Neodrag.shared.draggable(standard, [transform()]);
 
-new Draggable(custom, [
+Neodrag.shared.draggable(custom, [
   transform((data) => {
     data.rootNode.style.transform = `
       translate(${data.offsetX}px, ${data.offsetY}px) 
@@ -165,7 +165,7 @@ new Draggable(custom, [
 
 ```svelte
 <script>
-  import { transform } from '@neodrag/svelte';
+  import { draggable, transform } from '@neodrag/svelte';
 
   // Scaling effect
   const scaleTransform = (data) => {
@@ -370,7 +370,7 @@ function CustomTransforms() {
 <div slot="vanilla">
 
 ```typescript
-import { Draggable, transform } from '@neodrag/vanilla';
+import { Neodrag, transform } from '@neodrag/vanilla';
 
 const scale = document.getElementById('scale');
 const rotate = document.getElementById('rotate');
@@ -403,9 +403,9 @@ const skewTransform = (data) => {
   `;
 };
 
-new Draggable(scale, [transform(scaleTransform)]);
-new Draggable(rotate, [transform(rotateTransform)]);
-new Draggable(skew, [transform(skewTransform)]);
+Neodrag.shared.draggable(scale, [transform(scaleTransform)]);
+Neodrag.shared.draggable(rotate, [transform(rotateTransform)]);
+Neodrag.shared.draggable(skew, [transform(skewTransform)]);
 ```
 
 </div>

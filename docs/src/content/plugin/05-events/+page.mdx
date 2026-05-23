@@ -22,7 +22,7 @@ events({
 
 ```svelte
 <script>
-  import { events } from '@neodrag/svelte';
+  import { draggable, events } from '@neodrag/svelte';
 
   let dragStatus = $state('idle');
   let position = $state({ x: 0, y: 0 });
@@ -172,13 +172,13 @@ function EventExample() {
 <div slot="vanilla">
 
 ```typescript
-import { events, Draggable } from '@neodrag/vanilla';
+import { events, Neodrag } from '@neodrag/vanilla';
 
 const element = document.getElementById('element');
 const statusEl = document.getElementById('status');
 const positionEl = document.getElementById('position');
 
-new Draggable(element, [
+Neodrag.shared.draggable(element, [
   events({
     onDragStart: () => {
       statusEl.textContent = 'dragging';
@@ -212,7 +212,7 @@ All event callbacks receive a `DragEventData` object with:
 
 ```svelte
 <script>
-  import { events } from '@neodrag/svelte';
+  import { draggable, events } from '@neodrag/svelte';
 
   function logEventData(data) {
     console.log('Position:', data.offset);
@@ -329,7 +329,7 @@ function EventDataExample() {
 <div slot="vanilla">
 
 ```typescript
-import { events, Draggable } from '@neodrag/vanilla';
+import { events, Neodrag } from '@neodrag/vanilla';
 
 const element = document.getElementById('element');
 
@@ -340,7 +340,7 @@ function logEventData(data) {
   console.log('Pointer event:', data.event);
 }
 
-new Draggable(element, [
+Neodrag.shared.draggable(element, [
   events({
     onDragStart: logEventData,
     onDrag: logEventData,
@@ -361,7 +361,7 @@ new Draggable(element, [
 
 ```svelte
 <script>
-  import { events } from '@neodrag/svelte';
+  import { draggable, events } from '@neodrag/svelte';
 
   let position = $state({ x: 0, y: 0 });
   let velocity = $state({ x: 0, y: 0 });
@@ -553,7 +553,7 @@ function VelocityTracker() {
 <div slot="vanilla">
 
 ```typescript
-import { events, Draggable } from '@neodrag/vanilla';
+import { events, Neodrag } from '@neodrag/vanilla';
 
 const element = document.getElementById('tracker');
 const positionEl = document.getElementById('position');
@@ -562,7 +562,7 @@ const velocityEl = document.getElementById('velocity');
 let lastTime = 0;
 let lastPosition = { x: 0, y: 0 };
 
-new Draggable(element, [
+Neodrag.shared.draggable(element, [
   events({
     onDrag: (data) => {
       const now = Date.now();
@@ -599,7 +599,7 @@ new Draggable(element, [
 
 ```svelte
 <script>
-  import { events } from '@neodrag/svelte';
+  import { draggable, events } from '@neodrag/svelte';
 
   const saveHandler = events({
     onDragEnd: (data) => {
@@ -724,11 +724,11 @@ function SavePosition() {
 <div slot="vanilla">
 
 ```typescript
-import { events, Draggable } from '@neodrag/vanilla';
+import { events, Neodrag } from '@neodrag/vanilla';
 
 const element = document.getElementById('element');
 
-new Draggable(element, [
+Neodrag.shared.draggable(element, [
   events({
     onDragEnd: (data) => {
       localStorage.setItem(

@@ -21,7 +21,7 @@ grid([null, 15]); // Only snap vertically every 15px
 
 ```svelte
 <script>
-  import { grid } from '@neodrag/svelte';
+  import { draggable, grid } from '@neodrag/svelte';
 </script>
 
 <!-- Square 20px grid -->
@@ -134,17 +134,17 @@ function GridExamples() {
 <div slot="vanilla">
 
 ```typescript
-import { grid, Draggable } from '@neodrag/vanilla';
+import { grid, Neodrag } from '@neodrag/vanilla';
 
 const square = document.getElementById('square');
 const rect = document.getElementById('rect');
 const horizontal = document.getElementById('horizontal');
 const vertical = document.getElementById('vertical');
 
-new Draggable(square, [grid([20, 20])]);
-new Draggable(rect, [grid([50, 30])]);
-new Draggable(horizontal, [grid([25, null])]);
-new Draggable(vertical, [grid([null, 20])]);
+Neodrag.shared.draggable(square, [grid([20, 20])]);
+Neodrag.shared.draggable(rect, [grid([50, 30])]);
+Neodrag.shared.draggable(horizontal, [grid([25, null])]);
+Neodrag.shared.draggable(vertical, [grid([null, 20])]);
 ```
 
 </div>
@@ -157,7 +157,7 @@ new Draggable(vertical, [grid([null, 20])]);
 
 ```svelte
 <script>
-  import { grid, Compartment } from '@neodrag/svelte';
+  import { draggable, grid, Compartment } from '@neodrag/svelte';
 
   let gridSize = $state(20);
   let enableSnap = $state(true);
@@ -347,7 +347,7 @@ function DynamicGrid() {
 <div slot="vanilla">
 
 ```typescript
-import { grid, Draggable, Compartment } from '@neodrag/vanilla';
+import { grid, Neodrag, Compartment } from '@neodrag/vanilla';
 
 let gridSize = 20;
 let enableSnap = true;
@@ -361,7 +361,7 @@ const sizeSlider = document.getElementById('size-slider');
 const snapToggle = document.getElementById('snap-toggle');
 const statusEl = document.getElementById('status');
 
-new Draggable(element, () => [gridComp]);
+Neodrag.shared.draggable(element, () => [gridComp]);
 
 function updateStatus() {
   statusEl.textContent = enableSnap ? `${gridSize}px` : 'disabled';
@@ -393,7 +393,7 @@ snapToggle.addEventListener('change', (e) => {
 
 ```svelte
 <script>
-  import { grid } from '@neodrag/svelte';
+  import { draggable, grid } from '@neodrag/svelte';
 </script>
 
 <!-- Wide columns, short rows -->
@@ -491,15 +491,15 @@ function AsymmetricGrids() {
 <div slot="vanilla">
 
 ```typescript
-import { grid, Draggable } from '@neodrag/vanilla';
+import { grid, Neodrag } from '@neodrag/vanilla';
 
 const wide = document.getElementById('wide');
 const timeline = document.getElementById('timeline');
 const calendar = document.getElementById('calendar');
 
-new Draggable(wide, [grid([100, 20])]);
-new Draggable(timeline, [grid([60, null])]);
-new Draggable(calendar, [grid([80, 120])]);
+Neodrag.shared.draggable(wide, [grid([100, 20])]);
+Neodrag.shared.draggable(timeline, [grid([60, null])]);
+Neodrag.shared.draggable(calendar, [grid([80, 120])]);
 ```
 
 </div>
@@ -512,7 +512,7 @@ new Draggable(calendar, [grid([80, 120])]);
 
 ```svelte
 <script>
-  import { grid, Compartment } from '@neodrag/svelte';
+  import { draggable, grid, Compartment } from '@neodrag/svelte';
 
   let screenWidth = $state(window.innerWidth);
 
@@ -665,7 +665,7 @@ function ResponsiveGrid() {
 <div slot="vanilla">
 
 ```typescript
-import { grid, Draggable, Compartment } from '@neodrag/vanilla';
+import { grid, Neodrag, Compartment } from '@neodrag/vanilla';
 
 let screenWidth = window.innerWidth;
 
@@ -677,7 +677,7 @@ const responsiveGrid = new Compartment(() =>
 const element = document.getElementById('element');
 const statusEl = document.getElementById('status');
 
-new Draggable(element, () => [responsiveGrid]);
+Neodrag.shared.draggable(element, () => [responsiveGrid]);
 
 function handleResize() {
   screenWidth = window.innerWidth;

@@ -136,7 +136,7 @@ import { draggable } from '@neodrag/vanilla';
 
 // New imports
 import {
-  Draggable,
+  Neodrag,
   axis,
   bounds,
   BoundsFrom,
@@ -373,7 +373,7 @@ const { destroy } = draggable(element, {
 
 ```typescript
 import {
-  Draggable,
+  Neodrag,
   axis,
   bounds,
   BoundsFrom,
@@ -382,7 +382,7 @@ import {
 } from '@neodrag/vanilla';
 
 const element = document.getElementById('drag-me');
-const instance = new Draggable(element, [
+const instance = Neodrag.shared.draggable(element, [
   axis('x'),
   bounds(BoundsFrom.parent()),
   grid([10, 10]),
@@ -572,7 +572,7 @@ draggable(element, {
 **v3 Events:**
 
 ```typescript
-new Draggable(element, [
+Neodrag.shared.draggable(element, [
   events({
     onDragStart: ({ offset }) =>
       console.log('start', offset.x, offset.y),
@@ -869,7 +869,7 @@ const boundsComp = new Compartment(() =>
   isConstrained ? bounds(BoundsFrom.parent()) : null,
 );
 
-const instance = new Draggable(element, () =>
+const instance = Neodrag.shared.draggable(element, () =>
   [axisComp, boundsComp].filter(Boolean),
 );
 
@@ -1037,7 +1037,7 @@ function CustomExample() {
 <div slot="vanilla">
 
 ```typescript
-import { Draggable, unstable_definePlugin } from '@neodrag/vanilla';
+import { Neodrag, unstable_definePlugin } from '@neodrag/vanilla';
 
 const loggerPlugin = unstable_definePlugin(() => ({
   name: 'logger',
@@ -1059,7 +1059,7 @@ const loggerPlugin = unstable_definePlugin(() => ({
 }));
 
 const element = document.getElementById('custom');
-const instance = new Draggable(element, [loggerPlugin]);
+const instance = Neodrag.shared.draggable(element, [loggerPlugin]);
 ```
 
 </div>
@@ -1157,10 +1157,10 @@ function ScrollLockExample() {
 <div slot="vanilla">
 
 ```typescript
-import { Draggable, scrollLock } from '@neodrag/vanilla';
+import { Neodrag, scrollLock } from '@neodrag/vanilla';
 
 const element = document.getElementById('scroll-lock');
-const instance = new Draggable(element, [
+const instance = Neodrag.shared.draggable(element, [
   scrollLock({
     lockAxis: 'both',
     allowScrollbar: false,
@@ -1222,7 +1222,7 @@ const instance = new Draggable(element, [
 
 **Key Vanilla Changes:**
 
-- Function call → Class instantiation: `draggable(el, opts)` → `new Draggable(el, plugins)`
+- Function call → Class instantiation: `draggable(el, opts)` → `Neodrag.shared.draggable(el, plugins)`
 - Add `Compartment` class for reactive updates
 - Instance methods remain similar: `instance.destroy()`
 

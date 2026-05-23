@@ -1,10 +1,10 @@
 ---
 title: '@neodrag/svelte'
 nav_title: 'svelte'
-tagline: 'A lightweight Svelte Attachment to make your elements draggable.'
+tagline: 'A lightweight Svelte attachment to make your elements draggable.'
 ---
 
-A lightweight Svelte library to make your elements draggable using Svelte 5 attachments or legacy actions.
+A lightweight Svelte library to make your elements draggable with Svelte 5 **attachments** and the `{@attach}` syntax.
 
 ## Installation
 
@@ -12,11 +12,13 @@ A lightweight Svelte library to make your elements draggable using Svelte 5 atta
 npm i @neodrag/svelte@next
 ```
 
-## Svelte 5 Usage (Recommended)
+Requires **Svelte 5**.
 
-Neodrag for Svelte 5 uses the new **attachments** feature with the `{@attach}` syntax for better performance and reactivity.
+## Usage
 
-### Basic Usage
+Pass a plugin list (or nothing for defaults) to `draggable()` and attach it to an element:
+
+### Basic
 
 ```svelte
 <script>
@@ -26,7 +28,7 @@ Neodrag for Svelte 5 uses the new **attachments** feature with the `{@attach}` s
 <div {@attach draggable()}>Drag me around!</div>
 ```
 
-### With Plugins
+### With plugins
 
 ```svelte
 <script>
@@ -48,9 +50,9 @@ Neodrag for Svelte 5 uses the new **attachments** feature with the `{@attach}` s
 </div>
 ```
 
-### Reactive Plugins with Compartments
+### Reactive plugins with compartments
 
-Svelte 5's reactivity integrates seamlessly with Neodrag's compartments:
+Svelte 5 reactivity integrates with Neodrag compartments:
 
 ```svelte
 <script>
@@ -58,7 +60,6 @@ Svelte 5's reactivity integrates seamlessly with Neodrag's compartments:
 
   let currentAxis = $state('x');
 
-  // Compartment automatically updates when currentAxis changes
   const axisCompartment = Compartment.of(() => axis(currentAxis));
 </script>
 
@@ -73,11 +74,11 @@ Svelte 5's reactivity integrates seamlessly with Neodrag's compartments:
 </button>
 ```
 
-> NOTE: Compartment.of is reactive, its function body is run inside a `$effect.pre`.
+> **Note:** `Compartment.of` runs its function inside `$effect.pre`, so plugin changes stay in sync with Svelte state.
 
-## Advanced Examples
+## Advanced examples
 
-### Draggable Modal with Handle
+### Draggable modal with handle
 
 ```svelte
 <script>
@@ -114,7 +115,7 @@ Svelte 5's reactivity integrates seamlessly with Neodrag's compartments:
 </div>
 ```
 
-### Dynamic Grid Snapping
+### Dynamic grid snapping
 
 ```svelte
 <script>
@@ -159,7 +160,7 @@ Svelte 5's reactivity integrates seamlessly with Neodrag's compartments:
 </div>
 ```
 
-### Card Stack with Events
+### Card stack with events
 
 ```svelte
 <script>
@@ -213,9 +214,7 @@ Svelte 5's reactivity integrates seamlessly with Neodrag's compartments:
 {/if}
 ```
 
-## TypeScript Support
-
-Neodrag provides full TypeScript support for Svelte:
+## TypeScript
 
 ```svelte
 <script lang="ts">
@@ -224,6 +223,7 @@ Neodrag provides full TypeScript support for Svelte:
     axis,
     bounds,
     BoundsFrom,
+    events,
     type Plugin,
     type DragEventData,
   } from '@neodrag/svelte';
@@ -244,86 +244,27 @@ Neodrag provides full TypeScript support for Svelte:
 <div {@attach draggable(plugins)}>TypeScript-enabled dragging</div>
 ```
 
-## Legacy Svelte 3/4 Support
+## Shared engine (optional)
 
-For projects still using Svelte 4, import the legacy action:
-
-### Basic Legacy Usage
+Most apps only need `draggable(plugins)`. For a custom default plugin stack or debugging, use the `Neodrag` class:
 
 ```svelte
 <script>
-  import {
-    legacyDraggable,
-    axis,
-    grid,
-  } from '@neodrag/svelte/legacy';
+  import { Neodrag, draggable, axis } from '@neodrag/svelte';
+
+  const engine = new Neodrag({
+    onError: (e) => console.error(e),
+  });
+
+  // Inspect active bindings on this engine
+  console.log(engine.instances.size);
 </script>
 
-<!-- ⚠️ Legacy action syntax for Svelte 4 -->
-<div use:legacyDraggable={[axis('x'), grid([10, 10])]}>
-  Drag me (Svelte 4)
-</div>
+<div {@attach draggable([axis('x')])}>Uses Neodrag.shared by default</div>
 ```
 
-### Legacy with Events
+`draggable()` uses `Neodrag.shared` internally. Create your own `Neodrag` instance when you need separate engines on one page (uncommon).
 
-```svelte
-<script>
-  import { legacyDraggable, events } from '@neodrag/svelte';
+## Drop zones
 
-  let position = { x: 0, y: 0 };
-</script>
-
-<div
-  use:legacyDraggable={[
-    events({
-      onDrag: (data) => {
-        position = data.offset;
-      },
-    }),
-  ]}
->
-  Position: {position.x}, {position.y}
-</div>
-```
-
-### Compartments
-
-`Compartment.of` is not available in the legacy action, you must manually mutate the compartment
-
-```ts
-import { legacyDraggable, Compartment } from '@neodrag/svelte/legacy';
-
-let currentAxis = 'x';
-const axisCompartment = new Compartment(() => axis(currentAxis));
-
-$: axisCompartment.current = axis(currentAxis);
-
-function toggleAxis() {
-  currentAxis = currentAxis === 'x' ? 'y' : 'x';
-}
-```
-
-### Deprecation Notice
-
-The `legacyDraggable` action is **deprecated** and will be removed in **Neodrag v4**. Please migrate to Svelte 5 and use the new `{@attach draggable()}` syntax for:
-
-- Better performance
-- Improved reactivity
-- Conditional application support
-- Component spreading support
-- Future-proof compatibility
-
-## Migration from Legacy
-
-**Svelte 4 (Legacy):**
-
-```svelte
-<div use:legacyDraggable={[axis('x')]}>Drag me</div>
-```
-
-**Svelte 5 (Recommended):**
-
-```svelte
-<div {@attach draggable([axis('x')])}>Drag me</div>
-```
+For drag-and-drop targets, import from `@neodrag/svelte/drop` and use `{@attach droppable([...])}` the same way as `draggable`.

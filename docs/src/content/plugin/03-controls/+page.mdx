@@ -23,7 +23,7 @@ controls({
 
 ```svelte
 <script>
-  import { controls, ControlFrom } from '@neodrag/svelte';
+  import { draggable, controls, ControlFrom } from '@neodrag/svelte';
 </script>
 
 <!-- Only header can initiate dragging -->
@@ -153,15 +153,15 @@ function ControlledDragging() {
 <div slot="vanilla">
 
 ```typescript
-import { controls, ControlFrom, Draggable } from '@neodrag/vanilla';
+import { controls, ControlFrom, Neodrag } from '@neodrag/vanilla';
 
 const allowElement = document.getElementById('allow-example');
 const blockElement = document.getElementById('block-example');
 
-new Draggable(allowElement, [
+Neodrag.shared.draggable(allowElement, [
   controls({ allow: ControlFrom.selector('.header') }),
 ]);
-new Draggable(blockElement, [
+Neodrag.shared.draggable(blockElement, [
   controls({ block: ControlFrom.selector('button') }),
 ]);
 ```
@@ -178,12 +178,10 @@ new Draggable(blockElement, [
 
 ```svelte
 <script>
-  import {
-    controls,
+  import { draggable, controls,
     ControlFrom,
     bounds,
-    BoundsFrom,
-  } from '@neodrag/svelte';
+    BoundsFrom, } from '@neodrag/svelte';
 </script>
 
 <div
@@ -329,7 +327,7 @@ function DraggableModal() {
 
 ```typescript
 import {
-  Draggable,
+  Neodrag,
   controls,
   ControlFrom,
   bounds,
@@ -338,7 +336,7 @@ import {
 
 const modal = document.getElementById('modal');
 
-new Draggable(modal, [
+Neodrag.shared.draggable(modal, [
   controls({
     allow: ControlFrom.selector('.modal-header'),
     block: ControlFrom.selector('.modal-close, .modal-body button'),

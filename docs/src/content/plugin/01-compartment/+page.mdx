@@ -160,11 +160,11 @@ function App() {
 <div slot="vanilla">
 
 ```typescript
-import { Draggable, axis, Compartment } from '@neodrag/vanilla';
+import { Neodrag, axis, Compartment } from '@neodrag/vanilla';
 
 let currentAxis = 'x';
 const axisComp = new Compartment(() => axis(currentAxis));
-const instance = new Draggable(element, () => [axisComp]);
+const instance = Neodrag.shared.draggable(element, () => [axisComp]);
 
 // Manual update required
 function switchAxis() {
@@ -372,7 +372,7 @@ const boundsComp = new Compartment(() =>
 
 // Static plugins (never change)
 const staticPlugins = [events({ onDrag: console.log })];
-const instance = new Draggable(element, () => [
+const instance = Neodrag.shared.draggable(element, () => [
   ...staticPlugins,
   axisComp,
   gridComp,

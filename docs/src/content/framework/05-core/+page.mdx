@@ -222,9 +222,9 @@ currentAxis = 'y';
 axisCompartment.current = axis(currentAxis);
 ```
 
-## Framework Integration
+## Framework packages
 
-While you can use `@neodrag/core` directly, it is designed to be wrapped by framework-specific packages. Here is how the core integrates with each framework wrapper:
+`@neodrag/core` powers the framework packages. Prefer those entry points in apps; use core directly for custom integrations or plugins.
 
 ### Svelte
 
@@ -234,15 +234,10 @@ npm i @neodrag/svelte@next
 
 ```svelte
 <script>
-  import { DraggableFactory } from '@neodrag/core';
-  import { axis, grid } from '@neodrag/core/plugins';
-  import { wrapper } from '@neodrag/svelte';
-
-  const factory = new DraggableFactory();
-  const draggable = wrapper(factory);
+  import { draggable, axis, grid } from '@neodrag/svelte';
 </script>
 
-<div use:draggable={[axis('x'), grid([10, 10])]}>
+<div {@attach draggable([axis('x'), grid([10, 10])])}>
   Drag me horizontally!
 </div>
 ```
@@ -255,15 +250,10 @@ npm i @neodrag/react@next
 
 ```tsx
 import { useRef } from 'react';
-import { DraggableFactory } from '@neodrag/core';
-import { axis, grid } from '@neodrag/core/plugins';
-import { wrapper } from '@neodrag/react';
-
-const factory = new DraggableFactory();
-const useDraggable = wrapper(factory);
+import { useDraggable, axis, grid } from '@neodrag/react';
 
 function App() {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   useDraggable(ref, [axis('x'), grid([10, 10])]);
 
   return <div ref={ref}>Drag me horizontally!</div>;
@@ -278,12 +268,7 @@ npm i @neodrag/vue@next
 
 ```vue
 <script setup>
-import { DraggableFactory } from '@neodrag/core';
-import { axis, grid } from '@neodrag/core/plugins';
-import { wrapper } from '@neodrag/vue';
-
-const factory = new DraggableFactory();
-const vDraggable = wrapper(factory);
+import { vDraggable, axis, grid } from '@neodrag/vue';
 </script>
 
 <template>
@@ -301,15 +286,10 @@ npm i @neodrag/solid@next
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { DraggableFactory } from '@neodrag/core';
-import { axis, grid } from '@neodrag/core/plugins';
-import { wrapper } from '@neodrag/solid';
-
-const factory = new DraggableFactory();
-const useDraggable = wrapper(factory);
+import { useDraggable, axis, grid } from '@neodrag/solid';
 
 function App() {
-  const [ref, setRef] = createSignal();
+  const [ref, setRef] = createSignal<HTMLElement | null>(null);
   useDraggable(ref, [axis('x'), grid([10, 10])]);
 
   return <div ref={setRef}>Drag me horizontally!</div>;
@@ -323,38 +303,25 @@ npm i @neodrag/vanilla@next
 ```
 
 ```typescript
-import { DraggableFactory } from '@neodrag/core';
-import { axis, grid } from '@neodrag/core/plugins';
-import { Wrapper } from '@neodrag/vanilla';
+import { Neodrag, axis, grid } from '@neodrag/vanilla';
 
-const factory = new DraggableFactory();
+const drag = Neodrag.shared.draggable(
+  document.getElementById('drag')!,
+  [axis('x'), grid([10, 10])],
+);
 
-class MyDraggable extends Wrapper {
-  constructor(node, plugins) {
-    super(factory, node, plugins);
-  }
-}
-// Clean up when done
-dragInstance.destroy();
+drag.destroy();
 ```
 
-#### CDN Usage
+#### CDN
 
 ```html
 <script src="https://unpkg.com/@neodrag/vanilla@next/dist/umd/index.js"></script>
 <script>
-  const factory = new NeoDrag.DraggableFactory();
-
-  class MyDraggable extends NeoDrag.Wrapper {
-    constructor(node, plugins) {
-      super(factory, node, plugins);
-    }
-  }
-
-  const dragInstance = new MyDraggable(
-    document.getElementById('drag'),
-    [NeoDrag.axis('x'), NeoDrag.grid([10, 10])],
-  );
+  NeoDrag.Neodrag.shared.draggable(document.getElementById('drag'), [
+    NeoDrag.axis('x'),
+    NeoDrag.grid([10, 10]),
+  ]);
 </script>
 ```
 

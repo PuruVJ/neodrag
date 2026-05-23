@@ -21,7 +21,7 @@ threshold(null); // Disable threshold completely
 
 ```svelte
 <script>
-  import { threshold } from '@neodrag/svelte';
+  import { draggable, threshold } from '@neodrag/svelte';
 </script>
 
 <!-- Distance threshold -->
@@ -136,17 +136,17 @@ function ThresholdExamples() {
 <div slot="vanilla">
 
 ```typescript
-import { Draggable, threshold } from '@neodrag/vanilla';
+import { Neodrag, threshold } from '@neodrag/vanilla';
 
 const distance = document.getElementById('distance');
 const delay = document.getElementById('delay');
 const both = document.getElementById('both');
 const disabled = document.getElementById('disabled');
 
-new Draggable(distance, [threshold({ distance: 10 })]);
-new Draggable(delay, [threshold({ delay: 300 })]);
-new Draggable(both, [threshold({ distance: 8, delay: 150 })]);
-new Draggable(disabled, [threshold(null)]);
+Neodrag.shared.draggable(distance, [threshold({ distance: 10 })]);
+Neodrag.shared.draggable(delay, [threshold({ delay: 300 })]);
+Neodrag.shared.draggable(both, [threshold({ distance: 8, delay: 150 })]);
+Neodrag.shared.draggable(disabled, [threshold(null)]);
 ```
 
 </div>
@@ -161,7 +161,7 @@ Adjust thresholds based on device or user preferences:
 
 ```svelte
 <script>
-  import { threshold, Compartment } from '@neodrag/svelte';
+  import { draggable, threshold, Compartment } from '@neodrag/svelte';
 
   let deviceType = $state('desktop');
   let sensitivity = $state('normal');
@@ -214,7 +214,7 @@ Adjust thresholds based on device or user preferences:
 <div slot="vanilla">
 
 ```javascript
-import { Draggable, threshold, Compartment } from '@neodrag/vanilla';
+import { Neodrag, threshold, Compartment } from '@neodrag/vanilla';
 
 let deviceType = 'desktop';
 let sensitivity = 'normal';
@@ -252,7 +252,7 @@ function updateSettings() {
   settingsDisplay.textContent = `Current: ${settings}`;
 }
 
-new Draggable(element, () => [thresholdComp]);
+Neodrag.shared.draggable(element, () => [thresholdComp]);
 
 deviceSelect.addEventListener('change', (e) => {
   deviceType = e.target.value;

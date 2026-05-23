@@ -21,7 +21,7 @@ scrollLock({ allowScrollbar: true }); // Keep scrollbars clickable
 
 ```svelte
 <script>
-  import { scrollLock } from '@neodrag/svelte';
+  import { draggable, scrollLock } from '@neodrag/svelte';
 </script>
 
 <!-- Prevent all scrolling while dragging -->
@@ -158,16 +158,16 @@ function ScrollLockExamples() {
 <div slot="vanilla">
 
 ```typescript
-import { scrollLock, Draggable } from '@neodrag/vanilla';
+import { scrollLock, Neodrag } from '@neodrag/vanilla';
 
 const fullLock = document.getElementById('full-lock');
 const horizontal = document.getElementById('horizontal');
 const container = document.getElementById('container');
 const scrollArea = document.getElementById('scroll-area');
 
-new Draggable(fullLock, [scrollLock()]);
-new Draggable(horizontal, [scrollLock({ lockAxis: 'x' })]);
-new Draggable(container, [
+Neodrag.shared.draggable(fullLock, [scrollLock()]);
+Neodrag.shared.draggable(horizontal, [scrollLock({ lockAxis: 'x' })]);
+Neodrag.shared.draggable(container, [
   scrollLock({ container: () => scrollArea }),
 ]);
 ```
@@ -182,7 +182,7 @@ new Draggable(container, [
 
 ```svelte
 <script>
-  import { scrollLock, Compartment } from '@neodrag/svelte';
+  import { draggable, scrollLock, Compartment } from '@neodrag/svelte';
 
   let lockMode = $state('both');
   let allowScrollbar = $state(false);
@@ -427,7 +427,7 @@ function DynamicScrollLock() {
 <div slot="vanilla">
 
 ```typescript
-import { scrollLock, Draggable, Compartment } from '@neodrag/vanilla';
+import { scrollLock, Neodrag, Compartment } from '@neodrag/vanilla';
 
 const element = document.getElementById('draggable');
 const container = document.getElementById('container');
@@ -448,7 +448,7 @@ const scrollLockComp = new Compartment(() => {
   });
 });
 
-new Draggable(element, () => [scrollLockComp]);
+Neodrag.shared.draggable(element, () => [scrollLockComp]);
 
 function updateStatus() {
   statusEl.textContent = `Lock Mode: ${lockMode}, Scrollbar: ${

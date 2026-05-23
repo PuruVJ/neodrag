@@ -23,7 +23,7 @@ One draggable to rule em all
 - 🤏 **Small in size** - ~5KB, plugin architecture enables tree-shaking
 - 🧩 **Plugin-based** - Mix and match only what you need
 - ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
-- 🎯 **Svelte 5 Native** - Built for attachments with `{@attach}` syntax
+- 🎯 **Svelte 5 native** - Built for attachments with `{@attach}` syntax
 - 🔄 **Reactive** - Change options on the fly with compartments
 - 🗃️ **Highly customizable** - Tons of plugins available
 
@@ -33,9 +33,9 @@ One draggable to rule em all
 npm install @neodrag/svelte@next
 ```
 
-# Usage
+Requires Svelte 5.
 
-## Svelte 5 (Recommended)
+# Usage
 
 Basic usage
 
@@ -78,32 +78,20 @@ Reactive plugins with compartments
 
 ```svelte
 <script>
-  import { draggable, axis, createCompartment } from '@neodrag/svelte';
+  import { draggable, axis, Compartment } from '@neodrag/svelte';
 
   let currentAxis = $state('x');
-  const axisComp = createCompartment(() => axis(currentAxis));
+  const axisComp = Compartment.of(() => axis(currentAxis));
 </script>
 
-<div {@attach draggable([axisComp])}>
+<div {@attach draggable(() => [axisComp])}>
   Current axis: {currentAxis}
 </div>
 
-<button onclick={() => currentAxis = currentAxis === 'x' ? 'y' : 'x'}>
+<button onclick={() => (currentAxis = currentAxis === 'x' ? 'y' : 'x')}>
   Switch Axis
 </button>
 ```
-
-## Svelte 4 (Legacy Support)
-
-```svelte
-<script>
-  import { legacyDraggable, axis } from '@neodrag/svelte/legacy';
-</script>
-
-<div use:legacyDraggable={[axis('x')]}>Hello</div>
-```
-
-> **Note:** Legacy actions are deprecated and will be removed in v4. Migrate to Svelte 5 for better performance.
 
 <a href="https://next.neodrag.dev/docs/svelte" style="font-size: 2rem">Read the docs</a>
 
