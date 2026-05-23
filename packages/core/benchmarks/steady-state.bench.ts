@@ -3,7 +3,7 @@
  * Steady-state: engine created once; only pointer events per iteration.
  */
 import { bench, describe } from 'vitest';
-import { Neodrag } from '../src/index.ts';
+import { MINIMAL_DRAG_PLUGINS, Neodrag } from '../src/index.ts';
 import { createDraggableNode } from './helpers/dom.ts';
 import { simulateDragSteps } from './helpers/pointer.ts';
 
@@ -56,5 +56,25 @@ describe('steady-state drag (amortized setup)', () => {
 			);
 		},
 		{ iterations: 50000, warmupIterations: 500 },
+	);
+});
+
+describe('steady-state drag (minimal plugins)', () => {
+	const node = createDraggableNode();
+	const engine = new Neodrag({ plugins: MINIMAL_DRAG_PLUGINS });
+	engine.draggable(node, []);
+
+	bench(
+		'Neodrag minimal — 12-step drag only',
+		() => {
+			simulateDragSteps(node, {
+				fromX: 120,
+				fromY: 120,
+				toX: 220,
+				toY: 220,
+				steps: 12,
+			});
+		},
+		{ iterations: 2000, warmupIterations: 100 },
 	);
 });

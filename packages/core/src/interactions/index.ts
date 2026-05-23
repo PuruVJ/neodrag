@@ -27,6 +27,7 @@ export {
 } from './types.ts';
 export {
 	DEFAULT_DRAG_PLUGINS,
+	MINIMAL_DRAG_PLUGINS,
 	transform,
 	transformWith,
 	threshold,

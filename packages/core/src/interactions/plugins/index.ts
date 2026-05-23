@@ -26,3 +26,5 @@ export const DEFAULT_DRAG_PLUGINS: DragPlugin[] = [
 	threshold(),
 	touchAction,
 ];
+
+export const MINIMAL_DRAG_PLUGINS: DragPlugin[] = [transform, threshold()];
