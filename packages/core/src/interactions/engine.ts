@@ -177,11 +177,11 @@ export class Neodrag {
 
 		if (inst.lastList === resolved) return;
 
-		const prev = inst.flat;
-		if (prev.length === resolved.length) {
+		const merged = this.#mergeUserDragPlugins(resolved);
+		if (merged.length === inst.flat.length) {
 			let same = true;
-			for (let i = 0; i < resolved.length; i++) {
-				if (resolved[i] !== prev[i]) {
+			for (const plugin of merged) {
+				if (inst.byKey.get(plugin.key) !== plugin) {
 					same = false;
 					break;
 				}
@@ -688,20 +688,46 @@ export class Neodrag {
 		return Number.isFinite(scale) && scale > 0 ? scale : 1;
 	}
 
-	#installDragPlugins(inst: DragInstance, userPlugins: DragPlugin[]) {
+	#dragBucketsChanged(prev: DragPlugin[], next: DragPlugin[]) {
+		if (prev.length !== next.length) return true;
+		for (let i = 0; i < next.length; i++) {
+			const a = prev[i]!;
+			const b = next[i]!;
+			if (
+				a.key !== b.key ||
+				(a.phase ?? 'resolve') !== (b.phase ?? 'resolve') ||
+				!!a.start !== !!b.start ||
+				!!a.drag !== !!b.drag ||
+				!!a.end !== !!b.end
+			) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	#mergeUserDragPlugins(userPlugins: DragPlugin[]) {
 		const combined = [...this.#defaultDragPlugins, ...userPlugins];
 		const byKey = new Map<symbol, DragPlugin>();
 		for (const p of combined) byKey.set(p.key, p);
-		inst.flat = [...byKey.values()];
-		inst.byKey = byKey;
+		return [...byKey.values()];
+	}
+
+	#installDragPlugins(inst: DragInstance, userPlugins: DragPlugin[]) {
+		const merged = this.#mergeUserDragPlugins(userPlugins);
+		inst.flat = merged;
+		inst.byKey = new Map(merged.map((p) => [p.key, p]));
 		inst.rebuildBuckets();
 		this.#initDragPlugins(inst);
 	}
 
-	#diffDragPlugins(inst: DragInstance, next: DragPlugin[]) {
+	#diffDragPlugins(inst: DragInstance, userPlugins: DragPlugin[]) {
 		inst.isProcessingExternalUpdate = true;
-
-		const prevByKey = new Map(inst.flat.map((p) => [p.key, p]));
+		const offsetX = inst.offsetX;
+		const offsetY = inst.offsetY;
+		const next = this.#mergeUserDragPlugins(userPlugins);
+		const prevFlat = inst.flat;
+		const prevByKey = new Map(prevFlat.map((p) => [p.key, p]));
 
 		for (const plugin of next) {
 			const prev = prevByKey.get(plugin.key);
@@ -721,9 +747,14 @@ export class Neodrag {
 		}
 
 		inst.flat = next;
-		inst.rebuildBuckets();
+		if (this.#dragBucketsChanged(prevFlat, next)) inst.rebuildBuckets();
 		inst.isProcessingExternalUpdate = false;
-		this.#syncTransformAfterPluginDiff(inst);
+
+		if (inst.offsetX !== offsetX || inst.offsetY !== offsetY) {
+			this.#syncTransformAfterPluginDiff(inst);
+		} else {
+			inst.effects.flush();
+		}
 	}
 
 	#syncTransformAfterPluginDiff(inst: DragInstance) {

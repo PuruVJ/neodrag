@@ -17,6 +17,11 @@ export interface SortableOptions<T> {
 interface SortableContext<T> {
 	opts: SortableOptions<T>;
 	nodesByKey: Map<string, HTMLElement | SVGElement>;
+	midsCache: { mids: { key: string; mid: number; index: number }[]; itemsLen: number } | null;
+}
+
+function invalidateMidsCache<T>(ctx: SortableContext<T>) {
+	ctx.midsCache = null;
 }
 
 function computeIndex<T>(
@@ -30,18 +35,28 @@ function computeIndex<T>(
 	const len = items.length;
 	if (len === 0) return 0;
 
+	let mids = ctx.midsCache?.mids;
+	if (!ctx.midsCache || ctx.midsCache.itemsLen !== len) {
+		mids = [];
+		for (let i = 0; i < len; i++) {
+			const key = ctx.opts.keyBy(items[i]!);
+			const el = ctx.nodesByKey.get(key);
+			if (!el) continue;
+			const rect = el.getBoundingClientRect();
+			const mid =
+				strategy === 'horizontal' ? rect.left + rect.width / 2 : rect.top + rect.height / 2;
+			mids.push({ key, mid, index: i });
+		}
+		ctx.midsCache = { mids, itemsLen: len };
+	}
+
 	let index = len;
-	for (let i = 0; i < len; i++) {
-		const key = ctx.opts.keyBy(items[i]!);
-		if (key === excludeKey) continue;
-		const el = ctx.nodesByKey.get(key);
-		if (!el) continue;
-		const rect = el.getBoundingClientRect();
-		const mid =
-			strategy === 'horizontal' ? rect.left + rect.width / 2 : rect.top + rect.height / 2;
-		const pos = strategy === 'horizontal' ? pointerX : pointerY;
-		if (pos < mid) {
-			index = i;
+	const pos = strategy === 'horizontal' ? pointerX : pointerY;
+	for (let i = 0; i < mids!.length; i++) {
+		const entry = mids![i]!;
+		if (entry.key === excludeKey) continue;
+		if (pos < entry.mid) {
+			index = entry.index;
 			break;
 		}
 	}
@@ -52,6 +67,7 @@ export function sortable<T>(opts: SortableOptions<T>) {
 	const ctx: SortableContext<T> = {
 		opts,
 		nodesByKey: new Map(),
+		midsCache: null,
 	};
 	const itemKeys = new Map<string, symbol>();
 	const itemKey = (id: string) => {
@@ -98,6 +114,7 @@ export function sortable<T>(opts: SortableOptions<T>) {
 			if (!item) return;
 			const insertAt = to > from ? to - 1 : to;
 			items.splice(insertAt, 0, item);
+			invalidateMidsCache(ctx);
 			opts.onReorder(items, { from, to: insertAt, item });
 		},
 	}))();
@@ -121,6 +138,7 @@ export function sortable<T>(opts: SortableOptions<T>) {
 
 					destroy(dragCtx) {
 						ctx.nodesByKey.delete(key);
+						invalidateMidsCache(ctx);
 						dragCtx.rootNode.removeAttribute('data-sortable-key');
 					},
 				}))(),

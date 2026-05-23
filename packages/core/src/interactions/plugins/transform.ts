@@ -2,6 +2,15 @@ import { set_node_key_style } from '../../utils.ts';
 import type { DragCtx, DragPlugin } from '../types.ts';
 import { TRANSFORM_KEY } from './keys.ts';
 
+const TRANSFORM_CACHE = Symbol('neodrag.transformCache');
+
+type TransformCache = { x: number; y: number };
+
+function transformCache(node: HTMLElement | SVGElement): TransformCache {
+	const host = node as HTMLElement & { [TRANSFORM_CACHE]?: TransformCache };
+	return (host[TRANSFORM_CACHE] ??= { x: NaN, y: NaN });
+}
+
 function writeTransform(
 	ctx: DragCtx,
 	func?: (args: { offset: { x: number; y: number }; rootNode: HTMLElement | SVGElement }) => void,
@@ -12,12 +21,19 @@ function writeTransform(
 		return;
 	}
 
+	const x = ctx.offset.x;
+	const y = ctx.offset.y;
+	const cache = transformCache(targetNode);
+	if (cache.x === x && cache.y === y) return;
+	cache.x = x;
+	cache.y = y;
+
 	if (targetNode instanceof SVGElement) {
 		const element = targetNode as SVGGraphicsElement;
 		const svg = element.ownerSVGElement;
 		if (!svg) return;
 		const translation = svg.createSVGTransform();
-		translation.setTranslate(ctx.offset.x, ctx.offset.y);
+		translation.setTranslate(x, y);
 		const t = element.transform.baseVal;
 		t.clear();
 		t.appendItem(translation);
@@ -25,7 +41,7 @@ function writeTransform(
 		set_node_key_style(
 			targetNode,
 			'translate',
-			`${ctx.offset.x}px ${ctx.offset.y}px 0.000000001px`,
+			`${x}px ${y}px 0.000000001px`,
 		);
 	}
 }
