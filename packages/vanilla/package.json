@@ -15,6 +15,14 @@
 			"import": "./src/index.ts",
 			"default": "./src/index.ts"
 		},
+		"./drop": {
+			"types": "./src/drop.ts",
+			"import": "./src/drop.ts"
+		},
+		"./interactions": {
+			"types": "./src/interactions.ts",
+			"import": "./src/interactions.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {

@@ -1,9 +1,17 @@
-export { createEngine, InteractionEngine, type EngineOptions } from './engine.ts';
+export {
+	createEngine,
+	InteractionEngine,
+	Neodrag,
+	type EngineOptions,
+} from './engine.ts';
+export { DragHandle, DropHandle, type DragEngineHost } from './handles.ts';
 export { createSessionKey } from './session-key.ts';
 export { transitionSession, isTerminal } from './state-machine.ts';
 export {
 	defineDragPlugin,
 	defineDropPlugin,
+	DragPluginBase,
+	DropPluginBase,
 	type DragCtx,
 	type DragPlugin,
 	type DragPluginInput,

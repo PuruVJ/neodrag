@@ -38,7 +38,7 @@ describe('drag loop (default plugin stacks)', () => {
 			resetBody();
 			const node = createDraggableNode();
 			const engine = createEngine();
-			const dispose = engine.draggable(node, []);
+			const handle = engine.draggable(node, []);
 			simulateDragSteps(node, {
 				fromX: 120,
 				fromY: 120,
@@ -46,7 +46,7 @@ describe('drag loop (default plugin stacks)', () => {
 				toY: 220,
 				steps: 12,
 			});
-			dispose();
+			handle.destroy();
 			engine.dispose();
 		},
 		{ iterations: 200, warmupIterations: 10 },
@@ -80,7 +80,7 @@ describe('drag loop (minimal plugins, threshold off)', () => {
 			resetBody();
 			const node = createDraggableNode();
 			const engine = createEngine({ plugins: MINIMAL_V4 });
-			const dispose = engine.draggable(node, []);
+			const handle = engine.draggable(node, []);
 			simulateDragSteps(node, {
 				fromX: 120,
 				fromY: 120,
@@ -88,7 +88,7 @@ describe('drag loop (minimal plugins, threshold off)', () => {
 				toY: 220,
 				steps: 12,
 			});
-			dispose();
+			handle.destroy();
 			engine.dispose();
 		},
 		{ iterations: 300, warmupIterations: 15 },

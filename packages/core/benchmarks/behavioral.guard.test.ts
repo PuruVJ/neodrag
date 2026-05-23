@@ -39,11 +39,11 @@ describe('benchmark behavioral guards', () => {
 	it('v4 default drag reaches expected translate', async () => {
 		const node = createDraggableNode();
 		const engine = createEngine();
-		const dispose = engine.draggable(node, []);
+		const handle = engine.draggable(node, []);
 		simulateDragSteps(node, DRAG);
 		await flushEffects();
 		assertTranslate(node, DRAG.expected);
-		dispose();
+		handle.destroy();
 		engine.dispose();
 	});
 
@@ -73,7 +73,7 @@ describe('benchmark behavioral guards', () => {
 		assertTranslate(v3Node, DRAG.expected);
 
 		d1();
-		d2();
+		d2.destroy();
 		v3Factory.dispose();
 		v4Engine.dispose();
 	});

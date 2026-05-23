@@ -16,14 +16,22 @@
 		},
 		strategy: 'vertical',
 	});
+	const bindDrop = (n: HTMLElement) => {
+		const h = engine.droppable(n, list.container());
+		return () => h.destroy();
+	};
+	const bindDrag = (n: HTMLElement, plugins: ReturnType<typeof list.item>) => {
+		const h = engine.draggable(n, [transform, ...plugins]);
+		return () => h.destroy();
+	};
 </script>
 
-<ul class="list" data-testid="list" {@attach (n) => engine.droppable(n, list.container())}>
+<ul class="list" data-testid="list" {@attach bindDrop}>
 	{#each items as item (item.id)}
 		<li
 			data-testid="item-{item.id}"
 			data-sortable-key={item.id}
-			{@attach (n) => engine.draggable(n, [transform, ...list.item(item.id)])}
+			{@attach (n) => bindDrag(n, list.item(item.id))}
 		>
 			{item.text}
 		</li>

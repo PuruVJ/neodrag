@@ -2,7 +2,7 @@ import { defineConfig, type Format } from 'tsup';
 
 export default defineConfig([
 	{
-		entry: [`./src/index.ts`],
+		entry: [`./src/index.ts`, `./src/drop.ts`, `./src/interactions.ts`],
 		format: 'esm',
 		dts: true,
 		external: ['svelte/action', '@neodrag/core'],

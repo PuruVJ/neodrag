@@ -49,11 +49,11 @@ describe('behavioral — transform after drag', () => {
 			resetBody();
 			const node = createDraggableNode();
 			const engine = createEngine();
-			const dispose = engine.draggable(node, []);
+			const handle = engine.draggable(node, []);
 			simulateDragSteps(node, DRAG);
 			await flushEffects();
 			assertTranslate(node, DRAG.expected);
-			dispose();
+			handle.destroy();
 			engine.dispose();
 		},
 		{ iterations: 25, warmupIterations: 3 },
@@ -87,7 +87,7 @@ describe('behavioral — transform after drag', () => {
 			assertTranslate(v4Node, DRAG.expected);
 
 			d1();
-			d2();
+			d2.destroy();
 			v3Factory.dispose();
 			v4Engine.dispose();
 		},

@@ -123,10 +123,10 @@ describe('Chromium drag performance', () => {
 		box.dataset.benchBox = '1';
 
 		const engine = createEngine({ dev: false });
-		const dispose = engine.draggable(box, []);
+		const handle = engine.draggable(box, []);
 
 		const stats = benchDrag('v4', () => () => {
-			dispose();
+			handle.destroy();
 			engine.dispose();
 			box.remove();
 		});
@@ -165,7 +165,7 @@ describe('Chromium drag performance', () => {
 		expect(Math.abs(a.y - b.y)).toBeLessThan(1);
 
 		v3d();
-		v4d();
+		v4d.destroy();
 		v3f.dispose();
 		v4e.dispose();
 	});

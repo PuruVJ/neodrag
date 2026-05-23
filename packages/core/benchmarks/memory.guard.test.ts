@@ -65,7 +65,7 @@ describe('memory snapshots', () => {
 		for (let i = 0; i < N; i++) {
 			const node = createDraggableNode();
 			nodes.push(node);
-			disposers.push(engine.draggable(node, []));
+			disposers.push(() => engine.draggable(node, []).destroy());
 		}
 		for (const node of nodes) simulateDragSteps(node, DRAG);
 

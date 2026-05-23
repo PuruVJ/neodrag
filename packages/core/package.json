@@ -69,6 +69,7 @@
 		"test:bench:guard": "vitest run --config vitest.bench.config.ts benchmarks/behavioral.guard.test.ts",
 		"bench": "vitest bench --config vitest.bench.config.ts",
 		"bench:browser": "vitest run --config vitest.bench.browser.config.ts",
+		"bench:all": "pnpm bench:run && pnpm exec vitest bench --config vitest.bench.config.ts benchmarks/steady-state.bench.ts && pnpm bench:browser",
 		"bench:run": "vitest run --config vitest.bench.config.ts benchmarks/behavioral.guard.test.ts && vitest bench --config vitest.bench.config.ts",
 		"bench:memory": "NODE_OPTIONS='--expose-gc' vitest run --config vitest.bench.config.ts benchmarks/memory.guard.test.ts",
 		"test:coverage": "vitest run --coverage --browser=chromium"

@@ -7,6 +7,7 @@ import {
 	type DropCtxHost,
 	SessionPrivate,
 } from './instance.ts';
+import { DragHandle, DropHandle } from './handles.ts';
 import { DEFAULT_DRAG_PLUGINS } from './plugins/index.ts';
 import { createDragSession, resolveEndReason } from './session.ts';
 import { isTerminal, transitionSession } from './state-machine.ts';
@@ -36,6 +37,7 @@ export interface EngineOptions {
 }
 
 export class InteractionEngine {
+	static readonly shared = new InteractionEngine({ dev: false });
 	#dragSources = new Map<HTMLElement | SVGElement, DragInstance>();
 	#dropTargets = new Map<HTMLElement | SVGElement, DropInstance>();
 	#dropCount = 0;
@@ -112,7 +114,7 @@ export class InteractionEngine {
 		return () => this.#sessionListeners.delete(listener);
 	}
 
-	draggable(node: HTMLElement | SVGElement, plugins: DragPluginInput = []) {
+	draggable(node: HTMLElement | SVGElement, plugins: DragPluginInput = []): DragHandle {
 		if (is_svg_svg_element(node)) {
 			throw new Error(
 				'Dragging the root SVG element directly is not recommended. Wrap it in a div or use a child element.',
@@ -126,13 +128,13 @@ export class InteractionEngine {
 		this.#installDragPlugins(inst, resolved);
 		this.#dragSources.set(node, inst);
 
-		return () => {
+		return new DragHandle(this, node, () => {
 			this.#destroyDrag(inst);
 			this.#dragSources.delete(node);
-		};
+		});
 	}
 
-	droppable(node: HTMLElement | SVGElement, plugins: DropPluginInput = []) {
+	droppable(node: HTMLElement | SVGElement, plugins: DropPluginInput = []): DropHandle {
 		this.#initListeners();
 
 		const inst = new DropInstance(node, this.#dropHost);
@@ -147,11 +149,11 @@ export class InteractionEngine {
 		this.#dropTargets.set(node, inst);
 		this.#dropCount++;
 
-		return () => {
+		return new DropHandle(node, () => {
 			this.#destroyDrop(inst);
 			this.#dropTargets.delete(node);
 			this.#dropCount--;
-		};
+		});
 	}
 
 	update(node: HTMLElement | SVGElement, plugins: DragPlugin[]) {
@@ -821,6 +823,9 @@ export class InteractionEngine {
 	}
 }
 
+/** @deprecated Prefer `new InteractionEngine(options)` */
 export function createEngine(options?: EngineOptions) {
 	return new InteractionEngine(options);
 }
+
+export { InteractionEngine as Neodrag };

@@ -17,11 +17,20 @@
 	} = $props();
 
 	const engine = createEngine();
+
+	const bindDrop = (n: HTMLElement) => {
+		const h = engine.droppable(n, dropPlugins);
+		return () => h.destroy();
+	};
+	const bindDrag = (n: HTMLElement) => {
+		const h = engine.draggable(n, dragPlugins);
+		return () => h.destroy();
+	};
 </script>
 
 <div class="scene">
-	<div class="drop" data-testid={dropTestId} {@attach (n) => engine.droppable(n, dropPlugins)}>
-		<div class="box" data-testid={dragTestId} {@attach (n) => engine.draggable(n, dragPlugins)}></div>
+	<div class="drop" data-testid={dropTestId} {@attach bindDrop}>
+		<div class="box" data-testid={dragTestId} {@attach bindDrag}></div>
 	</div>
 	{@render children?.()}
 </div>

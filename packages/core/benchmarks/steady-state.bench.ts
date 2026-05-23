@@ -15,7 +15,7 @@ describe('steady-state drag (amortized setup)', () => {
 
 	const v4Node = createDraggableNode();
 	const v4Engine = createEngine();
-	const v4Dispose = v4Engine.draggable(v4Node, []);
+	const _v4Handle = v4Engine.draggable(v4Node, []);
 
 	bench(
 		'v3 — 12-step drag only',
