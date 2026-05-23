@@ -22,7 +22,3 @@ export async function flushEffects() {
 	await new Promise<void>((resolve) => queueMicrotask(resolve));
 	await new Promise<void>((resolve) => requestAnimationFrame(resolve));
 }
-
-export function flushEffectsSync() {
-	queueMicrotask(() => {});
-}
