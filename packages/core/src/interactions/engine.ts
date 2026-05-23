@@ -53,6 +53,10 @@ export class Neodrag {
 	#activePointerId: number | null = null;
 
 	#listenersInitialized = false;
+	#listenerDelegate: HTMLElement | null = null;
+	#boundOnMove: ((e: PointerEvent) => void) | null = null;
+	#boundOnUp: ((e: PointerEvent) => void) | null = null;
+	#pointerSessionAbort: AbortController | null = null;
 	#sessionListeners = new Set<SessionListener>();
 	#sessionCleanups = new Set<() => void>();
 
@@ -206,6 +210,7 @@ export class Neodrag {
 	}
 
 	dispose() {
+		this.#disarmPointerSession();
 		for (const inst of this.#dragSources.values()) this.#destroyDrag(inst);
 		for (const inst of this.#dropTargets.values()) this.#destroyDrop(inst);
 		this.#dragSources.clear();
@@ -274,19 +279,28 @@ export class Neodrag {
 	#initListeners() {
 		if (this.#listenersInitialized) return;
 		const target = this.#delegate();
+		this.#listenerDelegate = target;
+		this.#boundOnMove = this.#onPointerMove.bind(this);
+		this.#boundOnUp = this.#onPointerUp.bind(this);
 
-		const onDown = this.#onPointerDown.bind(this);
-		const onMove = this.#onPointerMove.bind(this);
-		const onUp = this.#onPointerUp.bind(this);
-
-		listen(target, 'pointerdown', onDown, { passive: true, capture: true });
-		listen(target, 'pointermove', onMove, { passive: false, capture: true });
-		listen(target, 'pointerup', onUp, { passive: true, capture: true });
-		listen(target, 'pointercancel', onUp, { passive: true, capture: true });
-
+		listen(target, 'pointerdown', this.#onPointerDown.bind(this), { passive: true, capture: true });
 		listen(target, 'keydown', this.#onKeyDown.bind(this), { passive: true });
 
 		this.#listenersInitialized = true;
+	}
+
+	#armPointerSession() {
+		if (this.#pointerSessionAbort) return;
+		const target = this.#listenerDelegate ?? this.#delegate();
+		const signal = (this.#pointerSessionAbort = new AbortController()).signal;
+		listen(target, 'pointermove', this.#boundOnMove!, { passive: false, capture: true, signal });
+		listen(target, 'pointerup', this.#boundOnUp!, { passive: true, capture: true, signal });
+		listen(target, 'pointercancel', this.#boundOnUp!, { passive: true, capture: true, signal });
+	}
+
+	#disarmPointerSession() {
+		this.#pointerSessionAbort?.abort();
+		this.#pointerSessionAbort = null;
 	}
 
 	#onKeyDown(e: KeyboardEvent) {
@@ -315,6 +329,7 @@ export class Neodrag {
 		inst.syncContext();
 
 		this.#beginSession(inst, e);
+		this.#armPointerSession();
 	}
 
 	#onPointerMove(e: PointerEvent) {
@@ -438,6 +453,7 @@ export class Neodrag {
 		this.#activeSessionView = null;
 		this.#dropHost.session = this.#idleSession;
 		inst.bindSession(this.#idleSession);
+		this.#disarmPointerSession();
 	}
 
 	#cleanupPointer(_pointerId: number) {
@@ -451,6 +467,7 @@ export class Neodrag {
 		this.#activeSessionView = null;
 		this.#dropHost.session = this.#idleSession;
 		inst.bindSession(this.#idleSession);
+		this.#disarmPointerSession();
 	}
 
 	#runStart(inst: DragInstance, ctx: DragCtx, e: PointerEvent): boolean {

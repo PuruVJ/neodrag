@@ -27,9 +27,25 @@ describe('steady-state drag (amortized setup)', () => {
 	);
 
 	bench(
-		'Neodrag — single pointermove while idle',
+		'Neodrag — pointermove on node while idle',
 		() => {
 			node.dispatchEvent(
+				new PointerEvent('pointermove', {
+					bubbles: true,
+					clientX: 150,
+					clientY: 150,
+					pointerId: 1,
+					pointerType: 'mouse',
+				}),
+			);
+		},
+		{ iterations: 50000, warmupIterations: 500 },
+	);
+
+	bench(
+		'Neodrag — pointermove on delegate while idle',
+		() => {
+			document.documentElement.dispatchEvent(
 				new PointerEvent('pointermove', {
 					bubbles: true,
 					clientX: 150,
