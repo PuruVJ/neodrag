@@ -56,6 +56,9 @@ export interface DraggableInstance extends PublicInstance {
 	[$.last_event]: PointerEvent | null;
 	[$.cached_root_node_rect]: DOMRect;
 	[$.currently_dragged_node]: HTMLElement | SVGElement;
+	[$.drag_target]: HTMLElement | SVGElement | null;
+	[$.original_node]: HTMLElement | SVGElement;
+	[$.proxy_intent]: boolean;
 }
 
 type Result<T> = { ok: true; value: T } | { ok: false; error: unknown };
@@ -199,6 +202,9 @@ export class DraggableFactory {
 			[$.last_event]: null,
 			[$.cached_root_node_rect]: node.getBoundingClientRect(),
 			[$.currently_dragged_node]: node,
+			[$.drag_target]: null,
+			[$.original_node]: node,
+			[$.proxy_intent]: false,
 
 			// PluginContext properties
 			get proposed() {
@@ -273,6 +279,57 @@ export class DraggableFactory {
 				instance[$.offset_x] = x;
 				instance[$.offset_y] = y;
 			},
+			get visualElement() {
+				// The element that visually moves during drag (could be original or ghost)
+				return instance[$.drag_target] || instance[$.root_node];
+			},
+			get sourceElement() {
+				// The original element that initiated the drag (never changes)
+				return instance[$.root_node];
+			},
+			proxy: {
+				get isActive() {
+					// True when we're dragging a proxy/ghost instead of the original
+					return instance[$.drag_target] !== null;
+				},
+				get hasIntent() {
+					// True when a plugin (like ghost) has registered intent to use a proxy
+					return instance[$.proxy_intent];
+				},
+				set(proxyNode: HTMLElement | SVGElement | null) {
+					if (proxyNode === null) {
+						// No proxy - drag the original element directly
+						instance[$.drag_target] = null;
+						instance[$.currently_dragged_node] = instance[$.root_node];
+					} else {
+						// Use proxy - original element is completely isolated from drag
+						instance[$.drag_target] = proxyNode;
+						instance[$.currently_dragged_node] = proxyNode;
+					}
+				},
+				end() {
+					// Clean end to proxy drag - original element never gets touched
+					if (instance[$.drag_target]) {
+						// Remove proxy from DOM if it exists
+						if (document.body.contains(instance[$.drag_target])) {
+							document.body.removeChild(instance[$.drag_target]);
+						}
+						
+						// CRITICAL: Reset offset state ONLY for proxy drags
+						// Regular drags should keep their offsets
+						instance[$.offset_x] = 0;
+						instance[$.offset_y] = 0;
+						
+						instance[$.drag_target] = null;
+						// Don't switch back to original - just end the drag cleanly
+						instance[$.currently_dragged_node] = instance[$.root_node];
+					}
+				},
+				registerIntent() {
+					// Ghost plugin calls this in setup to indicate it will create a proxy
+					instance[$.proxy_intent] = true;
+				},
+			},
 		};
 
 		return instance;
@@ -282,12 +339,10 @@ export class DraggableFactory {
 		const subscriptions = new Set<() => void>();
 
 		if (typeof plugins === 'function') {
-			// Manual mode
 			const resolved = plugins();
 			const resolved_plugins = this.#resolve_plugins(resolved, instance[$.compartment_map]);
 			instance[$.plugins] = this.#initialize_plugins(resolved_plugins);
 
-			// Set up compartment subscriptions
 			for (const item of resolved)
 				if (item instanceof Compartment) {
 					subscriptions.add(
@@ -298,11 +353,9 @@ export class DraggableFactory {
 					);
 				}
 		} else {
-			// Automatic mode
 			instance[$.plugins] = this.#initialize_plugins(plugins);
 		}
 
-		// Initialize plugin states
 		for (const plugin of instance[$.plugins]) {
 			const result = this.#resultify(
 				() => {
@@ -322,7 +375,6 @@ export class DraggableFactory {
 			}
 		}
 
-		// Return cleanup function for subscriptions
 		return () => {
 			subscriptions.forEach((unsubscribe) => unsubscribe());
 			subscriptions.clear();
@@ -458,7 +510,6 @@ export class DraggableFactory {
 		if (!instance.isInteracting) return;
 
 		if (instance[$.is_processing_external_update] && instance.lastEvent === e) {
-			// console.warn('Preventing recursive handle_pointer_move during external update');
 			return;
 		}
 
@@ -494,6 +545,11 @@ export class DraggableFactory {
 			if (!instance.isDragging) return;
 		}
 
+		// Mark event as neodrag event for drop zone detection
+		if (instance.isDragging) {
+			(e as any)[$.NEODRAG_EVENT] = instance.currentlyDraggedNode;
+		}
+
 		e.preventDefault();
 
 		if (!sync_only) {
@@ -524,6 +580,11 @@ export class DraggableFactory {
 
 		const instance = this.#instances.get(draggable_node)!;
 		if (!instance.isInteracting) return;
+
+		// Mark event for drop zone detection if dragging
+		if (instance.isDragging) {
+			(e as any)[$.NEODRAG_EVENT] = instance.currentlyDraggedNode;
+		}
 
 		if (instance.isDragging) {
 			listen(draggable_node as HTMLElement, 'click', (e) => e.stopPropagation(), {
@@ -663,7 +724,6 @@ export class DraggableFactory {
 
 		// ✅ CRITICAL FIX: Block recursive internal updates
 		if (!is_external && instance[$.is_processing_external_update]) {
-			// console.warn('Blocking recursive compartment update to prevent infinite loop');
 			return;
 		}
 

@@ -19,6 +19,15 @@ export interface PluginContext {
 	cancel: () => void;
 	preventStart: () => void;
 	setForcedPosition: (x: number, y: number) => void;
+	readonly visualElement: HTMLElement | SVGElement;
+	readonly sourceElement: HTMLElement | SVGElement;
+	readonly proxy: {
+		readonly isActive: boolean;
+		readonly hasIntent: boolean;
+		set: (proxyNode: HTMLElement | SVGElement | null) => void;
+		end: () => void;
+		registerIntent: () => void;
+	};
 }
 
 export interface Plugin<State = any> {
@@ -217,18 +226,25 @@ function apply_transform(
 	ctx: PluginContext,
 	func?: (args: { offset: { x: number; y: number }; rootNode: HTMLElement | SVGElement }) => void,
 ) {
-	const is_svg = ctx.rootNode instanceof SVGElement;
-
+	// If a plugin has registered proxy intent but proxy isn't established yet,
+	// skip transforms to original element to prevent initial movement leak
+	if (ctx.proxy.hasIntent && !ctx.proxy.isActive && !ctx.isDragging) {
+		return;
+	}
+	
+	const targetNode = ctx.visualElement;
+	const is_svg = targetNode instanceof SVGElement;
+	
 	ctx.effect.paint(() => {
 		if (func) {
 			return func({
 				offset: { ...ctx.offset },
-				rootNode: ctx.rootNode,
+				rootNode: targetNode,
 			});
 		}
 
 		if (is_svg) {
-			const element = ctx.rootNode as SVGGraphicsElement;
+			const element = targetNode as SVGGraphicsElement;
 			const svg = element.ownerSVGElement;
 			if (!svg) return;
 
@@ -239,10 +255,9 @@ function apply_transform(
 			const transform = element.transform.baseVal;
 			transform.clear();
 			transform.appendItem(translation);
-			// debugger;
 		} else {
 			set_node_key_style(
-				ctx.rootNode,
+				targetNode,
 				'translate',
 				`${ctx.offset.x}px ${ctx.offset.y}px 0.000000001px`,
 			);
@@ -351,10 +366,6 @@ export const BoundsFrom = {
 		bottom?: number;
 	}): BoundFromFunction {
 		return (ctx) => {
-			// console.log(
-			// 	(ctx.root_node.parentNode as HTMLElement).getBoundingClientRect(),
-			// 	BoundsFrom.element(ctx.root_node.parentNode as HTMLElement, padding)(ctx),
-			// );
 			return BoundsFrom.element(ctx.root_node.parentElement as HTMLElement, padding)(ctx);
 		};
 	},
@@ -1035,3 +1046,64 @@ export const scrollLock = unstable_definePlugin(
 		},
 	}),
 );
+
+/**
+ * Ghost plugin - creates a clone for dragging while keeping original in place
+ * Useful for drag and drop across different containers
+ */
+export const ghost = unstable_definePlugin<any, [{ opacity?: number }]>((options = {}) => ({
+	name: 'ghost',
+	priority: 1000, // Run before transform (which has -1000)
+
+	setup(ctx) {
+		// Register intent to use a proxy - this prevents transforms from 
+		// being applied to original element before proxy is established
+		ctx.proxy.registerIntent();
+		
+		return {
+			ghostElement: null as HTMLElement | SVGElement | null,
+		};
+	},
+
+	start(ctx, state) {
+		// Create ghost clone of source element
+		const ghost = ctx.sourceElement.cloneNode(true) as HTMLElement | SVGElement;
+		const rect = ctx.sourceElement.getBoundingClientRect();
+		
+		state.ghostElement = ghost;
+		
+		// Style ghost for visual dragging
+		ghost.classList.add('neodrag-ghost');
+		(ghost as HTMLElement).style.opacity = String(options.opacity ?? 0.5);
+		ghost.style.position = 'fixed';
+		ghost.style.pointerEvents = 'none';
+		ghost.style.zIndex = '9999';
+		ghost.style.margin = '0';
+		
+		// Position ghost to match source element's current position
+		ghost.style.top = `${rect.top}px`;
+		ghost.style.left = `${rect.left}px`;
+		ghost.style.width = `${rect.width}px`;
+		ghost.style.height = `${rect.height}px`;
+		
+		// Clear any inherited transforms
+		ghost.style.transform = '';
+		ghost.style.translate = '';
+		
+		// Add to DOM and set as drag proxy
+		document.body.appendChild(ghost);
+		ctx.proxy.set(ghost);
+	},
+
+	end(ctx, state) {
+		// Clean proxy drag end - handles DOM cleanup and state reset
+		ctx.proxy.end();
+		state.ghostElement = null;
+	},
+
+	cleanup(ctx, state) {
+		// Cleanup in case of early termination
+		ctx.proxy.end();
+		state.ghostElement = null;
+	},
+}));

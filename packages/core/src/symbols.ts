@@ -35,3 +35,10 @@ export const compartment_map = Symbol();
 export const pending_compartments = Symbol();
 export const is_flushing_compartments = Symbol();
 export const is_processing_external_update = Symbol();
+
+export const NEODRAG_EVENT = Symbol();
+export const drag_target = Symbol();
+export const original_node = Symbol();
+export const proxy_intent = Symbol();
+
+export const sortable_registry = Symbol();

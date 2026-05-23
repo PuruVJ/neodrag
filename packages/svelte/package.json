@@ -20,6 +20,12 @@
 			"import": "./src/legacy.ts",
 			"default": "./src/legacy.ts"
 		},
+		"./drop": {
+			"types": "./src/drop/index.svelte.ts",
+			"svelte": "./src/drop/index.svelte.ts",
+			"import": "./src/drop/index.svelte.ts",
+			"default": "./src/drop/index.svelte.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
