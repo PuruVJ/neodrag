@@ -1,36 +1,36 @@
 <script lang="ts">
-	import { draggable } from '@neodrag/svelte';
-	import { droppable, sortable, sortableItemBySelector } from '@neodrag/svelte/drop';
+	import { Neodrag, transform } from '@neodrag/svelte';
+	import { droppable, sortable } from '@neodrag/svelte/drop';
 
-	let items = $state([
-		'Apple', 'Banana', 'Cherry', 'Date', 'Elderberry'
-	]);
+	let items = $state(['Apple', 'Banana', 'Cherry', 'Date', 'Elderberry']);
 
-	function handleSort(from: number, to: number) {
-		console.log(`Moving item from ${from} to ${to}`);
-		const item = items.splice(from, 1)[0];
-		items.splice(to, 0, item);
-	}
+	const list = sortable({
+		items: () => items,
+		keyBy: (item) => item,
+		onReorder: (next) => {
+			items = next;
+		},
+		strategy: 'vertical',
+	});
+
+	const bindDrop = (n: HTMLElement) => {
+		const h = Neodrag.shared.droppable(n, list.container());
+		return () => h.destroy();
+	};
+
+	const bindDrag = (n: HTMLElement, plugins: ReturnType<typeof list.item>) => {
+		const h = Neodrag.shared.draggable(n, [transform, ...plugins]);
+		return () => h.destroy();
+	};
 </script>
 
 <h1>Sortable Test</h1>
-<p>Drag items to reorder them. Z-index stacking is fixed!</p>
+<p>Drag items to reorder them.</p>
 
-<div 
-	class="sortable-list"
-	{@attach droppable([
-		sortable({
-			onSort: handleSort
-		})
-	])}
->
-	{#each items as item, index (item)}
-		<div 
-			class="sortable-item"
-			{@attach draggable([])}
-			{@attach sortableItemBySelector('.sortable-list')}
-		>
-			<span class="index">{index + 1}</span>
+<div class="sortable-list" {@attach bindDrop}>
+	{#each items as item (item)}
+		<div class="sortable-item" {@attach (n) => bindDrag(n, list.item(item))}>
+			<span class="index">{items.indexOf(item) + 1}</span>
 			<span class="name">{item}</span>
 		</div>
 	{/each}
@@ -85,13 +85,6 @@
 
 	.name {
 		font-weight: 500;
-	}
-
-	:global(.neodrag-sortable-dragging) {
-		opacity: 0.8 !important;
-		transform: rotate(2deg) scale(1.02) !important;
-		z-index: 9999 !important;
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
 	}
 
 	.result {

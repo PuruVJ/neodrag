@@ -296,9 +296,9 @@ const plugins = [logger, grid([10, 10])];
 Make plugins configurable with a factory function:
 
 ```typescript
-import { unstable_definePlugin } from '@neodrag/core/plugins';
+import { defineDragPlugin } from '@neodrag/core/plugins';
 
-const logger = unstable_definePlugin((prefix = 'DRAG') => ({
+const logger = defineDragPlugin((prefix = 'DRAG') => ({
   name: 'my:logger',
 
   start(ctx) {
@@ -420,9 +420,9 @@ Create publishable plugins for the community:
 
 ```typescript
 // my-awesome-plugin.ts
-import { unstable_definePlugin } from '@neodrag/core/plugins';
+import { defineDragPlugin } from '@neodrag/core/plugins';
 
-export const awesomePlugin = unstable_definePlugin(
+export const awesomePlugin = defineDragPlugin(
   (options: AwesomePluginOptions = {}) => ({
     name: 'awesome:plugin',
 
@@ -505,4 +505,4 @@ for (const [element, instance] of map) {
 }
 ```
 
-With `@neodrag/core` directly, use `factory.instances` on your `DraggableFactory` instance instead.
+With `@neodrag/core` directly, use `Neodrag.shared.instances` on your engine instance.

@@ -1,26 +1,14 @@
-import { registerSortableItem } from '@neodrag/core/drop/plugins';
+import { resolveDragPlugins, sortable, type SortableOptions } from '@neodrag/core/drop';
+import { draggable } from '@neodrag/svelte';
+import type { PluginInput } from '@neodrag/core/plugins';
 import { Attachment } from 'svelte/attachments';
 
-/**
- * Svelte action to register an element as a sortable item
- * Usage: {@attach sortableItem(containerElement)}
- * 
- * @param container The container element that has the sortable drop plugin
- * @returns An attachment that registers the element as sortable
- */
-export const sortableItem = (container: HTMLElement): Attachment<HTMLElement> => 
-	(element) => registerSortableItem(element, container);
-
-/**
- * Alternative approach using a selector to find the container
- * Usage: {@attach sortableItemBySelector('.sortable-container')}
- */
-export const sortableItemBySelector = (containerSelector: string): Attachment<HTMLElement> => 
-	(element) => {
-		const container = element.closest(containerSelector) as HTMLElement;
-		if (!container) {
-			console.warn(`sortableItemBySelector: Container not found for selector "${containerSelector}"`);
-			return () => {};
-		}
-		return registerSortableItem(element, container);
-	};
+export function sortableItemFor<T>(
+	options: SortableOptions<T>,
+	key: string,
+	extra?: PluginInput,
+): Attachment<HTMLElement | SVGElement> {
+	const itemPlugins = sortable(options).item(key);
+	if (!extra) return draggable(itemPlugins);
+	return draggable(() => [...itemPlugins, ...resolveDragPlugins(extra)]);
+}

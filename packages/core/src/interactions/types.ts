@@ -1,3 +1,5 @@
+import type { Compartment } from './compartment.ts';
+
 export type EndReason = 'drop' | 'no-target' | 'cancel';
 
 export type SessionState = 'idle' | 'pending' | 'active' | 'completed' | 'cancelled';
@@ -57,6 +59,7 @@ export interface DragCtx {
 	effect(fn: () => void): void;
 	cancel(): void;
 	setForcedPosition(x: number, y: number): void;
+	setVisual(node: HTMLElement | SVGElement): void;
 }
 
 export interface DropCtx {
@@ -95,7 +98,9 @@ export interface DropPlugin<S = unknown> {
 	destroy?(ctx: DropCtx, state: S): void;
 }
 
-export type DragPluginInput = DragPlugin[] | (() => DragPlugin[]);
+export type DragPluginEntry = DragPlugin | Compartment;
+
+export type DragPluginInput = DragPluginEntry[] | (() => DragPluginEntry[]);
 export type DropPluginInput = DropPlugin[] | (() => DropPlugin[]);
 
 export interface ErrorInfo {

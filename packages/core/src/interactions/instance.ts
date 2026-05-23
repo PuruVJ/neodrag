@@ -99,6 +99,8 @@ export class DragInstance {
 	isProcessingExternalUpdate = false;
 	isUpdating = false;
 	pendingUpdate: DragPlugin[] | null = null;
+	pluginInput: import('./types.ts').DragPluginInput = [];
+	compartmentUnsubs: (() => void)[] = [];
 
 	constructor(node: HTMLElement | SVGElement, idleSession: DragSession) {
 		this.rootNode = node;
@@ -147,6 +149,9 @@ export class DragInstance {
 				inst.offsetX = x;
 				inst.offsetY = y;
 				inst.syncContext();
+			},
+			setVisual(node) {
+				inst.setVisual(node);
 			},
 		};
 	}

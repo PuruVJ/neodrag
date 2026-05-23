@@ -4,7 +4,6 @@ export default defineConfig([
 	{
 		entry: {
 			'index.svelte': './src/index.svelte.ts',
-			'interactions.svelte': './src/interactions.svelte.ts',
 			'drop/index.svelte': './src/drop/index.svelte.ts',
 		},
 		format: 'esm',

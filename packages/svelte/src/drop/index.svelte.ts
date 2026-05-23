@@ -1,56 +1,23 @@
-import { DROP_DEFAULTS, DropFactory, type DropErrorInfo } from '@neodrag/core/drop';
-import type { DropPlugin } from '@neodrag/core/drop';
+import { Neodrag, type EngineOptions, type DropPluginInput } from '@neodrag/core';
 import { Attachment } from 'svelte/attachments';
 
-export type NeodragDropOptions = {
-	plugins?: (typeof DROP_DEFAULTS)['plugins'];
-	delegate?: (typeof DROP_DEFAULTS)['delegate'];
-	onError?: (error: DropErrorInfo) => void;
-};
+export type NeodragDropOptions = EngineOptions;
 
-export class NeodragDrop {
-	readonly #factory: DropFactory;
-
-	static readonly shared = new NeodragDrop();
-
-	constructor(options: NeodragDropOptions = {}) {
-		this.#factory = new DropFactory({
-			plugins: options.plugins ?? DROP_DEFAULTS.plugins,
-			delegate: options.delegate ?? DROP_DEFAULTS.delegate,
-			onError: options.onError ?? DROP_DEFAULTS.onError,
-		});
-	}
-
-	get instances() {
-		return this.#factory.instances;
-	}
-
-	bind(node: HTMLElement | SVGElement, plugins: DropPlugin[] = []) {
-		return this.#factory.droppable(node, plugins);
-	}
-
-	droppable(plugins?: DropPlugin[]): Droppable {
-		return new Droppable(this, plugins ?? []);
-	}
-
-	dispose() {
-		this.#factory.dispose();
-	}
-}
+export { Neodrag };
 
 export class Droppable {
-	readonly #engine: NeodragDrop;
-	readonly #plugins: DropPlugin[];
-	#destroy?: () => void;
+	readonly #engine: Neodrag;
+	readonly #plugins: DropPluginInput;
+	#handle?: import('@neodrag/core').DropHandle;
 
-	constructor(engine: NeodragDrop = NeodragDrop.shared, plugins: DropPlugin[] = []) {
+	constructor(engine: Neodrag = Neodrag.shared, plugins: DropPluginInput = []) {
 		this.#engine = engine;
 		this.#plugins = plugins;
 	}
 
 	attach(element: HTMLElement | SVGElement) {
 		this.detach();
-		this.#destroy = this.#engine.bind(element, this.#plugins);
+		this.#handle = this.#engine.droppable(element, this.#plugins);
 		return () => this.detach();
 	}
 
@@ -59,15 +26,15 @@ export class Droppable {
 	}
 
 	detach() {
-		this.#destroy?.();
-		this.#destroy = undefined;
+		this.#handle?.destroy();
+		this.#handle = undefined;
 	}
 }
 
-export function droppable(plugins?: DropPlugin[]): Attachment<HTMLElement | SVGElement> {
-	return new Droppable(NeodragDrop.shared, plugins ?? []).attachment();
+export function droppable(plugins?: DropPluginInput): Attachment<HTMLElement | SVGElement> {
+	return new Droppable(Neodrag.shared, plugins ?? []).attachment();
 }
 
 export * from '@neodrag/core/drop/plugins';
-
-export { sortableItem, sortableItemBySelector } from './sortable.svelte';
+export { sortable, type SortableOptions, type SortableStrategy } from '@neodrag/core/drop';
+export { sortableItemFor } from './sortable.svelte';

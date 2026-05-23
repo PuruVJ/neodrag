@@ -15,3 +15,5 @@ export const DRAG_DATA_KEY = Symbol('neodrag.dragData');
 export const ACCEPTS_KEY = Symbol('neodrag.accepts');
 export const HIGHLIGHT_KEY = Symbol('neodrag.highlight');
 export const ON_DROP_KEY = Symbol('neodrag.onDrop');
+export const SCROLL_LOCK_KEY = Symbol('neodrag.scrollLock');
+export const GHOST_KEY = Symbol('neodrag.ghost');

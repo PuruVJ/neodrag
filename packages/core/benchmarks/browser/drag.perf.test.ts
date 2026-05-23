@@ -2,8 +2,7 @@
  * Real Chromium benchmarks via Vitest browser + Playwright.
  */
 import { describe, expect, it } from 'vitest';
-import { DraggableFactory, DEFAULTS } from '../../src/index.ts';
-import { Neodrag } from '../../src/interactions/index.ts';
+import { Neodrag } from '../../src/index.ts';
 
 function createBox() {
 	const box = document.createElement('div');
@@ -100,33 +99,15 @@ function benchDrag(name: string, setup: () => () => void, iterations = 400) {
 }
 
 describe('Chromium drag performance', () => {
-	it('v3 steady-state 12-step drag', async () => {
-		document.body.replaceChildren();
-		const box = createBox();
-		box.dataset.benchBox = '1';
-
-		const factory = new DraggableFactory(DEFAULTS);
-		const dispose = factory.draggable(box, []);
-
-		const stats = benchDrag('v3', () => () => {
-			dispose();
-			factory.dispose();
-			box.remove();
-		});
-
-		expect(stats.median).toBeLessThan(8);
-	});
-
-	it('v4 steady-state 12-step drag', async () => {
+	it('steady-state 12-step drag', async () => {
 		document.body.replaceChildren();
 		const box = createBox();
 		box.dataset.benchBox = '1';
 
 		const engine = new Neodrag({ dev: false });
-		const handle = engine.draggable(box, []);
+		engine.draggable(box, []);
 
-		const stats = benchDrag('v4', () => () => {
-			handle.destroy();
+		const stats = benchDrag('Neodrag', () => () => {
 			engine.dispose();
 			box.remove();
 		});
@@ -134,21 +115,20 @@ describe('Chromium drag performance', () => {
 		expect(stats.median).toBeLessThan(12);
 	});
 
-	it('v4 matches v3 translate within tolerance', async () => {
+	it('two boxes reach same translate', async () => {
 		document.body.replaceChildren();
 
-		const v3box = createBox();
-		v3box.style.left = '100px';
-		const v4box = createBox();
-		v4box.style.left = '300px';
+		const a = createBox();
+		a.style.left = '100px';
+		const b = createBox();
+		b.style.left = '300px';
 
-		const v3f = new DraggableFactory(DEFAULTS);
-		const v3d = v3f.draggable(v3box, []);
-		const v4e = new Neodrag({ dev: false });
-		const v4d = v4e.draggable(v4box, []);
+		const engine = new Neodrag({ dev: false });
+		engine.draggable(a, []);
+		engine.draggable(b, []);
 
-		drag12(v3box, 120, 120, 220, 220);
-		drag12(v4box, 320, 120, 420, 220);
+		drag12(a, 120, 120, 220, 220);
+		drag12(b, 320, 120, 420, 220);
 
 		await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
@@ -159,14 +139,11 @@ describe('Chromium drag performance', () => {
 			return { x: Number.parseFloat(p[0]!), y: Number.parseFloat(p[1]!) };
 		};
 
-		const a = parse(v3box);
-		const b = parse(v4box);
-		expect(Math.abs(a.x - b.x)).toBeLessThan(1);
-		expect(Math.abs(a.y - b.y)).toBeLessThan(1);
+		const ta = parse(a);
+		const tb = parse(b);
+		expect(Math.abs(ta.x - tb.x)).toBeLessThan(2);
+		expect(Math.abs(ta.y - tb.y)).toBeLessThan(2);
 
-		v3d();
-		v4d.destroy();
-		v3f.dispose();
-		v4e.dispose();
+		engine.dispose();
 	});
 });

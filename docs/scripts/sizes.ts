@@ -182,15 +182,15 @@ async function measureCombinationWithBuild(
 	const testContent =
 		actualImports.length > 0
 			? `
-import { DraggableFactory } from '@neodrag/core';
+import { Neodrag } from '@neodrag/core';
 import { ${actualImports.join(', ')} } from '@neodrag/core/plugins';
 
-export const factory = DraggableFactory(${actualImports.join(',')});
+export const engine = new Neodrag({ plugins: [${actualImports.join(',')}] });
 `
 			: `
-import { DraggableFactory } from '@neodrag/core';
+import { Neodrag } from '@neodrag/core';
 
-export const factory = DraggableFactory();
+export const engine = new Neodrag();
 `;
 
 	const entryPath = join(measureDir, 'test.js');
@@ -286,7 +286,7 @@ async function main() {
 	const allRawPlugins = getCorePluginExports();
 	const excludedPlugins = [
 		'Compartment',
-		'unstable_definePlugin',
+		'defineDragPlugin',
 		'BoundsFrom',
 		'ControlFrom',
 		'resolve_plugins',

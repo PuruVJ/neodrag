@@ -1,57 +1,29 @@
-import { DEFAULTS, DraggableFactory, type ErrorInfo } from '@neodrag/core';
-import { Compartment as CoreCompartment, type PluginInput } from '@neodrag/core/plugins';
+import {
+	Neodrag,
+	Compartment as CoreCompartment,
+	type EngineOptions,
+	type DragPluginInput,
+} from '@neodrag/core';
 import { onDestroy } from 'svelte';
 import { Attachment } from 'svelte/attachments';
 
-export type NeodragOptions = {
-	plugins?: (typeof DEFAULTS)['plugins'];
-	delegate?: (typeof DEFAULTS)['delegate'];
-	onError?: (error: ErrorInfo) => void;
-};
+export type NeodragOptions = EngineOptions;
 
-export class Neodrag {
-	readonly #factory: DraggableFactory;
-
-	static readonly shared = new Neodrag();
-
-	constructor(options: NeodragOptions = {}) {
-		this.#factory = new DraggableFactory({
-			plugins: options.plugins ?? DEFAULTS.plugins,
-			delegate: options.delegate ?? DEFAULTS.delegate,
-			onError: options.onError ?? DEFAULTS.onError,
-		});
-	}
-
-	get instances() {
-		return this.#factory.instances;
-	}
-
-	bind(node: HTMLElement | SVGElement, plugins: PluginInput = []) {
-		return this.#factory.draggable(node, plugins);
-	}
-
-	draggable(plugins?: PluginInput): Draggable {
-		return new Draggable(this, plugins);
-	}
-
-	dispose() {
-		this.#factory.dispose();
-	}
-}
+export { Neodrag };
 
 export class Draggable {
 	readonly #engine: Neodrag;
-	readonly #plugins: PluginInput;
-	#destroy?: () => void;
+	readonly #plugins: DragPluginInput;
+	#handle?: import('@neodrag/core').DragHandle;
 
-	constructor(engine: Neodrag = Neodrag.shared, plugins: PluginInput = []) {
+	constructor(engine: Neodrag = Neodrag.shared, plugins: DragPluginInput = []) {
 		this.#engine = engine;
 		this.#plugins = plugins;
 	}
 
 	attach(element: HTMLElement | SVGElement) {
 		this.detach();
-		this.#destroy = this.#engine.bind(element, this.#plugins);
+		this.#handle = this.#engine.draggable(element, this.#plugins);
 		return () => this.detach();
 	}
 
@@ -59,9 +31,13 @@ export class Draggable {
 		return (element) => this.attach(element);
 	}
 
+	update(plugins: DragPluginInput) {
+		this.#handle?.update(plugins);
+	}
+
 	detach() {
-		this.#destroy?.();
-		this.#destroy = undefined;
+		this.#handle?.destroy();
+		this.#handle = undefined;
 	}
 }
 
@@ -81,11 +57,21 @@ export function auto_destroy_effect_root(fn: () => void | VoidFunction) {
 	return destroy;
 }
 
-export function draggable(plugins?: PluginInput): Attachment<HTMLElement | SVGElement> {
-	return new Draggable(Neodrag.shared, plugins).attachment();
+export function draggable(plugins?: DragPluginInput): Attachment<HTMLElement | SVGElement> {
+	return new Draggable(Neodrag.shared, plugins ?? []).attachment();
 }
 
 export * from '@neodrag/core/plugins';
+export {
+	DragHandle,
+	DropHandle,
+	defineDropPlugin,
+	DropPluginBase,
+	accepts,
+	highlight,
+	onDrop,
+	sortable,
+} from '@neodrag/core';
 
 export class Compartment extends CoreCompartment {
 	static of(reactive: ConstructorParameters<typeof CoreCompartment>[0]) {

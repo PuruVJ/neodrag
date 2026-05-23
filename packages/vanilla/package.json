@@ -20,8 +20,8 @@
 			"import": "./src/drop.ts"
 		},
 		"./interactions": {
-			"types": "./src/interactions.ts",
-			"import": "./src/interactions.ts"
+			"types": "./src/index.ts",
+			"import": "./src/index.ts"
 		},
 		"./package.json": "./package.json"
 	},

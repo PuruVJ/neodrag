@@ -8,6 +8,7 @@ import {
 	SessionPrivate,
 } from './instance.ts';
 import { DragHandle, DropHandle } from './handles.ts';
+import { collectCompartments, resolveDragPlugins } from './resolve-plugins.ts';
 import { DEFAULT_DRAG_PLUGINS } from './plugins/index.ts';
 import { createDragSession, resolveEndReason } from './session.ts';
 import { isTerminal, transitionSession } from './state-machine.ts';
@@ -129,8 +130,9 @@ export class Neodrag {
 		this.#initListeners();
 
 		const inst = new DragInstance(node, this.#idleSession);
-		const resolved = typeof plugins === 'function' ? plugins() : plugins;
-		this.#installDragPlugins(inst, resolved);
+		inst.pluginInput = plugins;
+		this.#installDragPlugins(inst, resolveDragPlugins(plugins));
+		this.#wireCompartments(inst);
 		this.#dragSources.set(node, inst);
 
 		return new DragHandle(this, node, () => {
@@ -161,18 +163,21 @@ export class Neodrag {
 		});
 	}
 
-	update(node: HTMLElement | SVGElement, plugins: DragPlugin[]) {
+	update(node: HTMLElement | SVGElement, plugins: DragPluginInput) {
 		const inst = this.#dragSources.get(node);
 		if (!inst) return;
 
-		if (inst.lastList === plugins) return;
-		inst.lastList = plugins;
+		inst.pluginInput = plugins;
+		const resolved = resolveDragPlugins(plugins);
+
+		if (inst.lastList === resolved) return;
+		inst.lastList = resolved;
 
 		const prev = inst.flat;
-		if (prev.length === plugins.length) {
+		if (prev.length === resolved.length) {
 			let same = true;
-			for (let i = 0; i < plugins.length; i++) {
-				if (plugins[i] !== prev[i]) {
+			for (let i = 0; i < resolved.length; i++) {
+				if (resolved[i] !== prev[i]) {
 					same = false;
 					break;
 				}
@@ -181,18 +186,18 @@ export class Neodrag {
 		}
 
 		if (inst.isUpdating) {
-			inst.pendingUpdate = plugins;
+			inst.pendingUpdate = resolved;
 			return;
 		}
 
 		inst.isUpdating = true;
 		if (inst.isProcessingExternalUpdate) {
-			inst.pendingUpdate = plugins;
+			inst.pendingUpdate = resolved;
 			inst.isUpdating = false;
 			return;
 		}
 
-		this.#diffDragPlugins(inst, plugins);
+		this.#diffDragPlugins(inst, resolved);
 		inst.isUpdating = false;
 
 		const pending = inst.pendingUpdate;
@@ -749,7 +754,22 @@ export class Neodrag {
 		inst.effects.flush();
 	}
 
+	#wireCompartments(inst: DragInstance) {
+		for (const unsub of inst.compartmentUnsubs) unsub();
+		inst.compartmentUnsubs.length = 0;
+
+		for (const compartment of collectCompartments(inst.pluginInput)) {
+			inst.compartmentUnsubs.push(
+				compartment.subscribe(() => {
+					this.update(inst.rootNode, inst.pluginInput);
+				}),
+			);
+		}
+	}
+
 	#destroyDrag(inst: DragInstance) {
+		for (const unsub of inst.compartmentUnsubs) unsub();
+		inst.compartmentUnsubs.length = 0;
 		for (const plugin of inst.flat) this.#destroyOneDragPlugin(inst, plugin);
 		inst.controller.abort();
 		inst.effects.clear();

@@ -902,9 +902,9 @@ Create your own dragging behavior:
 
 ```svelte
 <script>
-  import { draggable, unstable_definePlugin } from '@neodrag/svelte';
+  import { draggable, defineDragPlugin } from '@neodrag/svelte';
 
-  const loggerPlugin = unstable_definePlugin(() => ({
+  const loggerPlugin = defineDragPlugin(() => ({
     name: 'logger',
 
     setup(ctx) {
@@ -936,9 +936,9 @@ Create your own dragging behavior:
 <div slot="react">
 
 ```tsx
-import { useDraggable, unstable_definePlugin } from '@neodrag/react';
+import { useDraggable, defineDragPlugin } from '@neodrag/react';
 
-const loggerPlugin = unstable_definePlugin(() => ({
+const loggerPlugin = defineDragPlugin(() => ({
   name: 'logger',
   setup(ctx) {
     console.log('Drag initialized');
@@ -970,9 +970,9 @@ function CustomExample() {
 
 ```vue
 <script setup>
-import { vDraggable, unstable_definePlugin } from '@neodrag/vue';
+import { vDraggable, defineDragPlugin } from '@neodrag/vue';
 
-const loggerPlugin = unstable_definePlugin(() => ({
+const loggerPlugin = defineDragPlugin(() => ({
   name: 'logger',
   setup(ctx) {
     console.log('Drag initialized');
@@ -1004,9 +1004,9 @@ const plugins = [loggerPlugin];
 <div slot="solid">
 
 ```tsx
-import { useDraggable, unstable_definePlugin } from '@neodrag/solid';
+import { useDraggable, defineDragPlugin } from '@neodrag/solid';
 
-const loggerPlugin = unstable_definePlugin(() => ({
+const loggerPlugin = defineDragPlugin(() => ({
   name: 'logger',
   setup(ctx) {
     console.log('Drag initialized');
@@ -1037,9 +1037,9 @@ function CustomExample() {
 <div slot="vanilla">
 
 ```typescript
-import { Neodrag, unstable_definePlugin } from '@neodrag/vanilla';
+import { Neodrag, defineDragPlugin } from '@neodrag/vanilla';
 
-const loggerPlugin = unstable_definePlugin(() => ({
+const loggerPlugin = defineDragPlugin(() => ({
   name: 'logger',
   setup(ctx) {
     console.log('Drag initialized');

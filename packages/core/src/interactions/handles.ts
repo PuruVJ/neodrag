@@ -1,7 +1,8 @@
-import type { DragPlugin, DragPluginInput } from './types.ts';
+import { resolveDragPlugins } from './resolve-plugins.ts';
+import type { DragPluginInput } from './types.ts';
 
 export interface NeodragHost {
-	update(node: HTMLElement | SVGElement, plugins: DragPlugin[]): void;
+	update(node: HTMLElement | SVGElement, plugins: DragPluginInput): void;
 }
 
 export class DragHandle {
@@ -15,9 +16,8 @@ export class DragHandle {
 		this.#dispose = dispose;
 	}
 
-	update(plugins: DragPlugin[] | (() => DragPlugin[])) {
-		const list = typeof plugins === 'function' ? plugins() : plugins;
-		this.#engine.update(this.node, list);
+	update(plugins: DragPluginInput) {
+		this.#engine.update(this.node, plugins);
 	}
 
 	destroy() {

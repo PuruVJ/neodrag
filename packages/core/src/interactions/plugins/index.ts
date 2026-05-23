@@ -10,6 +10,8 @@ export { events, type DragEventData } from './events.ts';
 export { disabled } from './disabled.ts';
 export { controls, ControlFrom } from './controls.ts';
 export { dragData } from './drag-data.ts';
+export { scrollLock } from './scroll-lock.ts';
+export { ghost } from './ghost.ts';
 
 import { applyUserSelectHack, ignoreMultitouch, stateMarker, touchAction } from './builtins.ts';
 import { threshold } from './threshold.ts';

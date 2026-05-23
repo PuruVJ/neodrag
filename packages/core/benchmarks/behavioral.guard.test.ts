@@ -1,12 +1,8 @@
 /**
  * @vitest-environment jsdom
- *
- * Fast CI guard for behavioral scenarios (same invariants as behavioral.bench.ts).
  */
 import { afterEach, describe, expect, it } from 'vitest';
-import { DraggableFactory, DEFAULTS } from '../src/index.ts';
-import { threshold, transform } from '../src/plugins.ts';
-import { Neodrag, position, transform as iTransform } from '../src/interactions/index.ts';
+import { DEFAULTS, Neodrag, position, threshold, transform } from '../src/index.ts';
 import { assertTranslate } from './helpers/behavioral.ts';
 import { createDraggableNode, flushEffects, parseTranslate, resetBody } from './helpers/dom.ts';
 import { simulateDragSteps } from './helpers/pointer.ts';
@@ -25,18 +21,7 @@ afterEach(() => {
 });
 
 describe('benchmark behavioral guards', () => {
-	it('v3 default drag reaches expected translate', async () => {
-		const node = createDraggableNode();
-		const factory = new DraggableFactory(DEFAULTS);
-		const dispose = factory.draggable(node, []);
-		simulateDragSteps(node, DRAG);
-		await flushEffects();
-		assertTranslate(node, DRAG.expected);
-		dispose();
-		factory.dispose();
-	});
-
-	it('v4 default drag reaches expected translate', async () => {
+	it('default drag reaches expected translate', async () => {
 		const node = createDraggableNode();
 		const engine = new Neodrag();
 		const handle = engine.draggable(node, []);
@@ -47,34 +32,38 @@ describe('benchmark behavioral guards', () => {
 		engine.dispose();
 	});
 
-	it('v3 and v4 minimal stacks agree on translate', async () => {
-		const v3Node = createDraggableNode();
-		const v4Node = createDraggableNode();
-
-		const v3Factory = new DraggableFactory({
-			...DEFAULTS,
-			plugins: [transform(), threshold(null)],
+	it('minimal stack reaches expected translate', async () => {
+		const node = createDraggableNode();
+		const engine = new Neodrag({
+			plugins: [transform, position({ current: { x: 0, y: 0 } })],
 		});
-		const v4Engine = new Neodrag({
-			plugins: [iTransform, position({ current: { x: 0, y: 0 } })],
-		});
+		const handle = engine.draggable(node, [threshold(null)]);
+		simulateDragSteps(node, DRAG);
+		await flushEffects();
+		assertTranslate(node, DRAG.expected);
+		handle.destroy();
+		engine.dispose();
+	});
 
-		const d1 = v3Factory.draggable(v3Node, []);
-		const d2 = v4Engine.draggable(v4Node, []);
+	it('two engines agree on translate', async () => {
+		const a = createDraggableNode();
+		const b = createDraggableNode();
+		const engine = new Neodrag({ plugins: DEFAULTS.plugins });
 
-		simulateDragSteps(v3Node, DRAG);
-		simulateDragSteps(v4Node, DRAG);
+		const h1 = engine.draggable(a, []);
+		const h2 = engine.draggable(b, []);
+
+		simulateDragSteps(a, DRAG);
+		simulateDragSteps(b, DRAG);
 		await flushEffects();
 
-		const a = parseTranslate(v3Node);
-		const b = parseTranslate(v4Node);
-		expect(a.x).toBeCloseTo(b.x, 0);
-		expect(a.y).toBeCloseTo(b.y, 0);
-		assertTranslate(v3Node, DRAG.expected);
+		const ta = parseTranslate(a);
+		const tb = parseTranslate(b);
+		expect(ta.x).toBeCloseTo(tb.x, 0);
+		expect(ta.y).toBeCloseTo(tb.y, 0);
 
-		d1();
-		d2.destroy();
-		v3Factory.dispose();
-		v4Engine.dispose();
+		h1.destroy();
+		h2.destroy();
+		engine.dispose();
 	});
 });

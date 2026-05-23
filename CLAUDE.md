@@ -32,16 +32,15 @@ neodrag/
 
 ### Central Components
 
-1. **DraggableFactory** (`packages/core/src/index.ts`): Main orchestrator class
-   - Manages draggable instances
-   - Handles event delegation and pointer events
-   - Coordinates plugin execution lifecycle
-   - Manages state and effects
+1. **Neodrag** (`packages/core/src/interactions/engine.ts`): Main orchestrator
+   - Manages drag/drop handles and pointer event delegation
+   - Coordinates plugin phases (`pre`, `resolve`, `post`)
+   - Session state machine and plugin error isolation
 
-2. **Plugin System** (`packages/core/src/plugins.ts`): Modular functionality
-   - Plugin interface with lifecycle hooks: `setup`, `shouldStart`, `start`, `drag`, `end`, `cleanup`
-   - Plugin priority system for execution order
-   - Built-in plugins: `transform`, `bounds`, `controls`, `grid`, `threshold`, etc.
+2. **Plugin System** (`packages/core/src/interactions/plugins/`): Modular functionality
+   - Drag plugins: `init`, `start`, `drag`, `update`, `end`, `destroy`
+   - Drop plugins: `init`, `enter`, `over`, `leave`, `drop`, `update`, `destroy`
+   - Built-in plugins: `transform`, `bounds`, `controls`, `grid`, `threshold`, `sortable`, etc.
 
 3. **Compartment System**: Dynamic plugin management
    - Allows runtime plugin swapping
@@ -126,29 +125,22 @@ packages/core/tests/
 
 ### Plugin Development Pattern
 ```typescript
-export const myPlugin = unstable_definePlugin((options = {}) => ({
+export const myPlugin = defineDragPlugin((options = {}) => ({
+  key: Symbol('my-plugin'),
   name: 'my-plugin',
-  priority: 100,
-  setup(ctx) {
-    // Initialize plugin state
+  init(ctx) {
     return { /* state */ };
   },
-  shouldStart(ctx, state, event) {
-    // Determine if drag should start
+  start(ctx, state, event) {
     return true;
   },
-  start(ctx, state, event) {
-    // Handle drag start
-  },
   drag(ctx, state, event) {
-    // Handle drag movement
+    return { x: ctx.proposed.x, y: ctx.proposed.y };
   },
   end(ctx, state, event) {
-    // Handle drag end
   },
-  cleanup(ctx, state) {
-    // Clean up resources
-  }
+  destroy(ctx, state) {
+  },
 }));
 ```
 
@@ -266,8 +258,8 @@ pnpm ci:release            # Publish to npm
 ## Key Files to Understand
 
 ### Core Implementation
-- `packages/core/src/index.ts` - Main DraggableFactory class
-- `packages/core/src/plugins.ts` - Plugin system and built-in plugins
+- `packages/core/src/interactions/engine.ts` - Neodrag engine
+- `packages/core/src/interactions/plugins/` - Built-in drag/drop plugins
 - `packages/core/src/utils.ts` - Utility functions
 
 ### Framework Wrappers

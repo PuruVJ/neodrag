@@ -1,20 +1,13 @@
 /**
  * @vitest-environment jsdom
- *
- * Behavioral benchmarks: each iteration asserts invariants so regressions fail
- * the bench run (correctness under repeated execution, not just wall time).
  */
 import { bench, describe } from 'vitest';
-import { DraggableFactory, DEFAULTS } from '../src/index.ts';
-import { threshold, transform } from '../src/plugins.ts';
-import { Neodrag, position, transform as iTransform } from '../src/interactions/index.ts';
-import { assertOffset, assertTranslate } from './helpers/behavioral.ts';
-import { createDraggableNode, flushEffects, parseTranslate, resetBody } from './helpers/dom.ts';
+import { Neodrag, position, threshold, transform } from '../src/index.ts';
+import { assertTranslate } from './helpers/behavioral.ts';
+import { createDraggableNode, flushEffects, resetBody } from './helpers/dom.ts';
 import { simulateDragSteps } from './helpers/pointer.ts';
 
-const MINIMAL_V3 = [transform(), threshold(null)];
-const MINIMAL_V4 = [iTransform, position({ current: { x: 0, y: 0 } })];
-
+const MINIMAL = [transform, position({ current: { x: 0, y: 0 } })];
 const DRAG = {
 	fromX: 120,
 	fromY: 120,
@@ -26,25 +19,7 @@ const DRAG = {
 
 describe('behavioral — transform after drag', () => {
 	bench(
-		'v3 default stack reaches (100, 100) translate',
-		async () => {
-			resetBody();
-			const node = createDraggableNode();
-			const factory = new DraggableFactory(DEFAULTS);
-			const dispose = factory.draggable(node, []);
-			simulateDragSteps(node, DRAG);
-			await flushEffects();
-			assertTranslate(node, DRAG.expected);
-			const inst = factory.instances.get(node)!;
-			assertOffset(inst, DRAG.expected);
-			dispose();
-			factory.dispose();
-		},
-		{ iterations: 25, warmupIterations: 3 },
-	);
-
-	bench(
-		'v4 default stack reaches (100, 100) translate',
+		'default stack reaches (100, 100) translate',
 		async () => {
 			resetBody();
 			const node = createDraggableNode();
@@ -60,49 +35,30 @@ describe('behavioral — transform after drag', () => {
 	);
 
 	bench(
-		'v3 vs v4 parity (minimal plugins)',
+		'minimal plugins reach (100, 100) translate',
 		async () => {
 			resetBody();
-			const v3Node = createDraggableNode();
-			const v4Node = createDraggableNode();
-			v4Node.style.left = v3Node.style.left;
-			v4Node.style.top = v3Node.style.top;
-
-			const v3Factory = new DraggableFactory({ ...DEFAULTS, plugins: MINIMAL_V3 });
-			const v4Engine = new Neodrag({ plugins: MINIMAL_V4 });
-
-			const d1 = v3Factory.draggable(v3Node, []);
-			const d2 = v4Engine.draggable(v4Node, []);
-
-			simulateDragSteps(v3Node, DRAG);
-			simulateDragSteps(v4Node, DRAG);
+			const node = createDraggableNode();
+			const engine = new Neodrag({ plugins: MINIMAL });
+			const handle = engine.draggable(node, [threshold(null)]);
+			simulateDragSteps(node, DRAG);
 			await flushEffects();
-
-			const a = parseTranslate(v3Node);
-			const b = parseTranslate(v4Node);
-			if (Math.abs(a.x - b.x) > 0.5 || Math.abs(a.y - b.y) > 0.5) {
-				throw new Error(`v3/v4 parity failed: v3=(${a.x},${a.y}) v4=(${b.x},${b.y})`);
-			}
-			assertTranslate(v3Node, DRAG.expected);
-			assertTranslate(v4Node, DRAG.expected);
-
-			d1();
-			d2.destroy();
-			v3Factory.dispose();
-			v4Engine.dispose();
+			assertTranslate(node, DRAG.expected);
+			handle.destroy();
+			engine.dispose();
 		},
-		{ iterations: 15, warmupIterations: 2 },
+		{ iterations: 25, warmupIterations: 3 },
 	);
 });
 
 describe('behavioral — repeated drag stability', () => {
 	bench(
-		'v3 five consecutive identical drags',
+		'five consecutive identical drags',
 		async () => {
 			resetBody();
 			const node = createDraggableNode();
-			const factory = new DraggableFactory({ ...DEFAULTS, plugins: MINIMAL_V3 });
-			const dispose = factory.draggable(node, []);
+			const engine = new Neodrag({ plugins: MINIMAL });
+			const handle = engine.draggable(node, [threshold(null)]);
 
 			for (let i = 0; i < 5; i++) {
 				simulateDragSteps(node, DRAG);
@@ -110,18 +66,18 @@ describe('behavioral — repeated drag stability', () => {
 				assertTranslate(node, DRAG.expected);
 			}
 
-			dispose();
-			factory.dispose();
+			handle.destroy();
+			engine.dispose();
 		},
 		{ iterations: 10, warmupIterations: 1 },
 	);
 
 	bench(
-		'v4 engine.update does not re-init same plugin keys',
+		'engine.update does not re-init same plugin keys',
 		async () => {
 			resetBody();
 			const node = createDraggableNode();
-			const engine = new Neodrag({ plugins: MINIMAL_V4 });
+			const engine = new Neodrag({ plugins: MINIMAL });
 			let inits = 0;
 			const pos = position({ current: { x: 0, y: 0 } });
 			const origInit = pos.init!;
@@ -130,9 +86,9 @@ describe('behavioral — repeated drag stability', () => {
 				return origInit(ctx);
 			};
 
-			engine.draggable(node, [iTransform, pos]);
+			engine.draggable(node, [transform, pos]);
 			inits = 0;
-			engine.update(node, [iTransform, position({ current: { x: 0, y: 0 } })]);
+			engine.update(node, [transform, position({ current: { x: 0, y: 0 } })]);
 			if (inits !== 0) {
 				throw new Error(`expected 0 init calls after options-only update, got ${inits}`);
 			}
