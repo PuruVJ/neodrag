@@ -73,6 +73,18 @@ export function pointer(
 	);
 }
 
+export function dragElementByDelta(
+	el: HTMLElement,
+	deltaX: number,
+	deltaY: number,
+	steps = 12,
+) {
+	const rect = el.getBoundingClientRect();
+	const fromX = rect.left + rect.width / 2;
+	const fromY = rect.top + rect.height / 2;
+	dragSteps(el, fromX, fromY, fromX + deltaX, fromY + deltaY, steps);
+}
+
 export function dragSteps(
 	target: HTMLElement,
 	fromX: number,

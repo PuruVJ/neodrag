@@ -79,6 +79,7 @@
 		"test:interactions": "vitest run --config vitest.interactions.config.ts",
 		"test:interactions:unit": "vitest run tests/interactions/state-machine.test.ts tests/interactions/session.test.ts tests/interactions/update.test.ts tests/interactions/update-pending.test.ts tests/interactions/plugins-phases.test.ts tests/interactions/coalescing.test.ts tests/interactions/drop-raf.test.ts tests/interactions/transform-update.test.ts tests/interactions/update-defaults.test.ts --browser.enabled=false",
 		"test:bench:guard": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/",
+		"test:human": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/human-expectations.suite.test.ts && vitest run --config vitest.interactions.config.ts tests/interactions/human-expectations.test.svelte.ts",
 		"bench": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/perf.suite.test.ts",
 		"bench:browser": "vitest run --config vitest.bench.browser.config.ts",
 		"bench:all": "pnpm test:bench:guard",
