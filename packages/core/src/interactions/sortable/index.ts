@@ -1,4 +1,4 @@
-import { dragData } from '../plugins/drag-data.ts';
+import { dragData } from '../plugins.ts';
 import { createSessionKey } from '../session-key.ts';
 import { defineDropPlugin, defineDragPlugin } from '../types.ts';
 

@@ -54,6 +54,8 @@ export {
 	ghost,
 	type PositionOptions,
 	type DragEventData,
-} from './plugins/index.ts';
-export { accepts, highlight, onDrop } from './drop/index.ts';
+	accepts,
+	highlight,
+	onDrop,
+} from './plugins.ts';
 export { sortable, type SortableOptions, type SortableStrategy } from './sortable/index.ts';

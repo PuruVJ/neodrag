@@ -2,9 +2,9 @@ import {
 	applyUserSelectHack,
 	ignoreMultitouch,
 	stateMarker,
+	threshold,
 	touchAction,
-} from './interactions/plugins/builtins.ts';
-import { threshold } from './interactions/plugins/threshold.ts';
+} from './interactions/plugins.ts';
 import type { EngineOptions } from './interactions/engine.ts';
 import type { DragPlugin } from './interactions/types.ts';
 import type { ErrorInfo } from './interactions/types.ts';

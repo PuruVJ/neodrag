@@ -37,7 +37,7 @@ neodrag/
    - Coordinates plugin phases (`pre`, `resolve`, `post`)
    - Session state machine and plugin error isolation
 
-2. **Plugin System** (`packages/core/src/interactions/plugins/`): Modular functionality
+2. **Plugin System** (`packages/core/src/interactions/plugins.ts`): Built-in drag and drop plugins
    - Drag plugins: `init`, `start`, `drag`, `update`, `end`, `destroy`
    - Drop plugins: `init`, `enter`, `over`, `leave`, `drop`, `update`, `destroy`
    - Built-in plugins: `transform`, `bounds`, `controls`, `grid`, `threshold`, `sortable`, etc.
@@ -259,7 +259,7 @@ pnpm ci:release            # Publish to npm
 
 ### Core Implementation
 - `packages/core/src/interactions/engine.ts` - Neodrag engine
-- `packages/core/src/interactions/plugins/` - Built-in drag/drop plugins
+- `packages/core/src/interactions/plugins.ts` - Built-in drag/drop plugins
 - `packages/core/src/utils.ts` - Utility functions
 
 ### Framework Wrappers

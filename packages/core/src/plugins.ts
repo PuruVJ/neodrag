@@ -1,4 +1,4 @@
-export * from './interactions/plugins/index.ts';
+export * from './interactions/plugins.ts';
 export {
 	hasReactiveSlots,
 	resolveDragPluginList,
@@ -14,4 +14,4 @@ export {
 	type PluginSlot,
 	type DragCtx as PluginContext,
 } from './interactions/types.ts';
-export type { DragEventData } from './interactions/plugins/events.ts';
+export type { DragEventData } from './interactions/plugins.ts';
