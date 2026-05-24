@@ -1,39 +1,41 @@
 <script lang="ts">
-	import { draggable } from '@neodrag/svelte';
-	import { droppable } from '@neodrag/svelte/drop';
+	import { Draggable } from '@neodrag/svelte';
+	import { Droppable } from '@neodrag/svelte/drop';
 
 	let dragCount = $state(0);
 	let dropCount = $state(0);
-</script>
 
-<div class="container">
-	<h1>Simple Drag and Drop Test</h1>
-
-	<div
-		class="box draggable"
-		{@attach draggable([
+	const drag = new Draggable({
+		plugins: [
 			{
 				name: 'countDrag',
 				start() {
 					dragCount++;
 				},
 			},
-		])}
-	>
-		Drag me (dragged {dragCount} times)
-	</div>
+		],
+	});
 
-	<div
-		class="box drop-zone"
-		{@attach droppable([
+	const drop = new Droppable({
+		plugins: [
 			{
 				name: 'countDrop',
 				onDrop() {
 					dropCount++;
 				},
 			},
-		])}
-	>
+		],
+	});
+</script>
+
+<div class="container">
+	<h1>Simple Drag and Drop Test</h1>
+
+	<div class="box draggable" {@attach drag.attachment}>
+		Drag me (dragged {dragCount} times)
+	</div>
+
+	<div class="box drop-zone" {@attach drop.attachment}>
 		Drop here (dropped {dropCount} times)
 	</div>
 </div>

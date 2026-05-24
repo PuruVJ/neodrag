@@ -21,25 +21,30 @@ scrollLock({ allowScrollbar: true }); // Keep scrollbars clickable
 
 ```svelte
 <script>
-  import { draggable, scrollLock } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { scrollLock } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [scrollLock()] });
+	const drag_1 = new Draggable({ plugins: [scrollLock({ lockAxis: 'x' })] });
+	const drag_2 = new Draggable({ plugins: [
+      scrollLock({ container: () => scrollContainer }),
+    ] });
 </script>
 
 <!-- Prevent all scrolling while dragging -->
-<div {@attach draggable([scrollLock()])}>
+<div {@attach drag_0.attachment}>
   Drag me - page won't scroll
 </div>
 
 <!-- Only prevent horizontal scrolling -->
-<div {@attach draggable([scrollLock({ lockAxis: 'x' })])}>
+<div {@attach drag_1.attachment}>
   Vertical scrolling still works
 </div>
 
 <!-- Target specific container -->
 <div bind:this={scrollContainer} class="scroll-area">
   <div
-    {@attach draggable([
-      scrollLock({ container: () => scrollContainer }),
-    ])}
+    {@attach drag_2.attachment}
   >
     Lock specific container
   </div>
@@ -182,7 +187,8 @@ Neodrag.shared.draggable(container, [
 
 ```svelte
 <script>
-  import { draggable, scrollLock } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { scrollLock } from '@neodrag/svelte/plugins';
 
   let lockMode = $state('both');
   let allowScrollbar = $state(false);
@@ -195,10 +201,12 @@ Neodrag.shared.draggable(container, [
       container: targetContainer,
     });
   });
+
+	const drag_0 = new Draggable({ plugins: [() => [scrollLockComp]] });
 </script>
 
 <div bind:this={targetContainer} class="scroll-container">
-  <div {@attach draggable(() => [scrollLockComp])}>
+  <div {@attach drag_0.attachment}>
     Lock Mode: {lockMode}
     <br />
     Scrollbar: {allowScrollbar ? 'visible' : 'hidden'}

@@ -91,25 +91,30 @@ export const vDroppable: Directive;
 
 ```svelte
 <script>
-  import { draggable } from '@neodrag/svelte';
-  import { droppable } from '@neodrag/svelte/drop';
-  import { dragData } from '@neodrag/svelte';
-  import { accepts, events, highlight } from '@neodrag/svelte/drop';
+  import { Draggable } from '@neodrag/svelte';
+  import { Droppable } from '@neodrag/svelte/drop';
+  import { dragData } from '@neodrag/svelte/plugins';
+  import { accepts } from '@neodrag/svelte/drop'
+	import { events, highlight } from '@neodrag/core/drop/plugins';
+
+	const drag_0 = new Draggable({ plugins: [
+  dragData({ id: 1, type: 'todo', text: 'Task 1' })
+] });
+
+	const drop_0 = new Droppable({ plugins: [
+  accepts(['todo']),
+  highlight({ className: 'drop-highlight' }),
+  events({ onDrop: (data) => console.log('Dropped:', data) })
+] });
 </script>
 
 <!-- Draggable item -->
-<div {@attach draggable([
-  dragData({ id: 1, type: 'todo', text: 'Task 1' })
-])}>
+<div {@attach drag_0.attachment}>
   📝 Task 1
 </div>
 
 <!-- Drop zone composed from simple plugins -->
-<div {@attach droppable([
-  accepts(['todo']),
-  highlight({ className: 'drop-highlight' }),
-  events({ onDrop: (data) => console.log('Dropped:', data) })
-])}>
+<div {@attach drop_0.attachment}>
   Drop todos here
 </div>
 ```
@@ -118,7 +123,7 @@ export const vDroppable: Directive;
 
 ```svelte
 <script>
-  import { droppable } from '@neodrag/svelte/drop';
+  import { Droppable } from '@neodrag/svelte/drop';
   import { sortable, insertionLine } from '@neodrag/svelte/drop';
   
   let todos = $state([
@@ -126,17 +131,19 @@ export const vDroppable: Directive;
     { id: 2, text: 'Task 2' },
     { id: 3, text: 'Task 3' }
   ]);
-</script>
 
-<!-- Sortable list: composition of simple plugins -->
-<ul {@attach droppable([
+	const drop_0 = new Droppable({ plugins: [
   sortable({ 
     items: () => todos, 
     onReorder: (newOrder) => todos = newOrder,
     type: 'todo'
   }),
   insertionLine({ axis: 'y' })
-])}>
+] });
+</script>
+
+<!-- Sortable list: composition of simple plugins -->
+<ul {@attach drop_0.attachment}>
   {#each todos as todo}
     <li>{todo.text}</li>
   {/each}
@@ -147,9 +154,9 @@ export const vDroppable: Directive;
 
 ```svelte
 <script>
-  import { draggable } from '@neodrag/svelte';
-  import { droppable } from '@neodrag/svelte/drop';
-  import { transform } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  import { Droppable } from '@neodrag/svelte/drop';
+  import { transform } from '@neodrag/svelte/plugins';
   import { validation, highlightOnDrag, cardDrop } from '@neodrag/svelte/drop';
   
   let columns = $state([
@@ -161,28 +168,32 @@ export const vDroppable: Directive;
   function moveCard(card, targetColumn) {
     // Move card between columns
   }
-</script>
 
-{#each columns as column}
-  <div 
-    {@attach droppable([
+	const drag_0 = new Draggable({ plugins: [
+          transform(),
+          data({ id: card.id, type: 'card' })
+        ] });
+
+	const drop_0 = new Droppable({ plugins: [
       validation({ accept: ['card'] }),
       highlightOnDrag({ className: 'valid-target' }), // Auto-highlights when drag starts
       cardDrop({ 
         column: column.id,
         onDrop: (cardData) => moveCard(cardData, column) 
       })
-    ])}
+    ] });
+</script>
+
+{#each columns as column}
+  <div 
+    {@attach drop_0.attachment}
     class="column"
   >
     <h3>{column.title}</h3>
     
     {#each column.cards as card}
       <div 
-        {@attach draggable([
-          transform(),
-          data({ id: card.id, type: 'card' })
-        ])}
+        {@attach drag_0.attachment}
         class="card"
       >
         {card.title}
@@ -196,8 +207,9 @@ export const vDroppable: Directive;
 
 ```svelte
 <script>
-  import { droppable } from '@neodrag/svelte/drop';
-  import { sortable, accepts, events, highlight, insertionLine } from '@neodrag/svelte/drop';
+  import { Droppable } from '@neodrag/svelte/drop';
+  import { sortable, accepts, insertionLine } from '@neodrag/svelte/drop'
+	import { events, highlight } from '@neodrag/core/drop/plugins';
   
   let columns = $state([
     { id: 'todo', title: 'To Do', cards: [
@@ -214,23 +226,16 @@ export const vDroppable: Directive;
     sourceColumn.cards = sourceColumn.cards.filter(c => c.id !== cardData.id);
     targetColumn.cards.push(cardData);
   }
-</script>
 
-<!-- Board: columns sortable horizontally -->
-<div {@attach droppable([
+	const drop_0 = new Droppable({ plugins: [
   sortable({ 
     items: () => columns, 
     onReorder: (newOrder) => columns = newOrder,
     type: 'column',
     axis: 'x'
   })
-])}>
-  {#each columns as column}
-    <div class="column">
-      <h3>{column.title}</h3>
-      
-      <!-- Column: cards sortable vertically + accepts cards from other columns -->
-      <div {@attach droppable([
+] });
+	const drop_1 = new Droppable({ plugins: [
         sortable({ 
           items: () => column.cards, 
           onReorder: (newOrder) => column.cards = newOrder,
@@ -240,7 +245,17 @@ export const vDroppable: Directive;
         events({ onDrop: (cardData) => moveCard(cardData, column) }),
         highlight({ className: 'column-highlight' }),
         insertionLine({ axis: 'y' })
-      ])}>
+      ] });
+</script>
+
+<!-- Board: columns sortable horizontally -->
+<div {@attach drop_0.attachment}>
+  {#each columns as column}
+    <div class="column">
+      <h3>{column.title}</h3>
+      
+      <!-- Column: cards sortable vertically + accepts cards from other columns -->
+      <div {@attach drop_1.attachment}>
         {#each column.cards as card}
           <div class="card">{card.title}</div>
         {/each}
@@ -683,22 +698,27 @@ npm install @neodrag/svelte/drop
 
 ```svelte
 <script>
-  import { draggable } from '@neodrag/svelte';
-  import { droppable } from '@neodrag/svelte/drop';
-  import { transform } from '@neodrag/svelte';
-  import { validation, events } from '@neodrag/svelte/drop';
+  import { Draggable } from '@neodrag/svelte';
+  import { Droppable } from '@neodrag/svelte/drop';
+  import { transform } from '@neodrag/svelte/plugins';
+  import { validation } from '@neodrag/svelte/drop'
+	import { events } from '@neodrag/core/drop/plugins';
+
+	const drag_0 = new Draggable({ plugins: [transform()] });
+
+	const drop_0 = new Droppable({ plugins: [
+  validation({ accept: ['text/plain'] }),
+  events({ onDrop: (data) => console.log('Dropped:', data) })
+] });
 </script>
 
 <!-- Draggable element -->
-<div {@attach draggable([transform()])}>
+<div {@attach drag_0.attachment}>
   Drag me
 </div>
 
 <!-- Drop zone -->
-<div {@attach droppable([
-  validation({ accept: ['text/plain'] }),
-  events({ onDrop: (data) => console.log('Dropped:', data) })
-])}>
+<div {@attach drop_0.attachment}>
   Drop here
 </div>
 ```
@@ -723,21 +743,24 @@ const sortable = new Sortable(listElement, {
 });
 
 // Neodrag (after)
-import { draggable } from '@neodrag/svelte';
-import { droppable } from '@neodrag/svelte/drop';
+import { Draggable } from '@neodrag/svelte';
+import { Droppable } from '@neodrag/svelte/drop';
+import { transform } from '@neodrag/svelte/plugins';
 import { sortable } from '@neodrag/svelte/drop';
+
+const itemDrag = new Draggable({ plugins: [transform()] });
+const listDrop = new Droppable({
+  plugins: [
+    sortable({
+      group: 'shared',
+      onDrop: (data, target) => handleReorder(data, target),
+    }),
+  ],
+});
 
 // In Svelte component
 {#each items as item}
-  <div 
-    {@attach draggable([transform()])}
-    {@attach droppable([
-      sortable({ 
-        group: 'shared',
-        onDrop: (data, target) => handleReorder(data, target)
-      })
-    ])}
-  >
+  <div {@attach itemDrag.attachment} {@attach listDrop.attachment}>
     {item.text}
   </div>
 {/each}
@@ -759,16 +782,18 @@ element.addEventListener('drop', (e) => {
 });
 
 // Neodrag (after)
-import { droppable } from '@neodrag/svelte/drop';
-import { validation, events } from '@neodrag/svelte/drop';
+import { Droppable } from '@neodrag/svelte/drop';
+import { validation, events } from '@neodrag/core/drop/plugins';
+
+const drop = new Droppable({
+  plugins: [
+    validation({ accept: ['text/plain'] }),
+    events({ onDrop: handleDrop }),
+  ],
+});
 
 // In Svelte component
-<div {@attach droppable([
-  validation({ accept: ['text/plain'] }),
-  events({ onDrop: handleDrop })
-])}>
-  Drop zone
-</div>
+<div {@attach drop.attachment}>Drop zone</div>
 ```
 
 ### From react-dnd

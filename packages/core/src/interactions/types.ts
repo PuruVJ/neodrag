@@ -101,12 +101,6 @@ export type PluginSlot<T> = T | (() => T | T[]);
 export type DragPluginList = PluginSlot<DragPlugin>[];
 export type DropPluginList = PluginSlot<DropPlugin>[];
 
-/** @deprecated Use DragPluginList */
-export type DragPluginInput = DragPluginList;
-/** @deprecated Use DropPluginList */
-export type DropPluginInput = DropPluginList;
-/** @deprecated Use DragPluginList */
-export type PluginInput<T extends DragPlugin | DropPlugin = DragPlugin> = PluginSlot<T>[];
 
 export interface ErrorInfo {
 	phase: 'init' | 'start' | 'drag' | 'end' | 'enter' | 'over' | 'leave' | 'drop' | 'update' | 'destroy';

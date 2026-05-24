@@ -20,17 +20,22 @@ axis(null); // Free movement (removes constraint)
 
 ```svelte
 <script>
-  import { draggable, axis } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { axis } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [axis('x')] });
+	const drag_1 = new Draggable({ plugins: [axis('y')] });
+	const drag_2 = new Draggable({ plugins: [axis(null)] });
 </script>
 
 <!-- Horizontal slider -->
-<div {@attach draggable([axis('x')])}>Horizontal only</div>
+<div {@attach drag_0.attachment}>Horizontal only</div>
 
 <!-- Vertical scrollbar -->
-<div {@attach draggable([axis('y')])}>Vertical only</div>
+<div {@attach drag_1.attachment}>Vertical only</div>
 
 <!-- Free movement -->
-<div {@attach draggable([axis(null)])}>Any direction</div>
+<div {@attach drag_2.attachment}>Any direction</div>
 ```
 
 </div>
@@ -135,12 +140,15 @@ Neodrag.shared.draggable(free, [axis(null)]);
 
 ```svelte
 <script>
-  import { draggable, axis } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { axis } from '@neodrag/svelte/plugins';
 
   let currentAxis = $state('x');
-  </script>
+  
+	const drag_0 = new Draggable({ plugins: [() => [axisComp]] });
+</script>
 
-<div {@attach draggable(() => [axisComp])}>
+<div {@attach drag_0.attachment}>
   Currently locked to: {currentAxis} axis
 </div>
 
@@ -278,13 +286,8 @@ button.addEventListener('click', () => {
 
 ```svelte
 <script>
-  import {
-    draggable,
-    axis,
-    bounds,
-    BoundsFrom,
-    events,
-  } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { axis, bounds, BoundsFrom, events } from '@neodrag/svelte/plugins';
 
   let track;
   let handle;
@@ -296,17 +299,19 @@ button.addEventListener('click', () => {
       value = Math.round((data.offset.x / trackWidth) * 100);
     }
   }
+
+	const drag_0 = new Draggable({ plugins: [
+      axis('x'),
+      bounds(() => BoundsFrom.element(track)),
+      events({ onDrag: handleDrag }),
+    ] });
 </script>
 
 <div bind:this={track} class="track">
   <div
     bind:this={handle}
     class="handle"
-    {@attach draggable([
-      axis('x'),
-      bounds(() => BoundsFrom.element(track)),
-      events({ onDrag: handleDrag }),
-    ])}
+    {@attach drag_0.attachment}
   />
 </div>
 <p>Value: {value}%</p>

@@ -41,20 +41,26 @@ Basic usage
 
 ```svelte
 <script>
-  import { draggable } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+
+	const drag_0 = new Draggable({ plugins:  });
+	const drag_1 = new Draggable({ plugins: [axis('x'), grid([10, 10])] });
+	const drag_2 = new Draggable({ plugins: plugins });
+	const drag_3 = new Draggable({ plugins: [() => [axisComp]] });
 </script>
 
-<div {@attach draggable()}>Hello</div>
+<div {@attach drag_0.attachment}>Hello</div>
 ```
 
 With plugins
 
 ```svelte
 <script>
-  import { draggable, axis, grid } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { axis, grid } from '@neodrag/svelte/plugins';
 </script>
 
-<div {@attach draggable([axis('x'), grid([10, 10])])}>
+<div {@attach drag_1.attachment}>
   Hello
 </div>
 ```
@@ -63,7 +69,8 @@ Defining plugins elsewhere with TypeScript
 
 ```svelte
 <script lang="ts">
-  import { draggable, axis, bounds, BoundsFrom, type Plugin } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { axis, bounds, BoundsFrom, type Plugin } from '@neodrag/svelte/plugins';
 
   let plugins: Plugin[] = [
     axis('y'),
@@ -71,19 +78,20 @@ Defining plugins elsewhere with TypeScript
   ];
 </script>
 
-<div {@attach draggable(plugins)}>Hello</div>
+<div {@attach drag_2.attachment}>Hello</div>
 ```
 
 Reactive plugins with compartments
 
 ```svelte
 <script>
-  import { draggable, axis } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { axis } from '@neodrag/svelte/plugins';
 
   let currentAxis = $state('x');
   </script>
 
-<div {@attach draggable(() => [axisComp])}>
+<div {@attach drag_3.attachment}>
   Current axis: {currentAxis}
 </div>
 

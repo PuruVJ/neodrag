@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { draggable, events, ghost } from '@neodrag/svelte';
-	import { droppable } from '@neodrag/svelte/drop';
+	import { Draggable, ghost } from '@neodrag/svelte'
+	import { events } from '@neodrag/svelte/plugins';
+	import { Droppable } from '@neodrag/svelte/drop';
 
 	let tasks = $state([
 		{ id: '1', title: 'Task 1', column: 'todo' },
@@ -41,27 +42,8 @@
 			console.log('SAME COLUMN DROP - NO CHANGE NEEDED');
 		}
 	}
-</script>
 
-<h1>Bare Kanban</h1>
-
-<div style="display: flex; gap: 20px;">
-	<div
-		style="border: 1px solid black; width: 200px; min-height: 300px; padding: 10px;"
-		{@attach droppable([
-			{
-				name: 'todo-drop',
-				onDrop() {
-					dropInColumn('todo');
-				},
-			},
-		])}
-	>
-		<h2>TODO</h2>
-		{#each getTasksForColumn('todo') as task (task.id)}
-			<div
-				style="border: 1px solid red; padding: 5px; margin: 5px 0; background: white;"
-				{@attach draggable([
+	const drag_0 = new Draggable({ plugins: [
 					ghost({ opacity: 0.2 }),
 					events({
 						onDragStart() {
@@ -71,7 +53,48 @@
 							endDrag();
 						},
 					}),
-				])}
+				] });
+	const drop_1 = new Droppable({ plugins: [
+			{
+				name: 'todo-drop',
+				onDrop() {
+					dropInColumn('todo');
+				},
+			},
+		] });
+	const drop_2 = new Droppable({ plugins: [
+			{
+				name: 'done-drop',
+				onDrop() {
+					console.log(2);
+					dropInColumn('done');
+				},
+			},
+		] });
+
+	const drop_0 = new Droppable({ plugins: [
+			{
+				name: 'done-drop',
+				onDrop() {
+					console.log(2);
+					dropInColumn('done');
+				},
+			},
+		] });
+</script>
+
+<h1>Bare Kanban</h1>
+
+<div style="display: flex; gap: 20px;">
+	<div
+		style="border: 1px solid black; width: 200px; min-height: 300px; padding: 10px;"
+		{@attach drop_1.attachment}
+	>
+		<h2>TODO</h2>
+		{#each getTasksForColumn('todo') as task (task.id)}
+			<div
+				style="border: 1px solid red; padding: 5px; margin: 5px 0; background: white;"
+				{@attach drag_0.attachment}
 			>
 				{task.title}
 			</div>
@@ -80,31 +103,11 @@
 
 	<div
 		style="border: 1px solid black; width: 200px; min-height: 300px; padding: 10px;"
-		{@attach droppable([
-			{
-				name: 'done-drop',
-				onDrop() {
-					console.log(2);
-					dropInColumn('done');
-				},
-			},
-		])}
+		{@attach drop_0.attachment}
 	>
 		<h2>DONE</h2>
-		{#each getTasksForColumn('done') as task (task.id)}
-			<div
-				style="border: 1px solid green; padding: 5px; margin: 5px 0; background: white;"
-				{@attach draggable([
-					ghost({ opacity: 0.2 }),
-					events({
-						onDragStart() {
-							startDrag(task);
-						},
-						onDragEnd() {
-							endDrag();
-						},
-					}),
-				])}
+		{#e{@attach drop_2.attachment}und: white;"
+				{@attach drag_0.attachment}
 			>
 				{task.title}
 			</div>

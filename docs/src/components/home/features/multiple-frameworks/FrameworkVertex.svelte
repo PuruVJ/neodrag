@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { portal } from '$attachments/portal.svelte';
 	import type { Framework } from '$helpers/constants';
-	import { draggable, events, position, type DragEventData } from '@neodrag/svelte';
+	import { Draggable, type DragEventData } from '@neodrag/svelte'
+	import { events, position } from '@neodrag/svelte/plugins';
 	import type { Attachment } from 'svelte/attachments';
 	import { expoOut } from 'svelte/easing';
 	import { on } from 'svelte/events';
@@ -190,12 +191,8 @@
 		// Mark for update when position changes
 		mark_for_update();
 	});
-</script>
 
-<div
-	data-paw-cursor="true"
-	bind:this={button_el}
-	{@attach draggable(() => [
+	const drag_0 = new Draggable({ plugins: [() => [
 		position({ current: draggable_position.current }),
 		events({
 			onDragStart: (data) => {
@@ -216,7 +213,13 @@
 				on_drag_end?.(data);
 			},
 		}),
-	])}
+	]] });
+</script>
+
+<div
+	data-paw-cursor="true"
+	bind:this={button_el}
+	{@attach drag_0.attachment}
 	{@attach connect(logoEl)}
 >
 	<button onclick={selectFramework}>

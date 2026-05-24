@@ -21,26 +21,32 @@ threshold(null); // Disable threshold completely
 
 ```svelte
 <script>
-  import { draggable, threshold } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { threshold } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [threshold({ distance: 10 })] });
+	const drag_1 = new Draggable({ plugins: [threshold({ delay: 300 })] });
+	const drag_2 = new Draggable({ plugins: [threshold({ distance: 8, delay: 150 })] });
+	const drag_3 = new Draggable({ plugins: [threshold(null)] });
 </script>
 
 <!-- Distance threshold -->
-<div {@attach draggable([threshold({ distance: 10 })])}>
+<div {@attach drag_0.attachment}>
   Drag after moving 10px
 </div>
 
 <!-- Time threshold -->
-<div {@attach draggable([threshold({ delay: 300 })])}>
+<div {@attach drag_1.attachment}>
   Hold for 300ms to drag
 </div>
 
 <!-- Combined threshold -->
-<div {@attach draggable([threshold({ distance: 8, delay: 150 })])}>
+<div {@attach drag_2.attachment}>
   Move 8px AND wait 150ms
 </div>
 
 <!-- Disable threshold -->
-<div {@attach draggable([threshold(null)])}>Immediate dragging</div>
+<div {@attach drag_3.attachment}>Immediate dragging</div>
 ```
 
 </div>
@@ -161,7 +167,8 @@ Adjust thresholds based on device or user preferences:
 
 ```svelte
 <script>
-  import { draggable, threshold } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { threshold } from '@neodrag/svelte/plugins';
 
   let deviceType = $state('desktop');
   let sensitivity = $state('normal');
@@ -173,9 +180,11 @@ Adjust thresholds based on device or user preferences:
       });
     }
   });
+
+	const drag_0 = new Draggable({ plugins: [() => [thresholdComp]] });
 </script>
 
-<div {@attach draggable(() => [thresholdComp])}>
+<div {@attach drag_0.attachment}>
   Adaptive threshold ({deviceType}, {sensitivity})
 </div>
 

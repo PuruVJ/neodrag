@@ -1,13 +1,12 @@
 <script lang="ts">
 	import squircle from '$/worklet/squircle?url';
 	import { browser } from '$helpers/utils';
-	import { draggable, type DragOptions } from '@neodrag/svelte';
+	import { Draggable } from '@neodrag/svelte';
+	import { events, position as positionPlugin, transform } from '@neodrag/svelte/plugins';
 	import { untrack, type Snippet } from 'svelte';
 	import IonReloadIcon from '~icons/ion/reload';
 
 	interface Props {
-		options?: DragOptions;
-		position?: any;
 		customClass?: string;
 		size?: string;
 		draggableEl?: HTMLDivElement | undefined;
@@ -20,8 +19,6 @@
 	}
 
 	let {
-		options = {},
-		position = $bindable(getDefaultPosition()),
 		customClass = '',
 		size = '8rem',
 		draggableEl = $bindable(undefined),
@@ -34,6 +31,19 @@
 	}: Props = $props();
 
 	let key = $state(0);
+	let pos = $state({ x: 0, y: 0 });
+
+	const drag = new Draggable({
+		plugins: [
+			transform,
+			() => positionPlugin({ current: pos }),
+			events({
+				onDrag: (data) => {
+					pos = { x: data.offset.x, y: data.offset.y };
+				},
+			}),
+		],
+	});
 
 	if (browser)
 		if ('paintWorklet' in CSS) {
@@ -41,65 +51,9 @@
 			CSS.paintWorklet.addModule(squircle);
 		}
 
-	type IncludeExclude = (HTMLElement | undefined)[] | undefined;
-	function getPawableElements(): [include: IncludeExclude, exclude: IncludeExclude] {
-		const arr: [IncludeExclude, IncludeExclude] = [, undefined];
-
-		for (const option of ['handle', 'cancel'] as const) {
-			const idx = option === 'handle' ? 0 : 1;
-
-			const optionVal = options[option];
-
-			if (optionVal) {
-				// Get all the handle elements inside the draggableEl based on `options.handle`
-				if (typeof optionVal === 'string')
-					arr[idx] = Array.from<HTMLElement>(draggableEl!.querySelectorAll(optionVal));
-				else if (optionVal instanceof HTMLElement) arr[idx] = [optionVal];
-				else {
-					arr[idx] = optionVal;
-				}
-			}
-		}
-
-		return arr;
-	}
-
-	function setPawCursor() {
-		const [include = [draggableEl], exclude = []] = getPawableElements();
-
-		for (const el of include) {
-			el && (el.dataset.pawCursor = 'true');
-		}
-
-		for (const el of exclude) {
-			el && (el.dataset.pawCursor = 'false');
-		}
-	}
-
-	function getDefaultPosition() {
-		return options.position ?? options.defaultPosition ?? { x: 0, y: 0 };
-	}
-	let finalOptions = $derived({
-		...options,
-		position,
-		onDrag: (data) => {
-			options.onDrag?.(data);
-			position = { x: data.offsetX, y: data.offsetY };
-		},
-	} as DragOptions);
-
 	$effect(() => {
 		key;
-
-		untrack(() => (finalOptions.position = position = getDefaultPosition()));
-	});
-
-	$effect(() => {
-		options; // watch
-
-		if (draggableEl) {
-			setPawCursor();
-		}
+		untrack(() => (pos = { x: 0, y: 0 }));
 	});
 </script>
 
@@ -110,7 +64,7 @@
 >
 	{#key key}
 		<div class="parent">
-			<div class="box" bind:this={draggableEl} use:draggable={finalOptions}>
+			<div class="box" bind:this={draggableEl} {@attach drag.attachment}>
 				{@render children?.()}
 			</div>
 		</div>
@@ -122,9 +76,9 @@
 		{/if}
 		<div class="offset">
 			{#if positionSnippet}
-				{@render positionSnippet(position.x, position.y)}
+				{@render positionSnippet(pos.x, pos.y)}
 			{:else}
-				{position.x}, {position.y}
+				{pos.x}, {pos.y}
 			{/if}
 		</div>
 	{/key}

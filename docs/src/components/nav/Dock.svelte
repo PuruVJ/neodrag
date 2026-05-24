@@ -12,7 +12,8 @@
 	import Nav from '$components/docs/Nav.svelte';
 	import ThemeSwitcher from '$components/ThemeSwitcher.svelte';
 	import { FRAMEWORKS, type Framework } from '$helpers/constants';
-	import { ControlFrom, controls, draggable } from '@neodrag/svelte';
+	import { Draggable } from '@neodrag/svelte';
+	import { ControlFrom, controls } from '@neodrag/svelte/plugins';
 	import { prefetch } from 'astro:prefetch';
 	import { onMount, type Component } from 'svelte';
 	import { expoOut } from 'svelte/easing';
@@ -71,6 +72,8 @@
 	onMount(() => {
 		return on(window, 'astro:after-swap', (e) => console.log(e));
 	});
+
+	const drag_0 = new Draggable({ plugins: [controls({ allow: ControlFrom.selector('.handle') })] });
 </script>
 
 <div class={['overlay', menu_view.open && 'visible']}></div>
@@ -78,7 +81,7 @@
 <section class="dock-container">
 	<div
 		class={['dock-el', menu_view.open && 'menu-open']}
-		{@attach draggable([controls({ allow: ControlFrom.selector('.handle') })])}
+		{@attach drag_0.attachment}
 		{@attach interact_outside(() => menu_view.close())}
 	>
 		<div class="mobile expanded-menu">

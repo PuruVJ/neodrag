@@ -51,7 +51,7 @@ Create a **`Draggable`** once in `<script>` (stable attachment), then attach it.
 <div {@attach dragBounds.attachment}>Constrained to parent element</div>
 ```
 
-### Reactive plugins (v3-next.2)
+### Reactive plugins
 
 ```svelte
 <script>
@@ -68,32 +68,28 @@ Create a **`Draggable`** once in `<script>` (stable attachment), then attach it.
 <div {@attach drag.attachment}>…</div>
 ```
 
-`draggable()` remains as a deprecated shim for migration; prefer `new Draggable` in script.
-
-### Reactive plugins with compartments
-
-Svelte 5 reactivity integrates with Neodrag compartments:
+### Reactive axis switching
 
 ```svelte
 <script>
-  import { draggable, axis } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  import { axis } from '@neodrag/svelte/plugins';
 
-  let currentAxis = $state('x');
+  let currentAxis = $state<'x' | 'y'>('x');
 
-  </script>
+  const drag = new Draggable({
+    plugins: [() => axis(currentAxis)],
+  });
+</script>
 
-<div {@attach draggable(() => [axisCompartment])}>
+<div {@attach drag.attachment}>
   Currently draggable on: {currentAxis} axis
 </div>
 
-<button
-  onclick={() => (currentAxis = currentAxis === 'x' ? 'y' : 'x')}
->
+<button onclick={() => (currentAxis = currentAxis === 'x' ? 'y' : 'x')}>
   Switch to {currentAxis === 'x' ? 'Y' : 'X'} axis
 </button>
 ```
-
-> **Note:** `Compartment.of` runs its function inside `$effect.pre`, so plugin changes stay in sync with Svelte state.
 
 ## Advanced examples
 
@@ -101,35 +97,29 @@ Svelte 5 reactivity integrates with Neodrag compartments:
 
 ```svelte
 <script>
-  import {
-    draggable,
-    controls,
-    ControlFrom,
-    bounds,
-    BoundsFrom,
-    events,
-  } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  import { controls, ControlFrom, bounds, BoundsFrom, events } from '@neodrag/svelte/plugins';
 
   let dragPosition = $state({ x: 0, y: 0 });
+
+  const drag = new Draggable({
+    plugins: [
+      controls({ allow: ControlFrom.selector('.drag-handle') }),
+      bounds(BoundsFrom.viewport()),
+      events({
+        onDrag: (data) => {
+          dragPosition = data.offset;
+        },
+      }),
+    ],
+  });
 </script>
 
-<div
-  {@attach draggable([
-    controls({ allow: ControlFrom.selector('.drag-handle') }),
-    bounds(BoundsFrom.viewport()),
-    events({
-      onDrag: (data) => {
-        dragPosition = data.offset;
-      },
-    }),
-  ])}
->
+<div {@attach drag.attachment}>
   <div class="drag-handle">⋮⋮ Drag Handle</div>
   <div>Modal Content</div>
   <div>
-    Position: x:{dragPosition.x.toFixed(0)}, y:{dragPosition.y.toFixed(
-      0,
-    )}
+    Position: x:{dragPosition.x.toFixed(0)}, y:{dragPosition.y.toFixed(0)}
   </div>
 </div>
 ```
@@ -138,26 +128,23 @@ Svelte 5 reactivity integrates with Neodrag compartments:
 
 ```svelte
 <script>
-  import {
-    draggable,
-    grid,
-    axis,
-  } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  import { grid, axis } from '@neodrag/svelte/plugins';
 
   let gridSize = $state(20);
-  let lockAxis = $state('both');
+  let lockAxis = $state<'both' | 'x' | 'y'>('both');
 
-    </script>
+  const drag = new Draggable({
+    plugins: [
+      () => grid([gridSize, gridSize]),
+      () => (lockAxis === 'both' ? axis(null) : axis(lockAxis)),
+    ],
+  });
+</script>
 
 <label>
   Grid size: {gridSize}px
-  <input
-    type="range"
-    bind:value={gridSize}
-    min="10"
-    max="50"
-    step="5"
-  />
+  <input type="range" bind:value={gridSize} min="10" max="50" step="5" />
 </label>
 
 <label>
@@ -169,7 +156,7 @@ Svelte 5 reactivity integrates with Neodrag compartments:
   </select>
 </label>
 
-<div {@attach draggable(() => [gridCompartment, axisCompartment])}>
+<div {@attach drag.attachment}>
   Grid: {gridSize}px, Axis: {lockAxis}
 </div>
 ```
@@ -178,12 +165,8 @@ Svelte 5 reactivity integrates with Neodrag compartments:
 
 ```svelte
 <script>
-  import {
-    draggable,
-    events,
-    bounds,
-    BoundsFrom,
-  } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  import { events, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
   let cards = $state([
     { id: 1, title: 'Task 1' },
@@ -191,20 +174,22 @@ Svelte 5 reactivity integrates with Neodrag compartments:
     { id: 3, title: 'Task 3' },
   ]);
 
-  let dragState = $state(null);
-</script>
+  let dragState = $state<{
+    cardId: number;
+    isDragging?: boolean;
+    position?: { x: number; y: number };
+  } | null>(null);
 
-{#each cards as card (card.id)}
-  <div
-    {@attach draggable([
+  const cardDrag = new Draggable({
+    plugins: [
       bounds(BoundsFrom.parent()),
       events({
         onDragStart: () => {
-          dragState = { cardId: card.id, isDragging: true };
+          dragState = { cardId: 0, isDragging: true };
         },
         onDrag: (data) => {
           dragState = {
-            cardId: card.id,
+            cardId: dragState?.cardId ?? 0,
             position: data.offset,
           };
         },
@@ -212,73 +197,84 @@ Svelte 5 reactivity integrates with Neodrag compartments:
           dragState = null;
         },
       }),
-    ])}
+    ],
+  });
+</script>
+
+{#each cards as card (card.id)}
+  <div
+    {@attach cardDrag.attachment}
+    onpointerdown={() => {
+      dragState = { cardId: card.id, isDragging: true };
+    }}
   >
     {card.title}
     {#if dragState?.cardId === card.id}
-      - Dragging at ({dragState.position?.x.toFixed(0)}, {dragState.position?.y.toFixed(
-        0,
-      )})
+      - Dragging at ({dragState.position?.x.toFixed(0)}, {dragState.position?.y.toFixed(0)})
     {/if}
   </div>
 {/each}
-
-{#if dragState}
-  <p>Currently dragging card {dragState.cardId}</p>
-{/if}
 ```
 
 ## TypeScript
 
 ```svelte
 <script lang="ts">
-  import {
-    draggable,
-    axis,
-    bounds,
-    BoundsFrom,
-    events,
-    type Plugin,
-    type DragEventData,
-  } from '@neodrag/svelte';
+  import { Draggable, type DragEventData } from '@neodrag/svelte';
+  import { axis, bounds, BoundsFrom, events, type Plugin } from '@neodrag/svelte/plugins';
 
   let dragData = $state<DragEventData | null>(null);
 
-  const plugins: Plugin[] = [
-    axis('x'),
-    bounds(BoundsFrom.viewport()),
-    events({
-      onDrag: (data: DragEventData) => {
-        dragData = data;
-      },
-    }),
-  ];
+  const drag = new Draggable({
+    plugins: [
+      axis('x'),
+      bounds(BoundsFrom.viewport()),
+      events({
+        onDrag: (data: DragEventData) => {
+          dragData = data;
+        },
+      }),
+    ] satisfies Plugin[],
+  });
 </script>
 
-<div {@attach draggable(plugins)}>TypeScript-enabled dragging</div>
+<div {@attach drag.attachment}>TypeScript-enabled dragging</div>
 ```
 
 ## Shared engine (optional)
 
-Most apps only need `draggable(plugins)`. For a custom default plugin stack or debugging, use the `Neodrag` class:
+Most apps only need `new Draggable({ plugins })`. For a custom default plugin stack or debugging, use the `Neodrag` class:
 
 ```svelte
 <script>
-  import { Neodrag, draggable, axis } from '@neodrag/svelte';
+  import { Draggable, Neodrag } from '@neodrag/svelte';
+  import { axis } from '@neodrag/svelte/plugins';
 
   const engine = new Neodrag({
     onError: (e) => console.error(e),
   });
 
-  // Inspect active bindings on this engine
+  const drag = new Draggable({ plugins: [axis('x')], engine });
+
   console.log(engine.instances.size);
 </script>
 
-<div {@attach draggable([axis('x')])}>Uses Neodrag.shared by default</div>
+<div {@attach drag.attachment}>Custom engine instance</div>
 ```
 
-`draggable()` uses `Neodrag.shared` internally. Create your own `Neodrag` instance when you need separate engines on one page (uncommon).
+`Draggable` uses `Neodrag.shared` by default. Pass a custom `engine` when you need separate engines on one page (uncommon).
 
 ## Drop zones
 
-For drag-and-drop targets, import from `@neodrag/svelte/drop` and use `{@attach droppable([...])}` the same way as `draggable`.
+For drag-and-drop targets, import from `@neodrag/svelte/drop` and use `Droppable` the same way as `Draggable`:
+
+```svelte
+<script>
+  import { Droppable } from '@neodrag/svelte/drop';
+  import { highlight } from '@neodrag/core/drop/plugins';
+
+  const drop = new Droppable({ plugins: [highlight({ overClass: 'over' })] });
+</script>
+
+<div {@attach drop.attachment}>Drop here</div>
+```

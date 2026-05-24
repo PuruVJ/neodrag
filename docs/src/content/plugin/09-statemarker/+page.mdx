@@ -26,10 +26,12 @@ stateMarker(); // Adds data-neodrag-state and data-neodrag-count attributes
 
 ```svelte
 <script>
-  import { draggable, stateMarker } from '@neodrag/svelte';
+  import { Draggable, stateMarker } from '@neodrag/svelte';
+
+	const drag_0 = new Draggable({ plugins: [stateMarker()] });
 </script>
 
-<div {@attach draggable([stateMarker()])}>
+<div {@attach drag_0.attachment}>
   Drag me - watch the data attributes change
 </div>
 ```
@@ -116,7 +118,8 @@ Neodrag.shared.draggable(element, [stateMarker()]);
 
 ```svelte
 <script>
-  import { draggable, stateMarker, events } from '@neodrag/svelte';
+  import { Draggable, stateMarker } from '@neodrag/svelte'
+	import { events } from '@neodrag/svelte/plugins';
 
   let dragElement;
   let currentState = $state('idle');
@@ -140,9 +143,11 @@ Neodrag.shared.draggable(element, [stateMarker()]);
       onDragEnd: updateStateInfo,
     }),
   ];
+
+	const drag_0 = new Draggable({ plugins: plugins });
 </script>
 
-<div bind:this={dragElement} {@attach draggable(plugins)}>
+<div bind:this={dragElement} {@attach drag_0.attachment}>
   State: {currentState}
   <br />
   Drag Count: {dragCount}
@@ -321,7 +326,8 @@ Neodrag.shared.draggable(element, [
 
 ```svelte
 <script>
-  import { draggable, stateMarker, events } from '@neodrag/svelte';
+  import { Draggable, stateMarker } from '@neodrag/svelte'
+	import { events } from '@neodrag/svelte/plugins';
 
   let notifications = $state([]);
 
@@ -355,9 +361,11 @@ Neodrag.shared.draggable(element, [
       },
     }),
   ];
+
+	const drag_0 = new Draggable({ plugins: plugins });
 </script>
 
-<div {@attach draggable(plugins)}>Drag me for notifications</div>
+<div {@attach drag_0.attachment}>Drag me for notifications</div>
 
 <div class="notifications">
   {#each notifications as notification (notification.id)}
@@ -614,7 +622,8 @@ Neodrag.shared.draggable(element, [
 
 ```svelte
 <script>
-  import { draggable, stateMarker, events } from '@neodrag/svelte';
+  import { Draggable, stateMarker } from '@neodrag/svelte'
+	import { events } from '@neodrag/svelte/plugins';
 
   function trackDragAnalytics(eventName, data) {
     // Send to analytics service
@@ -633,9 +642,11 @@ Neodrag.shared.draggable(element, [
       onDragEnd: (data) => trackDragAnalytics('drag_completed', data),
     }),
   ];
+
+	const drag_0 = new Draggable({ plugins: analyticsPlugins });
 </script>
 
-<div {@attach draggable(analyticsPlugins)}>
+<div {@attach drag_0.attachment}>
   Analytics-tracked element
 </div>
 ```
@@ -778,7 +789,8 @@ Neodrag.shared.draggable(element, [
 
 ```svelte
 <script>
-  import { draggable, stateMarker, events } from '@neodrag/svelte';
+  import { Draggable, stateMarker } from '@neodrag/svelte'
+	import { events } from '@neodrag/svelte/plugins';
 
   let debugInfo = $state({
     state: 'idle',
@@ -806,9 +818,11 @@ Neodrag.shared.draggable(element, [
       onDragEnd: (data) => updateDebugInfo('dragEnd', data),
     }),
   ];
+
+	const drag_0 = new Draggable({ plugins: debugPlugins });
 </script>
 
-<div {@attach draggable(debugPlugins)}>Drag me to see debug info</div>
+<div {@attach drag_0.attachment}>Drag me to see debug info</div>
 
 <div class="debug-panel">
   <h3>Debug Information</h3>

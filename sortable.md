@@ -6,7 +6,7 @@ Sortable functionality in Neodrag provides drag-to-reorder behavior for lists an
 
 ## Design Principles
 
-1. **Composable with draggable()**: Sortable must work alongside the existing `draggable()` API, not replace it
+1. **Composable with Draggable**: Sortable must work alongside `new Draggable()`, not replace it
 2. **Container-centric**: Sortable manages the container and coordinates its children
 3. **Real-time feedback**: Elements reorder immediately as items are dragged over them
 4. **Framework idiomatic**: Consistent API patterns across Svelte, React, Vue, etc.
@@ -63,7 +63,7 @@ interface SortableOptions {
 
 ```svelte
 <script>
-  import { draggable } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
   import { Sortable } from '@neodrag/svelte/sortable';
   
   // Create sortable instance
@@ -72,13 +72,18 @@ interface SortableOptions {
       // Handle reorder
     }
   });
+
+	const drag_0 = new Draggable({ plugins: [list.item()] });
+	const drag_1 = new Draggable({ plugins: [sort.item()] });
+	const drag_2 = new Draggable({ plugins:  });
+	const drop_3 = new Droppable({ plugins: [sortable({ onSort })] });
 </script>
 
 <!-- Container -->
 <div {@attach list.container()}>
   <!-- Items -->
   {#each items as item}
-    <div {@attach draggable([list.item()])}>
+    <div {@attach drag_0.attachment}>
       {item}
     </div>
   {/each}
@@ -243,13 +248,13 @@ const sort = sortable({ onSort });
 // Container gets sortable management
 {@attach sort.container()}
 // Items get draggable with sortable plugin
-{@attach draggable([sort.item()])}
+{@attach drag_1.attachment}
 ```
 
 **Benefits:**
 - Clear ownership and separation of concerns
 - Sortable controls its domain completely
-- Still composes with draggable() for individual items
+- Still composes with `new Draggable()` for individual items
 - Can provide rich, sortable-specific features
 
 ## Features Roadmap
@@ -279,22 +284,18 @@ const sort = sortable({ onSort });
 
 For users currently using the drop plugin approach:
 
-```javascript
+```svelte
 // Before
-import { droppable, sortable } from '@neodrag/svelte/drop';
+import { Droppable, sortableItemFor } from '@neodrag/svelte/drop';
 
-<div {@attach droppable([sortable({ onSort })])}>
-  <div {@attach draggable()}>Item</div>
+const drop = new Droppable({ plugins: [sortable.container()] });
+const item = new Draggable({ plugins: [sortableItemFor('id')] });
+
+<div {@attach drop.attachment}>
+  <div {@attach item.attachment}>Item</div>
 </div>
 
-// After
-import { sortable } from '@neodrag/svelte/sortable';
-
-const sort = sortable({ onSort });
-
-<div {@attach sort.container()}>
-  <div {@attach draggable([sort.item()])}>Item</div>
-</div>
+// After — use sortable helpers from @neodrag/svelte/drop (see drop docs)
 ```
 
 ## Benefits
@@ -315,4 +316,4 @@ const sort = sortable({ onSort });
 
 ## Conclusion
 
-Moving sortable from a drop plugin to its own factory that produces draggable plugins creates a cleaner architecture that respects the library's core identity (everything builds on `draggable()`) while giving sortable the control it needs to provide a rich, opinionated reordering experience.
+Moving sortable from a drop plugin to its own factory that produces draggable plugins creates a cleaner architecture that respects the library's core identity (everything builds on `new Draggable()`) while giving sortable the control it needs to provide a rich, opinionated reordering experience.

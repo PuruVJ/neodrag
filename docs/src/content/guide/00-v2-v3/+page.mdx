@@ -156,7 +156,7 @@ import {
 
 ```svelte
 <script>
-  import { draggable } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
 </script>
 
 <div
@@ -175,23 +175,19 @@ import {
 
 ```svelte
 <script>
-  import {
-    draggable,
-    axis,
-    bounds,
-    BoundsFrom,
-    grid,
-    events,
-  } from '@neodrag/svelte';
-</script>
+  import { Draggable } from '@neodrag/svelte'
+	import { axis, bounds, BoundsFrom, grid, events } from '@neodrag/svelte/plugins';
 
-<div
-  {@attach draggable([
+	const drag_0 = new Draggable({ plugins: [
     axis('x'),
     bounds(BoundsFrom.parent()),
     grid([10, 10]),
     events({ onDrag: (data) => console.log(data) }),
-  ])}
+  ] });
+</script>
+
+<div
+  {@attach drag_0.attachment}
 >
   Drag me
 </div>
@@ -452,13 +448,7 @@ Events moved from options to dedicated plugin. Event data structure changed:
 **v3 Events:**
 
 ```svelte
-<div {@attach draggable([
-  events({
-    onDragStart: ({ offset }) => console.log('start', offset.x, offset.y),
-    onDrag: ({ offset }) => console.log('drag', offset.x, offset.y),
-    onDragEnd: ({ offset }) => console.log('end', offset.x, offset.y)
-  })
-])}>
+<div {@attach drag_0.attachment}>
 ```
 
 </div>
@@ -616,20 +606,18 @@ Neodrag.shared.draggable(element, [
 
 ```svelte
 <script>
-  import {
-    draggable,
-    axis,
-    bounds,
-    BoundsFrom,
-  } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { axis, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
   let currentAxis = $state('x');
   let isConstrained = $state(false);
 
-    </script>
+    
+	const drag_0 = new Draggable({ plugins: [() => [axisComp, boundsComp].filter(Boolean)] });
+</script>
 
 <div
-  {@attach draggable(() => [axisComp, boundsComp].filter(Boolean))}
+  {@attach drag_0.attachment}
 >
   Drag me
 </div>
@@ -869,7 +857,8 @@ Create your own dragging behavior:
 
 ```svelte
 <script>
-  import { draggable, defineDragPlugin } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { defineDragPlugin } from '@neodrag/svelte/plugins';
 
   const loggerPlugin = defineDragPlugin(() => ({
     name: 'logger',
@@ -893,9 +882,11 @@ Create your own dragging behavior:
       console.log('Drag ended');
     },
   }));
+
+	const drag_0 = new Draggable({ plugins: [loggerPlugin()] });
 </script>
 
-<div {@attach draggable([loggerPlugin()])}>Custom behavior</div>
+<div {@attach drag_0.attachment}>Custom behavior</div>
 ```
 
 </div>
@@ -1041,16 +1032,19 @@ Prevent page scrolling during drag:
 
 ```svelte
 <script>
-  import { draggable, scrollLock } from '@neodrag/svelte';
-</script>
+  import { Draggable } from '@neodrag/svelte'
+	import { scrollLock } from '@neodrag/svelte/plugins';
 
-<div
-  {@attach draggable([
+	const drag_0 = new Draggable({ plugins: [
     scrollLock({
       lockAxis: 'both',
       allowScrollbar: false,
     }),
-  ])}
+  ] });
+</script>
+
+<div
+  {@attach drag_0.attachment}
 >
   No page scroll while dragging
 </div>
@@ -1145,7 +1139,7 @@ const instance = Neodrag.shared.draggable(element, [
 
 **Key Svelte Changes:**
 
-- Actions become attachments: `use:draggable` → `{@attach draggable}`
+- Actions become attachments: `use:draggable` → `{@attach drag.attachment}` with `new Draggable({ plugins })`
 - Reactive declarations: `let var = value` → `let var = $state(value)`
 - Event handlers: `on:click` → `onclick`
 - Use `Compartment.of` for reactive plugins

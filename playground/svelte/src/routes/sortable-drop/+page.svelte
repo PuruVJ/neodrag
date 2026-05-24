@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Neodrag, transform } from '@neodrag/svelte';
-	import { droppable, sortable } from '@neodrag/svelte/drop';
+	import { Neodrag } from '@neodrag/svelte'
+	import { transform } from '@neodrag/svelte/plugins';
+	import { Droppable, sortable } from '@neodrag/svelte/drop';
 
 	let items = $state([
 		{ id: '1', text: 'Item 1' },

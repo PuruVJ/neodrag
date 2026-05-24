@@ -74,7 +74,7 @@ export class PluginListResolver<T extends { key: symbol }> {
 	}
 }
 
-export function resolvedPluginsUnchanged(prev: readonly T[], next: readonly T[]): boolean {
+export function resolvedPluginsUnchanged<T>(prev: readonly T[], next: readonly T[]): boolean {
 	if (prev.length !== next.length) return false;
 	for (let i = 0; i < next.length; i++) {
 		if (prev[i] !== next[i]) return false;
@@ -82,17 +82,3 @@ export function resolvedPluginsUnchanged(prev: readonly T[], next: readonly T[])
 	return true;
 }
 
-/** @deprecated Use resolveDragPluginList */
-export function resolveDragPlugins(input: DragPluginList): DragPlugin[] {
-	return resolveDragPluginList(input);
-}
-
-/** @deprecated Use resolveDropPluginList */
-export function resolveDropPlugins(input: DropPluginList): DropPlugin[] {
-	return resolveDropPluginList(input);
-}
-
-/** @deprecated */
-export function resolvePlugins<T extends { key: symbol }>(input: DragPluginList): T[] {
-	return resolvePluginList(input);
-}

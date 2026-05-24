@@ -36,14 +36,5 @@ export class Droppable extends CoreDroppable {
 	}
 }
 
-/** @deprecated Use `new Droppable({ plugins })` once in `<script>` and `{@attach drop.attachment}`. */
-export function droppable(plugins: DropPluginList | (() => DropPluginList) = []): Attachment<
-	HTMLElement | SVGElement
-> {
-	const slots: DropPluginList =
-		typeof plugins === 'function' ? [plugins as () => import('@neodrag/core').DropPlugin[]] : plugins;
-	return new Droppable({ plugins: slots }).attachment;
-}
-
 export { sortable, type SortableOptions, type SortableStrategy } from '@neodrag/core/drop';
 export { sortableItemFor } from './sortable.svelte';

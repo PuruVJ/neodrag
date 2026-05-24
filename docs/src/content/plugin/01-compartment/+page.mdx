@@ -11,12 +11,15 @@ import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
 ```svelte
 <script>
-  import { draggable, position } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { position } from '@neodrag/svelte/plugins';
 
   let pos = $state({ x: 0, y: 0 });
+
+  const drag = new Draggable({ plugins: [() => position({ current: pos })] });
 </script>
 
-<div {@attach draggable(() => [position({ current: pos })])}></div>
+<div {@attach drag.attachment}></div>
 ```
 
 ## React

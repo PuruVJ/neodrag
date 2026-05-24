@@ -20,14 +20,18 @@ disabled(false); // Enabled (same as not using plugin)
 
 ```svelte
 <script>
-  import { draggable, disabled } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { disabled } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [disabled(true)] });
+	const drag_1 = new Draggable({ plugins: [disabled(false)] });
 </script>
 
 <!-- This won't drag at all -->
-<div {@attach draggable([disabled(true)])}>Can't drag me!</div>
+<div {@attach drag_0.attachment}>Can't drag me!</div>
 
 <!-- This will drag normally -->
-<div {@attach draggable([disabled(false)])}>Can drag me!</div>
+<div {@attach drag_1.attachment}>Can drag me!</div>
 ```
 
 </div>
@@ -103,12 +107,15 @@ The real power comes from dynamically enabling/disabling with compartments:
 
 ```svelte
 <script>
-  import { draggable, disabled } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { disabled } from '@neodrag/svelte/plugins';
 
   let isDragDisabled = $state(false);
-  </script>
+  
+	const drag_0 = new Draggable({ plugins: [() => [disabledComp]] });
+</script>
 
-<div {@attach draggable(() => [disabledComp])}>
+<div {@attach drag_0.attachment}>
   Dragging is {isDragDisabled ? 'disabled' : 'enabled'}
 </div>
 
@@ -247,15 +254,18 @@ button.addEventListener('click', () => {
 
 ```svelte
 <script>
-  import { draggable, disabled } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { disabled } from '@neodrag/svelte/plugins';
 
   let isFormValid = $state(true);
   let isLoading = $state(false);
 
   // Disable dragging when form is invalid or loading
-  </script>
+  
+	const drag_0 = new Draggable({ plugins: [() => [disabledComp]] });
+</script>
 
-<div {@attach draggable(() => [disabledComp])}>
+<div {@attach drag_0.attachment}>
   {#if isLoading}
     Loading...
   {:else if !isFormValid}

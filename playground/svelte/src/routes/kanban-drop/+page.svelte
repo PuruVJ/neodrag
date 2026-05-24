@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { draggable, ghost } from '@neodrag/svelte';
-	import { droppable } from '@neodrag/svelte/drop';
+	import { Draggable, ghost } from '@neodrag/svelte';
+	import { Droppable } from '@neodrag/svelte/drop';
 	
 	interface Task {
 		id: string;
@@ -99,6 +99,33 @@
 			console.log('DROP: No draggedTask or same column');
 		}
 	}
+
+	const drag_0 = new Draggable({ plugins: [
+								ghost({ opacity: 0.7 }),
+								{
+									name: 'kanban-task',
+									start() {
+										handleTaskDragStart(task);
+									},
+									end() {
+										handleTaskDragEnd();
+									}
+								}
+							] });
+	const drop_1 = new Droppable({ plugins: [
+					{
+						name: 'kanban-column',
+						onEnter() {
+							handleColumnEnter(column.id);
+						},
+						onLeave() {
+							handleColumnLeave();
+						},
+						onDrop() {
+							handleColumnDrop(column.id);
+						}
+					}
+				] });
 </script>
 
 <div class="kanban-board">
@@ -115,20 +142,7 @@
 			<div 
 				class="column"
 				class:drop-hover={hoveredColumn === column.id}
-				{@attach droppable([
-					{
-						name: 'kanban-column',
-						onEnter() {
-							handleColumnEnter(column.id);
-						},
-						onLeave() {
-							handleColumnLeave();
-						},
-						onDrop() {
-							handleColumnDrop(column.id);
-						}
-					}
-				])}
+				{@attach drop_1.attachment}
 			>
 				<div class="column-header" style="background-color: {column.color}">
 					<h3>{column.title}</h3>
@@ -139,18 +153,7 @@
 					{#each getTasksForColumn(column.id) as task (task.id)}
 						<div 
 							class="task-card"
-							{@attach draggable([
-								ghost({ opacity: 0.7 }),
-								{
-									name: 'kanban-task',
-									start() {
-										handleTaskDragStart(task);
-									},
-									end() {
-										handleTaskDragEnd();
-									}
-								}
-							])}
+							{@attach drag_0.attachment}
 						>
 							<div class="task-header">
 								<h4>{task.title}</h4>

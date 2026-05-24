@@ -21,24 +21,30 @@ grid([null, 15]); // Only snap vertically every 15px
 
 ```svelte
 <script>
-  import { draggable, grid } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { grid } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [grid([20, 20])] });
+	const drag_1 = new Draggable({ plugins: [grid([50, 30])] });
+	const drag_2 = new Draggable({ plugins: [grid([25, null])] });
+	const drag_3 = new Draggable({ plugins: [grid([null, 20])] });
 </script>
 
 <!-- Square 20px grid -->
-<div {@attach draggable([grid([20, 20])])}>Snaps to 20px squares</div>
+<div {@attach drag_0.attachment}>Snaps to 20px squares</div>
 
 <!-- Rectangular grid -->
-<div {@attach draggable([grid([50, 30])])}>
+<div {@attach drag_1.attachment}>
   Snaps to 50x30px rectangles
 </div>
 
 <!-- Horizontal-only snapping -->
-<div {@attach draggable([grid([25, null])])}>
+<div {@attach drag_2.attachment}>
   Only snaps horizontally
 </div>
 
 <!-- Vertical-only snapping -->
-<div {@attach draggable([grid([null, 20])])}>
+<div {@attach drag_3.attachment}>
   Only snaps vertically
 </div>
 ```
@@ -157,14 +163,17 @@ Neodrag.shared.draggable(vertical, [grid([null, 20])]);
 
 ```svelte
 <script>
-  import { draggable, grid } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { grid } from '@neodrag/svelte/plugins';
 
   let gridSize = $state(20);
   let enableSnap = $state(true);
 
-  </script>
+  
+	const drag_0 = new Draggable({ plugins: [() => [gridComp]] });
+</script>
 
-<div {@attach draggable(() => [gridComp])}>
+<div {@attach drag_0.attachment}>
   Grid: {enableSnap ? `${gridSize}px` : 'disabled'}
 </div>
 
@@ -371,19 +380,24 @@ snapToggle.addEventListener('change', (e) => {
 
 ```svelte
 <script>
-  import { draggable, grid } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { grid } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [grid([100, 20])] });
+	const drag_1 = new Draggable({ plugins: [grid([60, null])] });
+	const drag_2 = new Draggable({ plugins: [grid([80, 120])] });
 </script>
 
 <!-- Wide columns, short rows -->
-<div {@attach draggable([grid([100, 20])])}>100x20px grid</div>
+<div {@attach drag_0.attachment}>100x20px grid</div>
 
 <!-- Timeline-style: hourly columns -->
-<div {@attach draggable([grid([60, null])])}>
+<div {@attach drag_1.attachment}>
   60px intervals (hourly)
 </div>
 
 <!-- Calendar-style: daily columns, weekly rows -->
-<div {@attach draggable([grid([80, 120])])}>Daily x Weekly</div>
+<div {@attach drag_2.attachment}>Daily x Weekly</div>
 ```
 
 </div>
@@ -490,7 +504,8 @@ Neodrag.shared.draggable(calendar, [grid([80, 120])]);
 
 ```svelte
 <script>
-  import { draggable, grid } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { grid } from '@neodrag/svelte/plugins';
 
   let screenWidth = $state(window.innerWidth);
 
@@ -502,11 +517,13 @@ Neodrag.shared.draggable(calendar, [grid([80, 120])]);
   function handleResize() {
     screenWidth = window.innerWidth;
   }
+
+	const drag_0 = new Draggable({ plugins: [() => [responsiveGrid]] });
 </script>
 
 <svelte:window on:resize={handleResize} />
 
-<div {@attach draggable(() => [responsiveGrid])}>
+<div {@attach drag_0.attachment}>
   Responsive 12-column grid
   <br />
   Column: {Math.round(columnWidth)}px

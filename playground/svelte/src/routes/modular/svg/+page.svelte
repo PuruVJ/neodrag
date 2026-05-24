@@ -1,16 +1,25 @@
 <!-- DragTest.svelte -->
 <script lang="ts">
-	import { bounds, BoundsFrom, draggable, events } from '@neodrag/svelte';
+	import { Draggable } from '@neodrag/svelte'
+	import { bounds, BoundsFrom, events } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [
+			events({
+				onDrag: (e) => console.log('HTML drag:', e.offset),
+			}),
+		] });
+	const drag_1 = new Draggable({ plugins: [bounds(BoundsFrom.parent())] });
+	const drag_2 = new Draggable({ plugins: [
+				events({
+					onDrag: (e) => console.log('SVG drag:', e.offset),
+				}),
+			] });
 </script>
 
 <div class="container">
 	<!-- HTML Element -->
 	<div
-		{@attach draggable([
-			events({
-				onDrag: (e) => console.log('HTML drag:', e.offset),
-			}),
-		])}
+		{@attach drag_0.attachment}
 		class="draggable-div"
 	>
 		Drag me (HTML)
@@ -19,7 +28,7 @@
 	<!-- SVG Elements -->
 	<svg width="400" height="400" viewBox="0 0 400 400">
 		<circle
-			{@attach draggable([bounds(BoundsFrom.parent())])}
+			{@attach drag_1.attachment}
 			cx="100"
 			cy="100"
 			r="50"
@@ -27,11 +36,7 @@
 			opacity="0.5"
 		/>
 		<rect
-			{@attach draggable([
-				events({
-					onDrag: (e) => console.log('SVG drag:', e.offset),
-				}),
-			])}
+			{@attach drag_2.attachment}
 			x="200"
 			y="200"
 			width="100"

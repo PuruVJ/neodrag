@@ -23,14 +23,20 @@ controls({
 
 ```svelte
 <script>
-  import { draggable, controls, ControlFrom } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { controls, ControlFrom } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [
+    controls({ allow: ControlFrom.selector('.header') }),
+  ] });
+	const drag_1 = new Draggable({ plugins: [
+    controls({ block: ControlFrom.selector('button') }),
+  ] });
 </script>
 
 <!-- Only header can initiate dragging -->
 <div
-  {@attach draggable([
-    controls({ allow: ControlFrom.selector('.header') }),
-  ])}
+  {@attach drag_0.attachment}
 >
   <div class="header">Drag handle</div>
   <div class="content">Content (not draggable)</div>
@@ -38,9 +44,7 @@ controls({
 
 <!-- Anywhere except buttons -->
 <div
-  {@attach draggable([
-    controls({ block: ControlFrom.selector('button') }),
-  ])}
+  {@attach drag_1.attachment}
 >
   <p>Drag anywhere in this area</p>
   <button>Can't drag from here</button>
@@ -178,20 +182,20 @@ Neodrag.shared.draggable(blockElement, [
 
 ```svelte
 <script>
-  import { draggable, controls,
-    ControlFrom,
-    bounds,
-    BoundsFrom, } from '@neodrag/svelte';
-</script>
+  import { Draggable } from '@neodrag/svelte'
+	import { controls, ControlFrom, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
-<div
-  {@attach draggable([
+	const drag_0 = new Draggable({ plugins: [
     controls({
       allow: ControlFrom.selector('.modal-header'),
       block: ControlFrom.selector('.modal-close, .modal-body button'),
     }),
     bounds(BoundsFrom.viewport()),
-  ])}
+  ] });
+</script>
+
+<div
+  {@attach drag_0.attachment}
 >
   <div class="modal-header">
     <h3>Modal Title</h3>

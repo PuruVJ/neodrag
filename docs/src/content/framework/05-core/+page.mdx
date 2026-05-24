@@ -18,7 +18,7 @@ npm i @neodrag/core@next
 
 ## Architecture
 
-- **`Neodrag`**: Main engine — `draggable()`, `droppable()`, `dispose()`
+- **`Neodrag`**: Main engine — `new Draggable()`, `new Droppable()`, `dispose()`
 - **Plugins**: `defineDragPlugin` / `defineDropPlugin` with lifecycle hooks
 - **Event delegation**: Three global pointer listeners on the delegate element
 - **Reactive reconcile**: wrappers call `engine.update` when plugin inputs change
@@ -99,6 +99,6 @@ console.log(Neodrag.shared.instances.size);
 
 ## Framework packages
 
-See the framework docs for `{@attach draggable()}`, `{@attach droppable()}`, `useDraggable`, `useDroppable`, `vDraggable`, and `vDroppable`. All use this core engine.
+See the framework docs for `{@attach drag_0.attachmen{@attach drop_1.attachment}pable()}`, `useDraggable`, `useDroppable`, `vDraggable`, and `vDroppable`. All use this core engine.
 
 Import built-in plugins from `@neodrag/core/plugins` (not from `@neodrag/svelte` / `@neodrag/react` main entries). Framework packages expose `@neodrag/*/plugins` re-exports for convenience only.

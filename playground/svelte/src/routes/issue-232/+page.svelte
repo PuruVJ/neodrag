@@ -1,26 +1,29 @@
 <script lang="ts">
-	import { draggable, events, position, threshold } from '@neodrag/svelte';
+	import { Draggable } from '@neodrag/svelte';
+	import { events, position, threshold } from '@neodrag/svelte/plugins';
 
 	let x = $state(0);
 	let y = $state(300);
 
-	const dragAttachment = draggable(() => [
-		position({ current: { x, y } }),
-		threshold({
-			distance: 0,
-			delay: 0,
-		}),
-		events({
-			onDrag: (data) => {
-				x = data.offset.x;
-				y = data.offset.y;
-			},
-		}),
-	]);
+	const drag = new Draggable({
+		plugins: [
+			() => position({ current: { x, y } }),
+			threshold({
+				distance: 0,
+				delay: 0,
+			}),
+			events({
+				onDrag: (data) => {
+					x = data.offset.x;
+					y = data.offset.y;
+				},
+			}),
+		],
+	});
 </script>
 
 <main>
-	<div {@attach dragAttachment} class="drag">
+	<div {@attach drag.attachment} class="drag">
 		<p class="drag">DRAG</p>
 	</div>
 	<button

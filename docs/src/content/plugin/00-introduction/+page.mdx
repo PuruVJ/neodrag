@@ -16,15 +16,18 @@ Want grid snapping? Add `grid()`. Need movement constraints? Use `bounds()`. Wan
 
 ```svelte
 <script>
-  import { draggable, grid, axis, bounds, BoundsFrom } from '@neodrag/svelte';
-</script>
+  import { Draggable } from '@neodrag/svelte'
+	import { grid, axis, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
-<div
-  {@attach draggable([
+	const drag_0 = new Draggable({ plugins: [
     grid([20, 20]), // Snap to 20px grid
     axis('x'), // Only move horizontally
     bounds(BoundsFrom.viewport()), // Stay in viewport
-  ])}
+  ] });
+</script>
+
+<div
+  {@attach drag_0.attachment}
 >
   Drag me around!
 </div>
@@ -152,12 +155,15 @@ For plugins that change based on user interaction, pass a reactive factory:
 
 ```svelte
 <script>
-  import { draggable, axis } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { axis } from '@neodrag/svelte/plugins';
 
   let currentAxis = $state('x');
-  </script>
+  
+	const drag_0 = new Draggable({ plugins: [() => [axisComp]] });
+</script>
 
-<div {@attach draggable(() => [axisComp])}>Drag me</div>
+<div {@attach drag_0.attachment}>Drag me</div>
 <button onclick={() => (currentAxis = 'y')}>Switch to Y axis</button>
 ```
 
@@ -483,7 +489,7 @@ Inspect active instances:
 ```typescript
 import { draggable, Neodrag } from '@neodrag/svelte';
 
-// Shared engine used by draggable() in most apps
+// Shared engine used by Draggable
 const map = Neodrag.shared.instances;
 console.log('Active draggables:', map.size);
 

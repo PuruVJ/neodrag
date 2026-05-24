@@ -1,13 +1,6 @@
 <script lang="ts">
-	import {
-		ControlFrom,
-		controls,
-		draggable,
-		events,
-		position,
-		threshold,
-		scrollLock,
-	} from '@neodrag/svelte';
+	import { Draggable } from '@neodrag/svelte'
+	import { ControlFrom, controls, events, position, threshold, scrollLock } from '@neodrag/svelte/plugins';
 
 	let element = $state<HTMLElement>();
 

@@ -19,20 +19,24 @@ position({ default: { x: 0, y: 0 } }); // Set initial position
 
 ```svelte
 <script>
-  import { draggable, position } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { position } from '@neodrag/svelte/plugins';
 
   let currentPos = $state({ x: 100, y: 50 });
   let defaultPos = $state({ x: 0, y: 0 });
 
-    </script>
+    
+	const drag_0 = new Draggable({ plugins: [() => [position({ current: currentPos })]] });
+	const drag_1 = new Draggable({ plugins: [() => [position({ default: defaultPos })]] });
+</script>
 
 <!-- Force element to specific position -->
-<div {@attach draggable(() => [position({ current: currentPos })])}>
+<div {@attach drag_0.attachment}>
   Controlled position
 </div>
 
 <!-- Set initial position only -->
-<div {@attach draggable(() => [position({ default: defaultPos })])}>
+<div {@attach drag_1.attachment}>
   Initial position, then user controls
 </div>
 ```
@@ -176,11 +180,8 @@ const initial = Neodrag.shared.draggable(element, [
 
 ```svelte
 <script>
-  import {
-    draggable,
-    position,
-    events,
-  } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { position, events } from '@neodrag/svelte/plugins';
 
   let elementPosition = $state({ x: 50, y: 50 });
 
@@ -193,9 +194,11 @@ const initial = Neodrag.shared.draggable(element, [
   function savePosition(pos) {
     localStorage.setItem('elementPosition', JSON.stringify(pos));
   }
+
+	const drag_0 = new Draggable({ plugins: [() => [position({ current: elementPosition }), events({ onDrag: (data) => { elementPosition = data.offset; savePosition(elementPosition); } })]] });
 </script>
 
-<div {@attach draggable(() => [position({ current: elementPosition }), events({ onDrag: (data) => { elementPosition = data.offset; savePosition(elementPosition); } })])}>
+<div {@attach drag_0.attachment}>
   Position synced with state
 </div>
 

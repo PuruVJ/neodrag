@@ -21,22 +21,26 @@ transform(customFunction); // Custom transform implementation
 
 ```svelte
 <script>
-  import { draggable, transform } from '@neodrag/svelte';
-</script>
+  import { Draggable } from '@neodrag/svelte'
+	import { transform } from '@neodrag/svelte/plugins';
 
-<!-- Default transform (usually automatic) -->
-<div {@attach draggable([transform()])}>Standard dragging</div>
-
-<!-- Custom transform function -->
-<div
-  {@attach draggable([
+	const drag_0 = new Draggable({ plugins: [transform()] });
+	const drag_1 = new Draggable({ plugins: [
     transform((data) => {
       data.rootNode.style.transform = `
         translate(${data.offsetX}px, ${data.offsetY}px) 
         rotate(${data.offsetX * 0.5}deg)
       `;
     }),
-  ])}
+  ] });
+</script>
+
+<!-- Default transform (usually automatic) -->
+<div {@attach drag_0.attachment}>Standard dragging</div>
+
+<!-- Custom transform function -->
+<div
+  {@attach drag_1.attachment}
 >
   Rotates while dragging
 </div>
@@ -165,7 +169,8 @@ Neodrag.shared.draggable(custom, [
 
 ```svelte
 <script>
-  import { draggable, transform } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { transform } from '@neodrag/svelte/plugins';
 
   // Scaling effect
   const scaleTransform = (data) => {
@@ -193,15 +198,19 @@ Neodrag.shared.draggable(custom, [
       skewX(${skewX}deg)
     `;
   };
+
+	const drag_0 = new Draggable({ plugins: [transform(scaleTransform)] });
+	const drag_1 = new Draggable({ plugins: [transform(rotateTransform)] });
+	const drag_2 = new Draggable({ plugins: [transform(skewTransform)] });
 </script>
 
-<div {@attach draggable([transform(scaleTransform)])}>
+<div {@attach drag_0.attachment}>
   Scales while dragging
 </div>
-<div {@attach draggable([transform(rotateTransform)])}>
+<div {@attach drag_1.attachment}>
   Rotates while dragging
 </div>
-<div {@attach draggable([transform(skewTransform)])}>
+<div {@attach drag_2.attachment}>
   Skews while dragging
 </div>
 ```
