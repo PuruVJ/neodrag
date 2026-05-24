@@ -1,7 +1,7 @@
 import type { Locator } from '@vitest/browser/context';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { grid, transform } from '../../src/interactions/index.ts';
+import { grid } from '../../src/interactions/index.ts';
 import InteractionsBox from '../components/InteractionsBox.svelte';
 import { dragAndDrop } from '../mouse.ts';
 import { sleepAndWaitForEffects, translate } from '../utils.ts';
@@ -10,7 +10,7 @@ describe('interactions grid', () => {
 	let el: Locator;
 
 	beforeEach(() => {
-		const comp = render(InteractionsBox, { plugins: [transform, grid([10, 10])] });
+		const comp = render(InteractionsBox, { plugins: [grid([10, 10])] });
 		el = comp.getByTestId('draggable');
 	});
 

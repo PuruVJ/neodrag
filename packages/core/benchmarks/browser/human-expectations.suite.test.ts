@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { DEFAULTS, Neodrag } from '../../src/index.ts';
-import { BoundsFrom, axis, bounds, disabled, threshold, transform } from '../../src/plugins.ts';
+import { BoundsFrom, axis, bounds, disabled, threshold } from '../../src/plugins.ts';
 import { accepts, highlight, onDrop } from '../../src/interactions/drop/index.ts';
 import { dragData } from '../../src/plugins.ts';
 import { sortable } from '../../src/interactions/sortable/index.ts';
@@ -45,7 +45,7 @@ describe('Human expectations (Chromium)', () => {
 		it('does not move when disabled', async () => {
 			resetBody();
 			const box = createBox();
-			const engine = new Neodrag({ plugins: [transform, threshold(null)], dev: false });
+			const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
 			engine.draggable(box, [disabled()]);
 			dragElementByDelta(box, 80, 80, 8);
 			await flushEffects();
@@ -58,7 +58,7 @@ describe('Human expectations (Chromium)', () => {
 		it('locks movement to one axis when configured', async () => {
 			resetBody();
 			const box = createBox();
-			const engine = new Neodrag({ plugins: [transform, threshold(null)], dev: false });
+			const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
 			engine.draggable(box, [axis('x')]);
 			dragElementByDelta(box, 60, 60, 10);
 			await flushEffects();
@@ -76,7 +76,7 @@ describe('Human expectations (Chromium)', () => {
 			document.body.appendChild(parent);
 
 			const engine = new Neodrag({
-				plugins: [transform, threshold(null), bounds(BoundsFrom.parent())],
+				plugins: [threshold(null), bounds(BoundsFrom.parent())],
 				dev: false,
 			});
 			engine.draggable(box, []);
@@ -102,7 +102,7 @@ describe('Human expectations (Chromium)', () => {
 			zone.appendChild(box);
 			document.body.appendChild(zone);
 
-			const engine = new Neodrag({ plugins: [transform, threshold(null)], dev: false });
+			const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
 			engine.droppable(zone, [
 				accepts<{ kind: string }>((d) => d.kind === 'card'),
 				onDrop((d) => drops.push(d.kind)),
@@ -135,7 +135,7 @@ describe('Human expectations (Chromium)', () => {
 			const box = createBox('40px', '40px');
 			document.body.append(zone, box);
 
-			const engine = new Neodrag({ plugins: [transform, threshold(null)], dev: false });
+			const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
 			engine.droppable(zone, [onDrop(() => drops.push('dropped'))]);
 			engine.draggable(box, []);
 
@@ -167,7 +167,7 @@ describe('Human expectations (Chromium)', () => {
 			zone.appendChild(box);
 			document.body.appendChild(zone);
 
-			const engine = new Neodrag({ plugins: [transform, threshold(null)], dev: false });
+			const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
 			engine.droppable(zone, [
 				accepts<{ kind: string }>((d) => d.kind === 'allowed'),
 				onDrop((d) => drops.push(d.kind)),
@@ -200,7 +200,7 @@ describe('Human expectations (Chromium)', () => {
 			zone.appendChild(box);
 			document.body.appendChild(zone);
 
-			const engine = new Neodrag({ plugins: [transform, threshold(null)], dev: false });
+			const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
 			engine.droppable(zone, [highlight({ overClass: 'drop-over' })]);
 			engine.draggable(box, []);
 
@@ -255,7 +255,7 @@ describe('Human expectations (Chromium)', () => {
 				strategy: 'vertical',
 			});
 
-			const engine = new Neodrag({ plugins: [transform, threshold(null)], dev: false });
+			const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
 			engine.droppable(container, list.container());
 			for (const item of items) {
 				const el = container.querySelector(`[data-sortable-key="${item.id}"]`) as HTMLElement;

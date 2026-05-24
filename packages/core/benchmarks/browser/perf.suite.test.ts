@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { MINIMAL_DRAG_PLUGINS, Neodrag } from '../../src/index.ts';
 import { sortable } from '../../src/interactions/sortable/index.ts';
-import { transform } from '../../src/plugins.ts';
+
 import {
 	createBox,
 	dragSteps,
@@ -83,7 +83,7 @@ function setupSortable() {
 		strategy: 'vertical',
 	});
 
-	const engine = new Neodrag({ plugins: [transform], dev: false });
+	const engine = new Neodrag({ plugins: [], dev: false });
 	engine.droppable(container, list.container());
 	for (const item of items) {
 		const el = container.querySelector(`[data-sortable-key="${item.id}"]`) as HTMLElement;

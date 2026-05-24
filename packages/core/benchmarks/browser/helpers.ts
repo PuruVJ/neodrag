@@ -193,18 +193,16 @@ export type TwoWayBindingBench = {
 export function setupTwoWayBinding(
 	Neodrag: typeof import('../../src/index.ts').Neodrag,
 	position: typeof import('../../src/index.ts').position,
-	transform: typeof import('../../src/index.ts').transform,
 	events: typeof import('../../src/index.ts').events,
 	left?: string,
 	top?: string,
 ): TwoWayBindingBench {
-	const leftPos = left ?? '100px';
+	const leftPos = left ?? '20px';
 	const topPos = top ?? '100px';
 	const engine = new Neodrag({ dev: false });
 	const box = createBox(leftPos, topPos);
 	const pos = { x: 0, y: 0 };
 	const build = () => [
-		transform,
 		position({ current: { x: pos.x, y: pos.y } }),
 		events({
 			onDrag(data) {

@@ -2,7 +2,7 @@
 	import squircle from '$/worklet/squircle?url';
 	import { browser } from '$helpers/utils';
 	import { Draggable } from '@neodrag/svelte';
-	import { events, position as positionPlugin, transform } from '@neodrag/svelte/plugins';
+	import { events, position as positionPlugin } from '@neodrag/svelte/plugins';
 	import { untrack, type Snippet } from 'svelte';
 	import IonReloadIcon from '~icons/ion/reload';
 
@@ -35,7 +35,6 @@
 
 	const drag = new Draggable({
 		plugins: [
-			transform,
 			() => positionPlugin({ current: pos }),
 			events({
 				onDrag: (data) => {

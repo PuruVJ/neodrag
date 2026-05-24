@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
 import { sortable } from '../../src/interactions/sortable/index.ts';
-import { transform } from '../../src/plugins.ts';
+
 import { pointer, resetBody, runBench } from './helpers.ts';
 
 const SORTABLE_N = 40;
@@ -31,7 +31,7 @@ function setupSortableDrag() {
 		strategy: 'vertical',
 	});
 
-	const engine = new Neodrag({ plugins: [transform], dev: false });
+	const engine = new Neodrag({ plugins: [], dev: false });
 	engine.droppable(container, list.container());
 	for (const item of items) {
 		const el = container.querySelector(`[data-sortable-key="${item.id}"]`) as HTMLElement;

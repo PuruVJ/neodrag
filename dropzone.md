@@ -156,7 +156,6 @@ export const vDroppable: Directive;
 <script>
   import { Draggable } from '@neodrag/svelte';
   import { Droppable } from '@neodrag/svelte/drop';
-  import { transform } from '@neodrag/svelte/plugins';
   import { validation, highlightOnDrag, cardDrop } from '@neodrag/svelte/drop';
   
   let columns = $state([
@@ -170,7 +169,6 @@ export const vDroppable: Directive;
   }
 
 	const drag_0 = new Draggable({ plugins: [
-          transform(),
           data({ id: card.id, type: 'card' })
         ] });
 
@@ -700,11 +698,10 @@ npm install @neodrag/svelte/drop
 <script>
   import { Draggable } from '@neodrag/svelte';
   import { Droppable } from '@neodrag/svelte/drop';
-  import { transform } from '@neodrag/svelte/plugins';
   import { validation } from '@neodrag/svelte/drop'
 	import { events } from '@neodrag/core/drop/plugins';
 
-	const drag_0 = new Draggable({ plugins: [transform()] });
+	const drag_0 = new Draggable({ plugins: [] });
 
 	const drop_0 = new Droppable({ plugins: [
   validation({ accept: ['text/plain'] }),
@@ -745,10 +742,9 @@ const sortable = new Sortable(listElement, {
 // Neodrag (after)
 import { Draggable } from '@neodrag/svelte';
 import { Droppable } from '@neodrag/svelte/drop';
-import { transform } from '@neodrag/svelte/plugins';
 import { sortable } from '@neodrag/svelte/drop';
 
-const itemDrag = new Draggable({ plugins: [transform()] });
+const itemDrag = new Draggable({ plugins: [] });
 const listDrop = new Droppable({
   plugins: [
     sortable({

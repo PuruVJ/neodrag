@@ -1,4 +1,3 @@
-export const TRANSFORM_KEY = Symbol('neodrag.transform');
 export const THRESHOLD_KEY = Symbol('neodrag.threshold');
 export const STATE_MARKER_KEY = Symbol('neodrag.stateMarker');
 export const IGNORE_MULTITOUCH_KEY = Symbol('neodrag.ignoreMultitouch');

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 	import { Draggable } from '@neodrag/vue';
-	import { position, transform } from '@neodrag/vue/plugins';
+	import { position } from '@neodrag/vue/plugins';
 	import { ref, watch } from 'vue';
 
 	const props = defineProps<{ external: { x: number; y: number } }>();
@@ -15,10 +15,7 @@
 	);
 
 	const drag = new Draggable({
-		plugins: [
-			transform,
-			() => position({ current: { x: pos.value.x, y: pos.value.y } }),
-		],
+		plugins: [() => position({ current: { x: pos.value.x, y: pos.value.y } })],
 	});
 </script>
 

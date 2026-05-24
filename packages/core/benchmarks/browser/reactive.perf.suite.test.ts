@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
-import { events, position, transform } from '../../src/plugins.ts';
+import { events, position } from '../../src/plugins.ts';
 import {
 	createBox,
 	pointer,
@@ -25,18 +25,17 @@ describe('Reactive Chromium perf suite', () => {
 		let tick = 0;
 		const churnBox = createBox();
 		const churnHandle = engine.draggable(churnBox, [
-			transform,
-			position({ current: { x: tick, y: tick } }),
+				position({ current: { x: tick, y: tick } }),
 		]);
 		results.push(
 			runBench('reactive suite · plugin ref churn', 100, 10, () => {
 				tick += 1;
-				churnHandle.update([transform, position({ current: { x: tick, y: tick * 2 } })]);
+				churnHandle.update([position({ current: { x: tick, y: tick * 2 } })]);
 			}),
 		);
 
 		const stablePos = position({ current: { x: 0, y: 0 } });
-		const stablePlugins = [transform, stablePos];
+		const stablePlugins = [stablePos];
 		const stableBox = createBox('100px', '220px');
 		const stableHandle = engine.draggable(stableBox, stablePlugins);
 		results.push(
@@ -50,7 +49,7 @@ describe('Reactive Chromium perf suite', () => {
 		results.push(
 			runBench('reactive suite · in-place update', 60, 8, () => {
 				tick += 1;
-				reconcileHandle.update([transform, position({ current: { x: tick, y: tick } })]);
+				reconcileHandle.update([position({ current: { x: tick, y: tick } })]);
 			}),
 		);
 
@@ -62,13 +61,12 @@ describe('Reactive Chromium perf suite', () => {
 				remountTick += 1;
 				remountHandle.destroy();
 				remountHandle = engine.draggable(remountBox, [
-					transform,
-					position({ current: { x: remountTick, y: remountTick } }),
+								position({ current: { x: remountTick, y: remountTick } }),
 				]);
 			}),
 		);
 
-		const twoWay = setupTwoWayBinding(Neodrag, position, transform, events, '280px', '220px');
+		const twoWay = setupTwoWayBinding(Neodrag, position, events, '280px', '220px');
 		results.push(
 			runBench('reactive suite · two-way idle reconcile', 60, 8, () => {
 				twoWay.pos.x += 1;

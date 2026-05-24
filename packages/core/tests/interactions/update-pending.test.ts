@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { Neodrag, position, transform, type DragPlugin } from '../../src/interactions/index.ts';
+import { Neodrag, position, type DragPlugin } from '../../src/interactions/index.ts';
 
 describe('engine.update pending coalescing', () => {
 	it('limits synchronous update nesting to MAX_UPDATE_DEPTH', () => {
@@ -23,8 +23,7 @@ describe('engine.update pending coalescing', () => {
 				maxNest = Math.max(maxNest, nest);
 				if (calls <= 80) {
 					engine.update(node, [
-						transform,
-						position({ current: { x: calls, y: calls } }),
+										position({ current: { x: calls, y: calls } }),
 						makePing(),
 					]);
 				}
@@ -32,9 +31,9 @@ describe('engine.update pending coalescing', () => {
 			},
 		});
 
-		engine.draggable(node, [transform, position({ current: { x: 0, y: 0 } }), makePing()]);
+		engine.draggable(node, [position({ current: { x: 0, y: 0 } }), makePing()]);
 		calls = 0;
-		engine.update(node, [transform, position({ current: { x: 99, y: 99 } }), makePing()]);
+		engine.update(node, [position({ current: { x: 99, y: 99 } }), makePing()]);
 
 		expect(maxNest).toBeLessThanOrEqual(64);
 		expect(calls).toBeGreaterThan(0);

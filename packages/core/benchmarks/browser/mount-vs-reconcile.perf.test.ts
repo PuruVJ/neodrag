@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
-import { position, transform } from '../../src/plugins.ts';
+import { position } from '../../src/plugins.ts';
 import {
 	createBox,
 	printBenchReport,
@@ -20,7 +20,7 @@ describe('mount vs reconcile', () => {
 		const engine = new Neodrag({ dev: false });
 
 		let tick = 0;
-		const build = () => [transform, position({ current: { x: tick, y: tick * 2 } })];
+		const build = () => [position({ current: { x: tick, y: tick * 2 } })];
 
 		const reconcileBox = createBox('100px', '100px');
 		let reconcileHandle = engine.draggable(reconcileBox, build());
@@ -41,8 +41,7 @@ describe('mount vs reconcile', () => {
 				remountTick += 1;
 				remountHandle.destroy();
 				remountHandle = engine.draggable(remountBox, [
-					transform,
-					position({ current: { x: remountTick, y: remountTick * 2 } }),
+								position({ current: { x: remountTick, y: remountTick * 2 } }),
 				]);
 			}),
 		);

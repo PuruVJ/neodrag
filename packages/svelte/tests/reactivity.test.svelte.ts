@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { Draggable } from '@neodrag/svelte';
-import { position, transform } from '@neodrag/core/plugins';
+import { position } from '@neodrag/core/plugins';
 import SvelteReactiveHarness from './SvelteReactiveHarness.svelte';
 import SvelteStaticHarness from './SvelteStaticHarness.svelte';
 import { sleepAndWaitForEffects, translate } from '../../core/tests/utils.ts';
@@ -28,7 +28,7 @@ describe('@neodrag/svelte reactivity', () => {
 	});
 
 	test('Draggable.attachment is stable', () => {
-		const drag = new Draggable({ plugins: [transform] });
+		const drag = new Draggable({ plugins: [] });
 		expect(drag.attachment).toBe(drag.attachment);
 	});
 });

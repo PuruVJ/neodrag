@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Draggable } from '@neodrag/svelte';
-	import { position, transform } from '@neodrag/svelte/plugins';
+	import { position } from '@neodrag/svelte/plugins';
 
 	const { external = { x: 0, y: 0 } }: { external?: { x: number; y: number } } = $props();
 
@@ -11,7 +11,7 @@
 	});
 
 	const drag = new Draggable({
-		plugins: [transform, () => position({ current: pos })],
+		plugins: [() => position({ current: pos })],
 	});
 </script>
 

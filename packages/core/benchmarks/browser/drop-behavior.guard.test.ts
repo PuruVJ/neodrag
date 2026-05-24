@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
 import { accepts, onDrop } from '../../src/interactions/drop/index.ts';
-import { dragData, threshold, transform } from '../../src/plugins.ts';
+import { dragData, threshold } from '../../src/plugins.ts';
 import { sortable } from '../../src/interactions/sortable/index.ts';
 import { createBox, dragSteps, flushEffects, resetBody } from './helpers.ts';
 
@@ -19,7 +19,7 @@ describe('drop & sortable behavioral guards', () => {
 		zone.appendChild(box);
 		document.body.appendChild(zone);
 
-		const engine = new Neodrag({ plugins: [transform, threshold(null)], dev: false });
+		const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
 		engine.droppable(zone, [
 			accepts<{ kind: string }>((d) => d.kind === 'card'),
 			onDrop((d) => drops.push(d.kind)),
@@ -72,7 +72,7 @@ describe('drop & sortable behavioral guards', () => {
 			},
 		});
 
-		const engine = new Neodrag({ plugins: [transform, threshold(null)], dev: false });
+		const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
 		engine.droppable(container, list.container());
 		for (const item of items) {
 			const el = container.querySelector(`[data-sortable-key="${item.id}"]`) as HTMLElement;

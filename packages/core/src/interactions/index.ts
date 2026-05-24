@@ -7,7 +7,8 @@ export {
 	PluginListResolver,
 	resolvedPluginsUnchanged,
 } from './resolve-plugins.ts';
-export { Draggable, DroppableBinding, type DraggableOptions, type TransformApplier } from './draggable-binding.ts';
+export { Draggable, DroppableBinding, type DraggableOptions } from './draggable-binding.ts';
+export type { TransformApplier } from './apply-transform.ts';
 export { DragHandle, DropHandle, type NeodragHost } from './handles.ts';
 export { createSessionKey } from './session-key.ts';
 export { transitionSession, isTerminal } from './state-machine.ts';
@@ -32,11 +33,8 @@ export {
 	type SessionListener,
 	type SessionState,
 } from './types.ts';
+export { DEFAULT_DRAG_PLUGINS, MINIMAL_DRAG_PLUGINS } from '../defaults.ts';
 export {
-	DEFAULT_DRAG_PLUGINS,
-	MINIMAL_DRAG_PLUGINS,
-	transform,
-	transformWith,
 	threshold,
 	ignoreMultitouch,
 	stateMarker,

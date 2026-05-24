@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Draggable, transform } from '../../src/interactions/index.ts';
+	import { Draggable } from '../../src/interactions/index.ts';
 
 	const { external = 0 }: { external?: number } = $props();
 
-	const drag = new Draggable({ plugins: [transform] });
+	const drag = new Draggable({ plugins: [] });
 
 	void external;
 </script>

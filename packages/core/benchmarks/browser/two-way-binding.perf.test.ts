@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
-import { events, position, transform } from '../../src/plugins.ts';
+import { events, position } from '../../src/plugins.ts';
 import {
 	createBox,
 	dragSteps,
@@ -20,8 +20,7 @@ describe('two-way binding perf', () => {
 		const { engine, box, handle, pos, build } = setupTwoWayBinding(
 			Neodrag,
 			position,
-			transform,
-			events,
+				events,
 		);
 
 		const stats = runBench('two-way · idle reconcile ×60', 60, 10, () => {
@@ -41,8 +40,7 @@ describe('two-way binding perf', () => {
 		const { engine, box, handle, pos, build } = setupTwoWayBinding(
 			Neodrag,
 			position,
-			transform,
-			events,
+				events,
 			'100px',
 			'220px',
 		);
@@ -65,8 +63,7 @@ describe('two-way binding perf', () => {
 		const { engine, box, handle, build } = setupTwoWayBinding(
 			Neodrag,
 			position,
-			transform,
-			events,
+				events,
 			'280px',
 			'100px',
 		);
@@ -92,7 +89,7 @@ describe('two-way binding perf', () => {
 			const box = createBox('100px', '340px');
 			let x = 0;
 			let y = 0;
-			const build = () => [transform, position({ current: { x, y } })];
+			const build = () => [position({ current: { x, y } })];
 			const handle = engine.draggable(box, build());
 			results.push(
 				runBench('two-way · position only · idle update', 80, 10, () => {
@@ -110,8 +107,7 @@ describe('two-way binding perf', () => {
 			const { engine, box, handle, pos, build } = setupTwoWayBinding(
 				Neodrag,
 				position,
-				transform,
-				events,
+						events,
 				'280px',
 				'340px',
 			);

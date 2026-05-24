@@ -4,14 +4,7 @@
 import type { Locator } from '@vitest/browser/context';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import {
-	accepts,
-	axis,
-	disabled,
-	dragData,
-	onDrop,
-	transform,
-} from '../../src/interactions/index.ts';
+import { accepts, axis, disabled, dragData, onDrop } from '../../src/interactions/index.ts';
 import InteractionsBox from '../components/InteractionsBox.svelte';
 import InteractionsBoundsParent from '../components/InteractionsBoundsParent.svelte';
 import InteractionsDrop from '../components/InteractionsDrop.svelte';
@@ -29,7 +22,7 @@ describe('human expectations (Playwright + Svelte)', () => {
 	});
 
 	test('element moves where you drag it', async () => {
-		const comp = render(InteractionsBox, { plugins: [transform] });
+		const comp = render(InteractionsBox, { plugins: [] });
 		const draggable = comp.getByTestId('draggable');
 		await dragAndDrop(draggable, { deltaX: 100, deltaY: 100 }, { steps: 8 });
 		await sleepAndWaitForEffects();
@@ -37,7 +30,7 @@ describe('human expectations (Playwright + Svelte)', () => {
 	});
 
 	test('disabled element stays put', async () => {
-		const comp = render(InteractionsBox, { plugins: [transform, disabled()] });
+		const comp = render(InteractionsBox, { plugins: [disabled()] });
 		const el = comp.getByTestId('draggable');
 		await dragAndDrop(el, { deltaX: 60, deltaY: 60 }, { steps: 6 });
 		const node = await el.element();
@@ -46,7 +39,7 @@ describe('human expectations (Playwright + Svelte)', () => {
 	});
 
 	test('axis lock keeps perpendicular offset near zero', async () => {
-		const comp = render(InteractionsBox, { plugins: [transform, axis('x')] });
+		const comp = render(InteractionsBox, { plugins: [axis('x')] });
 		const el = comp.getByTestId('draggable');
 		await dragAndDrop(el, { deltaX: 80, deltaY: 80 }, { steps: 8 });
 		await sleepAndWaitForEffects();
@@ -67,7 +60,7 @@ describe('human expectations (Playwright + Svelte)', () => {
 	test('drop succeeds once over the zone with valid data', async () => {
 		const drops: { kind: string }[] = [];
 		const comp = render(InteractionsDrop, {
-			dragPlugins: [transform, dragData(() => ({ kind: 'card' }))],
+			dragPlugins: [dragData(() => ({ kind: 'card' }))],
 			dropPlugins: [
 				accepts<{ kind: string }>((d) => d.kind === 'card'),
 				onDrop((data) => drops.push(data)),

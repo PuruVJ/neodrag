@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { Neodrag, position, transform, events } from '../../src/interactions/index.ts';
+import { Neodrag, position, events } from '../../src/interactions/index.ts';
 import TwoWayBindingBox from '../components/TwoWayBindingBox.svelte';
 import { dragAndDrop, startCursorTracking, stopCursorTracking } from '../mouse.ts';
 import { sleepAndWaitForEffects, translate } from '../utils.ts';

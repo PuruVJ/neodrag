@@ -1,13 +1,7 @@
 import type { Locator } from '@vitest/browser/context';
 import { describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import {
-	accepts,
-	defineDropPlugin,
-	dragData,
-	onDrop,
-	transform,
-} from '../../src/interactions/index.ts';
+import { accepts, defineDropPlugin, dragData, onDrop } from '../../src/interactions/index.ts';
 import InteractionsDropMulti from '../components/InteractionsDropMulti.svelte';
 import { dragAndDrop } from '../mouse.ts';
 import { sleepAndWaitForEffects } from '../utils.ts';
@@ -24,7 +18,7 @@ describe('drop stopPropagation', () => {
 	test('inner stopPropagation prevents outer enter and drop', async () => {
 		const drops: string[] = [];
 		const comp = render(InteractionsDropMulti, {
-			dragPlugins: [transform, dragData(() => ({ zone: 'inner' }))],
+			dragPlugins: [dragData(() => ({ zone: 'inner' }))],
 			outerDropPlugins: [
 				accepts<{ zone: string }>(() => true),
 				onDrop((d) => drops.push(`outer:${d.zone}`)),

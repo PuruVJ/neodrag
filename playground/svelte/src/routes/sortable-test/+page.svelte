@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Neodrag } from '@neodrag/svelte'
-	import { transform } from '@neodrag/svelte/plugins';
+	
 	import { Droppable, sortable } from '@neodrag/svelte/drop';
 
 	let items = $state(['Apple', 'Banana', 'Cherry', 'Date', 'Elderberry']);
@@ -20,7 +20,7 @@
 	};
 
 	const bindDrag = (n: HTMLElement, plugins: ReturnType<typeof list.item>) => {
-		const h = Neodrag.shared.draggable(n, [transform, ...plugins]);
+		const h = Neodrag.shared.draggable(n, [...plugins]);
 		return () => h.destroy();
 	};
 </script>

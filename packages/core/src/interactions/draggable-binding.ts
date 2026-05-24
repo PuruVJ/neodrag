@@ -1,27 +1,19 @@
 import { Neodrag } from './engine.ts';
 import type { DragHandle } from './handles.ts';
-import { transformWith } from './plugins/transform.ts';
 import {
 	hasReactiveSlots,
 	PluginListResolver,
 	resolvedPluginsUnchanged,
 } from './resolve-plugins.ts';
+import type { TransformApplier } from './apply-transform.ts';
 import type { DragPlugin, DragPluginList } from './types.ts';
 
-export type TransformApplier = (args: {
-	offset: { x: number; y: number };
-	rootNode: HTMLElement | SVGElement;
-}) => void;
+export type { TransformApplier };
 
 export interface DraggableOptions {
 	engine?: Neodrag;
 	plugins: DragPluginList;
 	applyTransform?: TransformApplier;
-}
-
-function withApplyTransform(slots: DragPluginList, applyTransform?: TransformApplier): DragPluginList {
-	if (!applyTransform) return slots;
-	return [...slots, transformWith(applyTransform)];
 }
 
 export class Draggable {
@@ -32,11 +24,12 @@ export class Draggable {
 	#lastResolved: DragPlugin[] | null = null;
 
 	readonly attachment: (node: HTMLElement | SVGElement) => () => void;
+	readonly #applyTransform?: TransformApplier;
 
 	constructor(options: DraggableOptions) {
 		this.#engine = options.engine ?? Neodrag.shared;
-		const slots = withApplyTransform(options.plugins, options.applyTransform);
-		this.#resolver = new PluginListResolver(slots);
+		this.#applyTransform = options.applyTransform;
+		this.#resolver = new PluginListResolver(options.plugins);
 
 		this.attachment = (node) => {
 			this.attach(node);
@@ -53,7 +46,9 @@ export class Draggable {
 		this.#node = node;
 		const resolved = this.#resolver.resolveFull();
 		this.#lastResolved = resolved;
-		this.#handle = this.#engine.draggable(node, resolved);
+		this.#handle = this.#engine.draggable(node, resolved, {
+			applyTransform: this.#applyTransform,
+		});
 	}
 
 	detach() {

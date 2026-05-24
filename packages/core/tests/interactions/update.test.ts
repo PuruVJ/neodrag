@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { Neodrag, position, transform } from '../../src/interactions/index.ts';
+import { Neodrag, position } from '../../src/interactions/index.ts';
 
 describe('engine.update symbol-keyed diff', () => {
 	it('does not re-init when same plugin key gets new options object', () => {
@@ -18,9 +18,9 @@ describe('engine.update symbol-keyed diff', () => {
 			return origInit?.(ctx);
 		};
 
-		engine.draggable(node, [transform, pos]);
+		engine.draggable(node, [pos]);
 		initCalls = 0;
-		engine.update(node, [transform, position({ current: { x: 10, y: 20 } })]);
+		engine.update(node, [position({ current: { x: 10, y: 20 } })]);
 		expect(initCalls).toBe(0);
 		node.remove();
 	});
@@ -36,7 +36,7 @@ describe('engine.update symbol-keyed diff', () => {
 			initCalls++;
 			return origInit?.(ctx);
 		};
-		const plugins = [transform, pos];
+		const plugins = [pos];
 		engine.draggable(node, plugins);
 		initCalls = 0;
 		engine.update(node, plugins);

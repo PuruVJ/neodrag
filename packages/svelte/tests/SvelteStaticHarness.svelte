@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Draggable } from '@neodrag/svelte';
-	import { transform } from '@neodrag/svelte/plugins';
+	
 
 	const { tick = 0 }: { tick?: number } = $props();
-	const drag = new Draggable({ plugins: [transform] });
+	const drag = new Draggable({ plugins: [] });
 	void tick;
 </script>
 

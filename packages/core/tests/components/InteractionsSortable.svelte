@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Neodrag, sortable, transform } from '../../src/interactions/index.ts';
+	import { Neodrag, sortable } from '../../src/interactions/index.ts';
 
 	let items = $state([
 		{ id: '1', text: 'One' },
@@ -21,7 +21,7 @@
 		return () => h.destroy();
 	};
 	const bindDrag = (n: HTMLElement, plugins: ReturnType<typeof list.item>) => {
-		const h = engine.draggable(n, [transform, ...plugins]);
+		const h = engine.draggable(n, [...plugins]);
 		return () => h.destroy();
 	};
 </script>

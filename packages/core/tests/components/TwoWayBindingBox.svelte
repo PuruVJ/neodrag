@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Draggable, events, position, transform } from '../../src/interactions/index.ts';
+	import { Draggable, events, position } from '../../src/interactions/index.ts';
 
 	const {
 		testid = 'draggable',
@@ -30,8 +30,7 @@
 	const drag = new Draggable({
 		engine,
 		plugins: [
-			transform,
-			() => {
+				() => {
 				onReconcile?.();
 				return position({ current: { x, y } });
 			},

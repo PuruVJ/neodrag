@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
 import { render } from 'solid-js/web';
 import { describe, expect, test } from 'vitest';
-import { axis, position, transform } from '@neodrag/core/plugins';
+import { axis, position } from '@neodrag/core/plugins';
 import { useDraggable } from '../src/index.ts';
 
 function ReactiveBox() {
@@ -51,7 +51,7 @@ describe('@neodrag/solid reactivity', () => {
 
 	test('static useDraggable slots', async () => {
 		function Static() {
-			const [, ref] = useDraggable([transform]);
+			const [, ref] = useDraggable([]);
 			return (
 				<div
 					ref={ref}

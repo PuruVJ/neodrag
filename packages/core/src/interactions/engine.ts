@@ -15,7 +15,7 @@ import {
 	resolvePluginList,
 } from './resolve-plugins.ts';
 import { DEFAULT_DRAG_PLUGINS } from '../defaults.ts';
-import { TRANSFORM_KEY } from './plugins/keys.ts';
+import { applyDragTransform, type TransformApplier } from './apply-transform.ts';
 import { DropTargetTracker, type DropTargetHost } from './drop-targets.ts';
 import { createDragSession, resolveEndReason } from './session.ts';
 import { transitionSession } from './state-machine.ts';
@@ -147,7 +147,11 @@ export class Neodrag {
 		return () => this.#sessionListeners.delete(listener);
 	}
 
-	draggable(node: HTMLElement | SVGElement, plugins: DragPluginList = []): DragHandle {
+	draggable(
+		node: HTMLElement | SVGElement,
+		plugins: DragPluginList = [],
+		options: { applyTransform?: TransformApplier } = {},
+	): DragHandle {
 		if (is_svg_svg_element(node)) {
 			throw new Error(
 				'Dragging the root SVG element directly is not recommended. Wrap it in a div or use a child element.',
@@ -157,11 +161,13 @@ export class Neodrag {
 		this.#initListeners();
 
 		const inst = new DragInstance(node, this.#idleSession);
+		inst.applyTransform = options.applyTransform;
 		inst.lastSlots = plugins;
 		inst.slotStaticCache = [];
 		const resolved = resolvePluginList(plugins, inst.slotStaticCache, false);
 		inst.lastList = resolved;
 		this.#installDragPlugins(inst, resolved);
+		this.#syncDragTransform(inst);
 		this.#dragSources.set(node, inst);
 
 		return new DragHandle(this, node, () => {
@@ -498,6 +504,7 @@ export class Neodrag {
 		inst.offsetY += inst.proposedY;
 		inst.proposedX = 0;
 		inst.proposedY = 0;
+		inst.dragCtx.effect(() => this.#syncDragTransform(inst));
 		inst.effects.flush();
 
 		if (this.#dropCount > 0) this.#dropTracker.queueUpdate(e);
@@ -795,18 +802,12 @@ export class Neodrag {
 		}
 	}
 
+	#syncDragTransform(inst: DragInstance) {
+		applyDragTransform(inst.dragCtx, inst.applyTransform);
+	}
+
 	#syncTransformAfterPluginDiff(inst: DragInstance) {
-		const transformPlugin = inst.byKey.get(TRANSFORM_KEY);
-		if (!transformPlugin?.update) {
-			inst.effects.flush();
-			return;
-		}
-		this.#pluginVoid(
-			inst,
-			transformPlugin.key,
-			{ phase: 'update', plugin: { name: transformPlugin.name, hook: 'update' }, node: inst.rootNode },
-			() => transformPlugin.update!(inst.dragCtx, inst.states.get(transformPlugin.key)),
-		);
+		this.#syncDragTransform(inst);
 		inst.effects.flush();
 	}
 

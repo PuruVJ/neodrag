@@ -1,15 +1,15 @@
 import { describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { Neodrag, transform } from '../../src/interactions/index.ts';
+import { Neodrag } from '../../src/interactions/index.ts';
 import InteractionsBox from '../components/InteractionsBox.svelte';
 import { dragAndDrop } from '../mouse.ts';
 import { sleepAndWaitForEffects } from '../utils.ts';
 
 describe('large coordinate precision', () => {
 	test('small drag delta is preserved at large translate offsets', async () => {
-		const engine = new Neodrag({ plugins: [transform] });
+		const engine = new Neodrag({ plugins: [] });
 		const comp = render(InteractionsBox, {
-			plugins: [transform],
+			plugins: [],
 			engine,
 		});
 		const box = comp.getByTestId('draggable');

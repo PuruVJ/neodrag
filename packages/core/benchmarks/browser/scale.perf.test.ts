@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
-import { transform } from '../../src/plugins.ts';
+
 import {
 	createBox,
 	dragSteps,

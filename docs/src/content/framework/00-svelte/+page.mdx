@@ -27,9 +27,9 @@ Create a **`Draggable`** once in `<script>` (stable attachment), then attach it.
 ```svelte
 <script>
   import { Draggable } from '@neodrag/svelte';
-  import { transform } from '@neodrag/svelte/plugins';
+  
 
-  const drag = new Draggable({ plugins: [transform] });
+  const drag = new Draggable({ plugins: [] });
 </script>
 
 <div {@attach drag.attachment}>Drag me around!</div>

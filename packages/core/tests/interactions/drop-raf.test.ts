@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineDropPlugin, Neodrag, threshold, transform } from '../../src/interactions/index.ts';
+import { defineDropPlugin, Neodrag, threshold } from '../../src/interactions/index.ts';
 
 function patchPointerCapture() {
 	const proto = HTMLElement.prototype;
@@ -51,7 +51,7 @@ describe('drop target rAF coalescing', () => {
 			},
 		}))();
 
-		const engine = new Neodrag({ plugins: [transform, threshold(null)], dev: false });
+		const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
 		const zone = document.createElement('div');
 		zone.style.cssText = 'position:absolute;left:0;top:0;width:400px;height:400px';
 		const box = document.createElement('div');

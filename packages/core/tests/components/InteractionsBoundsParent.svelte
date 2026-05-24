@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { bounds, BoundsFrom, transform } from '../../src/interactions/index.ts';
+	import { bounds, BoundsFrom } from '../../src/interactions/index.ts';
 	import InteractionsBox from './InteractionsBox.svelte';
 </script>
 
 <div class="parent" data-testid="parent">
-	<InteractionsBox plugins={[transform, bounds(BoundsFrom.parent())]} />
+	<InteractionsBox plugins={[bounds(BoundsFrom.parent())]} />
 </div>
 
 <style>

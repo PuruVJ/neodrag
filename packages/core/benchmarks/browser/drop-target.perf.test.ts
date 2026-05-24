@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
 import { defineDropPlugin } from '../../src/interactions/types.ts';
-import { threshold, transform } from '../../src/plugins.ts';
+import { threshold } from '../../src/plugins.ts';
 import { pointer, resetBody, runBench } from './helpers.ts';
 
 const ZONE_N = 10;
@@ -26,7 +26,7 @@ function setupSoleDrop() {
 		over() {},
 	}))();
 
-	const engine = new Neodrag({ plugins: [transform, threshold(null)], dev: false });
+	const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
 	engine.droppable(zone, [noopDrop]);
 	engine.draggable(box, []);
 
@@ -56,7 +56,7 @@ function setupMultiDrop() {
 		over() {},
 	}))();
 
-	const engine = new Neodrag({ plugins: [transform, threshold(null)], dev: false });
+	const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
 	for (const z of zones) engine.droppable(z, [noopDrop]);
 	engine.draggable(box, []);
 

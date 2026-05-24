@@ -1,7 +1,7 @@
 import type { Locator } from '@vitest/browser/context';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { accepts, dragData, onDrop, transform } from '../../src/interactions/index.ts';
+import { accepts, dragData, onDrop } from '../../src/interactions/index.ts';
 import InteractionsDropMulti from '../components/InteractionsDropMulti.svelte';
 import { dragAndDrop, startCursorTracking, stopCursorTracking } from '../mouse.ts';
 import { sleepAndWaitForEffects } from '../utils.ts';
@@ -17,7 +17,7 @@ describe('interactions drop multi', () => {
 		startCursorTracking();
 		const drops: string[] = [];
 		const comp = render(InteractionsDropMulti, {
-			dragPlugins: [transform, dragData(() => ({ zone: 'inner' }))],
+			dragPlugins: [dragData(() => ({ zone: 'inner' }))],
 			outerDropPlugins: [
 				accepts<{ zone: string }>((d) => d.zone === 'outer'),
 				onDrop((d) => drops.push(`outer:${d.zone}`)),
@@ -52,7 +52,7 @@ describe('interactions drop multi', () => {
 		startCursorTracking();
 		const drops: { kind: string }[] = [];
 		const comp = render(InteractionsDropMulti, {
-			dragPlugins: [transform, dragData(() => ({ zone: 'wrong' }))],
+			dragPlugins: [dragData(() => ({ zone: 'wrong' }))],
 			innerDropPlugins: [
 				accepts<{ zone: string }>((d) => d.zone === 'inner'),
 				onDrop((d) => drops.push(d)),

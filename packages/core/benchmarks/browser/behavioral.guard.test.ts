@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { DEFAULTS, Neodrag } from '../../src/index.ts';
-import { events, position, threshold, transform } from '../../src/plugins.ts';
+import { events, position, threshold } from '../../src/plugins.ts';
 import {
 	assertTranslate,
 	createBox,
@@ -39,7 +39,7 @@ describe('Chromium behavioral guards', () => {
 		resetBody();
 		const box = createBox();
 		const engine = new Neodrag({
-			plugins: [transform, position({ current: { x: 0, y: 0 } })],
+			plugins: [position({ current: { x: 0, y: 0 } })],
 			dev: false,
 		});
 		const handle = engine.draggable(box, [threshold(null)]);
@@ -78,8 +78,7 @@ describe('Chromium behavioral guards', () => {
 		const engine = new Neodrag({ dev: false });
 		const pos = { x: 0, y: 0 };
 		const build = () => [
-			transform,
-			position({ current: { x: pos.x, y: pos.y } }),
+				position({ current: { x: pos.x, y: pos.y } }),
 			events({
 				onDrag(data) {
 					pos.x = data.offset.x;
@@ -106,11 +105,10 @@ describe('Chromium behavioral guards', () => {
 		const box = createBox('300px', '360px');
 		const engine = new Neodrag({ dev: false });
 		const handle = engine.draggable(box, [
-			transform,
-			position({ current: { x: 0, y: 0 } }),
+				position({ current: { x: 0, y: 0 } }),
 		]);
 
-		handle.update([transform, position({ current: { x: 55, y: 77 } })]);
+		handle.update([position({ current: { x: 55, y: 77 } })]);
 		await flushEffects();
 
 		assertTranslate(box, { x: 55, y: 77 }, 2);

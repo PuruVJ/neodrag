@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Draggable, position, transform } from '../../src/interactions/index.ts';
+	import { Draggable, position } from '../../src/interactions/index.ts';
 
 	const {
 		engine,
@@ -19,7 +19,7 @@
 
 	const drag = new Draggable({
 		engine,
-		plugins: [transform, () => position({ current: pos })],
+		plugins: [() => position({ current: pos })],
 	});
 </script>
 

@@ -1,7 +1,7 @@
 import type { Locator } from '@vitest/browser/context';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { accepts, dragData, onDrop, transform } from '../../src/interactions/index.ts';
+import { accepts, dragData, onDrop } from '../../src/interactions/index.ts';
 import InteractionsDrop from '../components/InteractionsDrop.svelte';
 import { dragAndDrop, startCursorTracking, stopCursorTracking } from '../mouse.ts';
 import { sleepAndWaitForEffects } from '../utils.ts';
@@ -15,7 +15,7 @@ describe('interactions drop', () => {
 		startCursorTracking();
 		drops.length = 0;
 		const comp = render(InteractionsDrop, {
-			dragPlugins: [transform, dragData(() => ({ kind: 'card' }))],
+			dragPlugins: [dragData(() => ({ kind: 'card' }))],
 			dropPlugins: [
 				accepts<{ kind: string }>((d) => d.kind === 'card'),
 				onDrop((data) => {

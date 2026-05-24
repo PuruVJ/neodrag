@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { describe, expect, test } from 'vitest';
-import { axis, position, transform } from '@neodrag/core/plugins';
+import { axis, position } from '@neodrag/core/plugins';
 import { useDraggable } from '../src/index.ts';
 
 function ReactiveBox({ x, y }: { x: number; y: number }) {
@@ -16,7 +16,7 @@ function ReactiveBox({ x, y }: { x: number; y: number }) {
 }
 
 function StaticBox() {
-	const { ref } = useDraggable([transform]);
+	const { ref } = useDraggable([]);
 	return (
 		<div
 			ref={ref}

@@ -1,4 +1,5 @@
 import { EffectScheduler } from './effects.ts';
+import type { TransformApplier } from './apply-transform.ts';
 import type {
 	DragCtx,
 	DragPlugin,
@@ -102,6 +103,7 @@ export class DragInstance {
 	isUpdating = false;
 	updateDepth = 0;
 	pendingUpdate: import('./types.ts').DragPluginList | null = null;
+	applyTransform?: TransformApplier;
 
 	constructor(node: HTMLElement | SVGElement, idleSession: DragSession) {
 		this.rootNode = node;
