@@ -3,8 +3,17 @@
  */
 import { describe, expect, it } from 'vitest';
 import { MINIMAL_DRAG_PLUGINS, Neodrag } from '../../src/index.ts';
-import { sortable } from '../../src/interactions/sortable/index.ts';
+import { sortable } from '../../src/drop/index.ts';
 
+import { commands } from '@vitest/browser/context';
+import {
+	BASELINE_REL,
+	compareToBaseline,
+	formatRegressionReport,
+	LATEST_REL,
+	toReport,
+	type BenchReport,
+} from '../report-storage.ts';
 import {
 	createBox,
 	dragSteps,
@@ -179,7 +188,32 @@ describe('Chromium perf suite', () => {
 		console.log('\nComparisons:');
 		console.log(' ·', ratioLabel(results[1]!, results[0]!));
 		console.log(' ·', ratioLabel(results[5]!, results[4]!));
-		console.log('\nJSON:', JSON.stringify(results, null, 2));
+		const report = toReport(results);
+		await commands.writeFile(LATEST_REL, `${JSON.stringify(report, null, 2)}\n`);
+
+		let baseline: BenchReport | null = null;
+		try {
+			const raw = await commands.readFile(BASELINE_REL);
+			baseline = JSON.parse(raw) as BenchReport;
+		} catch {
+			baseline = null;
+		}
+
+		if (baseline) {
+			const comparison = compareToBaseline(results, baseline);
+			console.log('\n=== Baseline comparison ===\n');
+			console.log(formatRegressionReport(comparison, baseline));
+			expect(
+				comparison.regressions,
+				`Performance regressions vs baseline:\n${comparison.regressions
+					.map((r) => `${r.name}: ${r.ratio.toFixed(2)}× median`)
+					.join('\n')}`,
+			).toEqual([]);
+		} else {
+			console.warn(
+				`\nNo baseline at ${BASELINE_REL}. Run \`pnpm bench:baseline\` after reviewing latest.json.`,
+			);
+		}
 
 		const defaultDrag = results[0]!;
 		const minimalDrag = results[1]!;

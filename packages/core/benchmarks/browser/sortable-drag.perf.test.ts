@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
-import { sortable } from '../../src/interactions/sortable/index.ts';
+import { sortable } from '../../src/drop/index.ts';
 
 import { pointer, resetBody, runBench } from './helpers.ts';
 

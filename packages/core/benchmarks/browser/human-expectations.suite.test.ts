@@ -5,9 +5,9 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULTS, Neodrag } from '../../src/index.ts';
 import { BoundsFrom, axis, bounds, disabled, threshold } from '../../src/plugins.ts';
-import { accepts, highlight, onDrop } from '../../src/interactions/drop/index.ts';
+import { accepts, highlight, onDrop } from '../../src/drop/plugins.ts';
 import { dragData } from '../../src/plugins.ts';
-import { sortable } from '../../src/interactions/sortable/index.ts';
+import { sortable } from '../../src/drop/index.ts';
 import {
 	assertTranslate,
 	createBox,

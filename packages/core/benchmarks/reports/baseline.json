@@ -1,0 +1,54 @@
+{
+  "recordedAt": "2026-05-24T17:47:10.578Z",
+  "results": [
+    {
+      "name": "steady-state · default plugins · 12-step drag",
+      "meanMs": 0.09666666676600774,
+      "medianMs": 0.09999999403953552,
+      "p99Ms": 0.20000001788139343,
+      "hz": 10344.827575575866
+    },
+    {
+      "name": "steady-state · MINIMAL_DRAG_PLUGINS · 12-step drag",
+      "meanMs": 0.08200000007947286,
+      "medianMs": 0.09999999403953552,
+      "p99Ms": 0.20000001788139343,
+      "hz": 12195.12193940023
+    },
+    {
+      "name": "idle · pointermove on draggable node",
+      "meanMs": 0.0021000000089406966,
+      "medianMs": 0,
+      "p99Ms": 0.09999999403953552,
+      "hz": 476190.47416310734
+    },
+    {
+      "name": "idle · pointermove on document (delegate)",
+      "meanMs": 0.0021499999910593033,
+      "medianMs": 0,
+      "p99Ms": 0.09999999403953552,
+      "hz": 465116.28100393654
+    },
+    {
+      "name": "sortable index · querySelector × 40 items",
+      "meanMs": 0.105,
+      "medianMs": 0.09999999403953552,
+      "p99Ms": 0.20000001788139343,
+      "hz": 9523.809523809525
+    },
+    {
+      "name": "sortable index · Map registry × 40 items",
+      "meanMs": 0.07850000008940697,
+      "medianMs": 0.09999999403953552,
+      "p99Ms": 0.20000001788139343,
+      "hz": 12738.853488675895
+    },
+    {
+      "name": "sortable over · 40 items · dragging",
+      "meanMs": 0.23099999994039536,
+      "medianMs": 0.20000001788139343,
+      "p99Ms": 0.4000000059604645,
+      "hz": 4329.004330121336
+    }
+  ]
+}

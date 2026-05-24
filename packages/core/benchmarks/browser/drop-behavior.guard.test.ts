@@ -3,9 +3,9 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
-import { accepts, onDrop } from '../../src/interactions/drop/index.ts';
+import { accepts, onDrop } from '../../src/drop/plugins.ts';
 import { dragData, threshold } from '../../src/plugins.ts';
-import { sortable } from '../../src/interactions/sortable/index.ts';
+import { sortable } from '../../src/drop/index.ts';
 import { createBox, dragSteps, flushEffects, resetBody } from './helpers.ts';
 
 describe('drop & sortable behavioral guards', () => {

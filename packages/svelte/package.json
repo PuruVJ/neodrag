@@ -26,12 +26,6 @@
 			"import": "./src/drop/index.svelte.ts",
 			"default": "./src/drop/index.svelte.ts"
 		},
-		"./interactions": {
-			"types": "./src/index.svelte.ts",
-			"svelte": "./src/index.svelte.ts",
-			"import": "./src/index.svelte.ts",
-			"default": "./src/index.svelte.ts"
-		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {

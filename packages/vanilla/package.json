@@ -24,10 +24,6 @@
 			"types": "./src/drop.ts",
 			"import": "./src/drop.ts"
 		},
-		"./interactions": {
-			"types": "./src/index.ts",
-			"import": "./src/index.ts"
-		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {

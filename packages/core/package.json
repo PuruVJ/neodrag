@@ -23,18 +23,6 @@
 			"types": "./src/drop/plugins.ts",
 			"import": "./src/drop/plugins.ts"
 		},
-		"./interactions": {
-			"types": "./src/interactions/index.ts",
-			"import": "./src/interactions/index.ts"
-		},
-		"./interactions/drop": {
-			"types": "./src/interactions/drop/index.ts",
-			"import": "./src/interactions/drop/index.ts"
-		},
-		"./interactions/sortable": {
-			"types": "./src/interactions/sortable/index.ts",
-			"import": "./src/interactions/sortable/index.ts"
-		},
 		"./browser": {
 			"types": "./src/browser.ts",
 			"import": "./src/browser.ts"
@@ -60,18 +48,6 @@
 				"types": "./dist/drop/plugins.d.ts",
 				"import": "./dist/drop/plugins.js"
 			},
-			"./interactions": {
-				"types": "./dist/interactions/index.d.ts",
-				"import": "./dist/interactions/index.js"
-			},
-			"./interactions/drop": {
-				"types": "./dist/interactions/drop/index.d.ts",
-				"import": "./dist/interactions/drop/index.js"
-			},
-			"./interactions/sortable": {
-				"types": "./dist/interactions/sortable/index.d.ts",
-				"import": "./dist/interactions/sortable/index.js"
-			},
 			"./browser": {
 				"types": "./dist/browser.d.ts",
 				"import": "./dist/browser.js"
@@ -92,6 +68,7 @@
 		"bench:browser": "vitest run --config vitest.bench.browser.config.ts",
 		"bench:all": "pnpm test:bench:guard",
 		"bench:run": "pnpm test:bench:guard",
+		"bench:baseline": "node --experimental-strip-types benchmarks/scripts/record-baseline.ts",
 		"test:coverage": "vitest run --coverage --browser=chromium"
 	},
 	"repository": {
