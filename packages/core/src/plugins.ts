@@ -1,5 +1,9 @@
 export * from './interactions/plugins/index.ts';
-export { resolveDragPlugins } from './interactions/resolve-plugins.ts';
+export {
+	resolveDragPlugins,
+	resolveDropPlugins,
+	resolvePlugins,
+} from './interactions/resolve-plugins.ts';
 export {
 	defineDragPlugin,
 	type DragPlugin as Plugin,

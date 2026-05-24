@@ -1,4 +1,5 @@
 import type { ActiveSession } from './instance.ts';
+import { transitionSession } from './state-machine.ts';
 import type { DragSession, EndReason } from './types.ts';
 
 export function createDragSession(
@@ -39,7 +40,7 @@ export function createDragSession(
 			setVisual(node);
 		},
 		cancel() {
-			active.state = 'cancelled';
+			active.state = transitionSession(active.state, { type: 'cancel' });
 		},
 		stopPropagation() {
 			active.propagationStopped = true;

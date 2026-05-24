@@ -269,10 +269,16 @@ export class DropInstance {
 	#host: DropCtxHost;
 
 	flat: import('./types.ts').DropPlugin[] = [];
+	lastList: import('./types.ts').DropPlugin[] | null = null;
 	byKey = new Map<symbol, import('./types.ts').DropPlugin>();
 	states = new Map<symbol, unknown>();
 	failed = new Set<symbol>();
 	isOver = false;
+
+	isProcessingExternalUpdate = false;
+	isUpdating = false;
+	updateDepth = 0;
+	pendingUpdate: import('./types.ts').DropPlugin[] | null = null;
 
 	enterChain: import('./types.ts').DropPlugin[] = [];
 	overChain: import('./types.ts').DropPlugin[] = [];

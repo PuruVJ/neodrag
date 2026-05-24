@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const engine = Neodrag.shared;
 
-export type ReactiveDragPluginInput = DragPluginInput | (() => DragPluginInput);
+export type ReactiveDragPluginInput = DragPluginInput;
 
 export interface DragState extends DragEventData {
 	isDragging: boolean;
@@ -18,7 +18,7 @@ const defaultState: DragState = {
 	event: null as unknown as PointerEvent,
 };
 
-function resolvePlugins(plugins: ReactiveDragPluginInput): DragPluginInput {
+function resolvePlugins(plugins: DragPluginInput) {
 	return typeof plugins === 'function' ? plugins() : plugins;
 }
 
@@ -92,6 +92,38 @@ export function useDraggable(
 		const handle = handleRef.current;
 		if (!node || !handle) return;
 		handle.update(withSync(plugins, sync.current));
+	});
+}
+
+export function useDroppable(
+	ref: React.RefObject<HTMLElement | SVGElement | null>,
+	plugins: import('@neodrag/core').DropPluginInput = [],
+) {
+	const handleRef = useRef<ReturnType<typeof engine.droppable> | null>(null);
+	const pluginsRef = useRef(plugins);
+	pluginsRef.current = plugins;
+
+	useEffect(() => {
+		const node = ref.current;
+		if (!node) return;
+
+		const resolved =
+			typeof pluginsRef.current === 'function' ? pluginsRef.current() : pluginsRef.current;
+		const handle = engine.droppable(node, resolved);
+		handleRef.current = handle;
+
+		return () => {
+			handle.destroy();
+			handleRef.current = null;
+		};
+	}, [ref]);
+
+	useLayoutEffect(() => {
+		const node = ref.current;
+		const handle = handleRef.current;
+		if (!node || !handle) return;
+		const resolved = typeof plugins === 'function' ? plugins() : plugins;
+		handle.update(resolved);
 	});
 }
 

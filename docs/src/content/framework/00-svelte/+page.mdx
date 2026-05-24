@@ -14,6 +14,10 @@ npm i @neodrag/svelte@next
 
 Requires **Svelte 5**.
 
+## Plugins
+
+Import built-in drag plugins from `@neodrag/core/plugins` or `@neodrag/svelte/plugins` (not the main `@neodrag/svelte` entry). Drop and sortable helpers live under `@neodrag/svelte/drop`.
+
 ## Usage
 
 Pass a plugin list (or nothing for defaults) to `draggable()` and attach it to an element:
@@ -32,13 +36,8 @@ Pass a plugin list (or nothing for defaults) to `draggable()` and attach it to a
 
 ```svelte
 <script>
-  import {
-    draggable,
-    axis,
-    grid,
-    bounds,
-    BoundsFrom,
-  } from '@neodrag/svelte';
+  import { draggable } from '@neodrag/svelte';
+  import { axis, grid, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 </script>
 
 <div {@attach draggable([axis('x'), grid([20, 20])])}>

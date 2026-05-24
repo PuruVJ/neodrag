@@ -8,6 +8,8 @@ tagline: 'A lightweight directive to make your elements draggable.'
 npm i @neodrag/vue@next
 ```
 
+Import built-in plugins from `@neodrag/core/plugins` or `@neodrag/vue/plugins`. Use `v-droppable` with the same reactive plugin input as `v-draggable`.
+
 ## Usage
 
 Basic usage
@@ -26,7 +28,8 @@ With plugins
 
 ```vue
 <script setup>
-import { vDraggable, axis, grid } from '@neodrag/vue';
+import { vDraggable } from '@neodrag/vue';
+import { axis, grid } from '@neodrag/vue/plugins';
 </script>
 
 <template>

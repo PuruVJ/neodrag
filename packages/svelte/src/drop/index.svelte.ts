@@ -1,9 +1,14 @@
-import { Neodrag, type EngineOptions, type DropPluginInput } from '@neodrag/core';
+import { Neodrag, type DropPluginInput, type EngineOptions } from '@neodrag/core';
 import { Attachment } from 'svelte/attachments';
 
 export type NeodragDropOptions = EngineOptions;
+export type ReactiveDropPluginInput = DropPluginInput;
 
 export { Neodrag };
+
+function resolvePlugins(plugins: DropPluginInput) {
+	return typeof plugins === 'function' ? plugins() : plugins;
+}
 
 export class Droppable {
 	readonly #engine: Neodrag;
@@ -18,6 +23,14 @@ export class Droppable {
 	attach(element: HTMLElement | SVGElement) {
 		this.detach();
 		this.#handle = this.#engine.droppable(element, this.#plugins);
+		if (typeof this.#plugins === 'function') {
+			return $effect.root(() => {
+				$effect.pre(() => {
+					this.#handle?.update(resolvePlugins(this.#plugins));
+				});
+				return () => this.detach();
+			});
+		}
 		return () => this.detach();
 	}
 
@@ -31,10 +44,23 @@ export class Droppable {
 	}
 }
 
-export function droppable(plugins?: DropPluginInput): Attachment<HTMLElement | SVGElement> {
-	return new Droppable(Neodrag.shared, plugins ?? []).attachment();
+export function droppable(plugins: DropPluginInput = []): Attachment<HTMLElement | SVGElement> {
+	return (element) => {
+		const engine = Neodrag.shared;
+		const handle = engine.droppable(element, plugins);
+
+		if (typeof plugins !== 'function') {
+			return () => handle.destroy();
+		}
+
+		return $effect.root(() => {
+			$effect.pre(() => {
+				handle.update(resolvePlugins(plugins));
+			});
+			return () => handle.destroy();
+		});
+	};
 }
 
-export * from '@neodrag/core/drop/plugins';
 export { sortable, type SortableOptions, type SortableStrategy } from '@neodrag/core/drop';
 export { sortableItemFor } from './sortable.svelte';

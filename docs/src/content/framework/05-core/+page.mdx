@@ -53,11 +53,15 @@ Use `Neodrag.shared` when you do not need a custom default plugin stack.
 
 ### `draggable(node, plugins?)`
 
-Returns a `DragHandle`. Plugins are a `DragPlugin[]` array; framework wrappers reconcile changes.
+Returns a `DragHandle`. `plugins` is `DragPlugin[]` or `() => DragPlugin[]`; framework wrappers reconcile changes via `handle.update()`.
 
 ### `droppable(node, plugins?)`
 
-Returns a `DropHandle` for drop targets.
+Returns a `DropHandle` for drop targets. Same reactive `PluginInput` shape as drag (`DropPlugin[]` or `() => DropPlugin[]`).
+
+### SSR / browser
+
+For apps that must avoid touching `document` at import time, use `@neodrag/core/browser` and `createBrowserNeodrag()` with an explicit `delegate`.
 
 ### `dispose()`
 
@@ -95,4 +99,6 @@ console.log(Neodrag.shared.instances.size);
 
 ## Framework packages
 
-See the framework docs for `{@attach draggable()}`, `useDraggable`, and `vDraggable`. All use this core engine.
+See the framework docs for `{@attach draggable()}`, `{@attach droppable()}`, `useDraggable`, `useDroppable`, `vDraggable`, and `vDroppable`. All use this core engine.
+
+Import built-in plugins from `@neodrag/core/plugins` (not from `@neodrag/svelte` / `@neodrag/react` main entries). Framework packages expose `@neodrag/*/plugins` re-exports for convenience only.

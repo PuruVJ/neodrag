@@ -96,8 +96,9 @@ export interface DropPlugin<S = unknown> {
 	destroy?(ctx: DropCtx, state: S): void;
 }
 
-export type DragPluginInput = DragPlugin[];
-export type DropPluginInput = DropPlugin[] | (() => DropPlugin[]);
+export type PluginInput<T> = T[] | (() => T[]);
+export type DragPluginInput = PluginInput<DragPlugin>;
+export type DropPluginInput = PluginInput<DropPlugin>;
 
 export interface ErrorInfo {
 	phase: 'init' | 'start' | 'drag' | 'end' | 'enter' | 'over' | 'leave' | 'drop' | 'update' | 'destroy';

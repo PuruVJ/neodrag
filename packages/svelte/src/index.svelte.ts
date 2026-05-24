@@ -7,15 +7,15 @@ import {
 import { Attachment } from 'svelte/attachments';
 
 export type NeodragOptions = EngineOptions;
-export type ReactiveDragPluginInput = DragPluginInput | (() => DragPluginInput);
+export type ReactiveDragPluginInput = DragPluginInput;
 
 export { Neodrag };
 
-function resolvePlugins(plugins: ReactiveDragPluginInput): DragPluginInput {
+function resolvePlugins(plugins: DragPluginInput) {
 	return typeof plugins === 'function' ? plugins() : plugins;
 }
 
-export function draggable(plugins: ReactiveDragPluginInput = []): Attachment<HTMLElement | SVGElement> {
+export function draggable(plugins: DragPluginInput = []): Attachment<HTMLElement | SVGElement> {
 	return (element) => {
 		const engine = Neodrag.shared;
 		const handle = engine.draggable(element, resolvePlugins(plugins));

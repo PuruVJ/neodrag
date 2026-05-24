@@ -8,7 +8,7 @@ import {
 	SessionPrivate,
 } from './instance.ts';
 import { DragHandle, DropHandle } from './handles.ts';
-import { resolveDragPlugins } from './resolve-plugins.ts';
+import { resolveDragPlugins, resolveDropPlugins } from './resolve-plugins.ts';
 import { DEFAULT_DRAG_PLUGINS } from '../defaults.ts';
 import { TRANSFORM_KEY } from './plugins/keys.ts';
 import { DropTargetTracker, type DropTargetHost } from './drop-targets.ts';
@@ -167,14 +167,9 @@ export class Neodrag {
 		this.#initListeners();
 
 		const inst = new DropInstance(node, this.#dropHost);
-		const resolved = typeof plugins === 'function' ? plugins() : plugins;
-		const combined = [...this.#defaultDropPlugins, ...resolved];
-		const byKey = new Map<symbol, DropPlugin>();
-		for (const p of combined) byKey.set(p.key, p);
-		inst.flat = [...byKey.values()];
-		inst.byKey = byKey;
-		inst.rebuildBuckets();
-		this.#initDropPlugins(inst);
+		const resolved = resolveDropPlugins(plugins);
+		inst.lastList = resolved;
+		this.#installDropPlugins(inst, resolved);
 		this.#dropTargets.set(node, inst);
 		this.#dropCount++;
 		if (this.#dropCount === 1) this.#soleDrop = inst;
@@ -191,55 +186,56 @@ export class Neodrag {
 		const inst = this.#dropTargets.get(node);
 		if (!inst) return;
 
-		const resolved = typeof plugins === 'function' ? plugins() : plugins;
-		const combined = [...this.#defaultDropPlugins, ...resolved];
-		const byKey = new Map<symbol, DropPlugin>();
-		for (const p of combined) byKey.set(p.key, p);
-		const next = [...byKey.values()];
+		const resolved = resolveDropPlugins(plugins);
 
-		if (next.length === inst.flat.length) {
+		if (inst.lastList === resolved) return;
+
+		const merged = this.#mergeUserDropPlugins(resolved);
+		if (merged.length === inst.flat.length) {
 			let same = true;
-			for (const plugin of next) {
+			for (const plugin of merged) {
 				if (inst.byKey.get(plugin.key) !== plugin) {
 					same = false;
 					break;
 				}
 			}
-			if (same) return;
-		}
-
-		for (const plugin of inst.flat) {
-			if (!byKey.has(plugin.key)) {
-				if (plugin.destroy) {
-					this.#pluginVoid(
-						inst,
-						plugin.key,
-						{ phase: 'destroy', plugin: { name: plugin.name, hook: 'destroy' }, node: inst.rootNode },
-						() => plugin.destroy!(inst.dropCtx, inst.states.get(plugin.key)),
-					);
-				}
-				inst.states.delete(plugin.key);
+			if (same) {
+				inst.lastList = resolved;
+				return;
 			}
 		}
 
-		inst.flat = next;
-		inst.byKey = byKey;
-		inst.rebuildBuckets();
-
-		for (const plugin of next) {
-			if (!inst.states.has(plugin.key) && plugin.init) {
-				this.#pluginVoid(
-					inst,
-					plugin.key,
-					{ phase: 'init', plugin: { name: plugin.name, hook: 'init' }, node: inst.rootNode },
-					() => {
-						const state = plugin.init!(inst.dropCtx);
-						if (state !== undefined) inst.states.set(plugin.key, state);
-					},
-				);
-			}
+		if (inst.isUpdating) {
+			inst.pendingUpdate = resolved;
+			return;
 		}
-		inst.effects.flush();
+
+		if (inst.updateDepth >= MAX_UPDATE_DEPTH) {
+			if (this.#dev) {
+				console.warn('[neodrag] drop update depth limit reached; coalescing pending plugin reconciliation');
+			}
+			inst.pendingUpdate = resolved;
+			return;
+		}
+
+		inst.isUpdating = true;
+		inst.updateDepth++;
+
+		if (inst.isProcessingExternalUpdate) {
+			inst.pendingUpdate = resolved;
+			inst.updateDepth--;
+			inst.isUpdating = false;
+			return;
+		}
+
+		inst.lastList = resolved;
+		this.#diffDropPlugins(inst, resolved);
+		inst.updateDepth--;
+		inst.isUpdating = false;
+
+		const pending = inst.pendingUpdate;
+		inst.pendingUpdate = null;
+		if (pending && pending !== resolved) this.updateDrop(node, pending);
 	}
 
 	update(node: HTMLElement | SVGElement, plugins: DragPluginInput) {
@@ -314,7 +310,7 @@ export class Neodrag {
 	#beginSession(source: DragInstance, e: PointerEvent) {
 		const rect = source.rootNode.getBoundingClientRect();
 		this.#active = {
-			state: 'pending',
+			state: transitionSession('idle', { type: 'pointerdown' }),
 			sourceNode: source.rootNode,
 			visualNode: source.visualNode,
 			sourceRect: rect,
@@ -330,7 +326,9 @@ export class Neodrag {
 			pointerId: e.pointerId,
 			startedAt: Date.now(),
 			cancel: () => {
-				if (this.#active) this.#active.state = 'cancelled';
+				if (this.#active) {
+					this.#active.state = transitionSession(this.#active.state, { type: 'cancel' });
+				}
 			},
 		};
 		this.#activeSource = source;
@@ -338,7 +336,9 @@ export class Neodrag {
 
 		this.#activeSessionView = createDragSession(this.#active, (node) => this.#activeSource?.setVisual(node));
 		source.bindSession(this.#activeSessionView, () => {
-			if (this.#active) this.#active.state = 'cancelled';
+			if (this.#active) {
+				this.#active.state = transitionSession(this.#active.state, { type: 'cancel' });
+			}
 		});
 		this.#dropHost.session = this.#activeSessionView;
 
@@ -823,21 +823,99 @@ export class Neodrag {
 		inst.states.delete(plugin.key);
 	}
 
-	#initDropPlugins(inst: DropInstance) {
-		const ctx = inst.dropCtx;
-		for (const plugin of inst.flat) {
-			if (!plugin.init) continue;
-			this.#pluginVoid(
-				inst,
-				plugin.key,
-				{ phase: 'init', plugin: { name: plugin.name, hook: 'init' }, node: inst.rootNode },
-				() => {
-					const state = plugin.init!(ctx);
-					if (state !== undefined) inst.states.set(plugin.key, state);
-				},
-			);
+	#mergeUserDropPlugins(userPlugins: DropPlugin[]) {
+		const combined = [...this.#defaultDropPlugins, ...userPlugins];
+		const byKey = new Map<symbol, DropPlugin>();
+		for (const p of combined) byKey.set(p.key, p);
+		return [...byKey.values()];
+	}
+
+	#installDropPlugins(inst: DropInstance, userPlugins: DropPlugin[]) {
+		const merged = this.#mergeUserDropPlugins(userPlugins);
+		inst.flat = merged;
+		inst.byKey = new Map(merged.map((p) => [p.key, p]));
+		inst.rebuildBuckets();
+		this.#initDropPlugins(inst);
+	}
+
+	#dropBucketsChanged(prev: DropPlugin[], next: DropPlugin[]) {
+		if (prev.length !== next.length) return true;
+		for (let i = 0; i < next.length; i++) {
+			const a = prev[i]!;
+			const b = next[i]!;
+			if (
+				a.key !== b.key ||
+				(a.phase ?? 'resolve') !== (b.phase ?? 'resolve') ||
+				!!a.enter !== !!b.enter ||
+				!!a.over !== !!b.over ||
+				!!a.leave !== !!b.leave ||
+				!!a.drop !== !!b.drop
+			) {
+				return true;
+			}
 		}
+		return false;
+	}
+
+	#diffDropPlugins(inst: DropInstance, userPlugins: DropPlugin[]) {
+		inst.isProcessingExternalUpdate = true;
+		const next = this.#mergeUserDropPlugins(userPlugins);
+		const prevFlat = inst.flat;
+		const prevByKey = new Map(prevFlat.map((p) => [p.key, p]));
+
+		for (const plugin of next) {
+			const prev = prevByKey.get(plugin.key);
+			if (!prev) {
+				inst.byKey.set(plugin.key, plugin);
+				this.#initOneDropPlugin(inst, plugin);
+			} else if (prev !== plugin) {
+				plugin.update?.(inst.dropCtx, inst.states.get(plugin.key));
+				inst.byKey.set(plugin.key, plugin);
+			}
+			prevByKey.delete(plugin.key);
+		}
+
+		for (const orphan of prevByKey.values()) {
+			this.#destroyOneDropPlugin(inst, orphan);
+			inst.byKey.delete(orphan.key);
+		}
+
+		inst.flat = next;
+		if (this.#dropBucketsChanged(prevFlat, next)) inst.rebuildBuckets();
+		inst.isProcessingExternalUpdate = false;
 		inst.effects.flush();
+	}
+
+	#initDropPlugins(inst: DropInstance) {
+		for (const plugin of inst.flat) this.#initOneDropPlugin(inst, plugin);
+		inst.effects.flush();
+	}
+
+	#initOneDropPlugin(inst: DropInstance, plugin: DropPlugin) {
+		if (!plugin.init) return;
+		this.#pluginVoid(
+			inst,
+			plugin.key,
+			{ phase: 'init', plugin: { name: plugin.name, hook: 'init' }, node: inst.rootNode },
+			() => {
+				const state = plugin.init!(inst.dropCtx);
+				if (state !== undefined) inst.states.set(plugin.key, state);
+			},
+		);
+	}
+
+	#destroyOneDropPlugin(inst: DropInstance, plugin: DropPlugin) {
+		if (!plugin.destroy) {
+			inst.states.delete(plugin.key);
+			return;
+		}
+		this.#pluginVoid(
+			inst,
+			plugin.key,
+			{ phase: 'destroy', plugin: { name: plugin.name, hook: 'destroy' }, node: inst.rootNode },
+			() => plugin.destroy!(inst.dropCtx, inst.states.get(plugin.key)),
+		);
+		inst.states.delete(plugin.key);
 	}
 
 	#destroyDrag(inst: DragInstance) {
@@ -847,16 +925,7 @@ export class Neodrag {
 	}
 
 	#destroyDrop(inst: DropInstance) {
-		for (const plugin of inst.flat) {
-			if (plugin.destroy) {
-				this.#pluginVoid(
-					inst,
-					plugin.key,
-					{ phase: 'destroy', plugin: { name: plugin.name, hook: 'destroy' }, node: inst.rootNode },
-					() => plugin.destroy!(inst.dropCtx, inst.states.get(plugin.key)),
-				);
-			}
-		}
+		for (const plugin of inst.flat) this.#destroyOneDropPlugin(inst, plugin);
 		inst.controller.abort();
 		inst.effects.clear();
 	}

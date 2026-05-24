@@ -8,6 +8,8 @@ tagline: 'A lightweight react hook to make your elements draggable.'
 npm i @neodrag/react@next
 ```
 
+Import built-in plugins from `@neodrag/core/plugins` or `@neodrag/react/plugins`. Use `useDroppable(ref, plugins)` for drop targets (same reactive `plugins` / `() => plugins` shape as `useDraggable`).
+
 ## Usage
 
 Basic usage
@@ -28,7 +30,8 @@ With plugins
 
 ```tsx
 import { useRef } from 'react';
-import { useDraggable, axis, grid } from '@neodrag/react';
+import { useDraggable } from '@neodrag/react';
+import { axis, grid } from '@neodrag/react/plugins';
 
 function App() {
   const draggableRef = useRef<HTMLDivElement>(null);
