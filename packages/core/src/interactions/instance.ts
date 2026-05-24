@@ -73,6 +73,8 @@ export class DragInstance {
 
 	flat: DragPlugin[] = [];
 	lastList: DragPlugin[] | null = null;
+	lastSlots: import('./types.ts').DragPluginList | null = null;
+	slotStaticCache: (DragPlugin | undefined)[] = [];
 	byKey = new Map<symbol, DragPlugin>();
 	states = new Map<symbol, unknown>();
 	failed = new Set<symbol>();
@@ -99,7 +101,7 @@ export class DragInstance {
 	isProcessingExternalUpdate = false;
 	isUpdating = false;
 	updateDepth = 0;
-	pendingUpdate: DragPlugin[] | null = null;
+	pendingUpdate: import('./types.ts').DragPluginList | null = null;
 
 	constructor(node: HTMLElement | SVGElement, idleSession: DragSession) {
 		this.rootNode = node;
@@ -270,6 +272,8 @@ export class DropInstance {
 
 	flat: import('./types.ts').DropPlugin[] = [];
 	lastList: import('./types.ts').DropPlugin[] | null = null;
+	lastSlots: import('./types.ts').DropPluginList | null = null;
+	slotStaticCache: (import('./types.ts').DropPlugin | undefined)[] = [];
 	byKey = new Map<symbol, import('./types.ts').DropPlugin>();
 	states = new Map<symbol, unknown>();
 	failed = new Set<symbol>();
@@ -278,7 +282,7 @@ export class DropInstance {
 	isProcessingExternalUpdate = false;
 	isUpdating = false;
 	updateDepth = 0;
-	pendingUpdate: import('./types.ts').DropPlugin[] | null = null;
+	pendingUpdate: import('./types.ts').DropPluginList | null = null;
 
 	enterChain: import('./types.ts').DropPlugin[] = [];
 	overChain: import('./types.ts').DropPlugin[] = [];

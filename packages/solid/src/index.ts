@@ -1,11 +1,19 @@
-import { Neodrag, type DragEventData, type DragPlugin, type DragPluginInput } from '@neodrag/core';
+import {
+	Draggable as CoreDraggable,
+	DroppableBinding,
+	Neodrag,
+	hasReactiveSlots,
+	type DragEventData,
+	type DragPlugin,
+	type DragPluginList,
+	type DropPluginList,
+} from '@neodrag/core';
 import { defineDragPlugin } from '@neodrag/core/plugins';
 import type { Accessor } from 'solid-js';
 import { createEffect, createSignal, onCleanup, untrack } from 'solid-js';
 
-const engine = Neodrag.shared;
-
-export type ReactiveDragPluginInput = DragPluginInput | (() => DragPluginInput);
+export type { DragPluginList };
+export { Neodrag, CoreDraggable as Draggable };
 
 export interface DragState extends DragEventData {
 	isDragging: boolean;
@@ -18,10 +26,6 @@ const defaultDragState: DragState = {
 	isDragging: false,
 	event: null as unknown as PointerEvent,
 };
-
-function resolvePlugins(plugins: ReactiveDragPluginInput): DragPluginInput {
-	return typeof plugins === 'function' ? plugins() : plugins;
-}
 
 const createSyncPlugin = (setState: (state: DragState) => void) =>
 	defineDragPlugin(() => ({
@@ -61,40 +65,131 @@ const createSyncPlugin = (setState: (state: DragState) => void) =>
 		},
 	}))();
 
-function withSync(plugins: ReactiveDragPluginInput, sync: DragPlugin): DragPluginInput {
-	return [...resolvePlugins(plugins), sync];
+function withSync(plugins: DragPluginList, sync: DragPlugin): DragPluginList {
+	return [...plugins, sync];
 }
+
+export function useDraggable(slots: DragPluginList = []): [typeof defaultDragState, (node: HTMLElement | SVGElement | null) => void];
 
 export function useDraggable(
 	element: Accessor<HTMLElement | SVGElement | null | undefined>,
-	plugins: Accessor<ReactiveDragPluginInput> = () => [],
+	slots: DragPluginList,
+): [typeof defaultDragState];
+
+export function useDraggable(
+	elementOrSlots: Accessor<HTMLElement | SVGElement | null | undefined> | DragPluginList = [],
+	maybeSlots: DragPluginList = [],
 ) {
+	const isElementForm = typeof elementOrSlots === 'function';
+
 	const [dragState, setDragState] = createSignal<DragState>(defaultDragState);
 	const sync = createSyncPlugin(setDragState);
 
-	let handle: ReturnType<typeof engine.draggable> | undefined;
+	const slots = (): DragPluginList =>
+		isElementForm ? maybeSlots : (elementOrSlots as DragPluginList);
 
-	createEffect(() => {
-		const node = element();
+	const binding = new CoreDraggable({
+		plugins: untrack(() => withSync(slots(), sync)),
+	});
+
+	const attachRef = (node: HTMLElement | SVGElement | null) => {
 		if (!node) {
-			handle = undefined;
+			binding.detach();
 			return;
 		}
+		binding.attach(node);
+	};
 
-		handle = engine.draggable(node, untrack(() => withSync(plugins(), sync)));
+	if (isElementForm) {
+		const element = elementOrSlots as Accessor<HTMLElement | SVGElement | null | undefined>;
 
-		onCleanup(() => {
-			handle?.destroy();
-			handle = undefined;
+		createEffect(() => {
+			const node = element();
+			if (!node) {
+				binding.detach();
+				return;
+			}
+			untrack(() => binding.attach(node));
+			onCleanup(() => binding.detach());
 		});
-	});
+
+		createEffect(() => {
+			const list = withSync(slots(), sync);
+			if (!hasReactiveSlots(list)) return;
+			binding.update(list);
+		});
+
+		onCleanup(() => binding.destroy());
+		return [dragState];
+	}
 
 	createEffect(() => {
-		if (!handle) return;
-		handle.update(withSync(plugins(), sync));
+		const list = withSync(slots(), sync);
+		if (!hasReactiveSlots(list)) return;
+		binding.update(list);
 	});
 
-	return dragState;
+	onCleanup(() => binding.destroy());
+
+	return [dragState, attachRef] as const;
 }
 
-export { Neodrag };
+export function useDroppable(slots: DropPluginList = []): [
+	undefined,
+	(node: HTMLElement | SVGElement | null) => void,
+];
+
+export function useDroppable(
+	element: Accessor<HTMLElement | SVGElement | null | undefined>,
+	slots: DropPluginList,
+): [undefined];
+
+export function useDroppable(
+	elementOrSlots: Accessor<HTMLElement | SVGElement | null | undefined> | DropPluginList = [],
+	maybeSlots: DropPluginList = [],
+) {
+	const isElementForm = typeof elementOrSlots === 'function';
+	const slots = (): DropPluginList =>
+		isElementForm ? maybeSlots : (elementOrSlots as DropPluginList);
+
+	const binding = new DroppableBinding({ plugins: untrack(() => slots()) });
+
+	const attachRef = (node: HTMLElement | SVGElement | null) => {
+		if (!node) {
+			binding.detach();
+			return;
+		}
+		binding.attach(node);
+	};
+
+	if (isElementForm) {
+		const element = elementOrSlots as Accessor<HTMLElement | SVGElement | null | undefined>;
+
+		createEffect(() => {
+			const node = element();
+			if (!node) {
+				binding.detach();
+				return;
+			}
+			untrack(() => binding.attach(node));
+			onCleanup(() => binding.detach());
+		});
+
+		createEffect(() => {
+			if (!hasReactiveSlots(slots())) return;
+			binding.update(slots());
+		});
+
+		onCleanup(() => binding.destroy());
+		return [undefined];
+	}
+
+	createEffect(() => {
+		if (!hasReactiveSlots(slots())) return;
+		binding.update(slots());
+	});
+
+	onCleanup(() => binding.destroy());
+
+	return [undefined, attachRef] as const;
+}

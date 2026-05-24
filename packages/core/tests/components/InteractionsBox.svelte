@@ -1,35 +1,23 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { Neodrag, type DragPlugin } from '../../src/interactions/index.ts';
+	import { Draggable, type DragPluginList } from '../../src/interactions/index.ts';
 
 	const {
 		testid = 'draggable',
 		children,
 		plugins = [],
-		engine = new Neodrag(),
+		engine,
 	}: {
-		plugins?: DragPlugin[] | (() => DragPlugin[]);
+		plugins?: DragPluginList;
 		testid?: string;
 		children?: Snippet;
-		engine?: Neodrag;
+		engine?: import('../../src/interactions/engine.ts').Neodrag;
 	} = $props();
 
-	function attach(node: HTMLElement) {
-		const list = typeof plugins === 'function' ? plugins() : plugins;
-		const handle = engine.draggable(node, list);
-		if (typeof plugins === 'function') {
-			return $effect.root(() => {
-				$effect.pre(() => {
-					handle.update(plugins());
-				});
-				return () => handle.destroy();
-			});
-		}
-		return () => handle.destroy();
-	}
+	const drag = new Draggable({ engine, plugins });
 </script>
 
-<div class="box" {@attach attach} data-testid={testid}>
+<div class="box" {@attach drag.attachment} data-testid={testid}>
 	{@render children?.()}
 </div>
 

@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { Neodrag, events, position, transform } from '../../src/interactions/index.ts';
+	import { Draggable, events, position, transform } from '../../src/interactions/index.ts';
 
 	const {
 		testid = 'draggable',
-		engine = new Neodrag(),
+		engine,
 		initial = { x: 0, y: 0 },
 		external = null,
 		twoWay = true,
 		onReconcile,
 	}: {
 		testid?: string;
-		engine?: Neodrag;
+		engine?: import('../../src/interactions/engine.ts').Neodrag;
 		initial?: { x: number; y: number };
 		external?: { x: number; y: number } | null;
 		twoWay?: boolean;
@@ -27,38 +27,30 @@
 		}
 	});
 
-	function attach(node: HTMLElement) {
-		const build = () => {
-			onReconcile?.();
-			const plugins = [
-				transform,
-				position({ current: { x, y } }),
-				...(twoWay
-					? [
+	const drag = new Draggable({
+		engine,
+		plugins: [
+			transform,
+			() => {
+				onReconcile?.();
+				return position({ current: { x, y } });
+			},
+			...(twoWay
+				? [
+						() =>
 							events({
 								onDrag(data) {
 									x = data.offset.x;
 									y = data.offset.y;
 								},
 							}),
-						]
-					: []),
-			];
-			return plugins;
-		};
-
-		const handle = engine.draggable(node, build());
-
-		return $effect.root(() => {
-			$effect.pre(() => {
-				handle.update(build());
-			});
-			return () => handle.destroy();
-		});
-	}
+					]
+				: []),
+		],
+	});
 </script>
 
-<div class="box" {@attach attach} data-testid={testid}></div>
+<div class="box" {@attach drag.attachment} data-testid={testid}></div>
 
 <style>
 	.box {

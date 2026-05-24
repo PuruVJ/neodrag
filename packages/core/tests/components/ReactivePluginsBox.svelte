@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Neodrag, position, transform } from '../../src/interactions/index.ts';
+	import { Draggable, position, transform } from '../../src/interactions/index.ts';
 
 	const {
-		engine = new Neodrag(),
+		engine,
 		external = null,
 	}: {
-		engine?: Neodrag;
+		engine?: import('../../src/interactions/engine.ts').Neodrag;
 		external?: { x: number; y: number } | null;
 	} = $props();
 
@@ -17,19 +17,13 @@
 		}
 	});
 
-	function attach(node: HTMLElement) {
-		const handle = engine.draggable(node, [transform, position({ current: pos })]);
-
-		return $effect.root(() => {
-			$effect.pre(() => {
-				handle.update([transform, position({ current: pos })]);
-			});
-			return () => handle.destroy();
-		});
-	}
+	const drag = new Draggable({
+		engine,
+		plugins: [transform, () => position({ current: pos })],
+	});
 </script>
 
-<div class="box" {@attach attach} data-testid="draggable"></div>
+<div class="box" {@attach drag.attachment} data-testid="draggable"></div>
 
 <style>
 	.box {

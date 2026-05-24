@@ -1,49 +1,12 @@
-import { Neodrag, type EngineOptions, type DragPluginInput } from '@neodrag/core';
+import {
+	Draggable,
+	DroppableBinding,
+	Neodrag,
+	type DragPluginList,
+	type DropPluginList,
+	type EngineOptions,
+} from '@neodrag/core';
 
 export type NeodragOptions = EngineOptions;
-
-export { Neodrag };
-
-export class Draggable {
-	readonly node: HTMLElement | SVGElement;
-	readonly #handle: import('@neodrag/core').DragHandle;
-
-	constructor(
-		node: HTMLElement | SVGElement,
-		plugins: DragPluginInput = [],
-		engine: Neodrag = Neodrag.shared,
-	) {
-		this.node = node;
-		this.#handle = engine.draggable(node, plugins);
-	}
-
-	update(plugins: DragPluginInput) {
-		this.#handle.update(plugins);
-	}
-
-	destroy() {
-		this.#handle.destroy();
-	}
-}
-
-export class Droppable {
-	readonly node: HTMLElement | SVGElement;
-	readonly #handle: import('@neodrag/core').DropHandle;
-
-	constructor(
-		node: HTMLElement | SVGElement,
-		plugins: import('@neodrag/core').DropPluginInput = [],
-		engine: Neodrag = Neodrag.shared,
-	) {
-		this.node = node;
-		this.#handle = engine.droppable(node, plugins);
-	}
-
-	update(plugins: import('@neodrag/core').DropPluginInput) {
-		this.#handle.update(plugins);
-	}
-
-	destroy() {
-		this.#handle.destroy();
-	}
-}
+export type { DragPluginList, DropPluginList };
+export { Neodrag, Draggable, DroppableBinding as Droppable };

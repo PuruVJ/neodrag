@@ -1,9 +1,8 @@
-import type { DropPluginInput } from './types.ts';
-import type { DragPluginInput } from './types.ts';
+import type { DragPluginList, DropPluginList } from './types.ts';
 
 export interface NeodragHost {
-	update(node: HTMLElement | SVGElement, plugins: DragPluginInput): void;
-	updateDrop(node: HTMLElement | SVGElement, plugins: DropPluginInput): void;
+	update(node: HTMLElement | SVGElement, plugins: DragPluginList): void;
+	updateDrop(node: HTMLElement | SVGElement, plugins: DropPluginList): void;
 }
 
 export class DragHandle {
@@ -17,7 +16,7 @@ export class DragHandle {
 		this.#dispose = dispose;
 	}
 
-	update(plugins: DragPluginInput) {
+	update(plugins: DragPluginList) {
 		this.#engine.update(this.node, plugins);
 	}
 
@@ -37,7 +36,7 @@ export class DropHandle {
 		this.#dispose = dispose;
 	}
 
-	update(plugins: DropPluginInput) {
+	update(plugins: DropPluginList) {
 		this.#engine.updateDrop(this.node, plugins);
 	}
 
@@ -46,4 +45,4 @@ export class DropHandle {
 	}
 }
 
-export type { DragPluginInput };
+export type { DragPluginList };

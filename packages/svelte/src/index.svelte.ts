@@ -1,34 +1,41 @@
-import {
-	Neodrag,
-	type DragPlugin,
-	type DragPluginInput,
-	type EngineOptions,
-} from '@neodrag/core';
+import { Draggable as CoreDraggable, Neodrag, type DragPluginList, type EngineOptions } from '@neodrag/core';
 import { Attachment } from 'svelte/attachments';
 
 export type NeodragOptions = EngineOptions;
-export type ReactiveDragPluginInput = DragPluginInput;
+export { Neodrag, CoreDraggable as DraggableCore };
+export type { DragPluginList };
+export type { DragPluginList as PluginInput };
 
-export { Neodrag };
-
-function resolvePlugins(plugins: DragPluginInput) {
-	return typeof plugins === 'function' ? plugins() : plugins;
+/** @deprecated Use `new Draggable({ plugins })` once in `<script>` and `{@attach drag.attachment}`. */
+export function draggable(
+	plugins: DragPluginList | (() => DragPluginList),
+): Attachment<HTMLElement | SVGElement> {
+	const slots: DragPluginList =
+		typeof plugins === 'function' ? [plugins as () => import('@neodrag/core').DragPlugin[]] : plugins;
+	return new Draggable({ plugins: slots }).attachment;
 }
 
-export function draggable(plugins: DragPluginInput = []): Attachment<HTMLElement | SVGElement> {
-	return (element) => {
-		const engine = Neodrag.shared;
-		const handle = engine.draggable(element, resolvePlugins(plugins));
+export class Draggable extends CoreDraggable {
+	readonly #reactiveAttachment: Attachment<HTMLElement | SVGElement>;
 
-		if (typeof plugins !== 'function') {
-			return () => handle.destroy();
-		}
+	constructor(options: ConstructorParameters<typeof CoreDraggable>[0]) {
+		super(options);
 
-		return $effect.root(() => {
-			$effect.pre(() => {
-				handle.update(resolvePlugins(plugins));
+		const coreAttachment = this.attachment;
+		this.#reactiveAttachment = (element) => {
+			const cleanup = coreAttachment(element);
+			if (!this.hasReactiveSlots) return cleanup;
+
+			return $effect.root(() => {
+				$effect.pre(() => {
+					this.flushReactive();
+				});
+				return cleanup;
 			});
-			return () => handle.destroy();
-		});
-	};
+		};
+	}
+
+	get attachment(): Attachment<HTMLElement | SVGElement> {
+		return this.#reactiveAttachment;
+	}
 }

@@ -8,7 +8,12 @@ import {
 	SessionPrivate,
 } from './instance.ts';
 import { DragHandle, DropHandle } from './handles.ts';
-import { resolveDragPlugins, resolveDropPlugins } from './resolve-plugins.ts';
+import {
+	hasReactiveSlots,
+	resolveDragPluginList,
+	resolveDropPluginList,
+	resolvePluginList,
+} from './resolve-plugins.ts';
 import { DEFAULT_DRAG_PLUGINS } from '../defaults.ts';
 import { TRANSFORM_KEY } from './plugins/keys.ts';
 import { DropTargetTracker, type DropTargetHost } from './drop-targets.ts';
@@ -17,10 +22,10 @@ import { transitionSession } from './state-machine.ts';
 import type {
 	DragCtx,
 	DragPlugin,
-	DragPluginInput,
+	DragPluginList,
 	DropCtx,
 	DropPlugin,
-	DropPluginInput,
+	DropPluginList,
 	DropTargetInfo,
 	EndReason,
 	ErrorInfo,
@@ -142,7 +147,7 @@ export class Neodrag {
 		return () => this.#sessionListeners.delete(listener);
 	}
 
-	draggable(node: HTMLElement | SVGElement, plugins: DragPluginInput = []): DragHandle {
+	draggable(node: HTMLElement | SVGElement, plugins: DragPluginList = []): DragHandle {
 		if (is_svg_svg_element(node)) {
 			throw new Error(
 				'Dragging the root SVG element directly is not recommended. Wrap it in a div or use a child element.',
@@ -152,7 +157,9 @@ export class Neodrag {
 		this.#initListeners();
 
 		const inst = new DragInstance(node, this.#idleSession);
-		const resolved = resolveDragPlugins(plugins);
+		inst.lastSlots = plugins;
+		inst.slotStaticCache = [];
+		const resolved = resolvePluginList(plugins, inst.slotStaticCache, false);
 		inst.lastList = resolved;
 		this.#installDragPlugins(inst, resolved);
 		this.#dragSources.set(node, inst);
@@ -163,11 +170,13 @@ export class Neodrag {
 		});
 	}
 
-	droppable(node: HTMLElement | SVGElement, plugins: DropPluginInput = []): DropHandle {
+	droppable(node: HTMLElement | SVGElement, plugins: DropPluginList = []): DropHandle {
 		this.#initListeners();
 
 		const inst = new DropInstance(node, this.#dropHost);
-		const resolved = resolveDropPlugins(plugins);
+		inst.lastSlots = plugins;
+		inst.slotStaticCache = [];
+		const resolved = resolvePluginList(plugins, inst.slotStaticCache, false);
 		inst.lastList = resolved;
 		this.#installDropPlugins(inst, resolved);
 		this.#dropTargets.set(node, inst);
@@ -182,11 +191,20 @@ export class Neodrag {
 		});
 	}
 
-	updateDrop(node: HTMLElement | SVGElement, plugins: DropPluginInput) {
+	updateDrop(node: HTMLElement | SVGElement, plugins: DropPluginList) {
 		const inst = this.#dropTargets.get(node);
 		if (!inst) return;
 
-		const resolved = resolveDropPlugins(plugins);
+		if (!hasReactiveSlots(plugins) && inst.lastSlots === plugins) return;
+
+		if (inst.lastSlots !== plugins) {
+			inst.lastSlots = plugins;
+			inst.slotStaticCache = [];
+		}
+
+		const resolved = hasReactiveSlots(plugins)
+			? resolvePluginList(plugins, inst.slotStaticCache, true)
+			: resolvePluginList(plugins, inst.slotStaticCache, false);
 
 		if (inst.lastList === resolved) return;
 
@@ -206,7 +224,7 @@ export class Neodrag {
 		}
 
 		if (inst.isUpdating) {
-			inst.pendingUpdate = resolved;
+			inst.pendingUpdate = plugins;
 			return;
 		}
 
@@ -214,7 +232,7 @@ export class Neodrag {
 			if (this.#dev) {
 				console.warn('[neodrag] drop update depth limit reached; coalescing pending plugin reconciliation');
 			}
-			inst.pendingUpdate = resolved;
+			inst.pendingUpdate = plugins;
 			return;
 		}
 
@@ -222,7 +240,7 @@ export class Neodrag {
 		inst.updateDepth++;
 
 		if (inst.isProcessingExternalUpdate) {
-			inst.pendingUpdate = resolved;
+			inst.pendingUpdate = plugins;
 			inst.updateDepth--;
 			inst.isUpdating = false;
 			return;
@@ -235,14 +253,23 @@ export class Neodrag {
 
 		const pending = inst.pendingUpdate;
 		inst.pendingUpdate = null;
-		if (pending && pending !== resolved) this.updateDrop(node, pending);
+		if (pending && pending !== plugins) this.updateDrop(node, pending);
 	}
 
-	update(node: HTMLElement | SVGElement, plugins: DragPluginInput) {
+	update(node: HTMLElement | SVGElement, plugins: DragPluginList) {
 		const inst = this.#dragSources.get(node);
 		if (!inst) return;
 
-		const resolved = resolveDragPlugins(plugins);
+		if (!hasReactiveSlots(plugins) && inst.lastSlots === plugins) return;
+
+		if (inst.lastSlots !== plugins) {
+			inst.lastSlots = plugins;
+			inst.slotStaticCache = [];
+		}
+
+		const resolved = hasReactiveSlots(plugins)
+			? resolvePluginList(plugins, inst.slotStaticCache, true)
+			: resolvePluginList(plugins, inst.slotStaticCache, false);
 
 		if (inst.lastList === resolved) return;
 
@@ -262,7 +289,7 @@ export class Neodrag {
 		}
 
 		if (inst.isUpdating) {
-			inst.pendingUpdate = resolved;
+			inst.pendingUpdate = plugins;
 			return;
 		}
 
@@ -270,7 +297,7 @@ export class Neodrag {
 			if (this.#dev) {
 				console.warn('[neodrag] update depth limit reached; coalescing pending plugin reconciliation');
 			}
-			inst.pendingUpdate = resolved;
+			inst.pendingUpdate = plugins;
 			return;
 		}
 
@@ -278,7 +305,7 @@ export class Neodrag {
 		inst.updateDepth++;
 
 		if (inst.isProcessingExternalUpdate) {
-			inst.pendingUpdate = resolved;
+			inst.pendingUpdate = plugins;
 			inst.updateDepth--;
 			inst.isUpdating = false;
 			return;
@@ -291,7 +318,7 @@ export class Neodrag {
 
 		const pending = inst.pendingUpdate;
 		inst.pendingUpdate = null;
-		if (pending && pending !== resolved) this.update(node, pending);
+		if (pending && pending !== plugins) this.update(node, pending);
 	}
 
 	dispose() {

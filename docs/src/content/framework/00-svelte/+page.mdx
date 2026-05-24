@@ -20,34 +20,55 @@ Import built-in drag plugins from `@neodrag/core/plugins` or `@neodrag/svelte/pl
 
 ## Usage
 
-Pass a plugin list (or nothing for defaults) to `draggable()` and attach it to an element:
+Create a **`Draggable`** once in `<script>` (stable attachment), then attach it. Use **static** plugins in the array; wrap only dynamic parts in `() =>`:
 
 ### Basic
 
 ```svelte
 <script>
-  import { draggable } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  import { transform } from '@neodrag/svelte/plugins';
+
+  const drag = new Draggable({ plugins: [transform] });
 </script>
 
-<div {@attach draggable()}>Drag me around!</div>
+<div {@attach drag.attachment}>Drag me around!</div>
 ```
 
 ### With plugins
 
 ```svelte
 <script>
-  import { draggable } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
   import { axis, grid, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
+
+  const dragX = new Draggable({ plugins: [axis('x'), grid([20, 20])] });
+  const dragBounds = new Draggable({ plugins: [bounds(BoundsFrom.parent())] });
 </script>
 
-<div {@attach draggable([axis('x'), grid([20, 20])])}>
-  Horizontal only, snapped to 20px grid
-</div>
+<div {@attach dragX.attachment}>Horizontal only, snapped to 20px grid</div>
 
-<div {@attach draggable([bounds(BoundsFrom.parent())])}>
-  Constrained to parent element
-</div>
+<div {@attach dragBounds.attachment}>Constrained to parent element</div>
 ```
+
+### Reactive plugins (v3-next.2)
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+  import { axis, position } from '@neodrag/svelte/plugins';
+
+  let pos = $state({ x: 0, y: 0 });
+
+  const drag = new Draggable({
+    plugins: [axis('x'), () => position({ current: pos })],
+  });
+</script>
+
+<div {@attach drag.attachment}>…</div>
+```
+
+`draggable()` remains as a deprecated shim for migration; prefer `new Draggable` in script.
 
 ### Reactive plugins with compartments
 

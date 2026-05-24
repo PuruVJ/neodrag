@@ -1,65 +1,48 @@
-import { Neodrag, type DropPluginInput, type EngineOptions } from '@neodrag/core';
+import {
+	DroppableBinding as CoreDroppable,
+	Neodrag,
+	type DropPluginList,
+	type EngineOptions,
+} from '@neodrag/core';
 import { Attachment } from 'svelte/attachments';
 
 export type NeodragDropOptions = EngineOptions;
-export type ReactiveDropPluginInput = DropPluginInput;
+export type { DropPluginList };
 
 export { Neodrag };
 
-function resolvePlugins(plugins: DropPluginInput) {
-	return typeof plugins === 'function' ? plugins() : plugins;
-}
+export class Droppable extends CoreDroppable {
+	readonly #reactiveAttachment: Attachment<HTMLElement | SVGElement>;
 
-export class Droppable {
-	readonly #engine: Neodrag;
-	readonly #plugins: DropPluginInput;
-	#handle?: import('@neodrag/core').DropHandle;
+	constructor(options: ConstructorParameters<typeof CoreDroppable>[0]) {
+		super(options);
 
-	constructor(engine: Neodrag = Neodrag.shared, plugins: DropPluginInput = []) {
-		this.#engine = engine;
-		this.#plugins = plugins;
-	}
+		const coreAttachment = this.attachment;
+		this.#reactiveAttachment = (element) => {
+			const cleanup = coreAttachment(element);
+			if (!this.hasReactiveSlots) return cleanup;
 
-	attach(element: HTMLElement | SVGElement) {
-		this.detach();
-		this.#handle = this.#engine.droppable(element, this.#plugins);
-		if (typeof this.#plugins === 'function') {
 			return $effect.root(() => {
 				$effect.pre(() => {
-					this.#handle?.update(resolvePlugins(this.#plugins));
+					this.flushReactive();
 				});
-				return () => this.detach();
+				return cleanup;
 			});
-		}
-		return () => this.detach();
+		};
 	}
 
-	attachment(): Attachment<HTMLElement | SVGElement> {
-		return (element) => this.attach(element);
-	}
-
-	detach() {
-		this.#handle?.destroy();
-		this.#handle = undefined;
+	get attachment(): Attachment<HTMLElement | SVGElement> {
+		return this.#reactiveAttachment;
 	}
 }
 
-export function droppable(plugins: DropPluginInput = []): Attachment<HTMLElement | SVGElement> {
-	return (element) => {
-		const engine = Neodrag.shared;
-		const handle = engine.droppable(element, plugins);
-
-		if (typeof plugins !== 'function') {
-			return () => handle.destroy();
-		}
-
-		return $effect.root(() => {
-			$effect.pre(() => {
-				handle.update(resolvePlugins(plugins));
-			});
-			return () => handle.destroy();
-		});
-	};
+/** @deprecated Use `new Droppable({ plugins })` once in `<script>` and `{@attach drop.attachment}`. */
+export function droppable(plugins: DropPluginList | (() => DropPluginList) = []): Attachment<
+	HTMLElement | SVGElement
+> {
+	const slots: DropPluginList =
+		typeof plugins === 'function' ? [plugins as () => import('@neodrag/core').DropPlugin[]] : plugins;
+	return new Droppable({ plugins: slots }).attachment;
 }
 
 export { sortable, type SortableOptions, type SortableStrategy } from '@neodrag/core/drop';

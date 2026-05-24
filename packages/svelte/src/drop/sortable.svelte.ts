@@ -1,14 +1,20 @@
-import { resolveDragPlugins, sortable, type SortableOptions } from '@neodrag/core/drop';
-import { draggable } from '@neodrag/svelte';
-import type { PluginInput } from '@neodrag/core/plugins';
+import { sortable, type SortableOptions } from '@neodrag/core/drop';
+import type { DragPluginList } from '@neodrag/core';
+import { Draggable } from '@neodrag/svelte';
 import { Attachment } from 'svelte/attachments';
 
 export function sortableItemFor<T>(
 	options: SortableOptions<T>,
 	key: string,
-	extra?: PluginInput,
+	extra?: DragPluginList,
 ): Attachment<HTMLElement | SVGElement> {
 	const itemPlugins = sortable(options).item(key);
-	if (!extra) return draggable(itemPlugins);
-	return draggable(() => [...itemPlugins, ...resolveDragPlugins(extra)]);
+	if (!extra) {
+		const drag = new Draggable({ plugins: itemPlugins });
+		return drag.attachment;
+	}
+	const drag = new Draggable({
+		plugins: [...itemPlugins, ...extra],
+	});
+	return drag.attachment;
 }
