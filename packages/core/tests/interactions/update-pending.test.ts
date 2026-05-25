@@ -17,7 +17,6 @@ describe('engine.update pending coalescing', () => {
 		const PING_KEY = Symbol('ping');
 		const makePing = (): DragPlugin => ({
 			key: PING_KEY,
-			name: 'ping',
 			update() {
 				calls++;
 				nest++;

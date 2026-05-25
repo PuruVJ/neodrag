@@ -32,7 +32,6 @@ const defaultDragState: DragState = {
 const createSyncPlugin = (setState: (state: DragState) => void, mode: DragSyncMode) =>
 	defineDragPlugin(() => ({
 		key: Symbol('neodrag.solid-state-sync'),
-		name: 'solid-state-sync',
 		phase: 'post',
 		skipOnCancel: true,
 

@@ -22,7 +22,6 @@ function setupSoleDrop() {
 
 	const noopDrop = defineDropPlugin(() => ({
 		key: Symbol('noop'),
-		name: 'noop',
 		over() {},
 	}))();
 
@@ -52,7 +51,6 @@ function setupMultiDrop() {
 
 	const noopDrop = defineDropPlugin(() => ({
 		key: Symbol('noop'),
-		name: 'noop',
 		over() {},
 	}))();
 

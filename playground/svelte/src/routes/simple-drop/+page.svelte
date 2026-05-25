@@ -8,7 +8,6 @@
 	const drag = new Draggable({
 		plugins: [
 			{
-				name: 'countDrag',
 				start() {
 					dragCount++;
 				},
@@ -19,7 +18,6 @@
 	const drop = new Droppable({
 		plugins: [
 			{
-				name: 'countDrop',
 				onDrop() {
 					dropCount++;
 				},

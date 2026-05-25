@@ -28,7 +28,6 @@ type UserSelectState = { body_user_select_val: string };
 
 export const ignoreMultitouch: DragPlugin<MultitouchState> = {
 	key: IGNORE_MULTITOUCH_KEY,
-	name: 'ignoreMultitouch',
 
 	init() {
 		return { active_pointers: new Set<number>() };
@@ -52,7 +51,6 @@ export const ignoreMultitouch: DragPlugin<MultitouchState> = {
 
 export const stateMarker: DragPlugin<StateMarkerState> = {
 	key: STATE_MARKER_KEY,
-	name: 'stateMarker',
 	phase: 'post',
 	skipOnCancel: true,
 
@@ -75,7 +73,6 @@ export const stateMarker: DragPlugin<StateMarkerState> = {
 
 export const applyUserSelectHack: DragPlugin<UserSelectState> = {
 	key: APPLY_USER_SELECT_KEY,
-	name: 'applyUserSelectHack',
 	phase: 'post',
 	skipOnCancel: true,
 
@@ -102,7 +99,6 @@ export const applyUserSelectHack: DragPlugin<UserSelectState> = {
 
 export const touchAction: DragPlugin = {
 	key: TOUCH_ACTION_KEY,
-	name: 'touchAction',
 	phase: 'pre',
 
 	init(ctx) {
@@ -112,7 +108,6 @@ export const touchAction: DragPlugin = {
 
 export const axis = defineDragPlugin((value?: 'x' | 'y' | null) => ({
 	key: AXIS_KEY,
-	name: 'axis',
 	phase: 'resolve',
 
 	drag(ctx) {
@@ -127,7 +122,6 @@ const snap = (val: number, step: number) => (step === 0 ? 0 : Math.round(val / s
 export const grid = defineDragPlugin(
 	(values?: [x: number | null | undefined, y: number | null | undefined] | null) => ({
 		key: GRID_KEY,
-		name: 'grid',
 		phase: 'resolve',
 
 		drag(ctx) {
@@ -162,7 +156,6 @@ export const bounds = defineDragPlugin(
 		shouldRecompute: (ctx: { hook: BoundsHook }) => boolean = (ctx) => ctx.hook === 'start',
 	) => ({
 		key: BOUNDS_KEY,
-		name: 'bounds',
 		phase: 'resolve',
 
 		init(ctx) {
@@ -231,7 +224,6 @@ function applyPosition(
 
 export const position = defineDragPlugin((options: PositionOptions | null = null) => ({
 	key: POSITION_KEY,
-	name: 'position',
 	phase: 'pre',
 
 	init(ctx) {
@@ -266,7 +258,6 @@ export const events = defineDragPlugin(
 		onDragEnd?: (data: DragEventData) => void;
 	} = {}) => ({
 		key: EVENTS_KEY,
-		name: 'events',
 		phase: 'post',
 		skipOnCancel: true,
 
@@ -292,7 +283,6 @@ function readDisabled(input: DisabledInput): boolean {
 
 export const disabled = defineDragPlugin((isDisabled: DisabledInput = true) => ({
 	key: DISABLED_KEY,
-	name: 'disabled',
 	phase: 'pre',
 
 	start() {
@@ -404,7 +394,6 @@ export const controls = defineDragPlugin(
 			ctx.hook === 'init',
 	) => ({
 		key: CONTROLS_KEY,
-		name: 'controls',
 		phase: 'pre',
 
 		init(ctx) {
@@ -447,7 +436,6 @@ export const controls = defineDragPlugin(
 
 export const dragData = defineDragPlugin(<T,>(getData: () => T) => ({
 	key: DRAG_DATA_KEY,
-	name: 'dragData',
 	phase: 'pre',
 
 	start(ctx) {
@@ -471,7 +459,6 @@ export const threshold = defineDragPlugin((options?: { delay?: number; distance?
 
 	return {
 		key: THRESHOLD_KEY,
-		name: 'threshold',
 		phase: 'pre' as const,
 
 		init() {
@@ -529,7 +516,6 @@ export const scrollLock = defineDragPlugin(
 		} | null = {},
 	) => ({
 		key: SCROLL_LOCK_KEY,
-		name: 'scrollLock',
 		phase: 'pre',
 
 		init() {
@@ -605,7 +591,6 @@ export const scrollLock = defineDragPlugin(
 
 export const ghost = defineDragPlugin((options: { opacity?: number } = {}) => ({
 	key: GHOST_KEY,
-	name: 'ghost',
 	phase: 'pre',
 
 	init() {
@@ -651,7 +636,6 @@ export const ghost = defineDragPlugin((options: { opacity?: number } = {}) => ({
 export const accepts = defineDropPlugin(
 	<T,>(predicate: (data: T) => boolean) => ({
 		key: ACCEPTS_KEY,
-		name: 'accepts',
 		phase: 'pre',
 
 		enter(ctx) {
@@ -664,7 +648,6 @@ export const accepts = defineDropPlugin(
 export const highlight = defineDropPlugin(
 	(options: { overClass?: string } = {}) => ({
 		key: HIGHLIGHT_KEY,
-		name: 'highlight',
 		phase: 'post',
 
 		init() {
@@ -687,7 +670,6 @@ export const highlight = defineDropPlugin(
 
 export const onDrop = defineDropPlugin(<T,>(handler: (data: T, ctx: DropCtx) => void) => ({
 	key: ON_DROP_KEY,
-	name: 'onDrop',
 	phase: 'post',
 
 	drop(ctx) {
@@ -703,6 +685,7 @@ export {
 export {
 	defineDragPlugin,
 	defineDropPlugin,
+	pluginKeyLabel,
 	type DragPlugin as Plugin,
 	type DragPluginList,
 	type DropPluginList,

@@ -72,9 +72,12 @@ export interface DropCtx {
 	effect(fn: () => void): void;
 }
 
+export function pluginKeyLabel(key: symbol): string {
+	return key.description ?? 'plugin';
+}
+
 export interface DragPlugin<S = unknown> {
 	key: symbol;
-	name: string;
 	phase?: PluginPhase;
 	skipOnCancel?: boolean;
 	init?(ctx: DragCtx): S;
@@ -87,7 +90,6 @@ export interface DragPlugin<S = unknown> {
 
 export interface DropPlugin<S = unknown> {
 	key: symbol;
-	name: string;
 	phase?: PluginPhase;
 	init?(ctx: DropCtx): S;
 	enter?(ctx: DropCtx, state: S, event: PointerEvent): boolean | void;
@@ -107,7 +109,7 @@ export type DropPluginList = PluginSlot<DropPlugin>[];
 export interface ErrorInfo {
 	phase: 'init' | 'start' | 'drag' | 'end' | 'enter' | 'over' | 'leave' | 'drop' | 'update' | 'destroy';
 	plugin?: {
-		name: string;
+		key: symbol;
 		hook: string;
 	};
 	node: HTMLElement | SVGElement;

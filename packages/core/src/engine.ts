@@ -538,7 +538,7 @@ export class Neodrag {
 			const out = this.#pluginCall(
 				inst,
 				plugin.key,
-				{ phase: 'start', plugin: { name: plugin.name, hook: 'start' }, node: inst.rootNode },
+				{ phase: 'start', plugin: { key: plugin.key, hook: 'start' }, node: inst.rootNode },
 				() => plugin.start!(ctx, state, e),
 			);
 			if (out === PLUGIN_FAILED) return false;
@@ -561,7 +561,7 @@ export class Neodrag {
 			const patch = this.#pluginCall(
 				inst,
 				plugin.key,
-				{ ...info, plugin: { name: plugin.name, hook: 'drag' } },
+				{ ...info, plugin: { key: plugin.key, hook: 'drag' } },
 				() => plugin.drag!(ctx, state, e),
 			);
 			if (patch === PLUGIN_FAILED) continue;
@@ -585,7 +585,7 @@ export class Neodrag {
 			this.#pluginVoid(
 				inst,
 				plugin.key,
-				{ phase: 'end', plugin: { name: plugin.name, hook: 'end' }, node: inst.rootNode },
+				{ phase: 'end', plugin: { key: plugin.key, hook: 'end' }, node: inst.rootNode },
 				() => plugin.end!(ctx, state, e, reason),
 			);
 		}
@@ -623,7 +623,7 @@ export class Neodrag {
 			const out = this.#pluginCall(
 				inst,
 				plugin.key,
-				{ ...info, plugin: { name: plugin.name, hook } },
+				{ ...info, plugin: { key: plugin.key, hook } },
 				() => handler(ctx, state, e),
 			);
 			if (out === PLUGIN_FAILED) continue;
@@ -717,7 +717,7 @@ export class Neodrag {
 		this.#pluginVoid(
 			inst,
 			plugin.key,
-			{ phase: 'init', plugin: { name: plugin.name, hook: 'init' }, node: inst.rootNode },
+			{ phase: 'init', plugin: { key: plugin.key, hook: 'init' }, node: inst.rootNode },
 			() => {
 				const state = plugin.init!(inst.dragCtx);
 				if (state !== undefined) inst.states.set(plugin.key, state);
@@ -733,7 +733,7 @@ export class Neodrag {
 		this.#pluginVoid(
 			inst,
 			plugin.key,
-			{ phase: 'destroy', plugin: { name: plugin.name, hook: 'destroy' }, node: inst.rootNode },
+			{ phase: 'destroy', plugin: { key: plugin.key, hook: 'destroy' }, node: inst.rootNode },
 			() => plugin.destroy!(inst.dragCtx, inst.states.get(plugin.key)),
 		);
 		inst.states.delete(plugin.key);
@@ -779,7 +779,7 @@ export class Neodrag {
 		this.#pluginVoid(
 			inst,
 			plugin.key,
-			{ phase: 'init', plugin: { name: plugin.name, hook: 'init' }, node: inst.rootNode },
+			{ phase: 'init', plugin: { key: plugin.key, hook: 'init' }, node: inst.rootNode },
 			() => {
 				const state = plugin.init!(inst.dropCtx);
 				if (state !== undefined) inst.states.set(plugin.key, state);
@@ -795,7 +795,7 @@ export class Neodrag {
 		this.#pluginVoid(
 			inst,
 			plugin.key,
-			{ phase: 'destroy', plugin: { name: plugin.name, hook: 'destroy' }, node: inst.rootNode },
+			{ phase: 'destroy', plugin: { key: plugin.key, hook: 'destroy' }, node: inst.rootNode },
 			() => plugin.destroy!(inst.dropCtx, inst.states.get(plugin.key)),
 		);
 		inst.states.delete(plugin.key);

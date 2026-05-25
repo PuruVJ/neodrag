@@ -46,7 +46,6 @@ describe('drop target rAF coalescing', () => {
 		let overCalls = 0;
 		const dropPlugin = defineDropPlugin(() => ({
 			key: Symbol('spy-over'),
-			name: 'spy-over',
 			over() {
 				overCalls++;
 			},

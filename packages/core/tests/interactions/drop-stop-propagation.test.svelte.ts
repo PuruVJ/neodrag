@@ -10,7 +10,6 @@ import { sleepAndWaitForEffects } from '../utils.ts';
 
 const stopPropagationOnEnter = defineDropPlugin(() => ({
 	key: Symbol('stop-propagation'),
-	name: 'stop-propagation',
 	enter(ctx) {
 		ctx.session.stopPropagation();
 	},

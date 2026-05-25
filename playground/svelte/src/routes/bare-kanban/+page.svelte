@@ -56,7 +56,6 @@
 				] });
 	const drop_1 = new Droppable({ plugins: [
 			{
-				name: 'todo-drop',
 				onDrop() {
 					dropInColumn('todo');
 				},
@@ -64,7 +63,6 @@
 		] });
 	const drop_2 = new Droppable({ plugins: [
 			{
-				name: 'done-drop',
 				onDrop() {
 					console.log(2);
 					dropInColumn('done');
@@ -74,7 +72,6 @@
 
 	const drop_0 = new Droppable({ plugins: [
 			{
-				name: 'done-drop',
 				onDrop() {
 					console.log(2);
 					dropInColumn('done');

@@ -90,12 +90,13 @@ import { defineDragPlugin } from '@neodrag/core';
 
 export const myPlugin = defineDragPlugin(() => ({
   key: Symbol('my-plugin'),
-  name: 'my-plugin',
   drag(ctx, state, event) {
     return { x: ctx.proposed.x, y: ctx.proposed.y };
   },
 }));
 ```
+
+Use a **named** `Symbol('…')` so `key.description` is readable in errors and devtools. Anonymous `Symbol()` still works; identity is always `key`.
 
 ## Reactive updates
 

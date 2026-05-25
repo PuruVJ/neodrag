@@ -34,7 +34,6 @@ const createSyncPlugin = (
 ) =>
 	defineDragPlugin(() => ({
 		key: Symbol('neodrag.react-state-sync'),
-		name: 'react-state-sync',
 		phase: 'post',
 		skipOnCancel: true,
 

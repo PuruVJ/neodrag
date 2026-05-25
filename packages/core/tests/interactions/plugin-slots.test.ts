@@ -12,21 +12,21 @@ import {
 describe('plugin slots resolver', () => {
 	it('hasReactiveSlots detects function slots', () => {
 		const key = Symbol('a');
-		const p = defineDragPlugin(() => ({ key, name: 'a' }))();
+		const p = defineDragPlugin(() => ({ key }))();
 		expect(hasReactiveSlots([p])).toBe(false);
 		expect(hasReactiveSlots([p, () => p])).toBe(true);
 	});
 
 	it('caches static slots on reactive-only resolve', () => {
 		const key = Symbol('static');
-		const staticPlugin = defineDragPlugin(() => ({ key, name: 'static' }))();
+		const staticPlugin = defineDragPlugin(() => ({ key }))();
 		let dynamicCalls = 0;
 		const dynamicKey = Symbol('dynamic');
 		const slots = [
 			staticPlugin,
 			() => {
 				dynamicCalls++;
-				return defineDragPlugin(() => ({ key: dynamicKey, name: 'dynamic' }))();
+				return defineDragPlugin(() => ({ key: dynamicKey }))();
 			},
 		];
 
@@ -43,13 +43,13 @@ describe('plugin slots resolver', () => {
 
 	it('PluginListResolver resolveReactive skips static re-init', () => {
 		const key = Symbol('s');
-		const staticPlugin = defineDragPlugin(() => ({ key, name: 's' }))();
+		const staticPlugin = defineDragPlugin(() => ({ key }))();
 		let n = 0;
 		const resolver = new PluginListResolver([
 			staticPlugin,
 			() => {
 				n++;
-				return defineDragPlugin(() => ({ key: Symbol('d'), name: 'd' }))();
+				return defineDragPlugin(() => ({ key: Symbol('d') }))();
 			},
 		]);
 
@@ -65,7 +65,7 @@ describe('plugin slots resolver', () => {
 		const resolver = new PluginListResolver([
 			() => {
 				calls++;
-				return defineDragPlugin(() => ({ key, name: 'r' }))();
+				return defineDragPlugin(() => ({ key }))();
 			},
 		]);
 
@@ -74,8 +74,8 @@ describe('plugin slots resolver', () => {
 	});
 
 	it('flattens array return from slot', () => {
-		const a = defineDragPlugin(() => ({ key: Symbol('a'), name: 'a' }))();
-		const b = defineDragPlugin(() => ({ key: Symbol('b'), name: 'b' }))();
+		const a = defineDragPlugin(() => ({ key: Symbol('a') }))();
+		const b = defineDragPlugin(() => ({ key: Symbol('b') }))();
 		const out = resolvePluginList([() => [a, b]]);
 		expect(out).toHaveLength(2);
 	});

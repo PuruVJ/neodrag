@@ -15,7 +15,6 @@ describe('engine.updateDrop symbol-keyed diff', () => {
 		const makePlugin = (label: string) =>
 			defineDropPlugin(() => ({
 				key,
-				name: 'opts',
 				init() {
 					return { label };
 				},
@@ -40,7 +39,6 @@ describe('engine.updateDrop symbol-keyed diff', () => {
 
 		const plugin = defineDropPlugin(() => ({
 			key: Symbol('once'),
-			name: 'once',
 			init() {
 				initCalls++;
 			},

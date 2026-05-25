@@ -1,7 +1,7 @@
 import { dragData } from '../plugins.ts';
 import { defineDropPlugin, defineDragPlugin } from '../types.ts';
 
-const SORTABLE_DROP_KEY = Symbol('neodrag.sortable.drop');
+const SORTABLE_DROP_KEY = Symbol('neodrag.sortable.container');
 
 export type SortableStrategy = 'vertical' | 'horizontal';
 
@@ -88,7 +88,6 @@ export function sortable<T>(opts: SortableOptions<T>) {
 
 	const containerDrop = defineDropPlugin(() => ({
 		key: SORTABLE_DROP_KEY,
-		name: 'sortable-container',
 		phase: 'resolve',
 
 		init() {
@@ -155,7 +154,6 @@ export function sortable<T>(opts: SortableOptions<T>) {
 			const plugins: import('../types.ts').DragPlugin[] = [
 				defineDragPlugin(() => ({
 					key: itemKey(key),
-					name: `sortable-item:${key}`,
 					phase: 'pre',
 
 					init(dragCtx) {

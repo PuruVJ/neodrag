@@ -265,8 +265,10 @@ function switchAxis() {
 Create a simple logging plugin:
 
 ```typescript
-const logger = {
-  name: 'my:logger',
+import { defineDragPlugin } from '@neodrag/core/plugins';
+
+const logger = defineDragPlugin(() => ({
+  key: Symbol('my:logger'),
 
   start(ctx, state, event) {
     console.log('Started dragging at:', ctx.initial.x, ctx.initial.y);
@@ -279,7 +281,7 @@ const logger = {
   end(ctx, state, event) {
     console.log('Stopped dragging at:', ctx.offset.x, ctx.offset.y);
   },
-};
+}));
 ```
 
 Use it like any built-in plugin:
@@ -296,7 +298,7 @@ Make plugins configurable with a factory function:
 import { defineDragPlugin } from '@neodrag/core/plugins';
 
 const logger = defineDragPlugin((prefix = 'DRAG') => ({
-  name: 'my:logger',
+  key: Symbol('my:logger'),
 
   start(ctx) {
     console.log(
@@ -324,18 +326,14 @@ const plugins = [logger('MY_APP')];
 Plugins can implement these hooks that run at different drag stages:
 
 ```typescript
-interface Plugin {
-  name: string; // Unique identifier
-  priority?: number; // Higher = runs earlier (default: 0)
-  liveUpdate?: boolean; // Can update during active drag
-  cancelable?: boolean; // Respects cancellation (default: true)
-
-  setup?: (ctx) => state; // Initialize plugin
-  shouldStart?: (ctx, state, event) => boolean; // Should dragging begin?
-  start?: (ctx, state, event) => void; // Dragging started
-  drag?: (ctx, state, event) => void; // During dragging
-  end?: (ctx, state, event) => void; // Dragging ended
-  cleanup?: (ctx, state) => void; // Plugin destroyed
+interface DragPlugin {
+  key: symbol; // Unique identity — use Symbol('my-plugin') for a readable description
+  phase?: 'pre' | 'resolve' | 'post';
+  init?: (ctx) => state;
+  start?: (ctx, state, event) => boolean | void;
+  drag?: (ctx, state, event) => { x?: number; y?: number } | void;
+  end?: (ctx, state, event, reason) => void;
+  destroy?: (ctx, state) => void;
 }
 ```
 
@@ -383,7 +381,6 @@ Plugins can maintain state between lifecycle calls:
 
 ```typescript
 const statefulPlugin = {
-  name: 'stateful:example',
 
   setup(ctx) {
     return {
@@ -421,9 +418,9 @@ import { defineDragPlugin } from '@neodrag/core/plugins';
 
 export const awesomePlugin = defineDragPlugin(
   (options: AwesomePluginOptions = {}) => ({
-    name: 'awesome:plugin',
+    key: Symbol('awesome:plugin'),
 
-    setup(ctx) {
+    init(ctx) {
       return {
         /* state */
       };
@@ -457,7 +454,6 @@ Add logging to understand plugin execution:
 
 ```typescript
 const debugPlugin = {
-  name: 'debug:execution',
   priority: 999, // Run early
 
   setup(ctx) {

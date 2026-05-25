@@ -114,7 +114,6 @@
 							] });
 	const drop_1 = new Droppable({ plugins: [
 					{
-						name: 'kanban-column',
 						onEnter() {
 							handleColumnEnter(column.id);
 						},

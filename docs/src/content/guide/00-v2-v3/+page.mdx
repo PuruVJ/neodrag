@@ -861,8 +861,7 @@ Create your own dragging behavior:
 	import { defineDragPlugin } from '@neodrag/svelte/plugins';
 
   const loggerPlugin = defineDragPlugin(() => ({
-    name: 'logger',
-
+    key: Symbol('logger'),
     setup(ctx) {
       console.log('Drag initialized');
       return { startTime: 0 };
@@ -897,7 +896,7 @@ Create your own dragging behavior:
 import { useDraggable, defineDragPlugin } from '@neodrag/react';
 
 const loggerPlugin = defineDragPlugin(() => ({
-  name: 'logger',
+  key: Symbol('logger'),
   setup(ctx) {
     console.log('Drag initialized');
     return { startTime: 0 };
@@ -931,7 +930,7 @@ function CustomExample() {
 import { vDraggable, defineDragPlugin } from '@neodrag/vue';
 
 const loggerPlugin = defineDragPlugin(() => ({
-  name: 'logger',
+  key: Symbol('logger'),
   setup(ctx) {
     console.log('Drag initialized');
     return { startTime: 0 };
@@ -965,7 +964,7 @@ const plugins = [loggerPlugin];
 import { useDraggable, defineDragPlugin } from '@neodrag/solid';
 
 const loggerPlugin = defineDragPlugin(() => ({
-  name: 'logger',
+  key: Symbol('logger'),
   setup(ctx) {
     console.log('Drag initialized');
     return { startTime: 0 };
@@ -998,7 +997,7 @@ function CustomExample() {
 import { Neodrag, defineDragPlugin } from '@neodrag/vanilla';
 
 const loggerPlugin = defineDragPlugin(() => ({
-  name: 'logger',
+  key: Symbol('logger'),
   setup(ctx) {
     console.log('Drag initialized');
     return { startTime: 0 };
