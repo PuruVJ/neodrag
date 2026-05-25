@@ -8,6 +8,7 @@ export default defineConfig({
 		'drop/index': './src/drop/index.ts',
 		'drop/plugins': './src/drop-plugins.ts',
 		'testing/index': './src/testing/index.ts',
+		'dev/index': './src/dev/index.ts',
 	},
 	format: 'esm',
 	dts: { resolve: true },

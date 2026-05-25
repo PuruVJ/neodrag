@@ -50,6 +50,19 @@ export interface EngineOptions {
 	dev?: boolean;
 }
 
+export interface NeodragDebugSnapshot {
+	dragTargets: number;
+	dropTargets: number;
+	session: {
+		state: import('./types.ts').SessionState;
+		pointerX: number;
+		pointerY: number;
+		deltaX: number;
+		deltaY: number;
+		overTargets: number;
+	} | null;
+}
+
 export class Neodrag {
 	static #sharedInstance: Neodrag | null = null;
 
@@ -228,6 +241,25 @@ export class Neodrag {
 			diff: (target, resolved) => this.#diffDragPlugins(target as DragInstance, resolved),
 			recurse: (pending) => this.update(node, pending as DragPluginList),
 		});
+	}
+
+	debugSnapshot(): NeodragDebugSnapshot | null {
+		if (!this.#dev) return null;
+		const active = this.#active;
+		return {
+			dragTargets: this.#dragSources.size,
+			dropTargets: this.#dropCount,
+			session: active
+				? {
+						state: active.state,
+						pointerX: active.pointerX,
+						pointerY: active.pointerY,
+						deltaX: active.deltaX,
+						deltaY: active.deltaY,
+						overTargets: active.overTargets.length,
+					}
+				: null,
+		};
 	}
 
 	dispose() {

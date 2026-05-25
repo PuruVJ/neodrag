@@ -18,6 +18,11 @@
 			"import": "./src/plugins.ts",
 			"default": "./src/plugins.ts"
 		},
+		"./drop": {
+			"types": "./src/drop/index.ts",
+			"import": "./src/drop/index.ts",
+			"default": "./src/drop/index.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -26,6 +31,16 @@
 				"types": "./dist/index.d.ts",
 				"import": "./dist/index.js",
 				"default": "./dist/index.js"
+			},
+			"./plugins": {
+				"types": "./dist/plugins.d.ts",
+				"import": "./dist/plugins.js",
+				"default": "./dist/plugins.js"
+			},
+			"./drop": {
+				"types": "./dist/drop/index.d.ts",
+				"import": "./dist/drop/index.js",
+				"default": "./dist/drop/index.js"
 			},
 			"./package.json": "./package.json"
 		}

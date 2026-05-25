@@ -33,6 +33,16 @@
 				"import": "./dist/index.js",
 				"default": "./dist/index.js"
 			},
+			"./plugins": {
+				"types": "./dist/plugins.d.ts",
+				"import": "./dist/plugins.js",
+				"default": "./dist/plugins.js"
+			},
+			"./drop": {
+				"types": "./dist/drop.d.ts",
+				"import": "./dist/drop.js",
+				"default": "./dist/drop.js"
+			},
 			"./package.json": "./package.json"
 		}
 	},

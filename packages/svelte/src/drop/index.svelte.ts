@@ -43,5 +43,16 @@ export class Droppable extends CoreDroppable {
 	}
 }
 
-export { sortable, type SortableOptions, type SortableStrategy } from '@neodrag/core/drop';
+export {
+	sortable,
+	applySortableReorder,
+	accepts,
+	highlight,
+	onDrop,
+	type SortableOptions,
+	type SortableStrategy,
+	type SortableMode,
+	type SortablePreviewMeta,
+	type SortableReorderMeta,
+} from '@neodrag/core/drop';
 export { sortableItemFor } from './sortable.svelte';
