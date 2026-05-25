@@ -84,7 +84,7 @@ export class Neodrag {
 	#dropTracker: DropTargetTracker;
 	#dropHostBridge: DropTargetHost;
 
-	#idleSession: import('./types.ts').DragSession;
+	#idleSession: import('./types.ts').DragSession | null = null;
 	#activeSessionView: import('./types.ts').DragSession | null = null;
 
 	readonly #dropHost: DropCtxHost = {
@@ -107,14 +107,20 @@ export class Neodrag {
 
 		this.#defaultDragPlugins = options.plugins ?? DEFAULT_DRAG_PLUGINS;
 		this.#defaultDropPlugins = options.dropPlugins ?? [];
-		this.#delegate = options.delegate ?? (() => document.documentElement);
+		this.#delegate = options.delegate ?? DEFAULTS.delegate;
 		this.#onError = options.onError ?? DEFAULTS.onError;
 		this.#dev = options.dev ?? DEV;
+	}
 
-		const idleActive: ActiveSession = {
+	#createIdleActive(): ActiveSession {
+		const root =
+			typeof document !== 'undefined'
+				? document.documentElement
+				: ({ getBoundingClientRect: () => new DOMRect() } as HTMLElement);
+		return {
 			state: 'idle',
-			sourceNode: document.documentElement,
-			visualNode: document.documentElement,
+			sourceNode: root,
+			visualNode: root,
 			sourceRect: new DOMRect(),
 			visualRect: new DOMRect(),
 			pointerX: 0,
@@ -128,8 +134,16 @@ export class Neodrag {
 			pointerId: -1,
 			startedAt: 0,
 		};
-		this.#idleSession = createDragSession(idleActive, () => {});
-		this.#dropHost.session = this.#idleSession;
+	}
+
+	#ensureIdleSession(): import('./types.ts').DragSession {
+		if (!this.#idleSession) {
+			this.#idleSession = createDragSession(this.#createIdleActive(), () => {});
+			if (!this.#activeSessionView) {
+				this.#dropHost.session = this.#idleSession;
+			}
+		}
+		return this.#idleSession;
 	}
 
 	get dev() {
@@ -153,7 +167,7 @@ export class Neodrag {
 
 		this.#initListeners();
 
-		const inst = new DragInstance(node, this.#idleSession);
+		const inst = new DragInstance(node, this.#ensureIdleSession());
 		inst.applyTransform = options.applyTransform;
 		inst.lastSlots = plugins;
 		inst.slotStaticCache = [];
@@ -468,8 +482,8 @@ export class Neodrag {
 		this.#activeSource = null;
 		this.#activePointerId = null;
 		this.#activeSessionView = null;
-		this.#dropHost.session = this.#idleSession;
-		inst.bindSession(this.#idleSession);
+		this.#dropHost.session = this.#ensureIdleSession();
+		inst.bindSession(this.#ensureIdleSession());
 		this.#disarmPointerSession();
 		this.#dropTracker.reset();
 	}
@@ -506,8 +520,8 @@ export class Neodrag {
 		this.#activeSource = null;
 		this.#activePointerId = null;
 		this.#activeSessionView = null;
-		this.#dropHost.session = this.#idleSession;
-		inst.bindSession(this.#idleSession);
+		this.#dropHost.session = this.#ensureIdleSession();
+		inst.bindSession(this.#ensureIdleSession());
 		this.#disarmPointerSession();
 		this.#dropTracker.reset();
 	}
