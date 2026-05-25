@@ -440,11 +440,7 @@ export const controls = defineDragPlugin(
 
 			if (!zone) return is_allow;
 
-			if (is_allow) {
-				ctx.session.setVisual(zone.element as HTMLElement);
-				return true;
-			}
-			return false;
+			return is_allow;
 		},
 	}),
 );
