@@ -48,17 +48,8 @@ jobs:
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
 
-      - name: Test webkit
-        run: pnpm test --browser=webkit
+      - name: Compile
+        run: pnpm compile
 
-      - name: Test firefox
-        run: pnpm test --browser=firefox
-
-      - name: Interactions unit tests
-        run: pnpm --filter @neodrag/core test:interactions:unit
-
-      - name: Benchmark guards (Chromium)
-        run: pnpm --filter @neodrag/core test:bench:guard
-
-      - name: Coverage
-        run: pnpm test --coverage --browser=chromium
+      - name: Test (Turbo)
+        run: pnpm test:ci

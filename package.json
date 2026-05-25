@@ -6,11 +6,18 @@
 	"scripts": {
 		"changeset": "changeset",
 		"compile": "turbo run compile",
+		"build": "turbo run build",
+		"dev": "turbo run dev",
 		"docs:build": "turbo run docs#build",
+		"sizes": "turbo run sizes",
+		"bench": "turbo run bench --filter=@neodrag/core",
+		"test": "turbo run test",
+		"test:unit": "turbo run test:unit --filter=@neodrag/core",
+		"test:bench:guard": "turbo run test:bench:guard --filter=@neodrag/core",
+		"test:adapters": "turbo run test --filter=@neodrag/svelte --filter=@neodrag/react --filter=@neodrag/vue --filter=@neodrag/solid",
+		"test:ci": "turbo run test:webkit test:firefox test:unit test:bench:guard test:coverage --filter=@neodrag/core && turbo run test --filter=@neodrag/svelte --filter=@neodrag/react --filter=@neodrag/vue --filter=@neodrag/solid",
 		"ci:version": "changeset version",
-		"ci:release": "changeset publish",
-		"test": "cd packages/core && pnpm test",
-		"test:adapters": "pnpm --filter @neodrag/svelte --filter @neodrag/react --filter @neodrag/vue --filter @neodrag/solid test"
+		"ci:release": "changeset publish"
 	},
 	"devDependencies": {
 		"@changesets/changelog-github": "^0.5.1",

@@ -1,25 +1,110 @@
 {
 	"$schema": "https://turbo.build/schema.json",
+	"globalDependencies": ["pnpm-lock.yaml", "pnpm-workspace.yaml"],
 	"tasks": {
 		"compile": {
-			"outputs": ["dist"],
-			"inputs": ["./src/**/*.ts", "tsdown.config.ts"],
-			"dependsOn": ["^compile"]
+			"dependsOn": ["^compile"],
+			"outputs": ["dist/**"],
+			"inputs": [
+				"src/**",
+				"tsdown.config.ts",
+				"package.json",
+				"tsconfig.json"
+			]
 		},
-		"docs#build": {
-			"outputs": ["dist"],
-			"dependsOn": ["^compile", "sizes"]
+		"test": {
+			"dependsOn": ["^compile"],
+			"cache": false,
+			"inputs": [
+				"src/**",
+				"tests/**",
+				"benchmarks/**",
+				"vitest*.config.ts",
+				"package.json"
+			]
+		},
+		"test:webkit": {
+			"dependsOn": ["^compile"],
+			"cache": false,
+			"inputs": [
+				"src/**",
+				"tests/**",
+				"vitest*.config.ts"
+			]
+		},
+		"test:firefox": {
+			"dependsOn": ["^compile"],
+			"cache": false,
+			"inputs": [
+				"src/**",
+				"tests/**",
+				"vitest*.config.ts"
+			]
+		},
+		"test:chromium": {
+			"dependsOn": ["^compile"],
+			"cache": false,
+			"inputs": [
+				"src/**",
+				"tests/**",
+				"vitest*.config.ts"
+			]
+		},
+		"test:unit": {
+			"dependsOn": ["^compile"],
+			"inputs": [
+				"src/**",
+				"tests/interactions/**",
+				"vitest.config.ts"
+			]
+		},
+		"test:bench:guard": {
+			"dependsOn": ["^compile"],
+			"cache": false,
+			"inputs": [
+				"src/**",
+				"benchmarks/**",
+				"vitest.bench.browser.config.ts"
+			]
+		},
+		"test:coverage": {
+			"dependsOn": ["^compile"],
+			"outputs": ["coverage/**"],
+			"cache": false,
+			"inputs": [
+				"src/**",
+				"tests/**",
+				"vitest*.config.ts"
+			]
+		},
+		"bench": {
+			"dependsOn": ["^compile"],
+			"cache": false,
+			"inputs": [
+				"src/**",
+				"benchmarks/**",
+				"vitest.bench.browser.config.ts"
+			]
 		},
 		"sizes": {
-			"outputs": ["dist"],
-			"dependsOn": ["^compile", "^sizes"]
+			"dependsOn": ["^compile"],
+			"outputs": ["../src/sizes.json"],
+			"inputs": ["sizes.ts", "package.json"]
+		},
+		"build": {
+			"dependsOn": ["^compile"],
+			"outputs": ["dist/**", ".astro/**"],
+			"inputs": ["src/**", "public/**", "astro.config.*", "package.json"]
 		},
 		"dev": {
-			"outputs": ["dist"],
 			"dependsOn": ["^compile"],
-			"inputs": ["./src/**/*.ts", "tsdown.config.ts"],
 			"cache": false,
-			"persistent": true
+			"persistent": true,
+			"inputs": ["src/**", "tsdown.config.ts", "vite.config.*", "package.json"]
+		},
+		"docs#build": {
+			"dependsOn": ["^compile", "sizes"],
+			"outputs": ["dist/**"]
 		}
 	},
 	"ui": "tui"

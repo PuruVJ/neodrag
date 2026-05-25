@@ -68,13 +68,20 @@ Each framework package provides:
 # Install dependencies
 pnpm install
 
-# Build all packages
+# Build all packages (Turbo)
 pnpm compile
 
-# Run core tests
+# Tests (Turbo: core browsers + unit + adapters)
 pnpm test
+pnpm test:unit
+pnpm test:adapters
+pnpm test:ci
 
-# Build documentation
+# Benchmarks & bundle sizes (Turbo)
+pnpm bench
+pnpm sizes
+
+# Build documentation (Turbo)
 pnpm docs:build
 
 # Release workflow
@@ -85,7 +92,7 @@ pnpm ci:release  # Publish packages
 ### Build Configuration
 - **TypeScript**: Shared catalog version (5.8.3)
 - **Vite**: Shared catalog version (6.3.5)
-- **Turbo**: Orchestrates build dependencies
+- **Turbo**: Orchestrates compile, test, bench, sizes, build, and dev across packages
 - **tsdown**: Builds ESM (and UMD where needed) plus TypeScript declarations
 
 ## Testing Strategy
