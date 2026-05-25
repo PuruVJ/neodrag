@@ -6,7 +6,8 @@ import {
 	resolvedPluginsUnchanged,
 } from './resolve-plugins.ts';
 import type { TransformApplier } from './apply-transform.ts';
-import type { DragPlugin, DragPluginList } from './types.ts';
+import type { DragPlugin, DragPluginList, DropPlugin, DropPluginList } from './types.ts';
+import type { DropHandle } from './handles.ts';
 
 export type { TransformApplier };
 
@@ -23,7 +24,7 @@ export class Draggable {
 	#node: HTMLElement | SVGElement | null = null;
 	#lastResolved: DragPlugin[] | null = null;
 
-	readonly attachment: (node: HTMLElement | SVGElement) => () => void;
+	readonly attachment: (node: HTMLElement | SVGElement) => void | (() => void);
 	readonly #applyTransform?: TransformApplier;
 
 	constructor(options: DraggableOptions) {
@@ -89,12 +90,13 @@ export class Draggable {
 
 export class DroppableBinding {
 	readonly #engine: Neodrag;
-	#resolver: PluginListResolver<import('./types.ts').DropPlugin>;
-	#handle: import('./handles.ts').DropHandle | null = null;
+	#resolver: PluginListResolver<DropPlugin>;
+	#handle: DropHandle | null = null;
+	#lastResolved: DropPlugin[] | null = null;
 
-	readonly attachment: (node: HTMLElement | SVGElement) => () => void;
+	readonly attachment: (node: HTMLElement | SVGElement) => void | (() => void);
 
-	constructor(options: { engine?: Neodrag; plugins: import('./types.ts').DropPluginList }) {
+	constructor(options: { engine?: Neodrag; plugins: DropPluginList }) {
 		this.#engine = options.engine ?? Neodrag.shared;
 		this.#resolver = new PluginListResolver(options.plugins);
 
@@ -115,8 +117,6 @@ export class DroppableBinding {
 		this.#handle = this.#engine.droppable(node, resolved);
 	}
 
-	#lastResolved: import('./types.ts').DropPlugin[] | null = null;
-
 	detach() {
 		this.#handle?.destroy();
 		this.#handle = null;
@@ -131,7 +131,7 @@ export class DroppableBinding {
 		this.#lastResolved = next;
 	}
 
-	update(slots?: import('./types.ts').DropPluginList) {
+	update(slots?: DropPluginList) {
 		if (slots) this.#resolver.setSlots(slots);
 		if (!this.#handle) return;
 		const next = this.#resolver.hasReactive()

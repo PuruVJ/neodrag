@@ -27,6 +27,11 @@
 				"import": "./dist/index.js",
 				"default": "./dist/index.js"
 			},
+			"./plugins": {
+				"types": "./dist/plugins.d.ts",
+				"import": "./dist/plugins.js",
+				"default": "./dist/plugins.js"
+			},
 			"./package.json": "./package.json"
 		}
 	},

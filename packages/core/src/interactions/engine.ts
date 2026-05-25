@@ -1,5 +1,4 @@
 import { is_svg_element, is_svg_svg_element, listen } from '../utils.ts';
-import { EffectScheduler } from './effects.ts';
 import {
 	ActiveSession,
 	DragInstance,
@@ -8,12 +7,7 @@ import {
 	SessionPrivate,
 } from './instance.ts';
 import { DragHandle, DropHandle } from './handles.ts';
-import {
-	hasReactiveSlots,
-	resolveDragPluginList,
-	resolveDropPluginList,
-	resolvePluginList,
-} from './resolve-plugins.ts';
+import { hasReactiveSlots, resolvePluginList } from './resolve-plugins.ts';
 import { DEFAULT_DRAG_PLUGINS } from '../defaults.ts';
 import { applyDragTransform, type TransformApplier } from './apply-transform.ts';
 import { DropTargetTracker, type DropTargetHost } from './drop-targets.ts';
@@ -66,6 +60,8 @@ export class Neodrag {
 
 	#listenersInitialized = false;
 	#listenerDelegate: HTMLElement | null = null;
+	#boundOnDown: ((e: PointerEvent) => void) | null = null;
+	#boundOnKeyDown: ((e: KeyboardEvent) => void) | null = null;
 	#boundOnMove: ((e: PointerEvent) => void) | null = null;
 	#boundOnUp: ((e: PointerEvent) => void) | null = null;
 	#pointerSessionAbort: AbortController | null = null;
@@ -329,11 +325,16 @@ export class Neodrag {
 
 	dispose() {
 		this.#disarmPointerSession();
+		this.#endActiveInteraction('cancel');
 		for (const inst of this.#dragSources.values()) this.#destroyDrag(inst);
 		for (const inst of this.#dropTargets.values()) this.#destroyDrop(inst);
 		this.#dragSources.clear();
 		this.#dropTargets.clear();
-		this.#cancelSession('cancel');
+		this.#dropCount = 0;
+		this.#soleDrop = null;
+		this.#sessionListeners.clear();
+		this.#sessionCleanups.clear();
+		this.#removeGlobalListeners();
 	}
 
 	#getSession(): import('./types.ts').DragSession {
@@ -402,13 +403,29 @@ export class Neodrag {
 		if (this.#listenersInitialized) return;
 		const target = this.#delegate();
 		this.#listenerDelegate = target;
+		this.#boundOnDown = this.#onPointerDown.bind(this);
+		this.#boundOnKeyDown = this.#onKeyDown.bind(this);
 		this.#boundOnMove = this.#onPointerMove.bind(this);
 		this.#boundOnUp = this.#onPointerUp.bind(this);
 
-		listen(target, 'pointerdown', this.#onPointerDown.bind(this), { passive: true, capture: true });
-		listen(target, 'keydown', this.#onKeyDown.bind(this), { passive: true });
+		listen(target, 'pointerdown', this.#boundOnDown, { passive: true, capture: true });
+		listen(target, 'keydown', this.#boundOnKeyDown, { passive: true });
 
 		this.#listenersInitialized = true;
+	}
+
+	#removeGlobalListeners() {
+		if (!this.#listenersInitialized || !this.#listenerDelegate) return;
+		const target = this.#listenerDelegate;
+		const capture = { capture: true } as EventListenerOptions;
+		if (this.#boundOnDown) target.removeEventListener('pointerdown', this.#boundOnDown, capture);
+		if (this.#boundOnKeyDown) target.removeEventListener('keydown', this.#boundOnKeyDown);
+		this.#listenersInitialized = false;
+		this.#listenerDelegate = null;
+		this.#boundOnDown = null;
+		this.#boundOnKeyDown = null;
+		this.#boundOnMove = null;
+		this.#boundOnUp = null;
 	}
 
 	#armPointerSession() {
@@ -433,6 +450,7 @@ export class Neodrag {
 
 	#onPointerDown(e: PointerEvent) {
 		if (e.button === 2) return;
+		if (this.#activeSource?.isInteracting) return;
 
 		const node = this.#findDragSource(e);
 		if (!node) return;
@@ -454,6 +472,8 @@ export class Neodrag {
 	}
 
 	#onPointerMove(e: PointerEvent) {
+		if (this.#activePointerId !== null && e.pointerId !== this.#activePointerId) return;
+
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
 
@@ -511,6 +531,8 @@ export class Neodrag {
 	}
 
 	#onPointerUp(e: PointerEvent) {
+		if (this.#activePointerId !== null && e.pointerId !== this.#activePointerId) return;
+
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
 
@@ -534,7 +556,11 @@ export class Neodrag {
 			});
 		}
 
-		if (inst.pointerCapturedId !== null && inst.visualNode.hasPointerCapture(inst.pointerCapturedId)) {
+		if (
+			inst.pointerCapturedId !== null &&
+			typeof inst.visualNode.hasPointerCapture === 'function' &&
+			inst.visualNode.hasPointerCapture(inst.pointerCapturedId)
+		) {
 			inst.visualNode.releasePointerCapture(inst.pointerCapturedId);
 		}
 
@@ -579,14 +605,38 @@ export class Neodrag {
 	#cleanupPointer(_pointerId: number) {
 		const inst = this.#activeSource;
 		if (!inst) return;
+		inst.cancelled = true;
+		const e = inst.lastEvent;
+		if (e) {
+			this.#finishInteraction('cancel', e);
+			return;
+		}
+		this.#clearSessionState(inst);
+	}
+
+	#endActiveInteraction(reason: EndReason) {
+		const inst = this.#activeSource;
+		if (!inst?.isInteracting) return;
+		const e = inst.lastEvent;
+		if (e && this.#active) {
+			this.#finishInteraction(reason, e);
+			return;
+		}
+		this.#clearSessionState(inst);
+	}
+
+	#clearSessionState(inst: DragInstance) {
 		inst.isInteracting = false;
 		inst.isDragging = false;
+		inst.cancelled = false;
+		inst.pointerCapturedId = null;
 		this.#active = null;
 		this.#activeSource = null;
 		this.#activePointerId = null;
 		this.#activeSessionView = null;
 		this.#dropHost.session = this.#idleSession;
 		inst.bindSession(this.#idleSession);
+		this.#endSessionListeners();
 		this.#disarmPointerSession();
 		this.#dropTracker.reset();
 	}
@@ -947,6 +997,10 @@ export class Neodrag {
 	}
 
 	#destroyDrag(inst: DragInstance) {
+		if (this.#activeSource === inst && inst.isInteracting) {
+			inst.cancelled = true;
+			this.#endActiveInteraction('cancel');
+		}
 		for (const plugin of inst.flat) this.#destroyOneDragPlugin(inst, plugin);
 		inst.controller.abort();
 		inst.effects.clear();

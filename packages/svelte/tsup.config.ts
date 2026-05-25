@@ -8,7 +8,7 @@ export default defineConfig([
 		},
 		format: 'esm',
 		dts: true,
-		external: ['svelte/action', '@neodrag/core'],
+		external: ['svelte/attachments', '@neodrag/core'],
 		clean: true,
 		treeshake: 'smallest',
 	},

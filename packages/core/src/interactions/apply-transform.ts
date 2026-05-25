@@ -8,6 +8,9 @@ export type TransformApplier = (args: {
 
 const TRANSFORM_CACHE = Symbol('neodrag.transformCache');
 
+const SVG_TRANSFORM_TRANSLATE =
+	typeof SVGTransform !== 'undefined' ? SVGTransform.SVG_TRANSFORM_TRANSLATE : 2;
+
 type TransformCache = { x: number; y: number };
 
 function transformCache(node: HTMLElement | SVGElement): TransformCache {
@@ -33,11 +36,21 @@ export function applyDragTransform(ctx: DragCtx, custom?: TransformApplier) {
 		const element = targetNode as SVGGraphicsElement;
 		const svg = element.ownerSVGElement;
 		if (!svg) return;
-		const translation = svg.createSVGTransform();
-		translation.setTranslate(x, y);
 		const t = element.transform.baseVal;
-		t.clear();
-		t.appendItem(translation);
+		let translateIndex = -1;
+		for (let i = 0; i < t.numberOfItems; i++) {
+			if (t.getItem(i).type === SVG_TRANSFORM_TRANSLATE) {
+				translateIndex = i;
+				break;
+			}
+		}
+		if (translateIndex >= 0) {
+			t.getItem(translateIndex).setTranslate(x, y);
+		} else {
+			const translation = svg.createSVGTransform();
+			translation.setTranslate(x, y);
+			t.insertItemBefore(translation, 0);
+		}
 	} else {
 		set_node_key_style(
 			targetNode,

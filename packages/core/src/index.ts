@@ -33,4 +33,5 @@ export {
 	type SessionState,
 	type DropTargetInfo,
 } from './interactions/types.ts';
+export type { DragEventData } from './interactions/plugins.ts';
 export { DEFAULTS, DEFAULT_DRAG_PLUGINS, MINIMAL_DRAG_PLUGINS } from './defaults.ts';

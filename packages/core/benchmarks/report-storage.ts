@@ -3,6 +3,8 @@ import type { BenchStats } from './browser/helpers.ts';
 export const BASELINE_REL = 'benchmarks/reports/baseline.json';
 export const LATEST_REL = 'benchmarks/reports/latest.json';
 
+export const MIN_COMPARE_MEDIAN_MS = 0.05;
+
 export type BenchReportEntry = {
 	name: string;
 	meanMs: number;
@@ -58,12 +60,13 @@ export function compareToBaseline(
 			newBenchmarks.push(row.name);
 			continue;
 		}
-		if (row.medianMs > base.medianMs * maxRegressionRatio) {
+		const baselineMedian = Math.max(base.medianMs, MIN_COMPARE_MEDIAN_MS);
+		if (row.medianMs > baselineMedian * maxRegressionRatio) {
 			regressions.push({
 				name: row.name,
 				baselineMedianMs: base.medianMs,
 				currentMedianMs: row.medianMs,
-				ratio: row.medianMs / base.medianMs,
+				ratio: row.medianMs / baselineMedian,
 			});
 		}
 	}

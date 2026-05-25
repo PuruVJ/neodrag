@@ -12,8 +12,10 @@ import { defineDragPlugin } from '@neodrag/core/plugins';
 import type { Accessor } from 'solid-js';
 import { createEffect, createSignal, onCleanup, untrack } from 'solid-js';
 
-export type { DragPluginList };
+export type { DragEventData, DragPluginList };
 export { Neodrag, CoreDraggable as Draggable };
+
+export type DragSyncMode = 'full' | 'start-end' | false;
 
 export interface DragState extends DragEventData {
 	isDragging: boolean;
@@ -27,7 +29,7 @@ const defaultDragState: DragState = {
 	event: null as unknown as PointerEvent,
 };
 
-const createSyncPlugin = (setState: (state: DragState) => void) =>
+const createSyncPlugin = (setState: (state: DragState) => void, mode: DragSyncMode) =>
 	defineDragPlugin(() => ({
 		key: Symbol('neodrag.solid-state-sync'),
 		name: 'solid-state-sync',
@@ -45,6 +47,7 @@ const createSyncPlugin = (setState: (state: DragState) => void) =>
 		},
 
 		drag(ctx, _, event) {
+			if (mode !== 'full') return;
 			setState({
 				offset: { x: ctx.offset.x, y: ctx.offset.y },
 				rootNode: ctx.rootNode,
@@ -69,24 +72,33 @@ function withSync(plugins: DragPluginList, sync: DragPlugin): DragPluginList {
 	return [...plugins, sync];
 }
 
-export function useDraggable(slots: DragPluginList = []): [typeof defaultDragState, (node: HTMLElement | SVGElement | null) => void];
+export function useDraggable(
+	slots?: DragPluginList,
+	options?: { syncState?: DragSyncMode },
+): [Accessor<DragState>, (node: HTMLElement | SVGElement | null) => void];
 
 export function useDraggable(
 	element: Accessor<HTMLElement | SVGElement | null | undefined>,
 	slots: DragPluginList,
-): [typeof defaultDragState];
+	options?: { syncState?: DragSyncMode },
+): [Accessor<DragState>];
 
 export function useDraggable(
 	elementOrSlots: Accessor<HTMLElement | SVGElement | null | undefined> | DragPluginList = [],
-	maybeSlots: DragPluginList = [],
+	maybeSlotsOrOptions?: DragPluginList | { syncState?: DragSyncMode },
+	maybeOptions?: { syncState?: DragSyncMode },
 ) {
 	const isElementForm = typeof elementOrSlots === 'function';
+	const options = (
+		isElementForm ? maybeOptions : maybeSlotsOrOptions
+	) as { syncState?: DragSyncMode } | undefined;
+	const syncMode: DragSyncMode = options?.syncState ?? 'start-end';
 
 	const [dragState, setDragState] = createSignal<DragState>(defaultDragState);
-	const sync = createSyncPlugin(setDragState);
+	const sync = createSyncPlugin(setDragState, syncMode);
 
 	const slots = (): DragPluginList =>
-		isElementForm ? maybeSlots : (elementOrSlots as DragPluginList);
+		isElementForm ? (maybeSlotsOrOptions as DragPluginList) : (elementOrSlots as DragPluginList);
 
 	const binding = new CoreDraggable({
 		plugins: untrack(() => withSync(slots(), sync)),
@@ -134,7 +146,7 @@ export function useDraggable(
 	return [dragState, attachRef] as const;
 }
 
-export function useDroppable(slots: DropPluginList = []): [
+export function useDroppable(slots?: DropPluginList): [
 	undefined,
 	(node: HTMLElement | SVGElement | null) => void,
 ];

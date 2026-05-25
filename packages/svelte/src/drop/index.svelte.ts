@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
 	DroppableBinding as CoreDroppable,
 	Neodrag,

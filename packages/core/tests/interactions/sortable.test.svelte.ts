@@ -49,7 +49,6 @@ describe('interactions sortable', () => {
 		const keys = [...listEl.querySelectorAll('[data-sortable-key]')].map((el) =>
 			el.getAttribute('data-sortable-key'),
 		);
-		expect(keys[0]).not.toBe('1');
-		expect(keys).toContain('1');
+		expect(keys).toEqual(['2', '3', '1']);
 	});
 });

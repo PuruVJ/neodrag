@@ -133,8 +133,8 @@ export const grid = defineDragPlugin(
 		drag(ctx) {
 			if (!values) return;
 			const patch: { x?: number; y?: number } = {};
-			if (values[0]) patch.x = snap(ctx.proposed.x, values[0]);
-			if (values[1]) patch.y = snap(ctx.proposed.y, values[1]);
+			if (values[0] != null && values[0] > 0) patch.x = snap(ctx.proposed.x, values[0]);
+			if (values[1] != null && values[1] > 0) patch.y = snap(ctx.proposed.y, values[1]);
 			if (patch.x !== undefined || patch.y !== undefined) return patch;
 		},
 	}),
@@ -373,6 +373,7 @@ function resolve_zone(
 	allow: ControlZone[],
 	block: ControlZone[],
 	allow_defined: boolean,
+	priority: 'allow' | 'block' = 'allow',
 ): { zone: ControlZone | null; is_allow: boolean } {
 	if (allow_defined && allow.length === 0) return { zone: null, is_allow: false };
 	if (allow.length === 0 && block.length === 0) return { zone: null, is_allow: allow_defined ? false : true };
@@ -386,6 +387,10 @@ function resolve_zone(
 		if (!b) return { zone: a, is_allow: true };
 		if (is_nested(a, b)) return { zone: a, is_allow: true };
 		if (is_nested(b, a)) return { zone: b, is_allow: false };
+		if (a.area === b.area && priority === 'block') {
+			j++;
+			return { zone: b, is_allow: false };
+		}
 		if (a.area <= b.area) {
 			i++;
 			return { zone: a, is_allow: true };
@@ -438,6 +443,7 @@ export const controls = defineDragPlugin(
 				allow_zones,
 				block_zones,
 				state.allow.length > 0,
+				state.priority,
 			);
 
 			if (!zone) return is_allow;

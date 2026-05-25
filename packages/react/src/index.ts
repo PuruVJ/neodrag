@@ -11,14 +11,14 @@ import {
 import { defineDragPlugin } from '@neodrag/core/plugins';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-const engine = Neodrag.shared;
-
-export type { DragPluginList };
+export type { DragEventData, DragPluginList };
 export { Neodrag, CoreDraggable as Draggable };
 
 export interface DragState extends DragEventData {
 	isDragging: boolean;
 }
+
+export type DragSyncMode = 'full' | 'start-end' | false;
 
 const defaultState: DragState = {
 	offset: { x: 0, y: 0 },
@@ -28,7 +28,10 @@ const defaultState: DragState = {
 	event: null as unknown as PointerEvent,
 };
 
-const createSyncPlugin = (setState: React.Dispatch<React.SetStateAction<DragState>>) =>
+const createSyncPlugin = (
+	setState: React.Dispatch<React.SetStateAction<DragState>>,
+	mode: DragSyncMode,
+) =>
 	defineDragPlugin(() => ({
 		key: Symbol('neodrag.react-state-sync'),
 		name: 'react-state-sync',
@@ -46,6 +49,7 @@ const createSyncPlugin = (setState: React.Dispatch<React.SetStateAction<DragStat
 		},
 
 		drag(ctx, _, event) {
+			if (mode !== 'full') return;
 			setState({
 				offset: { x: ctx.offset.x, y: ctx.offset.y },
 				rootNode: ctx.rootNode,
@@ -66,7 +70,8 @@ const createSyncPlugin = (setState: React.Dispatch<React.SetStateAction<DragStat
 		},
 	}))();
 
-function withSync(plugins: DragPluginList, sync: DragPlugin): DragPluginList {
+function withSync(plugins: DragPluginList, sync: DragPlugin | null): DragPluginList {
+	if (!sync) return plugins;
 	return [...plugins, sync];
 }
 
@@ -75,61 +80,74 @@ type UseDraggableSlots = DragPluginList;
 function useDraggableBinding(
 	slots: UseDraggableSlots,
 	withState: boolean,
+	syncMode: DragSyncMode,
 	externalRef?: React.RefObject<HTMLElement | SVGElement | null>,
 ) {
 	const [state, setState] = useState<DragState>(defaultState);
-	const sync = useRef(createSyncPlugin(setState));
+	const sync = useRef(withState && syncMode ? createSyncPlugin(setState, syncMode) : null);
 	const bindingRef = useRef<CoreDraggable | null>(null);
 	const slotsRef = useRef(slots);
 	slotsRef.current = slots;
 
-	const pluginList = withState ? withSync(slots, sync.current) : slots;
-	const reactive = hasReactiveSlots(pluginList);
+	const pluginList = withSync(slots, sync.current);
 
 	if (!bindingRef.current) {
 		bindingRef.current = new CoreDraggable({ plugins: pluginList });
 	}
 
-	const attachRef = useCallback(
-		(node: HTMLElement | SVGElement | null) => {
-			const binding = bindingRef.current;
-			if (!binding) return;
-
-			if (!node) {
-				binding.detach();
-				return;
-			}
-
-			binding.attach(node);
-		},
-		[],
-	);
+	const attachRef = useCallback((node: HTMLElement | SVGElement | null) => {
+		const binding = bindingRef.current;
+		if (!binding) return;
+		if (!node) {
+			binding.detach();
+			return;
+		}
+		binding.attach(node);
+	}, []);
 
 	useLayoutEffect(() => {
 		const binding = bindingRef.current;
 		if (!binding) return;
-		const list = withState ? withSync(slotsRef.current, sync.current) : slotsRef.current;
+		const list = withSync(slotsRef.current, sync.current);
 		if (!hasReactiveSlots(list)) return;
 		binding.update(list);
 	});
 
-	useEffect(() => {
-		return () => bindingRef.current?.destroy();
-	}, []);
+	useEffect(() => () => bindingRef.current?.destroy(), []);
+
+	useLayoutEffect(() => {
+		if (!externalRef) return;
+		attachRef(externalRef.current);
+	});
 
 	useEffect(() => {
 		if (!externalRef) return;
-		attachRef(externalRef.current);
+		let cancelled = false;
+		const tryAttach = () => {
+			if (cancelled) return;
+			if (externalRef.current) {
+				attachRef(externalRef.current);
+				return;
+			}
+			requestAnimationFrame(tryAttach);
+		};
+		tryAttach();
+		return () => {
+			cancelled = true;
+			attachRef(null);
+		};
 	}, [externalRef, attachRef]);
 
 	return {
 		ref: attachRef,
 		state: withState ? state : defaultState,
-		reactive,
 	};
 }
 
-export function useDraggable(slots: UseDraggableSlots = []): {
+export function useDraggable(
+	slots?: UseDraggableSlots,
+	options?: { syncState?: DragSyncMode },
+): {
 	ref: (node: HTMLElement | SVGElement | null) => void;
 	state: DragState;
 };
@@ -137,11 +155,13 @@ export function useDraggable(slots: UseDraggableSlots = []): {
 export function useDraggable(
 	ref: React.RefObject<HTMLElement | SVGElement | null>,
 	slots?: UseDraggableSlots,
+	options?: { syncState?: DragSyncMode },
 ): DragState;
 
 export function useDraggable(
 	refOrSlots: React.RefObject<HTMLElement | SVGElement | null> | UseDraggableSlots = [],
-	maybeSlots: UseDraggableSlots = [],
+	maybeSlotsOrOptions?: UseDraggableSlots | { syncState?: DragSyncMode },
+	maybeOptions?: { syncState?: DragSyncMode },
 ) {
 	const isRefForm =
 		refOrSlots !== null &&
@@ -149,17 +169,24 @@ export function useDraggable(
 		'current' in refOrSlots &&
 		!Array.isArray(refOrSlots);
 
+	const options = (
+		isRefForm ? maybeOptions : maybeSlotsOrOptions
+	) as { syncState?: DragSyncMode } | undefined;
+	const syncMode = options?.syncState ?? 'start-end';
+
 	if (isRefForm) {
 		const ref = refOrSlots as React.RefObject<HTMLElement | SVGElement | null>;
-		const { state } = useDraggableBinding(maybeSlots, true, ref);
+		const slots = (maybeSlotsOrOptions as UseDraggableSlots) ?? [];
+		const { state } = useDraggableBinding(slots, true, syncMode, ref);
 		return state;
 	}
 
-	const { ref, state } = useDraggableBinding(refOrSlots as UseDraggableSlots, true);
+	const slots = refOrSlots as UseDraggableSlots;
+	const { ref, state } = useDraggableBinding(slots, true, syncMode);
 	return { ref, state };
 }
 
-export function useDroppable(slots: DropPluginList = []): {
+export function useDroppable(slots?: DropPluginList): {
 	ref: (node: HTMLElement | SVGElement | null) => void;
 };
 
@@ -208,9 +235,27 @@ export function useDroppable(
 
 	useEffect(() => () => bindingRef.current?.destroy(), []);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (!externalRef) return;
 		attachRef(externalRef.current);
+	});
+
+	useEffect(() => {
+		if (!externalRef) return;
+		let cancelled = false;
+		const tryAttach = () => {
+			if (cancelled) return;
+			if (externalRef.current) {
+				attachRef(externalRef.current);
+				return;
+			}
+			requestAnimationFrame(tryAttach);
+		};
+		tryAttach();
+		return () => {
+			cancelled = true;
+			attachRef(null);
+		};
 	}, [externalRef, attachRef]);
 
 	if (isRefForm) return;

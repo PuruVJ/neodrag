@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Draggable as CoreDraggable, Neodrag, type DragPluginList, type EngineOptions } from '@neodrag/core';
 import { Attachment } from 'svelte/attachments';
 

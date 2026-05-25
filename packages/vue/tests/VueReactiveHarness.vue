@@ -1,21 +1,11 @@
 <script setup lang="ts">
 	import { Draggable } from '@neodrag/vue';
 	import { position } from '@neodrag/vue/plugins';
-	import { ref, watch } from 'vue';
 
 	const props = defineProps<{ external: { x: number; y: number } }>();
-	const pos = ref({ ...props.external });
-
-	watch(
-		() => props.external,
-		(v) => {
-			pos.value = { x: v.x, y: v.y };
-		},
-		{ deep: true },
-	);
 
 	const drag = new Draggable({
-		plugins: [() => position({ current: { x: pos.value.x, y: pos.value.y } })],
+		plugins: [() => position({ current: { x: props.external.x, y: props.external.y } })],
 	});
 </script>
 

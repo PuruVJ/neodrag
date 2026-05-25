@@ -118,6 +118,19 @@ export function flushEffects() {
 	);
 }
 
+export function resetElementPosition(el: HTMLElement | SVGElement) {
+	if (el instanceof SVGElement) {
+		const element = el as SVGGraphicsElement;
+		const t = element.transform?.baseVal;
+		if (!t) return;
+		for (let i = t.numberOfItems - 1; i >= 0; i--) {
+			if (t.getItem(i).type === SVGTransform.SVG_TRANSFORM_TRANSLATE) t.removeItem(i);
+		}
+		return;
+	}
+	(el as HTMLElement).style.translate = '0px 0px';
+}
+
 export function createBox(left = '100px', top = '100px') {
 	const box = document.createElement('div');
 	box.style.cssText = `position:absolute;left:${left};top:${top};width:120px;height:80px;touch-action:none;background:#4a9eff`;

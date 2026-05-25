@@ -54,5 +54,11 @@ jobs:
       - name: Test firefox
         run: pnpm test --browser=firefox
 
+      - name: Interactions unit tests
+        run: pnpm --filter @neodrag/core test:interactions:unit
+
+      - name: Benchmark guards (Chromium)
+        run: pnpm --filter @neodrag/core test:bench:guard
+
       - name: Coverage
         run: pnpm test --coverage --browser=chromium

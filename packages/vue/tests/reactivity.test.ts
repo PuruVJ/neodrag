@@ -1,4 +1,4 @@
-import { createApp, h } from 'vue';
+import { createApp, defineComponent, h, nextTick, reactive } from 'vue';
 import { describe, expect, test } from 'vitest';
 import { vDraggable } from '../src/index.ts';
 import VueReactiveHarness from './VueReactiveHarness.vue';
@@ -8,39 +8,37 @@ function translateStyle(el: HTMLElement) {
 }
 
 describe('@neodrag/vue reactivity', () => {
-	test('v-draggable binding flushes reactive position slot', async () => {
+	test('v-draggable flushes reactive position when parent props change', async () => {
 		const host = document.createElement('div');
 		document.body.appendChild(host);
 
-		let external = { x: 6, y: 14 };
-		const app = createApp({
-			render: () => h(VueReactiveHarness, { external }),
+		const external = reactive({ x: 6, y: 14 });
+		const Parent = defineComponent({
+			setup() {
+				return () => h(VueReactiveHarness, { external });
+			},
 		});
+
+		const app = createApp(Parent);
 		app.directive('draggable', vDraggable);
 		app.mount(host);
 
+		await nextTick();
 		await new Promise((r) => requestAnimationFrame(() => r(undefined)));
 
 		const el = host.querySelector('[data-testid="draggable"]') as HTMLElement;
 		expect(translateStyle(el)).toContain('6');
 		expect(translateStyle(el)).toContain('14');
 
-		external = { x: 25, y: 35 };
-		app.unmount();
-		const app2 = createApp({
-			render: () => h(VueReactiveHarness, { external }),
-		});
-		app2.directive('draggable', vDraggable);
-		app2.mount(host);
-
+		external.x = 25;
+		external.y = 35;
+		await nextTick();
 		await new Promise((r) => requestAnimationFrame(() => r(undefined)));
-		await new Promise((r) => setTimeout(r, 0));
 
-		const el2 = host.querySelector('[data-testid="draggable"]') as HTMLElement;
-		expect(translateStyle(el2)).toContain('25');
-		expect(translateStyle(el2)).toContain('35');
+		expect(translateStyle(el)).toContain('25');
+		expect(translateStyle(el)).toContain('35');
 
-		app2.unmount();
+		app.unmount();
 		host.remove();
 	});
 });

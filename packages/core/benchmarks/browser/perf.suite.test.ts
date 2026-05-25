@@ -21,6 +21,7 @@ import {
 	pointer,
 	ratioLabel,
 	resetBody,
+	resetElementPosition,
 	runBench,
 	type BenchStats,
 } from './helpers.ts';
@@ -119,6 +120,7 @@ describe('Chromium perf suite', () => {
 
 		results.push(
 			runBench('steady-state · default plugins · 12-step drag', 300, 30, () => {
+				resetElementPosition(box);
 				dragSteps(box, DRAG.fromX, DRAG.fromY, DRAG.toX, DRAG.toY, DRAG.steps);
 			}),
 		);
@@ -129,6 +131,7 @@ describe('Chromium perf suite', () => {
 
 		results.push(
 			runBench('steady-state · MINIMAL_DRAG_PLUGINS · 12-step drag', 300, 30, () => {
+				resetElementPosition(minimalBox);
 				dragSteps(minimalBox, DRAG.fromX, DRAG.fromY, DRAG.toX, DRAG.toY, DRAG.steps);
 			}),
 		);
@@ -209,6 +212,7 @@ describe('Chromium perf suite', () => {
 					.map((r) => `${r.name}: ${r.ratio.toFixed(2)}× median`)
 					.join('\n')}`,
 			).toEqual([]);
+			expect(comparison.missing, 'Benchmarks missing from current run').toEqual([]);
 		} else {
 			console.warn(
 				`\nNo baseline at ${BASELINE_REL}. Run \`pnpm bench:baseline\` after reviewing latest.json.`,

@@ -36,6 +36,17 @@
 				"import": "./dist/index.svelte.js",
 				"default": "./dist/index.svelte.js"
 			},
+			"./plugins": {
+				"types": "./dist/plugins.d.ts",
+				"import": "./dist/plugins.js",
+				"default": "./dist/plugins.js"
+			},
+			"./drop": {
+				"types": "./dist/drop/index.svelte.d.ts",
+				"svelte": "./dist/drop/index.svelte.js",
+				"import": "./dist/drop/index.svelte.js",
+				"default": "./dist/drop/index.svelte.js"
+			},
 			"./package.json": "./package.json"
 		}
 	},
