@@ -44,5 +44,3 @@ export class DropHandle {
 		this.#dispose();
 	}
 }
-
-export type { DragPluginList };

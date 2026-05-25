@@ -1,6 +1,4 @@
 export * from './index.ts';
-import { Neodrag, type EngineOptions } from './interactions/engine.ts';
-export { Neodrag, type EngineOptions };
 
 export function createBrowserNeodrag(
 	options: Omit<import('./interactions/engine.ts').EngineOptions, 'delegate'> & {

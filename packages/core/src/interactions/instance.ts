@@ -333,10 +333,6 @@ export class DropInstance {
 		};
 	}
 
-	bindHost(host: DropCtxHost) {
-		this.#host = host;
-	}
-
 	rebuildBuckets() {
 		this.preEnter = [];
 		this.resolveEnter = [];

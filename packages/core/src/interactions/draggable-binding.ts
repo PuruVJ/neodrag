@@ -1,10 +1,6 @@
 import { Neodrag } from './engine.ts';
 import type { DragHandle } from './handles.ts';
-import {
-	hasReactiveSlots,
-	PluginListResolver,
-	resolvedPluginsUnchanged,
-} from './resolve-plugins.ts';
+import { PluginListResolver, resolvedPluginsUnchanged } from './resolve-plugins.ts';
 import type { TransformApplier } from './apply-transform.ts';
 import type { DragPlugin, DragPluginList, DropPlugin, DropPluginList } from './types.ts';
 import type { DropHandle } from './handles.ts';

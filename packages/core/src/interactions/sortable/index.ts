@@ -1,8 +1,6 @@
 import { dragData } from '../plugins.ts';
-import { createSessionKey } from '../session-key.ts';
 import { defineDropPlugin, defineDragPlugin } from '../types.ts';
 
-const SORTABLE_CTX_KEY = createSessionKey<SortableContext<unknown>>();
 const SORTABLE_DROP_KEY = Symbol('neodrag.sortable.drop');
 
 export type SortableStrategy = 'vertical' | 'horizontal';
@@ -93,8 +91,7 @@ export function sortable<T>(opts: SortableOptions<T>) {
 		name: 'sortable-container',
 		phase: 'resolve',
 
-		init(dropCtx) {
-			dropCtx.session.private.set(SORTABLE_CTX_KEY, ctx as SortableContext<unknown>);
+		init() {
 			return {
 				hoverIndex: -1,
 				dragKey: '',
@@ -168,6 +165,7 @@ export function sortable<T>(opts: SortableOptions<T>) {
 
 					destroy(dragCtx) {
 						ctx.nodesByKey.delete(key);
+						itemKeys.delete(key);
 						invalidateMidsCache(ctx);
 						dragCtx.rootNode.removeAttribute('data-sortable-key');
 					},

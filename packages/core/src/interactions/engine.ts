@@ -8,7 +8,7 @@ import {
 } from './instance.ts';
 import { DragHandle, DropHandle } from './handles.ts';
 import { hasReactiveSlots, resolvePluginList } from './resolve-plugins.ts';
-import { DEFAULT_DRAG_PLUGINS } from '../defaults.ts';
+import { DEFAULT_DRAG_PLUGINS, DEFAULTS } from '../defaults.ts';
 import { applyDragTransform, type TransformApplier } from './apply-transform.ts';
 import { DropTargetTracker, type DropTargetHost } from './drop-targets.ts';
 import { createDragSession, resolveEndReason } from './session.ts';
@@ -105,7 +105,7 @@ export class Neodrag {
 		this.#defaultDragPlugins = options.plugins ?? DEFAULT_DRAG_PLUGINS;
 		this.#defaultDropPlugins = options.dropPlugins ?? [];
 		this.#delegate = options.delegate ?? (() => document.documentElement);
-		this.#onError = options.onError;
+		this.#onError = options.onError ?? DEFAULTS.onError;
 		this.#dev = options.dev ?? DEV;
 
 		const idleActive: ActiveSession = {
@@ -208,8 +208,6 @@ export class Neodrag {
 			? resolvePluginList(plugins, inst.slotStaticCache, true)
 			: resolvePluginList(plugins, inst.slotStaticCache, false);
 
-		if (inst.lastList === resolved) return;
-
 		const merged = this.#mergeUserDropPlugins(resolved);
 		if (merged.length === inst.flat.length) {
 			let same = true;
@@ -272,8 +270,6 @@ export class Neodrag {
 		const resolved = hasReactiveSlots(plugins)
 			? resolvePluginList(plugins, inst.slotStaticCache, true)
 			: resolvePluginList(plugins, inst.slotStaticCache, false);
-
-		if (inst.lastList === resolved) return;
 
 		const merged = this.#mergeUserDragPlugins(resolved);
 		if (merged.length === inst.flat.length) {
@@ -846,7 +842,8 @@ export class Neodrag {
 		inst.isProcessingExternalUpdate = false;
 
 		if (inst.offsetX !== offsetX || inst.offsetY !== offsetY) {
-			this.#syncTransformAfterPluginDiff(inst);
+			this.#syncDragTransform(inst);
+			inst.effects.flush();
 		} else {
 			inst.effects.flush();
 		}
@@ -854,11 +851,6 @@ export class Neodrag {
 
 	#syncDragTransform(inst: DragInstance) {
 		applyDragTransform(inst.dragCtx, inst.applyTransform);
-	}
-
-	#syncTransformAfterPluginDiff(inst: DragInstance) {
-		this.#syncDragTransform(inst);
-		inst.effects.flush();
 	}
 
 	#initDragPlugins(inst: DragInstance) {

@@ -207,12 +207,6 @@ export const bounds = defineDragPlugin(
 				y: clamp(py, minOy, maxOy) - ctx.offset.y,
 			};
 		},
-
-		end(ctx, state) {
-			if (shouldRecompute({ hook: 'end' })) {
-				state.bounds = recomputeBounds(value, ctx);
-			}
-		},
 	}),
 );
 
@@ -242,18 +236,10 @@ export const position = defineDragPlugin((options: PositionOptions | null = null
 
 	init(ctx) {
 		applyPosition(ctx, options);
-		return { lastX: options?.current?.x, lastY: options?.current?.y };
 	},
 
 	update(ctx) {
 		applyPosition(ctx, options);
-	},
-
-	drag(ctx, state) {
-		if (options?.current) {
-			state.lastX = options.current.x;
-			state.lastY = options.current.y;
-		}
 	},
 }));
 
@@ -501,6 +487,11 @@ export const threshold = defineDragPlugin((options?: { delay?: number; distance?
 			if (!state.enabled) return true;
 			if (ctx.isDragging) return true;
 
+			if (!ctx.rootNode.contains(event.target as Node)) {
+				ctx.cancel();
+				return false;
+			}
+
 			if (!state.started) {
 				state.started = true;
 				state.start_time = Date.now();
@@ -519,14 +510,6 @@ export const threshold = defineDragPlugin((options?: { delay?: number; distance?
 			}
 
 			return true;
-		},
-
-		drag(ctx, state, event) {
-			if (!state.enabled || ctx.isDragging) return;
-
-			if (!ctx.rootNode.contains(event.target as Node)) {
-				ctx.cancel();
-			}
 		},
 
 		end(_ctx, state) {
