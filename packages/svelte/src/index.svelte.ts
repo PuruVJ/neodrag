@@ -5,7 +5,6 @@ import {
 	type DragPluginList,
 	type EngineOptions,
 } from '@neodrag/core';
-import { isBrowser } from '@neodrag/core';
 import { Attachment } from 'svelte/attachments';
 import { untrack } from 'svelte';
 
@@ -28,7 +27,6 @@ export class Draggable extends CoreDraggable {
 		}
 
 		this.#attachment = (element) => {
-			if (!isBrowser()) return;
 			const cleanup = untrack(() => {
 				coreAttachment(element);
 				if (this.hasReactiveSlots) this.flushReactive();

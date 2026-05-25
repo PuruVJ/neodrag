@@ -66,11 +66,3 @@ export function is_svg_svg_element(element: Element | EventTarget): element is S
 }
 
 export const is_null = (v: unknown): v is null => Object.is(v, null);
-
-export function isBrowser(): boolean {
-	return (
-		typeof globalThis !== 'undefined' &&
-		'document' in globalThis &&
-		globalThis.document != null
-	);
-}

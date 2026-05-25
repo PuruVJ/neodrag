@@ -1,4 +1,3 @@
-import { isBrowser } from './utils.ts';
 import { Neodrag } from './engine.ts';
 import type { DragHandle, DropHandle } from './handles.ts';
 import { PluginListResolver, resolvedPluginsUnchanged } from './resolve-plugins.ts';
@@ -34,7 +33,6 @@ export class PluginBinding<P extends { key: symbol }> {
 		this.#attachIdempotency = options.attachIdempotency ?? 'handle-node';
 
 		this.attachment = (node) => {
-			if (!isBrowser()) return;
 			this.attach(node);
 			return () => this.detach();
 		};
@@ -49,7 +47,6 @@ export class PluginBinding<P extends { key: symbol }> {
 	}
 
 	attach(node: HTMLElement | SVGElement) {
-		if (!isBrowser()) return;
 		if (this.#attachIdempotency === 'node-and-handle') {
 			if (this.#node === node && this.#handle) return;
 		} else if (this.#handle?.node === node) {

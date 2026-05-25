@@ -1,8 +1,11 @@
+/**
+ * @vitest-environment jsdom
+ */
 import { describe, expect, it, vi } from 'vitest';
 import { Neodrag } from '../../src/engine.ts';
 import { Draggable } from '../../src/draggable-binding.ts';
 
-describe('SSR-safe construction', () => {
+describe('engine delegate wiring', () => {
 	it('Neodrag constructor does not invoke delegate', () => {
 		const delegate = vi.fn(() => document.documentElement);
 		new Neodrag({ delegate });

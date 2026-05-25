@@ -1,7 +1,6 @@
 // @ts-nocheck
 import {
 	DroppableBinding as CoreDroppable,
-	isBrowser,
 	Neodrag,
 	type DropPluginList,
 	type EngineOptions,
@@ -29,7 +28,6 @@ export class Droppable extends CoreDroppable {
 		}
 
 		this.#attachment = (element) => {
-			if (!isBrowser()) return;
 			const cleanup = untrack(() => {
 				coreAttachment(element);
 				if (this.hasReactiveSlots) this.flushReactive();

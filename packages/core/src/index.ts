@@ -33,6 +33,5 @@ export {
 } from './types.ts';
 export type { DragEventData } from './plugins.ts';
 export { DEFAULTS, DEFAULT_DRAG_PLUGINS, MINIMAL_DRAG_PLUGINS } from './defaults.ts';
-export { isBrowser } from './utils.ts';
 export { autoScroll } from './plugins.ts';
 export { presetDockHandle, presetKanbanCard, presetListItem } from './presets.ts';

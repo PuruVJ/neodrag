@@ -59,9 +59,9 @@ Returns a `DragHandle`. `plugins` is `DragPlugin[]` or `() => DragPlugin[]`; fra
 
 Returns a `DropHandle` for drop targets. Same reactive `PluginInput` shape as drag (`DropPlugin[]` or `() => DropPlugin[]`).
 
-### SSR
+### Delegate target
 
-`delegate` is only invoked when the engine attaches its first draggable or droppable (framework `{@attach drag.attachment}`). Constructing `new Draggable({ plugins })` in `<script>` is safe on the server; `document` is not read until the attachment runs in the browser.
+`delegate` runs when the first draggable or droppable attaches (e.g. `{@attach drag.attachment}`). Neodrag is browser-only — wire it on elements that exist in the DOM.
 
 Pass a custom delegate when you use `new Neodrag()` directly:
 
