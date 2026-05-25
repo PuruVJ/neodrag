@@ -2,6 +2,8 @@
 	import { Neodrag } from '../../src/index.ts';
 	import { sortable } from '../../src/drop/index.ts';
 
+	let { preview = false }: { preview?: boolean } = $props();
+
 	let items = $state([
 		{ id: '1', text: 'One' },
 		{ id: '2', text: 'Two' },
@@ -15,6 +17,11 @@
 		onReorder: (next) => {
 			items = next;
 		},
+		onSortPreview: preview
+			? (next) => {
+					items = next as typeof items;
+				}
+			: undefined,
 		strategy: 'vertical',
 	});
 	const bindDrop = (n: HTMLElement) => {

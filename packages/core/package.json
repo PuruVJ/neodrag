@@ -23,6 +23,14 @@
 			"types": "./src/drop/plugins.ts",
 			"import": "./src/drop/plugins.ts"
 		},
+		"./presets": {
+			"types": "./src/presets.ts",
+			"import": "./src/presets.ts"
+		},
+		"./testing": {
+			"types": "./src/testing/index.ts",
+			"import": "./src/testing/index.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -43,6 +51,14 @@
 			"./drop/plugins": {
 				"types": "./dist/drop/plugins.d.ts",
 				"import": "./dist/drop/plugins.js"
+			},
+			"./presets": {
+				"types": "./dist/presets.d.ts",
+				"import": "./dist/presets.js"
+			},
+			"./testing": {
+				"types": "./dist/testing/index.d.ts",
+				"import": "./dist/testing/index.js"
 			},
 			"./package.json": "./package.json"
 		}

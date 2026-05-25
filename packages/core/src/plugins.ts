@@ -21,6 +21,7 @@ const HIGHLIGHT_KEY = Symbol('neodrag.highlight');
 const ON_DROP_KEY = Symbol('neodrag.onDrop');
 const SCROLL_LOCK_KEY = Symbol('neodrag.scrollLock');
 const GHOST_KEY = Symbol('neodrag.ghost');
+const AUTO_SCROLL_KEY = Symbol('neodrag.autoScroll');
 
 type MultitouchState = { active_pointers: Set<number> };
 type StateMarkerState = { count: number };
@@ -585,6 +586,53 @@ export const scrollLock = defineDragPlugin(
 				set_node_key_style(element, 'overflow', styles.overflow);
 			}
 			state.originalStyles.clear();
+		},
+	}),
+);
+
+export const autoScroll = defineDragPlugin(
+	(
+		options: {
+			margin?: number;
+			maxSpeed?: number;
+			container?: HTMLElement | (() => HTMLElement);
+		} | null = {},
+	) => ({
+		key: AUTO_SCROLL_KEY,
+		phase: 'drag',
+
+		init() {
+			return {
+				margin: options?.margin ?? 48,
+				maxSpeed: options?.maxSpeed ?? 24,
+				container: options?.container,
+			};
+		},
+
+		drag(_ctx, state, event) {
+			const margin = state.margin;
+			const maxSpeed = state.maxSpeed;
+			const container =
+				typeof state.container === 'function'
+					? state.container()
+					: (state.container ?? document.documentElement);
+			const rect =
+				container === document.documentElement
+					? { top: 0, left: 0, right: window.innerWidth, bottom: window.innerHeight }
+					: container.getBoundingClientRect();
+
+			let dx = 0;
+			let dy = 0;
+			if (event.clientY < rect.top + margin) dy = -maxSpeed;
+			else if (event.clientY > rect.bottom - margin) dy = maxSpeed;
+			if (event.clientX < rect.left + margin) dx = -maxSpeed;
+			else if (event.clientX > rect.right - margin) dx = maxSpeed;
+
+			if (dx === 0 && dy === 0) return;
+			const scrollEl =
+				container === document.documentElement ? document.documentElement : container;
+			scrollEl.scrollTop += dy;
+			scrollEl.scrollLeft += dx;
 		},
 	}),
 );
