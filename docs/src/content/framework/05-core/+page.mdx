@@ -59,9 +59,19 @@ Returns a `DragHandle`. `plugins` is `DragPlugin[]` or `() => DragPlugin[]`; fra
 
 Returns a `DropHandle` for drop targets. Same reactive `PluginInput` shape as drag (`DropPlugin[]` or `() => DropPlugin[]`).
 
-### SSR / browser
+### SSR
 
-For apps that must avoid touching `document` at import time, use `@neodrag/core/browser` — it is the same API as `@neodrag/core`, with `delegate` defaulting to `document.documentElement`.
+`delegate` is a **function** so the engine does not read `document` until listeners are initialized (first `draggable` / `droppable` call). On the server, avoid `Neodrag.shared` (it is constructed at import). Create the engine on the client only:
+
+```typescript
+import { Neodrag } from '@neodrag/core';
+
+const engine = new Neodrag({
+  delegate: () => document.documentElement,
+});
+```
+
+Framework packages handle this pattern internally.
 
 ### `dispose()`
 

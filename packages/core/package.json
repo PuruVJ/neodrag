@@ -23,10 +23,6 @@
 			"types": "./src/drop/plugins.ts",
 			"import": "./src/drop/plugins.ts"
 		},
-		"./browser": {
-			"types": "./src/browser.ts",
-			"import": "./src/browser.ts"
-		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -47,10 +43,6 @@
 			"./drop/plugins": {
 				"types": "./dist/drop/plugins.d.ts",
 				"import": "./dist/drop/plugins.js"
-			},
-			"./browser": {
-				"types": "./dist/browser.d.ts",
-				"import": "./dist/browser.js"
 			},
 			"./package.json": "./package.json"
 		}
