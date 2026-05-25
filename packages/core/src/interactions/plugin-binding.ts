@@ -15,7 +15,8 @@ export type PluginBindingOptions<P extends { key: symbol }> = {
 };
 
 export class PluginBinding<P extends { key: symbol }> {
-	readonly #engine: Neodrag;
+	readonly #engineOption?: Neodrag;
+	#engine: Neodrag | null = null;
 	#resolver: PluginListResolver<P>;
 	#handle: DragHandle | DropHandle | null = null;
 	#node: HTMLElement | SVGElement | null = null;
@@ -26,7 +27,7 @@ export class PluginBinding<P extends { key: symbol }> {
 	readonly attachment: (node: HTMLElement | SVGElement) => void | (() => void);
 
 	constructor(options: PluginBindingOptions<P>) {
-		this.#engine = options.engine ?? Neodrag.shared;
+		this.#engineOption = options.engine;
 		this.#resolver = new PluginListResolver(options.plugins);
 		this.#register = options.register;
 		this.#attachIdempotency = options.attachIdempotency ?? 'handle-node';
@@ -39,6 +40,10 @@ export class PluginBinding<P extends { key: symbol }> {
 
 	get hasReactiveSlots() {
 		return this.#resolver.hasReactive();
+	}
+
+	#resolveEngine(): Neodrag {
+		return (this.#engine ??= this.#engineOption ?? Neodrag.shared);
 	}
 
 	attach(node: HTMLElement | SVGElement) {
@@ -54,7 +59,7 @@ export class PluginBinding<P extends { key: symbol }> {
 			? this.#resolver.resolveAttach()
 			: this.#resolver.resolveFull();
 		this.#lastResolved = resolved;
-		this.#handle = this.#register(this.#engine, node, resolved);
+		this.#handle = this.#register(this.#resolveEngine(), node, resolved);
 	}
 
 	detach() {

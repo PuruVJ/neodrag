@@ -61,7 +61,9 @@ Returns a `DropHandle` for drop targets. Same reactive `PluginInput` shape as dr
 
 ### SSR
 
-`delegate` is a **function** so the engine does not read `document` until listeners are initialized (first `draggable` / `droppable` call). On the server, avoid `Neodrag.shared` (it is constructed at import). Create the engine on the client only:
+`delegate` is only invoked when the engine attaches its first draggable or droppable (framework `{@attach drag.attachment}`). Constructing `new Draggable({ plugins })` in `<script>` is safe on the server; `document` is not read until the attachment runs in the browser.
+
+Pass a custom delegate when you use `new Neodrag()` directly:
 
 ```typescript
 import { Neodrag } from '@neodrag/core';
@@ -70,8 +72,6 @@ const engine = new Neodrag({
   delegate: () => document.documentElement,
 });
 ```
-
-Framework packages handle this pattern internally.
 
 ### `dispose()`
 

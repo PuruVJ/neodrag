@@ -76,7 +76,7 @@ export class Neodrag {
 
 	#defaultDragPlugins: DragPlugin[];
 	#defaultDropPlugins: DropPlugin[];
-	#delegate: () => HTMLElement;
+	#delegate?: () => HTMLElement;
 	#onError?: (error: ErrorInfo) => void;
 	#dev: boolean;
 
@@ -107,7 +107,7 @@ export class Neodrag {
 
 		this.#defaultDragPlugins = options.plugins ?? DEFAULT_DRAG_PLUGINS;
 		this.#defaultDropPlugins = options.dropPlugins ?? [];
-		this.#delegate = options.delegate ?? DEFAULTS.delegate;
+		this.#delegate = options.delegate;
 		this.#onError = options.onError ?? DEFAULTS.onError;
 		this.#dev = options.dev ?? DEV;
 	}
@@ -279,9 +279,13 @@ export class Neodrag {
 		if (e) this.#finishInteraction(reason, e);
 	}
 
+	#resolveDelegateTarget(): HTMLElement {
+		return (this.#delegate ?? DEFAULTS.delegate)();
+	}
+
 	#initListeners() {
 		if (this.#listenersInitialized) return;
-		const target = this.#delegate();
+		const target = this.#resolveDelegateTarget();
 		this.#listenerDelegate = target;
 		this.#boundOnDown = this.#onPointerDown.bind(this);
 		this.#boundOnKeyDown = this.#onKeyDown.bind(this);
@@ -310,7 +314,7 @@ export class Neodrag {
 
 	#armPointerSession() {
 		if (this.#pointerSessionAbort) return;
-		const target = this.#listenerDelegate ?? this.#delegate();
+		const target = this.#listenerDelegate ?? this.#resolveDelegateTarget();
 		const signal = (this.#pointerSessionAbort = new AbortController()).signal;
 		listen(target, 'pointermove', this.#boundOnMove!, { passive: false, capture: true, signal });
 		listen(target, 'pointerup', this.#boundOnUp!, { passive: true, capture: true, signal });
