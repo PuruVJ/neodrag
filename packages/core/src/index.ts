@@ -14,8 +14,6 @@ export { transitionSession, isTerminal } from './interactions/state-machine.ts';
 export {
 	defineDragPlugin,
 	defineDropPlugin,
-	DragPluginBase,
-	DropPluginBase,
 	type DragCtx,
 	type DragPlugin,
 	type DragPluginList,

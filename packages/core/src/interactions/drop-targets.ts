@@ -18,8 +18,8 @@ export type DropTargetHost = {
 };
 
 export class DropTargetTracker {
-	overStack: DropInstance[] = [];
-	#overStackScratch: DropInstance[] = [];
+	#currentOver: DropInstance[] = [];
+	#nextOverScratch: DropInstance[] = [];
 	#lastDropEvent: PointerEvent | null = null;
 	#lastDropPointerX = NaN;
 	#lastDropPointerY = NaN;
@@ -31,6 +31,10 @@ export class DropTargetTracker {
 		this.#host = host;
 	}
 
+	getOverDrops(): readonly DropInstance[] {
+		return this.#currentOver;
+	}
+
 	reset() {
 		if (this.#dropRafId) {
 			cancelAnimationFrame(this.#dropRafId);
@@ -39,6 +43,7 @@ export class DropTargetTracker {
 		this.#lastDropEvent = null;
 		this.#lastDropPointerX = NaN;
 		this.#lastDropPointerY = NaN;
+		this.#currentOver.length = 0;
 	}
 
 	queueUpdate(e: PointerEvent) {
@@ -70,6 +75,15 @@ export class DropTargetTracker {
 		this.#updateMulti(e, force);
 	}
 
+	#syncSessionTargets(drops: readonly DropInstance[]) {
+		const overTargets = this.#host.getActive()?.overTargets;
+		if (!overTargets) return;
+		overTargets.length = 0;
+		for (let i = 0; i < drops.length; i++) {
+			overTargets.push(this.#lazyTarget(drops[i]!.rootNode));
+		}
+	}
+
 	#updateSole(drop: DropInstance, e: PointerEvent, force: boolean) {
 		const x = e.clientX;
 		const y = e.clientY;
@@ -78,10 +92,7 @@ export class DropTargetTracker {
 		this.#lastDropPointerY = y;
 
 		const over = this.#containsPointer(drop, x, y);
-		const stack = this.#host.getActive()?.overTargets;
-		if (stack) stack.length = 0;
-
-		this.overStack.length = 0;
+		this.#currentOver.length = 0;
 
 		if (over) {
 			if (!drop.isOver) {
@@ -89,14 +100,14 @@ export class DropTargetTracker {
 				drop.isOver = accepted !== false;
 			}
 			if (drop.isOver) {
-				if (stack) stack.push(this.#lazyTarget(drop.rootNode));
-				this.overStack.push(drop);
+				this.#currentOver.push(drop);
 				this.#host.runDropHook(drop, 'over', e);
 			}
 		} else if (drop.isOver) {
 			this.#host.runDropHook(drop, 'leave', e);
 			drop.isOver = false;
 		}
+		this.#syncSessionTargets(this.#currentOver);
 		drop.effects.flush();
 	}
 
@@ -108,7 +119,7 @@ export class DropTargetTracker {
 		this.#lastDropPointerY = y;
 
 		const targets = this.#hitTestTargets(x, y);
-		const next = this.#overStackScratch;
+		const next = this.#nextOverScratch;
 		next.length = 0;
 
 		for (let i = 0; i < targets.length; i++) {
@@ -118,18 +129,16 @@ export class DropTargetTracker {
 		}
 
 		const nextSet = new Set(next);
-		for (let i = 0; i < this.overStack.length; i++) {
-			const drop = this.overStack[i]!;
+		for (let i = 0; i < this.#currentOver.length; i++) {
+			const drop = this.#currentOver[i]!;
 			if (!nextSet.has(drop) && drop.isOver) {
 				this.#host.runDropHook(drop, 'leave', e);
 				drop.isOver = false;
 			}
 		}
 
-		const stack = this.overStack;
+		const stack = this.#currentOver;
 		stack.length = 0;
-		const overTargets = this.#host.getActive()?.overTargets;
-		if (overTargets) overTargets.length = 0;
 
 		for (let i = 0; i < next.length; i++) {
 			const drop = next[i]!;
@@ -139,12 +148,11 @@ export class DropTargetTracker {
 			} else {
 				this.#host.runDropHook(drop, 'over', e);
 			}
-			if (drop.isOver) {
-				stack.push(drop);
-				if (overTargets) overTargets.push(this.#lazyTarget(drop.rootNode));
-			}
+			if (drop.isOver) stack.push(drop);
 			if (this.#host.getActive()?.propagationStopped) break;
 		}
+
+		this.#syncSessionTargets(stack);
 
 		for (let i = 0; i < stack.length; i++) {
 			stack[i]!.effects.flush();

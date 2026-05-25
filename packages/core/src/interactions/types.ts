@@ -118,32 +118,6 @@ export function defineDragPlugin<S = unknown, Args extends unknown[] = []>(
 	return fn;
 }
 
-export abstract class DragPluginBase<S = unknown> implements DragPlugin<S> {
-	abstract readonly key: symbol;
-	abstract readonly name: string;
-	phase?: PluginPhase;
-	skipOnCancel?: boolean;
-	abstract init?(ctx: DragCtx): S;
-	start?(ctx: DragCtx, state: S, event: PointerEvent): boolean | void;
-	drag?(ctx: DragCtx, state: S, event: PointerEvent): DeltaPatch | void;
-	update?(ctx: DragCtx, state: S): void;
-	end?(ctx: DragCtx, state: S, event: PointerEvent, reason: EndReason): void;
-	destroy?(ctx: DragCtx, state: S): void;
-}
-
-export abstract class DropPluginBase<S = unknown> implements DropPlugin<S> {
-	abstract readonly key: symbol;
-	abstract readonly name: string;
-	phase?: PluginPhase;
-	abstract init?(ctx: DropCtx): S;
-	enter?(ctx: DropCtx, state: S, event: PointerEvent): boolean | void;
-	over?(ctx: DropCtx, state: S, event: PointerEvent): void;
-	leave?(ctx: DropCtx, state: S, event: PointerEvent): void;
-	drop?(ctx: DropCtx, state: S, event: PointerEvent): void;
-	update?(ctx: DropCtx, state: S): void;
-	destroy?(ctx: DropCtx, state: S): void;
-}
-
 export function defineDropPlugin<S = unknown, Args extends unknown[] = []>(
 	fn: (...args: Args) => DropPlugin<S>,
 ) {

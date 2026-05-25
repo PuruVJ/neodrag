@@ -284,13 +284,19 @@ export const events = defineDragPlugin(
 	}),
 );
 
-export const disabled = defineDragPlugin((value = true) => ({
+export type DisabledInput = boolean | (() => boolean);
+
+function readDisabled(input: DisabledInput): boolean {
+	return typeof input === 'function' ? input() : input;
+}
+
+export const disabled = defineDragPlugin((isDisabled: DisabledInput = true) => ({
 	key: DISABLED_KEY,
 	name: 'disabled',
 	phase: 'pre',
 
 	start() {
-		return !value;
+		return !readDisabled(isDisabled);
 	},
 }));
 

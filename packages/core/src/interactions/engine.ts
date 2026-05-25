@@ -7,7 +7,8 @@ import {
 	SessionPrivate,
 } from './instance.ts';
 import { DragHandle, DropHandle } from './handles.ts';
-import { hasReactiveSlots, resolvePluginList } from './resolve-plugins.ts';
+import { resolvePluginList } from './resolve-plugins.ts';
+import { reconcilePluginListUpdate } from './plugin-reconcile.ts';
 import { DEFAULT_DRAG_PLUGINS, DEFAULTS } from '../defaults.ts';
 import { applyDragTransform, type TransformApplier } from './apply-transform.ts';
 import { DropTargetTracker, type DropTargetHost } from './drop-targets.ts';
@@ -27,7 +28,6 @@ import type {
 } from './types.ts';
 
 const DEV = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production';
-const MAX_UPDATE_DEPTH = 64;
 
 const PLUGIN_FAILED = Symbol('neodrag.pluginFailed');
 
@@ -196,127 +196,29 @@ export class Neodrag {
 	updateDrop(node: HTMLElement | SVGElement, plugins: DropPluginList) {
 		const inst = this.#dropTargets.get(node);
 		if (!inst) return;
-
-		if (!hasReactiveSlots(plugins) && inst.lastSlots === plugins) return;
-
-		if (inst.lastSlots !== plugins) {
-			inst.lastSlots = plugins;
-			inst.slotStaticCache = [];
-		}
-
-		const resolved = hasReactiveSlots(plugins)
-			? resolvePluginList(plugins, inst.slotStaticCache, true)
-			: resolvePluginList(plugins, inst.slotStaticCache, false);
-
-		const merged = this.#mergeUserDropPlugins(resolved);
-		if (merged.length === inst.flat.length) {
-			let same = true;
-			for (const plugin of merged) {
-				if (inst.byKey.get(plugin.key) !== plugin) {
-					same = false;
-					break;
-				}
-			}
-			if (same) {
-				inst.lastList = resolved;
-				return;
-			}
-		}
-
-		if (inst.isUpdating) {
-			inst.pendingUpdate = plugins;
-			return;
-		}
-
-		if (inst.updateDepth >= MAX_UPDATE_DEPTH) {
-			if (this.#dev) {
-				console.warn('[neodrag] drop update depth limit reached; coalescing pending plugin reconciliation');
-			}
-			inst.pendingUpdate = plugins;
-			return;
-		}
-
-		inst.isUpdating = true;
-		inst.updateDepth++;
-
-		if (inst.isProcessingExternalUpdate) {
-			inst.pendingUpdate = plugins;
-			inst.updateDepth--;
-			inst.isUpdating = false;
-			return;
-		}
-
-		inst.lastList = resolved;
-		this.#diffDropPlugins(inst, resolved);
-		inst.updateDepth--;
-		inst.isUpdating = false;
-
-		const pending = inst.pendingUpdate;
-		inst.pendingUpdate = null;
-		if (pending && pending !== plugins) this.updateDrop(node, pending);
+		reconcilePluginListUpdate({
+			inst,
+			plugins,
+			dev: this.#dev,
+			warnLabel: 'drop',
+			merge: (resolved) => this.#mergeUserDropPlugins(resolved),
+			diff: (target, resolved) => this.#diffDropPlugins(target as DropInstance, resolved),
+			recurse: (pending) => this.updateDrop(node, pending as DropPluginList),
+		});
 	}
 
 	update(node: HTMLElement | SVGElement, plugins: DragPluginList) {
 		const inst = this.#dragSources.get(node);
 		if (!inst) return;
-
-		if (!hasReactiveSlots(plugins) && inst.lastSlots === plugins) return;
-
-		if (inst.lastSlots !== plugins) {
-			inst.lastSlots = plugins;
-			inst.slotStaticCache = [];
-		}
-
-		const resolved = hasReactiveSlots(plugins)
-			? resolvePluginList(plugins, inst.slotStaticCache, true)
-			: resolvePluginList(plugins, inst.slotStaticCache, false);
-
-		const merged = this.#mergeUserDragPlugins(resolved);
-		if (merged.length === inst.flat.length) {
-			let same = true;
-			for (const plugin of merged) {
-				if (inst.byKey.get(plugin.key) !== plugin) {
-					same = false;
-					break;
-				}
-			}
-			if (same) {
-				inst.lastList = resolved;
-				return;
-			}
-		}
-
-		if (inst.isUpdating) {
-			inst.pendingUpdate = plugins;
-			return;
-		}
-
-		if (inst.updateDepth >= MAX_UPDATE_DEPTH) {
-			if (this.#dev) {
-				console.warn('[neodrag] update depth limit reached; coalescing pending plugin reconciliation');
-			}
-			inst.pendingUpdate = plugins;
-			return;
-		}
-
-		inst.isUpdating = true;
-		inst.updateDepth++;
-
-		if (inst.isProcessingExternalUpdate) {
-			inst.pendingUpdate = plugins;
-			inst.updateDepth--;
-			inst.isUpdating = false;
-			return;
-		}
-
-		inst.lastList = resolved;
-		this.#diffDragPlugins(inst, resolved);
-		inst.updateDepth--;
-		inst.isUpdating = false;
-
-		const pending = inst.pendingUpdate;
-		inst.pendingUpdate = null;
-		if (pending && pending !== plugins) this.update(node, pending);
+		reconcilePluginListUpdate({
+			inst,
+			plugins,
+			dev: this.#dev,
+			warnLabel: 'drag',
+			merge: (resolved) => this.#mergeUserDragPlugins(resolved),
+			diff: (target, resolved) => this.#diffDragPlugins(target as DragInstance, resolved),
+			recurse: (pending) => this.update(node, pending as DragPluginList),
+		});
 	}
 
 	dispose() {
@@ -485,7 +387,13 @@ export class Neodrag {
 		if (!inst.isDragging) {
 			const startOk = this.#runStart(inst, inst.dragCtx, e);
 			inst.effects.flush();
-			if (!startOk || inst.cancelled) return;
+			if (!startOk) {
+				if (this.#active) {
+					this.#active.state = transitionSession(this.#active.state, { type: 'start-abort' });
+				}
+				return;
+			}
+			if (inst.cancelled) return;
 
 			inst.isDragging = true;
 			if (this.#active) {
@@ -563,17 +471,18 @@ export class Neodrag {
 		this.#runEnd(inst, inst.dragCtx, e, reason);
 		inst.effects.flush();
 
-		if (reason === 'drop' && this.#dropTracker.overStack.length > 0) {
-			const top = this.#dropTracker.overStack[this.#dropTracker.overStack.length - 1]!;
+		const overDrops = this.#dropTracker.getOverDrops();
+		if (reason === 'drop' && overDrops.length > 0) {
+			const top = overDrops[overDrops.length - 1]!;
 			this.#runDropHook(top, 'drop', e);
 			top.effects.flush();
 		}
 
-		for (const drop of this.#dropTracker.overStack) {
+		for (const drop of overDrops) {
 			if (drop.isOver) this.#runDropHook(drop, 'leave', e);
 			drop.isOver = false;
 		}
-		this.#dropTracker.overStack.length = 0;
+		if (this.#active) this.#active.overTargets.length = 0;
 
 		inst.isInteracting = false;
 		inst.isDragging = false;
