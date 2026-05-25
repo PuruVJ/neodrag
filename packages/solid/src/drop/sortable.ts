@@ -1,9 +1,17 @@
 import { sortable, type SortableOptions } from '@neodrag/core/drop';
 import type { DragPluginList } from '@neodrag/core';
-import { useDraggable } from '../index.ts';
+import { useDroppable, useDraggable } from '../index.ts';
+
+export type SortableList<T> = ReturnType<typeof sortable<T>>;
+
+export function useSortable<T>(options: SortableOptions<T>) {
+	const list = sortable(options);
+	const [, dropRef] = useDroppable(list.container());
+	return { list, dropRef };
+}
 
 export function sortableItemPlugins<T>(
-	list: ReturnType<typeof sortable<T>>,
+	list: SortableList<T>,
 	key: string,
 	extra?: DragPluginList,
 ): DragPluginList {
@@ -12,7 +20,7 @@ export function sortableItemPlugins<T>(
 }
 
 export function useSortableItem<T>(
-	list: ReturnType<typeof sortable<T>>,
+	list: SortableList<T>,
 	key: string,
 	extra?: DragPluginList,
 ) {

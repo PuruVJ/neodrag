@@ -10,4 +10,10 @@ export {
 	type SortableReorderMeta,
 	type SortableStrategy,
 } from '@neodrag/core/drop';
-export { sortableItemPlugins, useSortableItem } from './sortable.ts';
+export {
+	sortableItemPlugins,
+	useSortable,
+	useSortableItem,
+	type SortableList,
+	type UseSortableOptions,
+} from './sortable.ts';

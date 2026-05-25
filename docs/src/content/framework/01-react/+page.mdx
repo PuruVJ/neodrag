@@ -8,7 +8,7 @@ tagline: 'A lightweight react hook to make your elements draggable.'
 npm i @neodrag/react@next
 ```
 
-Import built-in plugins from `@neodrag/core/plugins` or `@neodrag/react/plugins`. Drop targets and sortable lists use `@neodrag/react/drop` (`useDroppable`, `sortable`, `useSortableItem`). Same reactive `plugins` / `() => plugins` shape as `useDraggable`.
+Import built-in plugins from `@neodrag/core/plugins` or `@neodrag/react/plugins`. Sortable lists use `@neodrag/react/drop` — prefer `useSortable` (stable instance + container `dropRef`) and `useSortableItem` per row. Low-level `sortable()` is still available when you want full control.
 
 ## Usage
 
