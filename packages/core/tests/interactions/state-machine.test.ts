@@ -2,7 +2,7 @@
  * @vitest-environment node
  */
 import { describe, expect, it } from 'vitest';
-import { isTerminal, transitionSession } from '../../src/interactions/state-machine.ts';
+import { transitionSession } from '../../src/interactions/state-machine.ts';
 
 describe('interactions state machine', () => {
 	it('idle → pending on pointerdown', () => {
@@ -35,8 +35,7 @@ describe('interactions state machine', () => {
 		expect(transitionSession('active', { type: 'pointerup', reason: 'cancel' })).toBe('cancelled');
 	});
 
-	it('completed → idle is terminal reset', () => {
-		expect(isTerminal('completed')).toBe(true);
+	it('completed → idle on pointerdown', () => {
 		expect(transitionSession('completed', { type: 'pointerdown' })).toBe('idle');
 	});
 });

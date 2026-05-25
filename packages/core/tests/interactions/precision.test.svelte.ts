@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { Neodrag } from '../../src/interactions/index.ts';
+import { Neodrag } from '../../src/index.ts';
 import InteractionsBox from '../components/InteractionsBox.svelte';
 import { dragAndDrop } from '../mouse.ts';
 import { sleepAndWaitForEffects } from '../utils.ts';

@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { defineDropPlugin, Neodrag } from '../../src/interactions/index.ts';
+import { defineDropPlugin, Neodrag } from '../../src/index.ts';
 
 describe('engine.updateDrop symbol-keyed diff', () => {
 	it('calls update when same plugin key gets new options object', () => {

@@ -2,7 +2,8 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { Neodrag, position } from '../../src/interactions/index.ts';
+import { Neodrag } from '../../src/index.ts';
+import { position } from '../../src/plugins.ts';
 
 describe('engine.update preserves default plugins', () => {
 	it('keeps built-in plugins after reconciling user plugins', () => {

@@ -1,7 +1,7 @@
 import type { Locator } from '@vitest/browser/context';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { position } from '../../src/interactions/index.ts';
+import { position } from '../../src/plugins.ts';
 import InteractionsBox from '../components/InteractionsBox.svelte';
 import { sleepAndWaitForEffects, translate } from '../utils.ts';
 

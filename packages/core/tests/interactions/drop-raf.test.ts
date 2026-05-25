@@ -2,7 +2,8 @@
  * @vitest-environment jsdom
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineDropPlugin, Neodrag, threshold } from '../../src/interactions/index.ts';
+import { defineDropPlugin, Neodrag } from '../../src/index.ts';
+import { threshold } from '../../src/plugins.ts';
 
 function patchPointerCapture() {
 	const proto = HTMLElement.prototype;

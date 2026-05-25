@@ -1,7 +1,8 @@
 import type { Locator } from '@vitest/browser/context';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { accepts, dragData, onDrop } from '../../src/interactions/index.ts';
+import { dragData } from '../../src/plugins.ts';
+import { accepts, onDrop } from '../../src/drop/index.ts';
 import InteractionsDropMulti from '../components/InteractionsDropMulti.svelte';
 import { dragAndDrop, startCursorTracking, stopCursorTracking } from '../mouse.ts';
 import { sleepAndWaitForEffects } from '../utils.ts';

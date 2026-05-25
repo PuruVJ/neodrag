@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Neodrag, sortable } from '../../src/interactions/index.ts';
+	import { Neodrag } from '../../src/index.ts';
+	import { sortable } from '../../src/drop/index.ts';
 
 	let items = $state([
 		{ id: '1', text: 'One' },

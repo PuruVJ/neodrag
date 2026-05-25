@@ -36,7 +36,3 @@ export function transitionSession(state: SessionState, event: SessionEvent): Ses
 			return state;
 	}
 }
-
-export function isTerminal(state: SessionState): boolean {
-	return state === 'completed' || state === 'cancelled';
-}

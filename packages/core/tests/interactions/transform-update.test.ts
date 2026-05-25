@@ -2,7 +2,8 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { Neodrag, position } from '../../src/interactions/index.ts';
+import { Neodrag } from '../../src/index.ts';
+import { position } from '../../src/plugins.ts';
 
 describe('built-in drag transform', () => {
 	it('repaints translate after position plugin reconcile', () => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { bounds, BoundsFrom } from '../../src/interactions/index.ts';
+	import { bounds, BoundsFrom } from '../../src/plugins.ts';
 	import InteractionsBox from './InteractionsBox.svelte';
 </script>
 

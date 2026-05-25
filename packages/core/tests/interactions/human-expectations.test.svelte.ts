@@ -4,7 +4,8 @@
 import type { Locator } from '@vitest/browser/context';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { accepts, axis, disabled, dragData, onDrop } from '../../src/interactions/index.ts';
+import { axis, disabled, dragData } from '../../src/plugins.ts';
+import { accepts, onDrop } from '../../src/drop/index.ts';
 import InteractionsBox from '../components/InteractionsBox.svelte';
 import InteractionsBoundsParent from '../components/InteractionsBoundsParent.svelte';
 import InteractionsDrop from '../components/InteractionsDrop.svelte';

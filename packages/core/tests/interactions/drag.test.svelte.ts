@@ -1,7 +1,7 @@
 import type { Locator } from '@vitest/browser/context';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { Neodrag } from '../../src/interactions/index.ts';
+import { Neodrag } from '../../src/index.ts';
 import InteractionsBox from '../components/InteractionsBox.svelte';
 import { dragAndDrop, startCursorTracking, stopCursorTracking } from '../mouse.ts';
 import { sleepAndWaitForEffects, translate } from '../utils.ts';

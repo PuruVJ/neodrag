@@ -2,7 +2,8 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { Neodrag, position, type DragPlugin } from '../../src/interactions/index.ts';
+import { Neodrag, type DragPlugin } from '../../src/index.ts';
+import { position } from '../../src/plugins.ts';
 
 describe('engine.update coalescing', () => {
 	it('no-ops identical plugin list without re-initing plugins', () => {

@@ -61,7 +61,7 @@ Returns a `DropHandle` for drop targets. Same reactive `PluginInput` shape as dr
 
 ### SSR / browser
 
-For apps that must avoid touching `document` at import time, use `@neodrag/core/browser` and `createBrowserNeodrag()` with an explicit `delegate`.
+For apps that must avoid touching `document` at import time, use `@neodrag/core/browser` — it is the same API as `@neodrag/core`, with `delegate` defaulting to `document.documentElement`.
 
 ### `dispose()`
 

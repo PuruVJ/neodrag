@@ -1,7 +1,7 @@
 import type { Locator } from '@vitest/browser/context';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { disabled } from '../../src/interactions/index.ts';
+import { disabled } from '../../src/plugins.ts';
 import InteractionsBox from '../components/InteractionsBox.svelte';
 import { dragAndDrop } from '../mouse.ts';
 import { translate } from '../utils.ts';

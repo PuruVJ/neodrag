@@ -2,7 +2,8 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { Neodrag, position } from '../../src/interactions/index.ts';
+import { Neodrag } from '../../src/index.ts';
+import { position } from '../../src/plugins.ts';
 
 describe('engine.update symbol-keyed diff', () => {
 	it('does not re-init when same plugin key gets new options object', () => {

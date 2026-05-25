@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Draggable } from '../../src/interactions/index.ts';
+	import { Draggable } from '../../src/index.ts';
 
 	const { external = 0 }: { external?: number } = $props();
 

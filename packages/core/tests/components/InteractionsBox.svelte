@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { Draggable, type DragPluginList } from '../../src/interactions/index.ts';
+	import { Draggable, type DragPluginList } from '../../src/index.ts';
 
 	const {
 		testid = 'draggable',

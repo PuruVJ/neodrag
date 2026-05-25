@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { Draggable } from '../../src/interactions/index.ts';
+import { Draggable } from '../../src/index.ts';
 import ReactivePluginsBox from '../components/ReactivePluginsBox.svelte';
 import StaticDraggableHarness from '../components/StaticDraggableHarness.svelte';
 import { sleepAndWaitForEffects, translate } from '../utils.ts';

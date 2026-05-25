@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Neodrag, type DragPlugin, type DropPlugin } from '../../src/interactions/index.ts';
+	import { Neodrag, type DragPlugin, type DropPlugin } from '../../src/index.ts';
 
 	const {
 		dragPlugins = [],
