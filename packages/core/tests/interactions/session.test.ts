@@ -2,9 +2,9 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { resolveEndReason } from '../../src/interactions/session.ts';
-import type { ActiveSession } from '../../src/interactions/instance.ts';
-import { SessionPrivate } from '../../src/interactions/instance.ts';
+import { resolveEndReason } from '../../src/session.ts';
+import type { ActiveSession } from '../../src/instance.ts';
+import { SessionPrivate } from '../../src/instance.ts';
 
 function active(over: Partial<ActiveSession> = {}): ActiveSession {
 	return {

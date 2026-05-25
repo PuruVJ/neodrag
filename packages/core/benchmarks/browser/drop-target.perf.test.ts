@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
-import { defineDropPlugin } from '../../src/interactions/types.ts';
+import { defineDropPlugin } from '../../src/types.ts';
 import { threshold } from '../../src/plugins.ts';
 import { pointer, resetBody, runBench } from './helpers.ts';
 

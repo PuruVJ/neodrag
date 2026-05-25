@@ -4,10 +4,10 @@ import {
 	stateMarker,
 	threshold,
 	touchAction,
-} from './interactions/plugins.ts';
-import type { EngineOptions } from './interactions/engine.ts';
-import type { DragPlugin } from './interactions/types.ts';
-import type { ErrorInfo } from './interactions/types.ts';
+} from './plugins.ts';
+import type { EngineOptions } from './engine.ts';
+import type { DragPlugin } from './types.ts';
+import type { ErrorInfo } from './types.ts';
 
 export const DEFAULT_DRAG_PLUGINS: DragPlugin[] = [
 	ignoreMultitouch,

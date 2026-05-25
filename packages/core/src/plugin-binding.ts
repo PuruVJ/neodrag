@@ -1,4 +1,4 @@
-import { isBrowser } from '../utils.ts';
+import { isBrowser } from './utils.ts';
 import { Neodrag } from './engine.ts';
 import type { DragHandle, DropHandle } from './handles.ts';
 import { PluginListResolver, resolvedPluginsUnchanged } from './resolve-plugins.ts';

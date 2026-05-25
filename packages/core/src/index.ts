@@ -1,13 +1,13 @@
-export { Neodrag, type EngineOptions } from './interactions/engine.ts';
+export { Neodrag, type EngineOptions } from './engine.ts';
 export {
 	hasReactiveSlots,
 	resolvePluginList,
 	PluginListResolver,
 	resolvedPluginsUnchanged,
-} from './interactions/resolve-plugins.ts';
-export { Draggable, DroppableBinding, type DraggableOptions, type TransformApplier } from './interactions/draggable-binding.ts';
-export { BindingHandle, DragHandle, DropHandle, type NeodragHost } from './interactions/handles.ts';
-export { transitionSession } from './interactions/state-machine.ts';
+} from './resolve-plugins.ts';
+export { Draggable, DroppableBinding, type DraggableOptions, type TransformApplier } from './draggable-binding.ts';
+export { BindingHandle, DragHandle, DropHandle, type NeodragHost } from './handles.ts';
+export { transitionSession } from './state-machine.ts';
 export {
 	defineDragPlugin,
 	defineDropPlugin,
@@ -27,7 +27,7 @@ export {
 	type SessionKey,
 	type SessionState,
 	type DropTargetInfo,
-} from './interactions/types.ts';
-export type { DragEventData } from './interactions/plugins.ts';
+} from './types.ts';
+export type { DragEventData } from './plugins.ts';
 export { DEFAULTS, DEFAULT_DRAG_PLUGINS, MINIMAL_DRAG_PLUGINS } from './defaults.ts';
 export { isBrowser } from './utils.ts';

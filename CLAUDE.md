@@ -32,12 +32,12 @@ neodrag/
 
 ### Central Components
 
-1. **Neodrag** (`packages/core/src/interactions/engine.ts`): Main orchestrator
+1. **Neodrag** (`packages/core/src/engine.ts`): Main orchestrator
    - Manages drag/drop handles and pointer event delegation
    - Coordinates plugin phases (`pre`, `resolve`, `post`)
    - Session state machine and plugin error isolation
 
-2. **Plugin System** (`packages/core/src/interactions/plugins.ts`): Built-in drag and drop plugins
+2. **Plugin System** (`packages/core/src/plugins.ts`): Built-in drag and drop plugins
    - Drag plugins: `init`, `start`, `drag`, `update`, `end`, `destroy`
    - Drop plugins: `init`, `enter`, `over`, `leave`, `drop`, `update`, `destroy`
    - Built-in plugins: `transform`, `bounds`, `controls`, `grid`, `threshold`, `sortable`, etc.
@@ -107,7 +107,7 @@ pnpm ci:release  # Publish packages
 ```
 packages/core/tests/
 ├── components/          # Test components (Svelte)
-├── tests/interactions/       # Interaction engine tests
+├── tests/                    # Engine + plugin tests
 ├── tests.test.ts        # Core functionality tests
 ├── mouse.ts             # Mouse simulation utilities
 └── utils.ts             # Test helpers
@@ -265,8 +265,8 @@ pnpm ci:release            # Publish to npm
 ## Key Files to Understand
 
 ### Core Implementation
-- `packages/core/src/interactions/engine.ts` - Neodrag engine
-- `packages/core/src/interactions/plugins.ts` - Built-in drag/drop plugins
+- `packages/core/src/engine.ts` - Neodrag engine
+- `packages/core/src/plugins.ts` - Built-in drag/drop plugins
 - `packages/core/src/utils.ts` - Utility functions
 
 ### Framework Wrappers

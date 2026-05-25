@@ -2,8 +2,8 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { applyDragTransform } from '../../src/interactions/apply-transform.ts';
-import type { DragCtx } from '../../src/interactions/types.ts';
+import { applyDragTransform } from '../../src/apply-transform.ts';
+import type { DragCtx } from '../../src/types.ts';
 
 const SVG_TRANSFORM_TRANSLATE = 2;
 const SVG_TRANSFORM_SCALE = 3;

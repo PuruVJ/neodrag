@@ -1,4 +1,4 @@
-import { is_svg_element } from '../utils.ts';
+import { is_svg_element } from './utils.ts';
 import type { DropInstance } from './instance.ts';
 import type { ActiveSession } from './instance.ts';
 import type { DragInstance } from './instance.ts';

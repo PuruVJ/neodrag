@@ -2,9 +2,9 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { createDragSession } from '../../src/interactions/session.ts';
-import { DragInstance, SessionPrivate, type ActiveSession } from '../../src/interactions/instance.ts';
-import type { DragPlugin } from '../../src/interactions/types.ts';
+import { createDragSession } from '../../src/session.ts';
+import { DragInstance, SessionPrivate, type ActiveSession } from '../../src/instance.ts';
+import type { DragPlugin } from '../../src/types.ts';
 
 function idleSession() {
 	const active: ActiveSession = {

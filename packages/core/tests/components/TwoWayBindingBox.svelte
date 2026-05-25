@@ -11,7 +11,7 @@
 		onReconcile,
 	}: {
 		testid?: string;
-		engine?: import('../../src/interactions/engine.ts').Neodrag;
+		engine?: import('../../src/engine.ts').Neodrag;
 		initial?: { x: number; y: number };
 		external?: { x: number; y: number } | null;
 		twoWay?: boolean;

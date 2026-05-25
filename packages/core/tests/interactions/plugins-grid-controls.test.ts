@@ -3,7 +3,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MINIMAL_DRAG_PLUGINS, Neodrag } from '../../src/index.ts';
-import { ControlFrom, controls, grid, threshold } from '../../src/interactions/plugins.ts';
+import { ControlFrom, controls, grid, threshold } from '../../src/plugins.ts';
 
 describe('grid plugin', () => {
 	it('skips X snapping when step is 0 but still snaps Y', () => {

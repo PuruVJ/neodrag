@@ -1,4 +1,4 @@
-import { set_node_key_style } from '../utils.ts';
+import { set_node_key_style } from './utils.ts';
 import type { DragCtx } from './types.ts';
 
 export type TransformApplier = (args: {

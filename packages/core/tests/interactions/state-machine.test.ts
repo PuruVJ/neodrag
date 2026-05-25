@@ -2,7 +2,7 @@
  * @vitest-environment node
  */
 import { describe, expect, it } from 'vitest';
-import { transitionSession } from '../../src/interactions/state-machine.ts';
+import { transitionSession } from '../../src/state-machine.ts';
 
 describe('interactions state machine', () => {
 	it('idle → pending on pointerdown', () => {

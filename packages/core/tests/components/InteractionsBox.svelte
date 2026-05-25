@@ -11,7 +11,7 @@
 		plugins?: DragPluginList;
 		testid?: string;
 		children?: Snippet;
-		engine?: import('../../src/interactions/engine.ts').Neodrag;
+		engine?: import('../../src/engine.ts').Neodrag;
 	} = $props();
 
 	const drag = new Draggable({ engine, plugins });

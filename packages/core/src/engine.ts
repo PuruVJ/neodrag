@@ -1,4 +1,4 @@
-import { is_svg_element, is_svg_svg_element, isBrowser, listen } from '../utils.ts';
+import { is_svg_element, is_svg_svg_element, isBrowser, listen } from './utils.ts';
 import {
 	ActiveSession,
 	DragInstance,
@@ -15,7 +15,7 @@ import {
 	pluginsLayoutChanged,
 } from './plugin-lifecycle.ts';
 import { sortByPhase } from './phase.ts';
-import { DEFAULT_DRAG_PLUGINS, DEFAULTS } from '../defaults.ts';
+import { DEFAULT_DRAG_PLUGINS, DEFAULTS } from './defaults.ts';
 import { applyDragTransform, type TransformApplier } from './apply-transform.ts';
 import { DropTargetTracker, type DropTargetHost } from './drop-targets.ts';
 import { createDragSession, resolveEndReason } from './session.ts';

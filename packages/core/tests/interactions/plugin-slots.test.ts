@@ -2,12 +2,12 @@
  * @vitest-environment node
  */
 import { describe, expect, it } from 'vitest';
-import { defineDragPlugin } from '../../src/interactions/types.ts';
+import { defineDragPlugin } from '../../src/types.ts';
 import {
 	hasReactiveSlots,
 	PluginListResolver,
 	resolvePluginList,
-} from '../../src/interactions/resolve-plugins.ts';
+} from '../../src/resolve-plugins.ts';
 
 describe('plugin slots resolver', () => {
 	it('hasReactiveSlots detects function slots', () => {

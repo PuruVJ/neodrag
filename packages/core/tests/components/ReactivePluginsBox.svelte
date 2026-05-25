@@ -6,7 +6,7 @@
 		engine,
 		external = null,
 	}: {
-		engine?: import('../../src/interactions/engine.ts').Neodrag;
+		engine?: import('../../src/engine.ts').Neodrag;
 		external?: { x: number; y: number } | null;
 	} = $props();
 
