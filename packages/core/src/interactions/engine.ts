@@ -1,4 +1,4 @@
-import { is_svg_element, is_svg_svg_element, listen } from '../utils.ts';
+import { is_svg_element, is_svg_svg_element, isBrowser, listen } from '../utils.ts';
 import {
 	ActiveSession,
 	DragInstance,
@@ -113,10 +113,9 @@ export class Neodrag {
 	}
 
 	#createIdleActive(): ActiveSession {
-		const root =
-			typeof document !== 'undefined'
-				? document.documentElement
-				: ({ getBoundingClientRect: () => new DOMRect() } as HTMLElement);
+		const root = isBrowser()
+			? globalThis.document.documentElement
+			: ({ getBoundingClientRect: () => new DOMRect() } as HTMLElement);
 		return {
 			state: 'idle',
 			sourceNode: root,
@@ -284,7 +283,7 @@ export class Neodrag {
 	}
 
 	#initListeners() {
-		if (this.#listenersInitialized) return;
+		if (!isBrowser() || this.#listenersInitialized) return;
 		const target = this.#resolveDelegateTarget();
 		this.#listenerDelegate = target;
 		this.#boundOnDown = this.#onPointerDown.bind(this);
@@ -313,7 +312,7 @@ export class Neodrag {
 	}
 
 	#armPointerSession() {
-		if (this.#pointerSessionAbort) return;
+		if (!isBrowser() || this.#pointerSessionAbort) return;
 		const target = this.#listenerDelegate ?? this.#resolveDelegateTarget();
 		const signal = (this.#pointerSessionAbort = new AbortController()).signal;
 		listen(target, 'pointermove', this.#boundOnMove!, { passive: false, capture: true, signal });
