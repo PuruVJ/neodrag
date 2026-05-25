@@ -7,11 +7,6 @@ export type NeodragOptions = EngineOptions;
 export { Neodrag, CoreDraggable as DraggableCore };
 export type { DragPluginList };
 
-/**
- * Svelte {@attach} integration. Reactive `() => plugin` slots are not read during
- * attach (so the engine is mounted once). Call `flushReactive()` from a component
- * `$effect` whenever those dependencies change — see `watchDraggablePlugins`.
- */
 export class Draggable extends CoreDraggable {
 	readonly #attachment: Attachment<HTMLElement | SVGElement>;
 
@@ -19,18 +14,23 @@ export class Draggable extends CoreDraggable {
 		super(options);
 
 		const coreAttachment = this.attachment;
-		this.#attachment = (element) => untrack(() => coreAttachment(element));
+
+		if (this.hasReactiveSlots) {
+			$effect(() => {
+				this.flushReactive();
+			});
+		}
+
+		this.#attachment = (element) => {
+			const cleanup = untrack(() => {
+				coreAttachment(element);
+				if (this.hasReactiveSlots) this.flushReactive();
+			});
+			return cleanup;
+		};
 	}
 
 	get attachment(): Attachment<HTMLElement | SVGElement> {
 		return this.#attachment;
 	}
-}
-
-/** Run `readDeps` inside `$effect`, then `flushReactive()` when reactive plugin inputs change. */
-export function watchDraggablePlugins(drag: Draggable, readDeps: () => void) {
-	$effect(() => {
-		readDeps();
-		drag.flushReactive();
-	});
 }

@@ -20,7 +20,20 @@ export class Droppable extends CoreDroppable {
 		super(options);
 
 		const coreAttachment = this.attachment;
-		this.#attachment = (element) => untrack(() => coreAttachment(element));
+
+		if (this.hasReactiveSlots) {
+			$effect(() => {
+				this.flushReactive();
+			});
+		}
+
+		this.#attachment = (element) => {
+			const cleanup = untrack(() => {
+				coreAttachment(element);
+				if (this.hasReactiveSlots) this.flushReactive();
+			});
+			return cleanup;
+		};
 	}
 
 	get attachment(): Attachment<HTMLElement | SVGElement> {

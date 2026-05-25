@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Draggable, watchDraggablePlugins } from '@neodrag/svelte';
+	import { Draggable } from '@neodrag/svelte';
 	import { events, position } from '@neodrag/svelte/plugins';
 
 	const {
@@ -48,11 +48,6 @@
 					]
 				: []),
 		],
-	});
-
-	watchDraggablePlugins(drag, () => {
-		pos.x;
-		pos.y;
 	});
 </script>
 
