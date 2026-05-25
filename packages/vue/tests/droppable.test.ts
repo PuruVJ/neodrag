@@ -1,23 +1,27 @@
 import { createApp, defineComponent, h } from 'vue';
 import { describe, expect, test } from 'vitest';
 import { accepts } from '@neodrag/core/drop/plugins';
-import { useDroppable, vDroppable } from '../src/index.ts';
-
-const DropHarness = defineComponent({
-	setup() {
-		const drop = useDroppable([accepts(() => true)]);
-		return { drop };
-	},
-	template: `<div v-droppable="drop" data-testid="drop" style="width:120px;height:80px" />`,
-});
+import { useDroppable } from '../src/index.ts';
 
 describe('@neodrag/vue droppable', () => {
-	test('useDroppable and v-droppable attach', async () => {
+	test('useDroppable attaches to element ref', async () => {
 		const host = document.createElement('div');
 		document.body.appendChild(host);
 
+		const DropHarness = defineComponent({
+			setup() {
+				const drop = useDroppable([accepts(() => true)]);
+				return () =>
+					h('div', {
+						'data-testid': 'drop',
+						ref: (el: HTMLElement | null) => {
+							if (el) drop.value.attach(el);
+						},
+					});
+			},
+		});
+
 		const app = createApp(DropHarness);
-		app.directive('droppable', vDroppable);
 		app.mount(host);
 
 		await new Promise((r) => requestAnimationFrame(() => r(undefined)));

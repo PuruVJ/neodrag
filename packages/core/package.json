@@ -56,8 +56,8 @@
 		}
 	},
 	"scripts": {
-		"compile:watch": "tsup --watch",
-		"compile": "tsup",
+		"compile:watch": "tsdown --watch",
+		"compile": "tsdown",
 		"prepublishOnly": "npm run compile",
 		"test": "vitest",
 		"test:interactions": "vitest run --config vitest.interactions.config.ts",
@@ -79,6 +79,7 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@vitest/coverage-v8": "3.2.4",
-		"jsdom": "^29.1.1"
+		"jsdom": "^29.1.1",
+		"tsdown": "catalog:"
 	}
 }

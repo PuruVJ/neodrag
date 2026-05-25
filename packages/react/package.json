@@ -58,7 +58,7 @@
 	},
 	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/react#readme",
 	"scripts": {
-		"compile": "tsup",
+		"compile": "tsdown",
 		"prepublishOnly": "turbo compile",
 		"test": "vitest run --config vitest.config.ts"
 	},
@@ -76,6 +76,7 @@
 		"playwright": "^1.53.1",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
+		"tsdown": "catalog:",
 		"vitest": "^3.2.4"
 	}
 }

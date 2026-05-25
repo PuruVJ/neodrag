@@ -60,7 +60,7 @@ Each framework package provides:
 ### Package Management
 - **Package Manager**: pnpm with workspaces
 - **Build System**: Turbo for coordinated builds
-- **Bundler**: tsup for TypeScript compilation
+- **Bundler**: tsdown for TypeScript compilation
 - **Version Management**: Changesets for coordinated releases
 
 ### Key Scripts
@@ -86,7 +86,7 @@ pnpm ci:release  # Publish packages
 - **TypeScript**: Shared catalog version (5.8.3)
 - **Vite**: Shared catalog version (6.3.5)
 - **Turbo**: Orchestrates build dependencies
-- **tsup**: Builds both ESM and TypeScript declarations
+- **tsdown**: Builds ESM (and UMD where needed) plus TypeScript declarations
 
 ## Testing Strategy
 

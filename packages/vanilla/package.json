@@ -60,13 +60,17 @@
 	},
 	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/vanilla#readme",
 	"scripts": {
-		"compile": "tsup",
-		"compile:watch": "tsup --watch",
+		"compile": "tsdown",
+		"compile:watch": "tsdown --watch",
 		"prepublishOnly": "turbo compile",
 		"pub": "pnpm compile && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm compile && pnpm publish --dry-run --no-git-checks --access public"
 	},
 	"peerDependencies": {
 		"@neodrag/core": "workspace:*"
+	},
+	"devDependencies": {
+		"@neodrag/core": "workspace:*",
+		"tsdown": "catalog:"
 	}
 }

@@ -15,6 +15,6 @@
 		"@neodrag/core": "workspace:*",
 		"brotli-size": "^4.0.0",
 		"terser": "^5.26.0",
-		"tsup": "^8.0.1"
+		"tsdown": "catalog:"
 	}
 }

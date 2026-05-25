@@ -3,7 +3,7 @@
 	"tasks": {
 		"compile": {
 			"outputs": ["dist"],
-			"inputs": ["./src/**/*.ts", "tsup.config.ts"],
+			"inputs": ["./src/**/*.ts", "tsdown.config.ts"],
 			"dependsOn": ["^compile"]
 		},
 		"docs#build": {
@@ -17,7 +17,7 @@
 		"dev": {
 			"outputs": ["dist"],
 			"dependsOn": ["^compile"],
-			"inputs": ["./src/**/*.ts", "tsup.config.ts"],
+			"inputs": ["./src/**/*.ts", "tsdown.config.ts"],
 			"cache": false,
 			"persistent": true
 		}

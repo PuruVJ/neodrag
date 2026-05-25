@@ -51,7 +51,7 @@
 		}
 	},
 	"scripts": {
-		"compile": "tsup",
+		"compile": "tsdown",
 		"prepublishOnly": "turbo compile",
 		"test": "vitest run --config vitest.config.ts"
 	},
@@ -86,6 +86,7 @@
 		"@vitest/browser": "^3.2.4",
 		"playwright": "^1.53.1",
 		"svelte": "^5.33.1",
+		"tsdown": "catalog:",
 		"vitest": "^3.2.4",
 		"vitest-browser-svelte": "^1.0.0"
 	}

@@ -57,7 +57,7 @@
 	},
 	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/solid#readme",
 	"scripts": {
-		"compile": "tsup",
+		"compile": "tsdown",
 		"prepublishOnly": "turbo compile",
 		"test": "vitest run --config vitest.config.ts"
 	},
@@ -71,6 +71,7 @@
 		"playwright": "^1.53.1",
 		"solid-js": "^1.9.7",
 		"vite-plugin-solid": "^2.11.6",
+		"tsdown": "catalog:",
 		"vitest": "^3.2.4"
 	}
 }

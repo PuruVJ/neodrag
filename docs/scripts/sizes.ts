@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { build } from 'tsup';
+import { build } from 'tsdown';
 import { fileURLToPath } from 'node:url';
 import { sync } from 'brotli-size';
 
@@ -216,24 +216,14 @@ export const engine = new Neodrag();
 			entry: { [safeFilename]: entryPath },
 			format: ['esm'],
 			outDir,
-			bundle: true,
 			target: 'es2020',
-			treeshake: {
-				preset: 'smallest',
-				moduleSideEffects: false,
-			},
-			minify: 'terser',
-			terserOptions: {
-				compress: {
-					dead_code: true,
-					drop_console: true,
-					unused: true,
-				},
-				mangle: { toplevel: true },
-			},
+			platform: 'browser',
+			treeshake: { moduleSideEffects: false },
+			minify: true,
 			clean: false,
-			noExternal: ['@neodrag/core'],
-			silent: true,
+			dts: false,
+			deps: { alwaysBundle: ['@neodrag/core'] },
+			logLevel: 'silent',
 		});
 
 		const outputPath = join(outDir, `${safeFilename}.js`);
@@ -350,7 +340,7 @@ async function main() {
 
 	console.log(`\n✅ Processing complete:`);
 	console.log(`  📊 Total combinations: ${total}`);
-	console.log(`  🔨 Built with tsup: ${built}`);
+	console.log(`  🔨 Built with tsdown: ${built}`);
 	console.log(`  📊 Base size: ${baseSize} bytes`);
 
 	// Add validation check
