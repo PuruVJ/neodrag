@@ -177,6 +177,9 @@ importers:
 
   packages/core:
     devDependencies:
+      '@neodrag/svelte':
+        specifier: workspace:*
+        version: link:../svelte
       '@vitest/coverage-v8':
         specifier: 3.2.4
         version: 3.2.4(@vitest/browser@3.2.4)(vitest@3.2.4)

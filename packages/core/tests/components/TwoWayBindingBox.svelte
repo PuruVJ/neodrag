@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Draggable, events, position } from '../../src/interactions/index.ts';
+	import { Draggable, watchDraggablePlugins } from '@neodrag/svelte';
+	import { events, position } from '@neodrag/svelte/plugins';
 
 	const {
 		testid = 'draggable',
@@ -17,35 +18,41 @@
 		onReconcile?: () => void;
 	} = $props();
 
-	let x = $state(initial.x);
-	let y = $state(initial.y);
+	let pos = $state({ x: initial.x, y: initial.y });
 
 	$effect.pre(() => {
 		if (external) {
-			x = external.x;
-			y = external.y;
+			pos.x = external.x;
+			pos.y = external.y;
 		}
 	});
 
 	const drag = new Draggable({
 		engine,
 		plugins: [
-				() => {
+			() => {
 				onReconcile?.();
-				return position({ current: { x, y } });
+				pos.x;
+				pos.y;
+				return position({ current: pos });
 			},
 			...(twoWay
 				? [
 						() =>
 							events({
 								onDrag(data) {
-									x = data.offset.x;
-									y = data.offset.y;
+									pos.x = data.offset.x;
+									pos.y = data.offset.y;
 								},
 							}),
 					]
 				: []),
 		],
+	});
+
+	watchDraggablePlugins(drag, () => {
+		pos.x;
+		pos.y;
 	});
 </script>
 

@@ -11,21 +11,6 @@ import type { DropHandle } from './handles.ts';
 
 export type { TransformApplier };
 
-function attachmentCleanup(
-	binding: { detach(): void },
-	node: HTMLElement | SVGElement,
-	reactive: boolean,
-) {
-	if (!reactive) return () => binding.detach();
-
-	return () => {
-		queueMicrotask(() => {
-			if (node.isConnected) return;
-			binding.detach();
-		});
-	};
-}
-
 export interface DraggableOptions {
 	engine?: Neodrag;
 	plugins: DragPluginList;
@@ -49,7 +34,7 @@ export class Draggable {
 
 		this.attachment = (node) => {
 			this.attach(node);
-			return attachmentCleanup(this, node, this.#resolver.hasReactive());
+			return () => this.detach();
 		};
 	}
 
@@ -58,14 +43,13 @@ export class Draggable {
 	}
 
 	attach(node: HTMLElement | SVGElement) {
-		if (this.#node === node && this.#handle) {
-			this.flushReactive();
-			return;
-		}
+		if (this.#node === node && this.#handle) return;
 
 		this.detach();
 		this.#node = node;
-		const resolved = this.#resolver.resolveFull();
+		const resolved = this.#resolver.hasReactive()
+			? this.#resolver.resolveAttach()
+			: this.#resolver.resolveFull();
 		this.#lastResolved = resolved;
 		this.#handle = this.#engine.draggable(node, resolved, {
 			applyTransform: this.#applyTransform,
@@ -122,7 +106,7 @@ export class DroppableBinding {
 
 		this.attachment = (node) => {
 			this.attach(node);
-			return attachmentCleanup(this, node, this.#resolver.hasReactive());
+			return () => this.detach();
 		};
 	}
 
@@ -131,13 +115,12 @@ export class DroppableBinding {
 	}
 
 	attach(node: HTMLElement | SVGElement) {
-		if (this.#handle?.node === node) {
-			this.flushReactive();
-			return;
-		}
+		if (this.#handle?.node === node) return;
 
 		this.detach();
-		const resolved = this.#resolver.resolveFull();
+		const resolved = this.#resolver.hasReactive()
+			? this.#resolver.resolveAttach()
+			: this.#resolver.resolveFull();
 		this.#lastResolved = resolved;
 		this.#handle = this.#engine.droppable(node, resolved);
 	}

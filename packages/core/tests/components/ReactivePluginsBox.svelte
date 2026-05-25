@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Draggable, position } from '../../src/interactions/index.ts';
+	import { Draggable, watchDraggablePlugins } from '@neodrag/svelte';
+	import { position } from '@neodrag/svelte/plugins';
 
 	const {
 		engine,
@@ -19,7 +20,18 @@
 
 	const drag = new Draggable({
 		engine,
-		plugins: [() => position({ current: pos })],
+		plugins: [
+			() => {
+				pos.x;
+				pos.y;
+				return position({ current: pos });
+			},
+		],
+	});
+
+	watchDraggablePlugins(drag, () => {
+		pos.x;
+		pos.y;
 	});
 </script>
 

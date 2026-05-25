@@ -16,12 +16,14 @@ export function resolvePluginList<T extends { key: symbol }>(
 	slots: readonly PluginSlot<T>[],
 	staticCache?: (T | undefined)[],
 	reactiveOnly = false,
+	invokeReactiveSlots = true,
 ): T[] {
 	const out: T[] = [];
 
 	for (let i = 0; i < slots.length; i++) {
 		const slot = slots[i]!;
 		if (isReactiveSlot(slot)) {
+			if (!invokeReactiveSlots) continue;
 			out.push(...flattenSlotValue(slot()));
 		} else if (!reactiveOnly) {
 			if (staticCache) staticCache[i] = slot;
@@ -66,6 +68,11 @@ export class PluginListResolver<T extends { key: symbol }> {
 	resolveFull(): T[] {
 		this.#staticCache = [];
 		return resolvePluginList(this.#slots, this.#staticCache, false);
+	}
+
+	resolveAttach(): T[] {
+		this.#staticCache = [];
+		return resolvePluginList(this.#slots, this.#staticCache, false, false);
 	}
 
 	resolveReactive(): T[] {

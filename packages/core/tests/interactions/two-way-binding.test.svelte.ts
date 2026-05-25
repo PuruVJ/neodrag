@@ -49,6 +49,7 @@ describe('interactions two-way binding without feedback', () => {
 		});
 		const el = comp.getByTestId('draggable');
 
+		await sleepAndWaitForEffects();
 		await dragAndDrop(el, { deltaX: 30, deltaY: 20 }, { steps: 5 });
 		await sleepAndWaitForEffects();
 

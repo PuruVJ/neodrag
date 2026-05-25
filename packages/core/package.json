@@ -83,6 +83,7 @@
 	"author": "Puru Vijay",
 	"license": "MIT",
 	"devDependencies": {
+		"@neodrag/svelte": "workspace:*",
 		"@vitest/coverage-v8": "3.2.4",
 		"jsdom": "^29.1.1",
 		"tsdown": "catalog:"

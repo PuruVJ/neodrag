@@ -59,6 +59,20 @@ describe('plugin slots resolver', () => {
 		expect(n).toBe(1);
 	});
 
+	it('resolveAttach skips reactive slot invocation', () => {
+		let calls = 0;
+		const key = Symbol('r');
+		const resolver = new PluginListResolver([
+			() => {
+				calls++;
+				return defineDragPlugin(() => ({ key, name: 'r' }))();
+			},
+		]);
+
+		expect(resolver.resolveAttach()).toHaveLength(0);
+		expect(calls).toBe(0);
+	});
+
 	it('flattens array return from slot', () => {
 		const a = defineDragPlugin(() => ({ key: Symbol('a'), name: 'a' }))();
 		const b = defineDragPlugin(() => ({ key: Symbol('b'), name: 'b' }))();
