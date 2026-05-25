@@ -25,12 +25,14 @@ import {
 	type DragCtx,
 	type DragPlugin,
 	type DragPluginList,
+	type DragSession,
 	type DropCtx,
 	type DropPlugin,
 	type DropPluginList,
 	type DropTargetInfo,
 	type EndReason,
 	type ErrorInfo,
+	type SessionState,
 } from './types.ts';
 
 const DEV = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production';
@@ -54,7 +56,7 @@ export interface NeodragDebugSnapshot {
 	dragTargets: number;
 	dropTargets: number;
 	session: {
-		state: import('./types.ts').SessionState;
+		state: SessionState;
 		pointerX: number;
 		pointerY: number;
 		deltaX: number;
@@ -98,8 +100,8 @@ export class Neodrag {
 	#dropTracker: DropTargetTracker;
 	#dropHostBridge: DropTargetHost;
 
-	#idleSession: import('./types.ts').DragSession | null = null;
-	#activeSessionView: import('./types.ts').DragSession | null = null;
+	#idleSession: DragSession | null = null;
+	#activeSessionView: DragSession | null = null;
 
 	readonly #dropHost: DropCtxHost = {
 		pointerX: 0,
@@ -149,7 +151,7 @@ export class Neodrag {
 		};
 	}
 
-	#ensureIdleSession(): import('./types.ts').DragSession {
+	#ensureIdleSession(): DragSession {
 		if (!this.#idleSession) {
 			this.#idleSession = createDragSession(this.#createIdleActive(), () => {});
 			if (!this.#activeSessionView) {
