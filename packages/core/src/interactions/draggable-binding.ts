@@ -11,6 +11,21 @@ import type { DropHandle } from './handles.ts';
 
 export type { TransformApplier };
 
+function attachmentCleanup(
+	binding: { detach(): void },
+	node: HTMLElement | SVGElement,
+	reactive: boolean,
+) {
+	if (!reactive) return () => binding.detach();
+
+	return () => {
+		queueMicrotask(() => {
+			if (node.isConnected) return;
+			binding.detach();
+		});
+	};
+}
+
 export interface DraggableOptions {
 	engine?: Neodrag;
 	plugins: DragPluginList;
@@ -34,7 +49,7 @@ export class Draggable {
 
 		this.attachment = (node) => {
 			this.attach(node);
-			return () => this.detach();
+			return attachmentCleanup(this, node, this.#resolver.hasReactive());
 		};
 	}
 
@@ -43,6 +58,11 @@ export class Draggable {
 	}
 
 	attach(node: HTMLElement | SVGElement) {
+		if (this.#node === node && this.#handle) {
+			this.flushReactive();
+			return;
+		}
+
 		this.detach();
 		this.#node = node;
 		const resolved = this.#resolver.resolveFull();
@@ -102,7 +122,7 @@ export class DroppableBinding {
 
 		this.attachment = (node) => {
 			this.attach(node);
-			return () => this.detach();
+			return attachmentCleanup(this, node, this.#resolver.hasReactive());
 		};
 	}
 
@@ -111,6 +131,11 @@ export class DroppableBinding {
 	}
 
 	attach(node: HTMLElement | SVGElement) {
+		if (this.#handle?.node === node) {
+			this.flushReactive();
+			return;
+		}
+
 		this.detach();
 		const resolved = this.#resolver.resolveFull();
 		this.#lastResolved = resolved;
