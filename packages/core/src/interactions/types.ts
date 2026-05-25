@@ -6,8 +6,6 @@ export type DeltaPatch = { x?: number; y?: number };
 
 export type PluginPhase = 'pre' | 'resolve' | 'post';
 
-export type SessionListener = (session: DragSession) => (() => void) | void;
-
 export interface SessionPrivateStore {
 	get<T>(key: SessionKey<T>): T | undefined;
 	set<T>(key: SessionKey<T>, value: T): void;
@@ -17,6 +15,10 @@ export interface SessionPrivateStore {
 export interface SessionKey<T> {
 	readonly __brand: T;
 	readonly id: symbol;
+}
+
+export function createSessionKey<T>(): SessionKey<T> {
+	return { id: Symbol('neodrag.session'), __brand: undefined as T };
 }
 
 export interface DragSourceInfo {

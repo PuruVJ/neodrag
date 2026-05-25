@@ -3,24 +3,24 @@ import { BoundsFrom, validateBounds, type BoundFromFunction } from './lib/bounds
 import { clamp } from './lib/math.ts';
 import { defineDragPlugin, defineDropPlugin, type DragCtx, type DragPlugin, type DropCtx } from './types.ts';
 
-export const THRESHOLD_KEY = Symbol('neodrag.threshold');
-export const STATE_MARKER_KEY = Symbol('neodrag.stateMarker');
-export const IGNORE_MULTITOUCH_KEY = Symbol('neodrag.ignoreMultitouch');
-export const APPLY_USER_SELECT_KEY = Symbol('neodrag.applyUserSelectHack');
-export const TOUCH_ACTION_KEY = Symbol('neodrag.touchAction');
-export const AXIS_KEY = Symbol('neodrag.axis');
-export const GRID_KEY = Symbol('neodrag.grid');
-export const BOUNDS_KEY = Symbol('neodrag.bounds');
-export const POSITION_KEY = Symbol('neodrag.position');
-export const DISABLED_KEY = Symbol('neodrag.disabled');
-export const CONTROLS_KEY = Symbol('neodrag.controls');
-export const EVENTS_KEY = Symbol('neodrag.events');
-export const DRAG_DATA_KEY = Symbol('neodrag.dragData');
-export const ACCEPTS_KEY = Symbol('neodrag.accepts');
-export const HIGHLIGHT_KEY = Symbol('neodrag.highlight');
-export const ON_DROP_KEY = Symbol('neodrag.onDrop');
-export const SCROLL_LOCK_KEY = Symbol('neodrag.scrollLock');
-export const GHOST_KEY = Symbol('neodrag.ghost');
+const THRESHOLD_KEY = Symbol('neodrag.threshold');
+const STATE_MARKER_KEY = Symbol('neodrag.stateMarker');
+const IGNORE_MULTITOUCH_KEY = Symbol('neodrag.ignoreMultitouch');
+const APPLY_USER_SELECT_KEY = Symbol('neodrag.applyUserSelectHack');
+const TOUCH_ACTION_KEY = Symbol('neodrag.touchAction');
+const AXIS_KEY = Symbol('neodrag.axis');
+const GRID_KEY = Symbol('neodrag.grid');
+const BOUNDS_KEY = Symbol('neodrag.bounds');
+const POSITION_KEY = Symbol('neodrag.position');
+const DISABLED_KEY = Symbol('neodrag.disabled');
+const CONTROLS_KEY = Symbol('neodrag.controls');
+const EVENTS_KEY = Symbol('neodrag.events');
+const DRAG_DATA_KEY = Symbol('neodrag.dragData');
+const ACCEPTS_KEY = Symbol('neodrag.accepts');
+const HIGHLIGHT_KEY = Symbol('neodrag.highlight');
+const ON_DROP_KEY = Symbol('neodrag.onDrop');
+const SCROLL_LOCK_KEY = Symbol('neodrag.scrollLock');
+const GHOST_KEY = Symbol('neodrag.ghost');
 
 type MultitouchState = { active_pointers: Set<number> };
 type StateMarkerState = { count: number };
@@ -142,7 +142,7 @@ export const grid = defineDragPlugin(
 
 export { BoundsFrom };
 
-type BoundsHook = 'init' | 'start' | 'drag' | 'end';
+type BoundsHook = 'init' | 'start' | 'drag';
 
 function recomputeBounds(
 	value: BoundFromFunction,
@@ -400,7 +400,7 @@ export const controls = defineDragPlugin(
 			block?: ReturnType<(typeof ControlFrom)[keyof typeof ControlFrom]>;
 			priority?: 'allow' | 'block';
 		} | null,
-		shouldRecompute: (ctx: { hook: 'init' | 'start' | 'drag' | 'end' }) => boolean = (ctx) =>
+		shouldRecompute: (ctx: { hook: 'init' | 'start' | 'drag' }) => boolean = (ctx) =>
 			ctx.hook === 'init',
 	) => ({
 		key: CONTROLS_KEY,
@@ -533,7 +533,7 @@ export const scrollLock = defineDragPlugin(
 		} | null = {},
 	) => ({
 		key: SCROLL_LOCK_KEY,
-		name: 'neodrag:scrollLock',
+		name: 'scrollLock',
 		phase: 'pre',
 
 		init() {

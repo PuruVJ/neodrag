@@ -9,6 +9,12 @@ import {
 import { DragHandle, DropHandle } from './handles.ts';
 import { resolvePluginList } from './resolve-plugins.ts';
 import { reconcilePluginListUpdate } from './plugin-reconcile.ts';
+import {
+	diffPluginFlat,
+	mergePluginsByKey,
+	pluginsLayoutChanged,
+} from './plugin-lifecycle.ts';
+import { sortByPhase } from './phase.ts';
 import { DEFAULT_DRAG_PLUGINS, DEFAULTS } from '../defaults.ts';
 import { applyDragTransform, type TransformApplier } from './apply-transform.ts';
 import { DropTargetTracker, type DropTargetHost } from './drop-targets.ts';
@@ -24,7 +30,6 @@ import type {
 	DropTargetInfo,
 	EndReason,
 	ErrorInfo,
-	SessionListener,
 } from './types.ts';
 
 const DEV = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production';
@@ -65,8 +70,6 @@ export class Neodrag {
 	#boundOnMove: ((e: PointerEvent) => void) | null = null;
 	#boundOnUp: ((e: PointerEvent) => void) | null = null;
 	#pointerSessionAbort: AbortController | null = null;
-	#sessionListeners = new Set<SessionListener>();
-	#sessionCleanups = new Set<() => void>();
 
 	#lastTarget: Element | null = null;
 	#lastResult: HTMLElement | SVGElement | null = null;
@@ -124,7 +127,6 @@ export class Neodrag {
 			propagationStopped: false,
 			pointerId: -1,
 			startedAt: 0,
-			cancel() {},
 		};
 		this.#idleSession = createDragSession(idleActive, () => {});
 		this.#dropHost.session = this.#idleSession;
@@ -136,11 +138,6 @@ export class Neodrag {
 
 	set dev(value: boolean) {
 		this.#dev = value;
-	}
-
-	onSession(listener: SessionListener) {
-		this.#sessionListeners.add(listener);
-		return () => this.#sessionListeners.delete(listener);
 	}
 
 	draggable(
@@ -161,7 +158,6 @@ export class Neodrag {
 		inst.lastSlots = plugins;
 		inst.slotStaticCache = [];
 		const resolved = resolvePluginList(plugins, inst.slotStaticCache, false);
-		inst.lastList = resolved;
 		this.#installDragPlugins(inst, resolved);
 		this.#syncDragTransform(inst);
 		this.#dragSources.set(node, inst);
@@ -179,7 +175,6 @@ export class Neodrag {
 		inst.lastSlots = plugins;
 		inst.slotStaticCache = [];
 		const resolved = resolvePluginList(plugins, inst.slotStaticCache, false);
-		inst.lastList = resolved;
 		this.#installDropPlugins(inst, resolved);
 		this.#dropTargets.set(node, inst);
 		this.#dropCount++;
@@ -230,13 +225,7 @@ export class Neodrag {
 		this.#dropTargets.clear();
 		this.#dropCount = 0;
 		this.#soleDrop = null;
-		this.#sessionListeners.clear();
-		this.#sessionCleanups.clear();
 		this.#removeGlobalListeners();
-	}
-
-	#getSession(): import('./types.ts').DragSession {
-		return this.#activeSessionView ?? this.#idleSession;
 	}
 
 	#beginSession(source: DragInstance, e: PointerEvent) {
@@ -257,11 +246,6 @@ export class Neodrag {
 			propagationStopped: false,
 			pointerId: e.pointerId,
 			startedAt: Date.now(),
-			cancel: () => {
-				if (this.#active) {
-					this.#active.state = transitionSession(this.#active.state, { type: 'cancel' });
-				}
-			},
 		};
 		this.#activeSource = source;
 		this.#activePointerId = e.pointerId;
@@ -273,22 +257,6 @@ export class Neodrag {
 			}
 		});
 		this.#dropHost.session = this.#activeSessionView;
-
-		this.#notifySessionListeners();
-	}
-
-	#notifySessionListeners() {
-		if (!this.#active) return;
-		const session = this.#getSession();
-		for (const listener of this.#sessionListeners) {
-			const cleanup = listener(session);
-			if (typeof cleanup === 'function') this.#sessionCleanups.add(cleanup);
-		}
-	}
-
-	#endSessionListeners() {
-		for (const cleanup of this.#sessionCleanups) cleanup();
-		this.#sessionCleanups.clear();
 	}
 
 	#cancelSession(reason: EndReason) {
@@ -496,7 +464,6 @@ export class Neodrag {
 			});
 		}
 
-		this.#endSessionListeners();
 		this.#active = null;
 		this.#activeSource = null;
 		this.#activePointerId = null;
@@ -541,7 +508,6 @@ export class Neodrag {
 		this.#activeSessionView = null;
 		this.#dropHost.session = this.#idleSession;
 		inst.bindSession(this.#idleSession);
-		this.#endSessionListeners();
 		this.#disarmPointerSession();
 		this.#dropTracker.reset();
 	}
@@ -688,29 +654,8 @@ export class Neodrag {
 		return Number.isFinite(scale) && scale > 0 ? scale : 1;
 	}
 
-	#dragBucketsChanged(prev: DragPlugin[], next: DragPlugin[]) {
-		if (prev.length !== next.length) return true;
-		for (let i = 0; i < next.length; i++) {
-			const a = prev[i]!;
-			const b = next[i]!;
-			if (
-				a.key !== b.key ||
-				(a.phase ?? 'resolve') !== (b.phase ?? 'resolve') ||
-				!!a.start !== !!b.start ||
-				!!a.drag !== !!b.drag ||
-				!!a.end !== !!b.end
-			) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	#mergeUserDragPlugins(userPlugins: DragPlugin[]) {
-		const combined = [...this.#defaultDragPlugins, ...userPlugins];
-		const byKey = new Map<symbol, DragPlugin>();
-		for (const p of combined) byKey.set(p.key, p);
-		return [...byKey.values()];
+		return mergePluginsByKey(this.#defaultDragPlugins, userPlugins);
 	}
 
 	#installDragPlugins(inst: DragInstance, userPlugins: DragPlugin[]) {
@@ -722,40 +667,23 @@ export class Neodrag {
 	}
 
 	#diffDragPlugins(inst: DragInstance, userPlugins: DragPlugin[]) {
-		inst.isProcessingExternalUpdate = true;
 		const offsetX = inst.offsetX;
 		const offsetY = inst.offsetY;
-		const next = this.#mergeUserDragPlugins(userPlugins);
-		const prevFlat = inst.flat;
-		const prevByKey = new Map(prevFlat.map((p) => [p.key, p]));
-
-		for (const plugin of next) {
-			const prev = prevByKey.get(plugin.key);
-			if (!prev) {
-				inst.byKey.set(plugin.key, plugin);
-				this.#initOneDragPlugin(inst, plugin);
-			} else if (prev !== plugin) {
-				plugin.update?.(inst.dragCtx, inst.states.get(plugin.key));
-				inst.byKey.set(plugin.key, plugin);
-			}
-			prevByKey.delete(plugin.key);
-		}
-
-		for (const orphan of prevByKey.values()) {
-			this.#destroyOneDragPlugin(inst, orphan);
-			inst.byKey.delete(orphan.key);
-		}
-
-		inst.flat = next;
-		if (this.#dragBucketsChanged(prevFlat, next)) inst.rebuildBuckets();
-		inst.isProcessingExternalUpdate = false;
-
-		if (inst.offsetX !== offsetX || inst.offsetY !== offsetY) {
-			this.#syncDragTransform(inst);
-			inst.effects.flush();
-		} else {
-			inst.effects.flush();
-		}
+		diffPluginFlat(inst, {
+			userPlugins,
+			merge: (resolved) => this.#mergeUserDragPlugins(resolved),
+			bucketsChanged: (prev, next) =>
+				pluginsLayoutChanged(prev, next, (plugin) => [
+					!!plugin.start,
+					!!plugin.drag,
+					!!plugin.end,
+				]),
+			init: (plugin) => this.#initOneDragPlugin(inst, plugin),
+			destroy: (plugin) => this.#destroyOneDragPlugin(inst, plugin),
+			update: (plugin) => plugin.update?.(inst.dragCtx, inst.states.get(plugin.key)),
+		});
+		if (inst.offsetX !== offsetX || inst.offsetY !== offsetY) this.#syncDragTransform(inst);
+		inst.effects.flush();
 	}
 
 	#syncDragTransform(inst: DragInstance) {
@@ -763,16 +691,8 @@ export class Neodrag {
 	}
 
 	#initDragPlugins(inst: DragInstance) {
-		for (const plugin of this.#pluginsByPhase(inst)) this.#initOneDragPlugin(inst, plugin);
+		for (const plugin of sortByPhase(inst.flat)) this.#initOneDragPlugin(inst, plugin);
 		inst.effects.flush();
-	}
-
-	#pluginsByPhase(inst: DragInstance): DragPlugin[] {
-		const order = { pre: 0, resolve: 1, post: 2 } as const;
-		return [...inst.flat].sort(
-			(a, b) =>
-				(order[a.phase ?? 'resolve'] ?? 1) - (order[b.phase ?? 'resolve'] ?? 1),
-		);
 	}
 
 	#initOneDragPlugin(inst: DragInstance, plugin: DragPlugin) {
@@ -803,10 +723,7 @@ export class Neodrag {
 	}
 
 	#mergeUserDropPlugins(userPlugins: DropPlugin[]) {
-		const combined = [...this.#defaultDropPlugins, ...userPlugins];
-		const byKey = new Map<symbol, DropPlugin>();
-		for (const p of combined) byKey.set(p.key, p);
-		return [...byKey.values()];
+		return mergePluginsByKey(this.#defaultDropPlugins, userPlugins);
 	}
 
 	#installDropPlugins(inst: DropInstance, userPlugins: DropPlugin[]) {
@@ -817,56 +734,26 @@ export class Neodrag {
 		this.#initDropPlugins(inst);
 	}
 
-	#dropBucketsChanged(prev: DropPlugin[], next: DropPlugin[]) {
-		if (prev.length !== next.length) return true;
-		for (let i = 0; i < next.length; i++) {
-			const a = prev[i]!;
-			const b = next[i]!;
-			if (
-				a.key !== b.key ||
-				(a.phase ?? 'resolve') !== (b.phase ?? 'resolve') ||
-				!!a.enter !== !!b.enter ||
-				!!a.over !== !!b.over ||
-				!!a.leave !== !!b.leave ||
-				!!a.drop !== !!b.drop
-			) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	#diffDropPlugins(inst: DropInstance, userPlugins: DropPlugin[]) {
-		inst.isProcessingExternalUpdate = true;
-		const next = this.#mergeUserDropPlugins(userPlugins);
-		const prevFlat = inst.flat;
-		const prevByKey = new Map(prevFlat.map((p) => [p.key, p]));
-
-		for (const plugin of next) {
-			const prev = prevByKey.get(plugin.key);
-			if (!prev) {
-				inst.byKey.set(plugin.key, plugin);
-				this.#initOneDropPlugin(inst, plugin);
-			} else if (prev !== plugin) {
-				plugin.update?.(inst.dropCtx, inst.states.get(plugin.key));
-				inst.byKey.set(plugin.key, plugin);
-			}
-			prevByKey.delete(plugin.key);
-		}
-
-		for (const orphan of prevByKey.values()) {
-			this.#destroyOneDropPlugin(inst, orphan);
-			inst.byKey.delete(orphan.key);
-		}
-
-		inst.flat = next;
-		if (this.#dropBucketsChanged(prevFlat, next)) inst.rebuildBuckets();
-		inst.isProcessingExternalUpdate = false;
+		diffPluginFlat(inst, {
+			userPlugins,
+			merge: (resolved) => this.#mergeUserDropPlugins(resolved),
+			bucketsChanged: (prev, next) =>
+				pluginsLayoutChanged(prev, next, (plugin) => [
+					!!plugin.enter,
+					!!plugin.over,
+					!!plugin.leave,
+					!!plugin.drop,
+				]),
+			init: (plugin) => this.#initOneDropPlugin(inst, plugin),
+			destroy: (plugin) => this.#destroyOneDropPlugin(inst, plugin),
+			update: (plugin) => plugin.update?.(inst.dropCtx, inst.states.get(plugin.key)),
+		});
 		inst.effects.flush();
 	}
 
 	#initDropPlugins(inst: DropInstance) {
-		for (const plugin of inst.flat) this.#initOneDropPlugin(inst, plugin);
+		for (const plugin of sortByPhase(inst.flat)) this.#initOneDropPlugin(inst, plugin);
 		inst.effects.flush();
 	}
 

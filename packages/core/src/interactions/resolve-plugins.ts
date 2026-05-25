@@ -36,14 +36,6 @@ export function resolvePluginList<T extends { key: symbol }>(
 	return out;
 }
 
-export function resolveDragPluginList(slots: DragPluginList, reactiveOnly = false): DragPlugin[] {
-	return resolvePluginList(slots, undefined, reactiveOnly);
-}
-
-export function resolveDropPluginList(slots: DropPluginList, reactiveOnly = false): DropPlugin[] {
-	return resolvePluginList(slots, undefined, reactiveOnly);
-}
-
 export class PluginListResolver<T extends { key: symbol }> {
 	#slots: PluginSlot<T>[];
 	#staticCache: (T | undefined)[] = [];

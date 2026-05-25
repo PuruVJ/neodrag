@@ -1,12 +1,7 @@
 import { Neodrag } from './engine.ts';
+import type { DragHandle, DropHandle } from './handles.ts';
 import { PluginListResolver, resolvedPluginsUnchanged } from './resolve-plugins.ts';
 import type { PluginSlot } from './types.ts';
-
-export type PluginBindingHandle<P extends { key: symbol }> = {
-	readonly node: HTMLElement | SVGElement;
-	update(plugins: readonly PluginSlot<P>[]): void;
-	destroy(): void;
-};
 
 export type PluginBindingOptions<P extends { key: symbol }> = {
 	engine?: Neodrag;
@@ -15,14 +10,14 @@ export type PluginBindingOptions<P extends { key: symbol }> = {
 		engine: Neodrag,
 		node: HTMLElement | SVGElement,
 		resolved: P[],
-	) => PluginBindingHandle<P>;
+	) => DragHandle | DropHandle;
 	attachIdempotency?: 'node-and-handle' | 'handle-node';
 };
 
 export class PluginBinding<P extends { key: symbol }> {
 	readonly #engine: Neodrag;
 	#resolver: PluginListResolver<P>;
-	#handle: PluginBindingHandle<P> | null = null;
+	#handle: DragHandle | DropHandle | null = null;
 	#node: HTMLElement | SVGElement | null = null;
 	#lastResolved: P[] | null = null;
 	readonly #register: PluginBindingOptions<P>['register'];
@@ -69,28 +64,26 @@ export class PluginBinding<P extends { key: symbol }> {
 		this.#lastResolved = null;
 	}
 
-	flushReactive() {
-		if (!this.#handle || !this.#resolver.hasReactive()) return;
-
-		const next = this.#resolver.resolveReactive();
+	#pushResolved(next: P[]) {
+		if (!this.#handle) return;
 		if (this.#lastResolved && resolvedPluginsUnchanged(this.#lastResolved, next)) return;
-
 		this.#handle.update(next);
 		this.#lastResolved = next;
+	}
+
+	flushReactive() {
+		if (!this.#resolver.hasReactive()) return;
+		this.#pushResolved(this.#resolver.resolveReactive());
 	}
 
 	update(slots?: readonly PluginSlot<P>[]) {
 		if (slots) this.#resolver.setSlots(slots);
 		if (!this.#handle) return;
-
-		const next = this.#resolver.hasReactive()
-			? this.#resolver.resolveReactive()
-			: this.#resolver.resolveFull();
-
-		if (this.#lastResolved && resolvedPluginsUnchanged(this.#lastResolved, next)) return;
-
-		this.#handle.update(next);
-		this.#lastResolved = next;
+		this.#pushResolved(
+			this.#resolver.hasReactive()
+				? this.#resolver.resolveReactive()
+				: this.#resolver.resolveFull(),
+		);
 	}
 
 	destroy() {

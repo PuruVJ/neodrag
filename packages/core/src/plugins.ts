@@ -1,8 +1,6 @@
 export * from './interactions/plugins.ts';
 export {
 	hasReactiveSlots,
-	resolveDragPluginList,
-	resolveDropPluginList,
 	resolvePluginList,
 	PluginListResolver,
 } from './interactions/resolve-plugins.ts';

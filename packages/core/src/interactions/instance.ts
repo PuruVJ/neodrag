@@ -1,4 +1,5 @@
 import { EffectScheduler } from './effects.ts';
+import { phaseChain, pushByPhase } from './phase.ts';
 import type { TransformApplier } from './apply-transform.ts';
 import type {
 	DragCtx,
@@ -42,7 +43,6 @@ export interface ActiveSession {
 	propagationStopped: boolean;
 	pointerId: number;
 	startedAt: number;
-	cancel(): void;
 }
 
 export class DragInstance {
@@ -73,7 +73,6 @@ export class DragInstance {
 	readonly #liveInitial: { readonly x: number; readonly y: number };
 
 	flat: DragPlugin[] = [];
-	lastList: DragPlugin[] | null = null;
 	lastSlots: import('./types.ts').DragPluginList | null = null;
 	slotStaticCache: (DragPlugin | undefined)[] = [];
 	byKey = new Map<symbol, DragPlugin>();
@@ -228,19 +227,9 @@ export class DragInstance {
 			if (plugin.end) this.#pushPhase(this.preEnd, this.resolveEnd, this.postEnd, phase, plugin);
 		}
 
-		this.startChain = this.#phaseChain(this.preStart, this.resolveStart, this.postStart);
-		this.dragChain = this.#phaseChain(this.preDrag, this.resolveDrag, this.postDrag);
-		this.endChain = this.#phaseChain(this.preEnd, this.resolveEnd, this.postEnd);
-	}
-
-	#phaseChain(
-		pre: DragPlugin[],
-		resolve: DragPlugin[],
-		post: DragPlugin[],
-	): DragPlugin[] {
-		return pre.length + resolve.length + post.length === 0
-			? []
-			: [...pre, ...resolve, ...post];
+		this.startChain = phaseChain(this.preStart, this.resolveStart, this.postStart);
+		this.dragChain = phaseChain(this.preDrag, this.resolveDrag, this.postDrag);
+		this.endChain = phaseChain(this.preEnd, this.resolveEnd, this.postEnd);
 	}
 
 	#pushPhase(
@@ -250,9 +239,7 @@ export class DragInstance {
 		phase: NonNullable<DragPlugin['phase']>,
 		plugin: DragPlugin,
 	) {
-		if (phase === 'pre') pre.push(plugin);
-		else if (phase === 'post') post.push(plugin);
-		else resolve.push(plugin);
+		pushByPhase(pre, resolve, post, phase, plugin);
 	}
 }
 
@@ -273,7 +260,6 @@ export class DropInstance {
 	#host: DropCtxHost;
 
 	flat: import('./types.ts').DropPlugin[] = [];
-	lastList: import('./types.ts').DropPlugin[] | null = null;
 	lastSlots: import('./types.ts').DropPluginList | null = null;
 	slotStaticCache: (import('./types.ts').DropPlugin | undefined)[] = [];
 	byKey = new Map<symbol, import('./types.ts').DropPlugin>();
@@ -360,20 +346,10 @@ export class DropInstance {
 			if (plugin.drop) this.#bucket(phase, 'drop', plugin);
 		}
 
-		this.enterChain = this.#phaseDropChain(this.preEnter, this.resolveEnter, this.postEnter);
-		this.overChain = this.#phaseDropChain(this.preOver, this.resolveOver, this.postOver);
-		this.leaveChain = this.#phaseDropChain(this.preLeave, this.resolveLeave, this.postLeave);
-		this.dropChain = this.#phaseDropChain(this.preDrop, this.resolveDrop, this.postDrop);
-	}
-
-	#phaseDropChain(
-		pre: import('./types.ts').DropPlugin[],
-		resolve: import('./types.ts').DropPlugin[],
-		post: import('./types.ts').DropPlugin[],
-	): import('./types.ts').DropPlugin[] {
-		return pre.length + resolve.length + post.length === 0
-			? []
-			: [...pre, ...resolve, ...post];
+		this.enterChain = phaseChain(this.preEnter, this.resolveEnter, this.postEnter);
+		this.overChain = phaseChain(this.preOver, this.resolveOver, this.postOver);
+		this.leaveChain = phaseChain(this.preLeave, this.resolveLeave, this.postLeave);
+		this.dropChain = phaseChain(this.preDrop, this.resolveDrop, this.postDrop);
 	}
 
 	#bucket(
@@ -406,8 +382,6 @@ export class DropInstance {
 						? this.postLeave
 						: this.postDrop;
 
-		if (phase === 'pre') pre.push(plugin);
-		else if (phase === 'post') post.push(plugin);
-		else resolve.push(plugin);
+		pushByPhase(pre, resolve, post, phase, plugin);
 	}
 }

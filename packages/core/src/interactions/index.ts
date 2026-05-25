@@ -1,8 +1,6 @@
 export { Neodrag, type EngineOptions } from './engine.ts';
 export {
 	hasReactiveSlots,
-	resolveDragPluginList,
-	resolveDropPluginList,
 	resolvePluginList,
 	PluginListResolver,
 	resolvedPluginsUnchanged,
@@ -10,11 +8,11 @@ export {
 export { Draggable, DroppableBinding, type DraggableOptions } from './draggable-binding.ts';
 export type { TransformApplier } from './apply-transform.ts';
 export { DragHandle, DropHandle, type NeodragHost } from './handles.ts';
-export { createSessionKey } from './session-key.ts';
-export { transitionSession, isTerminal } from './state-machine.ts';
+export { transitionSession } from './state-machine.ts';
 export {
 	defineDragPlugin,
 	defineDropPlugin,
+	createSessionKey,
 	type DragCtx,
 	type DragPlugin,
 	type DragPluginList,
@@ -28,7 +26,6 @@ export {
 	type ErrorInfo,
 	type PluginPhase,
 	type SessionKey,
-	type SessionListener,
 	type SessionState,
 } from './types.ts';
 export { DEFAULT_DRAG_PLUGINS, MINIMAL_DRAG_PLUGINS } from '../defaults.ts';

@@ -12,7 +12,6 @@ export type PluginListInstance<P extends { key: symbol }> = {
 	updateDepth: number;
 	pendingUpdate: DragPluginList | DropPluginList | null;
 	isProcessingExternalUpdate: boolean;
-	lastList: P[] | null;
 };
 
 export type ReconcilePluginUpdateOptions<P extends { key: symbol }> = {
@@ -50,10 +49,7 @@ export function reconcilePluginListUpdate<P extends { key: symbol }>(
 				break;
 			}
 		}
-		if (same) {
-			inst.lastList = resolved;
-			return;
-		}
+		if (same) return;
 	}
 
 	if (inst.isUpdating) {
@@ -81,7 +77,6 @@ export function reconcilePluginListUpdate<P extends { key: symbol }>(
 		return;
 	}
 
-	inst.lastList = resolved;
 	diff(inst, resolved);
 	inst.updateDepth--;
 	inst.isUpdating = false;
