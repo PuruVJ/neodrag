@@ -1,7 +1,7 @@
 export type SizesKeyMap = Record<string, string>;
 
 export type SizesOutput = {
-	version: number;
+	version: 2;
 	generatedAt: string;
 	drag: { keys: SizesKeyMap; sizes: Record<string, number> };
 	drop: { keys: SizesKeyMap; sizes: Record<string, number> };
@@ -39,13 +39,4 @@ export function lookupSize(sizes: Record<string, number>, mask: number, fallback
 export function formatBytes(bytes: number): string {
 	if (bytes < 1024) return `${bytes.toFixed(0)} B`;
 	return `${(bytes / 1024).toFixed(2)} KB`;
-}
-
-export function isSizesV2(data: unknown): data is SizesOutput {
-	return (
-		typeof data === 'object' &&
-		data !== null &&
-		'version' in data &&
-		(data as SizesOutput).version === 2
-	);
 }

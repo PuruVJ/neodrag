@@ -1,26 +1,12 @@
 <script lang="ts">
-	import sizes_json from '$/sizes.json?raw';
+	import data from '$/sizes.json';
 	import {
 		bitmaskFromKeys,
 		DRAG_DEFAULT_NAMES,
 		formatBytes,
-		isSizesV2,
 		lookupSize,
-		type SizesOutput,
 	} from '$/lib/sizes-data.ts';
 	import TickIcon from '~icons/material-symbols/check';
-
-	const raw = JSON.parse(sizes_json);
-	const data: SizesOutput = isSizesV2(raw)
-		? raw
-		: {
-				version: 2,
-				generatedAt: '',
-				drag: { keys: (raw as { keys?: Record<string, string> }).keys ?? {}, sizes: (raw as { sizes?: Record<string, number> }).sizes ?? {} },
-				drop: { keys: {}, sizes: {} },
-				extras: { engineMinimal: 0, sortable: 0 },
-				presets: {},
-			};
 
 	const defaultOptionalDrag = Object.entries(data.drag.keys)
 		.filter(([, name]) => !DRAG_DEFAULT_NAMES.includes(name as (typeof DRAG_DEFAULT_NAMES)[number]))
