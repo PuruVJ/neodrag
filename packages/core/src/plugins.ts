@@ -683,6 +683,8 @@ export {
 	PluginListResolver,
 } from './resolve-plugins.ts';
 export {
+	assertNamedPluginKey,
+	assertNamedPluginKeys,
 	defineDragPlugin,
 	defineDropPlugin,
 	pluginKeyLabel,

@@ -72,8 +72,28 @@ export interface DropCtx {
 	effect(fn: () => void): void;
 }
 
+const DEV =
+	typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production';
+
 export function pluginKeyLabel(key: symbol): string {
 	return key.description ?? 'plugin';
+}
+
+export function assertNamedPluginKey(key: symbol, dev: boolean = DEV): void {
+	if (!dev) return;
+	const label = key.description;
+	if (label != null && label !== '') return;
+	throw new Error(
+		'Neodrag plugin key must be a named Symbol (e.g. Symbol("my-plugin")). Anonymous Symbol() is not allowed when dev mode is on.',
+	);
+}
+
+export function assertNamedPluginKeys(
+	plugins: readonly { key: symbol }[],
+	dev: boolean = DEV,
+): void {
+	if (!dev) return;
+	for (const plugin of plugins) assertNamedPluginKey(plugin.key, true);
 }
 
 export interface DragPlugin<S = unknown> {

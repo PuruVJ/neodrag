@@ -20,16 +20,17 @@ import { applyDragTransform, type TransformApplier } from './apply-transform.ts'
 import { DropTargetTracker, type DropTargetHost } from './drop-targets.ts';
 import { createDragSession, resolveEndReason } from './session.ts';
 import { transitionSession } from './state-machine.ts';
-import type {
-	DragCtx,
-	DragPlugin,
-	DragPluginList,
-	DropCtx,
-	DropPlugin,
-	DropPluginList,
-	DropTargetInfo,
-	EndReason,
-	ErrorInfo,
+import {
+	assertNamedPluginKeys,
+	type DragCtx,
+	type DragPlugin,
+	type DragPluginList,
+	type DropCtx,
+	type DropPlugin,
+	type DropPluginList,
+	type DropTargetInfo,
+	type EndReason,
+	type ErrorInfo,
 } from './types.ts';
 
 const DEV = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production';
@@ -672,6 +673,7 @@ export class Neodrag {
 	}
 
 	#mergeUserDragPlugins(userPlugins: DragPlugin[]) {
+		assertNamedPluginKeys(userPlugins, this.#dev);
 		return mergePluginsByKey(this.#defaultDragPlugins, userPlugins);
 	}
 
@@ -740,6 +742,7 @@ export class Neodrag {
 	}
 
 	#mergeUserDropPlugins(userPlugins: DropPlugin[]) {
+		assertNamedPluginKeys(userPlugins, this.#dev);
 		return mergePluginsByKey(this.#defaultDropPlugins, userPlugins);
 	}
 

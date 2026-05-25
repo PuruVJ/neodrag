@@ -96,7 +96,7 @@ export const myPlugin = defineDragPlugin(() => ({
 }));
 ```
 
-Use a **named** `Symbol('…')` so `key.description` is readable in errors and devtools. Anonymous `Symbol()` still works; identity is always `key`.
+Use a **named** `Symbol('…')` so `key.description` is readable in errors and devtools. With **`dev: true`** (the default outside production builds), anonymous `Symbol()` keys **throw** at attach time. Production (`dev: false`) allows anonymous symbols; identity is always `key`.
 
 ## Reactive updates
 

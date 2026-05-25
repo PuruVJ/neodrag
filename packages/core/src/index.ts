@@ -28,6 +28,8 @@ export {
 	type SessionState,
 	type DropTargetInfo,
 	pluginKeyLabel,
+	assertNamedPluginKey,
+	assertNamedPluginKeys,
 } from './types.ts';
 export type { DragEventData } from './plugins.ts';
 export { DEFAULTS, DEFAULT_DRAG_PLUGINS, MINIMAL_DRAG_PLUGINS } from './defaults.ts';
