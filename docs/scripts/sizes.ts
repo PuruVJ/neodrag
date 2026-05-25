@@ -6,431 +6,346 @@ import { sync } from 'brotli-size';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
-// Global export mapping
-let exportKeyMap: Record<string, number> = {};
-let reverseKeyMap: Record<number, string> = {};
+const DRAG_DEFAULTS = [
+	'ignoreMultitouch',
+	'stateMarker',
+	'applyUserSelectHack',
+	'threshold()',
+	'touchAction',
+] as const;
 
-function createKeyMap(exports: string[]): void {
-	exports.forEach((exportName, index) => {
-		exportKeyMap[exportName] = index;
-		reverseKeyMap[index] = exportName;
+const DRAG_OPTIONAL = [
+	'axis',
+	'grid',
+	'bounds',
+	'position',
+	'events',
+	'disabled',
+	'controls',
+	'scrollLock',
+	'ghost',
+	'dragData',
+] as const;
+
+const DROP_OPTIONAL = ['accepts', 'highlight', 'onDrop'] as const;
+
+const PLUGIN_EXPR: Record<string, string> = {
+	ignoreMultitouch: 'ignoreMultitouch',
+	stateMarker: 'stateMarker',
+	applyUserSelectHack: 'applyUserSelectHack',
+	touchAction: 'touchAction',
+	threshold: 'threshold()',
+	axis: 'axis()',
+	grid: 'grid([10, 10])',
+	bounds: 'bounds()',
+	position: 'position()',
+	events: 'events({})',
+	disabled: 'disabled()',
+	controls: 'controls()',
+	scrollLock: 'scrollLock()',
+	ghost: 'ghost()',
+	dragData: 'dragData(() => null)',
+	accepts: 'accepts(() => true)',
+	highlight: 'highlight()',
+	onDrop: 'onDrop(() => {})',
+};
+
+type KeyMap = Record<string, string>;
+
+export type SizesOutput = {
+	version: 2;
+	generatedAt: string;
+	drag: { keys: KeyMap; sizes: Record<string, number> };
+	drop: { keys: KeyMap; sizes: Record<string, number> };
+	extras: {
+		engineMinimal: number;
+		sortable: number;
+	};
+	presets: Record<string, { bytes: number; drag: string[]; drop: string[]; label: string }>;
+};
+
+function createKeyMap(exports: readonly string[]): { keys: KeyMap; reverse: Record<number, string> } {
+	const keys: KeyMap = {};
+	const reverse: Record<number, string> = {};
+	exports.forEach((name, index) => {
+		keys[String(index)] = name;
+		reverse[index] = name;
 	});
+	return { keys, reverse };
 }
 
-// Convert combination to bitmask
-function combinationToBitmask(combination: string[]): number {
+function combinationToBitmask(combination: readonly string[], keyMap: KeyMap): number {
 	let bitmask = 0;
-	for (const plugin of combination) {
-		const pluginIndex = exportKeyMap[plugin];
-		bitmask |= 1 << pluginIndex;
+	for (const name of combination) {
+		const index = Number(Object.entries(keyMap).find(([, v]) => v === name)?.[0]);
+		if (!Number.isNaN(index)) bitmask |= 1 << index;
 	}
 	return bitmask;
 }
 
-async function setupCoreEnvironment() {
-	const tempDir = resolve(__dirname, 'temp', 'core-analysis');
-	mkdirSync(tempDir, { recursive: true });
-
-	const corePackagePath = resolve(__dirname, '../../packages/core');
-	const nodeModulesDir = join(tempDir, 'node_modules', '@neodrag');
-	mkdirSync(nodeModulesDir, { recursive: true });
-
-	const coreDistPath = join(corePackagePath, 'dist');
-	const coreTargetPath = join(nodeModulesDir, 'core');
-	mkdirSync(coreTargetPath, { recursive: true });
-
-	if (existsSync(coreDistPath)) {
-		const coreEntries = readdirSync(coreDistPath, { withFileTypes: true });
-		for (const entry of coreEntries) {
-			if (entry.isFile()) {
-				const sourcePath = join(coreDistPath, entry.name);
-				const targetPath = join(coreTargetPath, entry.name);
-				const content = readFileSync(sourcePath, 'utf8');
-				writeFileSync(targetPath, content);
-			}
-		}
-
-		const corePackageJson = {
-			name: '@neodrag/core',
-			main: 'index.js',
-			module: 'index.js',
-			type: 'module',
-			sideEffects: false,
-			exports: {
-				'.': './index.js',
-				'./plugins': './plugins.js',
-			},
-		};
-		writeFileSync(join(coreTargetPath, 'package.json'), JSON.stringify(corePackageJson, null, 2));
-	}
-
-	return tempDir;
-}
-
-function getCorePluginExports(): string[] {
-	try {
-		const corePackagePath = resolve(__dirname, '../../packages/core');
-		const corePluginsPath = join(corePackagePath, 'dist', 'plugins.js');
-
-		if (existsSync(corePluginsPath)) {
-			const corePluginsContent = readFileSync(corePluginsPath, 'utf-8');
-			return extractExportsFromContent(corePluginsContent);
-		}
-
-		// Fallback: try to read from src if dist doesn't exist
-		const corePluginsSrcPath = join(corePackagePath, 'src', 'plugins.ts');
-		if (existsSync(corePluginsSrcPath)) {
-			const corePluginsContent = readFileSync(corePluginsSrcPath, 'utf-8');
-			return extractExportsFromContent(corePluginsContent);
-		}
-	} catch (error) {
-		// @ts-ignore
-		console.warn(`Could not read core plugins: ${error.message}`);
-	}
-
-	return [];
-}
-
-function extractExportsFromContent(jsContent: string): string[] {
-	const exports: string[] = [];
-
-	// Pattern 1: export { name1, name2, name3 }
-	const namedExportPattern = /export\s*\{\s*([^}]+)\s*\}/g;
-	let match;
-	while ((match = namedExportPattern.exec(jsContent)) !== null) {
-		const exportList = match[1];
-		const names = exportList
-			.split(',')
-			.map((name) => {
-				const parts = name.trim().split(/\s+as\s+/);
-				return parts[0].trim().replace(/["']/g, '');
-			})
-			.filter(Boolean);
-		exports.push(...names);
-	}
-
-	// Pattern 2: export const/let/var/function/class name
-	const directExportPattern =
-		/export\s+(?:const|let|var|function|class)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
-	while ((match = directExportPattern.exec(jsContent)) !== null) {
-		exports.push(match[1]);
-	}
-
-	return [...new Set(exports)].filter((exp) => exp !== 'default' && exp.length > 0);
-}
-
-function* generateAllCombinations<T>(arr: T[], maxCombinations = Infinity): Generator<T[]> {
-	const n = arr.length;
-	let count = 0;
-
-	for (let i = 0; i < Math.pow(2, n) && count < maxCombinations; i++) {
-		const combination = [];
+function* allCombinations<T>(items: readonly T[]): Generator<T[]> {
+	const n = items.length;
+	for (let i = 0; i < 1 << n; i++) {
+		const combo: T[] = [];
 		for (let j = 0; j < n; j++) {
-			if (i & (1 << j)) {
-				combination.push(arr[j]);
-			}
+			if (i & (1 << j)) combo.push(items[j]!);
 		}
-		yield combination;
-		count++;
-	}
-}
-
-function getActualImportsForCombination(plugins: string[]): {
-	actualImports: string[];
-	usedInFactory: string[];
-} {
-	// Remove BoundsFrom and ControlFrom from plugins if they're there
-	const cleanPlugins = plugins.filter((p) => p !== 'BoundsFrom' && p !== 'ControlFrom');
-	const actualImports = [...cleanPlugins];
-	const usedInFactory = [...cleanPlugins];
-
-	// Only include BoundsFrom if bounds is in the combination
-	if (cleanPlugins.includes('bounds')) {
-		actualImports.push('BoundsFrom');
-		usedInFactory.push('BoundsFrom');
-	}
-
-	// Only include ControlFrom if controls is in the combination
-	if (cleanPlugins.includes('controls')) {
-		actualImports.push('ControlFrom');
-		usedInFactory.push('ControlFrom');
-	}
-
-	return { actualImports, usedInFactory };
-}
-
-async function measureCombinationWithBuild(
-	keyPlugins: string[], // Plugins for the key
-	tempDir: string,
-	baseSize: number,
-): Promise<number> {
-	const measureDir = resolve(__dirname, 'temp', 'measure');
-	mkdirSync(measureDir, { recursive: true });
-
-	// Copy core package
-	const nodeModulesSource = join(tempDir, 'node_modules');
-	if (existsSync(nodeModulesSource)) {
-		const nodeModulesTarget = join(measureDir, 'node_modules');
-		mkdirSync(nodeModulesTarget, { recursive: true });
-		copyRecursive(nodeModulesSource, nodeModulesTarget);
-	}
-
-	// Get actual imports (including BoundsFrom/ControlFrom if needed)
-	const { actualImports } = getActualImportsForCombination(keyPlugins);
-
-	// Fix: Handle empty imports properly
-	const testContent =
-		actualImports.length > 0
-			? `
-import { Neodrag } from '@neodrag/core';
-import { ${actualImports.join(', ')} } from '@neodrag/core/plugins';
-
-export const engine = new Neodrag({ plugins: [${actualImports.join(',')}] });
-`
-			: `
-import { Neodrag } from '@neodrag/core';
-
-export const engine = new Neodrag();
-`;
-
-	const entryPath = join(measureDir, 'test.js');
-	writeFileSync(entryPath, testContent);
-
-	const packageJson = {
-		name: 'core-analysis',
-		type: 'module',
-	};
-	writeFileSync(join(measureDir, 'package.json'), JSON.stringify(packageJson, null, 2));
-
-	const outDir = resolve(__dirname, 'temp', 'build-output');
-	if (existsSync(outDir)) {
-		rmSync(outDir, { recursive: true, force: true });
-	}
-	mkdirSync(outDir, { recursive: true });
-
-	try {
-		const safeFilename =
-			`core-${Date.now()}-${keyPlugins.join('-').replace(/[^a-zA-Z0-9-]/g, '_')}`.slice(0, 100);
-
-		await build({
-			entry: { [safeFilename]: entryPath },
-			format: ['esm'],
-			outDir,
-			target: 'es2020',
-			platform: 'browser',
-			treeshake: { moduleSideEffects: false },
-			minify: true,
-			clean: false,
-			dts: false,
-			deps: { alwaysBundle: ['@neodrag/core'] },
-			logLevel: 'silent',
-		});
-
-		const outputPath = join(outDir, `${safeFilename}.js`);
-		const content = readFileSync(outputPath, 'utf-8');
-		const size = sync(content);
-
-		// Cleanup
-		rmSync(measureDir, { recursive: true, force: true });
-
-		return size;
-	} catch (error) {
-		console.warn(
-			// @ts-ignore
-			`    ❌ Build failed for [${keyPlugins.join(', ')}]: ${error.message.split('\n')[0]}`,
-		);
-		return baseSize; // Return base size if build fails
+		yield combo;
 	}
 }
 
 function copyRecursive(src: string, dest: string) {
-	const entries = readdirSync(src, { withFileTypes: true });
-	for (const entry of entries) {
+	for (const entry of readdirSync(src, { withFileTypes: true })) {
 		const srcPath = join(src, entry.name);
 		const destPath = join(dest, entry.name);
 		if (entry.isDirectory()) {
 			mkdirSync(destPath, { recursive: true });
 			copyRecursive(srcPath, destPath);
 		} else {
-			writeFileSync(destPath, readFileSync(srcPath, 'utf8'));
+			writeFileSync(destPath, readFileSync(srcPath));
 		}
 	}
 }
 
-function cleanup() {
-	try {
-		rmSync(resolve(__dirname, 'temp'), { recursive: true, force: true });
-	} catch {}
+async function setupCoreEnvironment(tempDir: string) {
+	const coreDist = resolve(__dirname, '../../packages/core/dist');
+	const target = join(tempDir, 'node_modules', '@neodrag', 'core');
+	mkdirSync(target, { recursive: true });
+
+	if (!existsSync(coreDist)) {
+		throw new Error('Run `pnpm compile` in packages/core before `pnpm sizes` in docs/scripts');
+	}
+
+	copyRecursive(coreDist, target);
+
+	writeFileSync(
+		join(target, 'package.json'),
+		JSON.stringify(
+			{
+				name: '@neodrag/core',
+				type: 'module',
+				sideEffects: false,
+				exports: {
+					'.': './index.js',
+					'./plugins': './plugins.js',
+					'./drop': './drop/index.js',
+					'./drop/plugins': './drop/plugins.js',
+				},
+			},
+			null,
+			2,
+		),
+	);
+}
+
+async function measureEntry(
+	tempDir: string,
+	filename: string,
+	content: string,
+): Promise<number> {
+	const measureDir = join(tempDir, 'measure');
+	const outDir = join(tempDir, 'out');
+	mkdirSync(measureDir, { recursive: true });
+	mkdirSync(outDir, { recursive: true });
+
+	copyRecursive(join(tempDir, 'node_modules'), join(measureDir, 'node_modules'));
+
+	const entryPath = join(measureDir, 'entry.js');
+	writeFileSync(entryPath, content);
+	writeFileSync(join(measureDir, 'package.json'), JSON.stringify({ type: 'module' }, null, 2));
+
+	await build({
+		entry: { [filename]: entryPath },
+		format: ['esm'],
+		outDir,
+		target: 'es2020',
+		platform: 'browser',
+		treeshake: { moduleSideEffects: false },
+		minify: true,
+		clean: true,
+		dts: false,
+		deps: { alwaysBundle: ['@neodrag/core'] },
+		logLevel: 'silent',
+	});
+
+	const bundle = readFileSync(join(outDir, `${filename}.js`), 'utf-8');
+	rmSync(measureDir, { recursive: true, force: true });
+	return sync(bundle);
+}
+
+async function measureDragCombo(tempDir: string, optional: readonly string[]): Promise<number> {
+	const imports = new Set<string>();
+	for (const name of optional) imports.add(name);
+
+	const importList = [...imports].sort().join(', ');
+	const pluginList = [...DRAG_DEFAULTS, ...optional.map((n) => PLUGIN_EXPR[n] ?? `${n}()`)];
+
+	const importBlock =
+		importList.length > 0
+			? `import { ${importList} } from '@neodrag/core/plugins';\n`
+			: '';
+
+	return measureEntry(
+		tempDir,
+		`drag-${optional.join('-') || 'defaults'}`,
+		`${importBlock}import { Neodrag } from '@neodrag/core';
+
+const engine = new Neodrag({ plugins: [${pluginList.join(', ')}] });
+export { engine };
+`,
+	);
+}
+
+async function measureDropCombo(tempDir: string, optional: readonly string[]): Promise<number> {
+	const importList = optional.length > 0 ? optional.join(', ') : '';
+	const pluginList =
+		optional.length > 0
+			? optional.map((n) => PLUGIN_EXPR[n] ?? `${n}()`).join(', ')
+			: '';
+
+	const importBlock =
+		optional.length > 0
+			? `import { ${importList} } from '@neodrag/core/drop';\n`
+			: `import '@neodrag/core/drop';\n`;
+
+	const dropLine =
+		optional.length > 0
+			? `engine.droppable(node, [${pluginList}]);`
+			: `engine.droppable(node, []);`;
+
+	return measureEntry(
+		tempDir,
+		`drop-${optional.join('-') || 'none'}`,
+		`${importBlock}import { Neodrag } from '@neodrag/core';
+
+const engine = new Neodrag();
+const node = typeof document !== 'undefined' ? document.createElement('div') : {};
+${dropLine}
+export { engine };
+`,
+	);
+}
+
+async function measureExtras(tempDir: string) {
+	const engineMinimal = await measureEntry(
+		tempDir,
+		'minimal',
+		`import { Neodrag } from '@neodrag/core';
+export const engine = new Neodrag({ plugins: [] });
+`,
+	);
+
+	const sortable = await measureEntry(
+		tempDir,
+		'sortable',
+		`import { Neodrag } from '@neodrag/core';
+import { sortable } from '@neodrag/core/drop';
+
+const engine = new Neodrag();
+const list = typeof document !== 'undefined' ? document.createElement('ul') : {};
+const plugins = sortable({ items: () => [], getKey: (i) => i.id });
+export { engine, plugins };
+`,
+	);
+
+	return { engineMinimal, sortable };
 }
 
 async function main() {
-	cleanup();
+	const tempDir = resolve(__dirname, 'temp');
+	rmSync(tempDir, { recursive: true, force: true });
+	mkdirSync(tempDir, { recursive: true });
 
-	console.log('🚀 Starting Core Plugin Bundle Analysis (All Combinations)...\n');
+	console.log('Setting up @neodrag/core dist…');
+	await setupCoreEnvironment(tempDir);
 
-	// Setup core environment
-	const tempDir = await setupCoreEnvironment();
-	console.log('✅ Core environment setup complete');
+	const dragMap = createKeyMap(DRAG_OPTIONAL);
+	const dropMap = createKeyMap(DROP_OPTIONAL);
+	const dragSizes: Record<string, number> = {};
+	const dropSizes: Record<string, number> = {};
 
-	// Get all available plugins and filter
-	const allRawPlugins = getCorePluginExports();
-	const excludedPlugins = [
-		'Compartment',
-		'defineDragPlugin',
-		'BoundsFrom',
-		'ControlFrom',
-		'resolve_plugins',
-	];
-	const allPlugins = allRawPlugins.filter((p) => !excludedPlugins.includes(p));
-
-	console.log(`📦 Found ${allPlugins.length} plugins (after filtering): ${allPlugins.join(', ')}`);
-	console.log(`🚫 Excluded: ${excludedPlugins.join(', ')}`);
-
-	// Create key mapping
-	createKeyMap(allPlugins);
-
-	// Use object with string keys for JSON compatibility
-	const sizes: Record<string, number> = {};
-
-	// Generate ALL combinations and measure them
-	console.log(`\n🧮 Generating combinations with bitmask keys...`);
-
-	let total = 0;
-	let built = 0;
-	let baseSize = 0; // We'll measure this as part of the loop
-
-	for (const combination of generateAllCombinations(allPlugins)) {
-		// Generate bitmask and use as string key
-		const bitmask = combinationToBitmask(combination);
-		const bitmaskKey = bitmask.toString();
-
-		total++;
-
-		if (total % 1000 === 0) {
-			console.log(
-				`  🔄 Progress: ${total}/${Math.pow(2, allPlugins.length)} combinations processed`,
-			);
-		}
-
-		// Measure ALL combinations, including empty
-		const size = await measureCombinationWithBuild(combination, tempDir, 0);
-		sizes[bitmaskKey] = size;
-
-		if (combination.length === 0) {
-			// This is the base case - capture it
-			baseSize = size;
-			sizes[''] = baseSize; // Store under empty key too
-			console.log(`📏 Base size measured: ${baseSize} bytes`);
-		} else {
-			built++;
-
-			// Add consistency check
-			if (size < baseSize && baseSize > 0) {
-				console.warn(
-					`⚠️  Suspicious: ${combination.length} plugins (${bitmaskKey}) = ${size}b < base ${baseSize}b`,
-				);
-				console.warn(`    Plugins: [${combination.join(', ')}]`);
-			}
-
-			if (built % 50 === 0) {
-				console.log(`    🔨 Built ${built} combinations so far...`);
-			}
-		}
+	console.log(`Measuring drag combinations (${1 << DRAG_OPTIONAL.length})…`);
+	let i = 0;
+	for (const combo of allCombinations(DRAG_OPTIONAL)) {
+		const mask = combinationToBitmask(combo, dragMap.keys);
+		dragSizes[String(mask)] = await measureDragCombo(tempDir, combo);
+		i++;
+		if (i % 64 === 0) console.log(`  drag ${i}/${1 << DRAG_OPTIONAL.length}`);
 	}
 
-	console.log(`\n✅ Processing complete:`);
-	console.log(`  📊 Total combinations: ${total}`);
-	console.log(`  🔨 Built with tsdown: ${built}`);
-	console.log(`  📊 Base size: ${baseSize} bytes`);
-
-	// Add validation check
-	const suspiciousEntries = Object.entries(sizes).filter(
-		([key, size]) => key !== '' && key !== '0' && size < baseSize,
-	);
-
-	if (suspiciousEntries.length > 0) {
-		console.log(`\n⚠️  Found ${suspiciousEntries.length} combinations smaller than base size:`);
-		suspiciousEntries.slice(0, 5).forEach(([bitmaskStr, size]) => {
-			const bitmask = parseInt(bitmaskStr);
-			const plugins = [];
-			for (let i = 0; i < 14; i++) {
-				if (bitmask & (1 << i)) {
-					plugins.push(reverseKeyMap[i]);
-				}
-			}
-			console.log(`    ${size}b (${size - baseSize}b): [${plugins.join(', ')}]`);
-		});
+	console.log(`Measuring drop combinations (${1 << DROP_OPTIONAL.length})…`);
+	i = 0;
+	for (const combo of allCombinations(DROP_OPTIONAL)) {
+		const mask = combinationToBitmask(combo, dropMap.keys);
+		dropSizes[String(mask)] = await measureDropCombo(tempDir, combo);
+		i++;
+		if (i % 4 === 0) console.log(`  drop ${i}/${1 << DROP_OPTIONAL.length}`);
 	}
 
-	// Prepare final output (same structure as before, but with bitmask keys)
-	const output = {
-		keys: reverseKeyMap,
-		sizes,
+	console.log('Measuring extras…');
+	const extras = await measureExtras(tempDir);
+
+	const presets: SizesOutput['presets'] = {
+		defaults: {
+			label: 'Default drag stack',
+			bytes: dragSizes['0'] ?? 0,
+			drag: [],
+			drop: [],
+		},
+		minimal: {
+			label: 'Engine only (plugins: [])',
+			bytes: extras.engineMinimal,
+			drag: [],
+			drop: [],
+		},
+		axisGrid: {
+			label: 'Defaults + axis + grid',
+			bytes: dragSizes[String(combinationToBitmask(['axis', 'grid'], dragMap.keys))] ?? 0,
+			drag: ['axis', 'grid'],
+			drop: [],
+		},
+		dropBasic: {
+			label: 'Defaults + accepts + onDrop',
+			bytes:
+				(dragSizes['0'] ?? 0) +
+				Math.max(
+					0,
+					(dropSizes[String(combinationToBitmask(['accepts', 'onDrop'], dropMap.keys))] ?? 0) -
+						(dropSizes['0'] ?? 0),
+				),
+			drag: [],
+			drop: ['accepts', 'onDrop'],
+		},
+		sortableList: {
+			label: 'Defaults + sortable list',
+			bytes:
+				(dragSizes['0'] ?? 0) +
+				Math.max(0, extras.sortable - extras.engineMinimal),
+			drag: [],
+			drop: [],
+		},
 	};
 
-	// Write results to same file as before
-	const sizesPath = new URL('../src/sizes.json', import.meta.url);
-	writeFileSync(sizesPath, JSON.stringify(output));
-	console.log(`\n✅ Wrote sizes.json with ${Object.keys(sizes).length} bitmask-based combinations`);
+	const output: SizesOutput = {
+		version: 2,
+		generatedAt: new Date().toISOString(),
+		drag: { keys: dragMap.keys, sizes: dragSizes },
+		drop: { keys: dropMap.keys, sizes: dropSizes },
+		extras,
+		presets,
+	};
 
-	// Summary
-	console.log('\n📈 CORE PLUGIN BUNDLE SIZE ANALYSIS:');
-	console.log(`  🎯 Base size: ${baseSize} bytes`);
+	const outPath = resolve(__dirname, '../src/sizes.json');
+	writeFileSync(outPath, JSON.stringify(output));
+	console.log(`Wrote ${outPath}`);
+	console.log(`  drag base (defaults only): ${dragSizes['0']} B brotli`);
+	console.log(`  engine minimal: ${extras.engineMinimal} B`);
+	console.log(`  sortable helper: ${extras.sortable} B`);
 
-	const sizeEntries = Object.entries(sizes).sort((a, b) => a[1] - b[1]);
-	if (sizeEntries.length > 0) {
-		const minSize = sizeEntries[0][1];
-		const maxSize = sizeEntries[sizeEntries.length - 1][1];
-		console.log(`  📏 Size range: ${minSize} - ${maxSize} bytes`);
-
-		// Show size distribution by plugin count
-		const byPluginCount = new Map<number, number[]>();
-		sizeEntries.forEach(([bitmaskStr, size]) => {
-			const bitmask = parseInt(bitmaskStr);
-			const pluginCount = bitmask === 0 ? 0 : bitmask.toString(2).split('1').length - 1;
-			if (!byPluginCount.has(pluginCount)) {
-				byPluginCount.set(pluginCount, []);
-			}
-			byPluginCount.get(pluginCount)!.push(size);
-		});
-
-		console.log(`  📈 Size by plugin count:`);
-		Array.from(byPluginCount.entries())
-			.sort((a, b) => a[0] - b[0])
-			.forEach(([count, sizesForCount]) => {
-				const avgSize = Math.round(sizesForCount.reduce((a, b) => a + b, 0) / sizesForCount.length);
-				const minSizeForCount = Math.min(...sizesForCount);
-				const maxSizeForCount = Math.max(...sizesForCount);
-				const avgOverhead = count === 0 ? 0 : avgSize - baseSize;
-
-				console.log(
-					`    ${count === 0 ? 'Base only' : count + ' plugins'}: ${sizesForCount.length} combos, avg ${avgSize}b (+${avgOverhead}b), range ${minSizeForCount}-${maxSizeForCount}b`,
-				);
-			});
-
-		// Show most efficient combinations
-		console.log(`\n🏆 Most efficient plugin combinations:`);
-		const pluginEntries = sizeEntries.filter(
-			([bitmaskStr]) => bitmaskStr !== '0' && bitmaskStr !== '',
-		);
-		pluginEntries.slice(0, 5).forEach(([bitmaskStr, size]) => {
-			const bitmask = parseInt(bitmaskStr);
-			const plugins = [];
-			for (let i = 0; i < 14; i++) {
-				if (bitmask & (1 << i)) {
-					plugins.push(reverseKeyMap[i]);
-				}
-			}
-			const overhead = size - baseSize;
-			const overheadPercent = Math.round((overhead / baseSize) * 100);
-			console.log(
-				`    +${overhead.toString().padStart(4)} bytes (+${overheadPercent.toString().padStart(2)}%): [${plugins.join(', ')}] (bitmask: ${bitmask})`,
-			);
-		});
-	}
-
-	cleanup();
-	console.log('\n🎉 Core analysis complete!');
+	rmSync(tempDir, { recursive: true, force: true });
 }
 
-await main().catch(console.error);
+await main().catch((err) => {
+	console.error(err);
+	process.exit(1);
+});
