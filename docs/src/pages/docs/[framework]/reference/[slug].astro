@@ -15,7 +15,7 @@ if (!reference_entry) {
 	return;
 }
 
-const { Content, headings } = await render(reference_entry);
+const { Content } = await render(reference_entry);
 
 export const getStaticPaths = (async () => {
 	const reference_collection = await getCollection('reference');
@@ -30,6 +30,6 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 ---
 
-<MainDocsLayout {...reference_entry.data} headings={headings} framework={framework}>
+<MainDocsLayout {...reference_entry.data} framework={framework}>
 	<Content />
 </MainDocsLayout>

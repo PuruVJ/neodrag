@@ -507,7 +507,7 @@
 	}
 
 	.docs-article-panel {
-		@apply max-w-[min(68ch,100%)] px-0 py-[clamp(0.5rem,2vw,1rem)];
+		@apply w-full max-w-none px-0 py-[clamp(0.5rem,2vw,1rem)];
 	}
 
 	.docs-sidebar-panel {

@@ -2,18 +2,15 @@
 import { get_nav_list } from '$/nav';
 import Nav from '$components/docs/Nav.svelte';
 import MetaThemeColor from '$components/MetaThemeColor.svelte';
-import ToC from '$components/ToC.astro';
 import type { Framework } from '$helpers/constants';
-import type { MarkdownHeading } from 'astro';
 import Layout from './Layout.astro';
 
 type Props = {
 	title: string;
-	headings: MarkdownHeading[];
 	framework: Framework;
 };
 
-const { title, headings, framework } = Astro.props;
+const { title, framework } = Astro.props;
 const nav_list = get_nav_list(framework);
 ---
 
@@ -56,11 +53,5 @@ const nav_list = get_nav_list(framework);
 				</footer>
 			</article>
 		</main>
-
-		<aside
-			class="toc fixed top-0 right-5 z-10 hidden h-full w-[280px] min-[1200px]:block"
-		>
-			<ToC headings={headings} />
-		</aside>
 	</section>
 </Layout>

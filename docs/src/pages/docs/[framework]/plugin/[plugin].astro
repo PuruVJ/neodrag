@@ -13,7 +13,7 @@ if (!plugin_entry) {
 	return;
 }
 
-const { Content, headings } = await render(plugin_entry);
+const { Content } = await render(plugin_entry);
 
 export const getStaticPaths = (async () => {
 	const plugin_collection = await getCollection('plugin');
@@ -28,6 +28,6 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 ---
 
-<MainDocsLayout {...plugin_entry.data} headings={headings} framework={framework}>
+<MainDocsLayout {...plugin_entry.data} framework={framework}>
 	<Content />
 </MainDocsLayout>

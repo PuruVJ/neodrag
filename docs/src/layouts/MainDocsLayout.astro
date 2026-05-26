@@ -1,6 +1,5 @@
 ---
 import { type Framework } from '$helpers/constants';
-import type { MarkdownHeading } from 'astro';
 import DocsLayout from './DocsLayout.astro';
 import core_package_json from '../../../packages/core/package.json';
 import react_package_json from '../../../packages/react/package.json';
@@ -13,14 +12,13 @@ type Props = {
 	title: string;
 	tagline: string;
 	framework: Framework;
-	headings: MarkdownHeading[];
 };
 
 const is_framework_only_page = /\/docs\/(svelte|react|solid|vanilla|vue|core)$/gi.test(
 	Astro.url.pathname,
 );
 
-const { tagline, title, framework, headings } = Astro.props;
+const { tagline, title, framework } = Astro.props;
 
 const version = {
 	core: core_package_json.version,
@@ -32,7 +30,7 @@ const version = {
 }[framework];
 ---
 
-<DocsLayout title={title} headings={headings} framework={framework}>
+<DocsLayout title={title} framework={framework}>
 	<p class="site-kicker mb-3">
 		@neodrag / {framework} · docs desk
 	</p>
