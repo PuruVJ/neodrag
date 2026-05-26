@@ -11,9 +11,7 @@ export function is_docs_path(path: string) {
 	return path.startsWith('/docs');
 }
 
-export function apply_docs_route_context(path = location.pathname) {
-	const framework = framework_from_path(path);
-	const is_docs = is_docs_path(path);
+export function apply_docs_framework(framework: string | undefined) {
 	const root = document.documentElement;
 
 	if (framework) {
@@ -22,7 +20,12 @@ export function apply_docs_route_context(path = location.pathname) {
 		delete root.dataset.framework;
 	}
 
-	delete document.body.dataset.framework;
+	if (document.body) {
+		delete document.body.dataset.framework;
+	}
+}
 
-	document.body.classList.toggle('docs-route', is_docs);
+export function apply_docs_route_context(path = location.pathname) {
+	apply_docs_framework(framework_from_path(path));
+	document.body?.classList.toggle('docs-route', is_docs_path(path));
 }

@@ -33,31 +33,31 @@ html[data-theme='dark'] .docs-page-grid::before {
 	mask-image: radial-gradient(ellipse 100% 85% at 50% 42%, black 14%, transparent 70%);
 }
 
-body.docs-route {
+.docs-page-grid {
 	--grid-accent: var(--app-color-primary);
 }
 
-html[data-framework='svelte'] {
+html[data-framework='svelte'] .docs-page-grid {
 	--grid-accent: var(--app-color-brand-svelte);
 }
 
-html[data-framework='react'] {
+html[data-framework='react'] .docs-page-grid {
 	--grid-accent: var(--app-color-brand-react);
 }
 
-html[data-framework='vue'] {
+html[data-framework='vue'] .docs-page-grid {
 	--grid-accent: var(--app-color-brand-vue);
 }
 
-html[data-framework='solid'] {
+html[data-framework='solid'] .docs-page-grid {
 	--grid-accent: var(--app-color-brand-solid);
 }
 
-html[data-framework='vanilla'] {
+html[data-framework='vanilla'] .docs-page-grid {
 	--grid-accent: var(--app-color-brand-vanilla);
 }
 
-html[data-framework='core'] {
+html[data-framework='core'] .docs-page-grid {
 	--grid-accent: var(--app-color-primary);
 }
 

@@ -384,6 +384,42 @@
 		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--color-brand) 8%);
 	}
 
+	html[data-framework='svelte'] .dock-host,
+	html[data-framework='svelte'] .dock-surface {
+		--color-brand: var(--app-color-brand-svelte);
+		--secondary-color: var(--app-color-brand-svelte);
+	}
+
+	html[data-framework='react'] .dock-host,
+	html[data-framework='react'] .dock-surface {
+		--color-brand: var(--app-color-brand-react);
+		--secondary-color: var(--app-color-brand-react);
+	}
+
+	html[data-framework='vue'] .dock-host,
+	html[data-framework='vue'] .dock-surface {
+		--color-brand: var(--app-color-brand-vue);
+		--secondary-color: var(--app-color-brand-vue);
+	}
+
+	html[data-framework='solid'] .dock-host,
+	html[data-framework='solid'] .dock-surface {
+		--color-brand: var(--app-color-brand-solid);
+		--secondary-color: var(--app-color-brand-solid);
+	}
+
+	html[data-framework='vanilla'] .dock-host,
+	html[data-framework='vanilla'] .dock-surface {
+		--color-brand: var(--app-color-brand-vanilla);
+		--secondary-color: var(--app-color-brand-vanilla);
+	}
+
+	html[data-framework='core'] .dock-host,
+	html[data-framework='core'] .dock-surface {
+		--color-brand: var(--app-color-primary);
+		--secondary-color: var(--app-color-primary);
+	}
+
 	.dock-zoom :global(svg) {
 		max-width: none !important;
 		width: auto !important;

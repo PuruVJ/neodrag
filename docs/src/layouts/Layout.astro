@@ -131,6 +131,16 @@ const nav_by_framework = Object.fromEntries(
 			apply_docs_route_context();
 
 			document.addEventListener('astro:page-load', apply_docs_route_context);
+			document.addEventListener('astro:before-swap', (event) => {
+				const next = event.newDocument?.documentElement?.dataset?.framework;
+				if (next) {
+					document.documentElement.dataset.framework = next;
+				} else {
+					delete document.documentElement.dataset.framework;
+				}
+				delete document.body.dataset.framework;
+			});
+			document.addEventListener('astro:after-swap', apply_docs_route_context);
 			matchMedia('(prefers-color-scheme: dark)').addEventListener(
 				'change',
 				window.__neodrag_apply_theme,
@@ -144,8 +154,7 @@ const nav_by_framework = Object.fromEntries(
 			<Dock
 				pathname={Astro.url.pathname}
 				nav_by_framework={nav_by_framework}
-				client:only="svelte"
-				transition:persist="dock"
+				client:load
 			/>
 			<slot />
 		</div>
