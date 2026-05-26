@@ -118,6 +118,7 @@
 		"test:bench:guard": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/",
 		"test:human": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/human-expectations.suite.test.ts && vitest run --config vitest.interactions.config.ts tests/interactions/human-expectations.test.svelte.ts",
 		"bench": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/perf.suite.test.ts",
+		"bench:profile": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/human-profile.suite.test.ts",
 		"bench:browser": "vitest run --config vitest.bench.browser.config.ts",
 		"bench:all": "pnpm test:bench:guard",
 		"bench:run": "pnpm test:bench:guard",

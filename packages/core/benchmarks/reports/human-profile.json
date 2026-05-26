@@ -1,0 +1,4886 @@
+{
+  "recordedAt": "2026-05-26T10:16:34.978Z",
+  "note": "CDP Profiler sampling. \"full\" = whole scenario × iterations. \"hot\" = gesture loop only inside one profile window.",
+  "reports": [
+    {
+      "name": "full · drag · drag-move-by-delta",
+      "sampleCount": 603,
+      "durationMs": 679.094,
+      "byCategory": {
+        "neodrag": 5.164,
+        "browser": 1.884,
+        "test": 3.967,
+        "other": 668.079
+      },
+      "topSelf": [
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 628.031,
+          "totalMs": 628.031,
+          "selfPct": 92.48071695523741,
+          "totalPct": 92.48071695523741
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 36.802,
+          "totalMs": 36.802,
+          "selfPct": 5.4192792161320815,
+          "totalPct": 5.4192792161320815
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 1.962,
+          "totalMs": 5.973,
+          "selfPct": 0.28891434764553947,
+          "totalPct": 0.879554229605916
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.201,
+          "totalMs": 1.201,
+          "selfPct": 0.17685327804398213,
+          "totalPct": 0.17685327804398213
+        },
+        {
+          "label": "(garbage collector)",
+          "functionName": "(garbage collector)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.091,
+          "totalMs": 1.091,
+          "selfPct": 0.16065522593337592,
+          "totalPct": 0.16065522593337592
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 1.062,
+          "totalMs": 12.227,
+          "selfPct": 0.1563848303769434,
+          "totalPct": 1.8004871196034715
+        },
+        {
+          "label": "Neodrag (src/engine.ts:57)",
+          "functionName": "Neodrag",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.058,
+          "totalMs": 1.058,
+          "selfPct": 0.1557958103001941,
+          "totalPct": 0.1557958103001941
+        },
+        {
+          "label": "#onInteractionMove (src/engine.ts:434)",
+          "functionName": "#onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.056,
+          "totalMs": 1.056,
+          "selfPct": 0.1555013002618194,
+          "totalPct": 0.1555013002618194
+        },
+        {
+          "label": "draggable (src/engine.ts:165)",
+          "functionName": "draggable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.055,
+          "totalMs": 4.134,
+          "selfPct": 0.15535404524263208,
+          "totalPct": 0.6087522493204182
+        },
+        {
+          "label": "onInteractionStart (src/engine.ts:123)",
+          "functionName": "onInteractionStart",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.055,
+          "totalMs": 2.009,
+          "selfPct": 0.15535404524263208,
+          "totalPct": 0.2958353335473439
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.954,
+          "totalMs": 0.954,
+          "selfPct": 0.14048128830471185,
+          "totalPct": 0.14048128830471185
+        },
+        {
+          "label": "pointerToInput (src/interaction-input.ts:11)",
+          "functionName": "pointerToInput",
+          "url": "http://localhost:63316/src/interaction-input.ts",
+          "category": "browser",
+          "selfMs": 0.946,
+          "totalMs": 0.946,
+          "selfPct": 0.13930324815121323,
+          "totalPct": 0.13930324815121323
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:26)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0.943,
+          "totalMs": 0.943,
+          "selfPct": 0.13886148309365123,
+          "totalPct": 0.13886148309365123
+        },
+        {
+          "label": "(anonymous) (src/plugins.ts:88)",
+          "functionName": "(anonymous)",
+          "url": "http://localhost:63316/src/plugins.ts",
+          "category": "neodrag",
+          "selfMs": 0.94,
+          "totalMs": 0.94,
+          "selfPct": 0.13841971803608924,
+          "totalPct": 0.13841971803608924
+        },
+        {
+          "label": "is_svg_svg_element (src/utils.ts:16)",
+          "functionName": "is_svg_svg_element",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0.938,
+          "totalMs": 0.938,
+          "selfPct": 0.1381252079977146,
+          "totalPct": 0.1381252079977146
+        },
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 679.094,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:26)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 11.165,
+          "selfPct": 0,
+          "totalPct": 1.6441022892265282
+        },
+        {
+          "label": "#installDragPlugins (src/engine.ts:739)",
+          "functionName": "#installDragPlugins",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 0.94,
+          "selfPct": 0,
+          "totalPct": 0.13841971803608924
+        },
+        {
+          "label": "#initDragPlugins (src/engine.ts:770)",
+          "functionName": "#initDragPlugins",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 0.94,
+          "selfPct": 0,
+          "totalPct": 0.13841971803608924
+        },
+        {
+          "label": "flush (src/effects.ts:11)",
+          "functionName": "flush",
+          "url": "http://localhost:63316/src/effects.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 0.94,
+          "selfPct": 0,
+          "totalPct": 0.13841971803608924
+        }
+      ],
+      "topTotal": [
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 679.094,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 628.031,
+          "totalMs": 628.031,
+          "selfPct": 92.48071695523741,
+          "totalPct": 92.48071695523741
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 36.802,
+          "totalMs": 36.802,
+          "selfPct": 5.4192792161320815,
+          "totalPct": 5.4192792161320815
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 1.062,
+          "totalMs": 12.227,
+          "selfPct": 0.1563848303769434,
+          "totalPct": 1.8004871196034715
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:26)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 11.165,
+          "selfPct": 0,
+          "totalPct": 1.6441022892265282
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 5.973,
+          "selfPct": 0,
+          "totalPct": 0.879554229605916
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 1.962,
+          "totalMs": 5.973,
+          "selfPct": 0.28891434764553947,
+          "totalPct": 0.879554229605916
+        },
+        {
+          "label": "draggable (src/engine.ts:165)",
+          "functionName": "draggable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.055,
+          "totalMs": 4.134,
+          "selfPct": 0.15535404524263208,
+          "totalPct": 0.6087522493204182
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 4.011,
+          "selfPct": 0,
+          "totalPct": 0.5906398819603766
+        },
+        {
+          "label": "onPointerDown (sensors/pointer-sensor.ts:39)",
+          "functionName": "onPointerDown",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.009,
+          "selfPct": 0,
+          "totalPct": 0.2958353335473439
+        },
+        {
+          "label": "onInteractionStart (src/engine.ts:123)",
+          "functionName": "onInteractionStart",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.055,
+          "totalMs": 2.009,
+          "selfPct": 0.15535404524263208,
+          "totalPct": 0.2958353335473439
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.002,
+          "selfPct": 0,
+          "totalPct": 0.2948045484130326
+        },
+        {
+          "label": "DragInstance (src/instance.ts:90)",
+          "functionName": "DragInstance",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.201,
+          "selfPct": 0,
+          "totalPct": 0.17685327804398213
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.201,
+          "totalMs": 1.201,
+          "selfPct": 0.17685327804398213,
+          "totalPct": 0.17685327804398213
+        },
+        {
+          "label": "(garbage collector)",
+          "functionName": "(garbage collector)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.091,
+          "totalMs": 1.091,
+          "selfPct": 0.16065522593337592,
+          "totalPct": 0.16065522593337592
+        },
+        {
+          "label": "Neodrag (src/engine.ts:94)",
+          "functionName": "Neodrag",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 0.1557958103001941
+        },
+        {
+          "label": "Neodrag (src/engine.ts:57)",
+          "functionName": "Neodrag",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.058,
+          "totalMs": 1.058,
+          "selfPct": 0.1557958103001941,
+          "totalPct": 0.1557958103001941
+        },
+        {
+          "label": "onInteractionMove (src/engine.ts:124)",
+          "functionName": "onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.056,
+          "selfPct": 0,
+          "totalPct": 0.1555013002618194
+        },
+        {
+          "label": "#onInteractionMove (src/engine.ts:434)",
+          "functionName": "#onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.056,
+          "totalMs": 1.056,
+          "selfPct": 0.1555013002618194,
+          "totalPct": 0.1555013002618194
+        },
+        {
+          "label": "#onInteractionStart (src/engine.ts:393)",
+          "functionName": "#onInteractionStart",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 0.954,
+          "selfPct": 0,
+          "totalPct": 0.14048128830471185
+        }
+      ]
+    },
+    {
+      "name": "full · drag · drag-disabled",
+      "sampleCount": 607,
+      "durationMs": 657.763,
+      "byCategory": {
+        "neodrag": 0,
+        "browser": 0,
+        "test": 1.235,
+        "other": 656.528
+      },
+      "topSelf": [
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 637.906,
+          "totalMs": 637.906,
+          "selfPct": 96.9811315017719,
+          "totalPct": 96.9811315017719
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 13.675,
+          "totalMs": 13.675,
+          "selfPct": 2.0790163022243577,
+          "totalPct": 2.0790163022243577
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 3.065,
+          "totalMs": 3.065,
+          "selfPct": 0.4659733064948925,
+          "totalPct": 0.4659733064948925
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:40)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 1.235,
+          "totalMs": 4.3,
+          "selfPct": 0.1877575965811394,
+          "totalPct": 0.6537309030760319
+        },
+        {
+          "label": "requestAnimationFrame",
+          "functionName": "requestAnimationFrame",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.945,
+          "totalMs": 0.945,
+          "selfPct": 0.1436687682341512,
+          "totalPct": 0.1436687682341512
+        },
+        {
+          "label": "removeEventListener",
+          "functionName": "removeEventListener",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.937,
+          "totalMs": 0.937,
+          "selfPct": 0.14245252469354464,
+          "totalPct": 0.14245252469354464
+        },
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 657.763,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 4.3,
+          "selfPct": 0,
+          "totalPct": 0.6537309030760319
+        },
+        {
+          "label": "draggable (src/engine.ts:165)",
+          "functionName": "draggable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 3.065,
+          "selfPct": 0,
+          "totalPct": 0.4659733064948925
+        },
+        {
+          "label": "DragInstance (src/instance.ts:90)",
+          "functionName": "DragInstance",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 3.065,
+          "selfPct": 0,
+          "totalPct": 0.4659733064948925
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:40)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 0.937,
+          "selfPct": 0,
+          "totalPct": 0.14245252469354464
+        },
+        {
+          "label": "dispose (src/engine.ts:298)",
+          "functionName": "dispose",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 0.937,
+          "selfPct": 0,
+          "totalPct": 0.14245252469354464
+        },
+        {
+          "label": "#teardownSensors (src/engine.ts:387)",
+          "functionName": "#teardownSensors",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 0.937,
+          "selfPct": 0,
+          "totalPct": 0.14245252469354464
+        },
+        {
+          "label": "(anonymous) (sensors/keyboard-move-sensor.ts:142)",
+          "functionName": "(anonymous)",
+          "url": "http://localhost:63316/src/sensors/keyboard-move-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 0.937,
+          "selfPct": 0,
+          "totalPct": 0.14245252469354464
+        },
+        {
+          "label": "(anonymous) (browser/helpers.ts:79)",
+          "functionName": "(anonymous)",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 0.945,
+          "selfPct": 0,
+          "totalPct": 0.1436687682341512
+        }
+      ],
+      "topTotal": [
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 657.763,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 637.906,
+          "totalMs": 637.906,
+          "selfPct": 96.9811315017719,
+          "totalPct": 96.9811315017719
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 13.675,
+          "totalMs": 13.675,
+          "selfPct": 2.0790163022243577,
+          "totalPct": 2.0790163022243577
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 4.3,
+          "selfPct": 0,
+          "totalPct": 0.6537309030760319
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:40)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 1.235,
+          "totalMs": 4.3,
+          "selfPct": 0.1877575965811394,
+          "totalPct": 0.6537309030760319
+        },
+        {
+          "label": "draggable (src/engine.ts:165)",
+          "functionName": "draggable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 3.065,
+          "selfPct": 0,
+          "totalPct": 0.4659733064948925
+        },
+        {
+          "label": "DragInstance (src/instance.ts:90)",
+          "functionName": "DragInstance",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 3.065,
+          "selfPct": 0,
+          "totalPct": 0.4659733064948925
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 3.065,
+          "totalMs": 3.065,
+          "selfPct": 0.4659733064948925,
+          "totalPct": 0.4659733064948925
+        },
+        {
+          "label": "(anonymous) (browser/helpers.ts:79)",
+          "functionName": "(anonymous)",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 0.945,
+          "selfPct": 0,
+          "totalPct": 0.1436687682341512
+        },
+        {
+          "label": "requestAnimationFrame",
+          "functionName": "requestAnimationFrame",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.945,
+          "totalMs": 0.945,
+          "selfPct": 0.1436687682341512,
+          "totalPct": 0.1436687682341512
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:40)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 0.937,
+          "selfPct": 0,
+          "totalPct": 0.14245252469354464
+        },
+        {
+          "label": "dispose (src/engine.ts:298)",
+          "functionName": "dispose",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 0.937,
+          "selfPct": 0,
+          "totalPct": 0.14245252469354464
+        },
+        {
+          "label": "#teardownSensors (src/engine.ts:387)",
+          "functionName": "#teardownSensors",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 0.937,
+          "selfPct": 0,
+          "totalPct": 0.14245252469354464
+        },
+        {
+          "label": "(anonymous) (sensors/keyboard-move-sensor.ts:142)",
+          "functionName": "(anonymous)",
+          "url": "http://localhost:63316/src/sensors/keyboard-move-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 0.937,
+          "selfPct": 0,
+          "totalPct": 0.14245252469354464
+        },
+        {
+          "label": "removeEventListener",
+          "functionName": "removeEventListener",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.937,
+          "totalMs": 0.937,
+          "selfPct": 0.14245252469354464,
+          "totalPct": 0.14245252469354464
+        }
+      ]
+    },
+    {
+      "name": "full · drag · drag-axis-x",
+      "sampleCount": 611,
+      "durationMs": 660.278,
+      "byCategory": {
+        "neodrag": 2.754,
+        "browser": 1.11,
+        "test": 0,
+        "other": 656.414
+      },
+      "topSelf": [
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 636.727,
+          "totalMs": 636.727,
+          "selfPct": 96.43316905909329,
+          "totalPct": 96.43316905909329
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 14.031,
+          "totalMs": 14.031,
+          "selfPct": 2.125014009250649,
+          "totalPct": 2.125014009250649
+        },
+        {
+          "label": "set_node_key_style (src/utils.ts:4)",
+          "functionName": "set_node_key_style",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 1.11,
+          "totalMs": 1.11,
+          "selfPct": 0.16811100778762886,
+          "totalPct": 0.16811100778762886
+        },
+        {
+          "label": "send",
+          "functionName": "send",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.058,
+          "totalMs": 1.058,
+          "selfPct": 0.16023553715253272,
+          "totalPct": 0.16023553715253272
+        },
+        {
+          "label": "Neodrag (src/engine.ts:94)",
+          "functionName": "Neodrag",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.952,
+          "totalMs": 0.952,
+          "selfPct": 0.14418169316560597,
+          "totalPct": 0.14418169316560597
+        },
+        {
+          "label": "abort",
+          "functionName": "abort",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.944,
+          "totalMs": 0.944,
+          "selfPct": 0.14297008229866814,
+          "totalPct": 0.14297008229866814
+        },
+        {
+          "label": "#destroyDrag (src/engine.ts:853)",
+          "functionName": "#destroyDrag",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.941,
+          "totalMs": 0.941,
+          "selfPct": 0.14251572822356642,
+          "totalPct": 0.14251572822356642
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.94,
+          "totalMs": 0.94,
+          "selfPct": 0.1423642768651992,
+          "totalPct": 0.1423642768651992
+        },
+        {
+          "label": "requestAnimationFrame",
+          "functionName": "requestAnimationFrame",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.929,
+          "totalMs": 0.929,
+          "selfPct": 0.14069831192315965,
+          "totalPct": 0.14069831192315965
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.902,
+          "totalMs": 0.902,
+          "selfPct": 0.13660912524724433,
+          "totalPct": 0.13660912524724433
+        },
+        {
+          "label": "(garbage collector)",
+          "functionName": "(garbage collector)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.883,
+          "totalMs": 0.883,
+          "selfPct": 0.1337315494382669,
+          "totalPct": 0.1337315494382669
+        },
+        {
+          "label": "#runDrag (src/engine.ts:638)",
+          "functionName": "#runDrag",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.861,
+          "totalMs": 0.861,
+          "selfPct": 0.13039961955418777,
+          "totalPct": 0.13039961955418777
+        },
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 660.278,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 7.696,
+          "selfPct": 0,
+          "totalPct": 1.1655696539942266
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:53)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 6.638,
+          "selfPct": 0,
+          "totalPct": 1.0053341168416938
+        },
+        {
+          "label": "dragElementByDelta (browser/helpers.ts:52)",
+          "functionName": "dragElementByDelta",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 3.855,
+          "selfPct": 0,
+          "totalPct": 0.583844986505684
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 3.855,
+          "selfPct": 0,
+          "totalPct": 0.583844986505684
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 3.855,
+          "selfPct": 0,
+          "totalPct": 0.583844986505684
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 3.855,
+          "selfPct": 0,
+          "totalPct": 0.583844986505684
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.971,
+          "selfPct": 0,
+          "totalPct": 0.29851062734181666
+        }
+      ],
+      "topTotal": [
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 660.278,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 636.727,
+          "totalMs": 636.727,
+          "selfPct": 96.43316905909329,
+          "totalPct": 96.43316905909329
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 14.031,
+          "totalMs": 14.031,
+          "selfPct": 2.125014009250649,
+          "totalPct": 2.125014009250649
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 7.696,
+          "selfPct": 0,
+          "totalPct": 1.1655696539942266
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:53)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 6.638,
+          "selfPct": 0,
+          "totalPct": 1.0053341168416938
+        },
+        {
+          "label": "dragElementByDelta (browser/helpers.ts:52)",
+          "functionName": "dragElementByDelta",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 3.855,
+          "selfPct": 0,
+          "totalPct": 0.583844986505684
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 3.855,
+          "selfPct": 0,
+          "totalPct": 0.583844986505684
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 3.855,
+          "selfPct": 0,
+          "totalPct": 0.583844986505684
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 3.855,
+          "selfPct": 0,
+          "totalPct": 0.583844986505684
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.971,
+          "selfPct": 0,
+          "totalPct": 0.29851062734181666
+        },
+        {
+          "label": "onInteractionMove (src/engine.ts:124)",
+          "functionName": "onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.971,
+          "selfPct": 0,
+          "totalPct": 0.29851062734181666
+        },
+        {
+          "label": "#onInteractionMove (src/engine.ts:434)",
+          "functionName": "#onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.971,
+          "selfPct": 0,
+          "totalPct": 0.29851062734181666
+        },
+        {
+          "label": "#syncDragTransform (src/engine.ts:767)",
+          "functionName": "#syncDragTransform",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.11,
+          "selfPct": 0,
+          "totalPct": 0.16811100778762886
+        },
+        {
+          "label": "applyDragTransform (src/apply-transform.ts:8)",
+          "functionName": "applyDragTransform",
+          "url": "http://localhost:63316/src/apply-transform.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.11,
+          "selfPct": 0,
+          "totalPct": 0.16811100778762886
+        },
+        {
+          "label": "set_node_key_style (src/utils.ts:4)",
+          "functionName": "set_node_key_style",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 1.11,
+          "totalMs": 1.11,
+          "selfPct": 0.16811100778762886,
+          "totalPct": 0.16811100778762886
+        },
+        {
+          "label": "send (/:120)",
+          "functionName": "send",
+          "url": "http://localhost:63316/?sessionId=4b97c828-79a8-4423-9df6-2cf734ebe815&iframeId=/workspace/packages/core/benchmarks/browser/human-profile.suite.test.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 0.16023553715253272
+        },
+        {
+          "label": "safeSendCall (__vitest_browser__/tester-BYDMHqQ9.js:171)",
+          "functionName": "safeSendCall",
+          "url": "http://localhost:63316/__vitest_browser__/tester-BYDMHqQ9.js",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 0.16023553715253272
+        },
+        {
+          "label": "withSafeTimers (__vitest_browser__/tester-BYDMHqQ9.js:143)",
+          "functionName": "withSafeTimers",
+          "url": "http://localhost:63316/__vitest_browser__/tester-BYDMHqQ9.js",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 0.16023553715253272
+        },
+        {
+          "label": "(anonymous) (__vitest_browser__/tester-BYDMHqQ9.js:171)",
+          "functionName": "(anonymous)",
+          "url": "http://localhost:63316/__vitest_browser__/tester-BYDMHqQ9.js",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 0.16023553715253272
+        },
+        {
+          "label": "sendCall (/.pnpm/@vitest+browser@3.2.4_playwright@1.53.1_vite@6.3.5_@types+node@24.0.3_lightningcss@1.30_34e86efe4cafd30d9282a379fba2b8b9/node_modules/@vitest/browser/dist/client.js:43)",
+          "functionName": "sendCall",
+          "url": "http://localhost:63316/@fs/workspace/node_modules/.pnpm/@vitest+browser@3.2.4_playwright@1.53.1_vite@6.3.5_@types+node@24.0.3_lightningcss@1.30_34e86efe4cafd30d9282a379fba2b8b9/node_modules/@vitest/browser/dist/client.js?v=e9fc4a01",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 0.16023553715253272
+        }
+      ]
+    },
+    {
+      "name": "full · drag · drag-bounds-parent",
+      "sampleCount": 606,
+      "durationMs": 657.464,
+      "byCategory": {
+        "neodrag": 3.9319999999999995,
+        "browser": 2.7569999999999997,
+        "test": 0.887,
+        "other": 649.888
+      },
+      "topSelf": [
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 635.167,
+          "totalMs": 635.167,
+          "selfPct": 96.60863560590388,
+          "totalPct": 96.60863560590388
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 10.683,
+          "totalMs": 10.683,
+          "selfPct": 1.6248798413297152,
+          "totalPct": 1.6248798413297152
+        },
+        {
+          "label": "disarm (sensors/pointer-sensor.ts:17)",
+          "functionName": "disarm",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 2.046,
+          "totalMs": 2.046,
+          "selfPct": 0.3111957460788727,
+          "totalPct": 0.3111957460788727
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 2.032,
+          "totalMs": 2.032,
+          "selfPct": 0.30906635192193027,
+          "totalPct": 0.30906635192193027
+        },
+        {
+          "label": "setProperty",
+          "functionName": "setProperty",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.067,
+          "totalMs": 1.067,
+          "selfPct": 0.16229025467554115,
+          "totalPct": 0.16229025467554115
+        },
+        {
+          "label": "set_node_key_style (src/utils.ts:4)",
+          "functionName": "set_node_key_style",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0.984,
+          "totalMs": 0.984,
+          "selfPct": 0.1496659893165253,
+          "totalPct": 0.1496659893165253
+        },
+        {
+          "label": "(anonymous) (src/effects.ts:8)",
+          "functionName": "(anonymous)",
+          "url": "http://localhost:63316/src/effects.ts",
+          "category": "browser",
+          "selfMs": 0.956,
+          "totalMs": 0.956,
+          "selfPct": 0.14540720100264043,
+          "totalPct": 0.14540720100264043
+        },
+        {
+          "label": "#teardownSensors (src/engine.ts:387)",
+          "functionName": "#teardownSensors",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.944,
+          "totalMs": 0.944,
+          "selfPct": 0.14358200601097548,
+          "totalPct": 0.14358200601097548
+        },
+        {
+          "label": "DragInstance (src/instance.ts:90)",
+          "functionName": "DragInstance",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 0.942,
+          "totalMs": 2.974,
+          "selfPct": 0.143277806845698,
+          "totalPct": 0.4523441587676283
+        },
+        {
+          "label": "setAttribute",
+          "functionName": "setAttribute",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.939,
+          "totalMs": 0.939,
+          "selfPct": 0.14282150809778177,
+          "totalPct": 0.14282150809778177
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:66)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0.887,
+          "totalMs": 9.714,
+          "selfPct": 0.134912329800567,
+          "totalPct": 1.4774953457527713
+        },
+        {
+          "label": "applyDragTransform (src/apply-transform.ts:8)",
+          "functionName": "applyDragTransform",
+          "url": "http://localhost:63316/src/apply-transform.ts",
+          "category": "browser",
+          "selfMs": 0.817,
+          "totalMs": 0.817,
+          "selfPct": 0.12426535901585484,
+          "totalPct": 0.12426535901585484
+        },
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 657.464,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 9.714,
+          "selfPct": 0,
+          "totalPct": 1.4774953457527713
+        },
+        {
+          "label": "dragElementByDelta (browser/helpers.ts:52)",
+          "functionName": "dragElementByDelta",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 4.786,
+          "selfPct": 0,
+          "totalPct": 0.7279486025090346
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 4.786,
+          "selfPct": 0,
+          "totalPct": 0.7279486025090346
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 4.786,
+          "selfPct": 0,
+          "totalPct": 0.7279486025090346
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 4.786,
+          "selfPct": 0,
+          "totalPct": 0.7279486025090346
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.74,
+          "selfPct": 0,
+          "totalPct": 0.41675285643016197
+        },
+        {
+          "label": "onInteractionMove (src/engine.ts:124)",
+          "functionName": "onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.74,
+          "selfPct": 0,
+          "totalPct": 0.41675285643016197
+        }
+      ],
+      "topTotal": [
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 657.464,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 635.167,
+          "totalMs": 635.167,
+          "selfPct": 96.60863560590388,
+          "totalPct": 96.60863560590388
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 10.683,
+          "totalMs": 10.683,
+          "selfPct": 1.6248798413297152,
+          "totalPct": 1.6248798413297152
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 9.714,
+          "selfPct": 0,
+          "totalPct": 1.4774953457527713
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:66)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0.887,
+          "totalMs": 9.714,
+          "selfPct": 0.134912329800567,
+          "totalPct": 1.4774953457527713
+        },
+        {
+          "label": "dragElementByDelta (browser/helpers.ts:52)",
+          "functionName": "dragElementByDelta",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 4.786,
+          "selfPct": 0,
+          "totalPct": 0.7279486025090346
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 4.786,
+          "selfPct": 0,
+          "totalPct": 0.7279486025090346
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 4.786,
+          "selfPct": 0,
+          "totalPct": 0.7279486025090346
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 4.786,
+          "selfPct": 0,
+          "totalPct": 0.7279486025090346
+        },
+        {
+          "label": "draggable (src/engine.ts:165)",
+          "functionName": "draggable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 4.041,
+          "selfPct": 0,
+          "totalPct": 0.6146344134431696
+        },
+        {
+          "label": "DragInstance (src/instance.ts:90)",
+          "functionName": "DragInstance",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 0.942,
+          "totalMs": 2.974,
+          "selfPct": 0.143277806845698,
+          "totalPct": 0.4523441587676283
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.74,
+          "selfPct": 0,
+          "totalPct": 0.41675285643016197
+        },
+        {
+          "label": "onInteractionMove (src/engine.ts:124)",
+          "functionName": "onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.74,
+          "selfPct": 0,
+          "totalPct": 0.41675285643016197
+        },
+        {
+          "label": "#onInteractionMove (src/engine.ts:434)",
+          "functionName": "#onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.74,
+          "selfPct": 0,
+          "totalPct": 0.41675285643016197
+        },
+        {
+          "label": "onUp (sensors/pointer-sensor.ts:32)",
+          "functionName": "onUp",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.046,
+          "selfPct": 0,
+          "totalPct": 0.3111957460788727
+        },
+        {
+          "label": "disarm (sensors/pointer-sensor.ts:17)",
+          "functionName": "disarm",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 2.046,
+          "totalMs": 2.046,
+          "selfPct": 0.3111957460788727,
+          "totalPct": 0.3111957460788727
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 2.032,
+          "totalMs": 2.032,
+          "selfPct": 0.30906635192193027,
+          "totalPct": 0.30906635192193027
+        },
+        {
+          "label": "flush (src/effects.ts:11)",
+          "functionName": "flush",
+          "url": "http://localhost:63316/src/effects.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.923,
+          "selfPct": 0,
+          "totalPct": 0.2924874974143071
+        },
+        {
+          "label": "#syncDragTransform (src/engine.ts:767)",
+          "functionName": "#syncDragTransform",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.067,
+          "selfPct": 0,
+          "totalPct": 0.16229025467554115
+        },
+        {
+          "label": "applyDragTransform (src/apply-transform.ts:8)",
+          "functionName": "applyDragTransform",
+          "url": "http://localhost:63316/src/apply-transform.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.067,
+          "selfPct": 0,
+          "totalPct": 0.16229025467554115
+        }
+      ]
+    },
+    {
+      "name": "full · drop · drop-once-matching",
+      "sampleCount": 608,
+      "durationMs": 657.365,
+      "byCategory": {
+        "neodrag": 3.9109999999999996,
+        "browser": 1.8889999999999998,
+        "test": 2.779,
+        "other": 648.786
+      },
+      "topSelf": [
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 626.776,
+          "totalMs": 626.776,
+          "selfPct": 95.34672518311744,
+          "totalPct": 95.34672518311744
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 13.907,
+          "totalMs": 13.907,
+          "selfPct": 2.1155674549146974,
+          "totalPct": 2.1155674549146974
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 2.009,
+          "totalMs": 2.009,
+          "selfPct": 0.3056140804575844,
+          "totalPct": 0.3056140804575844
+        },
+        {
+          "label": "elementFromPoint",
+          "functionName": "elementFromPoint",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.964,
+          "totalMs": 1.964,
+          "selfPct": 0.298768568451317,
+          "totalPct": 0.298768568451317
+        },
+        {
+          "label": "DropInstance (src/instance.ts:232)",
+          "functionName": "DropInstance",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 1.23,
+          "totalMs": 3.239,
+          "selfPct": 0.18711066150464353,
+          "totalPct": 0.492724741962228
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.131,
+          "totalMs": 1.131,
+          "selfPct": 0.17205053509085516,
+          "totalPct": 0.17205053509085516
+        },
+        {
+          "label": "addEventListener",
+          "functionName": "addEventListener",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.086,
+          "totalMs": 1.086,
+          "selfPct": 0.1652050230845877,
+          "totalPct": 0.1652050230845877
+        },
+        {
+          "label": "#destroyDrop (src/engine.ts:862)",
+          "functionName": "#destroyDrop",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.97,
+          "totalMs": 0.97,
+          "selfPct": 0.14755881435732052,
+          "totalPct": 0.14755881435732052
+        },
+        {
+          "label": "remove",
+          "functionName": "remove",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.967,
+          "totalMs": 0.967,
+          "selfPct": 0.14710244689023602,
+          "totalPct": 0.14710244689023602
+        },
+        {
+          "label": "setProperty",
+          "functionName": "setProperty",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.946,
+          "totalMs": 0.946,
+          "selfPct": 0.14390787462064453,
+          "totalPct": 0.14390787462064453
+        },
+        {
+          "label": "phaseChain (src/phase.ts:2)",
+          "functionName": "phaseChain",
+          "url": "http://localhost:63316/src/phase.ts",
+          "category": "browser",
+          "selfMs": 0.945,
+          "totalMs": 0.945,
+          "selfPct": 0.14375575213161637,
+          "totalPct": 0.14375575213161637
+        },
+        {
+          "label": "schedule (src/effects.ts:4)",
+          "functionName": "schedule",
+          "url": "http://localhost:63316/src/effects.ts",
+          "category": "browser",
+          "selfMs": 0.944,
+          "totalMs": 0.944,
+          "selfPct": 0.14360362964258822,
+          "totalPct": 0.14360362964258822
+        },
+        {
+          "label": "resetBody (browser/helpers.ts:1)",
+          "functionName": "resetBody",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0.941,
+          "totalMs": 0.941,
+          "selfPct": 0.1431472621755037,
+          "totalPct": 0.1431472621755037
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:84)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0.94,
+          "totalMs": 14.745,
+          "selfPct": 0.14299513968647554,
+          "totalPct": 2.2430461007202998
+        },
+        {
+          "label": "Neodrag (src/engine.ts:57)",
+          "functionName": "Neodrag",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.939,
+          "totalMs": 0.939,
+          "selfPct": 0.14284301719744738,
+          "totalPct": 0.14284301719744738
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0.898,
+          "totalMs": 4.578,
+          "selfPct": 0.1366059951472926,
+          "totalPct": 0.6964167547709417
+        },
+        {
+          "label": "#pluginCall (src/engine.ts:872)",
+          "functionName": "#pluginCall",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.772,
+          "totalMs": 0.772,
+          "selfPct": 0.11743856152974376,
+          "totalPct": 0.11743856152974376
+        },
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 657.365,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 14.745,
+          "selfPct": 0,
+          "totalPct": 2.2430461007202998
+        },
+        {
+          "label": "droppable (src/engine.ts:214)",
+          "functionName": "droppable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 4.325,
+          "selfPct": 0,
+          "totalPct": 0.6579297650468158
+        }
+      ],
+      "topTotal": [
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 657.365,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 626.776,
+          "totalMs": 626.776,
+          "selfPct": 95.34672518311744,
+          "totalPct": 95.34672518311744
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 14.745,
+          "selfPct": 0,
+          "totalPct": 2.2430461007202998
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:84)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0.94,
+          "totalMs": 14.745,
+          "selfPct": 0.14299513968647554,
+          "totalPct": 2.2430461007202998
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 13.907,
+          "totalMs": 13.907,
+          "selfPct": 2.1155674549146974,
+          "totalPct": 2.1155674549146974
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0.898,
+          "totalMs": 4.578,
+          "selfPct": 0.1366059951472926,
+          "totalPct": 0.6964167547709417
+        },
+        {
+          "label": "droppable (src/engine.ts:214)",
+          "functionName": "droppable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 4.325,
+          "selfPct": 0,
+          "totalPct": 0.6579297650468158
+        },
+        {
+          "label": "DropInstance (src/instance.ts:232)",
+          "functionName": "DropInstance",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 1.23,
+          "totalMs": 3.239,
+          "selfPct": 0.18711066150464353,
+          "totalPct": 0.492724741962228
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 2.908,
+          "selfPct": 0,
+          "totalPct": 0.44237219809390516
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 2.009,
+          "totalMs": 2.009,
+          "selfPct": 0.3056140804575844,
+          "totalPct": 0.3056140804575844
+        },
+        {
+          "label": "onUp (sensors/pointer-sensor.ts:32)",
+          "functionName": "onUp",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.964,
+          "selfPct": 0,
+          "totalPct": 0.298768568451317
+        },
+        {
+          "label": "onInteractionEnd (src/engine.ts:125)",
+          "functionName": "onInteractionEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.964,
+          "selfPct": 0,
+          "totalPct": 0.298768568451317
+        },
+        {
+          "label": "#onInteractionEnd (src/engine.ts:511)",
+          "functionName": "#onInteractionEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.964,
+          "selfPct": 0,
+          "totalPct": 0.298768568451317
+        },
+        {
+          "label": "flush (src/drop-targets.ts:38)",
+          "functionName": "flush",
+          "url": "http://localhost:63316/src/drop-targets.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.964,
+          "selfPct": 0,
+          "totalPct": 0.298768568451317
+        },
+        {
+          "label": "runUpdate (src/drop-targets.ts:46)",
+          "functionName": "runUpdate",
+          "url": "http://localhost:63316/src/drop-targets.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.964,
+          "selfPct": 0,
+          "totalPct": 0.298768568451317
+        },
+        {
+          "label": "#updateSole (src/drop-targets.ts:62)",
+          "functionName": "#updateSole",
+          "url": "http://localhost:63316/src/drop-targets.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.964,
+          "selfPct": 0,
+          "totalPct": 0.298768568451317
+        },
+        {
+          "label": "#containsPointer (src/drop-targets.ts:137)",
+          "functionName": "#containsPointer",
+          "url": "http://localhost:63316/src/drop-targets.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.964,
+          "selfPct": 0,
+          "totalPct": 0.298768568451317
+        },
+        {
+          "label": "elementFromPoint",
+          "functionName": "elementFromPoint",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.964,
+          "totalMs": 1.964,
+          "selfPct": 0.298768568451317,
+          "totalPct": 0.298768568451317
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:84)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 1.937,
+          "selfPct": 0,
+          "totalPct": 0.29466126124755654
+        },
+        {
+          "label": "draggable (src/engine.ts:165)",
+          "functionName": "draggable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.891,
+          "selfPct": 0,
+          "totalPct": 0.2876636267522609
+        }
+      ]
+    },
+    {
+      "name": "full · drop · drop-highlight-over",
+      "sampleCount": 1230,
+      "durationMs": 1324.717,
+      "byCategory": {
+        "neodrag": 3.133,
+        "browser": 0,
+        "test": 0,
+        "other": 1321.5839999999998
+      },
+      "topSelf": [
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1290.736,
+          "totalMs": 1290.736,
+          "selfPct": 97.43484834874165,
+          "totalPct": 97.43484834874165
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 20.091,
+          "totalMs": 20.091,
+          "selfPct": 1.5166258151741088,
+          "totalPct": 1.5166258151741088
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 2.111,
+          "totalMs": 2.111,
+          "selfPct": 0.1593547904948755,
+          "totalPct": 0.1593547904948755
+        },
+        {
+          "label": "(garbage collector)",
+          "functionName": "(garbage collector)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.252,
+          "totalMs": 1.252,
+          "selfPct": 0.09451075210780868,
+          "totalPct": 0.09451075210780868
+        },
+        {
+          "label": "addEventListener",
+          "functionName": "addEventListener",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.246,
+          "totalMs": 1.246,
+          "selfPct": 0.09405782518077445,
+          "totalPct": 0.09405782518077445
+        },
+        {
+          "label": "PointerEvent",
+          "functionName": "PointerEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.217,
+          "totalMs": 1.217,
+          "selfPct": 0.09186867836677569,
+          "totalPct": 0.09186867836677569
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.071,
+          "totalMs": 1.071,
+          "selfPct": 0.0808474564756095,
+          "totalPct": 0.0808474564756095
+        },
+        {
+          "label": "appendChild",
+          "functionName": "appendChild",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.064,
+          "totalMs": 1.064,
+          "selfPct": 0.08031904172740291,
+          "totalPct": 0.08031904172740291
+        },
+        {
+          "label": "#beginSession (src/engine.ts:311)",
+          "functionName": "#beginSession",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.051,
+          "totalMs": 1.051,
+          "selfPct": 0.07933770005216208,
+          "totalPct": 0.07933770005216208
+        },
+        {
+          "label": "runDropHook (src/engine.ts:106)",
+          "functionName": "runDropHook",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.027,
+          "totalMs": 1.027,
+          "selfPct": 0.07752599234402516,
+          "totalPct": 0.07752599234402516
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.944,
+          "totalMs": 2.807,
+          "selfPct": 0.07126050318671837,
+          "totalPct": 0.21189431403084583
+        },
+        {
+          "label": "#onInteractionEnd (src/engine.ts:511)",
+          "functionName": "#onInteractionEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.937,
+          "totalMs": 1.863,
+          "selfPct": 0.07073208843851178,
+          "totalPct": 0.14063381084412743
+        },
+        {
+          "label": "elementFromPoint",
+          "functionName": "elementFromPoint",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.926,
+          "totalMs": 0.926,
+          "selfPct": 0.0699017224056157,
+          "totalPct": 0.0699017224056157
+        },
+        {
+          "label": "PointerEvent",
+          "functionName": "PointerEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.926,
+          "totalMs": 0.926,
+          "selfPct": 0.0699017224056157,
+          "totalPct": 0.0699017224056157
+        },
+        {
+          "label": "#pluginVoid (src/engine.ts:885)",
+          "functionName": "#pluginVoid",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.118,
+          "totalMs": 0.118,
+          "selfPct": 0.008907562898339796,
+          "totalPct": 0.008907562898339796
+        },
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 1324.717,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 7.878,
+          "selfPct": 0,
+          "totalPct": 0.59469305519594
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:116)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 7.878,
+          "selfPct": 0,
+          "totalPct": 0.59469305519594
+        },
+        {
+          "label": "droppable (src/engine.ts:214)",
+          "functionName": "droppable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 3.475,
+          "selfPct": 0,
+          "totalPct": 0.26232017857398976
+        },
+        {
+          "label": "#initSensors (src/engine.ts:379)",
+          "functionName": "#initSensors",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.246,
+          "selfPct": 0,
+          "totalPct": 0.09405782518077445
+        }
+      ],
+      "topTotal": [
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 1324.717,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1290.736,
+          "totalMs": 1290.736,
+          "selfPct": 97.43484834874165,
+          "totalPct": 97.43484834874165
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 20.091,
+          "totalMs": 20.091,
+          "selfPct": 1.5166258151741088,
+          "totalPct": 1.5166258151741088
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 7.878,
+          "selfPct": 0,
+          "totalPct": 0.59469305519594
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:116)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 7.878,
+          "selfPct": 0,
+          "totalPct": 0.59469305519594
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:116)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 3.733,
+          "selfPct": 0,
+          "totalPct": 0.2817960364364615
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 3.733,
+          "selfPct": 0,
+          "totalPct": 0.2817960364364615
+        },
+        {
+          "label": "droppable (src/engine.ts:214)",
+          "functionName": "droppable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 3.475,
+          "selfPct": 0,
+          "totalPct": 0.26232017857398976
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.944,
+          "totalMs": 2.807,
+          "selfPct": 0.07126050318671837,
+          "totalPct": 0.21189431403084583
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 2.268,
+          "selfPct": 0,
+          "totalPct": 0.17120637841893774
+        },
+        {
+          "label": "DropInstance (src/instance.ts:232)",
+          "functionName": "DropInstance",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.111,
+          "selfPct": 0,
+          "totalPct": 0.1593547904948755
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 2.111,
+          "totalMs": 2.111,
+          "selfPct": 0.1593547904948755,
+          "totalPct": 0.1593547904948755
+        },
+        {
+          "label": "onUp (sensors/pointer-sensor.ts:32)",
+          "functionName": "onUp",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.863,
+          "selfPct": 0,
+          "totalPct": 0.14063381084412743
+        },
+        {
+          "label": "onInteractionEnd (src/engine.ts:125)",
+          "functionName": "onInteractionEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.863,
+          "selfPct": 0,
+          "totalPct": 0.14063381084412743
+        },
+        {
+          "label": "#onInteractionEnd (src/engine.ts:511)",
+          "functionName": "#onInteractionEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.937,
+          "totalMs": 1.863,
+          "selfPct": 0.07073208843851178,
+          "totalPct": 0.14063381084412743
+        },
+        {
+          "label": "(garbage collector)",
+          "functionName": "(garbage collector)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.252,
+          "totalMs": 1.252,
+          "selfPct": 0.09451075210780868,
+          "totalPct": 0.09451075210780868
+        },
+        {
+          "label": "#initSensors (src/engine.ts:379)",
+          "functionName": "#initSensors",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.246,
+          "selfPct": 0,
+          "totalPct": 0.09405782518077445
+        },
+        {
+          "label": "setup (sensors/sensor-base.ts:2)",
+          "functionName": "setup",
+          "url": "http://localhost:63316/src/sensors/sensor-base.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.246,
+          "selfPct": 0,
+          "totalPct": 0.09405782518077445
+        },
+        {
+          "label": "attach (sensors/pointer-sensor.ts:13)",
+          "functionName": "attach",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.246,
+          "selfPct": 0,
+          "totalPct": 0.09405782518077445
+        },
+        {
+          "label": "listen (src/utils.ts:1)",
+          "functionName": "listen",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.246,
+          "selfPct": 0,
+          "totalPct": 0.09405782518077445
+        }
+      ]
+    },
+    {
+      "name": "full · sortable · sortable-reorder",
+      "sampleCount": 614,
+      "durationMs": 659.148,
+      "byCategory": {
+        "neodrag": 3.862,
+        "browser": 4.495,
+        "test": 1.17,
+        "other": 649.6210000000002
+      },
+      "topSelf": [
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 626.278,
+          "totalMs": 626.278,
+          "selfPct": 95.01325954110457,
+          "totalPct": 95.01325954110457
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 10.944,
+          "totalMs": 10.944,
+          "selfPct": 1.6603251470079559,
+          "totalPct": 1.6603251470079559
+        },
+        {
+          "label": "PointerEvent",
+          "functionName": "PointerEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 2.969,
+          "totalMs": 2.969,
+          "selfPct": 0.4504299489644207,
+          "totalPct": 0.4504299489644207
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.849,
+          "totalMs": 1.849,
+          "selfPct": 0.2805136327501562,
+          "totalPct": 0.2805136327501562
+        },
+        {
+          "label": "(garbage collector)",
+          "functionName": "(garbage collector)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.07,
+          "totalMs": 1.07,
+          "selfPct": 0.16233076638327051,
+          "totalPct": 0.16233076638327051
+        },
+        {
+          "label": "#destroyDrop (src/engine.ts:862)",
+          "functionName": "#destroyDrop",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.069,
+          "totalMs": 1.069,
+          "selfPct": 0.16217905538665064,
+          "totalPct": 0.16217905538665064
+        },
+        {
+          "label": "(anonymous) (src/effects.ts:8)",
+          "functionName": "(anonymous)",
+          "url": "http://localhost:63316/src/effects.ts",
+          "category": "browser",
+          "selfMs": 1.063,
+          "totalMs": 1.063,
+          "selfPct": 0.16126878940693137,
+          "totalPct": 0.16126878940693137
+        },
+        {
+          "label": "elementFromPoint",
+          "functionName": "elementFromPoint",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.061,
+          "totalMs": 1.061,
+          "selfPct": 0.1609653674136916,
+          "totalPct": 0.1609653674136916
+        },
+        {
+          "label": "set_node_dataset (src/utils.ts:10)",
+          "functionName": "set_node_dataset",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0.999,
+          "totalMs": 0.999,
+          "selfPct": 0.15155928562325913,
+          "totalPct": 0.15155928562325913
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:144)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0.951,
+          "totalMs": 16.902,
+          "selfPct": 0.14427715778550493,
+          "totalPct": 2.564219264869195
+        },
+        {
+          "label": "rebuildBuckets (src/instance.ts:266)",
+          "functionName": "rebuildBuckets",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 0.949,
+          "totalMs": 0.949,
+          "selfPct": 0.14397373579226516,
+          "totalPct": 0.14397373579226516
+        },
+        {
+          "label": "setAttribute",
+          "functionName": "setAttribute",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.946,
+          "totalMs": 0.946,
+          "selfPct": 0.14351860280240553,
+          "totalPct": 0.14351860280240553
+        },
+        {
+          "label": "DragInstance (src/instance.ts:90)",
+          "functionName": "DragInstance",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 0.938,
+          "totalMs": 1.827,
+          "selfPct": 0.1423049148294465,
+          "totalPct": 0.2771759908245189
+        },
+        {
+          "label": "createDragSession (src/session.ts:2)",
+          "functionName": "createDragSession",
+          "url": "http://localhost:63316/src/session.ts",
+          "category": "browser",
+          "selfMs": 0.937,
+          "totalMs": 0.937,
+          "selfPct": 0.14215320383282662,
+          "totalPct": 0.14215320383282662
+        },
+        {
+          "label": "remove",
+          "functionName": "remove",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.936,
+          "totalMs": 0.936,
+          "selfPct": 0.14200149283620675,
+          "totalPct": 0.14200149283620675
+        },
+        {
+          "label": "get_node_style (src/utils.ts:7)",
+          "functionName": "get_node_style",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0.92,
+          "totalMs": 0.92,
+          "selfPct": 0.13957411689028867,
+          "totalPct": 0.13957411689028867
+        },
+        {
+          "label": "querySelector",
+          "functionName": "querySelector",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.903,
+          "totalMs": 0.903,
+          "selfPct": 0.13699502994775073,
+          "totalPct": 0.13699502994775073
+        },
+        {
+          "label": "addEventListener",
+          "functionName": "addEventListener",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.895,
+          "totalMs": 0.895,
+          "selfPct": 0.1357813419747917,
+          "totalPct": 0.1357813419747917
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.889,
+          "totalMs": 0.889,
+          "selfPct": 0.13487107599507242,
+          "totalPct": 0.13487107599507242
+        },
+        {
+          "label": "#destroyDrag (src/engine.ts:853)",
+          "functionName": "#destroyDrag",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.886,
+          "totalMs": 0.886,
+          "selfPct": 0.13441594300521278,
+          "totalPct": 0.13441594300521278
+        }
+      ],
+      "topTotal": [
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 659.148,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 626.278,
+          "totalMs": 626.278,
+          "selfPct": 95.01325954110457,
+          "totalPct": 95.01325954110457
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 16.902,
+          "selfPct": 0,
+          "totalPct": 2.564219264869195
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:144)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0.951,
+          "totalMs": 16.902,
+          "selfPct": 0.14427715778550493,
+          "totalPct": 2.564219264869195
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 10.944,
+          "totalMs": 10.944,
+          "selfPct": 1.6603251470079559,
+          "totalPct": 1.6603251470079559
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0.194,
+          "totalMs": 7.549,
+          "selfPct": 0.029431933344256526,
+          "totalPct": 1.1452663134834666
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0.025,
+          "totalMs": 7.355,
+          "selfPct": 0.0037927749154969747,
+          "totalPct": 1.1158343801392099
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 4.361,
+          "selfPct": 0,
+          "totalPct": 0.6616116562592923
+        },
+        {
+          "label": "draggable (src/engine.ts:165)",
+          "functionName": "draggable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.02,
+          "totalMs": 3.806,
+          "selfPct": 0.0030342199323975796,
+          "totalPct": 0.5774120531352595
+        },
+        {
+          "label": "droppable (src/engine.ts:214)",
+          "functionName": "droppable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 3.693,
+          "selfPct": 0,
+          "totalPct": 0.560268710517213
+        },
+        {
+          "label": "PointerEvent",
+          "functionName": "PointerEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 2.969,
+          "totalMs": 2.969,
+          "selfPct": 0.4504299489644207,
+          "totalPct": 0.4504299489644207
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:144)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 2.891,
+          "selfPct": 0,
+          "totalPct": 0.43859649122807015
+        },
+        {
+          "label": "onUp (sensors/pointer-sensor.ts:32)",
+          "functionName": "onUp",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.482,
+          "selfPct": 0,
+          "totalPct": 0.37654669361053966
+        },
+        {
+          "label": "onInteractionEnd (src/engine.ts:125)",
+          "functionName": "onInteractionEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.482,
+          "selfPct": 0,
+          "totalPct": 0.37654669361053966
+        },
+        {
+          "label": "#onInteractionEnd (src/engine.ts:511)",
+          "functionName": "#onInteractionEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.482,
+          "selfPct": 0,
+          "totalPct": 0.37654669361053966
+        },
+        {
+          "label": "dispose (src/engine.ts:298)",
+          "functionName": "dispose",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.955,
+          "selfPct": 0,
+          "totalPct": 0.29659499839186343
+        },
+        {
+          "label": "flush (src/drop-targets.ts:38)",
+          "functionName": "flush",
+          "url": "http://localhost:63316/src/drop-targets.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.942,
+          "selfPct": 0,
+          "totalPct": 0.294622755435805
+        },
+        {
+          "label": "runUpdate (src/drop-targets.ts:46)",
+          "functionName": "runUpdate",
+          "url": "http://localhost:63316/src/drop-targets.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.942,
+          "selfPct": 0,
+          "totalPct": 0.294622755435805
+        },
+        {
+          "label": "#updateSole (src/drop-targets.ts:62)",
+          "functionName": "#updateSole",
+          "url": "http://localhost:63316/src/drop-targets.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.942,
+          "selfPct": 0,
+          "totalPct": 0.294622755435805
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.866,
+          "selfPct": 0,
+          "totalPct": 0.28309271969269423
+        }
+      ]
+    },
+    {
+      "name": "full · engine · engine-two-dragables",
+      "sampleCount": 605,
+      "durationMs": 656.99,
+      "byCategory": {
+        "neodrag": 6.385,
+        "browser": 0,
+        "test": 2.209,
+        "other": 648.396
+      },
+      "topSelf": [
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 629.108,
+          "totalMs": 629.108,
+          "selfPct": 95.75609978842904,
+          "totalPct": 95.75609978842904
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 13.175,
+          "totalMs": 13.175,
+          "selfPct": 2.005357768002557,
+          "totalPct": 2.005357768002557
+        },
+        {
+          "label": "resetBody (browser/helpers.ts:1)",
+          "functionName": "resetBody",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 1.276,
+          "totalMs": 1.276,
+          "selfPct": 0.19421909009269547,
+          "totalPct": 0.19421909009269547
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.196,
+          "totalMs": 4.131,
+          "selfPct": 0.1820423446323384,
+          "totalPct": 0.6287766937091889
+        },
+        {
+          "label": "#destroyDrag (src/engine.ts:853)",
+          "functionName": "#destroyDrag",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.172,
+          "totalMs": 2.116,
+          "selfPct": 0.17838932099423127,
+          "totalPct": 0.32207491742644484
+        },
+        {
+          "label": "DragInstance (src/instance.ts:90)",
+          "functionName": "DragInstance",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 1.072,
+          "totalMs": 3.078,
+          "selfPct": 0.16316838916878493,
+          "totalPct": 0.4685002815872388
+        },
+        {
+          "label": "#inverseScale (src/engine.ts:732)",
+          "functionName": "#inverseScale",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.072,
+          "totalMs": 1.072,
+          "selfPct": 0.16316838916878493,
+          "totalPct": 0.16316838916878493
+        },
+        {
+          "label": "setProperty",
+          "functionName": "setProperty",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.067,
+          "totalMs": 1.067,
+          "selfPct": 0.16240734257751258,
+          "totalPct": 0.16240734257751258
+        },
+        {
+          "label": "DragInstance (src/instance.ts:22)",
+          "functionName": "DragInstance",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 1.065,
+          "totalMs": 1.065,
+          "selfPct": 0.16210292394100367,
+          "totalPct": 0.16210292394100367
+        },
+        {
+          "label": "addEventListener",
+          "functionName": "addEventListener",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.06,
+          "totalMs": 1.06,
+          "selfPct": 0.16134187734973138,
+          "totalPct": 0.16134187734973138
+        },
+        {
+          "label": "#createIdleActive (src/engine.ts:129)",
+          "functionName": "#createIdleActive",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.06,
+          "totalMs": 1.06,
+          "selfPct": 0.16134187734973138,
+          "totalPct": 0.16134187734973138
+        },
+        {
+          "label": "setAttribute",
+          "functionName": "setAttribute",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.053,
+          "totalMs": 1.053,
+          "selfPct": 0.1602764121219501,
+          "totalPct": 0.1602764121219501
+        },
+        {
+          "label": "#destroyOneDragPlugin (src/engine.ts:781)",
+          "functionName": "#destroyOneDragPlugin",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0.944,
+          "totalMs": 0.944,
+          "selfPct": 0.14368559643221357,
+          "totalPct": 0.14368559643221357
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.941,
+          "totalMs": 0.941,
+          "selfPct": 0.14322896847745017,
+          "totalPct": 0.14322896847745017
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:196)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0.933,
+          "totalMs": 12.591,
+          "selfPct": 0.14201129393141448,
+          "totalPct": 1.9164675261419504
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.796,
+          "totalMs": 0.796,
+          "selfPct": 0.12115861733055298,
+          "totalPct": 0.12115861733055298
+        },
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 656.99,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 12.591,
+          "selfPct": 0,
+          "totalPct": 1.9164675261419504
+        },
+        {
+          "label": "draggable (src/engine.ts:165)",
+          "functionName": "draggable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 6.251,
+          "selfPct": 0,
+          "totalPct": 0.9514604484086517
+        },
+        {
+          "label": "#installDragPlugins (src/engine.ts:739)",
+          "functionName": "#installDragPlugins",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.053,
+          "selfPct": 0,
+          "totalPct": 0.1602764121219501
+        }
+      ],
+      "topTotal": [
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 656.99,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 629.108,
+          "totalMs": 629.108,
+          "selfPct": 95.75609978842904,
+          "totalPct": 95.75609978842904
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 13.175,
+          "totalMs": 13.175,
+          "selfPct": 2.005357768002557,
+          "totalPct": 2.005357768002557
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 12.591,
+          "selfPct": 0,
+          "totalPct": 1.9164675261419504
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:196)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0.933,
+          "totalMs": 12.591,
+          "selfPct": 0.14201129393141448,
+          "totalPct": 1.9164675261419504
+        },
+        {
+          "label": "draggable (src/engine.ts:165)",
+          "functionName": "draggable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 6.251,
+          "selfPct": 0,
+          "totalPct": 0.9514604484086517
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 4.131,
+          "selfPct": 0,
+          "totalPct": 0.6287766937091889
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 4.131,
+          "selfPct": 0,
+          "totalPct": 0.6287766937091889
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.196,
+          "totalMs": 4.131,
+          "selfPct": 0.1820423446323384,
+          "totalPct": 0.6287766937091889
+        },
+        {
+          "label": "DragInstance (src/instance.ts:90)",
+          "functionName": "DragInstance",
+          "url": "http://localhost:63316/src/instance.ts",
+          "category": "neodrag",
+          "selfMs": 1.072,
+          "totalMs": 3.078,
+          "selfPct": 0.16316838916878493,
+          "totalPct": 0.4685002815872388
+        },
+        {
+          "label": "run (browser/human-scenarios.ts:196)",
+          "functionName": "run",
+          "url": "http://localhost:63316/benchmarks/browser/human-scenarios.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 2.116,
+          "selfPct": 0,
+          "totalPct": 0.32207491742644484
+        },
+        {
+          "label": "dispose (src/engine.ts:298)",
+          "functionName": "dispose",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.116,
+          "selfPct": 0,
+          "totalPct": 0.32207491742644484
+        },
+        {
+          "label": "#destroyDrag (src/engine.ts:853)",
+          "functionName": "#destroyDrag",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.172,
+          "totalMs": 2.116,
+          "selfPct": 0.17838932099423127,
+          "totalPct": 0.32207491742644484
+        },
+        {
+          "label": "onPointerDown (sensors/pointer-sensor.ts:39)",
+          "functionName": "onPointerDown",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.868,
+          "selfPct": 0,
+          "totalPct": 0.2843270064993379
+        },
+        {
+          "label": "onInteractionStart (src/engine.ts:123)",
+          "functionName": "onInteractionStart",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.868,
+          "selfPct": 0,
+          "totalPct": 0.2843270064993379
+        },
+        {
+          "label": "#onInteractionStart (src/engine.ts:393)",
+          "functionName": "#onInteractionStart",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.868,
+          "selfPct": 0,
+          "totalPct": 0.2843270064993379
+        },
+        {
+          "label": "resetBody (browser/helpers.ts:1)",
+          "functionName": "resetBody",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 1.276,
+          "totalMs": 1.276,
+          "selfPct": 0.19421909009269547,
+          "totalPct": 0.19421909009269547
+        },
+        {
+          "label": "#inverseScale (src/engine.ts:732)",
+          "functionName": "#inverseScale",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.072,
+          "totalMs": 1.072,
+          "selfPct": 0.16316838916878493,
+          "totalPct": 0.16316838916878493
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.067,
+          "selfPct": 0,
+          "totalPct": 0.16240734257751258
+        },
+        {
+          "label": "onInteractionMove (src/engine.ts:124)",
+          "functionName": "onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.067,
+          "selfPct": 0,
+          "totalPct": 0.16240734257751258
+        }
+      ]
+    },
+    {
+      "name": "hot · drag · default plugins",
+      "sampleCount": 12,
+      "durationMs": 21.804,
+      "byCategory": {
+        "neodrag": 1.059,
+        "browser": 1.62,
+        "test": 5.455,
+        "other": 13.67
+      },
+      "topSelf": [
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 10.731,
+          "totalMs": 10.731,
+          "selfPct": 49.21574023115025,
+          "totalPct": 49.21574023115025
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 4.236,
+          "totalMs": 8.472,
+          "selfPct": 19.427627958172813,
+          "totalPct": 38.85525591634563
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 1.219,
+          "totalMs": 9.691,
+          "selfPct": 5.59071729957806,
+          "totalPct": 44.445973215923686
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.071,
+          "totalMs": 4.236,
+          "selfPct": 4.911942762795817,
+          "totalPct": 19.427627958172813
+        },
+        {
+          "label": "#beginSession (src/engine.ts:311)",
+          "functionName": "#beginSession",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.059,
+          "totalMs": 1.059,
+          "selfPct": 4.856906989543203,
+          "totalPct": 4.856906989543203
+        },
+        {
+          "label": "setProperty",
+          "functionName": "setProperty",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.058,
+          "totalMs": 1.058,
+          "selfPct": 4.852320675105486,
+          "totalPct": 4.852320675105486
+        },
+        {
+          "label": "pointerToInput (src/interaction-input.ts:11)",
+          "functionName": "pointerToInput",
+          "url": "http://localhost:63316/src/interaction-input.ts",
+          "category": "browser",
+          "selfMs": 1.048,
+          "totalMs": 1.048,
+          "selfPct": 4.8064575307283075,
+          "totalPct": 4.8064575307283075
+        },
+        {
+          "label": "(garbage collector)",
+          "functionName": "(garbage collector)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.81,
+          "totalMs": 0.81,
+          "selfPct": 3.7149146945514593,
+          "totalPct": 3.7149146945514593
+        },
+        {
+          "label": "flush (src/effects.ts:11)",
+          "functionName": "flush",
+          "url": "http://localhost:63316/src/effects.ts",
+          "category": "browser",
+          "selfMs": 0.572,
+          "totalMs": 0.572,
+          "selfPct": 2.62337185837461,
+          "totalPct": 2.62337185837461
+        },
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 21.804,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "reports.push.profileScenario.iterations (packages/core/benchmarks/browser/human-profile.suite.test.ts:27)",
+          "functionName": "reports.push.profileScenario.iterations",
+          "url": "http://localhost:63316/workspace/packages/core/benchmarks/browser/human-profile.suite.test.ts?import&browserv=1779790588761",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 8.472,
+          "selfPct": 0,
+          "totalPct": 38.85525591634563
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 8.472,
+          "selfPct": 0,
+          "totalPct": 38.85525591634563
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.106,
+          "selfPct": 0,
+          "totalPct": 9.65877820583379
+        },
+        {
+          "label": "onInteractionMove (src/engine.ts:124)",
+          "functionName": "onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 4.852320675105486
+        },
+        {
+          "label": "#onInteractionMove (src/engine.ts:434)",
+          "functionName": "#onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 4.852320675105486
+        },
+        {
+          "label": "#syncDragTransform (src/engine.ts:767)",
+          "functionName": "#syncDragTransform",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 4.852320675105486
+        },
+        {
+          "label": "applyDragTransform (src/apply-transform.ts:8)",
+          "functionName": "applyDragTransform",
+          "url": "http://localhost:63316/src/apply-transform.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 4.852320675105486
+        },
+        {
+          "label": "set_node_key_style (src/utils.ts:4)",
+          "functionName": "set_node_key_style",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 4.852320675105486
+        },
+        {
+          "label": "onPointerDown (sensors/pointer-sensor.ts:39)",
+          "functionName": "onPointerDown",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.059,
+          "selfPct": 0,
+          "totalPct": 4.856906989543203
+        },
+        {
+          "label": "onInteractionStart (src/engine.ts:123)",
+          "functionName": "onInteractionStart",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.059,
+          "selfPct": 0,
+          "totalPct": 4.856906989543203
+        }
+      ],
+      "topTotal": [
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 21.804,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 10.731,
+          "totalMs": 10.731,
+          "selfPct": 49.21574023115025,
+          "totalPct": 49.21574023115025
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 1.219,
+          "totalMs": 9.691,
+          "selfPct": 5.59071729957806,
+          "totalPct": 44.445973215923686
+        },
+        {
+          "label": "reports.push.profileScenario.iterations (packages/core/benchmarks/browser/human-profile.suite.test.ts:27)",
+          "functionName": "reports.push.profileScenario.iterations",
+          "url": "http://localhost:63316/workspace/packages/core/benchmarks/browser/human-profile.suite.test.ts?import&browserv=1779790588761",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 8.472,
+          "selfPct": 0,
+          "totalPct": 38.85525591634563
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 8.472,
+          "selfPct": 0,
+          "totalPct": 38.85525591634563
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 4.236,
+          "totalMs": 8.472,
+          "selfPct": 19.427627958172813,
+          "totalPct": 38.85525591634563
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.071,
+          "totalMs": 4.236,
+          "selfPct": 4.911942762795817,
+          "totalPct": 19.427627958172813
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.106,
+          "selfPct": 0,
+          "totalPct": 9.65877820583379
+        },
+        {
+          "label": "onPointerDown (sensors/pointer-sensor.ts:39)",
+          "functionName": "onPointerDown",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.059,
+          "selfPct": 0,
+          "totalPct": 4.856906989543203
+        },
+        {
+          "label": "onInteractionStart (src/engine.ts:123)",
+          "functionName": "onInteractionStart",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.059,
+          "selfPct": 0,
+          "totalPct": 4.856906989543203
+        },
+        {
+          "label": "#onInteractionStart (src/engine.ts:393)",
+          "functionName": "#onInteractionStart",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.059,
+          "selfPct": 0,
+          "totalPct": 4.856906989543203
+        },
+        {
+          "label": "#beginSession (src/engine.ts:311)",
+          "functionName": "#beginSession",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 1.059,
+          "totalMs": 1.059,
+          "selfPct": 4.856906989543203,
+          "totalPct": 4.856906989543203
+        },
+        {
+          "label": "onInteractionMove (src/engine.ts:124)",
+          "functionName": "onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 4.852320675105486
+        },
+        {
+          "label": "#onInteractionMove (src/engine.ts:434)",
+          "functionName": "#onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 4.852320675105486
+        },
+        {
+          "label": "#syncDragTransform (src/engine.ts:767)",
+          "functionName": "#syncDragTransform",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 4.852320675105486
+        },
+        {
+          "label": "applyDragTransform (src/apply-transform.ts:8)",
+          "functionName": "applyDragTransform",
+          "url": "http://localhost:63316/src/apply-transform.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 4.852320675105486
+        },
+        {
+          "label": "set_node_key_style (src/utils.ts:4)",
+          "functionName": "set_node_key_style",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 4.852320675105486
+        },
+        {
+          "label": "setProperty",
+          "functionName": "setProperty",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.058,
+          "totalMs": 1.058,
+          "selfPct": 4.852320675105486,
+          "totalPct": 4.852320675105486
+        },
+        {
+          "label": "pointerToInput (src/interaction-input.ts:11)",
+          "functionName": "pointerToInput",
+          "url": "http://localhost:63316/src/interaction-input.ts",
+          "category": "browser",
+          "selfMs": 1.048,
+          "totalMs": 1.048,
+          "selfPct": 4.8064575307283075,
+          "totalPct": 4.8064575307283075
+        },
+        {
+          "label": "(garbage collector)",
+          "functionName": "(garbage collector)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0.81,
+          "totalMs": 0.81,
+          "selfPct": 3.7149146945514593,
+          "totalPct": 3.7149146945514593
+        }
+      ]
+    },
+    {
+      "name": "hot · drag · bounds parent",
+      "sampleCount": 8,
+      "durationMs": 17.106,
+      "byCategory": {
+        "neodrag": 0,
+        "browser": 1.06,
+        "test": 1.057,
+        "other": 14.988999999999999
+      },
+      "topSelf": [
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 10.562,
+          "totalMs": 10.562,
+          "selfPct": 61.74441716356833,
+          "totalPct": 61.74441716356833
+        },
+        {
+          "label": "setAttribute",
+          "functionName": "setAttribute",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.227,
+          "totalMs": 1.227,
+          "selfPct": 7.1729217818309365,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.084,
+          "totalMs": 1.084,
+          "selfPct": 6.336957792587396,
+          "totalPct": 6.336957792587396
+        },
+        {
+          "label": "applyDragTransform (src/apply-transform.ts:8)",
+          "functionName": "applyDragTransform",
+          "url": "http://localhost:63316/src/apply-transform.ts",
+          "category": "browser",
+          "selfMs": 1.06,
+          "totalMs": 1.06,
+          "selfPct": 6.1966561440430254,
+          "totalPct": 6.1966561440430254
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.059,
+          "totalMs": 3.176,
+          "selfPct": 6.190810242020342,
+          "totalPct": 18.566584824038348
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 1.057,
+          "totalMs": 4.233,
+          "selfPct": 6.179118437974979,
+          "totalPct": 24.745703262013325
+        },
+        {
+          "label": "composedPath",
+          "functionName": "composedPath",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.057,
+          "totalMs": 1.057,
+          "selfPct": 6.179118437974979,
+          "totalPct": 6.179118437974979
+        },
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 17.106,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 5.46,
+          "selfPct": 0,
+          "totalPct": 31.918625043844262
+        },
+        {
+          "label": "reports.push.profileScenario.iterations (packages/core/benchmarks/browser/human-profile.suite.test.ts:43)",
+          "functionName": "reports.push.profileScenario.iterations",
+          "url": "http://localhost:63316/workspace/packages/core/benchmarks/browser/human-profile.suite.test.ts?import&browserv=1779790588761",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 5.46,
+          "selfPct": 0,
+          "totalPct": 31.918625043844262
+        },
+        {
+          "label": "draggable (src/engine.ts:165)",
+          "functionName": "draggable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.227,
+          "selfPct": 0,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "#installDragPlugins (src/engine.ts:739)",
+          "functionName": "#installDragPlugins",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.227,
+          "selfPct": 0,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "#initDragPlugins (src/engine.ts:770)",
+          "functionName": "#initDragPlugins",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.227,
+          "selfPct": 0,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "(anonymous) (src/engine.ts:776)",
+          "functionName": "(anonymous)",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.227,
+          "selfPct": 0,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "init (src/plugins.ts:51)",
+          "functionName": "init",
+          "url": "http://localhost:63316/src/plugins.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.227,
+          "selfPct": 0,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "set_node_dataset (src/utils.ts:10)",
+          "functionName": "set_node_dataset",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.227,
+          "selfPct": 0,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "dragElementByDelta (browser/helpers.ts:52)",
+          "functionName": "dragElementByDelta",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 4.233,
+          "selfPct": 0,
+          "totalPct": 24.745703262013325
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 3.176,
+          "selfPct": 0,
+          "totalPct": 18.566584824038348
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.06,
+          "selfPct": 0,
+          "totalPct": 6.1966561440430254
+        },
+        {
+          "label": "onInteractionMove (src/engine.ts:124)",
+          "functionName": "onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.06,
+          "selfPct": 0,
+          "totalPct": 6.1966561440430254
+        }
+      ],
+      "topTotal": [
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 17.106,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 10.562,
+          "totalMs": 10.562,
+          "selfPct": 61.74441716356833,
+          "totalPct": 61.74441716356833
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 5.46,
+          "selfPct": 0,
+          "totalPct": 31.918625043844262
+        },
+        {
+          "label": "reports.push.profileScenario.iterations (packages/core/benchmarks/browser/human-profile.suite.test.ts:43)",
+          "functionName": "reports.push.profileScenario.iterations",
+          "url": "http://localhost:63316/workspace/packages/core/benchmarks/browser/human-profile.suite.test.ts?import&browserv=1779790588761",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 5.46,
+          "selfPct": 0,
+          "totalPct": 31.918625043844262
+        },
+        {
+          "label": "dragElementByDelta (browser/helpers.ts:52)",
+          "functionName": "dragElementByDelta",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 4.233,
+          "selfPct": 0,
+          "totalPct": 24.745703262013325
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 1.057,
+          "totalMs": 4.233,
+          "selfPct": 6.179118437974979,
+          "totalPct": 24.745703262013325
+        },
+        {
+          "label": "pointer (browser/helpers.ts:37)",
+          "functionName": "pointer",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 3.176,
+          "selfPct": 0,
+          "totalPct": 18.566584824038348
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.059,
+          "totalMs": 3.176,
+          "selfPct": 6.190810242020342,
+          "totalPct": 18.566584824038348
+        },
+        {
+          "label": "draggable (src/engine.ts:165)",
+          "functionName": "draggable",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.227,
+          "selfPct": 0,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "#installDragPlugins (src/engine.ts:739)",
+          "functionName": "#installDragPlugins",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.227,
+          "selfPct": 0,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "#initDragPlugins (src/engine.ts:770)",
+          "functionName": "#initDragPlugins",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.227,
+          "selfPct": 0,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "(anonymous) (src/engine.ts:776)",
+          "functionName": "(anonymous)",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.227,
+          "selfPct": 0,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "init (src/plugins.ts:51)",
+          "functionName": "init",
+          "url": "http://localhost:63316/src/plugins.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.227,
+          "selfPct": 0,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "set_node_dataset (src/utils.ts:10)",
+          "functionName": "set_node_dataset",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.227,
+          "selfPct": 0,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "setAttribute",
+          "functionName": "setAttribute",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.227,
+          "totalMs": 1.227,
+          "selfPct": 7.1729217818309365,
+          "totalPct": 7.1729217818309365
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.084,
+          "totalMs": 1.084,
+          "selfPct": 6.336957792587396,
+          "totalPct": 6.336957792587396
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.06,
+          "selfPct": 0,
+          "totalPct": 6.1966561440430254
+        },
+        {
+          "label": "onInteractionMove (src/engine.ts:124)",
+          "functionName": "onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.06,
+          "selfPct": 0,
+          "totalPct": 6.1966561440430254
+        },
+        {
+          "label": "#onInteractionMove (src/engine.ts:434)",
+          "functionName": "#onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.06,
+          "selfPct": 0,
+          "totalPct": 6.1966561440430254
+        },
+        {
+          "label": "#syncDragTransform (src/engine.ts:767)",
+          "functionName": "#syncDragTransform",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.06,
+          "selfPct": 0,
+          "totalPct": 6.1966561440430254
+        }
+      ]
+    },
+    {
+      "name": "hot · drop · over zone",
+      "sampleCount": 9,
+      "durationMs": 20.525,
+      "byCategory": {
+        "neodrag": 0,
+        "browser": 0,
+        "test": 2.29,
+        "other": 18.235000000000003
+      },
+      "topSelf": [
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 11.639,
+          "totalMs": 11.639,
+          "selfPct": 56.70645554202193,
+          "totalPct": 56.70645554202193
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.311,
+          "totalMs": 1.311,
+          "selfPct": 6.38733252131547,
+          "totalPct": 6.38733252131547
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 1.232,
+          "totalMs": 7.575,
+          "selfPct": 6.002436053593179,
+          "totalPct": 36.90621193666261
+        },
+        {
+          "label": "abort",
+          "functionName": "abort",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.06,
+          "totalMs": 1.06,
+          "selfPct": 5.164433617539586,
+          "totalPct": 5.164433617539586
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 1.058,
+          "totalMs": 6.343,
+          "selfPct": 5.154689403166871,
+          "totalPct": 30.90377588306943
+        },
+        {
+          "label": "addEventListener",
+          "functionName": "addEventListener",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.058,
+          "totalMs": 1.058,
+          "selfPct": 5.154689403166871,
+          "totalPct": 5.154689403166871
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.057,
+          "totalMs": 5.285,
+          "selfPct": 5.149817295980512,
+          "totalPct": 25.749086479902562
+        },
+        {
+          "label": "setProperty",
+          "functionName": "setProperty",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.056,
+          "totalMs": 1.056,
+          "selfPct": 5.144945188794154,
+          "totalPct": 5.144945188794154
+        },
+        {
+          "label": "getPropertyValue",
+          "functionName": "getPropertyValue",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.054,
+          "totalMs": 1.054,
+          "selfPct": 5.135200974421438,
+          "totalPct": 5.135200974421438
+        },
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 20.525,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "reports.push.profileScenario.iterations (packages/core/benchmarks/browser/human-profile.suite.test.ts:64)",
+          "functionName": "reports.push.profileScenario.iterations",
+          "url": "http://localhost:63316/workspace/packages/core/benchmarks/browser/human-profile.suite.test.ts?import&browserv=1779790588761",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 6.343,
+          "selfPct": 0,
+          "totalPct": 30.90377588306943
+        },
+        {
+          "label": "onUp (sensors/pointer-sensor.ts:32)",
+          "functionName": "onUp",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.06,
+          "selfPct": 0,
+          "totalPct": 5.164433617539586
+        },
+        {
+          "label": "disarm (sensors/pointer-sensor.ts:17)",
+          "functionName": "disarm",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.06,
+          "selfPct": 0,
+          "totalPct": 5.164433617539586
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.11,
+          "selfPct": 0,
+          "totalPct": 10.28014616321559
+        },
+        {
+          "label": "onInteractionMove (src/engine.ts:124)",
+          "functionName": "onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.11,
+          "selfPct": 0,
+          "totalPct": 10.28014616321559
+        },
+        {
+          "label": "#onInteractionMove (src/engine.ts:434)",
+          "functionName": "#onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.11,
+          "selfPct": 0,
+          "totalPct": 10.28014616321559
+        },
+        {
+          "label": "#syncDragTransform (src/engine.ts:767)",
+          "functionName": "#syncDragTransform",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.056,
+          "selfPct": 0,
+          "totalPct": 5.144945188794154
+        },
+        {
+          "label": "applyDragTransform (src/apply-transform.ts:8)",
+          "functionName": "applyDragTransform",
+          "url": "http://localhost:63316/src/apply-transform.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.056,
+          "selfPct": 0,
+          "totalPct": 5.144945188794154
+        },
+        {
+          "label": "set_node_key_style (src/utils.ts:4)",
+          "functionName": "set_node_key_style",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.056,
+          "selfPct": 0,
+          "totalPct": 5.144945188794154
+        },
+        {
+          "label": "flush (src/effects.ts:11)",
+          "functionName": "flush",
+          "url": "http://localhost:63316/src/effects.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.054,
+          "selfPct": 0,
+          "totalPct": 5.135200974421438
+        }
+      ],
+      "topTotal": [
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 20.525,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 11.639,
+          "totalMs": 11.639,
+          "selfPct": 56.70645554202193,
+          "totalPct": 56.70645554202193
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 1.232,
+          "totalMs": 7.575,
+          "selfPct": 6.002436053593179,
+          "totalPct": 36.90621193666261
+        },
+        {
+          "label": "reports.push.profileScenario.iterations (packages/core/benchmarks/browser/human-profile.suite.test.ts:64)",
+          "functionName": "reports.push.profileScenario.iterations",
+          "url": "http://localhost:63316/workspace/packages/core/benchmarks/browser/human-profile.suite.test.ts?import&browserv=1779790588761",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 6.343,
+          "selfPct": 0,
+          "totalPct": 30.90377588306943
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 1.058,
+          "totalMs": 6.343,
+          "selfPct": 5.154689403166871,
+          "totalPct": 30.90377588306943
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.057,
+          "totalMs": 5.285,
+          "selfPct": 5.149817295980512,
+          "totalPct": 25.749086479902562
+        },
+        {
+          "label": "listen.passive (sensors/pointer-sensor.ts:27)",
+          "functionName": "listen.passive",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.11,
+          "selfPct": 0,
+          "totalPct": 10.28014616321559
+        },
+        {
+          "label": "onInteractionMove (src/engine.ts:124)",
+          "functionName": "onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.11,
+          "selfPct": 0,
+          "totalPct": 10.28014616321559
+        },
+        {
+          "label": "#onInteractionMove (src/engine.ts:434)",
+          "functionName": "#onInteractionMove",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.11,
+          "selfPct": 0,
+          "totalPct": 10.28014616321559
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.311,
+          "totalMs": 1.311,
+          "selfPct": 6.38733252131547,
+          "totalPct": 6.38733252131547
+        },
+        {
+          "label": "onUp (sensors/pointer-sensor.ts:32)",
+          "functionName": "onUp",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.06,
+          "selfPct": 0,
+          "totalPct": 5.164433617539586
+        },
+        {
+          "label": "disarm (sensors/pointer-sensor.ts:17)",
+          "functionName": "disarm",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.06,
+          "selfPct": 0,
+          "totalPct": 5.164433617539586
+        },
+        {
+          "label": "abort",
+          "functionName": "abort",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.06,
+          "totalMs": 1.06,
+          "selfPct": 5.164433617539586,
+          "totalPct": 5.164433617539586
+        },
+        {
+          "label": "onPointerDown (sensors/pointer-sensor.ts:39)",
+          "functionName": "onPointerDown",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 5.154689403166871
+        },
+        {
+          "label": "arm (sensors/pointer-sensor.ts:23)",
+          "functionName": "arm",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 5.154689403166871
+        },
+        {
+          "label": "listen (src/utils.ts:1)",
+          "functionName": "listen",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.058,
+          "selfPct": 0,
+          "totalPct": 5.154689403166871
+        },
+        {
+          "label": "addEventListener",
+          "functionName": "addEventListener",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.058,
+          "totalMs": 1.058,
+          "selfPct": 5.154689403166871,
+          "totalPct": 5.154689403166871
+        },
+        {
+          "label": "#syncDragTransform (src/engine.ts:767)",
+          "functionName": "#syncDragTransform",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.056,
+          "selfPct": 0,
+          "totalPct": 5.144945188794154
+        },
+        {
+          "label": "applyDragTransform (src/apply-transform.ts:8)",
+          "functionName": "applyDragTransform",
+          "url": "http://localhost:63316/src/apply-transform.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.056,
+          "selfPct": 0,
+          "totalPct": 5.144945188794154
+        },
+        {
+          "label": "set_node_key_style (src/utils.ts:4)",
+          "functionName": "set_node_key_style",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.056,
+          "selfPct": 0,
+          "totalPct": 5.144945188794154
+        }
+      ]
+    },
+    {
+      "name": "hot · sortable · reorder",
+      "sampleCount": 9,
+      "durationMs": 21.401,
+      "byCategory": {
+        "neodrag": 0,
+        "browser": 0,
+        "test": 2.127,
+        "other": 19.274
+      },
+      "topSelf": [
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 13.618,
+          "totalMs": 13.618,
+          "selfPct": 63.632540535489,
+          "totalPct": 63.632540535489
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 2.127,
+          "totalMs": 6.491,
+          "selfPct": 9.938787907107145,
+          "totalPct": 30.33035839446755
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 2.123,
+          "totalMs": 2.123,
+          "selfPct": 9.920097191720014,
+          "totalPct": 9.920097191720014
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.292,
+          "totalMs": 1.292,
+          "selfPct": 6.037101070043456,
+          "totalPct": 6.037101070043456
+        },
+        {
+          "label": "setAttribute",
+          "functionName": "setAttribute",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.188,
+          "totalMs": 1.188,
+          "selfPct": 5.551142469978038,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "abort",
+          "functionName": "abort",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.053,
+          "totalMs": 1.053,
+          "selfPct": 4.920330825662353,
+          "totalPct": 4.920330825662353
+        },
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 21.401,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 6.491,
+          "selfPct": 0,
+          "totalPct": 30.33035839446755
+        },
+        {
+          "label": "reports.push.profileScenario.iterations (packages/core/benchmarks/browser/human-profile.suite.test.ts:99)",
+          "functionName": "reports.push.profileScenario.iterations",
+          "url": "http://localhost:63316/workspace/packages/core/benchmarks/browser/human-profile.suite.test.ts?import&browserv=1779790588761",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 6.491,
+          "selfPct": 0,
+          "totalPct": 30.33035839446755
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 4.364,
+          "selfPct": 0,
+          "totalPct": 20.391570487360404
+        },
+        {
+          "label": "onUp (sensors/pointer-sensor.ts:32)",
+          "functionName": "onUp",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.241,
+          "selfPct": 0,
+          "totalPct": 10.47147329564039
+        },
+        {
+          "label": "disarm (sensors/pointer-sensor.ts:17)",
+          "functionName": "disarm",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.053,
+          "selfPct": 0,
+          "totalPct": 4.920330825662353
+        },
+        {
+          "label": "onInteractionEnd (src/engine.ts:125)",
+          "functionName": "onInteractionEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.188,
+          "selfPct": 0,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "#onInteractionEnd (src/engine.ts:511)",
+          "functionName": "#onInteractionEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.188,
+          "selfPct": 0,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "#finishInteraction (src/engine.ts:528)",
+          "functionName": "#finishInteraction",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.188,
+          "selfPct": 0,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "#runEnd (src/engine.ts:661)",
+          "functionName": "#runEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.188,
+          "selfPct": 0,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "end (src/plugins.ts:60)",
+          "functionName": "end",
+          "url": "http://localhost:63316/src/plugins.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.188,
+          "selfPct": 0,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "set_node_dataset (src/utils.ts:10)",
+          "functionName": "set_node_dataset",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.188,
+          "selfPct": 0,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "onPointerDown (sensors/pointer-sensor.ts:39)",
+          "functionName": "onPointerDown",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.123,
+          "selfPct": 0,
+          "totalPct": 9.920097191720014
+        },
+        {
+          "label": "onInteractionStart (src/engine.ts:123)",
+          "functionName": "onInteractionStart",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.123,
+          "selfPct": 0,
+          "totalPct": 9.920097191720014
+        }
+      ],
+      "topTotal": [
+        {
+          "label": "(root)",
+          "functionName": "(root)",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 21.401,
+          "selfPct": 0,
+          "totalPct": 100
+        },
+        {
+          "label": "(program)",
+          "functionName": "(program)",
+          "url": "",
+          "category": "other",
+          "selfMs": 13.618,
+          "totalMs": 13.618,
+          "selfPct": 63.632540535489,
+          "totalPct": 63.632540535489
+        },
+        {
+          "label": "profileScenario (browser/profile-helpers.ts:3)",
+          "functionName": "profileScenario",
+          "url": "http://localhost:63316/benchmarks/browser/profile-helpers.ts",
+          "category": "test",
+          "selfMs": 0,
+          "totalMs": 6.491,
+          "selfPct": 0,
+          "totalPct": 30.33035839446755
+        },
+        {
+          "label": "reports.push.profileScenario.iterations (packages/core/benchmarks/browser/human-profile.suite.test.ts:99)",
+          "functionName": "reports.push.profileScenario.iterations",
+          "url": "http://localhost:63316/workspace/packages/core/benchmarks/browser/human-profile.suite.test.ts?import&browserv=1779790588761",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 6.491,
+          "selfPct": 0,
+          "totalPct": 30.33035839446755
+        },
+        {
+          "label": "dragSteps (browser/helpers.ts:58)",
+          "functionName": "dragSteps",
+          "url": "http://localhost:63316/benchmarks/browser/helpers.ts",
+          "category": "test",
+          "selfMs": 2.127,
+          "totalMs": 6.491,
+          "selfPct": 9.938787907107145,
+          "totalPct": 30.33035839446755
+        },
+        {
+          "label": "dispatchEvent",
+          "functionName": "dispatchEvent",
+          "url": "",
+          "category": "other",
+          "selfMs": 0,
+          "totalMs": 4.364,
+          "selfPct": 0,
+          "totalPct": 20.391570487360404
+        },
+        {
+          "label": "onUp (sensors/pointer-sensor.ts:32)",
+          "functionName": "onUp",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.241,
+          "selfPct": 0,
+          "totalPct": 10.47147329564039
+        },
+        {
+          "label": "onPointerDown (sensors/pointer-sensor.ts:39)",
+          "functionName": "onPointerDown",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.123,
+          "selfPct": 0,
+          "totalPct": 9.920097191720014
+        },
+        {
+          "label": "onInteractionStart (src/engine.ts:123)",
+          "functionName": "onInteractionStart",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.123,
+          "selfPct": 0,
+          "totalPct": 9.920097191720014
+        },
+        {
+          "label": "#onInteractionStart (src/engine.ts:393)",
+          "functionName": "#onInteractionStart",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 2.123,
+          "selfPct": 0,
+          "totalPct": 9.920097191720014
+        },
+        {
+          "label": "getBoundingClientRect",
+          "functionName": "getBoundingClientRect",
+          "url": "",
+          "category": "other",
+          "selfMs": 2.123,
+          "totalMs": 2.123,
+          "selfPct": 9.920097191720014,
+          "totalPct": 9.920097191720014
+        },
+        {
+          "label": "(idle)",
+          "functionName": "(idle)",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.292,
+          "totalMs": 1.292,
+          "selfPct": 6.037101070043456,
+          "totalPct": 6.037101070043456
+        },
+        {
+          "label": "onInteractionEnd (src/engine.ts:125)",
+          "functionName": "onInteractionEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.188,
+          "selfPct": 0,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "#onInteractionEnd (src/engine.ts:511)",
+          "functionName": "#onInteractionEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.188,
+          "selfPct": 0,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "#finishInteraction (src/engine.ts:528)",
+          "functionName": "#finishInteraction",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.188,
+          "selfPct": 0,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "#runEnd (src/engine.ts:661)",
+          "functionName": "#runEnd",
+          "url": "http://localhost:63316/src/engine.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.188,
+          "selfPct": 0,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "end (src/plugins.ts:60)",
+          "functionName": "end",
+          "url": "http://localhost:63316/src/plugins.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.188,
+          "selfPct": 0,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "set_node_dataset (src/utils.ts:10)",
+          "functionName": "set_node_dataset",
+          "url": "http://localhost:63316/src/utils.ts",
+          "category": "browser",
+          "selfMs": 0,
+          "totalMs": 1.188,
+          "selfPct": 0,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "setAttribute",
+          "functionName": "setAttribute",
+          "url": "",
+          "category": "other",
+          "selfMs": 1.188,
+          "totalMs": 1.188,
+          "selfPct": 5.551142469978038,
+          "totalPct": 5.551142469978038
+        },
+        {
+          "label": "disarm (sensors/pointer-sensor.ts:17)",
+          "functionName": "disarm",
+          "url": "http://localhost:63316/src/sensors/pointer-sensor.ts",
+          "category": "neodrag",
+          "selfMs": 0,
+          "totalMs": 1.053,
+          "selfPct": 0,
+          "totalPct": 4.920330825662353
+        }
+      ]
+    }
+  ]
+}
