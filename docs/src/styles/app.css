@@ -11,7 +11,6 @@
 	--color-primary: var(--app-color-primary);
 	--color-primary-contrast: var(--app-color-primary-contrast);
 	--color-brand: var(--secondary-color, var(--app-color-primary));
-	--color-accent: var(--color-brand);
 	--color-border: color-mix(in lch, var(--app-color-dark), transparent 88%);
 	--color-border-strong: color-mix(in lch, var(--app-color-dark), transparent 82%);
 	--color-panel: color-mix(in lch, var(--app-color-shell), var(--color-brand) 5%);
@@ -298,6 +297,27 @@
 
 	.dock-angular-bevel--brand > .dock-angular-bevel__fill {
 		background: color-mix(in lch, var(--color-brand), transparent 90%);
+	}
+
+	body.docs-route {
+		--chip-border: color-mix(in lch, var(--color-brand), transparent 74%);
+		--chip-fill: color-mix(in lch, var(--app-color-shell), var(--color-brand) 4%);
+		--chip-label: color-mix(in lch, var(--color-brand), var(--app-color-dark) 18%);
+	}
+
+	html[data-theme='dark'] body.docs-route {
+		--chip-border: color-mix(in lch, var(--color-brand), transparent 68%);
+		--chip-fill: color-mix(in lch, var(--app-color-shell), var(--color-brand) 7%);
+		--chip-label: color-mix(in lch, var(--color-brand), var(--app-color-dark) 8%);
+	}
+
+	body.docs-route .dock-angular-bevel--brand {
+		background: var(--chip-border);
+	}
+
+	body.docs-route .dock-angular-bevel--brand > .dock-angular-bevel__fill {
+		background: var(--chip-fill);
+		color: var(--chip-label);
 	}
 
 	.site-glow-layer,
