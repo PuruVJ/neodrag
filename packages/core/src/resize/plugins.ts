@@ -6,7 +6,8 @@ import { clamp } from '../lib/math.ts';
 import { defineResizePlugin, RESIZE_HANDLE_ATTR, type ResizeEdge } from './types.ts';
 
 const RESIZE_HANDLES_KEY = Symbol('neodrag.resizeHandles');
-const SIZE_BOUNDS_KEY = Symbol('neodrag.sizeBounds');
+export const SIZE_BOUNDS_PLUGIN_KEY = Symbol('neodrag.sizeBounds');
+const SIZE_BOUNDS_KEY = SIZE_BOUNDS_PLUGIN_KEY;
 const RESIZE_AXIS_KEY = Symbol('neodrag.resizeAxis');
 const ASPECT_RATIO_KEY = Symbol('neodrag.aspectRatio');
 const RESIZE_EVENTS_KEY = Symbol('neodrag.resizeEvents');

@@ -2,7 +2,7 @@
 	import { Length, Neodrag } from '@neodrag/core';
 	import { Draggable } from '@neodrag/svelte';
 	import { ControlFrom, controls } from '@neodrag/svelte/plugins';
-	import { Resizable, resizeHandles, sizeBounds } from '@neodrag/svelte/resize';
+	import { Resizable, resizeHandles } from '@neodrag/svelte/resize';
 
 	const engine = new Neodrag({ dev: false });
 	const length = new Length({ units: 'preserve' });
@@ -16,15 +16,9 @@
 	const resize = new Resizable({
 		engine,
 		length,
-		plugins: [
-			resizeHandles({ edges: 'all', size: 10, cornerSize: 22 }),
-			sizeBounds({
-				minWidth: 220,
-				minHeight: 140,
-				maxWidth: 'min(92vw, 720px)',
-				maxHeight: 'min(82vh, 520px)',
-			}),
-		],
+		minSize: { width: 220, height: 140 },
+		maxSize: { width: 'min(92vw, 720px)', height: 'min(82vh, 520px)' },
+		plugins: [resizeHandles({ edges: 'all', size: 10, cornerSize: 22 })],
 	});
 </script>
 

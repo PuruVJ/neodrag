@@ -19,7 +19,16 @@ export {
 	resolveDragThreshold,
 	type ResolvedDragThreshold,
 } from './threshold.ts';
-export { Resizable, type ResizableOptions } from './resizable-binding.ts';
+export {
+	Resizable,
+	composeResizePluginList,
+	resolveResizeSizeBounds,
+	type ResizableOptions,
+	type ResizeDimensions,
+	type ResizeSizeBoundsInput,
+	type ResizeSizeInput,
+	type ResolvedResizeSizeBounds,
+} from './resizable-binding.ts';
 export type { ResizeApplier } from './apply-resize.ts';
 export { BindingHandle, DragHandle, DropHandle, ResizeHandle, type NeodragHost } from './handles.ts';
 export { transitionSession } from './state-machine.ts';
