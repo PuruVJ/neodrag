@@ -11,6 +11,10 @@
 	import { interact_outside } from '$attachments/interact-outside';
 	import Nav from '$components/docs/Nav.svelte';
 	import ThemeSwitcher from '$components/ThemeSwitcher.svelte';
+	import {
+		apply_docs_route_context,
+		framework_from_path,
+	} from '$helpers/framework-route';
 	import { FRAMEWORKS, type Framework } from '$helpers/constants';
 	import { Draggable } from '@neodrag/svelte';
 	import { ControlFrom, controls } from '@neodrag/svelte/plugins';
@@ -21,10 +25,11 @@
 	import { slide } from 'svelte/transition';
 	import DockItem from './DockItem.svelte';
 
+	type NavList = ReturnType<typeof import('$/nav').get_nav_list>;
+
 	type Props = {
 		pathname: string;
-		selected: Framework;
-		nav_list: ReturnType<typeof import('$/nav').get_nav_list>;
+		nav_by_framework: Record<string, NavList>;
 	};
 
 	class MenuView {
@@ -43,20 +48,44 @@
 		}
 	}
 
-	const { pathname, selected, nav_list }: Props = $props();
+	const { pathname: initial_pathname, nav_by_framework }: Props = $props();
 
 	const frameworks: Framework[] = ['solid', 'react', 'svelte', 'vue', 'vanilla'];
 
+	let pathname = $state(initial_pathname);
 	let dock_mouse_x = $state<number | null>(null);
 	let menu_view = new MenuView();
 
-	const REGEX = /\/docs\/(svelte|react|solid|vanilla|vue)/gi;
+	const selected = $derived.by(() => {
+		const fw = framework_from_path(pathname);
+		return fw && fw !== 'core' ? fw : undefined;
+	});
+
+	const nav_list = $derived(
+		selected ? (nav_by_framework[selected] ?? nav_by_framework.svelte) : nav_by_framework.svelte,
+	);
+
+	const FRAMEWORK_PATH_RE = /\/docs\/(svelte|react|solid|vanilla|vue)/i;
 
 	function replace_framework_from_pathname(framework: Framework) {
 		return pathname === '/'
 			? `${pathname}docs/${framework}`
-			: pathname.replace(REGEX, `/docs/${framework}`);
+			: pathname.replace(FRAMEWORK_PATH_RE, `/docs/${framework}`);
 	}
+
+	function sync_route_from_location() {
+		pathname = window.location.pathname;
+		apply_docs_route_context(pathname);
+	}
+
+	$effect(() => {
+		pathname = initial_pathname;
+	});
+
+	$effect(() => {
+		document.addEventListener('astro:page-load', sync_route_from_location);
+		return () => document.removeEventListener('astro:page-load', sync_route_from_location);
+	});
 
 	const Icons: Record<Framework, Component> = {
 		svelte: SvelteIcon,

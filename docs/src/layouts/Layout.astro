@@ -6,6 +6,7 @@ import '../styles/app.css';
 import { get_nav_list } from '$/nav';
 import Dock from '$components/nav/Dock.svelte';
 import PawCursor from '$components/PawCursor.svelte';
+import { framework_from_path, is_docs_path } from '$helpers/framework-route';
 import { SEO } from 'astro-seo';
 import { ClientRouter } from 'astro:transitions';
 
@@ -15,10 +16,15 @@ export interface Props {
 
 const { title } = Astro.props;
 
-const framework = /\/docs\/(svelte|react|solid|vanilla|vue|core)/gi.exec(Astro.url.pathname)?.[1];
-const is_docs_route = Astro.url.pathname.startsWith('/docs');
+const framework = framework_from_path(Astro.url.pathname);
+const is_docs_route = is_docs_path(Astro.url.pathname);
 
-const nav_list = get_nav_list(framework ?? '');
+const nav_by_framework = Object.fromEntries(
+	(['svelte', 'react', 'vue', 'solid', 'vanilla', 'core'] as const).map((name) => [
+		name,
+		get_nav_list(name),
+	]),
+);
 ---
 
 <!doctype html>
@@ -91,7 +97,24 @@ const nav_list = get_nav_list(framework ?? '');
 	<body data-framework={framework} class:list={[{ 'docs-route': is_docs_route }]}>
 		{is_docs_route && <div class="docs-page-grid" aria-hidden="true" />}
 		<script is:inline data-astro-rerun>
+			function apply_docs_route_context() {
+				const match = location.pathname.match(/\/docs\/(svelte|react|solid|vanilla|vue|core)/i);
+				const framework = match?.[1];
+				const is_docs = location.pathname.startsWith('/docs');
+
+				if (framework) {
+					document.documentElement.dataset.framework = framework;
+				} else {
+					delete document.documentElement.dataset.framework;
+				}
+
+				document.body.classList.toggle('docs-route', is_docs);
+			}
+
 			window.__neodrag_apply_theme?.();
+			apply_docs_route_context();
+
+			document.addEventListener('astro:page-load', apply_docs_route_context);
 			matchMedia('(prefers-color-scheme: dark)').addEventListener(
 				'change',
 				window.__neodrag_apply_theme,
@@ -103,9 +126,8 @@ const nav_list = get_nav_list(framework ?? '');
 
 		<div>
 			<Dock
-				selected={framework}
 				pathname={Astro.url.pathname}
-				nav_list={nav_list}
+				nav_by_framework={nav_by_framework}
 				client:only="svelte"
 				transition:persist="dock"
 			/>
