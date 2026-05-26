@@ -40,8 +40,16 @@ import { DEFAULT_DRAG_PLUGINS, DEFAULTS } from './defaults.ts';
 import { applyDragTransform, type TransformApplier } from './apply-transform.ts';
 import { DropTargetTracker, type DropTargetHost } from './drop-targets.ts';
 import { createDragSession, resolveEndReason } from './session.ts';
+import {
+	interactionPointerId,
+	isPointerInput,
+	KEYBOARD_POINTER_ID,
+	type InteractionInput,
+	type PointerInteractionInput,
+} from './interaction-input.ts';
 import { defaultSensors } from './sensors/defaults.ts';
 import type { Sensor, SensorHost } from './sensors/types.ts';
+import { setDragLastInteraction, setDropHostLastInteraction, setResizeLastInteraction } from './set-last-interaction.ts';
 import { transitionSession } from './state-machine.ts';
 import {
 	assertNamedPluginKeys,
@@ -144,6 +152,7 @@ export class Neodrag {
 	readonly #dropHost: DropCtxHost = {
 		pointerX: 0,
 		pointerY: 0,
+		lastInput: null,
 		lastEvent: null,
 		session: null!,
 	};
@@ -157,7 +166,7 @@ export class Neodrag {
 			getActive: () => this.#active,
 			getActiveSource: () => this.#activeSource,
 			getDropTargets: () => this.#dropTargets,
-			runDropHook: (inst, hook, e) => this.#runDropHook(inst, hook, e),
+			runDropHook: (inst, hook, input) => this.#runDropHook(inst, hook, input),
 		};
 		this.#dropTracker = new DropTargetTracker(this.#dropHostBridge);
 
@@ -174,9 +183,9 @@ export class Neodrag {
 			setPointerDisarm: (disarm) => {
 				this.#pointerDisarm = disarm;
 			},
-			onPointerDown: (e) => this.#onPointerDown(e),
-			onPointerMove: (e) => this.#onPointerMove(e),
-			onPointerUp: (e) => this.#onPointerUp(e),
+			onInteractionStart: (input) => this.#onInteractionStart(input),
+			onInteractionMove: (input) => this.#onInteractionMove(input),
+			onInteractionEnd: (input) => this.#onInteractionEnd(input),
 			cancelActive: (reason) => this.#cancelSession(reason),
 		};
 	}
@@ -397,7 +406,7 @@ export class Neodrag {
 		this.#teardownSensors();
 	}
 
-	#beginSession(source: DragInstance, e: PointerEvent) {
+	#beginSession(source: DragInstance, input: InteractionInput) {
 		const rect = source.rootNode.getBoundingClientRect();
 		this.#active = {
 			state: transitionSession('idle', { type: 'pointerdown' }),
@@ -405,19 +414,19 @@ export class Neodrag {
 			visualNode: source.visualNode,
 			sourceRect: rect,
 			visualRect: rect,
-			pointerX: e.clientX,
-			pointerY: e.clientY,
+			pointerX: input.clientX,
+			pointerY: input.clientY,
 			deltaX: 0,
 			deltaY: 0,
 			data: undefined,
 			overTargets: [],
 			private: new SessionPrivate(),
 			propagationStopped: false,
-			pointerId: e.pointerId,
+			pointerId: interactionPointerId(input),
 			startedAt: Date.now(),
 		};
 		this.#activeSource = source;
-		this.#activePointerId = e.pointerId;
+		this.#activePointerId = interactionPointerId(input);
 
 		this.#activeSessionView = createDragSession(this.#active, (node) => this.#activeSource?.setVisual(node));
 		source.bindSession(this.#activeSessionView, () => {
@@ -430,13 +439,13 @@ export class Neodrag {
 
 	#cancelSession(reason: EndReason) {
 		if (this.#activeResizeSource?.isInteracting) {
-			const e = this.#activeResizeSource.lastEvent;
-			if (e) this.#finishResize('cancel', e);
+			const input = this.#activeResizeSource.lastInput;
+			if (input) this.#finishResize('cancel', input);
 			return;
 		}
 		if (!this.#active || !this.#activeSource) return;
-		const e = this.#activeSource.lastEvent;
-		if (e) this.#finishInteraction(reason, e);
+		const input = this.#activeSource.lastInput;
+		if (input) this.#finishInteraction(reason, input);
 	}
 
 	#resolveDelegateTarget(): HTMLElement {
@@ -458,32 +467,35 @@ export class Neodrag {
 		this.#pointerDisarm = null;
 	}
 
-	#onPointerDown(e: PointerEvent) {
-		if (e.button === 2) return;
+	#onInteractionStart(input: InteractionInput) {
+		if (isPointerInput(input) && input.pointer.button === 2) return;
 		if (this.#activeSource?.isInteracting || this.#activeResizeSource?.isInteracting) return;
 
-		const resizeHit = this.#findResizeTarget(e);
-		if (resizeHit) {
-			const { inst, anchor, handleNode } = resizeHit;
-			inst.cachedRootNodeRect = inst.rootNode.getBoundingClientRect();
-			inst.cachedTargetRect = inst.targetNode.getBoundingClientRect();
-			inst.inverseScale = this.#inverseScaleResize(inst);
-			inst.loadSizeFromNode();
-			inst.initialWidth = inst.width;
-			inst.initialHeight = inst.height;
-			inst.initialAuthored = inst.lengthAdapter.cloneAuthored(inst.unitPreserve);
-			inst.initialPointerX = e.clientX;
-			inst.initialPointerY = e.clientY;
-			inst.anchor = anchor;
-			inst.handleNode = handleNode;
-			inst.isInteracting = true;
-			inst.cancelled = false;
-			inst.lastEvent = e;
-			this.#beginResizeSession(inst, e);
-			return;
+		if (isPointerInput(input)) {
+			const e = input.native;
+			const resizeHit = this.#findResizeTarget(e);
+			if (resizeHit) {
+				const { inst, anchor, handleNode } = resizeHit;
+				inst.cachedRootNodeRect = inst.rootNode.getBoundingClientRect();
+				inst.cachedTargetRect = inst.targetNode.getBoundingClientRect();
+				inst.inverseScale = this.#inverseScaleResize(inst);
+				inst.loadSizeFromNode();
+				inst.initialWidth = inst.width;
+				inst.initialHeight = inst.height;
+				inst.initialAuthored = inst.lengthAdapter.cloneAuthored(inst.unitPreserve);
+				inst.initialPointerX = input.clientX;
+				inst.initialPointerY = input.clientY;
+				inst.anchor = anchor;
+				inst.handleNode = handleNode;
+				inst.isInteracting = true;
+				inst.cancelled = false;
+				setResizeLastInteraction(inst, input);
+				this.#beginResizeSession(inst, input);
+				return;
+			}
 		}
 
-		const node = this.#findDragSource(e);
+		const node = this.#resolveDragSource(input);
 		if (!node) return;
 
 		const inst = this.#dragSources.get(node)!;
@@ -491,38 +503,39 @@ export class Neodrag {
 
 		inst.cachedRootNodeRect = node.getBoundingClientRect();
 		inst.inverseScale = this.#inverseScale(inst);
-		inst.initialX = e.clientX - inst.offsetX / inst.inverseScale;
-		inst.initialY = e.clientY - inst.offsetY / inst.inverseScale;
+		inst.initialX = input.clientX - inst.offsetX / inst.inverseScale;
+		inst.initialY = input.clientY - inst.offsetY / inst.inverseScale;
 		inst.isInteracting = true;
 		inst.cancelled = false;
-		inst.lastEvent = e;
-		this.#dropHost.lastEvent = e;
+		setDragLastInteraction(inst, input);
+		setDropHostLastInteraction(this.#dropHost, input);
 		this.#dropTracker.reset();
-		this.#beginSession(inst, e);
+		this.#beginSession(inst, input);
 	}
 
-	#onPointerMove(e: PointerEvent) {
-		if (this.#activePointerId !== null && e.pointerId !== this.#activePointerId) return;
+	#onInteractionMove(input: InteractionInput) {
+		if (this.#activePointerId !== null && interactionPointerId(input) !== this.#activePointerId)
+			return;
 
 		if (this.#activeResizeSource?.isInteracting) {
-			this.#onResizePointerMove(e);
+			if (isPointerInput(input)) this.#onResizeInteractionMove(input);
 			return;
 		}
 
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
 
-		inst.lastEvent = e;
-		this.#dropHost.lastEvent = e;
+		setDragLastInteraction(inst, input);
+		setDropHostLastInteraction(this.#dropHost, input);
 		if (this.#active) {
-			this.#active.pointerX = e.clientX;
-			this.#active.pointerY = e.clientY;
-			this.#dropHost.pointerX = e.clientX;
-			this.#dropHost.pointerY = e.clientY;
+			this.#active.pointerX = input.clientX;
+			this.#active.pointerY = input.clientY;
+			this.#dropHost.pointerX = input.clientX;
+			this.#dropHost.pointerY = input.clientY;
 		}
 
 		if (!inst.isDragging) {
-			const startOk = this.#runStart(inst, inst.dragCtx, e);
+			const startOk = this.#runStart(inst, inst.dragCtx, input);
 			inst.effects.flush();
 			if (!startOk) {
 				if (this.#active) {
@@ -537,30 +550,29 @@ export class Neodrag {
 				this.#active.state = transitionSession(this.#active.state, { type: 'threshold-passed' });
 			}
 
-			inst.pointerCapturedId = e.pointerId;
-			try {
-				inst.visualNode.setPointerCapture(e.pointerId);
-			} catch {
-				this.#cleanupPointer(e.pointerId);
-				return;
+			if (isPointerInput(input)) {
+				inst.pointerCapturedId = input.pointer.pointerId;
+				try {
+					inst.visualNode.setPointerCapture(input.pointer.pointerId);
+				} catch {
+					this.#cleanupPointer(input.pointer.pointerId);
+					return;
+				}
+			} else {
+				inst.pointerCapturedId = KEYBOARD_POINTER_ID;
 			}
 		}
 
-		e.preventDefault();
+		if (isPointerInput(input)) input.native.preventDefault();
 
-		const target_offset_x = (e.clientX - inst.initialX) * inst.inverseScale;
-		const target_offset_y = (e.clientY - inst.initialY) * inst.inverseScale;
-		inst.deltaX = target_offset_x - inst.offsetX;
-		inst.deltaY = target_offset_y - inst.offsetY;
-		inst.proposedX = inst.deltaX;
-		inst.proposedY = inst.deltaY;
+		this.#applyDragDelta(inst, input);
 
 		if (this.#active) {
 			this.#active.deltaX = inst.deltaX;
 			this.#active.deltaY = inst.deltaY;
 		}
 
-		this.#runDrag(inst, inst.dragCtx, e);
+		this.#runDrag(inst, inst.dragCtx, input);
 		inst.offsetX += inst.proposedX;
 		inst.offsetY += inst.proposedY;
 		inst.proposedX = 0;
@@ -568,30 +580,52 @@ export class Neodrag {
 		inst.dragCtx.effect(() => this.#syncDragTransform(inst));
 		inst.effects.flush();
 
-		if (this.#dropCount > 0) this.#dropTracker.queueUpdate(e);
+		if (this.#dropCount > 0) this.#dropTracker.queueUpdate(input);
 	}
 
-	#onPointerUp(e: PointerEvent) {
-		if (this.#activePointerId !== null && e.pointerId !== this.#activePointerId) return;
+	#applyDragDelta(inst: DragInstance, input: InteractionInput) {
+		if (input.kind === 'pointer') {
+			const target_offset_x = (input.clientX - inst.initialX) * inst.inverseScale;
+			const target_offset_y = (input.clientY - inst.initialY) * inst.inverseScale;
+			inst.deltaX = target_offset_x - inst.offsetX;
+			inst.deltaY = target_offset_y - inst.offsetY;
+			inst.proposedX = inst.deltaX;
+			inst.proposedY = inst.deltaY;
+			return;
+		}
+		if (input.delta) {
+			inst.deltaX = input.delta.x;
+			inst.deltaY = input.delta.y;
+			inst.proposedX = input.delta.x;
+			inst.proposedY = input.delta.y;
+		}
+	}
+
+	#onInteractionEnd(input: InteractionInput) {
+		if (this.#activePointerId !== null && interactionPointerId(input) !== this.#activePointerId)
+			return;
 
 		if (this.#activeResizeSource?.isInteracting) {
 			const reason = resolveResizeEndReason(this.#activeResize, this.#activeResizeSource.cancelled);
-			this.#finishResize(reason, e);
+			this.#finishResize(reason, input);
 			return;
 		}
 
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
 
+		setDragLastInteraction(inst, input);
+		setDropHostLastInteraction(this.#dropHost, input);
+
 		if (inst.isDragging && this.#dropCount > 0) {
-			this.#dropTracker.flush(e);
+			this.#dropTracker.flush(input);
 		}
 
 		const reason = resolveEndReason(this.#active, inst.cancelled);
-		this.#finishInteraction(reason, e);
+		this.#finishInteraction(reason, input);
 	}
 
-	#finishInteraction(reason: EndReason, e: PointerEvent) {
+	#finishInteraction(reason: EndReason, input: InteractionInput) {
 		const inst = this.#activeSource;
 		if (!inst) return;
 
@@ -611,18 +645,18 @@ export class Neodrag {
 			inst.visualNode.releasePointerCapture(inst.pointerCapturedId);
 		}
 
-		this.#runEnd(inst, inst.dragCtx, e, reason);
+		this.#runEnd(inst, inst.dragCtx, input, reason);
 		inst.effects.flush();
 
 		const overDrops = this.#dropTracker.getOverDrops();
 		if (reason === 'drop' && overDrops.length > 0) {
 			const top = overDrops[overDrops.length - 1]!;
-			this.#runDropHook(top, 'drop', e);
+			this.#runDropHook(top, 'drop', input);
 			top.effects.flush();
 		}
 
 		for (const drop of overDrops) {
-			if (drop.isOver) this.#runDropHook(drop, 'leave', e);
+			if (drop.isOver) this.#runDropHook(drop, 'leave', input);
 			drop.isOver = false;
 		}
 		if (this.#active) this.#active.overTargets.length = 0;
@@ -653,9 +687,9 @@ export class Neodrag {
 		const inst = this.#activeSource;
 		if (!inst) return;
 		inst.cancelled = true;
-		const e = inst.lastEvent;
-		if (e) {
-			this.#finishInteraction('cancel', e);
+		const input = inst.lastInput;
+		if (input) {
+			this.#finishInteraction('cancel', input);
 			return;
 		}
 		this.#clearSessionState(inst);
@@ -664,9 +698,9 @@ export class Neodrag {
 	#endActiveInteraction(reason: EndReason) {
 		const resizeInst = this.#activeResizeSource;
 		if (resizeInst?.isInteracting) {
-			const e = resizeInst.lastEvent;
-			if (e && this.#activeResize) {
-				this.#finishResize(reason === 'cancel' ? 'cancel' : 'commit', e);
+			const input = resizeInst.lastInput;
+			if (input && this.#activeResize) {
+				this.#finishResize(reason === 'cancel' ? 'cancel' : 'commit', input);
 				return;
 			}
 			this.#clearResizeSessionState(resizeInst);
@@ -675,9 +709,9 @@ export class Neodrag {
 
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
-		const e = inst.lastEvent;
-		if (e && this.#active) {
-			this.#finishInteraction(reason, e);
+		const input = inst.lastInput;
+		if (input && this.#active) {
+			this.#finishInteraction(reason, input);
 			return;
 		}
 		this.#clearSessionState(inst);
@@ -698,7 +732,7 @@ export class Neodrag {
 		this.#dropTracker.reset();
 	}
 
-	#runStart(inst: DragInstance, ctx: DragCtx, e: PointerEvent): boolean {
+	#runStart(inst: DragInstance, ctx: DragCtx, input: InteractionInput): boolean {
 		const chain = inst.startChain;
 		for (let i = 0; i < chain.length; i++) {
 			const plugin = chain[i]!;
@@ -708,7 +742,7 @@ export class Neodrag {
 				inst,
 				plugin.key,
 				{ phase: 'start', plugin: { key: plugin.key, hook: 'start' }, node: inst.rootNode },
-				() => plugin.start!(ctx, state, e),
+				() => plugin.start!(ctx, state, input),
 			);
 			if (out === PLUGIN_FAILED) return false;
 			if (out === false) return false;
@@ -717,7 +751,7 @@ export class Neodrag {
 		return true;
 	}
 
-	#runDrag(inst: DragInstance, ctx: DragCtx, e: PointerEvent) {
+	#runDrag(inst: DragInstance, ctx: DragCtx, input: InteractionInput) {
 		const chain = inst.dragChain;
 		const info = { phase: 'drag' as const, node: inst.rootNode };
 
@@ -731,7 +765,7 @@ export class Neodrag {
 				inst,
 				plugin.key,
 				{ ...info, plugin: { key: plugin.key, hook: 'drag' } },
-				() => plugin.drag!(ctx, state, e),
+				() => plugin.drag!(ctx, state, input),
 			);
 			if (patch === PLUGIN_FAILED) continue;
 
@@ -744,7 +778,7 @@ export class Neodrag {
 		}
 	}
 
-	#runEnd(inst: DragInstance, ctx: DragCtx, e: PointerEvent, reason: EndReason) {
+	#runEnd(inst: DragInstance, ctx: DragCtx, input: InteractionInput, reason: EndReason) {
 		const chain = inst.endChain;
 		for (let i = 0; i < chain.length; i++) {
 			const plugin = chain[i]!;
@@ -755,7 +789,7 @@ export class Neodrag {
 				inst,
 				plugin.key,
 				{ phase: 'end', plugin: { key: plugin.key, hook: 'end' }, node: inst.rootNode },
-				() => plugin.end!(ctx, state, e, reason),
+				() => plugin.end!(ctx, state, input, reason),
 			);
 		}
 	}
@@ -776,7 +810,7 @@ export class Neodrag {
 	#runDropHook(
 		inst: DropInstance,
 		hook: 'enter' | 'over' | 'leave' | 'drop',
-		e: PointerEvent,
+		input: InteractionInput,
 	): boolean | void {
 		const ctx = inst.dropCtx;
 		const chain = this.#dropChain(inst, hook);
@@ -793,12 +827,28 @@ export class Neodrag {
 				inst,
 				plugin.key,
 				{ ...info, plugin: { key: plugin.key, hook } },
-				() => handler(ctx, state, e),
+				() => handler(ctx, state, input),
 			);
 			if (out === PLUGIN_FAILED) continue;
 			if (hook === 'enter' && out === false) return false;
 		}
 		return true;
+	}
+
+	#resolveDragSource(input: InteractionInput): HTMLElement | SVGElement | null {
+		if (input.kind === 'pointer') return this.#findDragSource(input.native);
+		if (input.kind === 'keyboard' || input.kind === 'programmatic') {
+			const target = input.target;
+			if (target instanceof HTMLElement && this.#dragSources.has(target)) return target;
+			if (
+				target instanceof SVGElement &&
+				!is_svg_svg_element(target) &&
+				this.#dragSources.has(target)
+			) {
+				return target;
+			}
+		}
+		return null;
 	}
 
 	#findDragSource(e: PointerEvent): HTMLElement | SVGElement | null {
@@ -1058,25 +1108,25 @@ export class Neodrag {
 		return this.#idleResizeSession;
 	}
 
-	#beginResizeSession(source: ResizeInstance, e: PointerEvent) {
+	#beginResizeSession(source: ResizeInstance, input: InteractionInput) {
 		const rect = source.rootNode.getBoundingClientRect();
 		this.#activeResize = {
 			state: transitionSession('idle', { type: 'pointerdown' }),
 			sourceNode: source.rootNode,
 			sourceRect: rect,
 			anchor: source.anchor,
-			pointerX: e.clientX,
-			pointerY: e.clientY,
+			pointerX: input.clientX,
+			pointerY: input.clientY,
 			deltaWidth: 0,
 			deltaHeight: 0,
 			width: source.width,
 			height: source.height,
 			data: undefined,
-			pointerId: e.pointerId,
+			pointerId: interactionPointerId(input),
 			startedAt: Date.now(),
 		};
 		this.#activeResizeSource = source;
-		this.#activePointerId = e.pointerId;
+		this.#activePointerId = interactionPointerId(input);
 
 		this.#activeResizeSessionView = createResizeSession(this.#activeResize);
 		source.bindSession(this.#activeResizeSessionView, () => {
@@ -1086,18 +1136,19 @@ export class Neodrag {
 		});
 	}
 
-	#onResizePointerMove(e: PointerEvent) {
+	#onResizeInteractionMove(input: PointerInteractionInput) {
+		const e = input.native;
 		const inst = this.#activeResizeSource;
 		if (!inst?.isInteracting) return;
 
-		inst.lastEvent = e;
+		setResizeLastInteraction(inst, input);
 		if (this.#activeResize) {
-			this.#activeResize.pointerX = e.clientX;
-			this.#activeResize.pointerY = e.clientY;
+			this.#activeResize.pointerX = input.clientX;
+			this.#activeResize.pointerY = input.clientY;
 		}
 
 		if (!inst.isResizing) {
-			const startOk = this.#runResizeStart(inst, inst.resizeCtx, e);
+			const startOk = this.#runResizeStart(inst, inst.resizeCtx, input);
 			inst.effects.flush();
 			if (!startOk) {
 				if (this.#activeResize) {
@@ -1113,11 +1164,11 @@ export class Neodrag {
 			}
 
 			const captureNode = inst.handleNode ?? (inst.rootNode as HTMLElement);
-			inst.pointerCapturedId = e.pointerId;
+			inst.pointerCapturedId = input.pointer.pointerId;
 			try {
-				captureNode.setPointerCapture(e.pointerId);
+				captureNode.setPointerCapture(input.pointer.pointerId);
 			} catch {
-				this.#cleanupResizePointer(e.pointerId);
+				this.#cleanupResizePointer(input.pointer.pointerId);
 				return;
 			}
 		}
@@ -1130,8 +1181,8 @@ export class Neodrag {
 			inst.initialPointerY,
 			inst.initialWidth,
 			inst.initialHeight,
-			e.clientX,
-			e.clientY,
+			input.clientX,
+			input.clientY,
 			inst.inverseScale,
 		);
 		inst.deltaWidth = target.width - inst.width;
@@ -1144,7 +1195,7 @@ export class Neodrag {
 			this.#activeResize.deltaHeight = inst.deltaHeight;
 		}
 
-		this.#runResize(inst, inst.resizeCtx, e);
+		this.#runResize(inst, inst.resizeCtx, input);
 		inst.width += inst.proposedWidth;
 		inst.height += inst.proposedHeight;
 		inst.proposedWidth = 0;
@@ -1159,7 +1210,7 @@ export class Neodrag {
 		inst.effects.flush();
 	}
 
-	#finishResize(reason: ResizeEndReason, e: PointerEvent) {
+	#finishResize(reason: ResizeEndReason, input: InteractionInput) {
 		const inst = this.#activeResizeSource;
 		if (!inst) return;
 
@@ -1172,7 +1223,7 @@ export class Neodrag {
 			captureNode.releasePointerCapture(inst.pointerCapturedId);
 		}
 
-		this.#runResizeEnd(inst, inst.resizeCtx, e, reason);
+		this.#runResizeEnd(inst, inst.resizeCtx, input, reason);
 		inst.effects.flush();
 
 		if (reason === 'cancel') {
@@ -1211,9 +1262,9 @@ export class Neodrag {
 		const inst = this.#activeResizeSource;
 		if (!inst) return;
 		inst.cancelled = true;
-		const e = inst.lastEvent;
-		if (e) {
-			this.#finishResize('cancel', e);
+		const last = inst.lastInput;
+		if (last) {
+			this.#finishResize('cancel', last);
 			return;
 		}
 		this.#clearResizeSessionState(inst);
@@ -1285,7 +1336,7 @@ export class Neodrag {
 		return Number.isFinite(scale) && scale > 0 ? scale : 1;
 	}
 
-	#runResizeStart(inst: ResizeInstance, ctx: ResizeCtx, e: PointerEvent): boolean {
+	#runResizeStart(inst: ResizeInstance, ctx: ResizeCtx, input: InteractionInput): boolean {
 		const chain = inst.startChain;
 		for (let i = 0; i < chain.length; i++) {
 			const plugin = chain[i]!;
@@ -1295,7 +1346,7 @@ export class Neodrag {
 				inst,
 				plugin.key,
 				{ phase: 'start', plugin: { key: plugin.key, hook: 'start' }, node: inst.rootNode },
-				() => plugin.start!(ctx, state, e),
+				() => plugin.start!(ctx, state, input),
 			);
 			if (out === PLUGIN_FAILED) return false;
 			if (out === false) return false;
@@ -1304,7 +1355,7 @@ export class Neodrag {
 		return true;
 	}
 
-	#runResize(inst: ResizeInstance, ctx: ResizeCtx, e: PointerEvent) {
+	#runResize(inst: ResizeInstance, ctx: ResizeCtx, input: InteractionInput) {
 		const chain = inst.resizeChain;
 		const info = { phase: 'resize' as const, node: inst.rootNode };
 
@@ -1318,7 +1369,7 @@ export class Neodrag {
 				inst,
 				plugin.key,
 				{ ...info, plugin: { key: plugin.key, hook: 'resize' } },
-				() => plugin.resize!(ctx, state, e),
+				() => plugin.resize!(ctx, state, input),
 			);
 			if (patch === PLUGIN_FAILED) continue;
 
@@ -1331,7 +1382,7 @@ export class Neodrag {
 		}
 	}
 
-	#runResizeEnd(inst: ResizeInstance, ctx: ResizeCtx, e: PointerEvent, reason: ResizeEndReason) {
+	#runResizeEnd(inst: ResizeInstance, ctx: ResizeCtx, input: InteractionInput, reason: ResizeEndReason) {
 		const chain = inst.endChain;
 		for (let i = 0; i < chain.length; i++) {
 			const plugin = chain[i]!;
@@ -1342,7 +1393,7 @@ export class Neodrag {
 				inst,
 				plugin.key,
 				{ phase: 'end', plugin: { key: plugin.key, hook: 'end' }, node: inst.rootNode },
-				() => plugin.end!(ctx, state, e, reason),
+				() => plugin.end!(ctx, state, input, reason),
 			);
 		}
 	}

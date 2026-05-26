@@ -1,3 +1,4 @@
+import type { InteractionInput } from '../interaction-input.ts';
 import type { LengthAdapter } from '../length-runtime.ts';
 import type { SizeInput } from '../length-runtime.ts';
 import type { SessionState } from '../types.ts';
@@ -42,6 +43,7 @@ export interface ResizeCtx {
 	readonly rootNode: HTMLElement | SVGElement;
 	readonly targetNode: HTMLElement | SVGElement;
 	readonly handleNode: HTMLElement | null;
+	readonly lastInput: InteractionInput | null;
 	readonly lastEvent: PointerEvent | null;
 	readonly cachedRootNodeRect: DOMRect;
 	readonly cachedTargetRect: DOMRect;
@@ -56,10 +58,10 @@ export interface ResizePlugin<S = unknown> {
 	phase?: 'pre' | 'resolve' | 'post';
 	skipOnCancel?: boolean;
 	init?(ctx: ResizeCtx): S;
-	start?(ctx: ResizeCtx, state: S, event: PointerEvent): boolean | void;
-	resize?(ctx: ResizeCtx, state: S, event: PointerEvent): SizePatch | void;
+	start?(ctx: ResizeCtx, state: S, input: InteractionInput): boolean | void;
+	resize?(ctx: ResizeCtx, state: S, input: InteractionInput): SizePatch | void;
 	update?(ctx: ResizeCtx, state: S): void;
-	end?(ctx: ResizeCtx, state: S, event: PointerEvent, reason: ResizeEndReason): void;
+	end?(ctx: ResizeCtx, state: S, input: InteractionInput, reason: ResizeEndReason): void;
 	destroy?(ctx: ResizeCtx, state: S): void;
 }
 

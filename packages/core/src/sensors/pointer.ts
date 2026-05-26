@@ -1,3 +1,4 @@
+import { pointerToInput } from '../interaction-input.ts';
 import { listen } from '../utils.ts';
 import type { PointerSensorOptions, Sensor, SensorHost } from './types.ts';
 
@@ -25,14 +26,14 @@ export function pointerSensor(options: PointerSensorOptions | null = {}): Sensor
 				if (armed) return;
 				armed = true;
 				const signal = (moveUpAbort = new AbortController()).signal;
-				listen(target, 'pointermove', (e) => host.onPointerMove(e), {
+				listen(target, 'pointermove', (e) => host.onInteractionMove(pointerToInput(e, 'move')), {
 					passive: false,
 					capture: true,
 					signal,
 				});
 				const onUp = (e: PointerEvent) => {
 					disarm();
-					host.onPointerUp(e);
+					host.onInteractionEnd(pointerToInput(e, 'end'));
 				};
 				listen(target, 'pointerup', onUp, { passive: true, capture: true, signal });
 				listen(target, 'pointercancel', onUp, { passive: true, capture: true, signal });
@@ -40,7 +41,7 @@ export function pointerSensor(options: PointerSensorOptions | null = {}): Sensor
 
 			const onPointerDown = (e: PointerEvent) => {
 				if (!buttons.includes(e.button)) return;
-				host.onPointerDown(e);
+				host.onInteractionStart(pointerToInput(e, 'start'));
 				arm();
 			};
 

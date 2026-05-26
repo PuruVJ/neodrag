@@ -3,6 +3,8 @@ import { resolveSizeInput, sizeContext } from './length-contract.ts';
 import type { SizeInput } from './length-runtime.ts';
 import { BoundsFrom, validateBounds, type BoundFromFunction } from './lib/bounds-from.ts';
 import { clamp } from './lib/math.ts';
+import { isPointerInput, nativePointerEvent } from './interaction-input.ts';
+import type { InteractionInput } from './interaction-input.ts';
 import { defineDragPlugin, defineDropPlugin, type DragCtx, type DragPlugin, type DropCtx } from './types.ts';
 
 const THRESHOLD_KEY = Symbol('neodrag.threshold');
@@ -37,7 +39,9 @@ export const ignoreMultitouch: DragPlugin<MultitouchState> = {
 		return { active_pointers: new Set<number>() };
 	},
 
-	start(ctx, state, event) {
+	start(ctx, state, input) {
+		if (!isPointerInput(input)) return;
+		const event = input.native;
 		ctx.effect(() => {
 			state.active_pointers.add(event.pointerId);
 			if (state.active_pointers.size > 1) event.preventDefault();
@@ -48,8 +52,9 @@ export const ignoreMultitouch: DragPlugin<MultitouchState> = {
 		if (state.active_pointers.size > 1) ctx.cancel();
 	},
 
-	end(_ctx, state, event) {
-		state.active_pointers.delete(event.pointerId);
+	end(_ctx, state, input) {
+		if (!isPointerInput(input)) return;
+		state.active_pointers.delete(input.native.pointerId);
 	},
 };
 
@@ -252,10 +257,13 @@ export type DragEventData = Readonly<{
 	offsetPx: Readonly<{ x: number; y: number }>;
 	rootNode: HTMLElement | SVGElement;
 	visualNode: HTMLElement | SVGElement;
-	event: PointerEvent;
+	input: InteractionInput;
+	pointer: Readonly<{ x: number; y: number }>;
+	event?: PointerEvent;
 }>;
 
-function eventPayload(ctx: DragCtx, e: PointerEvent): DragEventData {
+function eventPayload(ctx: DragCtx, input: InteractionInput): DragEventData {
+	const native = nativePointerEvent(input);
 	return {
 		offset: {
 			x: ctx.offsetAuthored?.x ?? ctx.offset.x,
@@ -264,7 +272,9 @@ function eventPayload(ctx: DragCtx, e: PointerEvent): DragEventData {
 		offsetPx: { x: ctx.offset.x, y: ctx.offset.y },
 		rootNode: ctx.rootNode,
 		visualNode: ctx.session.visual.node,
-		event: e,
+		input,
+		pointer: { x: input.clientX, y: input.clientY },
+		event: native ?? undefined,
 	};
 }
 
@@ -278,16 +288,16 @@ export const events = defineDragPlugin(
 		phase: 'post',
 		skipOnCancel: true,
 
-		start(ctx, _s, e) {
-			handlers.onDragStart?.(eventPayload(ctx, e));
+		start(ctx, _s, input) {
+			handlers.onDragStart?.(eventPayload(ctx, input));
 		},
 
-		drag(ctx, _s, e) {
-			handlers.onDrag?.(eventPayload(ctx, e));
+		drag(ctx, _s, input) {
+			handlers.onDrag?.(eventPayload(ctx, input));
 		},
 
-		end(ctx, _s, e) {
-			handlers.onDragEnd?.(eventPayload(ctx, e));
+		end(ctx, _s, input) {
+			handlers.onDragEnd?.(eventPayload(ctx, input));
 		},
 	}),
 );
@@ -428,7 +438,9 @@ export const controls = defineDragPlugin(
 			};
 		},
 
-		start(ctx, state, event) {
+		start(ctx, state, input) {
+			if (!isPointerInput(input)) return true;
+			const event = input.native;
 			if (shouldRecompute({ hook: 'start' })) {
 				const next = state.compute();
 				state.allow = next.allow;
@@ -499,9 +511,14 @@ export const threshold = defineDragPlugin(
 			};
 		},
 
-		start(ctx, state, event) {
+		start(ctx, state, input) {
 			if (!state.enabled) return true;
 			if (ctx.isDragging) return true;
+
+			if (input.kind === 'keyboard' || input.kind === 'programmatic') return true;
+
+			if (!isPointerInput(input)) return true;
+			const event = input.native;
 
 			if (!ctx.rootNode.contains(event.target as Node)) {
 				ctx.cancel();
@@ -511,8 +528,8 @@ export const threshold = defineDragPlugin(
 			if (!state.started) {
 				state.started = true;
 				state.start_time = Date.now();
-				state.start_x = event.clientX;
-				state.start_y = event.clientY;
+				state.start_x = input.clientX;
+				state.start_y = input.clientY;
 			}
 
 			if (state.options?.delay) {
@@ -520,8 +537,8 @@ export const threshold = defineDragPlugin(
 			}
 
 			if (state.options?.distance) {
-				const dx = event.clientX - state.start_x;
-				const dy = event.clientY - state.start_y;
+				const dx = input.clientX - state.start_x;
+				const dy = input.clientY - state.start_y;
 				if (dx * dx + dy * dy <= state.options.distance ** 2) return false;
 			}
 
@@ -644,7 +661,7 @@ export const autoScroll = defineDragPlugin(
 			};
 		},
 
-		drag(_ctx, state, event) {
+		drag(_ctx, state, input) {
 			const margin = state.margin;
 			const maxSpeed = state.maxSpeed;
 			const container =
@@ -658,10 +675,10 @@ export const autoScroll = defineDragPlugin(
 
 			let dx = 0;
 			let dy = 0;
-			if (event.clientY < rect.top + margin) dy = -maxSpeed;
-			else if (event.clientY > rect.bottom - margin) dy = maxSpeed;
-			if (event.clientX < rect.left + margin) dx = -maxSpeed;
-			else if (event.clientX > rect.right - margin) dx = maxSpeed;
+			if (input.clientY < rect.top + margin) dy = -maxSpeed;
+			else if (input.clientY > rect.bottom - margin) dy = maxSpeed;
+			if (input.clientX < rect.left + margin) dx = -maxSpeed;
+			else if (input.clientX > rect.right - margin) dx = maxSpeed;
 
 			if (dx === 0 && dy === 0) return;
 			const scrollEl =

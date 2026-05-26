@@ -1,3 +1,5 @@
+import { nativePointerEvent } from '../interaction-input.ts';
+import type { InteractionInput } from '../interaction-input.ts';
 import { resolveSizeInput, sizeContext } from '../length-contract.ts';
 import type { SizeInput } from '../length-runtime.ts';
 import { clamp } from '../lib/math.ts';
@@ -187,7 +189,9 @@ export type ResizeEventData = {
 	initial: { width: string; height: string };
 	anchor: ResizeEdge;
 	rootNode: HTMLElement | SVGElement;
-	event: PointerEvent;
+	input: InteractionInput;
+	pointer: Readonly<{ x: number; y: number }>;
+	event?: PointerEvent;
 };
 
 export const resizeEvents = defineResizePlugin(
@@ -200,27 +204,30 @@ export const resizeEvents = defineResizePlugin(
 		phase: 'post' as const,
 		skipOnCancel: true,
 
-		start(ctx, _, event) {
-			options?.onStart?.(eventData(ctx, event));
+		start(ctx, _, input) {
+			options?.onStart?.(eventData(ctx, input));
 		},
 
-		resize(ctx, _, event) {
-			options?.onResize?.(eventData(ctx, event));
+		resize(ctx, _, input) {
+			options?.onResize?.(eventData(ctx, input));
 		},
 
-		end(ctx, _, event, reason) {
-			options?.onEnd?.({ ...eventData(ctx, event), reason });
+		end(ctx, _, input, reason) {
+			options?.onEnd?.({ ...eventData(ctx, input), reason });
 		},
 	}),
 );
 
-function eventData(ctx: import('./types.ts').ResizeCtx, event: PointerEvent): ResizeEventData {
+function eventData(ctx: import('./types.ts').ResizeCtx, input: InteractionInput): ResizeEventData {
+	const native = nativePointerEvent(input);
 	return {
 		size: { width: ctx.size.width, height: ctx.size.height },
 		sizePx: { width: ctx.sizePx.width, height: ctx.sizePx.height },
 		initial: { width: ctx.initial.width, height: ctx.initial.height },
 		anchor: ctx.anchor,
 		rootNode: ctx.rootNode,
-		event,
+		input,
+		pointer: { x: input.clientX, y: input.clientY },
+		event: native ?? undefined,
 	};
 }

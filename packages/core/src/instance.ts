@@ -4,6 +4,8 @@ import type { LengthAdapter } from './length-runtime.ts';
 import type { SizeInput } from './length-runtime.ts';
 import { phaseChain, pushByPhase } from './phase.ts';
 import type { TransformApplier } from './apply-transform.ts';
+import { nativePointerEvent } from './interaction-input.ts';
+import type { InteractionInput } from './interaction-input.ts';
 import type {
 	DragCtx,
 	DragPlugin,
@@ -67,6 +69,7 @@ export class DragInstance {
 	isDragging = false;
 	isInteracting = false;
 	cancelled = false;
+	lastInput: InteractionInput | null = null;
 	lastEvent: PointerEvent | null = null;
 	cachedRootNodeRect: DOMRect;
 	visualNode: HTMLElement | SVGElement;
@@ -179,8 +182,11 @@ export class DragInstance {
 				return inst.isInteracting;
 			},
 			rootNode: inst.rootNode,
+			get lastInput() {
+				return inst.lastInput;
+			},
 			get lastEvent() {
-				return inst.lastEvent;
+				return nativePointerEvent(inst.lastInput);
 			},
 			get cachedRootNodeRect() {
 				return inst.cachedRootNodeRect;
@@ -275,6 +281,7 @@ export class DragInstance {
 export type DropCtxHost = {
 	pointerX: number;
 	pointerY: number;
+	lastInput: InteractionInput | null;
 	lastEvent: PointerEvent | null;
 	session: DragSession;
 };
@@ -342,6 +349,9 @@ export class DropInstance {
 			rootNode: inst.rootNode,
 			get cachedRootNodeRect() {
 				return inst.cachedRootNodeRect;
+			},
+			get lastInput() {
+				return inst.#host.lastInput;
 			},
 			get lastEvent() {
 				return inst.#host.lastEvent;

@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { MINIMAL_DRAG_PLUGINS, Neodrag, numberStub } from '../../src/index.ts';
+import { MINIMAL_DRAG_PLUGINS, Neodrag, numberStub, pointerToInput } from '../../src/index.ts';
 import { ControlFrom, controls, grid, threshold } from '../../src/plugins.ts';
 
 describe('grid plugin', () => {
@@ -143,13 +143,16 @@ describe('controls priority', () => {
 			},
 		];
 
-		const event = new PointerEvent('pointerdown', { clientX: 50, clientY: 50 });
+		const input = pointerToInput(
+			new PointerEvent('pointerdown', { clientX: 50, clientY: 50 }),
+			'start',
+		);
 		const ctx = {
 			cachedRootNodeRect: new DOMRect(0, 0, 200, 200),
 			session: { setVisual: () => {} },
 		} as Parameters<NonNullable<typeof plugin.start>>[0];
 
-		const out = plugin.start!(ctx, state, event);
+		const out = plugin.start!(ctx, state, input);
 		expect(out).toBe(false);
 	});
 });

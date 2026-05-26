@@ -5,6 +5,8 @@ import { numberStub, resolveSizeInput, sizeContext } from './length-contract.ts'
 import type { AuthoredSizePair, LengthAdapter } from './length-runtime.ts';
 import type { SizeInput } from './length-runtime.ts';
 import { readBoxSizePx } from './length/utils.ts';
+import { nativePointerEvent } from './interaction-input.ts';
+import type { InteractionInput } from './interaction-input.ts';
 import type { ResizeCtx, ResizePlugin, ResizeSession } from './resize/types.ts';
 
 export { readBoxSizePx as readSizePx };
@@ -52,6 +54,7 @@ export class ResizeInstance {
 	isResizing = false;
 	isInteracting = false;
 	cancelled = false;
+	lastInput: InteractionInput | null = null;
 	lastEvent: PointerEvent | null = null;
 	cachedRootNodeRect: DOMRect;
 	cachedTargetRect: DOMRect;
@@ -196,8 +199,11 @@ export class ResizeInstance {
 			get handleNode() {
 				return inst.handleNode;
 			},
+			get lastInput() {
+				return inst.lastInput;
+			},
 			get lastEvent() {
-				return inst.lastEvent;
+				return nativePointerEvent(inst.lastInput);
 			},
 			get cachedRootNodeRect() {
 				return inst.cachedRootNodeRect;

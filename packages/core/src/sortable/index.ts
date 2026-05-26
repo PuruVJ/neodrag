@@ -217,9 +217,9 @@ export function sortable<T>(opts: SortableOptions<T>) {
 			};
 		},
 
-		over(dropCtx, state, e) {
-			const x = e.clientX;
-			const y = e.clientY;
+		over(dropCtx, state, input) {
+			const x = input.clientX;
+			const y = input.clientY;
 			if (x === state.lastX && y === state.lastY) return;
 
 			const dragKey = (dropCtx.session.data as { key?: string } | undefined)?.key ?? '';

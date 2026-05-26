@@ -4,6 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { createDragSession } from '../../src/session.ts';
 import { DragInstance, SessionPrivate, type ActiveSession } from '../../src/instance.ts';
+import { pointerToInput } from '../../src/interaction-input.ts';
 import { pluginKeyLabel, type DragPlugin } from '../../src/types.ts';
 
 function idleSession() {
@@ -87,9 +88,9 @@ describe('plugin phase buckets', () => {
 
 		expect(inst.dragChain.map((p) => pluginKeyLabel(p.key))).toEqual(['pre', 'resolve', 'post']);
 
-		const e = new PointerEvent('pointermove', { clientX: 0, clientY: 0 });
+		const input = pointerToInput(new PointerEvent('pointermove', { clientX: 0, clientY: 0 }), 'move');
 		for (const plugin of inst.dragChain) {
-			plugin.drag!(inst.dragCtx, inst.states.get(plugin.key), e);
+			plugin.drag!(inst.dragCtx, inst.states.get(plugin.key), input);
 		}
 
 		expect(order).toEqual(['pre', 'resolve', 'post']);

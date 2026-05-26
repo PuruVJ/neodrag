@@ -1,3 +1,4 @@
+import type { InteractionInput } from './interaction-input.ts';
 import type { LengthAdapter } from './length-runtime.ts';
 import type { SizeInput } from './length-runtime.ts';
 
@@ -59,6 +60,7 @@ export interface DragCtx {
 	readonly isDragging: boolean;
 	readonly isInteracting: boolean;
 	readonly rootNode: HTMLElement | SVGElement;
+	readonly lastInput: InteractionInput | null;
 	readonly lastEvent: PointerEvent | null;
 	readonly cachedRootNodeRect: DOMRect;
 	readonly session: DragSession;
@@ -73,6 +75,7 @@ export interface DropCtx {
 	readonly session: DragSession;
 	readonly rootNode: HTMLElement | SVGElement;
 	readonly cachedRootNodeRect: DOMRect;
+	readonly lastInput: InteractionInput | null;
 	readonly lastEvent: PointerEvent | null;
 	readonly isOver: boolean;
 	readonly length: LengthAdapter;
@@ -108,10 +111,10 @@ export interface DragPlugin<S = unknown> {
 	phase?: PluginPhase;
 	skipOnCancel?: boolean;
 	init?(ctx: DragCtx): S;
-	start?(ctx: DragCtx, state: S, event: PointerEvent): boolean | void;
-	drag?(ctx: DragCtx, state: S, event: PointerEvent): DeltaPatch | void;
+	start?(ctx: DragCtx, state: S, input: InteractionInput): boolean | void;
+	drag?(ctx: DragCtx, state: S, input: InteractionInput): DeltaPatch | void;
 	update?(ctx: DragCtx, state: S): void;
-	end?(ctx: DragCtx, state: S, event: PointerEvent, reason: EndReason): void;
+	end?(ctx: DragCtx, state: S, input: InteractionInput, reason: EndReason): void;
 	destroy?(ctx: DragCtx, state: S): void;
 }
 
@@ -119,10 +122,10 @@ export interface DropPlugin<S = unknown> {
 	key: symbol;
 	phase?: PluginPhase;
 	init?(ctx: DropCtx): S;
-	enter?(ctx: DropCtx, state: S, event: PointerEvent): boolean | void;
-	over?(ctx: DropCtx, state: S, event: PointerEvent): void;
-	leave?(ctx: DropCtx, state: S, event: PointerEvent): void;
-	drop?(ctx: DropCtx, state: S, event: PointerEvent): void;
+	enter?(ctx: DropCtx, state: S, input: InteractionInput): boolean | void;
+	over?(ctx: DropCtx, state: S, input: InteractionInput): void;
+	leave?(ctx: DropCtx, state: S, input: InteractionInput): void;
+	drop?(ctx: DropCtx, state: S, input: InteractionInput): void;
 	update?(ctx: DropCtx, state: S): void;
 	destroy?(ctx: DropCtx, state: S): void;
 }

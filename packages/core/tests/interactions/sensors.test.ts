@@ -7,8 +7,8 @@ import { Draggable } from '../../src/draggable-binding.ts';
 import { defaultSensors, keyboardSensor, pointerSensor } from '../../src/sensors/index.ts';
 
 describe('sensors', () => {
-	it('defaultSensors includes pointer and keyboard', () => {
-		expect(defaultSensors()).toHaveLength(2);
+	it('defaultSensors includes pointer, keyboard cancel, and keyboard move', () => {
+		expect(defaultSensors()).toHaveLength(3);
 	});
 
 	it('Neodrag wires sensors on first attach', () => {

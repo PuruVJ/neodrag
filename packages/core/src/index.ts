@@ -76,8 +76,29 @@ export {
 	defaultSensors,
 	pointerSensor,
 	keyboardSensor,
+	keyboardMoveSensor,
 	type Sensor,
 	type SensorHost,
 	type PointerSensorOptions,
 	type KeyboardSensorOptions,
 } from './sensors/index.ts';
+export {
+	KEYBOARD_POINTER_ID,
+	pointerToInput,
+	keyboardToInput,
+	programmaticToInput,
+	submitInteraction,
+	isPointerInput,
+	isKeyboardInput,
+	isProgrammaticInput,
+	nativePointerEvent,
+	interactionPointerId,
+	type InteractionInput,
+	type InteractionKind,
+	type InteractionPhase,
+	type PointerInteractionInput,
+	type KeyboardInteractionInput,
+	type ProgrammaticInteractionInput,
+} from './interaction-input.ts';
+export { keyboardDrag, ariaDrag, KEYBOARD_DRAG_KEY, ARIA_DRAG_KEY } from './a11y/index.ts';
+export type { KeyboardDragOptions, AriaDragOptions } from './a11y/index.ts';

@@ -1,12 +1,12 @@
+import type { InteractionInput } from '../interaction-input.ts';
 import type { EndReason } from '../types.ts';
 
 export interface SensorHost {
 	getDelegate(): HTMLElement;
-	/** Pointer sensor registers disarm so the engine can release move/up listeners on cancel. */
 	setPointerDisarm(disarm: (() => void) | null): void;
-	onPointerDown(event: PointerEvent): void;
-	onPointerMove(event: PointerEvent): void;
-	onPointerUp(event: PointerEvent): void;
+	onInteractionStart(input: InteractionInput): void;
+	onInteractionMove(input: InteractionInput): void;
+	onInteractionEnd(input: InteractionInput): void;
 	cancelActive(reason: EndReason): void;
 }
 

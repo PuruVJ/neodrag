@@ -1,3 +1,4 @@
+import type { InteractionInput } from './interaction-input.ts';
 import { is_svg_element } from './utils.ts';
 import type { DropInstance } from './instance.ts';
 import type { ActiveSession } from './instance.ts';
@@ -13,14 +14,14 @@ export type DropTargetHost = {
 	runDropHook(
 		inst: DropInstance,
 		hook: 'enter' | 'over' | 'leave' | 'drop',
-		e: PointerEvent,
+		input: InteractionInput,
 	): boolean | void;
 };
 
 export class DropTargetTracker {
 	#currentOver: DropInstance[] = [];
 	#nextOverScratch: DropInstance[] = [];
-	#lastDropEvent: PointerEvent | null = null;
+	#lastDropInput: InteractionInput | null = null;
 	#lastDropPointerX = NaN;
 	#lastDropPointerY = NaN;
 	#dropRafId = 0;
@@ -40,39 +41,40 @@ export class DropTargetTracker {
 			cancelAnimationFrame(this.#dropRafId);
 			this.#dropRafId = 0;
 		}
-		this.#lastDropEvent = null;
+		this.#lastDropInput = null;
 		this.#lastDropPointerX = NaN;
 		this.#lastDropPointerY = NaN;
 		this.#currentOver.length = 0;
 	}
 
-	queueUpdate(e: PointerEvent) {
-		this.#lastDropEvent = e;
+	queueUpdate(input: InteractionInput) {
+		this.#lastDropInput = input;
 		if (this.#dropRafId) return;
 		this.#dropRafId = requestAnimationFrame(() => {
 			this.#dropRafId = 0;
-			const ev = this.#lastDropEvent;
-			if (!ev || !this.#host.getActiveSource()?.isDragging || this.#host.getDropCount() <= 0) return;
-			this.runUpdate(ev);
+			const current = this.#lastDropInput;
+			if (!current || !this.#host.getActiveSource()?.isDragging || this.#host.getDropCount() <= 0)
+				return;
+			this.runUpdate(current);
 		});
 	}
 
-	flush(e: PointerEvent) {
+	flush(input: InteractionInput) {
 		if (this.#dropRafId) {
 			cancelAnimationFrame(this.#dropRafId);
 			this.#dropRafId = 0;
 		}
-		this.#lastDropEvent = e;
-		if (this.#host.getDropCount() > 0) this.runUpdate(e, true);
+		this.#lastDropInput = input;
+		if (this.#host.getDropCount() > 0) this.runUpdate(input, true);
 	}
 
-	runUpdate(e: PointerEvent, force = false) {
+	runUpdate(input: InteractionInput, force = false) {
 		const sole = this.#host.getSoleDrop();
 		if (sole) {
-			this.#updateSole(sole, e, force);
+			this.#updateSole(sole, input, force);
 			return;
 		}
-		this.#updateMulti(e, force);
+		this.#updateMulti(input, force);
 	}
 
 	#syncSessionTargets(drops: readonly DropInstance[]) {
@@ -84,9 +86,9 @@ export class DropTargetTracker {
 		}
 	}
 
-	#updateSole(drop: DropInstance, e: PointerEvent, force: boolean) {
-		const x = e.clientX;
-		const y = e.clientY;
+	#updateSole(drop: DropInstance, input: InteractionInput, force: boolean) {
+		const x = input.clientX;
+		const y = input.clientY;
 		if (!force && x === this.#lastDropPointerX && y === this.#lastDropPointerY) return;
 		this.#lastDropPointerX = x;
 		this.#lastDropPointerY = y;
@@ -96,24 +98,24 @@ export class DropTargetTracker {
 
 		if (over) {
 			if (!drop.isOver) {
-				const accepted = this.#host.runDropHook(drop, 'enter', e);
+				const accepted = this.#host.runDropHook(drop, 'enter', input);
 				drop.isOver = accepted !== false;
 			}
 			if (drop.isOver) {
 				this.#currentOver.push(drop);
-				this.#host.runDropHook(drop, 'over', e);
+				this.#host.runDropHook(drop, 'over', input);
 			}
 		} else if (drop.isOver) {
-			this.#host.runDropHook(drop, 'leave', e);
+			this.#host.runDropHook(drop, 'leave', input);
 			drop.isOver = false;
 		}
 		this.#syncSessionTargets(this.#currentOver);
 		drop.effects.flush();
 	}
 
-	#updateMulti(e: PointerEvent, force: boolean) {
-		const x = e.clientX;
-		const y = e.clientY;
+	#updateMulti(input: InteractionInput, force: boolean) {
+		const x = input.clientX;
+		const y = input.clientY;
 		if (!force && x === this.#lastDropPointerX && y === this.#lastDropPointerY) return;
 		this.#lastDropPointerX = x;
 		this.#lastDropPointerY = y;
@@ -132,7 +134,7 @@ export class DropTargetTracker {
 		for (let i = 0; i < this.#currentOver.length; i++) {
 			const drop = this.#currentOver[i]!;
 			if (!nextSet.has(drop) && drop.isOver) {
-				this.#host.runDropHook(drop, 'leave', e);
+				this.#host.runDropHook(drop, 'leave', input);
 				drop.isOver = false;
 			}
 		}
@@ -143,10 +145,10 @@ export class DropTargetTracker {
 		for (let i = 0; i < next.length; i++) {
 			const drop = next[i]!;
 			if (!drop.isOver) {
-				const accepted = this.#host.runDropHook(drop, 'enter', e);
+				const accepted = this.#host.runDropHook(drop, 'enter', input);
 				drop.isOver = accepted !== false;
 			} else {
-				this.#host.runDropHook(drop, 'over', e);
+				this.#host.runDropHook(drop, 'over', input);
 			}
 			if (drop.isOver) stack.push(drop);
 			if (this.#host.getActive()?.propagationStopped) break;
