@@ -122,17 +122,17 @@
 ></div>
 
 <section
-	class="dock-host pointer-events-none fixed bottom-4 left-0 z-[1000] flex h-24 w-full items-end justify-center gap-[clamp(2rem,10vw,8rem)] p-1.5 max-md:bottom-0 max-md:h-auto max-md:min-h-16 max-md:justify-stretch max-md:gap-0 max-md:p-0"
+	class="dock-host pointer-events-none fixed bottom-4 left-0 z-[1000] flex w-full items-end justify-center gap-[clamp(2rem,10vw,8rem)] p-1.5 max-md:bottom-0 max-md:min-h-16 max-md:justify-stretch max-md:gap-0 max-md:p-0 md:overflow-visible"
 	style:--color-brand={dock_brand}
 	style:--secondary-color={dock_brand}
 >
 	<div
-		class="dock-angular-bevel dock-surface pointer-events-auto relative w-full overflow-visible shadow-[var(--dock-shadow)] max-md:h-auto max-md:min-h-16 md:h-full md:w-auto"
+		class="dock-angular-bevel dock-surface pointer-events-auto relative w-full overflow-visible shadow-[var(--dock-shadow)] max-md:min-h-16 md:h-12 md:max-h-12 md:w-auto"
 		{@attach dockDrag.attachment}
 		{@attach interact_outside(() => menu_view.close())}
 	>
 		<div
-			class="dock-shell-fill dock-angular-bevel__fill relative flex w-full min-h-0 flex-col items-end overflow-hidden max-md:min-h-16 max-md:p-0 md:h-full md:overflow-visible md:p-1.5"
+			class="dock-shell-fill dock-angular-bevel__fill relative flex w-full flex-col items-end max-md:min-h-16 max-md:overflow-hidden max-md:p-0 md:h-12 md:max-h-12 md:overflow-visible md:p-1"
 		>
 			{#if menu_view.open}
 				<div
@@ -149,8 +149,8 @@
 				</div>
 			{/if}
 
-			<div class="relative z-[1] flex h-full w-full shrink-0 max-md:h-16">
-				<div class="hidden items-end max-md:hidden md:flex">
+			<div class="relative z-[1] flex w-full shrink-0 max-md:h-16 md:h-12 md:overflow-visible">
+				<div class="hidden max-md:hidden md:flex md:h-12 md:items-end md:overflow-visible">
 					{@render framework_selector(false)}
 					<div
 						class="mx-0.5 my-1.5 w-px min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
@@ -163,7 +163,10 @@
 					<div
 						class="mx-0.5 my-1.5 w-px min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
 					></div>
-					<div class="dock-angular-bevel dock-angular-bevel--sm handle" data-paw-cursor="true">
+					<div
+						class="dock-angular-bevel dock-angular-bevel--sm handle h-12 shrink-0 self-end overflow-visible"
+						data-paw-cursor="true"
+					>
 						<div class="{dock_btn} dock-angular-bevel__fill">
 							<GridIcon />
 						</div>
@@ -222,7 +225,7 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class={[
-			'dock-zoom flex w-full items-end justify-center gap-0.5 overflow-visible',
+			'dock-zoom flex h-12 w-full items-end justify-center gap-0.5 overflow-visible',
 			!embedded && 'max-md:hidden',
 		]}
 		onmouseenter={() => {

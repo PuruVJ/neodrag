@@ -93,17 +93,13 @@
 {:else}
 <div
 	class={[
-		'group dock-angular-bevel dock-angular-bevel--sm relative',
+		'group dock-angular-bevel dock-angular-bevel--sm relative h-12 shrink-0 self-end overflow-visible',
 		(is_near || selected) && 'dock-angular-bevel--brand',
 	]}
 >
 	<button
 		aria-label="Launch {framework} page"
-		class={[
-			'dock-angular-bevel__fill relative flex w-full flex-col items-center justify-end gap-1 bg-transparent transition-[padding] duration-75',
-			'px-2 pt-2 pb-1',
-		]}
-		style:padding-bottom={embedded ? undefined : `${6 + Math.max(0, (width_px.current - base_width) * 0.15)}px`}
+		class="dock-angular-bevel__fill relative h-12 w-full overflow-visible bg-transparent px-2"
 	>
 	{#if !embedded}
 		<div
@@ -123,7 +119,7 @@
 
 	<span
 		bind:this={image_el}
-		class="flex items-center justify-center will-change-[width,height] text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_path]:!text-current [&_g]:!text-current [&_svg]:!max-w-none [&_svg]:!text-current"
+		class="absolute bottom-1 left-1/2 z-[2] flex -translate-x-1/2 origin-bottom items-end justify-center will-change-[width,height] text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_path]:!text-current [&_g]:!text-current [&_svg]:!max-w-none [&_svg]:!text-current"
 	>
 		<Icon
 			height={width_px.current}
@@ -133,7 +129,7 @@
 	</span>
 
 	<div
-		class="h-[3px] transition-opacity duration-100 [clip-path:polygon(0_0,100%_0,calc(100%-2px)_100%,2px_100%)] [background-color:var(--color-brand)]"
+		class="absolute bottom-0 left-1/2 z-[1] h-[3px] -translate-x-1/2 transition-opacity duration-100 [clip-path:polygon(0_0,100%_0,calc(100%-2px)_100%,2px_100%)] [background-color:var(--color-brand)]"
 		style="width: {Math.max(18, width_px.current * 0.55)}px; opacity: {selected ? 1 : is_near ? 0.65 : 0}"
 	></div>
 	</button>
