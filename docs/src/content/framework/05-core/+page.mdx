@@ -86,7 +86,9 @@ Returns a `DropHandle` for drop targets. Same reactive `PluginInput` shape as dr
 
 ### `resizable(node, plugins?, options?)`
 
-Returns a `ResizeHandle` for resize targets. **Numbers are always px.** CSS unit strings (`'10rem'`, `'50%'`) require opt-in per binding:
+Returns a `ResizeHandle` for resize targets. **Numbers are always px.** CSS unit strings (`'10rem'`, `'50%'`) require opt-in per binding.
+
+**`SizeInput` strings** must be a **single** length (`'10rem'`, `'92vw'`) — not `min()`, `max()`, `clamp()`, or `fr`. TypeScript exposes this as `CssLengthString`; see **[Resize → SizeInput](/plugin/13-resize#sizeinput)** for the full unit list and examples.
 
 ```typescript
 import { Neodrag, Length } from '@neodrag/core';
@@ -103,7 +105,7 @@ engine.resizable(
 );
 ```
 
-`length` is **not** on `Neodrag` / `Neodrag.shared` — each `draggable` / `resizable` / `Droppable` binding can pass its own adapter. Framework wrappers: `new Resizable({ length: new Length(), plugins: [...] })`.
+`length` is **not** on `Neodrag` / `Neodrag.shared` — each `draggable` / `resizable` / `Droppable` binding can pass its own adapter. Framework wrappers: `new Resizable({ length: new Length(), minSize: { width: 80, height: 40 }, plugins: [...] })`.
 
 - **`new Length({ units: 'preserve' })`** (default): keep `%` / `rem` on `width` / `height` after resize.
 - **`new Length({ units: 'px' })`**: always write px strings.
