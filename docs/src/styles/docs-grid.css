@@ -66,7 +66,7 @@ html[data-framework='core'] .docs-page-grid {
 }
 
 html[data-theme='dark'] .docs-page-grid {
-	background-color: color-mix(in lch, var(--app-color-shell), var(--docs-grid-accent) 2.25%);
+	background-color: color-mix(in oklch, var(--app-color-shell), var(--docs-grid-accent) 2.25%);
 }
 
 html[data-theme='dark'] .docs-page-grid::before {
