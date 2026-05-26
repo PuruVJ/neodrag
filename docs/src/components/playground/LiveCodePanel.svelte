@@ -17,6 +17,7 @@
 	const { world, framework, onframework, snippets }: Props = $props();
 
 	const snippet_text = $derived(get_snippet(world, framework));
+	const active_tab = $derived(FRAMEWORK_TABS.find((t) => t.id === framework));
 
 	let copied = $state(false);
 	let copy_timer: ReturnType<typeof setTimeout> | undefined;
@@ -29,9 +30,7 @@
 		copy_timer = setTimeout(() => (copied = false), 1600);
 	}
 
-	const docs_href = $derived(
-		FRAMEWORK_TABS.find((t) => t.id === framework)?.docsPath ?? '/docs/svelte',
-	);
+	const docs_href = $derived(active_tab?.docsPath ?? '/docs/svelte');
 
 	function sync_visible_snippet() {
 		if (!snippets_host) return;
@@ -52,7 +51,12 @@
 
 <aside class="code-panel" aria-label="Code for this scene">
 	<header class="code-head">
-		<span class="label h3">Source</span>
+		<div class="terminal-prompt" aria-hidden="true">
+			<span class="prompt-char">$</span>
+			<span class="prompt-cmd">neodrag</span>
+			<span class="prompt-flag">--adapter</span>
+			<span class="prompt-value">{active_tab?.label ?? framework}</span>
+		</div>
 		<div class="head-actions">
 			<button type="button" class="icon-btn" title="Copy snippet" onclick={copy_snippet}>
 				{#if copied}
@@ -61,11 +65,12 @@
 					<ContentCopyIcon />
 				{/if}
 			</button>
-			<a class="docs-link unstyled" href={docs_href}>Docs</a>
+			<a class="docs-link unstyled" href={docs_href}>docs →</a>
 		</div>
 	</header>
 
 	<div class="tabs" role="tablist" aria-label="Framework">
+		<span class="tabs-label" aria-hidden="true">adapters ▸</span>
 		{#each FRAMEWORK_TABS as tab (tab.id)}
 			<button
 				type="button"
@@ -95,107 +100,142 @@
 		flex-direction: column;
 		min-width: 0;
 		min-height: 0;
-		padding: clamp(1rem, 2.5vw, 1.5rem) clamp(1rem, 2.5vw, 1.5rem) clamp(1rem, 2.5vw, 1.5rem) 0;
+		padding: 0 0 0 clamp(0.75rem, 2vw, 1.25rem);
 	}
 
 	.code-head {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
-		gap: 1rem;
-		margin-bottom: 0.85rem;
+		gap: 0.65rem 1rem;
+		margin-bottom: 0.75rem;
 	}
 
-	.label {
-		margin: 0;
+	.terminal-prompt {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.35rem 0.5rem;
+		font-family: var(--app-font-mono);
+		font-size: clamp(0.72rem, 1.3vw, 0.8125rem);
+		color: var(--pg-muted, color-mix(in lch, var(--app-color-dark), transparent 35%));
+	}
+
+	.prompt-char {
+		font-weight: 900;
+		color: var(--pg-accent, var(--app-color-primary));
+	}
+
+	.prompt-cmd {
+		font-weight: 600;
+		color: var(--pg-fg, var(--app-color-dark));
+	}
+
+	.prompt-flag {
+		opacity: 0.55;
+	}
+
+	.prompt-value {
+		font-weight: 700;
+		color: var(--pg-fg, var(--app-color-dark));
 	}
 
 	.head-actions {
 		display: flex;
 		align-items: center;
-		gap: 0.65rem;
+		gap: 0.5rem;
 	}
 
 	.icon-btn {
 		display: grid;
 		place-items: center;
-		width: 2.25rem;
-		height: 2.25rem;
-		border-radius: 0.5rem;
-		color: color-mix(in lch, var(--app-color-dark), transparent 20%);
+		width: 2rem;
+		height: 2rem;
+		border: 0.2px solid var(--pg-border, color-mix(in lch, var(--app-color-dark), transparent 85%));
+		color: var(--pg-muted, color-mix(in lch, var(--app-color-dark), transparent 25%));
 
 		&:hover {
-			background: color-mix(in lch, var(--app-color-dark), transparent 92%);
+			border-color: color-mix(in lch, var(--pg-accent, var(--app-color-primary)), transparent 50%);
+			color: var(--pg-accent, var(--app-color-primary));
+			background: color-mix(in lch, var(--pg-accent, var(--app-color-primary)), transparent 92%);
 		}
 	}
 
 	.icon-btn :global(svg) {
-		width: 1.15rem;
-		height: 1.15rem;
+		width: 1.05rem;
+		height: 1.05rem;
 	}
 
 	.docs-link {
-		padding: 0.4rem 0.9rem;
-		border-radius: 0.5rem;
-		font-size: 0.88rem;
-		font-weight: 600;
-		color: var(--app-color-primary) !important;
-		background-color: color-mix(in lch, var(--app-color-primary), transparent 92%) !important;
+		padding: 0.35rem 0.75rem;
+		font-family: var(--app-font-mono);
+		font-size: 0.72rem;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--pg-fg, var(--app-color-dark)) !important;
+		background: transparent !important;
 		background-image: none !important;
-		border: 0.2px solid color-mix(in lch, var(--app-color-primary), transparent 60%);
+		border: 0.2px solid var(--pg-border-strong, color-mix(in lch, var(--app-color-dark), transparent 72%));
 
 		&:hover,
 		&:focus-visible {
-			color: var(--app-color-primary) !important;
-			background-color: color-mix(in lch, var(--app-color-primary), transparent 84%) !important;
-			border-radius: 0.5rem;
+			color: var(--pg-accent, var(--app-color-primary)) !important;
+			border-color: color-mix(in lch, var(--pg-accent, var(--app-color-primary)), transparent 40%);
+			background: color-mix(in lch, var(--pg-accent, var(--app-color-primary)), transparent 92%) !important;
 		}
 	}
 
 	.tabs {
 		display: flex;
 		flex-wrap: wrap;
+		align-items: center;
 		gap: 0.35rem;
-		margin-bottom: 1rem;
-		padding-bottom: 0.85rem;
-		border-bottom: 0.2px solid color-mix(in lch, var(--app-color-dark), transparent 85%);
+		margin-bottom: 0.75rem;
+		padding-bottom: 0.65rem;
+		border-bottom: 0.2px solid var(--pg-border, color-mix(in lch, var(--app-color-dark), transparent 85%));
+	}
+
+	.tabs-label {
+		width: 100%;
+		font-family: var(--app-font-mono);
+		font-size: 0.6rem;
+		font-weight: 600;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--pg-muted-soft, color-mix(in lch, var(--app-color-dark), transparent 55%));
 	}
 
 	.tabs button {
-		padding: 0.4rem 0.85rem;
-		border-radius: 0.5rem;
-		font-size: 0.8rem;
-		font-weight: 600;
+		padding: 0.3rem 0.65rem;
 		font-family: var(--app-font-mono);
-		border: 0.2px solid transparent;
-		color: color-mix(in lch, var(--app-color-dark), transparent 35%);
+		font-size: 0.7rem;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		border: 0.2px solid var(--pg-border, color-mix(in lch, var(--app-color-dark), transparent 88%));
+		color: var(--pg-muted, color-mix(in lch, var(--app-color-dark), transparent 32%));
 		background: transparent;
+		transition:
+			border-color 75ms ease,
+			color 75ms ease,
+			background-color 75ms ease;
 
 		&:hover:not(.selected) {
-			color: color-mix(in lch, var(--app-color-dark), transparent 12%);
-			background: color-mix(in lch, var(--app-color-dark), transparent 94%);
+			color: var(--pg-accent, var(--app-color-primary));
+			border-color: color-mix(in lch, var(--pg-accent, var(--app-color-primary)), transparent 55%);
+			background: color-mix(in lch, var(--pg-accent, var(--app-color-primary)), transparent 94%);
 		}
 
 		&.selected {
-			background: color-mix(in lch, var(--app-color-dark), transparent 90%);
-			color: color-mix(in lch, var(--app-color-dark), transparent 5%);
-			border-color: color-mix(in lch, var(--app-color-dark), transparent 82%);
+			color: var(--app-color-primary-contrast);
+			background: var(--pg-accent, var(--app-color-primary));
+			border-color: color-mix(in lch, var(--pg-accent, var(--app-color-primary)), black 12%);
 		}
 
-		&[data-framework='svelte'].selected {
-			color: var(--app-color-brand-svelte);
-		}
-		&[data-framework='react'].selected {
-			color: var(--app-color-brand-react);
-		}
-		&[data-framework='vue'].selected {
-			color: var(--app-color-brand-vue);
-		}
-		&[data-framework='solid'].selected {
-			color: var(--app-color-brand-solid);
-		}
-		&[data-framework='vanilla'].selected {
-			color: var(--app-color-brand-vanilla);
+		&[data-framework='svelte'].selected:not(:hover) {
+			color: var(--app-color-primary-contrast);
 		}
 	}
 
@@ -203,10 +243,16 @@
 		flex: 1;
 		min-height: 14rem;
 		overflow: auto;
-		padding: 0.75rem 0.85rem;
-		border-radius: 0.6rem;
-		background-color: color-mix(in lch, var(--app-color-dark), transparent 94%);
-		font-size: clamp(0.78rem, 1.2vw, 0.9rem);
+		padding: 0.85rem 0.9rem;
+		border: 0.2px solid var(--pg-border-strong, color-mix(in lch, var(--app-color-dark), transparent 78%));
+		background: var(--pg-code-bg, color-mix(in lch, var(--app-color-dark), transparent 94%));
+		box-shadow: inset 0 0 0 1px var(--pg-code-inset, transparent);
+		font-size: clamp(0.75rem, 1.15vw, 0.875rem);
 		line-height: 1.5;
+	}
+
+	.code-body:focus-within {
+		border-color: color-mix(in lch, var(--pg-accent, var(--app-color-primary)), transparent 35%);
+		box-shadow: 0 0 0 3px color-mix(in lch, var(--pg-accent, var(--app-color-primary)), transparent 88%);
 	}
 </style>

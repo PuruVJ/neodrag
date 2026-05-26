@@ -1,25 +1,23 @@
-/* Recessed play area — same language as Hero .container, no heavy drop shadow */
 .playground-well {
-	background-color: color-mix(in lch, var(--app-color-dark), transparent 90%);
-	border-radius: 1rem;
-	box-shadow: inset 0 1px 0 color-mix(in lch, var(--gray-1), transparent 85%);
+	background-color: var(--pg-well, color-mix(in lch, var(--app-color-dark), transparent 90%));
+	border-radius: 0.625rem;
+	box-shadow: inset 0 1px 0 var(--pg-well-inset, color-mix(in lch, var(--gray-1), transparent 85%));
 }
 
-/* Abstract window — flat shell card, hairline edge only */
 .playground-window {
 	background-color: var(--app-color-shell);
-	border-radius: 1rem;
+	border-radius: 0.625rem;
 	overflow: hidden;
-	border: 0.2px solid color-mix(in lch, var(--app-color-dark), transparent 78%);
+	border: 0.2px solid var(--pg-border-strong, color-mix(in lch, var(--app-color-dark), transparent 78%));
 	box-shadow: none;
 }
 
 .playground-window-chrome {
 	padding: 0.55rem 1rem;
-	border-bottom: 0.2px solid color-mix(in lch, var(--app-color-dark), transparent 70%);
-	background-color: color-mix(in lch, var(--app-color-dark), transparent 94%);
+	border-bottom: 0.2px solid var(--pg-border, color-mix(in lch, var(--app-color-dark), transparent 70%));
+	background-color: var(--pg-panel-strong, color-mix(in lch, var(--app-color-dark), transparent 94%));
 }
 
 .playground-divider {
-	background-color: color-mix(in lch, var(--app-color-dark), transparent 70%);
+	background-color: var(--pg-border-strong, color-mix(in lch, var(--app-color-dark), transparent 70%));
 }

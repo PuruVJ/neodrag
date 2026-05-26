@@ -57,9 +57,11 @@
 	}
 
 	.window-title {
-		font-family: var(--app-font-heading);
-		font-size: 1rem;
-		font-weight: 600;
+		font-family: var(--app-font-mono);
+		font-size: 0.8rem;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
 		color: color-mix(in lch, var(--app-color-dark), transparent 10%);
 	}
 

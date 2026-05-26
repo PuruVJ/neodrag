@@ -77,6 +77,9 @@ importers:
       '@fontsource-variable/eb-garamond':
         specifier: ^5.2.5
         version: 5.2.6
+      '@fontsource-variable/inter':
+        specifier: ^5.2.8
+        version: 5.2.8
       '@fontsource-variable/jetbrains-mono':
         specifier: ^5.2.5
         version: 5.2.6
@@ -962,6 +965,9 @@ packages:
 
   '@fontsource-variable/eb-garamond@5.2.6':
     resolution: {integrity: sha512-7WNOTFudWYYSiTmaRlTQO0GwS8UQeCVzrluVsRQY5ueDlrUzCwlCQdbGJ4IxGchYqgqB4ehOqX3jjTxBpJyNeA==}
+
+  '@fontsource-variable/inter@5.2.8':
+    resolution: {integrity: sha512-kOfP2D+ykbcX/P3IFnokOhVRNoTozo5/JxhAIVYLpea/UBmCQ/YWPBfWIDuBImXX/15KH+eKh4xpEUyS2sQQGQ==}
 
   '@fontsource-variable/jetbrains-mono@5.2.6':
     resolution: {integrity: sha512-1pvtyK6H1paBOixbtZ9xfQgArVQ4SJMW3WSGZPOd5PiW3yg0t8umwKnjDMzW2ofb7qSdiXnsnIaHPT36vEOdlg==}
@@ -5006,6 +5012,8 @@ snapshots:
   '@floating-ui/utils@0.2.9': {}
 
   '@fontsource-variable/eb-garamond@5.2.6': {}
+
+  '@fontsource-variable/inter@5.2.8': {}
 
   '@fontsource-variable/jetbrains-mono@5.2.6': {}
 

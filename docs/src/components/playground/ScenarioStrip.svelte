@@ -10,7 +10,7 @@
 </script>
 
 <nav class="scenes" aria-label="Playground scenarios">
-	{#each WORLDS as world (world.id)}
+	{#each WORLDS as world, i (world.id)}
 		<button
 			type="button"
 			class:selected={active === world.id}
@@ -19,7 +19,8 @@
 			title={world.available ? world.tagline : 'Coming soon'}
 			onclick={() => world.available && onselect(world.id)}
 		>
-			{world.label}
+			<span class="idx" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+			<span class="label">{world.label}</span>
 			{#if !world.available}
 				<span class="soon">soon</span>
 			{/if}
@@ -30,41 +31,65 @@
 <style>
 	.scenes {
 		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		justify-content: flex-end;
+		flex-direction: column;
+		gap: 0.35rem;
 	}
 
 	button {
-		padding: 0.45rem 0.9rem;
-		border-radius: 0.5rem;
+		display: grid;
+		grid-template-columns: 2.25rem 1fr auto;
+		align-items: baseline;
+		gap: 0.5rem;
+		padding: 0.5rem 0.55rem;
+		text-align: left;
 		font-family: var(--app-font-mono);
 		font-size: 0.78rem;
-		font-weight: 600;
 		border: 0.2px solid transparent;
-		color: color-mix(in lch, var(--app-color-dark), transparent 25%);
-		background: color-mix(in lch, var(--app-color-dark), transparent 94%);
+		color: var(--pg-muted, color-mix(in lch, var(--app-color-dark), transparent 30%));
+		background: transparent;
+		transition:
+			background-color 75ms ease,
+			border-color 75ms ease,
+			color 75ms ease,
+			padding-left 75ms ease;
 
 		&:hover:not(:disabled):not(.selected) {
-			color: color-mix(in lch, var(--app-color-dark), transparent 8%);
-			background: color-mix(in lch, var(--app-color-dark), transparent 88%);
-			border-color: color-mix(in lch, var(--app-color-dark), transparent 82%);
+			color: var(--pg-fg, var(--app-color-dark));
+			background: color-mix(in lch, var(--pg-accent, var(--app-color-primary)), transparent 94%);
+			padding-left: 0.75rem;
 		}
 
 		&.selected {
 			color: var(--app-color-primary-contrast);
-			background: var(--app-color-primary);
-			border-color: color-mix(in lch, var(--app-color-primary), var(--app-color-anti-mixer) 20%);
+			background: var(--pg-accent, var(--app-color-primary));
+			border-color: color-mix(in lch, var(--pg-accent, var(--app-color-primary)), black 15%);
+		}
+
+		&.selected .idx {
+			color: color-mix(in lch, var(--app-color-primary-contrast), transparent 25%);
 		}
 
 		&.locked {
-			opacity: 0.45;
+			opacity: 0.42;
 			cursor: not-allowed;
 		}
 	}
 
+	.idx {
+		font-weight: 900;
+		font-variant-numeric: tabular-nums;
+		color: var(--pg-muted-soft, color-mix(in lch, var(--app-color-dark), transparent 55%));
+	}
+
+	.label {
+		font-weight: 700;
+	}
+
 	.soon {
-		margin-left: 0.25rem;
-		opacity: 0.75;
+		font-size: 0.62rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		opacity: 0.8;
 	}
 </style>

@@ -1,0 +1,24 @@
+.home-playground {
+	--pg-accent: var(--app-color-primary);
+	--pg-fg: var(--app-color-dark);
+	--pg-muted: color-mix(in lch, var(--pg-fg), transparent 42%);
+	--pg-muted-soft: color-mix(in lch, var(--pg-fg), transparent 58%);
+	--pg-tint: var(--app-color-anti-mixer);
+	--pg-panel: color-mix(in lch, var(--pg-tint), transparent 97.5%);
+	--pg-panel-strong: color-mix(in lch, var(--pg-tint), transparent 95%);
+	--pg-border: color-mix(in lch, var(--pg-fg), transparent 85%);
+	--pg-border-strong: color-mix(in lch, var(--pg-fg), transparent 72%);
+	--pg-well: color-mix(in lch, var(--pg-fg), transparent 92%);
+	--pg-well-inset: color-mix(in lch, var(--pg-tint), transparent 88%);
+	--pg-code-bg: color-mix(in lch, var(--pg-fg), transparent 94%);
+	--pg-code-inset: color-mix(in lch, var(--pg-fg), transparent 96%);
+	--pg-font-display: 'Inter Variable', var(--app-font-main);
+	--pg-kicker-size: clamp(0.62rem, 1.2vw, 0.7rem);
+	--pg-section-gap: clamp(1rem, 2.5vw, 1.35rem);
+}
+
+body[data-theme='dark'] .home-playground {
+	--pg-well: color-mix(in lch, var(--pg-tint), transparent 94%);
+	--pg-code-bg: color-mix(in lch, var(--pg-tint), transparent 93%);
+	--pg-code-inset: color-mix(in lch, var(--pg-tint), transparent 95.5%);
+}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '@fontsource-variable/inter';
 	import type { Snippet } from 'svelte';
 	import { browser } from '$helpers/utils';
 	import { theme } from '$state/user-preferences.svelte';
@@ -19,7 +20,7 @@
 
 	const { snippets }: Props = $props();
 
-	theme.current;
+	const active_theme = $derived(theme.current);
 
 	let world = $state<WorldId>(DEFAULT_WORLD);
 	let framework = $state<Framework>(DEFAULT_FRAMEWORK);
@@ -46,41 +47,59 @@
 	});
 </script>
 
-<div class="home-playground">
-	<PlaygroundIntro {world} onworld={select_world} />
+<div class="home-playground" data-theme={active_theme}>
+	<div class="pg-backdrop" aria-hidden="true"></div>
 
-	<section class="play-canvas" aria-label="Try dragging">
-		<div class="stage-column">
-			<p class="stage-hint">Drag the windows — they stay inside the desk.</p>
-			<PlaygroundStage {world} />
-		</div>
+	<div class="pg-inner">
+		<PlaygroundIntro {world} onworld={select_world} />
 
-		<div class="playground-divider divider" aria-hidden="true"></div>
+		<section class="pg-section play-canvas" aria-label="Try dragging">
+			<header class="pg-section-head">
+				<span class="pg-kicker"><span aria-hidden="true">▍</span> try it</span>
+				<span class="pg-meta">drag · source</span>
+			</header>
 
-		<LiveCodePanel {world} {framework} onframework={(id) => (framework = id)} {snippets} />
-	</section>
+			<p class="pg-section-hint">Drag the windows — they stay inside the desk.</p>
+
+			<div class="play-canvas-grid">
+				<div class="stage-column">
+					<PlaygroundStage {world} />
+				</div>
+
+				<div class="playground-divider divider" aria-hidden="true"></div>
+
+				<LiveCodePanel {world} {framework} onframework={(id) => (framework = id)} {snippets} />
+			</div>
+		</section>
+	</div>
 </div>
 
 <style>
+	@import './playground-home.css';
 	@import './playground-chrome.css';
 
 	.home-playground {
 		display: flex;
 		flex-direction: column;
 		width: 100%;
-		max-width: min(1600px, 100%);
+		max-width: min(72rem, 100%);
 		margin: 0 auto;
-		padding: clamp(0.75rem, 2vw, 1.5rem) clamp(1rem, 3vw, 2.5rem) 8rem;
+		padding: clamp(0.75rem, 2vw, 1.25rem) clamp(0.75rem, 3vw, 2rem) 8rem;
 		box-sizing: border-box;
 		min-height: calc(100dvh - 6rem);
 	}
 
 	.play-canvas {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) 1px minmax(320px, 34vw);
-		gap: 0;
 		flex: 1;
 		min-height: clamp(28rem, 62vh, 44rem);
+	}
+
+	.play-canvas-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 1px minmax(300px, 36%);
+		gap: 0;
+		flex: 1;
+		min-height: clamp(22rem, 52vh, 40rem);
 	}
 
 	.stage-column {
@@ -88,13 +107,7 @@
 		flex-direction: column;
 		min-width: 0;
 		min-height: 0;
-	}
-
-	.stage-hint {
-		margin: 0 0 0.75rem;
-		font-family: var(--app-font-mono);
-		font-size: clamp(0.8rem, 1.5vw, 0.95rem);
-		color: color-mix(in lch, var(--app-color-dark), transparent 38%);
+		padding-right: clamp(0.75rem, 2vw, 1.25rem);
 	}
 
 	.divider {
@@ -104,10 +117,15 @@
 	}
 
 	@media (max-width: 1100px) {
-		.play-canvas {
+		.play-canvas-grid {
 			grid-template-columns: 1fr;
 			grid-template-rows: 1fr auto;
-			min-height: clamp(24rem, 55vh, 36rem);
+			min-height: clamp(22rem, 50vh, 34rem);
+		}
+
+		.stage-column {
+			padding-right: 0;
+			padding-bottom: 0.75rem;
 		}
 
 		.divider {
@@ -117,6 +135,8 @@
 
 		.home-playground :global(.code-panel) {
 			min-height: 16rem;
+			padding-left: 0 !important;
+			padding-top: 0.75rem !important;
 		}
 	}
 </style>
