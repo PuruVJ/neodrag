@@ -1,17 +1,17 @@
-export const PLAYGROUND_FRAMEWORKS = [
-	{ id: 'svelte', label: 'Svelte', docs: '/docs/svelte' },
-	{ id: 'react', label: 'React', docs: '/docs/react' },
-	{ id: 'vue', label: 'Vue', docs: '/docs/vue' },
-	{ id: 'solid', label: 'Solid', docs: '/docs/solid' },
-	{ id: 'vanilla', label: 'Vanilla', docs: '/docs/vanilla' },
-] as const;
+import type { Framework } from '$helpers/constants';
 
-export type FrameworkId = (typeof PLAYGROUND_FRAMEWORKS)[number]['id'];
+export type FrameworkTab = {
+	id: Framework;
+	label: string;
+	docsPath: string;
+};
 
-export function is_framework_id(value: string): value is FrameworkId {
-	return PLAYGROUND_FRAMEWORKS.some((f) => f.id === value);
-}
+export const FRAMEWORK_TABS: FrameworkTab[] = [
+	{ id: 'svelte', label: 'Svelte', docsPath: '/docs/svelte' },
+	{ id: 'react', label: 'React', docsPath: '/docs/react' },
+	{ id: 'vue', label: 'Vue', docsPath: '/docs/vue' },
+	{ id: 'solid', label: 'Solid', docsPath: '/docs/solid' },
+	{ id: 'vanilla', label: 'Vanilla', docsPath: '/docs/vanilla' },
+];
 
-export function framework_meta(id: FrameworkId) {
-	return PLAYGROUND_FRAMEWORKS.find((f) => f.id === id)!;
-}
+export const DEFAULT_FRAMEWORK: Framework = 'svelte';

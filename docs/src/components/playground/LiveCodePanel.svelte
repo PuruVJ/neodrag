@@ -1,208 +1,166 @@
 <script lang="ts">
-	import { copy } from '$attachments/copy';
-	import {
-		framework_meta,
-		PLAYGROUND_FRAMEWORKS,
-		type FrameworkId,
-	} from './frameworks';
-	import { get_snippet } from './snippet-templates';
+	import type { Framework } from '$helpers/constants';
+	import CheckIcon from '~icons/mdi/check';
+	import ContentCopyIcon from '~icons/mdi/content-copy';
+	import { FRAMEWORK_TABS } from './frameworks';
+	import HighlightedCode from './HighlightedCode.svelte';
+	import { get_snippet, LANG_BY_FRAMEWORK } from './snippet-templates';
 	import type { WorldId } from './worlds';
-	import { WORLDS } from './worlds';
 
 	type Props = {
-		worldId: WorldId;
+		world: WorldId;
+		framework: Framework;
+		onframework: (id: Framework) => void;
 	};
 
-	const { worldId }: Props = $props();
+	const { world, framework, onframework }: Props = $props();
 
-	let framework = $state<FrameworkId>('svelte');
-
-	const meta = $derived(WORLDS.find((w) => w.id === worldId)!);
-	const fw = $derived(framework_meta(framework));
-	const snippet = $derived(get_snippet(worldId, framework));
+	const snippet = $derived(get_snippet(world, framework));
+	const lang = $derived(LANG_BY_FRAMEWORK[framework]);
 
 	let copied = $state(false);
+	let copy_timer: ReturnType<typeof setTimeout> | undefined;
+
+	async function copy_snippet() {
+		await navigator.clipboard.writeText(snippet);
+		copied = true;
+		clearTimeout(copy_timer);
+		copy_timer = setTimeout(() => (copied = false), 1600);
+	}
+
+	const docs_href = $derived(
+		FRAMEWORK_TABS.find((t) => t.id === framework)?.docsPath ?? '/docs/svelte',
+	);
 </script>
 
-<aside class="code-panel">
-	<header class="code-header">
-		<div>
-			<p class="world-name">{meta.label}</p>
-			<p class="world-hint">{meta.hint}</p>
+<aside class="code-panel playground-surface" aria-label="Code for this scene">
+	<div class="toolbar">
+		<div class="tabs" role="tablist" aria-label="Framework">
+			{#each FRAMEWORK_TABS as tab (tab.id)}
+				<button
+					type="button"
+					role="tab"
+					aria-selected={framework === tab.id}
+					class:selected={framework === tab.id}
+					data-framework={tab.id}
+					onclick={() => onframework(tab.id)}
+				>
+					{tab.label}
+				</button>
+			{/each}
 		</div>
-	</header>
 
-	<div class="framework-tabs" role="tablist" aria-label="Framework">
-		{#each PLAYGROUND_FRAMEWORKS as fw_option}
-			<button
-				type="button"
-				role="tab"
-				class="fw-tab"
-				class:active={framework === fw_option.id}
-				aria-selected={framework === fw_option.id}
-				data-framework={fw_option.id}
-				onclick={() => (framework = fw_option.id)}
-			>
-				{fw_option.label}
+		<div class="toolbar-actions">
+			<button type="button" class="icon-btn" title="Copy snippet" onclick={copy_snippet}>
+				{#if copied}
+					<CheckIcon />
+				{:else}
+					<ContentCopyIcon />
+				{/if}
 			</button>
-		{/each}
+			<a class="docs-link" href={docs_href}>Docs</a>
+		</div>
 	</div>
 
-	<p class="demo-note">Demo runs in Svelte — snippet matches your stack.</p>
-
-	{#key `${worldId}-${framework}`}
-		<pre class="snippet"><code>{snippet}</code></pre>
-	{/key}
-
-	<div class="actions">
-		<button
-			type="button"
-			class="copy"
-			class:copied
-			{@attach copy({
-				text: snippet,
-				onCopy: () => {
-					copied = true;
-					setTimeout(() => (copied = false), 1500);
-				},
-			})}
-		>
-			{copied ? 'Copied' : 'Copy'}
-		</button>
-		<a class="docs-link" href={fw.docs}>Docs →</a>
+	<div class="code-body">
+		{#key `${world}-${framework}`}
+			<HighlightedCode code={snippet} {lang} />
+		{/key}
 	</div>
 </aside>
 
 <style>
+	@import './playground-chrome.css';
+
 	.code-panel {
 		display: flex;
 		flex-direction: column;
+		min-width: 0;
 		min-height: 0;
-		border-left: 1px solid color-mix(in lch, var(--app-color-dark), transparent 88%);
-		background: color-mix(in lch, var(--app-color-shell), var(--app-color-dark) 2%);
+		border-radius: 1.5rem;
+		overflow: hidden;
 	}
 
-	.code-header {
-		padding: 0.85rem 1rem 0.35rem;
-		flex-shrink: 0;
-	}
-
-	.world-name {
-		margin: 0;
-		font-family: var(--app-font-heading);
-		font-size: 1rem;
-		font-weight: 600;
-	}
-
-	.world-hint {
-		margin: 0.15rem 0 0;
-		font-size: 0.75rem;
-		opacity: 0.65;
-	}
-
-	.framework-tabs {
+	.toolbar {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.25rem;
-		padding: 0 0.75rem 0.5rem;
-		flex-shrink: 0;
-	}
-
-	.fw-tab {
-		padding: 0.25rem 0.5rem;
-		border-radius: 0.4rem;
-		font-size: 0.65rem;
-		font-family: var(--app-font-mono);
-		cursor: pointer;
-		color: var(--app-color-dark);
-		opacity: 0.7;
-		transition:
-			background 0.12s ease,
-			opacity 0.12s ease;
-	}
-
-	.fw-tab:hover {
-		opacity: 1;
-		background: color-mix(in lch, var(--app-color-dark), transparent 92%);
-	}
-
-	.fw-tab.active[data-framework='svelte'] {
-		background: color-mix(in lch, var(--app-color-brand-svelte), transparent 15%);
-		color: var(--app-color-brand-svelte);
-	}
-
-	.fw-tab.active[data-framework='react'] {
-		background: color-mix(in lch, var(--app-color-brand-react), transparent 15%);
-		color: var(--app-color-brand-react);
-	}
-
-	.fw-tab.active[data-framework='vue'] {
-		background: color-mix(in lch, var(--app-color-brand-vue), transparent 15%);
-		color: var(--app-color-brand-vue);
-	}
-
-	.fw-tab.active[data-framework='solid'] {
-		background: color-mix(in lch, var(--app-color-brand-solid), transparent 15%);
-		color: var(--app-color-brand-solid);
-	}
-
-	.fw-tab.active[data-framework='vanilla'] {
-		background: color-mix(in lch, var(--app-color-brand-vanilla), transparent 15%);
-		color: var(--app-color-brand-vanilla);
-	}
-
-	.demo-note {
-		margin: 0;
-		padding: 0 1rem 0.35rem;
-		font-size: 0.65rem;
-		opacity: 0.55;
-		flex-shrink: 0;
-	}
-
-	.snippet {
-		flex: 1;
-		margin: 0;
-		padding: 0 1rem 0.75rem;
-		overflow: auto;
-		font-family: var(--app-font-mono);
-		font-size: 0.68rem;
-		line-height: 1.45;
-		white-space: pre;
-		color: var(--app-color-dark);
-		min-height: 0;
-	}
-
-	.actions {
-		display: flex;
+		align-items: center;
+		justify-content: space-between;
 		gap: 0.5rem;
-		padding: 0.65rem 1rem 0.85rem;
-		border-top: 1px solid color-mix(in lch, var(--app-color-dark), transparent 90%);
-		flex-shrink: 0;
+		padding: 0.45rem 0.55rem;
+		border-bottom: 0.2px solid color-mix(in lch, var(--app-color-dark), transparent 80%);
 	}
 
-	.copy {
-		padding: 0.35rem 0.75rem;
-		border-radius: 0.45rem;
-		font-size: 0.8rem;
-		background: color-mix(in lch, var(--app-color-primary), transparent 85%);
-		color: var(--app-color-primary);
-		cursor: pointer;
+	.tabs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.2rem;
 	}
 
-	.copy.copied {
-		background: color-mix(in lch, #28c840, transparent 80%);
-		color: #1a6b2e;
+	.tabs button {
+		padding: 0.35rem 0.65rem;
+		border-radius: 999px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: color-mix(in lch, var(--app-color-dark), transparent 30%);
+		transition: background-color 150ms ease;
+
+		&.selected {
+			color: var(--app-color-primary);
+			background: color-mix(in lch, var(--app-color-primary), transparent 82%);
+		}
+
+		&[data-framework='svelte'].selected {
+			color: var(--app-color-brand-svelte);
+		}
+		&[data-framework='react'].selected {
+			color: var(--app-color-brand-react);
+		}
+		&[data-framework='vue'].selected {
+			color: var(--app-color-brand-vue);
+		}
+		&[data-framework='solid'].selected {
+			color: var(--app-color-brand-solid);
+		}
+		&[data-framework='vanilla'].selected {
+			color: var(--app-color-brand-vanilla);
+		}
+	}
+
+	.toolbar-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+	}
+
+	.icon-btn {
+		display: grid;
+		place-items: center;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 0.5rem;
+		color: color-mix(in lch, var(--app-color-dark), transparent 25%);
+
+		:global(svg) {
+			width: 1.1rem;
+			height: 1.1rem;
+		}
 	}
 
 	.docs-link {
 		padding: 0.35rem 0.75rem;
-		font-size: 0.8rem;
-		color: var(--app-color-primary);
+		border-radius: 999px;
+		font-size: 0.75rem;
+		font-weight: 600;
 		text-decoration: none;
-		border-radius: 0.45rem;
+		color: var(--app-color-primary-contrast);
+		background: var(--app-color-primary);
 	}
 
-	.docs-link:hover {
-		background: color-mix(in lch, var(--app-color-primary), transparent 92%);
+	.code-body {
+		flex: 1;
+		min-height: 0;
+		overflow: auto;
+		padding: 0.85rem 1rem 1.1rem;
 	}
 </style>

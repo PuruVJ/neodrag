@@ -1,36 +1,38 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
-	import type { WorldId } from './worlds';
-	import { WORLD_COMPONENTS } from './worlds';
+	import { WORLDS, WORLD_COMPONENTS, type WorldId } from './worlds';
 
 	type Props = {
-		worldId: WorldId;
+		world: WorldId;
 	};
 
-	const { worldId }: Props = $props();
+	const { world }: Props = $props();
 
-	const Scene = $derived(WORLD_COMPONENTS[worldId]);
+	const meta = $derived(WORLDS.find((w) => w.id === world)!);
+	const Scene = $derived(WORLD_COMPONENTS[world]);
 </script>
 
-<div class="stage">
-	{#key worldId}
-		<div class="scene" in:fade={{ duration: 200 }}>
-			<Scene {worldId} />
-		</div>
-	{/key}
-</div>
+<section class="stage-wrap playground-surface" aria-label="Live demo">
+	<div class="stage-inner">
+		<Scene world={meta} />
+	</div>
+</section>
 
 <style>
-	.stage {
-		position: relative;
+	@import './playground-chrome.css';
+
+	.stage-wrap {
+		flex: 1 1 auto;
 		min-width: 0;
 		min-height: 0;
-		height: 100%;
-		overflow: hidden;
+		padding: 0.45rem;
+		border-radius: 1.5rem;
+		display: flex;
 	}
 
-	.scene {
-		height: 100%;
+	.stage-inner {
+		flex: 1;
 		min-height: 0;
+		border-radius: 1.15rem;
+		overflow: hidden;
 	}
 </style>

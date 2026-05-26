@@ -1,60 +1,107 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { browser } from '$helpers/utils';
+	import { theme } from '$state/user-preferences.svelte';
 	import LiveCodePanel from './LiveCodePanel.svelte';
+	import PlaygroundIntro from './PlaygroundIntro.svelte';
 	import PlaygroundStage from './PlaygroundStage.svelte';
 	import ScenarioStrip from './ScenarioStrip.svelte';
-	import { DEFAULT_WORLD, world_from_hash, type WorldId } from './worlds';
+	import { DEFAULT_FRAMEWORK } from './frameworks';
+	import type { Framework } from '$helpers/constants';
+	import {
+		DEFAULT_WORLD,
+		parse_world_from_hash,
+		type WorldId,
+	} from './worlds';
 
-	let worldId = $state<WorldId>(DEFAULT_WORLD);
+	theme.current;
+
+	let world = $state<WorldId>(DEFAULT_WORLD);
+	let framework = $state<Framework>(DEFAULT_FRAMEWORK);
+
+	function sync_from_hash() {
+		if (!browser) return;
+		const from_hash = parse_world_from_hash(location.hash);
+		if (from_hash) world = from_hash;
+	}
 
 	function select_world(id: WorldId) {
-		worldId = id;
-		if (typeof location !== 'undefined') {
+		world = id;
+		if (browser) {
 			history.replaceState(null, '', `#${id}`);
 		}
 	}
 
-	onMount(() => {
-		const from_hash = world_from_hash(location.hash);
-		if (from_hash) worldId = from_hash;
-
-		const on_hash = () => {
-			const next = world_from_hash(location.hash);
-			if (next) worldId = next;
-		};
+	$effect(() => {
+		if (!browser) return;
+		sync_from_hash();
+		const on_hash = () => sync_from_hash();
 		window.addEventListener('hashchange', on_hash);
 		return () => window.removeEventListener('hashchange', on_hash);
 	});
 </script>
 
-<div id="playground-home" class="playground">
-	<ScenarioStrip active={worldId} onselect={select_world} />
-	<PlaygroundStage {worldId} />
-	<LiveCodePanel {worldId} />
+<div class="playground-home">
+	<PlaygroundIntro {world} />
+
+	<div class="workspace">
+		<ScenarioStrip active={world} onselect={select_world} />
+		<PlaygroundStage {world} />
+		<LiveCodePanel {world} {framework} onframework={(id) => (framework = id)} />
+	</div>
 </div>
 
 <style>
-	.playground {
-		display: grid;
-		grid-template-columns: 4.75rem minmax(0, 1fr) min(20rem, 34vw);
-		height: calc(100dvh - 5rem);
+	.playground-home {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 		width: 100%;
-		max-width: 100vw;
+		max-width: 1400px;
+		margin: 0 auto;
+		padding: 1rem 0 7rem;
+		min-height: min(100dvh, 100%);
 		box-sizing: border-box;
-		overflow: hidden;
 	}
 
-	@media (max-width: 900px) {
-		.playground {
-			grid-template-columns: 3.5rem minmax(0, 1fr);
-			grid-template-rows: minmax(0, 1fr) auto;
+	.workspace {
+		display: grid;
+		grid-template-columns: auto 1fr min(26rem, 38vw);
+		gap: 0.75rem;
+		flex: 1;
+		min-height: clamp(18rem, 52vh, 34rem);
+	}
+
+	@media (max-width: 1100px) {
+		.workspace {
+			grid-template-columns: auto 1fr;
+			grid-template-rows: 1fr auto;
 		}
 
-		.playground :global(.code-panel) {
+		.workspace :global(.code-panel) {
 			grid-column: 1 / -1;
-			max-height: 38vh;
-			border-left: none;
-			border-top: 1px solid color-mix(in lch, var(--app-color-dark), transparent 88%);
+			max-height: 14rem;
+		}
+	}
+
+	@media (max-width: 720px) {
+		.workspace {
+			grid-template-columns: 1fr;
+		}
+
+		.workspace :global(.strip) {
+			flex-direction: row;
+		}
+
+		.workspace :global(.strip ul) {
+			flex-direction: row;
+			flex-wrap: wrap;
+			justify-content: center;
+		}
+
+		.workspace :global(.strip button) {
+			width: auto;
+			flex-direction: row;
+			padding: 0.45rem 0.7rem;
 		}
 	}
 </style>

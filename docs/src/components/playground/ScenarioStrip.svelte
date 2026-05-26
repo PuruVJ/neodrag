@@ -1,6 +1,5 @@
 <script lang="ts">
-	import type { WorldId } from './worlds';
-	import { WORLDS } from './worlds';
+	import { WORLDS, type WorldId } from './worlds';
 
 	type Props = {
 		active: WorldId;
@@ -10,63 +9,70 @@
 	const { active, onselect }: Props = $props();
 </script>
 
-<nav class="strip" aria-label="Playground worlds">
-	{#each WORLDS as world}
-		<button
-			type="button"
-			class="world-btn"
-			class:active={active === world.id}
-			class:locked={!world.available}
-			disabled={!world.available}
-			title={world.available ? world.hint : `${world.label} — coming soon`}
-			aria-current={active === world.id ? 'true' : undefined}
-			onclick={() => world.available && onselect(world.id)}
-		>
-			<span class="glyph" aria-hidden="true">{world.glyph}</span>
-			<span class="label">{world.label}</span>
-		</button>
-	{/each}
+<nav class="strip playground-surface" aria-label="Scenarios">
+	<ul>
+		{#each WORLDS as world (world.id)}
+			<li>
+				<button
+					type="button"
+					class:selected={active === world.id}
+					class:locked={!world.available}
+					disabled={!world.available}
+					title={world.available ? world.tagline : `${world.label} — coming soon`}
+					onclick={() => world.available && onselect(world.id)}
+				>
+					<span class="glyph" aria-hidden="true">{world.glyph}</span>
+					<span class="label">{world.label}</span>
+				</button>
+			</li>
+		{/each}
+	</ul>
 </nav>
 
 <style>
+	@import './playground-chrome.css';
+
 	.strip {
+		padding: 0.45rem;
+		border-radius: 1.25rem;
+		height: fit-content;
+	}
+
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
 		display: flex;
 		flex-direction: column;
 		gap: 0.35rem;
-		padding: 0.75rem 0.5rem;
-		border-right: 1px solid color-mix(in lch, var(--app-color-dark), transparent 88%);
-		background: color-mix(in lch, var(--app-color-shell), var(--app-color-dark) 3%);
-		min-height: 0;
-		overflow-y: auto;
 	}
 
-	.world-btn {
+	button {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.25rem;
+		gap: 0.2rem;
+		width: 4.25rem;
 		padding: 0.5rem 0.35rem;
-		border-radius: 0.65rem;
-		cursor: pointer;
+		border-radius: 0.85rem;
+		color: color-mix(in lch, var(--app-color-dark), transparent 15%);
 		transition:
-			background 0.15s ease,
-			opacity 0.15s ease;
-		opacity: 0.85;
-	}
+			background-color 150ms ease,
+			transform 150ms ease;
 
-	.world-btn:hover:not(:disabled) {
-		background: color-mix(in lch, var(--app-color-primary), transparent 88%);
-		opacity: 1;
-	}
+		&:hover:not(:disabled) {
+			background: color-mix(in lch, var(--app-color-shell), transparent 55%);
+		}
 
-	.world-btn.active {
-		background: color-mix(in lch, var(--app-color-primary), transparent 82%);
-		opacity: 1;
-	}
+		&.selected {
+			background: color-mix(in lch, var(--app-color-primary), transparent 75%);
+			color: var(--app-color-primary);
+		}
 
-	.world-btn.locked {
-		opacity: 0.35;
-		cursor: not-allowed;
+		&.locked {
+			opacity: 0.45;
+			cursor: not-allowed;
+		}
 	}
 
 	.glyph {
@@ -75,10 +81,9 @@
 	}
 
 	.label {
-		font-size: 0.6rem;
+		font-size: 0.62rem;
+		font-weight: 600;
 		text-align: center;
 		line-height: 1.2;
-		max-width: 4.5rem;
-		color: var(--app-color-dark);
 	}
 </style>

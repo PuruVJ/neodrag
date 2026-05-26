@@ -1,149 +1,88 @@
-import type { FrameworkId } from './frameworks';
+import type { Framework } from '$helpers/constants';
 import type { WorldId } from './worlds';
 
-const PLACEHOLDER = `// This world is not built yet.
-// Pick Night desk (moon) to play.`;
+const SNIPPETS: Record<WorldId, Record<Framework, string>> = {
+	'night-desk': {
+		svelte: `<script lang="ts">
+  import { Draggable } from '@neodrag/svelte';
+  import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
-const NIGHT_DESK: Record<FrameworkId, string> = {
-	svelte: `import { Neodrag } from '@neodrag/core';
-import { Draggable } from '@neodrag/svelte';
-import { ControlFrom, controls } from '@neodrag/svelte/plugins';
-import { Resizable, resizeHandles } from '@neodrag/svelte/resize';
+  const drag = new Draggable({
+    plugins: [bounds(BoundsFrom.parent())],
+  });
+</script>
 
-const engine = new Neodrag();
-const drag = new Draggable({
-  engine,
-  plugins: [controls({ allow: ControlFrom.selector('[data-window-drag]') })],
-});
-const resize = new Resizable({
-  engine,
-  plugins: [resizeHandles({ edges: 'all', size: 10, cornerSize: 22 })],
-});
-
-<div class="window" {@attach drag.attachment} {@attach resize.attachment}>
-  <header data-window-drag>…</header>
+<div class="stage">
+  <div class="panel" {@attach drag.attachment}>Notes</div>
 </div>`,
+		react: `import { useRef } from 'react';
+import { useDraggable, bounds, BoundsFrom } from '@neodrag/react';
 
-	react: `import { Neodrag } from '@neodrag/core';
-import { useDraggable, useResizable } from '@neodrag/react';
-import { ControlFrom, controls } from '@neodrag/react/plugins';
-import { resizeHandles } from '@neodrag/core/resize';
+export function NightDesk() {
+  const ref = useRef<HTMLDivElement>(null);
+  useDraggable(ref, { plugins: [bounds(BoundsFrom.parent())] });
 
-const engine = new Neodrag();
-
-function Window() {
-  const { ref: dragRef } = useDraggable([
-    controls({ allow: ControlFrom.selector('[data-window-drag]') }),
-  ]);
-  const { ref: resizeRef } = useResizable([
-    resizeHandles({ edges: 'all', size: 10, cornerSize: 22 }),
-  ]);
-  const ref = (node: HTMLDivElement | null) => {
-    dragRef(node);
-    resizeRef(node);
-  };
-  return <div ref={ref} className="window">…</div>;
+  return (
+    <div className="stage">
+      <div ref={ref} className="panel">Notes</div>
+    </div>
+  );
 }`,
+		vue: `<script setup lang="ts">
+import { useTemplateRef } from 'vue';
+import { useDraggable, bounds, BoundsFrom } from '@neodrag/vue';
 
-	vue: `<script setup>
-import { Draggable, Resizable, vDraggable, vResizable } from '@neodrag/vue';
-import { ControlFrom, controls } from '@neodrag/vue/plugins';
-import { resizeHandles } from '@neodrag/core/resize';
-
-const drag = new Draggable({
-  plugins: [controls({ allow: ControlFrom.selector('[data-window-drag]') })],
-});
-const resize = new Resizable({
-  plugins: [resizeHandles({ edges: 'all', size: 10, cornerSize: 22 })],
-});
+const panel = useTemplateRef('panel');
+useDraggable(panel, { plugins: [bounds(BoundsFrom.parent())] });
 </script>
 
 <template>
-  <div v-draggable="drag" v-resizable="resize" class="window">
-    <header data-window-drag>…</header>
+  <div class="stage">
+    <div ref="panel" class="panel">Notes</div>
   </div>
 </template>`,
+		solid: `import { bounds, BoundsFrom, createDraggable } from '@neodrag/solid';
 
-	solid: `import { Draggable, Resizable } from '@neodrag/solid';
-import { ControlFrom, controls } from '@neodrag/solid/plugins';
-import { resizeHandles } from '@neodrag/core/resize';
+function Panel() {
+  const [ref, setRef] = createSignal<HTMLDivElement>();
+  createDraggable(ref, () => [bounds(BoundsFrom.parent())]);
 
-const drag = new Draggable({
-  plugins: [controls({ allow: ControlFrom.selector('[data-window-drag]') })],
-});
-const resize = new Resizable({
-  plugins: [resizeHandles({ edges: 'all', size: 10, cornerSize: 22 })],
-});
+  return (
+    <div class="stage">
+      <div ref={setRef} class="panel">Notes</div>
+    </div>
+  );
+}`,
+		vanilla: `import { Draggable, bounds, BoundsFrom } from '@neodrag/vanilla';
 
-<div
-  class="window"
-  ref={(el) => {
-    drag.attach(el);
-    resize.attach(el);
-  }}
->
-  <header data-window-drag>…</header>
-</div>`,
-
-	vanilla: `import { Draggable, Resizable } from '@neodrag/vanilla';
-import { ControlFrom, controls } from '@neodrag/vanilla/plugins';
-import { resizeHandles } from '@neodrag/core/resize';
-
-const drag = new Draggable({
-  plugins: [controls({ allow: ControlFrom.selector('[data-window-drag]') })],
-});
-const resize = new Resizable({
-  plugins: [resizeHandles({ edges: 'all', size: 10, cornerSize: 22 })],
-});
-
-const el = document.querySelector('.window')!;
-drag.attach(el);
-resize.attach(el);`,
+const panel = document.querySelector('.panel');
+new Draggable(panel, { plugins: [bounds(BoundsFrom.parent())] });`,
+	},
+	'last-mile': empty_snippets('Route a delivery pin'),
+	'split-bill': empty_snippets('Split line items'),
+	'fridge-paws': empty_snippets('Stick magnets on the fridge'),
+	'laser-heist': empty_snippets('Dodge the lasers'),
 };
 
-function placeholder_for(framework: FrameworkId): string {
-	return `${PLACEHOLDER}\n\n// ${framework} snippet lands when this world ships.`;
+function empty_snippets(hint: string): Record<Framework, string> {
+	const line = `// ${hint} — coming soon`;
+	return {
+		svelte: line,
+		react: line,
+		vue: line,
+		solid: line,
+		vanilla: line,
+	};
 }
 
-export const SNIPPETS: Record<FrameworkId, Record<WorldId, string>> = {
-	svelte: {
-		'night-desk': NIGHT_DESK.svelte,
-		'last-mile': PLACEHOLDER,
-		'split-bill': PLACEHOLDER,
-		'fridge-paws': PLACEHOLDER,
-		'laser-heist': PLACEHOLDER,
-	},
-	react: {
-		'night-desk': NIGHT_DESK.react,
-		'last-mile': PLACEHOLDER,
-		'split-bill': PLACEHOLDER,
-		'fridge-paws': PLACEHOLDER,
-		'laser-heist': PLACEHOLDER,
-	},
-	vue: {
-		'night-desk': NIGHT_DESK.vue,
-		'last-mile': PLACEHOLDER,
-		'split-bill': PLACEHOLDER,
-		'fridge-paws': PLACEHOLDER,
-		'laser-heist': PLACEHOLDER,
-	},
-	solid: {
-		'night-desk': NIGHT_DESK.solid,
-		'last-mile': PLACEHOLDER,
-		'split-bill': PLACEHOLDER,
-		'fridge-paws': PLACEHOLDER,
-		'laser-heist': PLACEHOLDER,
-	},
-	vanilla: {
-		'night-desk': NIGHT_DESK.vanilla,
-		'last-mile': PLACEHOLDER,
-		'split-bill': PLACEHOLDER,
-		'fridge-paws': PLACEHOLDER,
-		'laser-heist': PLACEHOLDER,
-	},
+export function get_snippet(world: WorldId, framework: Framework): string {
+	return SNIPPETS[world][framework];
+}
+
+export const LANG_BY_FRAMEWORK: Record<Framework, string> = {
+	svelte: 'svelte',
+	react: 'tsx',
+	vue: 'vue',
+	solid: 'tsx',
+	vanilla: 'ts',
 };
-
-/** Add per-world snippets under SNIPPETS[framework][worldId]. */
-export function get_snippet(world: WorldId, framework: FrameworkId) {
-	return SNIPPETS[framework][world] ?? placeholder_for(framework);
-}
