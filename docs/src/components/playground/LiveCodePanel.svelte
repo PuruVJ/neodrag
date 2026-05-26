@@ -35,7 +35,7 @@
 
 <aside class="code-panel" aria-label="Code for this scene">
 	<header class="code-head">
-		<span class="label">Source</span>
+		<span class="label h3">Source</span>
 		<div class="head-actions">
 			<button type="button" class="icon-btn" title="Copy snippet" onclick={copy_snippet}>
 				{#if copied}
@@ -44,7 +44,7 @@
 					<ContentCopyIcon />
 				{/if}
 			</button>
-			<a class="docs-link unstyled" href={docs_href}>Docs →</a>
+			<a class="docs-link unstyled" href={docs_href}>Docs</a>
 		</div>
 	</header>
 
@@ -71,13 +71,14 @@
 </aside>
 
 <style>
+	@import './playground-chrome.css';
+
 	.code-panel {
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
 		min-height: 0;
-		padding: clamp(1rem, 2.5vw, 1.5rem);
-		background: color-mix(in lch, var(--app-color-shell), var(--app-color-dark) 3%);
+		padding: clamp(1rem, 2.5vw, 1.5rem) clamp(1rem, 2.5vw, 1.5rem) clamp(1rem, 2.5vw, 1.5rem) 0;
 	}
 
 	.code-head {
@@ -89,9 +90,7 @@
 	}
 
 	.label {
-		font-family: var(--app-font-heading);
-		font-size: 1.15rem;
-		color: color-mix(in lch, var(--app-color-dark), transparent 10%);
+		margin: 0;
 	}
 
 	.head-actions {
@@ -105,20 +104,22 @@
 		place-items: center;
 		width: 2.25rem;
 		height: 2.25rem;
-		border-radius: 0.6rem;
+		border-radius: 0.5rem;
 		color: color-mix(in lch, var(--app-color-dark), transparent 20%);
-		background: color-mix(in lch, var(--app-color-dark), transparent 92%);
+	}
 
-		:global(svg) {
-			width: 1.15rem;
-			height: 1.15rem;
-		}
+	.icon-btn :global(svg) {
+		width: 1.15rem;
+		height: 1.15rem;
 	}
 
 	.docs-link {
+		padding: 0.4rem 0.9rem;
+		border-radius: 0.5rem;
 		font-size: 0.88rem;
 		font-weight: 600;
-		color: var(--app-color-primary) !important;
+		color: var(--app-color-primary-contrast) !important;
+		background: var(--app-color-primary);
 	}
 
 	.tabs {
@@ -140,11 +141,11 @@
 		transition: background-color 150ms ease;
 
 		&:hover {
-			background: color-mix(in lch, var(--app-color-dark), transparent 92%);
+			background: color-mix(in lch, var(--app-color-dark), transparent 94%);
 		}
 
 		&.selected {
-			background: color-mix(in lch, var(--app-color-dark), transparent 88%);
+			background: color-mix(in lch, var(--app-color-dark), transparent 90%);
 			color: color-mix(in lch, var(--app-color-dark), transparent 5%);
 		}
 
@@ -169,6 +170,5 @@
 		flex: 1;
 		min-height: 12rem;
 		overflow: auto;
-		padding: 0.25rem 0;
 	}
 </style>

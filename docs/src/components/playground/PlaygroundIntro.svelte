@@ -24,8 +24,8 @@
 
 	<div class="masthead-side">
 		<div class="actions">
-			<a class="cta primary" href="/docs/svelte">Getting started</a>
-			<a class="cta ghost" href="https://github.com/PuruVJ/neodrag" target="_blank" rel="external">
+			<a class="cta" href="/docs/svelte">Getting started</a>
+			<a class="cta secondary unstyled" href="https://github.com/PuruVJ/neodrag" target="_blank" rel="external">
 				GitHub
 			</a>
 		</div>
@@ -43,7 +43,6 @@
 		align-items: end;
 		gap: clamp(2rem, 6vw, 5rem);
 		padding: clamp(0.5rem, 2vw, 1.5rem) 0 clamp(1.5rem, 4vw, 2.5rem);
-		min-height: 0;
 	}
 
 	.brand {
@@ -64,8 +63,6 @@
 
 	.tagline {
 		margin: 0;
-		font-size: clamp(1.1rem, 3.5vw, 2rem);
-		color: color-mix(in lch, var(--app-color-dark), transparent 8%);
 	}
 
 	.plugin-line,
@@ -89,39 +86,25 @@
 	}
 
 	.actions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
-		justify-content: flex-end;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		width: min(100%, 22rem);
 	}
 
 	.cta {
-		display: inline-flex;
-		align-items: center;
+		display: flex;
 		justify-content: center;
-		padding: 0.85rem 1.75rem;
-		border-radius: 1rem;
+		align-items: center;
+		padding: 1rem 1.5rem;
+		border-radius: 1rem !important;
 		font-size: clamp(1rem, 2vw, 1.35rem);
-		font-weight: 600;
-		text-decoration: none;
-		transition:
-			transform 160ms ease,
-			filter 160ms ease;
-
-		&:hover {
-			transform: translateY(-1px);
-		}
-	}
-
-	.cta.primary {
-		color: var(--app-color-primary-contrast);
-		background: var(--app-color-primary);
-		box-shadow: 0 10px 32px color-mix(in lch, var(--app-color-primary), transparent 55%);
-	}
-
-	.cta.ghost {
+		text-align: center;
 		color: var(--app-color-primary);
-		background: color-mix(in lch, var(--app-color-primary), transparent 92%);
+	}
+
+	.cta.secondary {
+		color: var(--app-color-primary);
 	}
 
 	@media (max-width: 960px) {
@@ -136,7 +119,18 @@
 		}
 
 		.actions {
-			justify-content: flex-start;
+			width: 100%;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.actions {
+			grid-template-columns: 1fr;
+		}
+
+		.cta {
+			font-size: 1rem;
+			padding: 0.75rem 1rem;
 		}
 	}
 </style>

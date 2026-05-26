@@ -19,9 +19,9 @@
 			title={world.available ? world.tagline : 'Coming soon'}
 			onclick={() => world.available && onselect(world.id)}
 		>
-			<span class="name">{world.label}</span>
+			{world.label}
 			{#if !world.available}
-				<span class="soon">Soon</span>
+				<span class="soon">soon</span>
 			{/if}
 		</button>
 	{/each}
@@ -36,30 +36,22 @@
 	}
 
 	button {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
-		padding: 0.5rem 1rem;
-		border-radius: 999px;
-		font-size: 0.82rem;
+		padding: 0.45rem 0.9rem;
+		border-radius: 0.5rem;
+		font-family: var(--app-font-mono);
+		font-size: 0.78rem;
 		font-weight: 600;
-		letter-spacing: 0.02em;
-		color: color-mix(in lch, var(--app-color-dark), transparent 22%);
+		color: color-mix(in lch, var(--app-color-dark), transparent 30%);
 		background: color-mix(in lch, var(--app-color-dark), transparent 94%);
-		transition:
-			background-color 160ms ease,
-			color 160ms ease,
-			box-shadow 160ms ease;
+		transition: background-color 150ms ease;
 
 		&:hover:not(:disabled) {
-			color: color-mix(in lch, var(--app-color-dark), transparent 5%);
 			background: color-mix(in lch, var(--app-color-dark), transparent 88%);
 		}
 
 		&.selected {
-			color: var(--app-color-primary-contrast);
-			background: var(--app-color-primary);
-			box-shadow: 0 4px 18px color-mix(in lch, var(--app-color-primary), transparent 50%);
+			color: var(--app-color-primary);
+			background: color-mix(in lch, var(--app-color-primary), transparent 88%);
 		}
 
 		&.locked {
@@ -69,10 +61,7 @@
 	}
 
 	.soon {
-		font-size: 0.65rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		opacity: 0.7;
+		margin-left: 0.25rem;
+		opacity: 0.65;
 	}
 </style>

@@ -11,17 +11,18 @@
 	const Scene = $derived(WORLD_COMPONENTS[world]);
 </script>
 
-<div class="stage">
+<div class="stage playground-well">
 	<Scene world={meta} />
 </div>
 
 <style>
+	@import './playground-chrome.css';
+
 	.stage {
 		flex: 1;
 		min-height: 0;
 		min-width: 0;
 		position: relative;
-		border-radius: 1rem;
 		overflow: hidden;
 	}
 </style>

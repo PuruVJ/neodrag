@@ -42,13 +42,13 @@
 <div class="home-playground">
 	<PlaygroundIntro {world} onworld={select_world} />
 
-	<section class="play-canvas playground-dock-surface" aria-label="Try dragging">
+	<section class="play-canvas" aria-label="Try dragging">
 		<div class="stage-column">
-			<p class="stage-hint">Drag the cards — bounds stay inside the desk.</p>
+			<p class="stage-hint">Drag the windows — they stay inside the desk.</p>
 			<PlaygroundStage {world} />
 		</div>
 
-		<div class="playground-hairline divider" aria-hidden="true"></div>
+		<div class="playground-divider divider" aria-hidden="true"></div>
 
 		<LiveCodePanel {world} {framework} onframework={(id) => (framework = id)} />
 	</section>
@@ -74,8 +74,6 @@
 		gap: 0;
 		flex: 1;
 		min-height: clamp(28rem, 62vh, 44rem);
-		border-radius: clamp(1.25rem, 2vw, 2rem);
-		overflow: hidden;
 	}
 
 	.stage-column {
@@ -83,7 +81,6 @@
 		flex-direction: column;
 		min-width: 0;
 		min-height: 0;
-		padding: clamp(1rem, 2.5vw, 1.75rem);
 	}
 
 	.stage-hint {
@@ -112,7 +109,6 @@
 		}
 
 		.home-playground :global(.code-panel) {
-			max-height: none;
 			min-height: 16rem;
 		}
 	}
