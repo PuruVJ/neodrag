@@ -10,7 +10,7 @@ const { headings } = Astro.props;
 
 <aside aria-label="Links to sections in this Page" class="grid h-full w-full items-center">
 	<p class="site-kicker mb-3 pl-3">on this page</p>
-	<nav class="border-l-2 border-[var(--color-border)] pl-3">
+	<nav class="border-l border-[var(--color-border)] pl-3">
 		<ul class="m-0 list-none p-0">
 			{
 				headings.map(({ depth, slug, text }) => (

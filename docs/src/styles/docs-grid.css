@@ -2,15 +2,18 @@ body.docs-route .site-backdrop {
 	display: none !important;
 }
 
-body.docs-route::before {
-	content: '';
+.docs-page-grid {
+	--docs-grid-cell: 3.25rem;
+	--docs-grid-line: color-mix(in lch, var(--grid-accent), transparent 91%);
+	--docs-grid-major: color-mix(in lch, var(--grid-accent), transparent 80%);
+	--docs-grid-dot: color-mix(in lch, var(--grid-accent), transparent 89%);
+
+	pointer-events: none;
 	position: fixed;
 	inset: 0;
 	z-index: 0;
-	pointer-events: none;
-	--docs-grid-line: color-mix(in lch, var(--color-brand), transparent 70%);
-	--docs-grid-major: color-mix(in lch, var(--color-brand), transparent 52%);
-	--docs-grid-dot: color-mix(in lch, var(--color-brand), transparent 62%);
+	overflow: hidden;
+	background-color: color-mix(in lch, var(--app-color-shell), var(--grid-accent) 1.25%);
 	background-image:
 		radial-gradient(circle at center, var(--docs-grid-dot) 1px, transparent 1px),
 		linear-gradient(var(--docs-grid-major) 1px, transparent 1px),
@@ -18,45 +21,76 @@ body.docs-route::before {
 		linear-gradient(var(--docs-grid-line) 1px, transparent 1px),
 		linear-gradient(90deg, var(--docs-grid-line) 1px, transparent 1px);
 	background-size:
-		3.25rem 3.25rem,
-		13rem 13rem,
-		13rem 13rem,
-		3.25rem 3.25rem,
-		3.25rem 3.25rem;
-	background-position: center;
+		var(--docs-grid-cell) var(--docs-grid-cell),
+		calc(var(--docs-grid-cell) * 4) calc(var(--docs-grid-cell) * 4),
+		calc(var(--docs-grid-cell) * 4) calc(var(--docs-grid-cell) * 4),
+		var(--docs-grid-cell) var(--docs-grid-cell),
+		var(--docs-grid-cell) var(--docs-grid-cell);
+	background-position: center center;
+	mask-image: radial-gradient(ellipse 120% 95% at 50% 42%, black 35%, transparent 88%);
 }
 
-body[data-theme='dark'].docs-route::before {
-	--docs-grid-line: color-mix(in lch, var(--color-brand), transparent 76%);
-	--docs-grid-major: color-mix(in lch, var(--color-brand), transparent 58%);
-	--docs-grid-dot: color-mix(in lch, var(--color-brand), transparent 68%);
+body[data-theme='dark'] .docs-page-grid {
+	--docs-grid-line: color-mix(in lch, var(--grid-accent), transparent 93%);
+	--docs-grid-major: color-mix(in lch, var(--grid-accent), transparent 84%);
+	--docs-grid-dot: color-mix(in lch, var(--grid-accent), transparent 91%);
+	background-color: color-mix(in lch, var(--app-color-shell), var(--grid-accent) 2%);
+	mask-image: radial-gradient(ellipse 115% 90% at 50% 40%, black 30%, transparent 85%);
 }
 
-body.docs-route > div {
+body.docs-route {
+	--grid-accent: var(--app-color-primary);
+}
+
+body.docs-route[data-framework='svelte'] {
+	--grid-accent: var(--app-color-brand-svelte);
+}
+
+body.docs-route[data-framework='react'] {
+	--grid-accent: var(--app-color-brand-react);
+}
+
+body.docs-route[data-framework='vue'] {
+	--grid-accent: var(--app-color-brand-vue);
+}
+
+body.docs-route[data-framework='solid'] {
+	--grid-accent: var(--app-color-brand-solid);
+}
+
+body.docs-route[data-framework='vanilla'] {
+	--grid-accent: var(--app-color-brand-vanilla);
+}
+
+body.docs-route[data-framework='core'] {
+	--grid-accent: var(--app-color-primary);
+}
+
+body.docs-route > div:not(.docs-page-grid) {
 	position: relative;
 	z-index: 1;
-	background: transparent;
+	background: transparent !important;
 }
 
 #docs-container,
 #docs-container main,
 #docs-container article {
-	background: transparent !important;
+	background-color: transparent !important;
 }
 
 @media (pointer: fine) {
 	body.docs-route #docs-container,
 	body.docs-route .docs-sidebar-panel,
 	body.docs-route .toc nav,
-	body.docs-route .dock-angular-bevel__fill .max-h-\[48vh\] {
+	body.docs-route .dock-menu-scroll {
 		scrollbar-width: thin;
-		scrollbar-color: color-mix(in lch, var(--color-brand), transparent 38%) transparent;
+		scrollbar-color: color-mix(in lch, var(--grid-accent), transparent 38%) transparent;
 	}
 
 	body.docs-route #docs-container::-webkit-scrollbar,
 	body.docs-route .docs-sidebar-panel::-webkit-scrollbar,
 	body.docs-route .toc nav::-webkit-scrollbar,
-	body.docs-route .dock-surface .max-h-\[48vh\]::-webkit-scrollbar {
+	body.docs-route .dock-menu-scroll::-webkit-scrollbar {
 		width: 0.7rem;
 		height: 0.7rem;
 	}
@@ -71,8 +105,8 @@ body.docs-route > div {
 	body.docs-route #docs-container::-webkit-scrollbar-thumb,
 	body.docs-route .docs-sidebar-panel::-webkit-scrollbar-thumb,
 	body.docs-route .toc nav::-webkit-scrollbar-thumb,
-	body.docs-route .dock-surface .max-h-\[48vh\]::-webkit-scrollbar-thumb {
-		background-color: color-mix(in lch, var(--color-brand), transparent 42%);
+	body.docs-route .dock-menu-scroll::-webkit-scrollbar-thumb {
+		background-color: color-mix(in lch, var(--grid-accent), transparent 42%);
 		border: 2px solid transparent;
 		background-clip: padding-box;
 		border-radius: 0;
@@ -81,8 +115,8 @@ body.docs-route > div {
 	body.docs-route #docs-container::-webkit-scrollbar-thumb:hover,
 	body.docs-route .docs-sidebar-panel::-webkit-scrollbar-thumb:hover,
 	body.docs-route .toc nav::-webkit-scrollbar-thumb:hover,
-	body.docs-route .dock-surface .max-h-\[48vh\]::-webkit-scrollbar-thumb:hover {
-		background-color: color-mix(in lch, var(--color-brand), transparent 22%);
+	body.docs-route .dock-menu-scroll::-webkit-scrollbar-thumb:hover {
+		background-color: color-mix(in lch, var(--grid-accent), transparent 22%);
 	}
 
 	body.docs-route #docs-container::-webkit-scrollbar-corner,
