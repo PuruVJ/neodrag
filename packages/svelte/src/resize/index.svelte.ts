@@ -1,23 +1,22 @@
 // @ts-nocheck
 import {
-	Draggable as CoreDraggable,
 	Resizable as CoreResizable,
 	Neodrag,
-	type DragPluginList,
 	type ResizePluginList,
 	type EngineOptions,
 } from '@neodrag/core';
 import { Attachment } from 'svelte/attachments';
 import { untrack } from 'svelte';
 
-export type NeodragOptions = EngineOptions;
-export { Neodrag, CoreDraggable as DraggableCore, CoreResizable as ResizableCore };
-export type { DragPluginList, ResizePluginList };
+export type NeodragResizeOptions = EngineOptions;
+export type { ResizePluginList };
 
-export class Draggable extends CoreDraggable {
+export { Neodrag };
+
+export class Resizable extends CoreResizable {
 	readonly #attachment: Attachment<HTMLElement | SVGElement>;
 
-	constructor(options: ConstructorParameters<typeof CoreDraggable>[0]) {
+	constructor(options: ConstructorParameters<typeof CoreResizable>[0]) {
 		super(options);
 
 		const coreAttachment = this.attachment;
@@ -41,3 +40,20 @@ export class Draggable extends CoreDraggable {
 		return this.#attachment;
 	}
 }
+
+export {
+	resizeHandles,
+	sizeBounds,
+	resizeAxis,
+	aspectRatio,
+	resizeEvents,
+	presetPanel,
+	presetCornerBox,
+	presetSplitPane,
+	defineResizePlugin,
+	RESIZE_HANDLE_ATTR,
+	type ResizeCtx,
+	type ResizeEdge,
+	type ResizeSession,
+	type ResizeEventData,
+} from '@neodrag/core/resize';

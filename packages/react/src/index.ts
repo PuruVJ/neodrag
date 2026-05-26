@@ -1,18 +1,21 @@
 import {
 	Draggable as CoreDraggable,
 	DroppableBinding,
+	Resizable as CoreResizable,
 	Neodrag,
 	hasReactiveSlots,
 	type DragEventData,
 	type DragPlugin,
 	type DragPluginList,
 	type DropPluginList,
+	type ResizeApplier,
+	type ResizePluginList,
 } from '@neodrag/core';
 import { defineDragPlugin } from '@neodrag/core/plugins';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-export type { DragEventData, DragPluginList };
-export { Neodrag, CoreDraggable as Draggable };
+export type { DragEventData, DragPluginList, ResizeApplier, ResizePluginList };
+export { Neodrag, CoreDraggable as Draggable, CoreResizable as Resizable };
 
 export interface DragState extends DragEventData {
 	isDragging: boolean;
@@ -215,6 +218,82 @@ export function useDroppable(
 
 	if (!bindingRef.current) {
 		bindingRef.current = new DroppableBinding({ plugins: slots });
+	}
+
+	const attachRef = useCallback((node: HTMLElement | SVGElement | null) => {
+		const binding = bindingRef.current;
+		if (!binding) return;
+		if (!node) {
+			binding.detach();
+			return;
+		}
+		binding.attach(node);
+	}, []);
+
+	useLayoutEffect(() => {
+		if (!hasReactiveSlots(slotsRef.current)) return;
+		bindingRef.current?.update(slotsRef.current);
+	});
+
+	useEffect(() => () => bindingRef.current?.destroy(), []);
+
+	useLayoutEffect(() => {
+		if (!externalRef) return;
+		attachRef(externalRef.current);
+	});
+
+	useEffect(() => {
+		if (!externalRef) return;
+		let cancelled = false;
+		const tryAttach = () => {
+			if (cancelled) return;
+			if (externalRef.current) {
+				attachRef(externalRef.current);
+				return;
+			}
+			requestAnimationFrame(tryAttach);
+		};
+		tryAttach();
+		return () => {
+			cancelled = true;
+			attachRef(null);
+		};
+	}, [externalRef, attachRef]);
+
+	if (isRefForm) return;
+	return { ref: attachRef };
+}
+
+export function useResizable(slots?: ResizePluginList): {
+	ref: (node: HTMLElement | SVGElement | null) => void;
+};
+
+export function useResizable(
+	ref: React.RefObject<HTMLElement | SVGElement | null>,
+	slots?: ResizePluginList,
+): void;
+
+export function useResizable(
+	refOrSlots: React.RefObject<HTMLElement | SVGElement | null> | ResizePluginList = [],
+	maybeSlots: ResizePluginList = [],
+) {
+	const isRefForm =
+		refOrSlots !== null &&
+		typeof refOrSlots === 'object' &&
+		'current' in refOrSlots &&
+		!Array.isArray(refOrSlots);
+
+	const slots = (isRefForm ? maybeSlots : refOrSlots) as ResizePluginList;
+	const externalRef = isRefForm
+		? (refOrSlots as React.RefObject<HTMLElement | SVGElement | null>)
+		: undefined;
+
+	const bindingRef = useRef<CoreResizable | null>(null);
+	const slotsRef = useRef(slots);
+	slotsRef.current = slots;
+
+	if (!bindingRef.current) {
+		bindingRef.current = new CoreResizable({ plugins: slots });
 	}
 
 	const attachRef = useCallback((node: HTMLElement | SVGElement | null) => {

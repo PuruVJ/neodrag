@@ -24,6 +24,10 @@
 			"types": "./src/drop.ts",
 			"import": "./src/drop.ts"
 		},
+		"./resize": {
+			"types": "./src/resize.ts",
+			"import": "./src/resize.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -42,6 +46,11 @@
 				"types": "./dist/drop.d.ts",
 				"import": "./dist/drop.js",
 				"default": "./dist/drop.js"
+			},
+			"./resize": {
+				"types": "./dist/resize.d.ts",
+				"import": "./dist/resize.js",
+				"default": "./dist/resize.js"
 			},
 			"./package.json": "./package.json"
 		}

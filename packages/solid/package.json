@@ -23,6 +23,11 @@
 			"import": "./src/drop/index.ts",
 			"default": "./src/drop/index.ts"
 		},
+		"./resize": {
+			"types": "./src/resize.ts",
+			"import": "./src/resize.ts",
+			"default": "./src/resize.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -41,6 +46,11 @@
 				"types": "./dist/drop/index.d.ts",
 				"import": "./dist/drop/index.js",
 				"default": "./dist/drop/index.js"
+			},
+			"./resize": {
+				"types": "./dist/resize.d.ts",
+				"import": "./dist/resize.js",
+				"default": "./dist/resize.js"
 			},
 			"./package.json": "./package.json"
 		}

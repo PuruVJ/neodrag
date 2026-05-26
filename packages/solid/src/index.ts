@@ -1,19 +1,21 @@
 import {
 	Draggable as CoreDraggable,
 	DroppableBinding,
+	Resizable as CoreResizable,
 	Neodrag,
 	hasReactiveSlots,
 	type DragEventData,
 	type DragPlugin,
 	type DragPluginList,
 	type DropPluginList,
+	type ResizePluginList,
 } from '@neodrag/core';
 import { defineDragPlugin } from '@neodrag/core/plugins';
 import type { Accessor } from 'solid-js';
 import { createEffect, createSignal, onCleanup, untrack } from 'solid-js';
 
-export type { DragEventData, DragPluginList };
-export { Neodrag, CoreDraggable as Draggable };
+export type { DragEventData, DragPluginList, ResizePluginList };
+export { Neodrag, CoreDraggable as Draggable, CoreResizable as Resizable };
 
 export type DragSyncMode = 'full' | 'start-end' | false;
 
@@ -164,6 +166,66 @@ export function useDroppable(
 		isElementForm ? maybeSlots : (elementOrSlots as DropPluginList);
 
 	const binding = new DroppableBinding({ plugins: untrack(() => slots()) });
+
+	const attachRef = (node: HTMLElement | SVGElement | null) => {
+		if (!node) {
+			binding.detach();
+			return;
+		}
+		binding.attach(node);
+	};
+
+	if (isElementForm) {
+		const element = elementOrSlots as Accessor<HTMLElement | SVGElement | null | undefined>;
+
+		createEffect(() => {
+			const node = element();
+			if (!node) {
+				binding.detach();
+				return;
+			}
+			untrack(() => binding.attach(node));
+			onCleanup(() => binding.detach());
+		});
+
+		createEffect(() => {
+			if (!hasReactiveSlots(slots())) return;
+			binding.update(slots());
+		});
+
+		onCleanup(() => binding.destroy());
+		return [undefined];
+	}
+
+	createEffect(() => {
+		if (!hasReactiveSlots(slots())) return;
+		binding.update(slots());
+	});
+
+	onCleanup(() => binding.destroy());
+
+	return [undefined, attachRef] as const;
+}
+
+export function useResizable(slots?: ResizePluginList): [
+	undefined,
+	(node: HTMLElement | SVGElement | null) => void,
+];
+
+export function useResizable(
+	element: Accessor<HTMLElement | SVGElement | null | undefined>,
+	slots: ResizePluginList,
+): [undefined];
+
+export function useResizable(
+	elementOrSlots: Accessor<HTMLElement | SVGElement | null | undefined> | ResizePluginList = [],
+	maybeSlots: ResizePluginList = [],
+) {
+	const isElementForm = typeof elementOrSlots === 'function';
+	const slots = (): ResizePluginList =>
+		isElementForm ? maybeSlots : (elementOrSlots as ResizePluginList);
+
+	const binding = new CoreResizable({ plugins: untrack(() => slots()) });
 
 	const attachRef = (node: HTMLElement | SVGElement | null) => {
 		if (!node) {

@@ -5,6 +5,7 @@ export default defineConfig({
 		index: './src/index.ts',
 		plugins: './src/plugins.ts',
 		'drop/index': './src/drop/index.ts',
+		'resize': './src/resize.ts',
 	},
 	format: 'esm',
 	dts: true,

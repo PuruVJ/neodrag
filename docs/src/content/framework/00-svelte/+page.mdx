@@ -278,3 +278,18 @@ For drag-and-drop targets, import from `@neodrag/svelte/drop` and use `Droppable
 
 <div {@attach drop.attachment}>Drop here</div>
 ```
+
+## Resizable
+
+```svelte
+<script>
+  import { Resizable } from '@neodrag/svelte/resize';
+  import { resizeHandles, sizeBounds } from '@neodrag/svelte/resize';
+
+  const resize = new Resizable({
+    plugins: [resizeHandles({ edges: ['e', 's'] }), sizeBounds({ minWidth: 100 })],
+  });
+</script>
+
+<div {@attach resize.attachment} style="width:200px;height:120px">Resize me</div>
+```

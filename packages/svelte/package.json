@@ -26,6 +26,12 @@
 			"import": "./src/drop/index.svelte.ts",
 			"default": "./src/drop/index.svelte.ts"
 		},
+		"./resize": {
+			"types": "./src/resize/index.svelte.ts",
+			"svelte": "./src/resize/index.svelte.ts",
+			"import": "./src/resize/index.svelte.ts",
+			"default": "./src/resize/index.svelte.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -46,6 +52,12 @@
 				"svelte": "./dist/drop/index.svelte.js",
 				"import": "./dist/drop/index.svelte.js",
 				"default": "./dist/drop/index.svelte.js"
+			},
+			"./resize": {
+				"types": "./dist/resize/index.svelte.d.ts",
+				"svelte": "./dist/resize/index.svelte.js",
+				"import": "./dist/resize/index.svelte.js",
+				"default": "./dist/resize/index.svelte.js"
 			},
 			"./package.json": "./package.json"
 		}
