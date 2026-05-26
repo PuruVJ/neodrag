@@ -11,7 +11,12 @@ import type { LengthAdapter } from './length-runtime.ts';
 import { ActiveResizeSession, ResizeInstance } from './resize-instance.ts';
 import { invalidateSortableLayoutForNode } from './sortable/index.ts';
 import { DragHandle, DropHandle, ResizeHandle } from './handles.ts';
-import { applyResize, type ResizeApplier } from './apply-resize.ts';
+import {
+	applyResize,
+	captureResizeLayout,
+	restoreResizeLayout,
+	type ResizeApplier,
+} from './apply-resize.ts';
 import { DEFAULT_RESIZE_PLUGINS } from './resize-defaults.ts';
 import {
 	createResizeSession,
@@ -568,6 +573,14 @@ export class Neodrag {
 				inst.initialPointerY = input.clientY;
 				inst.anchor = anchor;
 				inst.handleNode = handleNode;
+				if (inst.targetNode instanceof HTMLElement) {
+					inst.resizeOrigin = captureResizeLayout(inst.targetNode, {
+						width: inst.width,
+						height: inst.height,
+					});
+				} else {
+					inst.resizeOrigin = null;
+				}
 				inst.isInteracting = true;
 				inst.cancelled = false;
 				syncResizeSessionPointer(input, inst, this.#activeResize);
@@ -1334,6 +1347,9 @@ export class Neodrag {
 			inst.height = inst.initialHeight;
 			inst.displaySize = inst.lengthAdapter.cloneAuthored(inst.initialAuthored);
 			inst.unitPreserve = inst.lengthAdapter.cloneAuthored(inst.initialAuthored);
+			if (inst.resizeOrigin && inst.targetNode instanceof HTMLElement) {
+				restoreResizeLayout(inst.targetNode, inst.resizeOrigin);
+			}
 			this.#syncResize(inst);
 			inst.effects.flush();
 		} else {
@@ -1345,6 +1361,7 @@ export class Neodrag {
 		inst.cancelled = false;
 		inst.pointerCapturedId = null;
 		inst.handleNode = null;
+		inst.resizeOrigin = null;
 
 		if (this.#activeResize) {
 			this.#activeResize.state = transitionSession(this.#activeResize.state, {
@@ -1520,6 +1537,7 @@ export class Neodrag {
 			{ width: inst.width, height: inst.height },
 			inst.anchor,
 			inst.applyResize,
+			inst.resizeOrigin,
 		);
 	}
 

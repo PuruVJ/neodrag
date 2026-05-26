@@ -26,7 +26,7 @@ const CURSOR_BY_EDGE: Record<ResizeEdge, string> = {
 
 function edgePosition(edge: ResizeEdge, size: number, inset: number) {
 	const half = size / 2;
-	const base = `position:absolute;touch-action:none;z-index:1;box-sizing:border-box;`;
+	const base = `position:absolute;touch-action:none;z-index:100;box-sizing:border-box;`;
 	const hit = `width:${size}px;height:${size}px;`;
 	switch (edge) {
 		case 'n':

@@ -1,6 +1,6 @@
 import { EffectScheduler } from './effects.ts';
 import { phaseChain, pushByPhase } from './phase.ts';
-import type { ResizeApplier } from './apply-resize.ts';
+import type { ResizeApplier, ResizeLayoutOrigin } from './apply-resize.ts';
 import { numberStub, resolveSizeInput, sizeContext } from './length-contract.ts';
 import type { AuthoredSizePair, LengthAdapter } from './length-runtime.ts';
 import type { SizeInput } from './length-runtime.ts';
@@ -97,6 +97,7 @@ export class ResizeInstance {
 	updateDepth = 0;
 	pendingUpdate: import('./resize/types.ts').ResizePluginList | null = null;
 	applyResize?: ResizeApplier;
+	resizeOrigin: ResizeLayoutOrigin | null = null;
 
 	constructor(
 		node: HTMLElement | SVGElement,

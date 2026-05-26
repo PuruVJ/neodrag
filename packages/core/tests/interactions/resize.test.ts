@@ -77,6 +77,25 @@ describe('resizable', () => {
 		expect(box.style.width).toBe('200px');
 	});
 
+	it('west edge resize shifts left and grows width', () => {
+		box.style.cssText = 'position:absolute;left:100px;top:40px;width:200px;height:100px';
+		engine.resizable(box, [resizeHandles({ edges: ['w'], size: 10 })]);
+		const handle = box.querySelector(`[${RESIZE_HANDLE_ATTR}="w"]`) as HTMLElement;
+		expect(handle).toBeTruthy();
+
+		const rect = { width: 200, height: 100, top: 40, left: 100, right: 300, bottom: 140 };
+		box.getBoundingClientRect = () => ({ ...rect, toJSON: () => rect }) as DOMRect;
+		handle.getBoundingClientRect = () =>
+			({ left: 100, top: 85, width: 10, height: 10, right: 110, bottom: 95, toJSON: () => ({}) }) as DOMRect;
+
+		pointer(handle, 'pointerdown', 105, 90);
+		pointer(document.documentElement, 'pointermove', 55, 90);
+		pointer(document.documentElement, 'pointerup', 55, 90);
+
+		expect(box.style.width).toBe('250px');
+		expect(box.style.left).toBe('50px');
+	});
+
 	it('clamps width with sizeBounds', () => {
 		engine.resizable(box, [
 			resizeHandles({ edges: ['e'], size: 10 }),

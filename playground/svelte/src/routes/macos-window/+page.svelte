@@ -35,7 +35,8 @@
 <main class="desktop">
 	<p class="hint">Drag the title bar · resize from edges and corners</p>
 
-	<div class="window" {@attach drag.attachment} {@attach resize.attachment}>
+	<div class="window-shell" {@attach drag.attachment} {@attach resize.attachment}>
+		<div class="window">
 		<header class="titlebar" data-window-drag>
 			<div class="traffic" aria-hidden="true">
 				<span class="dot close"></span>
@@ -63,6 +64,7 @@
 				<div class="file">📄 readme.md</div>
 				<div class="file">📄 notes.txt</div>
 			</div>
+		</div>
 		</div>
 	</div>
 </main>
@@ -97,12 +99,18 @@
 		text-align: center;
 	}
 
-	.window {
+	.window-shell {
 		position: absolute;
 		left: clamp(1rem, 12vw, 8rem);
 		top: clamp(3rem, 14vh, 6rem);
 		width: min(520px, 88vw);
 		height: min(340px, 70vh);
+		touch-action: none;
+	}
+
+	.window {
+		width: 100%;
+		height: 100%;
 		display: flex;
 		flex-direction: column;
 		border-radius: 10px;
@@ -113,7 +121,11 @@
 			0 8px 20px rgb(0 0 0 / 0.25);
 		background: #ececec;
 		color: #1d1d1f;
-		touch-action: none;
+		pointer-events: auto;
+	}
+
+	.window-shell :global([data-neodrag-resize-handle]) {
+		pointer-events: auto;
 	}
 
 	.titlebar {
@@ -199,6 +211,11 @@
 		flex: 1;
 		min-height: 0;
 		background: #fff;
+		pointer-events: none;
+	}
+
+	.content > * {
+		pointer-events: auto;
 	}
 
 	.sidebar {
