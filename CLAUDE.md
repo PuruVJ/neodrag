@@ -91,7 +91,7 @@ pnpm ci:release  # Publish packages
 
 ### Build Configuration
 - **TypeScript**: Shared catalog version (5.8.3)
-- **Vite**: Shared catalog version (7.3.1)
+- **Vite**: Shared catalog version (8.0.14, Rolldown bundler)
 - **Turbo**: Orchestrates compile, test, bench, sizes, build, and dev across packages
 - **tsdown**: Builds ESM (and UMD where needed) plus TypeScript declarations
 
