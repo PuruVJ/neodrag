@@ -108,17 +108,12 @@
 			var(--app-color-mixer) 35%
 		);
 		@apply overflow-hidden;
-		background-image:
-			radial-gradient(
-				ellipse farthest-corner at 95% 2%,
-				color-mix(in lch, var(--secondary-color), transparent 48%) 0%,
-				var(--app-color-shell) 72%
-			),
-			linear-gradient(
-				180deg,
-				color-mix(in lch, var(--secondary-color), transparent 94%) 0%,
-				transparent 28%
-			);
+		background-color: var(--app-color-shell);
+		background-image: radial-gradient(
+			ellipse 120% 80% at 88% 0%,
+			color-mix(in lch, var(--secondary-color), transparent 94%) 0%,
+			transparent 58%
+		);
 	}
 
 	:is(a[href], a[href]:visited):where(:not(.unstyled)) {
@@ -187,10 +182,10 @@
 }
 
 @utility site-grid-layer {
-	--pg-grid-line: color-mix(in lch, var(--app-color-dark), transparent 84%);
-	--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 62%);
-	--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 78%);
-	background-color: color-mix(in lch, var(--app-color-shell), var(--color-brand) 3%);
+	--pg-grid-line: color-mix(in lch, var(--color-brand), transparent 91%);
+	--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 80%);
+	--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 89%);
+	background-color: color-mix(in lch, var(--app-color-shell), var(--color-brand) 1.25%);
 	background-image:
 		radial-gradient(circle at center, var(--pg-grid-dot) 1px, transparent 1px),
 		linear-gradient(var(--pg-grid-major) 1px, transparent 1px),
@@ -243,18 +238,18 @@
 		background-image:
 			radial-gradient(
 				ellipse 130% 95% at 50% -28%,
-				color-mix(in lch, var(--color-brand), transparent 48%),
-				transparent 62%
+				color-mix(in lch, var(--color-brand), transparent 92%),
+				transparent 68%
 			),
 			radial-gradient(
 				ellipse 75% 55% at 100% 18%,
-				color-mix(in lch, var(--color-brand), transparent 72%),
-				transparent 50%
+				color-mix(in lch, var(--color-brand), transparent 95%),
+				transparent 58%
 			),
 			radial-gradient(
 				ellipse 65% 50% at 0% 72%,
-				color-mix(in lch, var(--color-brand), transparent 78%),
-				transparent 48%
+				color-mix(in lch, var(--color-brand), transparent 96%),
+				transparent 55%
 			);
 	}
 
@@ -353,9 +348,10 @@
 }
 
 body[data-theme='dark'] .site-grid-layer {
-	--pg-grid-line: color-mix(in lch, var(--app-color-anti-mixer), transparent 90%);
-	--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 72%);
-	background-color: color-mix(in lch, var(--app-color-shell), var(--color-brand) 5%);
+	--pg-grid-line: color-mix(in lch, var(--color-brand), transparent 93%);
+	--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 84%);
+	--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 91%);
+	background-color: color-mix(in lch, var(--app-color-shell), var(--color-brand) 2%);
 }
 
 @import './home.css' layer(components);

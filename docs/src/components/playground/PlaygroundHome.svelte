@@ -4,6 +4,7 @@
 	import ScenarioSection from './ScenarioSection.svelte';
 	import { DEFAULT_FRAMEWORK } from './frameworks';
 	import type { Framework } from '$helpers/constants';
+	import { browser } from '$helpers/utils';
 	import { WORLDS } from './worlds';
 
 	type Props = {
@@ -13,6 +14,11 @@
 	const { snippets }: Props = $props();
 
 	let framework = $state<Framework>(DEFAULT_FRAMEWORK);
+
+	$effect(() => {
+		if (!browser) return;
+		document.body.dataset.framework = framework;
+	});
 </script>
 
 <div class="home-playground">
