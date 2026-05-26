@@ -88,7 +88,7 @@
 >
 	<div
 		class={[
-			'dock-angular-bevel dock-surface pointer-events-auto relative h-full w-full overflow-visible shadow-[var(--dock-shadow)] max-md:dock-angular-bevel--bar md:w-auto',
+			'dock-angular-bevel dock-surface pointer-events-auto relative h-full w-full overflow-visible shadow-[var(--dock-shadow)] md:w-auto',
 		]}
 		{@attach dockDrag.attachment}
 		{@attach interact_outside(() => menu_view.close())}

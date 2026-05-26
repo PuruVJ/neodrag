@@ -247,6 +247,31 @@
 		);
 	}
 
+	@media (max-width: 767px) {
+		.dock-host > .dock-angular-bevel {
+			--bevel-cut: 0.7rem;
+			clip-path: polygon(
+				var(--bevel-cut) 0%,
+				calc(100% - var(--bevel-cut)) 0%,
+				100% var(--bevel-cut),
+				100% 100%,
+				0% 100%,
+				0% var(--bevel-cut)
+			);
+		}
+
+		.dock-host > .dock-angular-bevel > .dock-angular-bevel__fill {
+			clip-path: polygon(
+				calc(var(--bevel-cut) + var(--bevel-width)) var(--bevel-width),
+				calc(100% - var(--bevel-cut) - var(--bevel-width)) var(--bevel-width),
+				calc(100% - var(--bevel-width)) calc(var(--bevel-cut) + var(--bevel-width)),
+				calc(100% - var(--bevel-width)) calc(100% - var(--bevel-width)),
+				var(--bevel-width) calc(100% - var(--bevel-width)),
+				var(--bevel-width) calc(var(--bevel-cut) + var(--bevel-width))
+			);
+		}
+	}
+
 	.dock-angular-bevel--brand {
 		background: color-mix(in lch, var(--color-brand), transparent 55%);
 	}
@@ -380,8 +405,9 @@
 	}
 
 	.docs-prose :where(pre.astro-code) {
-		@apply my-6 w-full max-w-full overflow-x-auto rounded-none border border-[var(--color-border)] p-4 text-[clamp(0.85rem,1.5vw,1rem)] leading-normal;
-		background-color: color-mix(in lch, var(--app-color-dark), transparent 96%);
+		@apply my-6 w-full max-w-full overflow-x-auto rounded-sm border-0 p-4 text-[clamp(0.85rem,1.5vw,1rem)] leading-normal shadow-none;
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 97%);
+		box-shadow: inset 0 0 0 1px color-mix(in lch, var(--app-color-dark), transparent 90%);
 	}
 
 	.docs-prose :where(pre.astro-code code) {
