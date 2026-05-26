@@ -18,7 +18,10 @@ export function parseTranslate(el: HTMLElement) {
 	const t = getComputedStyle(el).translate;
 	if (!t || t === 'none') return { x: 0, y: 0 };
 	const p = t.split(/\s+/);
-	return { x: Number.parseFloat(p[0]!), y: Number.parseFloat(p[1]!) };
+	return {
+		x: Number.parseFloat(p[0]!) || 0,
+		y: Number.parseFloat(p[1]!) || 0,
+	};
 }
 
 export function assertTranslate(

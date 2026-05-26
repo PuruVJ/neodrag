@@ -27,6 +27,9 @@ export class DropTargetTracker {
 	#lastDropPointerX = NaN;
 	#lastDropPointerY = NaN;
 	#dropRafId = 0;
+	#efipX = NaN;
+	#efipY = NaN;
+	#efipEl: Element | null = null;
 
 	#host: DropTargetHost;
 
@@ -72,6 +75,9 @@ export class DropTargetTracker {
 
 	runUpdate(input: InteractionInput, force = false) {
 		const run = () => {
+			this.#efipX = NaN;
+			this.#efipY = NaN;
+			this.#efipEl = null;
 			const sole = this.#host.getSoleDrop();
 			if (sole) {
 				this.#updateSole(sole, input, force);
@@ -116,7 +122,7 @@ export class DropTargetTracker {
 			drop.isOver = false;
 		}
 		this.#syncSessionTargets(this.#currentOver);
-		drop.effects.flush();
+		if (drop.effects.hasPending()) drop.effects.flush();
 	}
 
 	#updateMulti(input: InteractionInput, force: boolean) {
@@ -165,7 +171,8 @@ export class DropTargetTracker {
 		this.#syncSessionTargets(stack);
 
 		for (let i = 0; i < stack.length; i++) {
-			stack[i]!.effects.flush();
+			const drop = stack[i]!;
+			if (drop.effects.hasPending()) drop.effects.flush();
 			if (this.#host.getActive()?.propagationStopped) break;
 		}
 	}
@@ -192,10 +199,21 @@ export class DropTargetTracker {
 				return true;
 			}
 		}
-		const el = document.elementFromPoint(x, y);
+		return this.#elementContainsRoot(x, y, drop.rootNode);
+	}
+
+	#elementAt(x: number, y: number) {
+		if (x === this.#efipX && y === this.#efipY) return this.#efipEl;
+		this.#efipX = x;
+		this.#efipY = y;
+		this.#efipEl = document.elementFromPoint(x, y);
+		return this.#efipEl;
+	}
+
+	#elementContainsRoot(x: number, y: number, root: HTMLElement | SVGElement) {
+		const el = this.#elementAt(x, y);
 		if (!el) return false;
 		let current: Element | null = el;
-		const root = drop.rootNode;
 		while (current && current !== document.documentElement) {
 			if (current === root) return true;
 			current = current.parentElement;
@@ -205,7 +223,7 @@ export class DropTargetTracker {
 
 	#hitTestTargets(x: number, y: number): DropTargetInfo[] {
 		const stack: DropTargetInfo[] = [];
-		const el = document.elementFromPoint(x, y);
+		const el = this.#elementAt(x, y);
 		if (!el) return stack;
 
 		let current: Element | null = el;

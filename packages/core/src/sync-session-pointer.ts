@@ -8,9 +8,12 @@ export function syncDragSessionPointer(
 	active: ActiveSession | null,
 	dropHost: DropCtxHost,
 ): void {
-	inst.lastInput = input;
 	const x = input.clientX;
 	const y = input.clientY;
+	const prev = inst.lastInput;
+	if (prev && prev.clientX === x && prev.clientY === y) return;
+
+	inst.lastInput = input;
 	if (active) {
 		active.pointerX = x;
 		active.pointerY = y;

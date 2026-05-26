@@ -623,7 +623,7 @@ export class Neodrag {
 			inst.syncLiveViews();
 
 			const startOk = this.#runStart(inst, inst.dragCtx, input);
-			measureCost(this, 'effects.flush', () => inst.effects.flush());
+			if (inst.effects.hasPending()) inst.effects.flush();
 			if (!startOk) {
 				if (this.#active) {
 					this.#active.state = transitionSession(this.#active.state, { type: 'start-abort' });
@@ -670,7 +670,7 @@ export class Neodrag {
 		inst.proposedX = 0;
 		inst.proposedY = 0;
 		inst.syncLiveViews();
-		measureCost(this, 'effects.flush', () => inst.effects.flush());
+		if (inst.effects.hasPending()) inst.effects.flush();
 		this.#syncDragTransform(inst);
 
 		if (this.#dropCount > 0) {
@@ -750,13 +750,13 @@ export class Neodrag {
 		}
 
 		this.#runEnd(inst, inst.dragCtx, input, reason);
-		inst.effects.flush();
+		if (inst.effects.hasPending()) inst.effects.flush();
 
 		const overDrops = this.#dropTracker.getOverDrops();
 		if (reason === 'drop' && overDrops.length > 0) {
 			const top = overDrops[overDrops.length - 1]!;
 			this.#runDropHook(top, 'drop', input);
-			top.effects.flush();
+			if (top.effects.hasPending()) top.effects.flush();
 		}
 
 		for (const drop of overDrops) {

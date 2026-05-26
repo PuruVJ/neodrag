@@ -41,10 +41,8 @@ export const ignoreMultitouch: DragPlugin<MultitouchState> = {
 	start(ctx, state, input) {
 		if (!isPointerInput(input)) return;
 		const event = input.native;
-		ctx.effect(() => {
-			state.active_pointers.add(event.pointerId);
-			if (state.active_pointers.size > 1) event.preventDefault();
-		});
+		state.active_pointers.add(event.pointerId);
+		if (state.active_pointers.size > 1) event.preventDefault();
 	},
 
 	drag(ctx, state) {
@@ -70,7 +68,7 @@ export const stateMarker: DragPlugin<StateMarkerState> = {
 	},
 
 	start(ctx) {
-		ctx.effect(() => set_node_dataset(ctx.rootNode, 'neodrag-state', 'dragging'));
+		set_node_dataset(ctx.rootNode, 'neodrag-state', 'dragging');
 	},
 
 	end(ctx, state) {
@@ -89,14 +87,12 @@ export const applyUserSelectHack: DragPlugin<UserSelectState> = {
 	},
 
 	start(ctx, state) {
-		ctx.effect(() => {
-			state.body_user_select_val =
-				get_node_style(document.body, 'user-select') ??
-				document.body.style.webkitUserSelect ??
-				'';
-			set_node_key_style(document.body, 'user-select', 'none');
-			document.body.style.webkitUserSelect = 'none';
-		});
+		state.body_user_select_val =
+			get_node_style(document.body, 'user-select') ??
+			document.body.style.webkitUserSelect ??
+			'';
+		set_node_key_style(document.body, 'user-select', 'none');
+		document.body.style.webkitUserSelect = 'none';
 	},
 
 	end(_ctx, state) {
@@ -110,7 +106,7 @@ export const touchAction: DragPlugin = {
 	phase: 'pre',
 
 	init(ctx) {
-		ctx.effect(() => set_node_key_style(ctx.rootNode, 'touch-action', 'none'));
+		set_node_key_style(ctx.rootNode, 'touch-action', 'none');
 	},
 };
 
@@ -675,7 +671,7 @@ export const highlight = defineDropPlugin(
 		},
 
 		enter(ctx, state) {
-			ctx.effect(() => ctx.rootNode.classList.add(state.overClass));
+			ctx.rootNode.classList.add(state.overClass);
 		},
 
 		leave(ctx, state) {

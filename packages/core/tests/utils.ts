@@ -1,5 +1,5 @@
 export function translate(x: number, y: number) {
-	return { translate: `${x}px ${y}px 0.000000001px` };
+	return { translate: `${x}px ${y}px` };
 }
 
 export function sleep(ms: number) {

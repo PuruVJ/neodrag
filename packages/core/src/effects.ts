@@ -10,6 +10,10 @@ export class EffectScheduler {
 		}
 	}
 
+	hasPending() {
+		return this.#effects.length > 0;
+	}
+
 	flush() {
 		const effects = this.#effects;
 		this.#effects = [];

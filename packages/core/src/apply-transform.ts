@@ -52,10 +52,6 @@ export function applyDragTransform(ctx: DragCtx, custom?: TransformApplier) {
 			t.insertItemBefore(translation, 0);
 		}
 	} else {
-		set_node_key_style(
-			targetNode,
-			'translate',
-			`${x}px ${y}px 0.000000001px`,
-		);
+		(targetNode as HTMLElement).style.translate = `${x}px ${y}px`;
 	}
 }
