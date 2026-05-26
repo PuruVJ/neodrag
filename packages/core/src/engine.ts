@@ -6,7 +6,28 @@ import {
 	type DropCtxHost,
 	SessionPrivate,
 } from './instance.ts';
-import { DragHandle, DropHandle } from './handles.ts';
+import {
+	ActiveResizeSession,
+	ResizeInstance,
+	readSizePx,
+} from './resize-instance.ts';
+import { DragHandle, DropHandle, ResizeHandle } from './handles.ts';
+import { applyResize, type ResizeApplier } from './apply-resize.ts';
+import { DEFAULT_RESIZE_PLUGINS } from './resize-defaults.ts';
+import {
+	createResizeSession,
+	resolveResizeEndReason,
+	sizeFromPointer,
+} from './resize-session.ts';
+import {
+	RESIZE_HANDLE_ATTR,
+	type ResizeCtx,
+	type ResizeEdge,
+	type ResizeEndReason,
+	type ResizePlugin,
+	type ResizePluginList,
+	type ResizeSession,
+} from './resize/types.ts';
 import { resolvePluginList } from './resolve-plugins.ts';
 import { reconcilePluginListUpdate } from './plugin-reconcile.ts';
 import {
@@ -58,6 +79,7 @@ export interface EngineOptions {
 export interface NeodragDebugSnapshot {
 	dragTargets: number;
 	dropTargets: number;
+	resizeTargets: number;
 	session: {
 		state: SessionState;
 		pointerX: number;
@@ -65,6 +87,16 @@ export interface NeodragDebugSnapshot {
 		deltaX: number;
 		deltaY: number;
 		overTargets: number;
+	} | null;
+	resizeSession: {
+		state: SessionState;
+		pointerX: number;
+		pointerY: number;
+		deltaWidth: number;
+		deltaHeight: number;
+		width: number;
+		height: number;
+		anchor: ResizeEdge;
 	} | null;
 }
 
@@ -76,10 +108,13 @@ export class Neodrag {
 	}
 	#dragSources = new Map<HTMLElement | SVGElement, DragInstance>();
 	#dropTargets = new Map<HTMLElement | SVGElement, DropInstance>();
+	#resizeSources = new Map<HTMLElement | SVGElement, ResizeInstance>();
 	#dropCount = 0;
 
 	#active: ActiveSession | null = null;
 	#activeSource: DragInstance | null = null;
+	#activeResize: ActiveResizeSession | null = null;
+	#activeResizeSource: ResizeInstance | null = null;
 	#activePointerId: number | null = null;
 
 	#sensorsInitialized = false;
@@ -92,6 +127,7 @@ export class Neodrag {
 
 	#defaultDragPlugins: DragPlugin[];
 	#defaultDropPlugins: DropPlugin[];
+	#defaultResizePlugins: ResizePlugin[];
 	#delegate?: () => HTMLElement;
 	#onError?: (error: ErrorInfo) => void;
 	#dev: boolean;
@@ -102,6 +138,8 @@ export class Neodrag {
 
 	#idleSession: DragSession | null = null;
 	#activeSessionView: DragSession | null = null;
+	#idleResizeSession: ResizeSession | null = null;
+	#activeResizeSessionView: ResizeSession | null = null;
 
 	readonly #dropHost: DropCtxHost = {
 		pointerX: 0,
@@ -125,6 +163,7 @@ export class Neodrag {
 
 		this.#defaultDragPlugins = options.plugins ?? DEFAULT_DRAG_PLUGINS;
 		this.#defaultDropPlugins = options.dropPlugins ?? [];
+		this.#defaultResizePlugins = DEFAULT_RESIZE_PLUGINS;
 		this.#delegate = options.delegate;
 		this.#sensors = options.sensors ?? defaultSensors();
 		this.#onError = options.onError ?? DEFAULTS.onError;
@@ -209,6 +248,34 @@ export class Neodrag {
 		});
 	}
 
+	resizable(
+		node: HTMLElement | SVGElement,
+		plugins: ResizePluginList = [],
+		options: { applyResize?: ResizeApplier } = {},
+	): ResizeHandle {
+		if (is_svg_svg_element(node)) {
+			throw new Error(
+				'Resizing the root SVG element directly is not supported. Wrap it in a div or use an HTML wrapper.',
+			);
+		}
+
+		this.#initSensors();
+
+		const inst = new ResizeInstance(node, this.#ensureIdleResizeSession());
+		inst.applyResize = options.applyResize;
+		inst.lastSlots = plugins;
+		inst.slotStaticCache = [];
+		const resolved = resolvePluginList(plugins, inst.slotStaticCache, false);
+		this.#installResizePlugins(inst, resolved);
+		this.#syncResize(inst);
+		this.#resizeSources.set(node, inst);
+
+		return new ResizeHandle(this, node, () => {
+			this.#destroyResize(inst);
+			this.#resizeSources.delete(node);
+		});
+	}
+
 	droppable(node: HTMLElement | SVGElement, plugins: DropPluginList = []): DropHandle {
 		this.#initSensors();
 
@@ -257,12 +324,28 @@ export class Neodrag {
 		});
 	}
 
+	updateResize(node: HTMLElement | SVGElement, plugins: ResizePluginList) {
+		const inst = this.#resizeSources.get(node);
+		if (!inst) return;
+		reconcilePluginListUpdate({
+			inst,
+			plugins,
+			dev: this.#dev,
+			warnLabel: 'resize',
+			merge: (resolved) => this.#mergeUserResizePlugins(resolved),
+			diff: (target, resolved) => this.#diffResizePlugins(target as ResizeInstance, resolved),
+			recurse: (pending) => this.updateResize(node, pending as ResizePluginList),
+		});
+	}
+
 	debugSnapshot(): NeodragDebugSnapshot | null {
 		if (!this.#dev) return null;
 		const active = this.#active;
+		const activeResize = this.#activeResize;
 		return {
 			dragTargets: this.#dragSources.size,
 			dropTargets: this.#dropCount,
+			resizeTargets: this.#resizeSources.size,
 			session: active
 				? {
 						state: active.state,
@@ -273,6 +356,18 @@ export class Neodrag {
 						overTargets: active.overTargets.length,
 					}
 				: null,
+			resizeSession: activeResize
+				? {
+						state: activeResize.state,
+						pointerX: activeResize.pointerX,
+						pointerY: activeResize.pointerY,
+						deltaWidth: activeResize.deltaWidth,
+						deltaHeight: activeResize.deltaHeight,
+						width: activeResize.width,
+						height: activeResize.height,
+						anchor: activeResize.anchor,
+					}
+				: null,
 		};
 	}
 
@@ -281,8 +376,10 @@ export class Neodrag {
 		this.#endActiveInteraction('cancel');
 		for (const inst of this.#dragSources.values()) this.#destroyDrag(inst);
 		for (const inst of this.#dropTargets.values()) this.#destroyDrop(inst);
+		for (const inst of this.#resizeSources.values()) this.#destroyResize(inst);
 		this.#dragSources.clear();
 		this.#dropTargets.clear();
+		this.#resizeSources.clear();
 		this.#dropCount = 0;
 		this.#soleDrop = null;
 		this.#teardownSensors();
@@ -320,6 +417,11 @@ export class Neodrag {
 	}
 
 	#cancelSession(reason: EndReason) {
+		if (this.#activeResizeSource?.isInteracting) {
+			const e = this.#activeResizeSource.lastEvent;
+			if (e) this.#finishResize('cancel', e);
+			return;
+		}
 		if (!this.#active || !this.#activeSource) return;
 		const e = this.#activeSource.lastEvent;
 		if (e) this.#finishInteraction(reason, e);
@@ -346,7 +448,29 @@ export class Neodrag {
 
 	#onPointerDown(e: PointerEvent) {
 		if (e.button === 2) return;
-		if (this.#activeSource?.isInteracting) return;
+		if (this.#activeSource?.isInteracting || this.#activeResizeSource?.isInteracting) return;
+
+		const resizeHit = this.#findResizeTarget(e);
+		if (resizeHit) {
+			const { inst, anchor, handleNode } = resizeHit;
+			inst.cachedRootNodeRect = inst.rootNode.getBoundingClientRect();
+			inst.cachedTargetRect = inst.targetNode.getBoundingClientRect();
+			inst.inverseScale = this.#inverseScaleResize(inst);
+			const size = readSizePx(inst.targetNode);
+			inst.width = size.width;
+			inst.height = size.height;
+			inst.initialWidth = size.width;
+			inst.initialHeight = size.height;
+			inst.initialPointerX = e.clientX;
+			inst.initialPointerY = e.clientY;
+			inst.anchor = anchor;
+			inst.handleNode = handleNode;
+			inst.isInteracting = true;
+			inst.cancelled = false;
+			inst.lastEvent = e;
+			this.#beginResizeSession(inst, e);
+			return;
+		}
 
 		const node = this.#findDragSource(e);
 		if (!node) return;
@@ -368,6 +492,11 @@ export class Neodrag {
 
 	#onPointerMove(e: PointerEvent) {
 		if (this.#activePointerId !== null && e.pointerId !== this.#activePointerId) return;
+
+		if (this.#activeResizeSource?.isInteracting) {
+			this.#onResizePointerMove(e);
+			return;
+		}
 
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
@@ -433,6 +562,12 @@ export class Neodrag {
 
 	#onPointerUp(e: PointerEvent) {
 		if (this.#activePointerId !== null && e.pointerId !== this.#activePointerId) return;
+
+		if (this.#activeResizeSource?.isInteracting) {
+			const reason = resolveResizeEndReason(this.#activeResize, this.#activeResizeSource.cancelled);
+			this.#finishResize(reason, e);
+			return;
+		}
 
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
@@ -516,6 +651,17 @@ export class Neodrag {
 	}
 
 	#endActiveInteraction(reason: EndReason) {
+		const resizeInst = this.#activeResizeSource;
+		if (resizeInst?.isInteracting) {
+			const e = resizeInst.lastEvent;
+			if (e && this.#activeResize) {
+				this.#finishResize(reason === 'cancel' ? 'cancel' : 'commit', e);
+				return;
+			}
+			this.#clearResizeSessionState(resizeInst);
+			return;
+		}
+
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
 		const e = inst.lastEvent;
@@ -862,6 +1008,401 @@ export class Neodrag {
 		} catch (error) {
 			this.#pluginError(info, inst, key, error);
 		}
+	}
+
+	#createIdleResizeActive(): ActiveResizeSession {
+		const root = document.documentElement;
+		return {
+			state: 'idle',
+			sourceNode: root,
+			sourceRect: new DOMRect(),
+			anchor: 'se',
+			pointerX: 0,
+			pointerY: 0,
+			deltaWidth: 0,
+			deltaHeight: 0,
+			width: 0,
+			height: 0,
+			data: undefined,
+			pointerId: -1,
+			startedAt: 0,
+		};
+	}
+
+	#ensureIdleResizeSession(): ResizeSession {
+		if (!this.#idleResizeSession) {
+			this.#idleResizeSession = createResizeSession(this.#createIdleResizeActive());
+		}
+		return this.#idleResizeSession;
+	}
+
+	#beginResizeSession(source: ResizeInstance, e: PointerEvent) {
+		const rect = source.rootNode.getBoundingClientRect();
+		this.#activeResize = {
+			state: transitionSession('idle', { type: 'pointerdown' }),
+			sourceNode: source.rootNode,
+			sourceRect: rect,
+			anchor: source.anchor,
+			pointerX: e.clientX,
+			pointerY: e.clientY,
+			deltaWidth: 0,
+			deltaHeight: 0,
+			width: source.width,
+			height: source.height,
+			data: undefined,
+			pointerId: e.pointerId,
+			startedAt: Date.now(),
+		};
+		this.#activeResizeSource = source;
+		this.#activePointerId = e.pointerId;
+
+		this.#activeResizeSessionView = createResizeSession(this.#activeResize);
+		source.bindSession(this.#activeResizeSessionView, () => {
+			if (this.#activeResize) {
+				this.#activeResize.state = transitionSession(this.#activeResize.state, { type: 'cancel' });
+			}
+		});
+	}
+
+	#onResizePointerMove(e: PointerEvent) {
+		const inst = this.#activeResizeSource;
+		if (!inst?.isInteracting) return;
+
+		inst.lastEvent = e;
+		if (this.#activeResize) {
+			this.#activeResize.pointerX = e.clientX;
+			this.#activeResize.pointerY = e.clientY;
+		}
+
+		if (!inst.isResizing) {
+			const startOk = this.#runResizeStart(inst, inst.resizeCtx, e);
+			inst.effects.flush();
+			if (!startOk) {
+				if (this.#activeResize) {
+					this.#activeResize.state = transitionSession(this.#activeResize.state, { type: 'start-abort' });
+				}
+				return;
+			}
+			if (inst.cancelled) return;
+
+			inst.isResizing = true;
+			if (this.#activeResize) {
+				this.#activeResize.state = transitionSession(this.#activeResize.state, { type: 'threshold-passed' });
+			}
+
+			const captureNode = inst.handleNode ?? (inst.rootNode as HTMLElement);
+			inst.pointerCapturedId = e.pointerId;
+			try {
+				captureNode.setPointerCapture(e.pointerId);
+			} catch {
+				this.#cleanupResizePointer(e.pointerId);
+				return;
+			}
+		}
+
+		e.preventDefault();
+
+		const target = sizeFromPointer(
+			inst.anchor,
+			inst.initialPointerX,
+			inst.initialPointerY,
+			inst.initialWidth,
+			inst.initialHeight,
+			e.clientX,
+			e.clientY,
+			inst.inverseScale,
+		);
+		inst.deltaWidth = target.width - inst.width;
+		inst.deltaHeight = target.height - inst.height;
+		inst.proposedWidth = inst.deltaWidth;
+		inst.proposedHeight = inst.deltaHeight;
+
+		if (this.#activeResize) {
+			this.#activeResize.deltaWidth = inst.deltaWidth;
+			this.#activeResize.deltaHeight = inst.deltaHeight;
+		}
+
+		this.#runResize(inst, inst.resizeCtx, e);
+		inst.width += inst.proposedWidth;
+		inst.height += inst.proposedHeight;
+		inst.proposedWidth = 0;
+		inst.proposedHeight = 0;
+
+		if (this.#activeResize) {
+			this.#activeResize.width = inst.width;
+			this.#activeResize.height = inst.height;
+		}
+
+		inst.resizeCtx.effect(() => this.#syncResize(inst));
+		inst.effects.flush();
+	}
+
+	#finishResize(reason: ResizeEndReason, e: PointerEvent) {
+		const inst = this.#activeResizeSource;
+		if (!inst) return;
+
+		const captureNode = inst.handleNode ?? (inst.rootNode as HTMLElement);
+		if (
+			inst.pointerCapturedId !== null &&
+			typeof captureNode.hasPointerCapture === 'function' &&
+			captureNode.hasPointerCapture(inst.pointerCapturedId)
+		) {
+			captureNode.releasePointerCapture(inst.pointerCapturedId);
+		}
+
+		this.#runResizeEnd(inst, inst.resizeCtx, e, reason);
+		inst.effects.flush();
+
+		if (reason === 'cancel') {
+			inst.width = inst.initialWidth;
+			inst.height = inst.initialHeight;
+			this.#syncResize(inst);
+			inst.effects.flush();
+		}
+
+		inst.isInteracting = false;
+		inst.isResizing = false;
+		inst.cancelled = false;
+		inst.pointerCapturedId = null;
+		inst.handleNode = null;
+
+		if (this.#activeResize) {
+			this.#activeResize.state = transitionSession(this.#activeResize.state, {
+				type: 'pointerup',
+				reason: reason === 'cancel' ? 'cancel' : 'no-target',
+			});
+		}
+
+		this.#activeResize = null;
+		this.#activeResizeSource = null;
+		this.#activePointerId = null;
+		this.#activeResizeSessionView = null;
+		inst.bindSession(this.#ensureIdleResizeSession());
+		this.#pointerDisarm?.();
+	}
+
+	#cleanupResizePointer(_pointerId: number) {
+		const inst = this.#activeResizeSource;
+		if (!inst) return;
+		inst.cancelled = true;
+		const e = inst.lastEvent;
+		if (e) {
+			this.#finishResize('cancel', e);
+			return;
+		}
+		this.#clearResizeSessionState(inst);
+	}
+
+	#clearResizeSessionState(inst: ResizeInstance) {
+		inst.isInteracting = false;
+		inst.isResizing = false;
+		inst.cancelled = false;
+		inst.pointerCapturedId = null;
+		inst.handleNode = null;
+		this.#activeResize = null;
+		this.#activeResizeSource = null;
+		this.#activePointerId = null;
+		this.#activeResizeSessionView = null;
+		inst.bindSession(this.#ensureIdleResizeSession());
+		this.#pointerDisarm?.();
+	}
+
+	#findResizeTarget(e: PointerEvent): {
+		inst: ResizeInstance;
+		anchor: ResizeEdge;
+		handleNode: HTMLElement;
+	} | null {
+		const path = e.composedPath();
+		for (let i = 0; i < Math.min(path.length, 20); i++) {
+			const el = path[i];
+			if (!(el instanceof HTMLElement)) continue;
+			const attr = el.getAttribute(RESIZE_HANDLE_ATTR);
+			if (!attr) continue;
+			const anchor = attr as ResizeEdge;
+			for (let j = i + 1; j < path.length; j++) {
+				const root = path[j];
+				if (
+					root instanceof HTMLElement &&
+					this.#resizeSources.has(root as HTMLElement | SVGElement)
+				) {
+					return {
+						inst: this.#resizeSources.get(root as HTMLElement)!,
+						anchor,
+						handleNode: el,
+					};
+				}
+			}
+			let parent: HTMLElement | null = el.parentElement;
+			while (parent) {
+				if (this.#resizeSources.has(parent)) {
+					return { inst: this.#resizeSources.get(parent)!, anchor, handleNode: el };
+				}
+				parent = parent.parentElement;
+			}
+		}
+		return null;
+	}
+
+	#inverseScaleResize(inst: ResizeInstance) {
+		const node = inst.targetNode;
+		let scale = 1;
+
+		if (node instanceof SVGElement) {
+			const bbox = (node as SVGGraphicsElement).getBBox();
+			const rect = inst.cachedTargetRect;
+			if (bbox.width && rect.width) scale = bbox.width / rect.width;
+		} else {
+			const el = node as HTMLElement;
+			scale = el.offsetWidth / inst.cachedTargetRect.width;
+		}
+
+		return Number.isFinite(scale) && scale > 0 ? scale : 1;
+	}
+
+	#runResizeStart(inst: ResizeInstance, ctx: ResizeCtx, e: PointerEvent): boolean {
+		const chain = inst.startChain;
+		for (let i = 0; i < chain.length; i++) {
+			const plugin = chain[i]!;
+			if (inst.failed.has(plugin.key) || !plugin.start) continue;
+			const state = inst.states.get(plugin.key);
+			const out = this.#pluginCall(
+				inst,
+				plugin.key,
+				{ phase: 'start', plugin: { key: plugin.key, hook: 'start' }, node: inst.rootNode },
+				() => plugin.start!(ctx, state, e),
+			);
+			if (out === PLUGIN_FAILED) return false;
+			if (out === false) return false;
+			if (inst.cancelled) return false;
+		}
+		return true;
+	}
+
+	#runResize(inst: ResizeInstance, ctx: ResizeCtx, e: PointerEvent) {
+		const chain = inst.resizeChain;
+		const info = { phase: 'resize' as const, node: inst.rootNode };
+
+		for (let i = 0; i < chain.length; i++) {
+			const plugin = chain[i]!;
+			if (inst.failed.has(plugin.key) || !plugin.resize) continue;
+			if (inst.cancelled && plugin.skipOnCancel) continue;
+
+			const state = inst.states.get(plugin.key);
+			const patch = this.#pluginCall(
+				inst,
+				plugin.key,
+				{ ...info, plugin: { key: plugin.key, hook: 'resize' } },
+				() => plugin.resize!(ctx, state, e),
+			);
+			if (patch === PLUGIN_FAILED) continue;
+
+			if (patch) {
+				if (patch.width !== undefined) inst.proposedWidth = patch.width;
+				if (patch.height !== undefined) inst.proposedHeight = patch.height;
+			}
+
+			if (inst.cancelled) break;
+		}
+	}
+
+	#runResizeEnd(inst: ResizeInstance, ctx: ResizeCtx, e: PointerEvent, reason: ResizeEndReason) {
+		const chain = inst.endChain;
+		for (let i = 0; i < chain.length; i++) {
+			const plugin = chain[i]!;
+			if (inst.failed.has(plugin.key) || !plugin.end) continue;
+			if (inst.cancelled && plugin.skipOnCancel) continue;
+			const state = inst.states.get(plugin.key);
+			this.#pluginVoid(
+				inst,
+				plugin.key,
+				{ phase: 'end', plugin: { key: plugin.key, hook: 'end' }, node: inst.rootNode },
+				() => plugin.end!(ctx, state, e, reason),
+			);
+		}
+	}
+
+	#mergeUserResizePlugins(userPlugins: ResizePlugin[]) {
+		assertNamedPluginKeys(userPlugins, this.#dev);
+		return mergePluginsByKey(this.#defaultResizePlugins, userPlugins);
+	}
+
+	#installResizePlugins(inst: ResizeInstance, userPlugins: ResizePlugin[]) {
+		const merged = this.#mergeUserResizePlugins(userPlugins);
+		inst.flat = merged;
+		inst.byKey = new Map(merged.map((p) => [p.key, p]));
+		inst.rebuildBuckets();
+		this.#initResizePlugins(inst);
+	}
+
+	#diffResizePlugins(inst: ResizeInstance, userPlugins: ResizePlugin[]) {
+		const width = inst.width;
+		const height = inst.height;
+		diffPluginFlat(inst, {
+			userPlugins,
+			merge: (resolved) => this.#mergeUserResizePlugins(resolved),
+			bucketsChanged: (prev, next) =>
+				pluginsLayoutChanged(prev, next, (plugin) => [
+					!!plugin.start,
+					!!plugin.resize,
+					!!plugin.end,
+				]),
+			init: (plugin) => this.#initOneResizePlugin(inst, plugin),
+			destroy: (plugin) => this.#destroyOneResizePlugin(inst, plugin),
+			update: (plugin) => plugin.update?.(inst.resizeCtx, inst.states.get(plugin.key)),
+		});
+		if (inst.width !== width || inst.height !== height) this.#syncResize(inst);
+		inst.effects.flush();
+	}
+
+	#syncResize(inst: ResizeInstance) {
+		applyResize(
+			inst.targetNode,
+			{ width: inst.width, height: inst.height },
+			inst.anchor,
+			inst.applyResize,
+		);
+	}
+
+	#initResizePlugins(inst: ResizeInstance) {
+		for (const plugin of sortByPhase(inst.flat)) this.#initOneResizePlugin(inst, plugin);
+		inst.effects.flush();
+	}
+
+	#initOneResizePlugin(inst: ResizeInstance, plugin: ResizePlugin) {
+		if (!plugin.init) return;
+		this.#pluginVoid(
+			inst,
+			plugin.key,
+			{ phase: 'init', plugin: { key: plugin.key, hook: 'init' }, node: inst.rootNode },
+			() => {
+				const state = plugin.init!(inst.resizeCtx);
+				if (state !== undefined) inst.states.set(plugin.key, state);
+			},
+		);
+	}
+
+	#destroyOneResizePlugin(inst: ResizeInstance, plugin: ResizePlugin) {
+		if (!plugin.destroy) {
+			inst.states.delete(plugin.key);
+			return;
+		}
+		this.#pluginVoid(
+			inst,
+			plugin.key,
+			{ phase: 'destroy', plugin: { key: plugin.key, hook: 'destroy' }, node: inst.rootNode },
+			() => plugin.destroy!(inst.resizeCtx, inst.states.get(plugin.key)),
+		);
+		inst.states.delete(plugin.key);
+	}
+
+	#destroyResize(inst: ResizeInstance) {
+		if (this.#activeResizeSource === inst && inst.isInteracting) {
+			inst.cancelled = true;
+			this.#endActiveInteraction('cancel');
+		}
+		for (const plugin of inst.flat) this.#destroyOneResizePlugin(inst, plugin);
+		inst.controller.abort();
+		inst.effects.clear();
 	}
 }
 

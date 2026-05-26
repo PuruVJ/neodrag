@@ -13,6 +13,8 @@ describe('Neodrag debugSnapshot', () => {
 		expect(snap).not.toBeNull();
 		expect(snap!.dragTargets).toBe(0);
 		expect(snap!.dropTargets).toBe(0);
+		expect(snap!.resizeTargets).toBe(0);
 		expect(snap!.session).toBeNull();
+		expect(snap!.resizeSession).toBeNull();
 	});
 });

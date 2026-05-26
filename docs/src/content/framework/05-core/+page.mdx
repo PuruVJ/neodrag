@@ -59,6 +59,23 @@ Returns a `DragHandle`. `plugins` is `DragPlugin[]` or `() => DragPlugin[]`; fra
 
 Returns a `DropHandle` for drop targets. Same reactive `PluginInput` shape as drag (`DropPlugin[]` or `() => DropPlugin[]`).
 
+### `resizable(node, plugins?)`
+
+Returns a `ResizeHandle` for resize targets. Sizes are **px only** in v1. Built-in plugins live under `@neodrag/core/resize` (`resizeHandles`, `sizeBounds`, `aspectRatio`, `resizeEvents`, presets). Cancel restores the size at pointer-down (`Escape` uses the keyboard sensor).
+
+```typescript
+import { Neodrag } from '@neodrag/core';
+import { resizeHandles, sizeBounds } from '@neodrag/core/resize';
+
+const engine = Neodrag.shared;
+engine.resizable(panel, [
+  resizeHandles({ edges: ['e', 's', 'se'] }),
+  sizeBounds({ minWidth: 120, minHeight: 80 }),
+]);
+```
+
+Resize handles take pointer priority over drag on the same node when both are bound. Drop hit-testing follows layout after resize.
+
 ### Sensors (input layer)
 
 Pointer and keyboard input are **sensors** on the engine — not hard-coded listeners. Default: `pointerSensor()` + `keyboardSensor()` (Escape cancels).
@@ -73,7 +90,7 @@ const engine = new Neodrag({
 });
 ```
 
-Custom sensors implement `setup(host) → cleanup` and call `SensorHost` (`onPointerDown`, `onPointerMove`, `onPointerUp`, `cancelActive`). Resize handles and multi-drag will add new sensors on this layer.
+Custom sensors implement `setup(host) → cleanup` and call `SensorHost` (`onPointerDown`, `onPointerMove`, `onPointerUp`, `cancelActive`). Resize uses handle hit-testing on the existing pointer sensor path; dedicated resize sensors may follow for multi-drag.
 
 ### Delegate target
 
@@ -95,7 +112,7 @@ Destroys all bindings and listeners on this engine.
 
 ## Plugins
 
-Import built-in drag plugins from `@neodrag/core/plugins`. Drop helpers from `@neodrag/core/drop/plugins`; sortable from `@neodrag/core/drop`. In development, `installInteractionInspector(engine)` from `@neodrag/core/dev` overlays live drag/drop stats when `engine.dev` is true. Browser tests can use `@neodrag/test` (also re-exported from `@neodrag/core/testing`).
+Import built-in drag plugins from `@neodrag/core/plugins`. Drop helpers from `@neodrag/core/drop/plugins`; sortable from `@neodrag/core/drop`. Resize plugins from `@neodrag/core/resize`. In development, `installInteractionInspector(engine)` from `@neodrag/core/dev` overlays live drag/drop stats when `engine.dev` is true. Browser tests can use `@neodrag/test` (also re-exported from `@neodrag/core/testing`).
 
 The main `@neodrag/core` entry exports the engine, types, and default plugin presets only — optional plugins are not pulled in unless you import them.
 

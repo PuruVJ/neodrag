@@ -127,7 +127,18 @@ export type DropPluginList = PluginSlot<DropPlugin>[];
 
 
 export interface ErrorInfo {
-	phase: 'init' | 'start' | 'drag' | 'end' | 'enter' | 'over' | 'leave' | 'drop' | 'update' | 'destroy';
+	phase:
+		| 'init'
+		| 'start'
+		| 'drag'
+		| 'resize'
+		| 'end'
+		| 'enter'
+		| 'over'
+		| 'leave'
+		| 'drop'
+		| 'update'
+		| 'destroy';
 	plugin?: {
 		key: symbol;
 		hook: string;

@@ -10,6 +10,7 @@ export default defineConfig({
 		'testing/index': './src/testing/index.ts',
 		'dev/index': './src/dev/index.ts',
 		'sensors/index': './src/sensors/index.ts',
+		'resize/index': './src/resize/index.ts',
 	},
 	format: 'esm',
 	dts: { resolve: true },

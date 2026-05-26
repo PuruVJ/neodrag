@@ -1,18 +1,20 @@
 import type { DragPluginList, DropPluginList } from './types.ts';
+import type { ResizePluginList } from './resize/types.ts';
 
 export interface NeodragHost {
 	update(node: HTMLElement | SVGElement, plugins: DragPluginList): void;
 	updateDrop(node: HTMLElement | SVGElement, plugins: DropPluginList): void;
+	updateResize(node: HTMLElement | SVGElement, plugins: ResizePluginList): void;
 }
 
 export class BindingHandle {
 	readonly node: HTMLElement | SVGElement;
 	readonly #dispose: () => void;
 	readonly #engine: NeodragHost;
-	readonly #kind: 'drag' | 'drop';
+	readonly #kind: 'drag' | 'drop' | 'resize';
 
 	constructor(
-		kind: 'drag' | 'drop',
+		kind: 'drag' | 'drop' | 'resize',
 		engine: NeodragHost,
 		node: HTMLElement | SVGElement,
 		dispose: () => void,
@@ -23,11 +25,13 @@ export class BindingHandle {
 		this.#dispose = dispose;
 	}
 
-	update(plugins: DragPluginList | DropPluginList) {
+	update(plugins: DragPluginList | DropPluginList | ResizePluginList) {
 		if (this.#kind === 'drag') {
 			this.#engine.update(this.node, plugins as DragPluginList);
-		} else {
+		} else if (this.#kind === 'drop') {
 			this.#engine.updateDrop(this.node, plugins as DropPluginList);
+		} else {
+			this.#engine.updateResize(this.node, plugins as ResizePluginList);
 		}
 	}
 
@@ -45,5 +49,11 @@ export class DragHandle extends BindingHandle {
 export class DropHandle extends BindingHandle {
 	constructor(engine: NeodragHost, node: HTMLElement | SVGElement, dispose: () => void) {
 		super('drop', engine, node, dispose);
+	}
+}
+
+export class ResizeHandle extends BindingHandle {
+	constructor(engine: NeodragHost, node: HTMLElement | SVGElement, dispose: () => void) {
+		super('resize', engine, node, dispose);
 	}
 }

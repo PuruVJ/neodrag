@@ -1,5 +1,5 @@
 import { Neodrag } from './engine.ts';
-import type { DragHandle, DropHandle } from './handles.ts';
+import type { DragHandle, DropHandle, ResizeHandle } from './handles.ts';
 import { PluginListResolver, resolvedPluginsUnchanged } from './resolve-plugins.ts';
 import type { PluginSlot } from './types.ts';
 
@@ -10,7 +10,7 @@ export type PluginBindingOptions<P extends { key: symbol }> = {
 		engine: Neodrag,
 		node: HTMLElement | SVGElement,
 		resolved: P[],
-	) => DragHandle | DropHandle;
+	) => DragHandle | DropHandle | ResizeHandle;
 	attachIdempotency?: 'node-and-handle' | 'handle-node';
 };
 
@@ -18,7 +18,7 @@ export class PluginBinding<P extends { key: symbol }> {
 	readonly #engineOption?: Neodrag;
 	#engine: Neodrag | null = null;
 	#resolver: PluginListResolver<P>;
-	#handle: DragHandle | DropHandle | null = null;
+	#handle: DragHandle | DropHandle | ResizeHandle | null = null;
 	#node: HTMLElement | SVGElement | null = null;
 	#lastResolved: P[] | null = null;
 	readonly #register: PluginBindingOptions<P>['register'];
