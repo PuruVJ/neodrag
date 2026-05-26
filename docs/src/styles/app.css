@@ -433,22 +433,25 @@
 		background: transparent;
 	}
 
-	body.docs-route .dock-shell-fill .dock-angular-bevel__fill {
+	body.docs-route .dock-shell-fill .dock-angular-bevel,
+	body.docs-route .dock-shell-fill .dock-angular-bevel--brand {
 		background: transparent;
 	}
 
-	body.docs-route .dock-shell-fill .dock-angular-bevel--brand > .dock-angular-bevel__fill {
-		background: var(--chip-fill);
+	body.docs-route .dock-shell-fill .dock-angular-bevel__fill,
+	body.docs-route .dock-shell-fill .dock-angular-bevel--brand > .dock-angular-bevel__fill,
+	body.docs-route .dock-shell-fill .theme-switcher-track {
+		background: transparent !important;
+	}
+
+	body.docs-route .dock-shell-fill .theme-switcher-track > .pointer-events-none {
+		background: color-mix(in lch, var(--color-brand), transparent 82%) !important;
 	}
 
 	body.docs-route .dock-zoom :global(svg),
 	body.docs-route .dock-zoom :global(svg *) {
 		fill: currentcolor !important;
 		color: currentcolor !important;
-	}
-
-	body.docs-route .theme-switcher-track {
-		background: color-mix(in oklch, var(--app-color-shell), var(--color-brand) 10%);
 	}
 
 	.dock-zoom :global(svg) {
