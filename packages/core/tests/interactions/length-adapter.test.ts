@@ -9,6 +9,7 @@ import {
 	delegateLengthAdapter,
 	numberStub,
 	type LengthAdapter,
+	type SizeInput,
 } from '../../src/index.ts';
 import { resizeHandles } from '../../src/resize/index.ts';
 
@@ -35,7 +36,7 @@ describe('length adapter', () => {
 			units: 'px',
 			resolvePx(value, ctx) {
 				if (typeof value === 'number') return value;
-				if (value === 'token') return 99;
+				if (typeof value === 'string' && value === 'token') return 99;
 				return new Length().resolvePx(value, ctx);
 			},
 			readAuthoredPair: (node) => new Length().readAuthoredPair(node),
@@ -43,18 +44,18 @@ describe('length adapter', () => {
 			cloneAuthored: (pair) => ({ ...pair }),
 		});
 		const el = document.createElement('div');
-		expect(custom.resolvePx('token', { element: el, axis: 'width' })).toBe(99);
+		expect(custom.resolvePx('token' as SizeInput, { element: el, axis: 'width' })).toBe(99);
 	});
 
 	it('delegateLengthAdapter overrides resolvePx only', () => {
 		const hybrid = delegateLengthAdapter(new Length(), {
 			resolvePx(value, ctx) {
-				if (value === 'magic') return 42;
+				if (typeof value === 'string' && value === 'magic') return 42;
 				return new Length().resolvePx(value, ctx);
 			},
 		});
 		const el = document.createElement('div');
-		expect(hybrid.resolvePx('magic', { element: el, axis: 'width' })).toBe(42);
+		expect(hybrid.resolvePx('magic' as SizeInput, { element: el, axis: 'width' })).toBe(42);
 		expect(hybrid.units).toBe('preserve');
 	});
 

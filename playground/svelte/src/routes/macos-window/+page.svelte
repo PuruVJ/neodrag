@@ -17,7 +17,7 @@
 		engine,
 		length,
 		minSize: { width: 220, height: 140 },
-		maxSize: { width: 'min(92vw, 720px)', height: 'min(82vh, 520px)' },
+		maxSize: { width: '92vw', height: '82vh' },
 		plugins: [resizeHandles({ edges: 'all', size: 10, cornerSize: 22 })],
 	});
 </script>

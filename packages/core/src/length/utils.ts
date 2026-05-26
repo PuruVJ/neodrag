@@ -1,25 +1,12 @@
+import { CSS_LENGTH_UNITS, isCssLengthUnit, type CssLengthUnit } from '../length-types.ts';
 import type { LengthAxis, LengthResolveContext } from '../length-runtime.ts';
 
-export type CssUnit =
-	| 'px'
-	| '%'
-	| 'rem'
-	| 'em'
-	| 'ch'
-	| 'ex'
-	| 'vw'
-	| 'vh'
-	| 'vmin'
-	| 'vmax'
-	| 'svw'
-	| 'svh'
-	| 'lvw'
-	| 'lvh'
-	| 'dvw'
-	| 'dvh';
+export type { CssLengthString, CssLengthUnit, SizeInput } from '../length-types.ts';
 
-const UNIT_PATTERN =
-	/^(-?\d*\.?\d+)(px|%|rem|em|ch|ex|vw|vh|vmin|vmax|svw|svh|lvw|lvh|dvw|dvh)$/;
+export type CssUnit = CssLengthUnit;
+
+const UNIT_ALTERNATION = CSS_LENGTH_UNITS.join('|');
+const UNIT_PATTERN = new RegExp(`^(-?\\d*\\.?\\d+)(${UNIT_ALTERNATION})$`);
 
 const UNSUPPORTED_UNITS = new Set<string>(['fr']);
 
@@ -32,7 +19,10 @@ function parseCssUnit(unit: string): CssUnit {
 	if (UNSUPPORTED_UNITS.has(unit)) {
 		throw new Error(`Neodrag Length: unit "${unit}" is not supported`);
 	}
-	return unit as CssUnit;
+	if (!isCssLengthUnit(unit)) {
+		throw new Error(`Neodrag Length: unit "${unit}" is not supported`);
+	}
+	return unit;
 }
 
 export function parseLengthString(raw: string): { value: number; unit: CssUnit } {

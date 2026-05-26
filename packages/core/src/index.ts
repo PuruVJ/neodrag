@@ -83,7 +83,10 @@ export type {
 	LengthAxis,
 	LengthResolveContext,
 	SizeInput,
+	CssLengthString,
+	CssLengthUnit,
 } from './length-runtime.ts';
+export { CSS_LENGTH_UNITS, isCssLengthUnit } from './length-runtime.ts';
 export {
 	numberStub,
 	resolveSizeInput,

@@ -1,4 +1,5 @@
-export type SizeInput = number | string;
+export type { CssLengthString, CssLengthUnit, SizeInput } from './length-types.ts';
+export { CSS_LENGTH_UNITS, isCssLengthUnit } from './length-types.ts';
 
 export type LengthAxis = 'width' | 'height' | 'x' | 'y';
 
