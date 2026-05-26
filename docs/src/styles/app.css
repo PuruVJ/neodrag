@@ -172,11 +172,7 @@
 		);
 		@apply overflow-hidden;
 		background-color: var(--app-color-shell);
-		background-image: radial-gradient(
-			ellipse 120% 80% at 88% 0%,
-			color-mix(in lch, var(--secondary-color), transparent 94%) 0%,
-			transparent 58%
-		);
+		background-image: none;
 	}
 
 	:is(a[href], a[href]:visited):where(:not(.unstyled)) {
@@ -382,6 +378,28 @@
 		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 86%);
 		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 80%);
 		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--color-brand) 8%);
+	}
+
+	body.docs-route .dock-host > .dock-angular-bevel {
+		background: color-mix(in lch, var(--color-brand), transparent 58%);
+	}
+
+	body.docs-route .dock-surface {
+		--dock-border: color-mix(in lch, var(--color-brand), transparent 68%);
+		--dock-border-strong: color-mix(in lch, var(--color-brand), transparent 58%);
+		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--color-brand) 12%);
+		--dock-shadow: 0 20px 44px -26px color-mix(in lch, var(--color-brand), transparent 78%);
+	}
+
+	html[data-theme='dark'] body.docs-route .dock-surface {
+		--dock-border: color-mix(in lch, var(--color-brand), transparent 72%);
+		--dock-border-strong: color-mix(in lch, var(--color-brand), transparent 62%);
+		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--color-brand) 16%);
+		--dock-shadow: 0 22px 48px -24px color-mix(in lch, var(--color-brand), transparent 74%);
+	}
+
+	body.docs-route .dock-host > .dock-angular-bevel > .dock-angular-bevel__fill::before {
+		opacity: 0.52;
 	}
 
 	html[data-framework='svelte'] .dock-host,
