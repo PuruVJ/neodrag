@@ -411,25 +411,26 @@
 	}
 
 	body.docs-route .dock-host > .dock-angular-bevel {
-		background: color-mix(in oklch, var(--color-brand), transparent 32%);
+		background: var(--dock-border);
 	}
 
 	body.docs-route .dock-surface {
-		--dock-surface: unset;
-		--dock-border: color-mix(in lch, var(--color-brand), transparent 68%);
-		--dock-border-strong: color-mix(in lch, var(--color-brand), transparent 58%);
-		--dock-shadow: 0 20px 44px -26px color-mix(in lch, var(--color-brand), transparent 78%);
+		--dock-surface: color-mix(in oklch, var(--app-color-shell) 97%, var(--color-brand) 3%);
+		--dock-border: color-mix(in oklch, var(--color-brand), transparent 78%);
+		--dock-border-strong: color-mix(in oklch, var(--color-brand), transparent 72%);
+		--dock-shadow: 0 20px 44px -26px color-mix(in lch, var(--app-color-dark), transparent 88%);
 	}
 
 	html[data-theme='dark'] body.docs-route .dock-surface {
-		--dock-border: color-mix(in lch, var(--color-brand), transparent 72%);
-		--dock-border-strong: color-mix(in lch, var(--color-brand), transparent 62%);
-		--dock-shadow: 0 22px 48px -24px color-mix(in lch, var(--color-brand), transparent 74%);
+		--dock-surface: color-mix(in oklch, var(--app-color-shell) 94%, var(--color-brand) 6%);
+		--dock-border: color-mix(in oklch, var(--color-brand), transparent 82%);
+		--dock-border-strong: color-mix(in oklch, var(--color-brand), transparent 76%);
+		--dock-shadow: 0 22px 48px -24px color-mix(in lch, var(--app-color-dark), transparent 90%);
 	}
 
 	body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
 		width: 100%;
-		background: color-mix(in oklch, var(--app-color-shell) 86%, var(--color-brand) 14%);
+		background: var(--dock-surface);
 	}
 
 	@media (min-width: 768px) {
@@ -446,7 +447,7 @@
 			inset: 0;
 			z-index: 0;
 			pointer-events: none;
-			background: color-mix(in oklch, var(--color-brand), transparent 32%);
+			background: var(--dock-border);
 			clip-path: polygon(
 				var(--bevel-cut) 0%,
 				calc(100% - var(--bevel-cut)) 0%,
