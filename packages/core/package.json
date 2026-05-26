@@ -20,8 +20,8 @@
 			"import": "./src/drop/index.ts"
 		},
 		"./drop/plugins": {
-			"types": "./src/drop/plugins.ts",
-			"import": "./src/drop/plugins.ts"
+			"types": "./src/drop-plugins.ts",
+			"import": "./src/drop-plugins.ts"
 		},
 		"./presets": {
 			"types": "./src/presets.ts",
