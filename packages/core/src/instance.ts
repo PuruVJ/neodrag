@@ -70,7 +70,6 @@ export class DragInstance {
 	isInteracting = false;
 	cancelled = false;
 	lastInput: InteractionInput | null = null;
-	lastEvent: PointerEvent | null = null;
 	cachedRootNodeRect: DOMRect;
 	visualNode: HTMLElement | SVGElement;
 	pointerCapturedId: number | null = null;
@@ -282,7 +281,6 @@ export type DropCtxHost = {
 	pointerX: number;
 	pointerY: number;
 	lastInput: InteractionInput | null;
-	lastEvent: PointerEvent | null;
 	session: DragSession;
 };
 
@@ -354,7 +352,7 @@ export class DropInstance {
 				return inst.#host.lastInput;
 			},
 			get lastEvent() {
-				return inst.#host.lastEvent;
+				return nativePointerEvent(inst.#host.lastInput);
 			},
 			get isOver() {
 				return inst.isOver;

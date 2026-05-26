@@ -21,6 +21,7 @@ export type DropTargetHost = {
 export class DropTargetTracker {
 	#currentOver: DropInstance[] = [];
 	#nextOverScratch: DropInstance[] = [];
+	#nextOverSet = new Set<DropInstance>();
 	#lastDropInput: InteractionInput | null = null;
 	#lastDropPointerX = NaN;
 	#lastDropPointerY = NaN;
@@ -130,7 +131,9 @@ export class DropTargetTracker {
 			next.push(drop);
 		}
 
-		const nextSet = new Set(next);
+		const nextSet = this.#nextOverSet;
+		nextSet.clear();
+		for (let i = 0; i < next.length; i++) nextSet.add(next[i]!);
 		for (let i = 0; i < this.#currentOver.length; i++) {
 			const drop = this.#currentOver[i]!;
 			if (!nextSet.has(drop) && drop.isOver) {

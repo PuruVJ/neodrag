@@ -8,7 +8,7 @@ Sensors listen on the engine **delegate** (usually `document.documentElement`) a
 
 ## Registration API
 
-Sensors are **classes** registered on `Neodrag`. There is no `sensors: []` constructor option.
+Sensors are **classes** extending `SensorBase`, registered on `Neodrag` via `registerSensor`. There is no `sensors: []` constructor option.
 
 ```typescript
 import {
@@ -17,9 +17,10 @@ import {
   KeyboardSensor,
   KeyboardMoveSensor,
   KEYBOARD_MOVE_SENSOR_KEY,
+  installDefaultSensors,
 } from '@neodrag/core';
 
-// Default: pointer + Escape cancel + keyboard move (Space / arrows)
+// Default: pointer + Escape cancel + keyboard move
 const engine = new Neodrag();
 
 // Pointer only
@@ -29,51 +30,42 @@ pointerOnly.registerSensor(new PointerSensor({ buttons: [0] }));
 // Trim a default
 const trimmed = new Neodrag();
 trimmed.unregisterSensor(KEYBOARD_MOVE_SENSOR_KEY);
+
+// Re-install built-ins after opting out
+const custom = new Neodrag({ defaultSensors: false });
+installDefaultSensors((sensor) => custom.registerSensor(sensor));
 ```
 
 ### `registerSensor(sensor)`
 
-- Adds a sensor instance (must extend `SensorBase` / implement `Sensor`).
+- Adds a sensor instance (`extends SensorBase`).
 - Throws if another sensor with the same `key` is already registered.
-- If the engine has already attached sensors (first `draggable` / `droppable`), listeners are wired immediately.
+- If listeners are already armed (after first binding), the sensor is set up immediately.
 
 ### `unregisterSensor(key)`
 
-- Runs that sensor’s cleanup and removes it from the engine.
+Runs cleanup and removes the sensor.
 
 ### `getSensors()`
 
-- Read-only list of registered sensors (in registration order).
+Read-only list in registration order.
 
-### `defaultSensors` option
+### `defaultSensors` engine option
 
 | Value | Behavior |
 |-------|----------|
-| omitted or `true` | Registers `PointerSensor`, `KeyboardSensor`, `KeyboardMoveSensor` |
-| `false` | No sensors until you `registerSensor` |
+| omitted / `true` | Registers `PointerSensor`, `KeyboardSensor`, `KeyboardMoveSensor` at construction |
+| `false` | No sensors until you call `registerSensor` |
 
-For manual bootstrap after `defaultSensors: false`:
+## Built-in sensor classes
 
-```typescript
-import { installDefaultSensors } from '@neodrag/core/sensors';
-
-const engine = new Neodrag({ defaultSensors: false });
-installDefaultSensors((sensor) => engine.registerSensor(sensor));
-```
-
-## Built-in sensors
-
-| Class | `key` | Role |
-|-------|-------|------|
-| `PointerSensor` | `POINTER_SENSOR_KEY` | `pointerdown` / move / up → `InteractionInput` (`kind: 'pointer'`) |
-| `KeyboardSensor` | `KEYBOARD_SENSOR_KEY` | `Escape` → `cancelActive('cancel')` |
-| `KeyboardMoveSensor` | `KEYBOARD_MOVE_SENSOR_KEY` | Space grab + arrows when `keyboardDrag` plugin is on the node |
-
-Resize handle hit-testing still uses the **pointer** path today. Keyboard resize is not a separate sensor yet.
+| Class | Role |
+|-------|------|
+| `PointerSensor` | Pointer events → `InteractionInput` (`kind: 'pointer'`) |
+| `KeyboardSensor` | `Escape` → `cancelActive('cancel')` |
+| `KeyboardMoveSensor` | Space grab + arrows when `keyboardDrag` plugin is on the node |
 
 ## Custom sensor
-
-Subclass `SensorBase` and implement `attach(host)`:
 
 ```typescript
 import { SensorBase, type SensorHost, keyboardToInput } from '@neodrag/core';
@@ -84,30 +76,22 @@ class MySensor extends SensorBase {
   protected attach(host: SensorHost) {
     const onMove = () => {
       host.onInteractionMove(
-        keyboardToInput({
-          phase: 'move',
-          clientX: 0,
-          clientY: 0,
-          key: 'ArrowRight',
-          delta: { x: 1, y: 0 },
-        }),
+        keyboardToInput({ phase: 'move', clientX: 0, clientY: 0, key: 'ArrowRight', delta: { x: 1, y: 0 } }),
       );
     };
     // listen(...)
-    return () => { /* remove listeners */ };
+    return () => { /* cleanup */ };
   }
 }
 
 engine.registerSensor(new MySensor());
 ```
 
-Use `SensorHost.onInteractionStart` / `Move` / `End` — not `PointerEvent` directly. See [keyboard-drag](/plugin/14-keyboard-drag) and `InteractionInput` on the core page.
-
 ## Plugins vs sensors
 
-| | Sensors | Plugins (`Draggable` `plugins`) |
-|---|---------|----------------------------------|
-| Scope | One engine | Per element |
-| Job | Raw input → `InteractionInput` | Bounds, grid, events, `keyboardDrag` config, etc. |
+| | Sensors | Plugins |
+|---|---------|---------|
+| Scope | Engine | Per draggable |
+| Job | Input → `InteractionInput` | Bounds, grid, `keyboardDrag` config, etc. |
 
-`keyboardDrag` is a **plugin** (per-node options). `KeyboardMoveSensor` is the **sensor** that reads that config and drives the engine.
+See [keyboard-drag](/plugin/14-keyboard-drag) for the keyboard grab model.

@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment jsdom
+ */
 import { describe, expect, test } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
 

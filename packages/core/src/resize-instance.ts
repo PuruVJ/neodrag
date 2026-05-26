@@ -55,7 +55,6 @@ export class ResizeInstance {
 	isInteracting = false;
 	cancelled = false;
 	lastInput: InteractionInput | null = null;
-	lastEvent: PointerEvent | null = null;
 	cachedRootNodeRect: DOMRect;
 	cachedTargetRect: DOMRect;
 	pointerCapturedId: number | null = null;

@@ -47,9 +47,10 @@ import {
 	type InteractionInput,
 	type PointerInteractionInput,
 } from './interaction-input.ts';
+import { inverseScaleFromNode } from './lib/inverse-scale.ts';
 import { installDefaultSensors } from './sensors/defaults.ts';
 import type { Sensor, SensorHost } from './sensors/types.ts';
-import { setDragLastInteraction, setDropHostLastInteraction, setResizeLastInteraction } from './set-last-interaction.ts';
+import { syncDragSessionPointer, syncResizeSessionPointer } from './sync-session-pointer.ts';
 import { transitionSession } from './state-machine.ts';
 import {
 	assertNamedPluginKeys,
@@ -154,13 +155,21 @@ export class Neodrag {
 		pointerX: 0,
 		pointerY: 0,
 		lastInput: null,
-		lastEvent: null,
 		session: null!,
 	};
+
+	readonly #pluginHookMeta = { key: Symbol('neodrag.plugin'), hook: '' };
+	readonly #pluginErrorFrame: Omit<ErrorInfo, 'error'>;
 
 	readonly #sensorHost: SensorHost;
 
 	constructor(options: EngineOptions = {}) {
+		this.#pluginErrorFrame = {
+			phase: 'drag',
+			plugin: this.#pluginHookMeta,
+			node: null as unknown as HTMLElement,
+		};
+
 		this.#dropHostBridge = {
 			getDropCount: () => this.#dropCount,
 			getSoleDrop: () => this.#soleDrop,
@@ -522,7 +531,7 @@ export class Neodrag {
 				inst.handleNode = handleNode;
 				inst.isInteracting = true;
 				inst.cancelled = false;
-				setResizeLastInteraction(inst, input);
+				syncResizeSessionPointer(input, inst, this.#activeResize);
 				this.#beginResizeSession(inst, input);
 				return;
 			}
@@ -540,8 +549,7 @@ export class Neodrag {
 		inst.initialY = input.clientY - inst.offsetY / inst.inverseScale;
 		inst.isInteracting = true;
 		inst.cancelled = false;
-		setDragLastInteraction(inst, input);
-		setDropHostLastInteraction(this.#dropHost, input);
+		syncDragSessionPointer(input, inst, null, this.#dropHost);
 		this.#dropTracker.reset();
 		this.#beginSession(inst, input);
 	}
@@ -558,14 +566,7 @@ export class Neodrag {
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
 
-		setDragLastInteraction(inst, input);
-		setDropHostLastInteraction(this.#dropHost, input);
-		if (this.#active) {
-			this.#active.pointerX = input.clientX;
-			this.#active.pointerY = input.clientY;
-			this.#dropHost.pointerX = input.clientX;
-			this.#dropHost.pointerY = input.clientY;
-		}
+		syncDragSessionPointer(input, inst, this.#active, this.#dropHost);
 
 		if (!inst.isDragging) {
 			const startOk = this.#runStart(inst, inst.dragCtx, input);
@@ -610,8 +611,8 @@ export class Neodrag {
 		inst.offsetY += inst.proposedY;
 		inst.proposedX = 0;
 		inst.proposedY = 0;
-		inst.dragCtx.effect(() => this.#syncDragTransform(inst));
 		inst.effects.flush();
+		this.#syncDragTransform(inst);
 
 		if (this.#dropCount > 0) this.#dropTracker.queueUpdate(input);
 	}
@@ -647,8 +648,7 @@ export class Neodrag {
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
 
-		setDragLastInteraction(inst, input);
-		setDropHostLastInteraction(this.#dropHost, input);
+		syncDragSessionPointer(input, inst, this.#active, this.#dropHost);
 
 		if (inst.isDragging && this.#dropCount > 0) {
 			this.#dropTracker.flush(input);
@@ -771,11 +771,8 @@ export class Neodrag {
 			const plugin = chain[i]!;
 			if (inst.failed.has(plugin.key) || !plugin.start) continue;
 			const state = inst.states.get(plugin.key);
-			const out = this.#pluginCall(
-				inst,
-				plugin.key,
-				{ phase: 'start', plugin: { key: plugin.key, hook: 'start' }, node: inst.rootNode },
-				() => plugin.start!(ctx, state, input),
+			const out = this.#pluginCall(inst, plugin.key, 'start', 'start', () =>
+				plugin.start!(ctx, state, input),
 			);
 			if (out === PLUGIN_FAILED) return false;
 			if (out === false) return false;
@@ -786,7 +783,6 @@ export class Neodrag {
 
 	#runDrag(inst: DragInstance, ctx: DragCtx, input: InteractionInput) {
 		const chain = inst.dragChain;
-		const info = { phase: 'drag' as const, node: inst.rootNode };
 
 		for (let i = 0; i < chain.length; i++) {
 			const plugin = chain[i]!;
@@ -794,11 +790,8 @@ export class Neodrag {
 			if (inst.cancelled && plugin.skipOnCancel) continue;
 
 			const state = inst.states.get(plugin.key);
-			const patch = this.#pluginCall(
-				inst,
-				plugin.key,
-				{ ...info, plugin: { key: plugin.key, hook: 'drag' } },
-				() => plugin.drag!(ctx, state, input),
+			const patch = this.#pluginCall(inst, plugin.key, 'drag', 'drag', () =>
+				plugin.drag!(ctx, state, input),
 			);
 			if (patch === PLUGIN_FAILED) continue;
 
@@ -818,11 +811,8 @@ export class Neodrag {
 			if (inst.failed.has(plugin.key) || !plugin.end) continue;
 			if (inst.cancelled && plugin.skipOnCancel) continue;
 			const state = inst.states.get(plugin.key);
-			this.#pluginVoid(
-				inst,
-				plugin.key,
-				{ phase: 'end', plugin: { key: plugin.key, hook: 'end' }, node: inst.rootNode },
-				() => plugin.end!(ctx, state, input, reason),
+			this.#pluginVoid(inst, plugin.key, 'end', 'end', () =>
+				plugin.end!(ctx, state, input, reason),
 			);
 		}
 	}
@@ -847,7 +837,6 @@ export class Neodrag {
 	): boolean | void {
 		const ctx = inst.dropCtx;
 		const chain = this.#dropChain(inst, hook);
-		const info = { phase: hook, node: inst.rootNode };
 
 		for (let i = 0; i < chain.length; i++) {
 			const plugin = chain[i]!;
@@ -856,12 +845,7 @@ export class Neodrag {
 			if (!handler) continue;
 			const state = inst.states.get(plugin.key);
 
-			const out = this.#pluginCall(
-				inst,
-				plugin.key,
-				{ ...info, plugin: { key: plugin.key, hook } },
-				() => handler(ctx, state, input),
-			);
+			const out = this.#pluginCall(inst, plugin.key, hook, hook, () => handler(ctx, state, input));
 			if (out === PLUGIN_FAILED) continue;
 			if (hook === 'enter' && out === false) return false;
 		}
@@ -908,19 +892,7 @@ export class Neodrag {
 	}
 
 	#inverseScale(inst: DragInstance) {
-		const node = inst.rootNode;
-		let scale = 1;
-
-		if (node instanceof SVGElement) {
-			const bbox = (node as SVGGraphicsElement).getBBox();
-			const rect = inst.cachedRootNodeRect;
-			if (bbox.width && rect.width) scale = bbox.width / rect.width;
-		} else {
-			const el = node as HTMLElement;
-			scale = el.offsetWidth / inst.cachedRootNodeRect.width;
-		}
-
-		return Number.isFinite(scale) && scale > 0 ? scale : 1;
+		return inverseScaleFromNode(inst.rootNode, inst.cachedRootNodeRect);
 	}
 
 	#mergeUserDragPlugins(userPlugins: DragPlugin[]) {
@@ -967,15 +939,10 @@ export class Neodrag {
 
 	#initOneDragPlugin(inst: DragInstance, plugin: DragPlugin) {
 		if (!plugin.init) return;
-		this.#pluginVoid(
-			inst,
-			plugin.key,
-			{ phase: 'init', plugin: { key: plugin.key, hook: 'init' }, node: inst.rootNode },
-			() => {
-				const state = plugin.init!(inst.dragCtx);
-				if (state !== undefined) inst.states.set(plugin.key, state);
-			},
-		);
+		this.#pluginVoid(inst, plugin.key, 'init', 'init', () => {
+			const state = plugin.init!(inst.dragCtx);
+			if (state !== undefined) inst.states.set(plugin.key, state);
+		});
 	}
 
 	#destroyOneDragPlugin(inst: DragInstance, plugin: DragPlugin) {
@@ -983,11 +950,8 @@ export class Neodrag {
 			inst.states.delete(plugin.key);
 			return;
 		}
-		this.#pluginVoid(
-			inst,
-			plugin.key,
-			{ phase: 'destroy', plugin: { key: plugin.key, hook: 'destroy' }, node: inst.rootNode },
-			() => plugin.destroy!(inst.dragCtx, inst.states.get(plugin.key)),
+		this.#pluginVoid(inst, plugin.key, 'destroy', 'destroy', () =>
+			plugin.destroy!(inst.dragCtx, inst.states.get(plugin.key)),
 		);
 		inst.states.delete(plugin.key);
 	}
@@ -1030,25 +994,20 @@ export class Neodrag {
 
 	#initOneDropPlugin(inst: DropInstance, plugin: DropPlugin) {
 		if (!plugin.init) return;
-		this.#pluginVoid(
-			inst,
-			plugin.key,
-			{ phase: 'init', plugin: { key: plugin.key, hook: 'init' }, node: inst.rootNode },
-			() => {
-				const state = plugin.init!(inst.dropCtx);
-				if (state !== undefined) {
-					inst.states.set(plugin.key, state);
-					if (plugin.key === DROP_HIT_EXPAND_KEY) {
-						inst.hitExpandPx = state as {
-							top: number;
-							right: number;
-							bottom: number;
-							left: number;
-						};
-					}
+		this.#pluginVoid(inst, plugin.key, 'init', 'init', () => {
+			const state = plugin.init!(inst.dropCtx);
+			if (state !== undefined) {
+				inst.states.set(plugin.key, state);
+				if (plugin.key === DROP_HIT_EXPAND_KEY) {
+					inst.hitExpandPx = state as {
+						top: number;
+						right: number;
+						bottom: number;
+						left: number;
+					};
 				}
-			},
-		);
+			}
+		});
 	}
 
 	#destroyOneDropPlugin(inst: DropInstance, plugin: DropPlugin) {
@@ -1057,11 +1016,8 @@ export class Neodrag {
 			inst.states.delete(plugin.key);
 			return;
 		}
-		this.#pluginVoid(
-			inst,
-			plugin.key,
-			{ phase: 'destroy', plugin: { key: plugin.key, hook: 'destroy' }, node: inst.rootNode },
-			() => plugin.destroy!(inst.dropCtx, inst.states.get(plugin.key)),
+		this.#pluginVoid(inst, plugin.key, 'destroy', 'destroy', () =>
+			plugin.destroy!(inst.dropCtx, inst.states.get(plugin.key)),
 		);
 		inst.states.delete(plugin.key);
 	}
@@ -1091,13 +1047,19 @@ export class Neodrag {
 	#pluginCall<T>(
 		inst: PluginHost,
 		key: symbol,
-		info: Omit<ErrorInfo, 'error'>,
+		phase: ErrorInfo['phase'],
+		hook: string,
 		fn: () => T,
 	): T | typeof PLUGIN_FAILED {
+		const frame = this.#pluginErrorFrame;
+		frame.phase = phase;
+		frame.node = inst.rootNode;
+		this.#pluginHookMeta.key = key;
+		this.#pluginHookMeta.hook = hook;
 		try {
 			return fn();
 		} catch (error) {
-			this.#pluginError(info, inst, key, error);
+			this.#pluginError(frame, inst, key, error);
 			return PLUGIN_FAILED;
 		}
 	}
@@ -1105,13 +1067,19 @@ export class Neodrag {
 	#pluginVoid(
 		inst: PluginHost,
 		key: symbol,
-		info: Omit<ErrorInfo, 'error'>,
+		phase: ErrorInfo['phase'],
+		hook: string,
 		fn: () => void,
 	) {
+		const frame = this.#pluginErrorFrame;
+		frame.phase = phase;
+		frame.node = inst.rootNode;
+		this.#pluginHookMeta.key = key;
+		this.#pluginHookMeta.hook = hook;
 		try {
 			fn();
 		} catch (error) {
-			this.#pluginError(info, inst, key, error);
+			this.#pluginError(frame, inst, key, error);
 		}
 	}
 
@@ -1174,7 +1142,7 @@ export class Neodrag {
 		const inst = this.#activeResizeSource;
 		if (!inst?.isInteracting) return;
 
-		setResizeLastInteraction(inst, input);
+		syncResizeSessionPointer(input, inst, this.#activeResize);
 		if (this.#activeResize) {
 			this.#activeResize.pointerX = input.clientX;
 			this.#activeResize.pointerY = input.clientY;
@@ -1239,8 +1207,8 @@ export class Neodrag {
 			this.#activeResize.height = inst.height;
 		}
 
-		inst.resizeCtx.effect(() => this.#syncResize(inst));
 		inst.effects.flush();
+		this.#syncResize(inst);
 	}
 
 	#finishResize(reason: ResizeEndReason, input: InteractionInput) {
@@ -1354,19 +1322,7 @@ export class Neodrag {
 	}
 
 	#inverseScaleResize(inst: ResizeInstance) {
-		const node = inst.targetNode;
-		let scale = 1;
-
-		if (node instanceof SVGElement) {
-			const bbox = (node as SVGGraphicsElement).getBBox();
-			const rect = inst.cachedTargetRect;
-			if (bbox.width && rect.width) scale = bbox.width / rect.width;
-		} else {
-			const el = node as HTMLElement;
-			scale = el.offsetWidth / inst.cachedTargetRect.width;
-		}
-
-		return Number.isFinite(scale) && scale > 0 ? scale : 1;
+		return inverseScaleFromNode(inst.targetNode, inst.cachedTargetRect);
 	}
 
 	#runResizeStart(inst: ResizeInstance, ctx: ResizeCtx, input: InteractionInput): boolean {
@@ -1375,11 +1331,8 @@ export class Neodrag {
 			const plugin = chain[i]!;
 			if (inst.failed.has(plugin.key) || !plugin.start) continue;
 			const state = inst.states.get(plugin.key);
-			const out = this.#pluginCall(
-				inst,
-				plugin.key,
-				{ phase: 'start', plugin: { key: plugin.key, hook: 'start' }, node: inst.rootNode },
-				() => plugin.start!(ctx, state, input),
+			const out = this.#pluginCall(inst, plugin.key, 'start', 'start', () =>
+				plugin.start!(ctx, state, input),
 			);
 			if (out === PLUGIN_FAILED) return false;
 			if (out === false) return false;
@@ -1390,7 +1343,6 @@ export class Neodrag {
 
 	#runResize(inst: ResizeInstance, ctx: ResizeCtx, input: InteractionInput) {
 		const chain = inst.resizeChain;
-		const info = { phase: 'resize' as const, node: inst.rootNode };
 
 		for (let i = 0; i < chain.length; i++) {
 			const plugin = chain[i]!;
@@ -1398,11 +1350,8 @@ export class Neodrag {
 			if (inst.cancelled && plugin.skipOnCancel) continue;
 
 			const state = inst.states.get(plugin.key);
-			const patch = this.#pluginCall(
-				inst,
-				plugin.key,
-				{ ...info, plugin: { key: plugin.key, hook: 'resize' } },
-				() => plugin.resize!(ctx, state, input),
+			const patch = this.#pluginCall(inst, plugin.key, 'resize', 'resize', () =>
+				plugin.resize!(ctx, state, input),
 			);
 			if (patch === PLUGIN_FAILED) continue;
 
@@ -1422,11 +1371,8 @@ export class Neodrag {
 			if (inst.failed.has(plugin.key) || !plugin.end) continue;
 			if (inst.cancelled && plugin.skipOnCancel) continue;
 			const state = inst.states.get(plugin.key);
-			this.#pluginVoid(
-				inst,
-				plugin.key,
-				{ phase: 'end', plugin: { key: plugin.key, hook: 'end' }, node: inst.rootNode },
-				() => plugin.end!(ctx, state, input, reason),
+			this.#pluginVoid(inst, plugin.key, 'end', 'end', () =>
+				plugin.end!(ctx, state, input, reason),
 			);
 		}
 	}
@@ -1482,15 +1428,10 @@ export class Neodrag {
 
 	#initOneResizePlugin(inst: ResizeInstance, plugin: ResizePlugin) {
 		if (!plugin.init) return;
-		this.#pluginVoid(
-			inst,
-			plugin.key,
-			{ phase: 'init', plugin: { key: plugin.key, hook: 'init' }, node: inst.rootNode },
-			() => {
-				const state = plugin.init!(inst.resizeCtx);
-				if (state !== undefined) inst.states.set(plugin.key, state);
-			},
-		);
+		this.#pluginVoid(inst, plugin.key, 'init', 'init', () => {
+			const state = plugin.init!(inst.resizeCtx);
+			if (state !== undefined) inst.states.set(plugin.key, state);
+		});
 	}
 
 	#destroyOneResizePlugin(inst: ResizeInstance, plugin: ResizePlugin) {
@@ -1498,11 +1439,8 @@ export class Neodrag {
 			inst.states.delete(plugin.key);
 			return;
 		}
-		this.#pluginVoid(
-			inst,
-			plugin.key,
-			{ phase: 'destroy', plugin: { key: plugin.key, hook: 'destroy' }, node: inst.rootNode },
-			() => plugin.destroy!(inst.resizeCtx, inst.states.get(plugin.key)),
+		this.#pluginVoid(inst, plugin.key, 'destroy', 'destroy', () =>
+			plugin.destroy!(inst.resizeCtx, inst.states.get(plugin.key)),
 		);
 		inst.states.delete(plugin.key);
 	}

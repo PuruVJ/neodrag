@@ -520,12 +520,11 @@ export const threshold = defineDragPlugin(
 			if (!isPointerInput(input)) return true;
 			const event = input.native;
 
-			if (!ctx.rootNode.contains(event.target as Node)) {
-				ctx.cancel();
-				return false;
-			}
-
 			if (!state.started) {
+				if (!ctx.rootNode.contains(event.target as Node)) {
+					ctx.cancel();
+					return false;
+				}
 				state.started = true;
 				state.start_time = Date.now();
 				state.start_x = input.clientX;
