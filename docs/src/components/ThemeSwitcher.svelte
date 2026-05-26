@@ -32,7 +32,7 @@
 	class={[
 		embedded
 			? 'relative h-12 w-full'
-			: 'dock-angular-bevel dock-angular-bevel--sm dock-surface relative m-1 h-12',
+			: 'dock-angular-bevel dock-angular-bevel--sm dock-surface relative h-14 max-h-14',
 	]}
 >
 	<div

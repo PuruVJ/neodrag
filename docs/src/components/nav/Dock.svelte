@@ -111,7 +111,7 @@
 	const enable_dock_zoom = new MediaQuery('(min-width: 768px)');
 
 	const dock_btn =
-		'grid h-full min-w-[3.25rem] place-items-center bg-transparent p-2.5 text-[1.35rem] text-[color-mix(in_lch,var(--app-color-dark),transparent_28%)] transition-[color,background-color] duration-75 hover:text-brand focus-visible:text-brand';
+		'grid h-14 min-h-14 max-h-14 min-w-[3.25rem] place-items-center bg-transparent p-2.5 text-[1.35rem] text-[color-mix(in_lch,var(--app-color-dark),transparent_28%)] transition-[color,background-color] duration-75 hover:text-brand focus-visible:text-brand';
 </script>
 
 <div
@@ -127,12 +127,12 @@
 	style:--secondary-color={dock_brand}
 >
 	<div
-		class="dock-angular-bevel dock-surface pointer-events-auto relative w-full overflow-visible shadow-[var(--dock-shadow)] max-md:min-h-16 md:h-12 md:max-h-12 md:w-auto"
+		class="dock-angular-bevel dock-surface pointer-events-auto relative w-full overflow-visible shadow-[var(--dock-shadow)] max-md:min-h-16 md:h-auto md:w-auto"
 		{@attach dockDrag.attachment}
 		{@attach interact_outside(() => menu_view.close())}
 	>
 		<div
-			class="dock-shell-fill dock-angular-bevel__fill relative flex w-full flex-col items-end max-md:min-h-16 max-md:overflow-hidden max-md:p-0 md:h-12 md:max-h-12 md:overflow-visible md:p-1"
+			class="dock-shell-fill dock-angular-bevel__fill relative flex w-full flex-col items-end max-md:min-h-16 max-md:overflow-hidden max-md:p-0 md:overflow-visible md:p-1.5"
 		>
 			{#if menu_view.open}
 				<div
@@ -149,8 +149,8 @@
 				</div>
 			{/if}
 
-			<div class="relative z-[1] flex w-full shrink-0 max-md:h-16 md:h-12 md:overflow-visible">
-				<div class="hidden max-md:hidden md:flex md:h-12 md:items-end md:overflow-visible">
+			<div class="relative z-[1] flex w-full shrink-0 max-md:h-16 md:overflow-visible">
+				<div class="dock-toolbar hidden max-md:hidden md:flex md:h-14 md:items-center md:overflow-visible">
 					{@render framework_selector(false)}
 					<div
 						class="mx-0.5 my-1.5 w-px min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
@@ -164,7 +164,7 @@
 						class="mx-0.5 my-1.5 w-px min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
 					></div>
 					<div
-						class="dock-angular-bevel dock-angular-bevel--sm handle h-12 shrink-0 self-end overflow-visible"
+						class="dock-angular-bevel dock-angular-bevel--sm handle h-14 shrink-0 overflow-visible"
 						data-paw-cursor="true"
 					>
 						<div class="{dock_btn} dock-angular-bevel__fill">
@@ -208,16 +208,14 @@
 			<GithubIcon />
 		</a>
 	{:else}
-		<div class="dock-angular-bevel dock-angular-bevel--sm h-12 shrink-0 self-end">
-			<a
-				href="https://github.com/PuruVJ/neodrag"
-				target="_blank"
-				rel="external"
-				class="{dock_btn} dock-angular-bevel__fill unstyled !h-full !text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_svg]:block [&_svg]:h-auto [&_svg]:w-8 [&_svg]:max-h-8 [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current"
-			>
-				<GithubIcon />
-			</a>
-		</div>
+		<a
+			href="https://github.com/PuruVJ/neodrag"
+			target="_blank"
+			rel="external"
+			class="{dock_btn} unstyled shrink-0 !text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_svg]:h-auto [&_svg]:w-8 [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current"
+		>
+			<GithubIcon />
+		</a>
 	{/if}
 {/snippet}
 
@@ -225,7 +223,7 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class={[
-			'dock-zoom flex h-12 w-full items-end justify-center gap-0.5 overflow-visible',
+			'dock-zoom flex h-14 shrink-0 items-center justify-center gap-0.5 overflow-visible',
 			!embedded && 'max-md:hidden',
 		]}
 		onmouseenter={() => {

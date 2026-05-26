@@ -435,9 +435,17 @@
 	@media (min-width: 768px) {
 		body.docs-route .dock-host > .dock-angular-bevel,
 		body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
-			height: 3rem;
-			max-height: 3rem;
 			overflow: visible;
+		}
+
+		body.docs-route .dock-toolbar {
+			height: 3.5rem;
+		}
+
+		body.docs-route .dock-shell-fill .dock-angular-bevel.dock-surface {
+			margin: 0;
+			height: 3.5rem;
+			max-height: 3.5rem;
 		}
 
 		body.docs-route .dock-shell-fill .dock-angular-bevel,
