@@ -39,7 +39,7 @@
 		class={[
 			embedded
 				? 'relative flex bg-transparent px-1 pb-1'
-				: 'dock-angular-bevel__fill relative flex bg-[color-mix(in_lch,var(--app-color-dark),transparent_96%)] px-1',
+				: 'dock-angular-bevel__fill theme-switcher-track relative flex px-1',
 			thumbnail && '!bg-transparent',
 		]}
 	>

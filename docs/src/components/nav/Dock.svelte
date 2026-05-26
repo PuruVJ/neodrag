@@ -132,7 +132,7 @@
 		{@attach interact_outside(() => menu_view.close())}
 	>
 		<div
-			class="dock-shell-fill dock-angular-bevel__fill relative flex w-full min-h-0 flex-col items-end overflow-hidden backdrop-blur-[14px] backdrop-saturate-[1.08] max-md:min-h-16 max-md:p-0 md:h-full md:overflow-visible md:p-1.5"
+			class="dock-shell-fill dock-angular-bevel__fill relative flex w-full min-h-0 flex-col items-end overflow-hidden max-md:min-h-16 max-md:p-0 md:h-full md:overflow-visible md:p-1.5"
 		>
 			{#if menu_view.open}
 				<div
