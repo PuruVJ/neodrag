@@ -17,7 +17,6 @@
 	import { prefetch } from 'astro:prefetch';
 	import type { Component } from 'svelte';
 	import { expoOut } from 'svelte/easing';
-	import { on } from 'svelte/events';
 	import { MediaQuery } from 'svelte/reactivity';
 	import { slide } from 'svelte/transition';
 	import DockItem from './DockItem.svelte';
@@ -72,68 +71,70 @@
 	});
 
 	const is_tablet = new MediaQuery('(max-width: 967px)');
+
+	const dock_btn =
+		'grid h-full min-w-[3.25rem] place-items-center border-2 border-transparent bg-transparent p-2.5 text-[1.35rem] text-[color-mix(in_lch,var(--app-color-dark),transparent_28%)] transition-[border-color,color,background-color] duration-75 hover:border-[color-mix(in_lch,var(--color-brand),transparent_45%)] hover:bg-[color-mix(in_lch,var(--color-brand),transparent_90%)] hover:text-brand focus-visible:border-[color-mix(in_lch,var(--color-brand),transparent_45%)] focus-visible:bg-[color-mix(in_lch,var(--color-brand),transparent_90%)] focus-visible:text-brand';
 </script>
 
-<div class={['overlay', menu_view.open && 'visible']}></div>
+<div
+	class={[
+		'pointer-events-none fixed inset-0 z-[999] hidden bg-black/50 opacity-0 transition-opacity duration-200 max-md:block',
+		menu_view.open && 'pointer-events-auto opacity-100',
+	]}
+></div>
 
-<section class="dock-container">
+<section
+	class="pointer-events-none fixed bottom-4 left-0 z-[1000] flex h-20 w-full items-end justify-center gap-[clamp(2rem,10vw,8rem)] p-1.5 max-md:bottom-0 max-md:h-16 max-md:p-0 [&_svg]:max-w-none [&_svg]:w-16"
+>
 	<div
-		class={['dock-el', 'dock-angular', menu_view.open && 'menu-open dock-angular--bar']}
+		class={[
+			'dock-surface dock-angular pointer-events-auto relative flex h-full flex-col items-end border-2 border-[var(--dock-border)] bg-[var(--dock-surface)] p-1.5 shadow-[var(--dock-accent-glow),inset_0_1px_0_color-mix(in_lch,var(--app-color-anti-mixer),transparent_88%),var(--dock-shadow)] backdrop-blur-[18px] backdrop-saturate-[1.12] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,color-mix(in_lch,var(--color-brand),transparent_88%)_0%,transparent_35%,transparent_65%,color-mix(in_lch,var(--color-brand),transparent_92%)_100%)] before:opacity-55 before:content-[""]',
+			menu_view.open && 'dock-angular-bar max-md:h-auto max-md:w-[min(96%,40rem)]',
+		]}
 		{@attach dockDrag.attachment}
 		{@attach interact_outside(() => menu_view.close())}
 	>
-		<div class="mobile expanded-menu">
+		<div class="hidden w-full max-md:block">
 			{#if menu_view.open}
-				<div style="width: 100%" transition:slide={{ duration: 400, easing: expoOut }}>
-					<div class="nav">
+				<div class="w-full" transition:slide={{ duration: 400, easing: expoOut }}>
+					<div class="max-h-[48vh] overflow-y-auto">
 						<Nav compact {pathname} {nav_list} onclick={() => menu_view.toggle()} />
 					</div>
-
-					<div>
-						{@render framework_selector(true)}
-					</div>
-
-					<div>
-						<ThemeSwitcher embedded />
-					</div>
+					<div>{@render framework_selector(true)}</div>
+					<div><ThemeSwitcher embedded /></div>
 				</div>
 			{/if}
 		</div>
 
-		<div class="main">
-			<div class="desktop">
+		<div class="relative z-[1] flex h-full w-full max-md:h-full">
+			<div class="hidden items-end max-md:hidden md:flex">
 				{@render framework_selector(false)}
-
-				<div class="divider"></div>
-
+				<div
+					class="mx-0.5 my-1.5 w-0.5 min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
+				></div>
 				<ThemeSwitcher />
-
-				<div class="divider"></div>
-
+				<div
+					class="mx-0.5 my-1.5 w-0.5 min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
+				></div>
 				{@render github()}
-
-				<div class="divider"></div>
-
-				<div class="handle" data-paw-cursor="true">
+				<div
+					class="mx-0.5 my-1.5 w-0.5 min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
+				></div>
+				<div class="{dock_btn} handle dock-angular-chip" data-paw-cursor="true">
 					<GridIcon />
 				</div>
 			</div>
 
-			<div class="mobile">
-				<a href="/" class="logo unstyled">
-					<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" />
-					<span class="h3">Neodrag</span>
+			<div class="hidden w-full items-center max-md:flex">
+				<a href="/" class="unstyled ml-2 flex items-center gap-2">
+					<img src="/logo.svg" alt="Neodrag" class="h-8 w-8" />
+					<span class="h3 m-0 font-heading">Neodrag</span>
 				</a>
-
-				<span style="flex: 1 1 auto"></span>
-
+				<span class="flex-1"></span>
 				{@render github()}
-
-				<div class="menu">
-					<button onclick={() => menu_view.toggle()}>
-						<MenuIcon />
-					</button>
-				</div>
+				<button type="button" class="{dock_btn} w-12 [&_svg]:!w-7" onclick={() => menu_view.toggle()}>
+					<MenuIcon />
+				</button>
 			</div>
 		</div>
 	</div>
@@ -144,7 +145,7 @@
 		href="https://github.com/PuruVJ/neodrag"
 		target="_blank"
 		rel="external"
-		class="unstyled github"
+		class="{dock_btn} dock-angular-chip unstyled !text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_svg]:h-auto [&_svg]:w-8 [&_svg]:max-md:w-7 [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current"
 	>
 		<GithubIcon />
 	</a>
@@ -153,7 +154,10 @@
 {#snippet framework_selector(embedded = false)}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class={['zoomable', !embedded && 'desktop']}
+		class={[
+			'flex w-full items-end justify-around',
+			!embedded && 'max-md:hidden',
+		]}
 		onmouseenter={() => {
 			for (const framework of FRAMEWORKS) {
 				prefetch(replace_framework_from_pathname(framework.name));
@@ -164,11 +168,9 @@
 	>
 		{#each frameworks as name}
 			<a
-				class="unstyled"
+				class="unstyled origin-bottom transition-transform duration-150 ease-in hover:scale-105"
 				href={replace_framework_from_pathname(name)}
-				onclick={() => {
-					menu_view.toggle();
-				}}
+				onclick={() => menu_view.toggle()}
 			>
 				<DockItem
 					mouse_x={dock_mouse_x}
@@ -181,332 +183,3 @@
 		{/each}
 	</div>
 {/snippet}
-
-<!-- <MobileMenu {popover} --background-color="var(--background-color)" /> -->
-
-<style>
-	/* enabled! */
-	@custom-media --tablet (width <= 768px);
-
-	.overlay {
-		display: none;
-
-		position: fixed;
-		top: 0;
-		left: 0;
-		z-index: 999;
-
-		width: 100%;
-		height: 100%;
-
-		opacity: 0;
-		background-color: color-mix(in lch, black, transparent 50%);
-
-		transition: opacity 200ms ease-in;
-		pointer-events: none;
-
-		&.visible {
-			opacity: 1;
-			pointer-events: all;
-		}
-
-		@media (--tablet) {
-			display: block;
-		}
-	}
-
-	.h3 {
-		margin: 0;
-	}
-
-	a {
-		transition: scale 150ms ease-in;
-		transform-origin: center bottom;
-
-		text-decoration: none;
-	}
-
-	.dock-container {
-		--background-color: var(--dock-surface);
-
-		display: flex;
-		gap: clamp(2rem, 10vw, 8rem);
-		align-items: end;
-
-		justify-content: center;
-
-		position: fixed;
-		left: 0;
-		bottom: 1rem;
-		z-index: 1000;
-
-		width: 100%;
-		height: 5rem;
-
-		padding: 0.4rem;
-
-		&:not(.dock-hidden) {
-			pointer-events: none;
-		}
-
-		:global(svg) {
-			width: 4rem;
-			max-width: unset;
-		}
-
-		@media (--tablet) {
-			bottom: 0;
-			padding: 0;
-			height: 4rem;
-		}
-	}
-
-	.dock-el {
-		backface-visibility: hidden;
-
-		display: flex;
-		flex-direction: column;
-
-		background-color: var(--background-color);
-		border: 2px solid var(--dock-border);
-		box-shadow:
-			var(--dock-accent-glow),
-			inset 0 1px 0 color-mix(in lch, var(--app-color-anti-mixer), transparent 88%),
-			var(--dock-shadow);
-		backdrop-filter: blur(18px) saturate(1.12);
-
-		position: relative;
-
-		padding: 0.35rem 0.45rem;
-
-		height: 100%;
-
-		display: flex;
-		align-items: flex-end;
-
-		transition:
-			transform 0.3s ease,
-			height 0.2s ease-in;
-
-		&:not(.hidden) {
-			pointer-events: auto;
-		}
-
-		* {
-			transform: translate3d(-1px);
-			backface-visibility: hidden;
-		}
-
-		.main {
-			position: relative;
-			z-index: 1;
-			display: flex;
-			height: 100%;
-			width: 100%;
-
-			.mobile {
-				display: none;
-
-				.logo {
-					display: flex;
-					align-items: center;
-					gap: 0.5rem;
-					margin-left: 0.6rem;
-					img {
-						height: 2rem;
-						width: 2rem;
-					}
-				}
-			}
-
-			.desktop {
-				display: flex;
-			}
-
-			@media (--tablet) {
-				height: 100%;
-				.mobile {
-					display: flex;
-					width: 100%;
-				}
-
-				.desktop {
-					display: none;
-				}
-			}
-		}
-
-		@media (--tablet) {
-			width: min(96%, 40rem);
-			bottom: 0.5rem;
-			height: auto;
-		}
-
-		&::before {
-			content: '';
-			position: absolute;
-			inset: 0;
-			pointer-events: none;
-			background: linear-gradient(
-				135deg,
-				color-mix(in lch, var(--app-color-primary), transparent 88%) 0%,
-				transparent 35%,
-				transparent 65%,
-				color-mix(in lch, var(--app-color-primary), transparent 92%) 100%
-			);
-			opacity: 0.55;
-		}
-	}
-
-	.expanded-menu {
-		display: none;
-
-		width: 100%;
-
-		@media (--tablet) {
-			display: block;
-			/* contain: layout style;
-			will-change: height; */
-		}
-
-		.nav {
-			max-height: 48vh;
-			overflow-y: auto;
-		}
-	}
-
-	.zoomable {
-		display: flex;
-		align-items: flex-end;
-		justify-content: space-around;
-
-		width: 100%;
-
-		@media (--tablet) {
-			&.desktop {
-				display: none;
-			}
-		}
-	}
-
-	.divider {
-		align-self: stretch;
-		width: 2px;
-		min-height: 2.25rem;
-		margin: 0.35rem 0.15rem;
-		background: linear-gradient(
-			180deg,
-			transparent,
-			var(--dock-border-strong) 18%,
-			var(--dock-border-strong) 82%,
-			transparent
-		);
-	}
-
-	.handle,
-	.menu button {
-		height: 100%;
-		min-width: 3.25rem;
-		padding: 0.65rem;
-		display: grid;
-		place-items: center;
-		font-size: 1.35rem;
-		border: 2px solid transparent;
-		background: transparent;
-		color: color-mix(in lch, var(--app-color-dark), transparent 28%);
-		transition:
-			border-color 75ms ease,
-			color 75ms ease,
-			background-color 75ms ease;
-	}
-
-	.handle:hover,
-	.handle:focus-visible,
-	.menu button:hover,
-	.menu button:focus-visible {
-		border-color: color-mix(in lch, var(--app-color-primary), transparent 45%);
-		background: color-mix(in lch, var(--app-color-primary), transparent 90%);
-		color: var(--app-color-primary);
-	}
-
-	.handle {
-		clip-path: polygon(
-			var(--dock-cut-sm) 0%,
-			100% 0%,
-			100% calc(100% - var(--dock-cut-sm)),
-			calc(100% - var(--dock-cut-sm)) 100%,
-			0% 100%,
-			0% var(--dock-cut-sm)
-		);
-
-		@media (--tablet) {
-			display: none;
-		}
-	}
-
-	.menu {
-		display: none;
-
-		@media (--tablet) {
-			display: flex;
-		}
-	}
-
-	.menu button {
-		width: 3rem;
-
-		:global {
-			svg {
-				width: 1.7rem !important;
-			}
-		}
-	}
-
-	.github {
-		display: grid;
-		place-items: center;
-		height: 100%;
-		min-width: 3rem;
-		padding: 0.65rem;
-		border: 2px solid transparent;
-		color: color-mix(in lch, var(--app-color-dark), transparent 25%) !important;
-		clip-path: polygon(
-			0% var(--dock-cut-sm),
-			var(--dock-cut-sm) 0%,
-			100% 0%,
-			100% calc(100% - var(--dock-cut-sm)),
-			calc(100% - var(--dock-cut-sm)) 100%,
-			0% 100%
-		);
-		transition:
-			border-color 75ms ease,
-			color 75ms ease,
-			background-color 75ms ease;
-
-		&:hover,
-		&:focus-visible {
-			border-color: color-mix(in lch, var(--app-color-primary), transparent 45%);
-			background: color-mix(in lch, var(--app-color-primary), transparent 90%);
-			color: var(--app-color-primary) !important;
-		}
-
-		:global {
-			svg {
-				will-change: width;
-				width: 1.7rem;
-				height: auto;
-				width: 2rem;
-
-				@media (--tablet) {
-					width: 1.7rem;
-				}
-
-				&,
-				g,
-				path {
-					color: currentColor !important;
-				}
-			}
-		}
-	}
-</style>

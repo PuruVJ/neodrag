@@ -33,7 +33,7 @@ const version = {
 ---
 
 <DocsLayout title={title} headings={headings} framework={framework}>
-	<h1>
+	<h1 class="m-0! max-w-full">
 		{
 			is_framework_only_page ? (
 				<>
@@ -47,8 +47,12 @@ const version = {
 
 	{
 		is_framework_only_page ? (
-			<div class="tags">
-				<span class="tag">{version}</span>
+			<div class="mb-4 flex flex-wrap gap-2">
+				<span
+					class="dock-angular-chip inline-block border-2 border-[color-mix(in_lch,var(--color-brand),transparent_55%)] bg-[color-mix(in_lch,var(--color-brand),transparent_90%)] px-3 py-2 font-mono text-sm font-bold text-[color-mix(in_lch,var(--color-brand),var(--app-color-anti-mixer)_35%)]"
+				>
+					{version}
+				</span>
 			</div>
 		) : null
 	}
@@ -56,31 +60,4 @@ const version = {
 	<p>{tagline}</p>
 
 	<slot />
-
-	<!-- <h2>Credits</h2>
-	<p>
-		Inspired from the amazing
-		<a href="https://github.com/react-grid-layout/react-draggable"> react-draggable </a>
-		library, and implements the same API.
-	</p> -->
 </DocsLayout>
-
-<style>
-	.tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		margin: 0.5rem 0 1rem;
-	}
-
-	.tag {
-		background: color-mix(in lch, var(--secondary-color), transparent 90%);
-		border-radius: 24px;
-		color: color-mix(in lch, var(--secondary-color), var(--app-color-anti-mixer) 40%);
-		display: inline-block;
-		font-size: 0.9rem;
-		font-weight: 600;
-		line-height: 1;
-		padding: 0.75rem 0.75rem;
-	}
-</style>

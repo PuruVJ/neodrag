@@ -19,29 +19,35 @@ const nav_list = get_nav_list(framework as any);
 
 <MetaThemeColor client:load />
 <Layout title={title}>
-	<!-- <div class="mobile-nav">
-		<MobileNav client:media="(max-width: 968px)">
-			<Nav framework={framework} />
-		</MobileNav>
-	</div> -->
+	<div class="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
+		<div class="site-grid-layer absolute inset-0"></div>
+		<div class="site-glow-layer absolute inset-0"></div>
+	</div>
 
-	<section class="docs-container" id="docs-container">
-		<aside>
+	<section
+		class="relative z-10 h-auto w-full overflow-x-hidden overflow-y-auto scroll-smooth max-[967px]:grid max-[967px]:grid-cols-1"
+		id="docs-container"
+	>
+		<aside
+			class="fixed z-10 hidden h-full w-[300px] overflow-y-auto border-r-2 border-[var(--color-border)] bg-[color-mix(in_lch,var(--app-color-shell),transparent_8%)] backdrop-blur-md min-[968px]:block"
+		>
 			<Nav framework={framework} pathname={Astro.url.pathname} nav_list={nav_list} />
 		</aside>
 
-		<main>
-			<article>
+		<main
+			class="relative min-h-dvh w-full min-w-0 pt-10 pr-4 pb-8 pl-4 min-[968px]:w-[calc(100%-300px)] min-[968px]:pl-[332px]"
+		>
+			<article class="docs-prose pb-12">
 				<slot />
 
-				<footer>
-					<span class="copyright"
-						>&copy; 2021-{new Date().getUTCFullYear()}
+				<footer class="mt-12 flex w-full justify-center">
+					<span class="flex items-center gap-2 font-mono text-sm text-fg-muted">
+						&copy; 2021-{new Date().getUTCFullYear()}
 						<a
 							href="https://x.com/puruvjdev"
 							target="blank"
 							rel="noopener noreferrer"
-							class={framework ? 'framework' : ''}
+							class="unstyled font-semibold text-brand"
 						>
 							Puru Vijay</a
 						>
@@ -50,226 +56,10 @@ const nav_list = get_nav_list(framework as any);
 			</article>
 		</main>
 
-		<aside class="toc">
+		<aside
+			class="toc fixed top-0 right-5 z-10 hidden h-full w-[280px] min-[1200px]:block"
+		>
 			<ToC headings={headings} />
 		</aside>
 	</section>
 </Layout>
-
-<style is:global>
-	.mobile-nav {
-		display: none;
-
-		@media (max-width: 967px) {
-			display: block;
-		}
-	}
-
-	.docs-container {
-		width: 100%;
-		height: auto;
-
-		overflow-y: auto;
-		overflow-x: hidden;
-		scroll-behavior: smooth;
-
-		@media (max-width: 967px) {
-			grid-template-columns: 1fr;
-
-			& aside {
-				display: none;
-			}
-
-			main {
-				width: 100%;
-				padding-left: 1rem;
-				padding-top: 2.5rem;
-			}
-		}
-	}
-
-	article {
-		padding-bottom: 3rem;
-	}
-
-	aside {
-		height: 100%;
-		width: 300px;
-		position: fixed;
-
-		z-index: 1;
-	}
-
-	.toc {
-		right: 20px;
-		top: 0;
-		width: 280px;
-	}
-
-	main {
-		/* Needed for the navigation bar intersection observer */
-		position: relative;
-
-		min-width: 0;
-		width: calc(100% - 300px);
-		height: 100vh;
-
-		padding: 1rem;
-
-		padding-left: 332px;
-
-		@media (max-width: 768px) {
-			padding: 4rem 1rem;
-		}
-	}
-
-	h1 {
-		margin: 0 !important;
-	}
-
-	.docs-container {
-		p,
-		pre.astro-code,
-		blockquote {
-			max-width: clamp(20ch, 100vw, var(--entity-width));
-
-			@media (max-width: 967px) {
-				max-width: 100%;
-			}
-		}
-
-		.astro-code .line {
-			display: inline-block;
-			width: 100%;
-		}
-
-		.astro-code .line.highlighted {
-			background-color: color-mix(in lch, var(--app-color-dark), transparent 40%) !important;
-		}
-
-		p,
-		a {
-			margin: 1.5rem 0;
-
-			font-size: clamp(1.1rem, 2vw, 1.2rem);
-			line-height: 1.618;
-		}
-
-		:global(code) {
-			font-family: var(--app-font-mono);
-			font-size: 0.9em;
-			word-break: break-all;
-
-			max-width: 100%;
-
-			background-color: hsla(var(--app-color-dark-hsl), 0.1);
-		}
-
-		:global(pre.astro-code code) {
-			background-color: transparent;
-		}
-
-		:global(h1, h2, h3, h4, h5) {
-			--anchor-opacity: 1;
-
-			display: flex;
-			align-items: center;
-			gap: 0.5rem;
-		}
-
-		:global(:where(h1, h2, h3, h4, h5):hover) {
-			--anchor-opacity: 1;
-		}
-
-		:global(:where(.heading-anchor)) {
-			opacity: var(--anchor-opacity);
-
-			font-family: var(--app-font-mono);
-			font-size: 0.7em;
-			text-decoration: none;
-
-			height: auto;
-		}
-	}
-
-	/* Global styles below */
-
-	body {
-		--secondary-color: var(--app-color-primary);
-		--app-color-scrolling-navbar: color-mix(
-			in lch,
-			var(--secondary-color),
-			var(--app-color-mixer) 35%
-		);
-
-		background-image: radial-gradient(
-			ellipse farthest-corner at 95% 2%,
-			color-mix(in lch, var(--secondary-color), transparent 50%) 0%,
-			var(--app-color-shell) 100%
-		);
-
-		overflow: hidden;
-
-		&[data-framework='svelte'] {
-			--secondary-color: var(--app-color-brand-svelte);
-		}
-
-		&[data-framework='vue'] {
-			--secondary-color: var(--app-color-brand-vue);
-		}
-
-		&[data-framework='react'] {
-			--secondary-color: var(--app-color-brand-react);
-		}
-
-		&[data-framework='solid'] {
-			--secondary-color: var(--app-color-brand-solid);
-		}
-
-		&[data-framework='vanilla'] {
-			--secondary-color: var(--app-color-brand-vanilla);
-		}
-	}
-
-	pre.astro-code {
-		--font-size: 1rem;
-		border-radius: 0.6rem;
-		overflow-x: auto;
-		overflow-y: hidden;
-		padding: 1rem;
-		font-size: var(--font-size) !important;
-		line-height: 1.5 !important;
-		margin: 1.5rem 0;
-
-		width: var(--entity-width);
-
-		@media (max-width: 967px) {
-			width: 100%;
-			--font-size: 0.9rem;
-		}
-
-		& code {
-			font-size: var(--font-size) !important;
-
-			background-color: transparent;
-		}
-	}
-
-	.copyright {
-		width: 100%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		gap: 0.5rem;
-		font-family: var(--app-font-mono);
-		font-size: 0.9rem;
-
-		a {
-			font-size: inherit;
-
-			&.framework {
-				--app-color-primary: var(--secondary-color);
-			}
-		}
-	}
-</style>

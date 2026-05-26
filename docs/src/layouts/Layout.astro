@@ -1,7 +1,7 @@
 ---
 import '@fontsource-variable/eb-garamond';
 import '@fontsource-variable/jetbrains-mono';
-import '../css/globals.css';
+import '../styles/app.css';
 
 import { get_nav_list } from '$/nav';
 import Dock from '$components/nav/Dock.svelte';
@@ -16,6 +16,7 @@ export interface Props {
 const { title } = Astro.props;
 
 const framework = /\/docs\/(svelte|react|solid|vanilla|vue|core)/gi.exec(Astro.url.pathname)?.[1];
+const is_docs_route = Astro.url.pathname.startsWith('/docs');
 
 const nav_list = get_nav_list(framework as any);
 ---
@@ -56,7 +57,7 @@ const nav_list = get_nav_list(framework as any);
 		/>
 	</head>
 
-	<body data-framework={framework}>
+	<body data-framework={framework} class:list={[{ 'docs-route': is_docs_route }]}>
 		<script is:inline data-astro-rerun>
 			function parse_theme_storage(storage_value) {
 				const DEFAULT = {

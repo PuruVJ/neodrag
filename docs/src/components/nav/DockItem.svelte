@@ -63,13 +63,7 @@
 	function animate() {
 		if (image_el && mouse_x !== null && !prefersReducedMotion.current) {
 			const rect = image_el.getBoundingClientRect();
-
-			// get the x coordinate of the img DOMElement's center
-			// the left x coordinate plus the half of the width
 			const img_center_x = rect.left + rect.width / 2;
-
-			// difference between the x coordinate value of the mouse pointer
-			// and the img center x coordinate value
 			const distance_delta = mouse_x - img_center_x;
 			distance = distance_delta;
 		} else distance = beyond_the_distance_limit;
@@ -86,11 +80,15 @@
 
 <button
 	aria-label="Launch {framework} page"
-	class={['dock-open-app-button', selected && 'is-selected']}
+	class={[
+		'group dock-angular-chip relative flex flex-col items-center justify-end gap-1 border-2 border-transparent bg-transparent px-3 pt-3 pb-1.5 transition-[border-color,background-color] duration-75 hover:border-[color-mix(in_lch,var(--color-brand),transparent_50%)] hover:bg-[color-mix(in_lch,var(--color-brand),transparent_92%)]',
+		selected &&
+			'border-brand bg-[color-mix(in_lch,var(--color-brand),transparent_88%)]',
+	]}
 >
 	{#if !embedded}
 		<p
-			class={['tooltip', theme.current === 'dark' && 'dark']}
+			class="dock-angular-chip pointer-events-none absolute hidden border-2 border-[var(--dock-border-strong)] bg-[var(--dock-surface)] px-3 py-1.5 font-mono text-[0.68rem] font-extrabold tracking-[0.14em] text-fg uppercase shadow-[var(--dock-shadow)] group-hover:block group-focus-visible:block"
 			style:top={prefersReducedMotion.current ? '-50px' : '-35%'}
 		>
 			{framework}
@@ -99,6 +97,7 @@
 
 	<span
 		bind:this={image_el}
+		class="flex items-center justify-center text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current"
 		style:translate="0 {app_open_icon_bounce_transform.current} 0.0000001px"
 	>
 		<Icon
@@ -109,121 +108,13 @@
 	</span>
 
 	{#if embedded}
-		<p class="embedded-text">{framework}</p>
+		<p class="m-0 text-[13px] font-normal tracking-wide text-[color-mix(in_lch,var(--app-color-light-contrast),transparent_20%)] capitalize">
+			{framework}
+		</p>
 	{/if}
 
-	<div class="dot" style:--opacity={selected ? 1 : 0}></div>
+	<div
+		class="h-[3px] w-[1.1rem] bg-brand opacity-[var(--dot-opacity,0)] [clip-path:polygon(0_0,100%_0,calc(100%-2px)_100%,2px_100%)]"
+		style:--dot-opacity={selected ? 1 : 0}
+	></div>
 </button>
-
-<style>
-	button span {
-		color: color-mix(in lch, var(--app-color-dark), transparent 25%) !important;
-	}
-
-	span {
-		:global {
-			svg {
-				will-change: width;
-
-				&,
-				g,
-				path {
-					color: currentColor !important;
-				}
-			}
-		}
-	}
-
-	button {
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-end;
-		align-items: center;
-		gap: 0.2rem;
-		position: relative;
-
-		padding: 0.7rem 0.75rem 6px;
-		border: 2px solid transparent;
-		background: transparent;
-		clip-path: polygon(
-			var(--dock-cut-sm) 0%,
-			calc(100% - var(--dock-cut-sm)) 0%,
-			100% var(--dock-cut-sm),
-			100% calc(100% - var(--dock-cut-sm)),
-			calc(100% - var(--dock-cut-sm)) 100%,
-			var(--dock-cut-sm) 100%,
-			0% calc(100% - var(--dock-cut-sm)),
-			0% var(--dock-cut-sm)
-		);
-		transition:
-			border-color 75ms ease,
-			background-color 75ms ease;
-
-		&:hover,
-		&:focus-visible {
-			border-color: color-mix(in lch, var(--app-color-primary), transparent 50%);
-			background: color-mix(in lch, var(--app-color-primary), transparent 92%);
-
-			.tooltip {
-				display: block;
-			}
-		}
-
-		& > span {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-		}
-	}
-
-	button.is-selected {
-		border-color: var(--app-color-primary);
-		background: color-mix(in lch, var(--app-color-primary), transparent 88%);
-	}
-
-	.embedded-text {
-		color: color-mix(in lch, var(--app-color-light-contrast), transparent 20%);
-		/* font-family: var(--system-font-family); */
-		font-weight: 400;
-		font-size: 13px;
-		letter-spacing: 0.4px;
-		margin: 0;
-	}
-
-	.tooltip {
-		white-space: nowrap;
-		line-height: 1;
-		position: absolute;
-		background-color: var(--dock-surface-strong);
-		padding: 0.45rem 0.75rem;
-		border: 2px solid var(--dock-border-strong);
-		box-shadow: var(--dock-shadow);
-		color: var(--app-color-dark);
-		font-family: var(--app-font-mono);
-		font-weight: 800;
-		font-size: 0.68rem;
-		text-transform: uppercase;
-		letter-spacing: 0.14em;
-		display: none;
-		clip-path: polygon(
-			0.35rem 0%,
-			calc(100% - 0.35rem) 0%,
-			100% 0.35rem,
-			100% calc(100% - 0.35rem),
-			calc(100% - 0.35rem) 100%,
-			0.35rem 100%,
-			0% calc(100% - 0.35rem),
-			0% 0.35rem
-		);
-	}
-
-	.dot {
-		height: 3px;
-		width: 1.1rem;
-		margin: 0;
-		border-radius: 0;
-		background-color: var(--app-color-primary);
-		opacity: var(--opacity);
-		clip-path: polygon(0 0, 100% 0, calc(100% - 2px) 100%, 2px 100%);
-	}
-</style>

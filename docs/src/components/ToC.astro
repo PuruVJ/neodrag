@@ -8,13 +8,19 @@ type Props = {
 const { headings } = Astro.props;
 ---
 
-<aside aria-label="Links to sections in this Page">
-	<nav>
-		<ul>
+<aside aria-label="Links to sections in this Page" class="grid h-full w-full items-center">
+	<nav class="border-l-2 border-[var(--color-border)] pl-3">
+		<ul class="m-0 list-none p-0">
 			{
 				headings.map(({ depth, slug, text }) => (
-					<li style={{ '--level': depth - 2 }}>
-						<a href={`#${slug}`} class="unstyled">
+					<li
+						class="h-[1.4rem] py-0 transition-colors duration-100"
+						style={`padding-left: calc(${(depth - 2) * 0.5}rem)`}
+					>
+						<a
+							href={`#${slug}`}
+							class="unstyled m-0! text-xs! leading-none! text-[color-mix(in_lch,var(--app-color-dark),transparent_30%)] hover:text-brand"
+						>
 							{text}
 						</a>
 					</li>
@@ -23,52 +29,3 @@ const { headings } = Astro.props;
 		</ul>
 	</nav>
 </aside>
-
-<style>
-	aside {
-		display: grid;
-		align-items: center;
-
-		width: 17vw;
-		height: 100%;
-	}
-
-	ul {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-	}
-
-	li {
-		/* position: relative; */
-
-		padding: 0;
-		padding-left: calc(var(--level) * 0.5rem);
-
-		height: 1.4rem;
-
-		/* height: 1.4rem; */
-		/* font-size: 0.2rem !important; */
-
-		a,
-		.placeholder {
-			transition: 100ms ease-in;
-			transition-property: opacity, color, background-color;
-		}
-
-		&.highlighted {
-			a {
-				color: var(--secondary-color);
-			}
-		}
-	}
-
-	a,
-	a:visited {
-		color: color-mix(in lch, var(--app-color-dark), transparent 30%);
-
-		font-size: 12px !important;
-		line-height: 1 !important;
-		margin: 0 !important;
-	}
-</style>

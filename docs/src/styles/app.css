@@ -1,0 +1,307 @@
+@import 'tailwindcss';
+@import '../css/themes.css';
+
+@theme inline {
+	--font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+	--font-heading: 'EB Garamond Variable', ui-serif, Georgia, serif;
+	--font-mono: 'Jetbrains mono Variable', ui-monospace, monospace;
+
+	--color-fg: var(--app-color-dark);
+	--color-fg-muted: color-mix(in lch, var(--app-color-dark), transparent 35%);
+	--color-shell: var(--app-color-shell);
+	--color-primary: var(--app-color-primary);
+	--color-primary-contrast: var(--app-color-primary-contrast);
+	--color-brand: var(--secondary-color, var(--app-color-primary));
+	--color-border: color-mix(in lch, var(--app-color-dark), transparent 72%);
+	--color-border-strong: color-mix(in lch, var(--app-color-dark), transparent 55%);
+	--color-panel: color-mix(in lch, var(--app-color-shell), var(--color-brand) 5%);
+	--color-well: color-mix(in lch, var(--app-color-dark), transparent 88%);
+
+	--spacing-grid: 3.25rem;
+	--spacing-dock-cut: 0.85rem;
+	--spacing-dock-cut-sm: 0.55rem;
+}
+
+@layer base {
+	*,
+	::after,
+	::before {
+		border-color: var(--color-border);
+	}
+
+	html {
+		@apply h-full w-full scroll-smooth antialiased;
+		scroll-padding-top: 5.5rem;
+	}
+
+	body {
+		@apply min-h-full w-full overflow-x-hidden;
+		background-color: var(--app-color-shell);
+		color: var(--app-color-dark);
+		font-family: var(--font-sans);
+		accent-color: var(--app-color-primary);
+	}
+
+	button {
+		@apply cursor-pointer border-0 bg-transparent p-0;
+	}
+
+	:is(h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5) {
+		@apply max-w-full font-heading text-balance text-fg;
+		font-family: var(--font-heading);
+	}
+
+	h1,
+	.h1 {
+		@apply mt-0 text-[clamp(2rem,8.5vw,3.4rem)];
+	}
+
+	h2,
+	.h2 {
+		@apply text-[clamp(1.5rem,4.25vw,2.4rem)];
+	}
+
+	h3,
+	.h3 {
+		@apply text-[clamp(1.13rem,2.1vw,1.7rem)];
+	}
+
+	code {
+		@apply rounded-sm bg-[color-mix(in_lch,var(--app-color-dark),transparent_92%)] font-mono text-fg;
+	}
+
+	::selection {
+		background-color: color-mix(in lch, var(--color-brand), transparent 70%);
+	}
+
+	*:focus-visible {
+		outline: none;
+		box-shadow: 0 0 0 4px color-mix(in lch, var(--color-brand), transparent 75%);
+	}
+
+	body[data-framework='svelte'] {
+		--secondary-color: var(--app-color-brand-svelte);
+	}
+
+	body[data-framework='vue'] {
+		--secondary-color: var(--app-color-brand-vue);
+	}
+
+	body[data-framework='react'] {
+		--secondary-color: var(--app-color-brand-react);
+	}
+
+	body[data-framework='solid'] {
+		--secondary-color: var(--app-color-brand-solid);
+	}
+
+	body[data-framework='vanilla'] {
+		--secondary-color: var(--app-color-brand-vanilla);
+	}
+
+	body[data-framework='core'] {
+		--secondary-color: var(--app-color-primary);
+	}
+
+	body.docs-route {
+		--app-color-scrolling-navbar: color-mix(
+			in lch,
+			var(--secondary-color),
+			var(--app-color-mixer) 35%
+		);
+		@apply overflow-hidden;
+		background-image:
+			radial-gradient(
+				ellipse farthest-corner at 95% 2%,
+				color-mix(in lch, var(--secondary-color), transparent 48%) 0%,
+				var(--app-color-shell) 72%
+			),
+			linear-gradient(
+				180deg,
+				color-mix(in lch, var(--secondary-color), transparent 94%) 0%,
+				transparent 28%
+			);
+	}
+
+	:is(a[href], a[href]:visited):where(:not(.unstyled)) {
+		@apply font-semibold text-primary no-underline;
+		background-image: linear-gradient(
+			transparent 50%,
+			color-mix(in lch, var(--app-color-primary), transparent 65%) 50%
+		);
+		background-size: 100% 200%;
+		background-position: 0 0;
+		transition:
+			color 150ms ease,
+			background-position 150ms ease,
+			border-radius 150ms ease;
+
+		&:hover,
+		&:focus-visible {
+			@apply rounded-sm text-primary-contrast;
+			background-position: 0 100%;
+			background-image: linear-gradient(
+				transparent 50%,
+				color-mix(in lch, var(--app-color-primary), transparent 0%) 50%
+			);
+		}
+	}
+}
+
+@utility dock-angular {
+	border-radius: 0;
+	clip-path: polygon(
+		var(--spacing-dock-cut) 0%,
+		calc(100% - var(--spacing-dock-cut)) 0%,
+		100% var(--spacing-dock-cut),
+		100% calc(100% - var(--spacing-dock-cut)),
+		calc(100% - var(--spacing-dock-cut)) 100%,
+		var(--spacing-dock-cut) 100%,
+		0% calc(100% - var(--spacing-dock-cut)),
+		0% var(--spacing-dock-cut)
+	);
+}
+
+@utility dock-angular-bar {
+	--spacing-dock-cut: 0.7rem;
+	clip-path: polygon(
+		var(--spacing-dock-cut) 0%,
+		calc(100% - var(--spacing-dock-cut)) 0%,
+		100% var(--spacing-dock-cut),
+		100% 100%,
+		0% 100%,
+		0% var(--spacing-dock-cut)
+	);
+}
+
+@utility dock-angular-chip {
+	border-radius: 0;
+	clip-path: polygon(
+		var(--spacing-dock-cut-sm) 0%,
+		calc(100% - var(--spacing-dock-cut-sm)) 0%,
+		100% var(--spacing-dock-cut-sm),
+		100% calc(100% - var(--spacing-dock-cut-sm)),
+		calc(100% - var(--spacing-dock-cut-sm)) 100%,
+		var(--spacing-dock-cut-sm) 100%,
+		0% calc(100% - var(--spacing-dock-cut-sm)),
+		0% var(--spacing-dock-cut-sm)
+	);
+}
+
+@utility site-grid-layer {
+	--pg-grid-line: color-mix(in lch, var(--app-color-dark), transparent 84%);
+	--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 62%);
+	--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 78%);
+	background-color: color-mix(in lch, var(--app-color-shell), var(--color-brand) 3%);
+	background-image:
+		radial-gradient(circle at center, var(--pg-grid-dot) 1px, transparent 1px),
+		linear-gradient(var(--pg-grid-major) 1px, transparent 1px),
+		linear-gradient(90deg, var(--pg-grid-major) 1px, transparent 1px),
+		linear-gradient(var(--pg-grid-line) 1px, transparent 1px),
+		linear-gradient(90deg, var(--pg-grid-line) 1px, transparent 1px);
+	background-size:
+		var(--spacing-grid) var(--spacing-grid),
+		calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
+		calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
+		var(--spacing-grid) var(--spacing-grid),
+		var(--spacing-grid) var(--spacing-grid);
+	mask-image: radial-gradient(ellipse 120% 95% at 50% 42%, black 35%, transparent 88%);
+}
+
+@layer components {
+	.site-glow-layer {
+		background-image:
+			radial-gradient(
+				ellipse 130% 95% at 50% -28%,
+				color-mix(in lch, var(--color-brand), transparent 48%),
+				transparent 62%
+			),
+			radial-gradient(
+				ellipse 75% 55% at 100% 18%,
+				color-mix(in lch, var(--color-brand), transparent 72%),
+				transparent 50%
+			),
+			radial-gradient(
+				ellipse 65% 50% at 0% 72%,
+				color-mix(in lch, var(--color-brand), transparent 78%),
+				transparent 48%
+			);
+	}
+
+	.site-panel {
+		@apply border-2 border-[var(--color-border)] bg-[color-mix(in_lch,var(--app-color-shell),transparent_12%)] shadow-[0_0_0_1px_color-mix(in_lch,var(--color-brand),transparent_82%),0_28px_56px_-36px_color-mix(in_lch,var(--app-color-dark),transparent_84%)] backdrop-blur-[14px] backdrop-saturate-[1.12];
+	}
+
+	.site-kicker {
+		@apply font-mono text-[0.68rem] font-extrabold tracking-[0.2em] text-brand uppercase;
+	}
+
+	.site-kicker::before {
+		content: '▍';
+		margin-right: 0.35rem;
+	}
+
+	.site-section-break {
+		@apply flex items-center gap-4 py-2 font-mono text-sm font-black text-fg-muted;
+	}
+
+	.site-section-break-line {
+		@apply h-px flex-1 bg-[var(--color-border-strong)];
+	}
+
+	.dock-surface {
+		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 68%);
+		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 52%);
+		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--app-color-primary) 6%);
+		--dock-accent-glow: 0 0 0 1px color-mix(in lch, var(--app-color-primary), transparent 65%);
+		--dock-shadow: 0 20px 48px -20px color-mix(in lch, var(--app-color-dark), transparent 78%);
+	}
+
+	body[data-theme='dark'] .dock-surface {
+		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 75%);
+		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 58%);
+		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--app-color-primary) 12%);
+	}
+
+	.docs-prose {
+		@apply max-w-[min(68ch,100%)];
+	}
+
+	.docs-prose :where(p, a) {
+		@apply my-6 text-[clamp(1.05rem,2vw,1.2rem)] leading-[1.618];
+	}
+
+	.docs-prose :where(pre.astro-code) {
+		@apply my-6 w-full max-w-full overflow-x-auto rounded-none border-2 border-[var(--color-border-strong)] p-4 text-[clamp(0.85rem,1.5vw,1rem)] leading-normal;
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 94%);
+	}
+
+	.docs-prose :where(pre.astro-code code) {
+		@apply bg-transparent;
+	}
+
+	.docs-prose :where(.line.highlighted) {
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 40%) !important;
+	}
+
+	.docs-prose :where(h1, h2, h3, h4, h5) {
+		@apply flex items-center gap-2;
+	}
+
+	.docs-prose :where(.heading-anchor) {
+		@apply font-mono text-[0.7em] opacity-100 no-underline;
+	}
+
+	blockquote {
+		@apply rounded-r-lg border-l-4 border-fg py-2 pl-4;
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 95%);
+	}
+}
+
+body[data-theme='dark'] .site-grid-layer {
+	--pg-grid-line: color-mix(in lch, var(--app-color-anti-mixer), transparent 90%);
+	--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 72%);
+	background-color: color-mix(in lch, var(--app-color-shell), var(--color-brand) 5%);
+}
+
+@import './home.css' layer(components);
