@@ -25,26 +25,25 @@ const CURSOR_BY_EDGE: Record<ResizeEdge, string> = {
 };
 
 function edgePosition(edge: ResizeEdge, size: number, inset: number) {
-	const half = size / 2;
-	const base = `position:absolute;touch-action:none;z-index:100;box-sizing:border-box;`;
-	const hit = `width:${size}px;height:${size}px;`;
+	const base = `position:absolute;touch-action:none;z-index:100;box-sizing:border-box;pointer-events:auto;`;
+	const corner = `width:${size}px;height:${size}px;`;
 	switch (edge) {
 		case 'n':
-			return `${base}${hit}left:50%;top:${inset}px;margin-left:-${half}px;cursor:${CURSOR_BY_EDGE.n}`;
+			return `${base}left:0;right:0;top:${inset}px;height:${size}px;cursor:${CURSOR_BY_EDGE.n}`;
 		case 's':
-			return `${base}${hit}left:50%;bottom:${inset}px;margin-left:-${half}px;cursor:${CURSOR_BY_EDGE.s}`;
+			return `${base}left:0;right:0;bottom:${inset}px;height:${size}px;cursor:${CURSOR_BY_EDGE.s}`;
 		case 'e':
-			return `${base}${hit}top:50%;right:${inset}px;margin-top:-${half}px;cursor:${CURSOR_BY_EDGE.e}`;
+			return `${base}top:0;bottom:0;right:${inset}px;width:${size}px;cursor:${CURSOR_BY_EDGE.e}`;
 		case 'w':
-			return `${base}${hit}top:50%;left:${inset}px;margin-top:-${half}px;cursor:${CURSOR_BY_EDGE.w}`;
+			return `${base}top:0;bottom:0;left:${inset}px;width:${size}px;cursor:${CURSOR_BY_EDGE.w}`;
 		case 'ne':
-			return `${base}${hit}top:${inset}px;right:${inset}px;cursor:${CURSOR_BY_EDGE.ne}`;
+			return `${base}${corner}top:${inset}px;right:${inset}px;z-index:101;cursor:${CURSOR_BY_EDGE.ne}`;
 		case 'nw':
-			return `${base}${hit}top:${inset}px;left:${inset}px;cursor:${CURSOR_BY_EDGE.nw}`;
+			return `${base}${corner}top:${inset}px;left:${inset}px;z-index:101;cursor:${CURSOR_BY_EDGE.nw}`;
 		case 'se':
-			return `${base}${hit}bottom:${inset}px;right:${inset}px;cursor:${CURSOR_BY_EDGE.se}`;
+			return `${base}${corner}bottom:${inset}px;right:${inset}px;z-index:101;cursor:${CURSOR_BY_EDGE.se}`;
 		case 'sw':
-			return `${base}${hit}bottom:${inset}px;left:${inset}px;cursor:${CURSOR_BY_EDGE.sw}`;
+			return `${base}${corner}bottom:${inset}px;left:${inset}px;z-index:101;cursor:${CURSOR_BY_EDGE.sw}`;
 	}
 }
 

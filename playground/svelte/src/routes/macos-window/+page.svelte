@@ -37,13 +37,15 @@
 
 	<div class="window-shell" {@attach drag.attachment} {@attach resize.attachment}>
 		<div class="window">
-		<header class="titlebar" data-window-drag>
-			<div class="traffic" aria-hidden="true">
-				<span class="dot close"></span>
-				<span class="dot min"></span>
-				<span class="dot max"></span>
+		<header class="titlebar">
+			<div class="titlebar-body" data-window-drag>
+				<div class="traffic" aria-hidden="true">
+					<span class="dot close"></span>
+					<span class="dot min"></span>
+					<span class="dot max"></span>
+				</div>
+				<span class="title">Finder — Documents</span>
 			</div>
-			<span class="title">Finder — Documents</span>
 		</header>
 		<div class="toolbar">
 			<span class="tb-btn">‹</span>
@@ -108,6 +110,11 @@
 		touch-action: none;
 	}
 
+	.window-shell :global([data-neodrag-resize-handle]) {
+		pointer-events: auto;
+		z-index: 1000;
+	}
+
 	.window {
 		width: 100%;
 		height: 100%;
@@ -121,27 +128,31 @@
 			0 8px 20px rgb(0 0 0 / 0.25);
 		background: #ececec;
 		color: #1d1d1f;
-		pointer-events: auto;
-	}
-
-	.window-shell :global([data-neodrag-resize-handle]) {
-		pointer-events: auto;
+		pointer-events: none;
 	}
 
 	.titlebar {
+		position: relative;
+		flex-shrink: 0;
+		height: 38px;
+		background: linear-gradient(180deg, #e8e8e8 0%, #dcdcdc 100%);
+		border-bottom: 1px solid #b8b8b8;
+		pointer-events: none;
+	}
+
+	.titlebar-body {
+		position: absolute;
+		inset: 10px 0 0;
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-		height: 38px;
 		padding: 0 0.75rem 0 0.65rem;
-		background: linear-gradient(180deg, #e8e8e8 0%, #dcdcdc 100%);
-		border-bottom: 1px solid #b8b8b8;
 		cursor: grab;
 		user-select: none;
-		flex-shrink: 0;
+		pointer-events: auto;
 	}
 
-	.titlebar:active {
+	.titlebar-body:active {
 		cursor: grabbing;
 	}
 
@@ -211,11 +222,6 @@
 		flex: 1;
 		min-height: 0;
 		background: #fff;
-		pointer-events: none;
-	}
-
-	.content > * {
-		pointer-events: auto;
 	}
 
 	.sidebar {

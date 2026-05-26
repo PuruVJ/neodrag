@@ -51,6 +51,21 @@ describe('resize plugins', () => {
 		document.body.replaceChildren();
 	});
 
+	it('resizeHandles use full-edge strips for cardinal edges', () => {
+		engine.resizable(box, [resizeHandles({ edges: 'all', size: 12 })]);
+		const n = box.querySelector(`[${RESIZE_HANDLE_ATTR}="n"]`) as HTMLElement;
+		const e = box.querySelector(`[${RESIZE_HANDLE_ATTR}="e"]`) as HTMLElement;
+		const se = box.querySelector(`[${RESIZE_HANDLE_ATTR}="se"]`) as HTMLElement;
+		expect(n.style.left).toBe('0px');
+		expect(n.style.right).toBe('0px');
+		expect(n.style.cursor).toBe('ns-resize');
+		expect(e.style.top).toBe('0px');
+		expect(e.style.bottom).toBe('0px');
+		expect(e.style.cursor).toBe('ew-resize');
+		expect(se.style.width).toBe('12px');
+		expect(se.style.height).toBe('12px');
+	});
+
 	it('resizeAxis locks width on y-only resize', () => {
 		engine.resizable(box, [resizeHandles({ edges: ['s'], size: 10 }), resizeAxis('y')]);
 		const handle = box.querySelector(`[${RESIZE_HANDLE_ATTR}="s"]`) as HTMLElement;
