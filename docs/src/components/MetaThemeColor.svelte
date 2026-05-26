@@ -27,31 +27,31 @@
 		return `#${to_hex(r)}${to_hex(g)}${to_hex(b)}`;
 	}
 
-	if (browser) {
-		$effect(() => {
-			const node = document.createElement('div');
-			node.style.display = 'none';
-			node.style.setProperty('color', 'var(--app-color-scrolling-navbar)');
-			document.body.appendChild(node);
+	$effect(() => {
+		if (!browser) return;
 
-			const apply = () => {
-				const value = getComputedStyle(node).getPropertyValue('color');
-				theme_color = lch_to_hex(value);
+		const node = document.createElement('div');
+		node.style.display = 'none';
+		node.style.setProperty('color', 'var(--app-color-scrolling-navbar)');
+		document.body.appendChild(node);
 
-				const meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement;
-				if (meta && theme_color) {
-					meta.content = theme_color;
-				}
-			};
+		const apply = () => {
+			const value = getComputedStyle(node).getPropertyValue('color');
+			theme_color = lch_to_hex(value);
 
-			const observer = new MutationObserver(() => apply());
-			observer.observe(document.body, { attributes: true });
-			apply();
+			const meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement;
+			if (meta && theme_color) {
+				meta.content = theme_color;
+			}
+		};
 
-			return () => {
-				observer.disconnect();
-				node.remove();
-			};
-		});
-	}
+		const observer = new MutationObserver(() => apply());
+		observer.observe(document.body, { attributes: true });
+		apply();
+
+		return () => {
+			observer.disconnect();
+			node.remove();
+		};
+	});
 </script>

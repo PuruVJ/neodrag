@@ -35,14 +35,13 @@
 		}
 	}
 
-	if (browser) {
-		$effect(() => {
-			sync_from_hash();
-			const on_hash = () => sync_from_hash();
-			window.addEventListener('hashchange', on_hash);
-			return () => window.removeEventListener('hashchange', on_hash);
-		});
-	}
+	$effect(() => {
+		if (!browser) return;
+		sync_from_hash();
+		const on_hash = () => sync_from_hash();
+		window.addEventListener('hashchange', on_hash);
+		return () => window.removeEventListener('hashchange', on_hash);
+	});
 </script>
 
 <div class="home-playground">
@@ -50,6 +49,12 @@
 
 	<div class="pg-inner">
 		<PlaygroundIntro {world} onworld={select_world} />
+
+		<div class="hp-section-break" aria-hidden="true">
+			<span class="hp-section-break-line"></span>
+			<span class="hp-section-break-glyph">§</span>
+			<span class="hp-section-break-line"></span>
+		</div>
 
 		<section class="hp-play-section" aria-label="Try dragging">
 			<header class="hp-section-head">
@@ -69,5 +74,10 @@
 				<LiveCodePanel {world} {framework} onframework={(id) => (framework = id)} {snippets} />
 			</div>
 		</section>
+
+		<p class="hp-desk-footer" aria-hidden="true">
+			<span class="hp-desk-footer-mark">▍</span>
+			pointer-first · plugins at every phase · ships for every framework
+		</p>
 	</div>
 </div>

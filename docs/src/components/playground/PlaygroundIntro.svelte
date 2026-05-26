@@ -13,12 +13,12 @@
 </script>
 
 <header class="hp-masthead">
-	<p class="hp-watermark" aria-hidden="true">v3</p>
+	<p class="hp-watermark" aria-hidden="true">NDR.</p>
 
 	<div class="hp-masthead-main">
 		<p class="hp-edition">
 			<span class="hp-edition-mark" aria-hidden="true">▍</span>
-			playground · plugins first · 2026
+			issue 003 · playground desk · 2026
 		</p>
 
 		<h1 class="hp-wordmark">
@@ -27,9 +27,15 @@
 			>
 		</h1>
 
+		<div class="hp-tagline-rule" aria-hidden="true">
+			<span class="hp-tagline-line"></span>
+			<span class="hp-tagline-text">everything&rsquo;s a plugin</span>
+			<span class="hp-tagline-line"></span>
+		</div>
+
 		<p class="hp-lede">
-			<strong>Everything&rsquo;s a plugin</strong> — mostly built-ins, plus your own. One engine for
-			Svelte, React, Vue, Solid, and vanilla.
+			Mostly built-ins, plus your own. One engine for Svelte, React, Vue, Solid, and vanilla — drag,
+			drop, sort, bounds, grid, and whatever you bolt on next.
 		</p>
 
 		{#if world_meta}
