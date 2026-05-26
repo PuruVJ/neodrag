@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { browser } from '$helpers/utils';
 
 	let theme_color = $state<string | null>(null);
 
@@ -27,36 +27,31 @@
 		return `#${to_hex(r)}${to_hex(g)}${to_hex(b)}`;
 	}
 
-	function update_meta_theme_color(node: HTMLElement) {
-		node.style.setProperty('color', 'var(--app-color-scrolling-navbar)');
+	if (browser) {
+		$effect(() => {
+			const node = document.createElement('div');
+			node.style.display = 'none';
+			node.style.setProperty('color', 'var(--app-color-scrolling-navbar)');
+			document.body.appendChild(node);
 
-		const apply = () => {
-			const value = getComputedStyle(node).getPropertyValue('color');
-			theme_color = lch_to_hex(value);
+			const apply = () => {
+				const value = getComputedStyle(node).getPropertyValue('color');
+				theme_color = lch_to_hex(value);
 
-			const meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement;
-			if (meta && theme_color) {
-				meta.content = theme_color;
-			}
-		};
+				const meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement;
+				if (meta && theme_color) {
+					meta.content = theme_color;
+				}
+			};
 
-		const observer = new MutationObserver(() => apply());
+			const observer = new MutationObserver(() => apply());
+			observer.observe(document.body, { attributes: true });
+			apply();
 
-		observer.observe(document.body, { attributes: true });
-
-		apply();
-
-		return () => observer.disconnect();
+			return () => {
+				observer.disconnect();
+				node.remove();
+			};
+		});
 	}
-
-	onMount(() => {
-		const node = document.createElement('div');
-		node.style.display = 'none';
-		document.body.appendChild(node);
-		const cleanup = update_meta_theme_color(node);
-		return () => {
-			cleanup();
-			node.remove();
-		};
-	});
 </script>

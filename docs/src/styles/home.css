@@ -559,7 +559,7 @@ body[data-theme='dark'] .pg-backdrop {
 
 .home-playground .playground-well {
 	flex: 1;
-	min-height: 0;
+	min-height: min(100%, 22rem);
 	position: relative;
 	overflow: hidden;
 	background: var(--pg-well);

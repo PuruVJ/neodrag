@@ -1,7 +1,6 @@
 <script lang="ts">
 	import '@fontsource-variable/inter';
 	import type { Snippet } from 'svelte';
-	import { onMount } from 'svelte';
 	import { browser } from '$helpers/utils';
 	import LiveCodePanel from './LiveCodePanel.svelte';
 	import PlaygroundIntro from './PlaygroundIntro.svelte';
@@ -36,12 +35,14 @@
 		}
 	}
 
-	onMount(() => {
-		sync_from_hash();
-		const on_hash = () => sync_from_hash();
-		window.addEventListener('hashchange', on_hash);
-		return () => window.removeEventListener('hashchange', on_hash);
-	});
+	if (browser) {
+		$effect(() => {
+			sync_from_hash();
+			const on_hash = () => sync_from_hash();
+			window.addEventListener('hashchange', on_hash);
+			return () => window.removeEventListener('hashchange', on_hash);
+		});
+	}
 </script>
 
 <div class="home-playground">

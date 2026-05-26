@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ThemeValue } from '$state/user-preferences.svelte';
-	import { onMount } from 'svelte';
+	import { browser } from '$helpers/utils';
 	import { on } from 'svelte/events';
 	import PawIcon from '~icons/mdi/paw';
 
@@ -64,10 +64,10 @@
 		return cleanups;
 	}
 
-	onMount(() => {
-		mounted = true;
+	$effect(() => {
+		if (!browser || is_touch_device) return;
 
-		if (is_touch_device) return;
+		mounted = true;
 
 		let paw_cleanups = bind_paw_targets();
 
@@ -86,6 +86,7 @@
 		const stop_move = on(window, 'mousemove', handle_mouse_move, { passive: true });
 
 		return () => {
+			mounted = false;
 			observer.disconnect();
 			for (const cleanup of paw_cleanups) cleanup();
 			stop_move();

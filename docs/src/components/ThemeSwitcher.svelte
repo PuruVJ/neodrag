@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { theme } from '$state/user-preferences.svelte';
+	import { apply_theme_to_dom, theme } from '$state/user-preferences.svelte';
+
+	function set_theme(preference: 'light' | 'dark' | 'system') {
+		theme.preference = preference;
+		apply_theme_to_dom(theme.current);
+	}
 	import SunIcon from '~icons/material-symbols-light/wb-sunny-rounded';
 	import SystemIcon from '~icons/heroicons/computer-desktop-20-solid';
 	import MoonIcon from '~icons/solar/moon-bold';
@@ -38,7 +43,7 @@
 			class="theme-button light"
 			class:active={theme.preference === 'light'}
 			onclick={() => {
-				theme.preference = 'light';
+				set_theme('light');
 				onclick?.();
 			}}
 		>
@@ -48,7 +53,7 @@
 			class="theme-button system"
 			class:active={theme.preference === 'system'}
 			onclick={() => {
-				theme.preference = 'system';
+				set_theme('system');
 				onclick?.();
 			}}
 		>
@@ -58,7 +63,7 @@
 			class="theme-button dark"
 			class:active={theme.preference === 'dark'}
 			onclick={() => {
-				theme.preference = 'dark';
+				set_theme('dark');
 				onclick?.();
 			}}
 		>

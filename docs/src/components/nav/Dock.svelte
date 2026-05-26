@@ -15,7 +15,7 @@
 	import { Draggable } from '@neodrag/svelte';
 	import { ControlFrom, controls } from '@neodrag/svelte/plugins';
 	import { prefetch } from 'astro:prefetch';
-	import { onMount, type Component } from 'svelte';
+	import type { Component } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { on } from 'svelte/events';
 	import { MediaQuery } from 'svelte/reactivity';
@@ -72,10 +72,6 @@
 	});
 
 	const is_tablet = new MediaQuery('(max-width: 967px)');
-
-	onMount(() => {
-		return on(window, 'astro:after-swap', (e) => console.log(e));
-	});
 </script>
 
 <div class={['overlay', menu_view.open && 'visible']}></div>

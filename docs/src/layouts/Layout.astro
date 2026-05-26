@@ -6,7 +6,6 @@ import '../css/globals.css';
 import { get_nav_list } from '$/nav';
 import Dock from '$components/nav/Dock.svelte';
 import PawCursor from '$components/PawCursor.svelte';
-import ThemeSync from '$components/ThemeSync.svelte';
 import { SEO } from 'astro-seo';
 import { ClientRouter } from 'astro:transitions';
 
@@ -77,7 +76,7 @@ const nav_list = get_nav_list(framework as any);
 				return parsed ?? DEFAULT;
 			}
 
-			function do_it() {
+			function apply_neodrag_theme() {
 				const local_theme = parse_theme_storage(localStorage.getItem('neodrag:theme'));
 
 				let theme = local_theme.current;
@@ -88,37 +87,27 @@ const nav_list = get_nav_list(framework as any);
 				document.body.dataset.theme = theme;
 			}
 
-			do_it();
-		</script>
+			apply_neodrag_theme();
 
-		<ThemeSync client:load />
+			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', apply_neodrag_theme);
+			window.addEventListener('storage', (event) => {
+				if (event.key === 'neodrag:theme') apply_neodrag_theme();
+			});
+
+			window.__neodrag_apply_theme = apply_neodrag_theme;
+		</script>
 
 		<div>
 			<Dock
 				selected={framework}
 				pathname={Astro.url.pathname}
 				nav_list={nav_list}
-				client:load
+				client:only="svelte"
 				transition:persist="dock"
 			/>
 			<slot />
 		</div>
 
 		<PawCursor client:only="svelte" />
-
-		<script is:inline>
-			(function (c, l, a, r, i, t, y) {
-				c[a] =
-					c[a] ||
-					function () {
-						(c[a].q = c[a].q || []).push(arguments);
-					};
-				t = l.createElement(r);
-				t.async = 1;
-				t.src = 'https://www.clarity.ms/tag/' + i;
-				y = l.getElementsByTagName(r)[0];
-				y.parentNode.insertBefore(t, y);
-			})(window, document, 'clarity', 'script', 'fc1eo18wuc');
-		</script>
 	</body>
 </html>

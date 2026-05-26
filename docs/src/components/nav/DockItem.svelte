@@ -24,9 +24,10 @@
 
 <script lang="ts">
 	import type { Framework } from '$helpers/constants';
+	import { browser } from '$helpers/utils';
 	import { theme } from '$state/user-preferences.svelte';
 	import { interpolate } from 'popmotion';
-	import { onMount, type Component } from 'svelte';
+	import type { Component } from 'svelte';
 	import { sineInOut } from 'svelte/easing';
 	import { prefersReducedMotion, Spring, Tween } from 'svelte/motion';
 
@@ -71,15 +72,14 @@
 			// and the img center x coordinate value
 			const distance_delta = mouse_x - img_center_x;
 			distance = distance_delta;
-			console.log(distance_delta, framework);
 		} else distance = beyond_the_distance_limit;
 
 		raf = requestAnimationFrame(animate);
 	}
 
-	onMount(() => {
+	$effect(() => {
+		if (!browser) return;
 		raf = requestAnimationFrame(animate);
-
 		return () => cancelAnimationFrame(raf);
 	});
 </script>
