@@ -31,7 +31,7 @@
 <div
 	class={[
 		embedded
-			? 'relative mx-2 mb-2 h-12'
+			? 'relative h-12 w-full'
 			: 'dock-angular-bevel dock-angular-bevel--sm dock-surface relative m-1 h-12',
 	]}
 >

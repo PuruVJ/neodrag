@@ -84,34 +84,32 @@
 ></div>
 
 <section
-	class="dock-host pointer-events-none fixed bottom-4 left-0 z-[1000] flex h-24 w-full items-end justify-center gap-[clamp(2rem,10vw,8rem)] p-1.5 max-md:bottom-0 max-md:h-16 max-md:justify-stretch max-md:gap-0 max-md:p-0"
+	class="dock-host pointer-events-none fixed bottom-4 left-0 z-[1000] flex h-24 w-full items-end justify-center gap-[clamp(2rem,10vw,8rem)] p-1.5 max-md:bottom-0 max-md:h-auto max-md:min-h-16 max-md:justify-stretch max-md:gap-0 max-md:p-0"
 >
 	<div
-		class={[
-			'dock-angular-bevel dock-surface pointer-events-auto relative h-full w-full overflow-visible shadow-[var(--dock-shadow)] md:w-auto',
-		]}
+		class="dock-angular-bevel dock-surface pointer-events-auto relative w-full overflow-visible shadow-[var(--dock-shadow)] max-md:h-auto max-md:min-h-16 md:h-full md:w-auto"
 		{@attach dockDrag.attachment}
 		{@attach interact_outside(() => menu_view.close())}
 	>
 		<div
-			class={[
-				'dock-angular-bevel__fill relative flex flex-col items-end overflow-visible backdrop-blur-[14px] backdrop-saturate-[1.08] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,color-mix(in_lch,var(--color-brand),transparent_94%)_0%,transparent_40%,transparent_60%,color-mix(in_lch,var(--color-brand),transparent_96%)_100%)] before:opacity-35 before:content-[""]',
-				menu_view.open ? 'max-md:p-0' : 'p-1.5',
-			]}
+			class="dock-angular-bevel__fill relative flex w-full min-h-0 flex-col items-end overflow-hidden backdrop-blur-[14px] backdrop-saturate-[1.08] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,color-mix(in_lch,var(--color-brand),transparent_94%)_0%,transparent_40%,transparent_60%,color-mix(in_lch,var(--color-brand),transparent_96%)_100%)] before:opacity-35 before:content-[''] max-md:min-h-16 max-md:p-0 md:h-full md:overflow-visible md:p-1.5"
 		>
-			<div class="hidden w-full max-md:block">
-				{#if menu_view.open}
-					<div class="w-full" transition:slide={{ duration: 400, easing: expoOut }}>
+			{#if menu_view.open}
+				<div
+					class="dock-mobile-menu w-full shrink-0"
+					transition:slide={{ duration: 400, easing: expoOut }}
+				>
+					<div class="dock-mobile-menu__body">
 						<div class="dock-menu-scroll max-h-[48vh] overflow-y-auto">
 							<Nav compact {pathname} {nav_list} onclick={() => menu_view.toggle()} />
 						</div>
 						<div>{@render framework_selector(true)}</div>
-						<div><ThemeSwitcher embedded /></div>
+						<ThemeSwitcher embedded />
 					</div>
-				{/if}
-			</div>
+				</div>
+			{/if}
 
-			<div class="relative z-[1] flex h-full w-full max-md:h-full">
+			<div class="relative z-[1] flex h-full w-full shrink-0 max-md:h-16">
 				<div class="hidden items-end max-md:hidden md:flex">
 					{@render framework_selector(false)}
 					<div

@@ -371,6 +371,21 @@
 		.dock-host {
 			--spacing-dock-cut: 0.7rem;
 		}
+
+		.dock-mobile-menu {
+			overflow: hidden;
+		}
+
+		.dock-mobile-menu__body {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+			padding: 0.5rem 0.5rem 0.25rem;
+		}
+
+		.dock-mobile-menu__body > :last-child {
+			margin: 0;
+		}
 	}
 
 	.docs-shell {
