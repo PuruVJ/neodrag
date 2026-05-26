@@ -150,7 +150,7 @@
 			{/if}
 
 			<div class="relative z-[1] flex w-full shrink-0 max-md:h-16 md:overflow-visible">
-				<div class="dock-toolbar hidden max-md:hidden md:flex md:h-14 md:items-center md:overflow-visible">
+				<div class="dock-toolbar hidden max-md:hidden md:flex md:h-14 md:items-end md:overflow-visible">
 					{@render framework_selector(false)}
 					<div
 						class="mx-0.5 my-1.5 w-px min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
@@ -223,7 +223,7 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class={[
-			'dock-zoom flex h-14 shrink-0 items-center justify-center gap-0.5 overflow-visible',
+			'dock-zoom flex h-14 shrink-0 items-end justify-center overflow-visible',
 			!embedded && 'max-md:hidden',
 		]}
 		onmouseenter={() => {
@@ -238,7 +238,7 @@
 	>
 		{#each frameworks as name}
 			<a
-				class="unstyled flex origin-bottom items-end"
+				class="unstyled flex shrink-0 origin-bottom items-end overflow-visible"
 				href={replace_framework_from_pathname(name)}
 				onclick={() => menu_view.toggle()}
 			>

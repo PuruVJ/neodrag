@@ -1,5 +1,6 @@
 <script module>
 	const base_width = 32;
+	const slot_padding_x = 16;
 	const distance_limit = base_width * 6;
 	const beyond_the_distance_limit = distance_limit + 1;
 	const distance_input = [
@@ -49,7 +50,7 @@
 		stiffness: 0.14,
 	});
 
-	const icon_scale = $derived(width_px.current / base_width);
+	const slot_width = $derived(Math.max(base_width + slot_padding_x, width_px.current + slot_padding_x));
 
 	const is_near = $derived(
 		mouse_x !== null && Math.abs(distance) < distance_limit && !prefersReducedMotion.current,
@@ -98,6 +99,7 @@
 			'group dock-angular-bevel dock-angular-bevel--sm relative h-14 shrink-0 overflow-visible',
 			(is_near || selected) && 'dock-angular-bevel--brand',
 		]}
+		style:width="{slot_width}px"
 	>
 		<button
 			aria-label="Launch {framework} page"
@@ -121,18 +123,17 @@
 
 			<span
 				bind:this={image_el}
-				class="flex size-8 origin-bottom items-end justify-center will-change-transform text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_path]:!text-current [&_g]:!text-current [&_svg]:!max-w-none [&_svg]:!text-current"
-				style="transform: scale({icon_scale});"
+				class="flex shrink-0 items-end justify-center will-change-[width,height] text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_path]:!text-current [&_g]:!text-current [&_svg]:!max-w-none [&_svg]:!text-current"
 			>
 				<Icon
-					height={base_width}
-					width={base_width}
-					style="width: {base_width}px; height: {base_width}px; max-width: none;"
+					height={width_px.current}
+					width={width_px.current}
+					style="width: {width_px.current}px; height: {width_px.current}px; max-width: none;"
 				/>
 			</span>
 
 			<div
-				class="h-[3px] transition-opacity duration-100 [clip-path:polygon(0_0,100%_0,calc(100%-2px)_100%,2px_100%)] [background-color:var(--color-brand)]"
+				class="h-[3px] shrink-0 transition-opacity duration-100 [clip-path:polygon(0_0,100%_0,calc(100%-2px)_100%,2px_100%)] [background-color:var(--color-brand)]"
 				style="width: {Math.max(18, width_px.current * 0.55)}px; opacity: {selected ? 1 : is_near ? 0.65 : 0}"
 			></div>
 		</button>
