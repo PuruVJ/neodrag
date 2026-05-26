@@ -53,6 +53,13 @@ import type { Sensor, SensorHost } from './sensors/types.ts';
 import { syncDragSessionPointer, syncResizeSessionPointer } from './sync-session-pointer.ts';
 import { transitionSession } from './state-machine.ts';
 import {
+	enableCostProfiling,
+	measureCost,
+	resetCostProfiling,
+	takeCostSnapshot,
+	type EngineCostSnapshot,
+} from './engine-profile.ts';
+import {
 	passesDragThreshold,
 	resetThresholdSample,
 	type DragThresholdInput,
@@ -89,6 +96,8 @@ export interface EngineOptions {
 	defaultSensors?: boolean;
 	onError?: (error: ErrorInfo) => void;
 	dev?: boolean;
+	/** Accumulate per-span timings for benchmarks (`getCostProfile`). */
+	profile?: boolean;
 }
 
 export interface NeodragDebugSnapshot {
@@ -167,6 +176,7 @@ export class Neodrag {
 	readonly #pluginErrorFrame: Omit<ErrorInfo, 'error'>;
 
 	readonly #sensorHost: SensorHost;
+	readonly #profileEnabled: boolean;
 
 	constructor(options: EngineOptions = {}) {
 		this.#pluginErrorFrame = {
@@ -182,6 +192,9 @@ export class Neodrag {
 			getActiveSource: () => this.#activeSource,
 			getDropTargets: () => this.#dropTargets,
 			runDropHook: (inst, hook, input) => this.#runDropHook(inst, hook, input),
+			measure: (span, fn) => {
+				measureCost(this, span, fn);
+			},
 		};
 		this.#dropTracker = new DropTargetTracker(this.#dropHostBridge);
 
@@ -191,6 +204,8 @@ export class Neodrag {
 		this.#delegate = options.delegate;
 		this.#onError = options.onError ?? DEFAULTS.onError;
 		this.#dev = options.dev ?? DEV;
+		this.#profileEnabled = options.profile === true;
+		if (this.#profileEnabled) enableCostProfiling(this);
 
 		if (options.defaultSensors !== false) {
 			installDefaultSensors((sensor) => this.registerSensor(sensor));
@@ -206,6 +221,15 @@ export class Neodrag {
 			onInteractionEnd: (input) => this.#onInteractionEnd(input),
 			cancelActive: (reason) => this.#cancelSession(reason),
 		};
+	}
+
+	resetCostProfile() {
+		if (this.#profileEnabled) resetCostProfiling(this);
+	}
+
+	takeCostProfile(wallMs: number): EngineCostSnapshot | null {
+		if (!this.#profileEnabled) return null;
+		return takeCostSnapshot(this, wallMs);
 	}
 
 	#createIdleActive(): ActiveSession {
@@ -521,6 +545,10 @@ export class Neodrag {
 	}
 
 	#onInteractionStart(input: InteractionInput) {
+		measureCost(this, 'interaction.start', () => this.#onInteractionStartCore(input));
+	}
+
+	#onInteractionStartCore(input: InteractionInput) {
 		if (isPointerInput(input) && input.pointer.button === 2) return;
 		if (this.#activeSource?.isInteracting || this.#activeResizeSource?.isInteracting) return;
 
@@ -567,6 +595,10 @@ export class Neodrag {
 	}
 
 	#onInteractionMove(input: InteractionInput) {
+		measureCost(this, 'interaction.move', () => this.#onInteractionMoveCore(input));
+	}
+
+	#onInteractionMoveCore(input: InteractionInput) {
 		if (this.#activePointerId !== null && interactionPointerId(input) !== this.#activePointerId)
 			return;
 
@@ -580,17 +612,18 @@ export class Neodrag {
 
 		if (!inst.isDragging) {
 			inst.lastInput = input;
-			if (
-				!passesDragThreshold(inst.thresholdConfig, inst.thresholdSample, inst.dragCtx, input)
-			) {
-				return;
-			}
+			const passes = measureCost(this, 'threshold.check', () =>
+				passesDragThreshold(inst.thresholdConfig, inst.thresholdSample, inst.dragCtx, input),
+			);
+			if (!passes) return;
 
-			syncDragSessionPointer(input, inst, this.#active, this.#dropHost);
+			measureCost(this, 'session.syncPointer', () =>
+				syncDragSessionPointer(input, inst, this.#active, this.#dropHost),
+			);
 			inst.syncLiveViews();
 
 			const startOk = this.#runStart(inst, inst.dragCtx, input);
-			inst.effects.flush();
+			measureCost(this, 'effects.flush', () => inst.effects.flush());
 			if (!startOk) {
 				if (this.#active) {
 					this.#active.state = transitionSession(this.#active.state, { type: 'start-abort' });
@@ -616,7 +649,9 @@ export class Neodrag {
 				inst.pointerCapturedId = KEYBOARD_POINTER_ID;
 			}
 		} else {
-			syncDragSessionPointer(input, inst, this.#active, this.#dropHost);
+			measureCost(this, 'session.syncPointer', () =>
+				syncDragSessionPointer(input, inst, this.#active, this.#dropHost),
+			);
 		}
 
 		if (isPointerInput(input)) input.native.preventDefault();
@@ -635,13 +670,19 @@ export class Neodrag {
 		inst.proposedX = 0;
 		inst.proposedY = 0;
 		inst.syncLiveViews();
-		inst.effects.flush();
+		measureCost(this, 'effects.flush', () => inst.effects.flush());
 		this.#syncDragTransform(inst);
 
-		if (this.#dropCount > 0) this.#dropTracker.queueUpdate(input);
+		if (this.#dropCount > 0) {
+			measureCost(this, 'drop.queue', () => this.#dropTracker.queueUpdate(input));
+		}
 	}
 
 	#applyDragDelta(inst: DragInstance, input: InteractionInput) {
+		measureCost(this, 'applyDragDelta', () => this.#applyDragDeltaCore(inst, input));
+	}
+
+	#applyDragDeltaCore(inst: DragInstance, input: InteractionInput) {
 		if (input.kind === 'pointer') {
 			const target_offset_x = (input.clientX - inst.initialX) * inst.inverseScale;
 			const target_offset_y = (input.clientY - inst.initialY) * inst.inverseScale;
@@ -660,6 +701,10 @@ export class Neodrag {
 	}
 
 	#onInteractionEnd(input: InteractionInput) {
+		measureCost(this, 'interaction.end', () => this.#onInteractionEndCore(input));
+	}
+
+	#onInteractionEndCore(input: InteractionInput) {
 		if (this.#activePointerId !== null && interactionPointerId(input) !== this.#activePointerId)
 			return;
 
@@ -672,10 +717,12 @@ export class Neodrag {
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
 
-		syncDragSessionPointer(input, inst, this.#active, this.#dropHost);
+		measureCost(this, 'session.syncPointer', () =>
+			syncDragSessionPointer(input, inst, this.#active, this.#dropHost),
+		);
 
 		if (inst.isDragging && this.#dropCount > 0) {
-			this.#dropTracker.flush(input);
+			measureCost(this, 'drop.flush', () => this.#dropTracker.flush(input));
 		}
 
 		const reason = resolveEndReason(this.#active, inst.cancelled);
@@ -791,6 +838,10 @@ export class Neodrag {
 	}
 
 	#runStart(inst: DragInstance, ctx: DragCtx, input: InteractionInput): boolean {
+		return measureCost(this, 'runStart', () => this.#runStartCore(inst, ctx, input));
+	}
+
+	#runStartCore(inst: DragInstance, ctx: DragCtx, input: InteractionInput): boolean {
 		const chain = inst.startChain;
 		for (let i = 0; i < chain.length; i++) {
 			const plugin = chain[i]!;
@@ -807,6 +858,10 @@ export class Neodrag {
 	}
 
 	#runDrag(inst: DragInstance, ctx: DragCtx, input: InteractionInput) {
+		measureCost(this, 'runDrag', () => this.#runDragCore(inst, ctx, input));
+	}
+
+	#runDragCore(inst: DragInstance, ctx: DragCtx, input: InteractionInput) {
 		const chain = inst.dragChain;
 
 		for (let i = 0; i < chain.length; i++) {
@@ -831,6 +886,10 @@ export class Neodrag {
 	}
 
 	#runEnd(inst: DragInstance, ctx: DragCtx, input: InteractionInput, reason: EndReason) {
+		measureCost(this, 'runEnd', () => this.#runEndCore(inst, ctx, input, reason));
+	}
+
+	#runEndCore(inst: DragInstance, ctx: DragCtx, input: InteractionInput, reason: EndReason) {
 		const chain = inst.endChain;
 		for (let i = 0; i < chain.length; i++) {
 			const plugin = chain[i]!;
@@ -857,6 +916,14 @@ export class Neodrag {
 	}
 
 	#runDropHook(
+		inst: DropInstance,
+		hook: 'enter' | 'over' | 'leave' | 'drop',
+		input: InteractionInput,
+	): boolean | void {
+		return measureCost(this, 'drop.hook', () => this.#runDropHookCore(inst, hook, input));
+	}
+
+	#runDropHookCore(
 		inst: DropInstance,
 		hook: 'enter' | 'over' | 'leave' | 'drop',
 		input: InteractionInput,
@@ -927,11 +994,13 @@ export class Neodrag {
 	}
 
 	#installDragPlugins(inst: DragInstance, userPlugins: DragPlugin[]) {
-		const merged = this.#mergeUserDragPlugins(userPlugins);
-		inst.flat = merged;
-		inst.byKey = new Map(merged.map((p) => [p.key, p]));
-		inst.rebuildBuckets();
-		this.#initDragPlugins(inst);
+		measureCost(this, 'bind.install', () => {
+			const merged = this.#mergeUserDragPlugins(userPlugins);
+			inst.flat = merged;
+			inst.byKey = new Map(merged.map((p) => [p.key, p]));
+			inst.rebuildBuckets();
+			this.#initDragPlugins(inst);
+		});
 	}
 
 	#diffDragPlugins(inst: DragInstance, userPlugins: DragPlugin[]) {
@@ -958,7 +1027,9 @@ export class Neodrag {
 	}
 
 	#syncDragTransform(inst: DragInstance) {
-		applyDragTransform(inst.dragCtx, inst.applyTransform);
+		measureCost(this, 'syncTransform', () =>
+			applyDragTransform(inst.dragCtx, inst.applyTransform),
+		);
 	}
 
 	#initDragPlugins(inst: DragInstance) {
@@ -1052,13 +1123,15 @@ export class Neodrag {
 	}
 
 	#destroyDrag(inst: DragInstance) {
-		if (this.#activeSource === inst && inst.isInteracting) {
-			inst.cancelled = true;
-			this.#endActiveInteraction('cancel');
-		}
-		for (const plugin of inst.flat) this.#destroyOneDragPlugin(inst, plugin);
-		inst.controller.abort();
-		inst.effects.clear();
+		measureCost(this, 'bind.destroy', () => {
+			if (this.#activeSource === inst && inst.isInteracting) {
+				inst.cancelled = true;
+				this.#endActiveInteraction('cancel');
+			}
+			for (const plugin of inst.flat) this.#destroyOneDragPlugin(inst, plugin);
+			inst.controller.abort();
+			inst.effects.clear();
+		});
 	}
 
 	#destroyDrop(inst: DropInstance) {

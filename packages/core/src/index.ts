@@ -1,4 +1,5 @@
 export { Neodrag, type EngineOptions, type NeodragDebugSnapshot } from './engine.ts';
+export type { EngineCostSnapshot, CostSpanStat } from './engine-profile.ts';
 export {
 	hasReactiveSlots,
 	resolvePluginList,

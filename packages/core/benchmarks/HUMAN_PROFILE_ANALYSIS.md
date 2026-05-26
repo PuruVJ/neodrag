@@ -1,12 +1,15 @@
 # Human behavior — CPU profile analysis
 
-Generated from Chromium CDP (`pnpm bench:profile`) → `benchmarks/reports/human-profile.json`.
+**Primary automated breakdown:** `pnpm bench:cost` → [`HUMAN_COST.md`](./HUMAN_COST.md) and `benchmarks/reports/human-cost.json` (engine instrumentation, per-span ms/%).
+
+CDP sampling (`pnpm bench:profile`) → `benchmarks/reports/human-profile.json` (coarse for sub-ms gestures).
 
 ## How to run
 
 ```bash
 cd packages/core
-pnpm bench:profile
+pnpm bench:cost      # recommended
+pnpm bench:profile   # optional CDP stacks
 ```
 
 Uses Vitest Browser `cdp()` → `Profiler.start/stop` (Playwright Chromium only). Each scenario is repeated inside one profile window so stacks accumulate.

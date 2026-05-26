@@ -16,6 +16,7 @@ export type DropTargetHost = {
 		hook: 'enter' | 'over' | 'leave' | 'drop',
 		input: InteractionInput,
 	): boolean | void;
+	measure?: (span: string, fn: () => void) => void;
 };
 
 export class DropTargetTracker {
@@ -70,12 +71,16 @@ export class DropTargetTracker {
 	}
 
 	runUpdate(input: InteractionInput, force = false) {
-		const sole = this.#host.getSoleDrop();
-		if (sole) {
-			this.#updateSole(sole, input, force);
-			return;
-		}
-		this.#updateMulti(input, force);
+		const run = () => {
+			const sole = this.#host.getSoleDrop();
+			if (sole) {
+				this.#updateSole(sole, input, force);
+				return;
+			}
+			this.#updateMulti(input, force);
+		};
+		if (this.#host.measure) this.#host.measure('drop.update', run);
+		else run();
 	}
 
 	#syncSessionTargets(drops: readonly DropInstance[]) {
