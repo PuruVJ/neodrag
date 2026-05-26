@@ -41,27 +41,30 @@
 		font-family: var(--app-font-mono);
 		font-size: 0.78rem;
 		font-weight: 600;
-		color: color-mix(in lch, var(--app-color-dark), transparent 30%);
+		border: 0.2px solid transparent;
+		color: color-mix(in lch, var(--app-color-dark), transparent 25%);
 		background: color-mix(in lch, var(--app-color-dark), transparent 94%);
-		transition: background-color 150ms ease;
 
-		&:hover:not(:disabled) {
+		&:hover:not(:disabled):not(.selected) {
+			color: color-mix(in lch, var(--app-color-dark), transparent 8%);
 			background: color-mix(in lch, var(--app-color-dark), transparent 88%);
+			border-color: color-mix(in lch, var(--app-color-dark), transparent 82%);
 		}
 
 		&.selected {
-			color: var(--app-color-primary);
-			background: color-mix(in lch, var(--app-color-primary), transparent 88%);
+			color: var(--app-color-primary-contrast);
+			background: var(--app-color-primary);
+			border-color: color-mix(in lch, var(--app-color-primary), var(--app-color-anti-mixer) 20%);
 		}
 
 		&.locked {
-			opacity: 0.5;
+			opacity: 0.45;
 			cursor: not-allowed;
 		}
 	}
 
 	.soon {
 		margin-left: 0.25rem;
-		opacity: 0.65;
+		opacity: 0.75;
 	}
 </style>

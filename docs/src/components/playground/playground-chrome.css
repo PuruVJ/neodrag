@@ -1,19 +1,17 @@
-/* Recessed play area — same language as Hero .container */
+/* Recessed play area — same language as Hero .container, no heavy drop shadow */
 .playground-well {
 	background-color: color-mix(in lch, var(--app-color-dark), transparent 90%);
 	border-radius: 1rem;
-	box-shadow: var(--inner-shadow-4);
+	box-shadow: inset 0 1px 0 color-mix(in lch, var(--gray-1), transparent 85%);
 }
 
-/* Abstract floating window — dock inset language, shell fill */
+/* Abstract window — flat shell card, hairline edge only */
 .playground-window {
 	background-color: var(--app-color-shell);
 	border-radius: 1rem;
 	overflow: hidden;
-	box-shadow:
-		inset 0 0 0 0.2px color-mix(in lch, var(--gray-1), transparent 30%),
-		0 0 0 0.2px color-mix(in lch, var(--gray-9), transparent 30%),
-		hsla(0, 0%, 0%, 0.22) 2px 5px 16px 5px;
+	border: 0.2px solid color-mix(in lch, var(--app-color-dark), transparent 78%);
+	box-shadow: none;
 }
 
 .playground-window-chrome {

@@ -106,6 +106,10 @@
 		height: 2.25rem;
 		border-radius: 0.5rem;
 		color: color-mix(in lch, var(--app-color-dark), transparent 20%);
+
+		&:hover {
+			background: color-mix(in lch, var(--app-color-dark), transparent 92%);
+		}
 	}
 
 	.icon-btn :global(svg) {
@@ -118,8 +122,17 @@
 		border-radius: 0.5rem;
 		font-size: 0.88rem;
 		font-weight: 600;
-		color: var(--app-color-primary-contrast) !important;
-		background: var(--app-color-primary);
+		color: var(--app-color-primary) !important;
+		background-color: color-mix(in lch, var(--app-color-primary), transparent 92%) !important;
+		background-image: none !important;
+		border: 0.2px solid color-mix(in lch, var(--app-color-primary), transparent 60%);
+
+		&:hover,
+		&:focus-visible {
+			color: var(--app-color-primary) !important;
+			background-color: color-mix(in lch, var(--app-color-primary), transparent 84%) !important;
+			border-radius: 0.5rem;
+		}
 	}
 
 	.tabs {
@@ -137,16 +150,19 @@
 		font-size: 0.8rem;
 		font-weight: 600;
 		font-family: var(--app-font-mono);
+		border: 0.2px solid transparent;
 		color: color-mix(in lch, var(--app-color-dark), transparent 35%);
-		transition: background-color 150ms ease;
+		background: transparent;
 
-		&:hover {
+		&:hover:not(.selected) {
+			color: color-mix(in lch, var(--app-color-dark), transparent 12%);
 			background: color-mix(in lch, var(--app-color-dark), transparent 94%);
 		}
 
 		&.selected {
 			background: color-mix(in lch, var(--app-color-dark), transparent 90%);
 			color: color-mix(in lch, var(--app-color-dark), transparent 5%);
+			border-color: color-mix(in lch, var(--app-color-dark), transparent 82%);
 		}
 
 		&[data-framework='svelte'].selected {

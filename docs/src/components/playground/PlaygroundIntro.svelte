@@ -24,8 +24,13 @@
 
 	<div class="masthead-side">
 		<div class="actions">
-			<a class="cta" href="/docs/svelte">Getting started</a>
-			<a class="cta secondary unstyled" href="https://github.com/PuruVJ/neodrag" target="_blank" rel="external">
+			<a class="cta unstyled" href="/docs/svelte">Getting started</a>
+			<a
+				class="cta unstyled"
+				href="https://github.com/PuruVJ/neodrag"
+				target="_blank"
+				rel="external"
+			>
 				GitHub
 			</a>
 		</div>
@@ -92,19 +97,32 @@
 		width: min(100%, 22rem);
 	}
 
-	.cta {
+	/* Override global link hover (white on light gradient) */
+	.actions .cta {
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		padding: 1rem 1.5rem;
-		border-radius: 1rem !important;
+		border-radius: 1rem;
 		font-size: clamp(1rem, 2vw, 1.35rem);
+		font-weight: 600;
 		text-align: center;
-		color: var(--app-color-primary);
-	}
+		color: var(--app-color-primary) !important;
+		background-image: none !important;
+		background-color: color-mix(in lch, var(--app-color-primary), transparent 92%);
+		border: 0.2px solid color-mix(in lch, var(--app-color-primary), transparent 65%);
+		transition:
+			background-color 160ms ease,
+			border-color 160ms ease,
+			color 160ms ease;
 
-	.cta.secondary {
-		color: var(--app-color-primary);
+		&:hover,
+		&:focus-visible {
+			color: var(--app-color-primary) !important;
+			background-color: color-mix(in lch, var(--app-color-primary), transparent 84%) !important;
+			border-color: color-mix(in lch, var(--app-color-primary), transparent 35%);
+			border-radius: 1rem;
+		}
 	}
 
 	@media (max-width: 960px) {
@@ -128,7 +146,7 @@
 			grid-template-columns: 1fr;
 		}
 
-		.cta {
+		.actions .cta {
 			font-size: 1rem;
 			padding: 0.75rem 1rem;
 		}
