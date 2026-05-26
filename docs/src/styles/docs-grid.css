@@ -4,16 +4,16 @@ body.docs-route .site-backdrop {
 
 .docs-page-grid {
 	--docs-grid-cell: 3.25rem;
-	--docs-grid-line: color-mix(in lch, var(--grid-accent), transparent 91%);
-	--docs-grid-major: color-mix(in lch, var(--grid-accent), transparent 80%);
-	--docs-grid-dot: color-mix(in lch, var(--grid-accent), transparent 89%);
+	--docs-grid-line: color-mix(in lch, var(--grid-accent), transparent 96%);
+	--docs-grid-major: color-mix(in lch, var(--grid-accent), transparent 91%);
+	--docs-grid-dot: color-mix(in lch, var(--grid-accent), transparent 95%);
 
 	pointer-events: none;
 	position: fixed;
 	inset: 0;
 	z-index: 0;
 	overflow: hidden;
-	background-color: color-mix(in lch, var(--app-color-shell), var(--grid-accent) 1.25%);
+	background-color: var(--app-color-shell);
 	background-image:
 		radial-gradient(circle at center, var(--docs-grid-dot) 1px, transparent 1px),
 		linear-gradient(var(--docs-grid-major) 1px, transparent 1px),
@@ -27,15 +27,15 @@ body.docs-route .site-backdrop {
 		var(--docs-grid-cell) var(--docs-grid-cell),
 		var(--docs-grid-cell) var(--docs-grid-cell);
 	background-position: center center;
-	mask-image: radial-gradient(ellipse 120% 95% at 50% 42%, black 35%, transparent 88%);
+	mask-image: radial-gradient(ellipse 105% 88% at 50% 44%, black 16%, transparent 74%);
 }
 
 body[data-theme='dark'] .docs-page-grid {
-	--docs-grid-line: color-mix(in lch, var(--grid-accent), transparent 93%);
-	--docs-grid-major: color-mix(in lch, var(--grid-accent), transparent 84%);
-	--docs-grid-dot: color-mix(in lch, var(--grid-accent), transparent 91%);
-	background-color: color-mix(in lch, var(--app-color-shell), var(--grid-accent) 2%);
-	mask-image: radial-gradient(ellipse 115% 90% at 50% 40%, black 30%, transparent 85%);
+	--docs-grid-line: color-mix(in lch, var(--grid-accent), transparent 97%);
+	--docs-grid-major: color-mix(in lch, var(--grid-accent), transparent 93%);
+	--docs-grid-dot: color-mix(in lch, var(--grid-accent), transparent 96%);
+	background-color: var(--app-color-shell);
+	mask-image: radial-gradient(ellipse 100% 85% at 50% 42%, black 14%, transparent 70%);
 }
 
 body.docs-route {
