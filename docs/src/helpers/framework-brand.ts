@@ -25,6 +25,6 @@ html[data-framework=${framework}]{${token}:color-mix(in lch,${lch},var(--app-col
 html[data-framework=${framework}] .docs-page-grid{--docs-grid-accent:var(${token});background-color:color-mix(in lch,var(--app-color-shell),var(${token}) 1.75%)}
 html[data-theme=dark][data-framework=${framework}] .docs-page-grid{background-color:color-mix(in oklch,var(--app-color-shell),var(${token}) 2.25%)}
 html[data-framework=${framework}] .dock-host,html[data-framework=${framework}] .dock-surface{--color-brand:var(${token});--secondary-color:var(${token})}
-body.docs-route .dock-host>.dock-angular-bevel{background:color-mix(in lch,var(--color-brand),transparent 58%)}
-body.docs-route .dock-host>.dock-angular-bevel>.dock-shell-fill.dock-angular-bevel__fill{background:transparent}`;
+body.docs-route .dock-host>.dock-angular-bevel{background:color-mix(in oklch,var(--color-brand),transparent 32%)}
+body.docs-route .dock-host>.dock-angular-bevel>.dock-shell-fill.dock-angular-bevel__fill{background:color-mix(in oklch,var(--app-color-shell) 86%,var(--color-brand) 14%)}`;
 }

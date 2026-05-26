@@ -411,7 +411,7 @@
 	}
 
 	body.docs-route .dock-host > .dock-angular-bevel {
-		background: color-mix(in lch, var(--color-brand), transparent 58%);
+		background: color-mix(in oklch, var(--color-brand), transparent 32%);
 	}
 
 	body.docs-route .dock-surface {
@@ -429,7 +429,7 @@
 
 	body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
 		width: 100%;
-		background: transparent;
+		background: color-mix(in oklch, var(--app-color-shell) 86%, var(--color-brand) 14%);
 	}
 
 	@media (min-width: 768px) {
