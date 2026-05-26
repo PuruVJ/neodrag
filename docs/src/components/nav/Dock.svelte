@@ -70,7 +70,7 @@
 		plugins: [controls({ allow: ControlFrom.selector('.handle') })],
 	});
 
-	const is_tablet = new MediaQuery('(max-width: 967px)');
+	const enable_dock_zoom = new MediaQuery('(min-width: 768px)');
 
 	const dock_btn =
 		'grid h-full min-w-[3.25rem] place-items-center border-2 border-transparent bg-transparent p-2.5 text-[1.35rem] text-[color-mix(in_lch,var(--app-color-dark),transparent_28%)] transition-[border-color,color,background-color] duration-75 hover:border-[color-mix(in_lch,var(--color-brand),transparent_45%)] hover:bg-[color-mix(in_lch,var(--color-brand),transparent_90%)] hover:text-brand focus-visible:border-[color-mix(in_lch,var(--color-brand),transparent_45%)] focus-visible:bg-[color-mix(in_lch,var(--color-brand),transparent_90%)] focus-visible:text-brand';
@@ -84,11 +84,11 @@
 ></div>
 
 <section
-	class="pointer-events-none fixed bottom-4 left-0 z-[1000] flex h-20 w-full items-end justify-center gap-[clamp(2rem,10vw,8rem)] p-1.5 max-md:bottom-0 max-md:h-16 max-md:p-0 [&_svg]:max-w-none [&_svg]:w-16"
+	class="pointer-events-none fixed bottom-4 left-0 z-[1000] flex h-24 w-full items-end justify-center gap-[clamp(2rem,10vw,8rem)] p-1.5 max-md:bottom-0 max-md:h-16 max-md:p-0"
 >
 	<div
 		class={[
-			'dock-surface dock-angular pointer-events-auto relative flex h-full flex-col items-end border-2 border-[var(--dock-border)] bg-[var(--dock-surface)] p-1.5 shadow-[var(--dock-accent-glow),inset_0_1px_0_color-mix(in_lch,var(--app-color-anti-mixer),transparent_88%),var(--dock-shadow)] backdrop-blur-[18px] backdrop-saturate-[1.12] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,color-mix(in_lch,var(--color-brand),transparent_88%)_0%,transparent_35%,transparent_65%,color-mix(in_lch,var(--color-brand),transparent_92%)_100%)] before:opacity-55 before:content-[""]',
+			'dock-surface dock-angular pointer-events-auto relative flex h-full flex-col items-end overflow-visible border-2 border-[var(--dock-border)] bg-[var(--dock-surface)] p-1.5 shadow-[var(--dock-accent-glow),inset_0_1px_0_color-mix(in_lch,var(--app-color-anti-mixer),transparent_88%),var(--dock-shadow)] backdrop-blur-[18px] backdrop-saturate-[1.12] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,color-mix(in_lch,var(--color-brand),transparent_88%)_0%,transparent_35%,transparent_65%,color-mix(in_lch,var(--color-brand),transparent_92%)_100%)] before:opacity-55 before:content-[""]',
 			menu_view.open && 'dock-angular-bar max-md:h-auto max-md:w-[min(96%,40rem)]',
 		]}
 		{@attach dockDrag.attachment}
@@ -155,7 +155,7 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class={[
-			'flex w-full items-end justify-around',
+			'dock-zoom flex w-full items-end justify-center gap-0.5 overflow-visible',
 			!embedded && 'max-md:hidden',
 		]}
 		onmouseenter={() => {
@@ -163,12 +163,14 @@
 				prefetch(replace_framework_from_pathname(framework.name));
 			}
 		}}
-		onmousemove={(e) => !is_tablet.current && (dock_mouse_x = e.clientX)}
+		onmousemove={(e) => {
+			if (enable_dock_zoom.current) dock_mouse_x = e.clientX;
+		}}
 		onmouseleave={() => (dock_mouse_x = null)}
 	>
 		{#each frameworks as name}
 			<a
-				class="unstyled origin-bottom transition-transform duration-150 ease-in hover:scale-105"
+				class="unstyled flex origin-bottom items-end"
 				href={replace_framework_from_pathname(name)}
 				onclick={() => menu_view.toggle()}
 			>

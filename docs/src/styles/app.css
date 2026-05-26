@@ -263,6 +263,12 @@
 		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--app-color-primary) 12%);
 	}
 
+	.dock-zoom :global(svg) {
+		max-width: none !important;
+		width: auto !important;
+		height: auto !important;
+	}
+
 	.docs-prose {
 		@apply max-w-[min(68ch,100%)];
 	}
