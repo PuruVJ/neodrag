@@ -102,27 +102,45 @@
 		&,
 		&:visited {
 			display: block;
-			padding: 0.25rem 0.75rem;
+			padding: 0.35rem 0.75rem;
 			text-decoration: none;
-			color: color-mix(in lch, var(--app-color-light), var(--app-color-anti-mixer) 90%);
+			color: color-mix(in lch, var(--app-color-light), var(--app-color-anti-mixer) 88%);
 			font-family: var(--app-font-mono);
-			font-size: 1rem;
-			border-radius: 4px;
-			transition: background-color 0.05s ease-in;
+			font-size: 0.88rem;
+			font-weight: 600;
+			border: 2px solid transparent;
+			border-left: 2px solid transparent;
+			transition:
+				background-color 75ms ease,
+				border-color 75ms ease,
+				color 75ms ease;
 			margin: 0;
+			clip-path: polygon(
+				0.35rem 0%,
+				100% 0%,
+				100% calc(100% - 0.35rem),
+				calc(100% - 0.35rem) 100%,
+				0% 100%,
+				0% 0.35rem
+			);
 		}
 
 		&:hover {
-			background-color: color-mix(in lch, var(--secondary-color), transparent 90%);
+			background-color: color-mix(in lch, var(--app-color-primary), transparent 90%);
+			border-color: color-mix(in lch, var(--app-color-primary), transparent 55%);
 		}
 	}
 
 	hr {
 		margin: 1rem 0;
 		border: none;
-		height: 1px;
-		box-shadow: inset 0 0 0 2px
-			color-mix(in lch, var(--secondary-color), var(--app-color-mixer) 50%);
+		height: 2px;
+		background: linear-gradient(
+			90deg,
+			var(--app-color-primary),
+			color-mix(in lch, var(--app-color-primary), transparent 75%),
+			transparent
+		);
 	}
 
 	.spacer {
@@ -130,17 +148,26 @@
 	}
 
 	.group .title {
-		font-size: 0.75rem;
-		font-weight: 600;
+		font-size: 0.68rem;
+		font-weight: 800;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		color: var(--app-color-light-contrast);
-		margin-bottom: 1ch;
+		letter-spacing: 0.18em;
+		color: var(--app-color-primary);
+		margin-bottom: 0.65ch;
+		padding-left: 0.15rem;
+	}
+
+	.group .title::before {
+		content: '▍';
+		margin-right: 0.35rem;
 	}
 
 	.group a {
 		&[aria-current='page'] {
-			background-color: color-mix(in lch, var(--secondary-color), transparent 80%);
+			background-color: color-mix(in lch, var(--app-color-primary), transparent 85%);
+			border-left-color: var(--app-color-primary);
+			color: var(--app-color-light);
+			font-weight: 800;
 		}
 	}
 

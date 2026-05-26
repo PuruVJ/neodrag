@@ -25,7 +25,14 @@
 	const SelectedIcon = $derived(ICONS[theme.preference]);
 </script>
 
-<div class={['theme-switcher', thumbnail && 'thumbnail', embedded && 'embedded']}>
+<div
+	class={[
+		'theme-switcher',
+		'dock-angular-chip',
+		thumbnail && 'thumbnail',
+		embedded && 'embedded',
+	]}
+>
 	{#if thumbnail}
 		<button class="theme-button" {onclick}>
 			<SelectedIcon />
@@ -80,8 +87,8 @@
 		padding: 0 0.28rem;
 		margin: 0.2rem;
 
-		background-color: color-mix(in lch, var(--app-color-dark), transparent 95%);
-		border-radius: 0.5rem;
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 94%);
+		border: 2px solid var(--dock-border);
 
 		&.embedded {
 			/* Remove margins and adjust padding */
@@ -102,16 +109,26 @@
 
 	.indicator {
 		position: absolute;
-		top: 0.25rem;
-		left: 0.28rem;
-		width: calc(33.333% - 0.187rem);
-		height: calc(100% - 0.5rem);
-		background-color: color-mix(in lch, var(--app-color-dark), transparent 85%);
-		border-radius: 0.25rem;
+		top: 0.3rem;
+		left: 0.32rem;
+		width: calc(33.333% - 0.2rem);
+		height: calc(100% - 0.6rem);
+		background-color: color-mix(in lch, var(--app-color-primary), transparent 82%);
+		border: 1px solid color-mix(in lch, var(--app-color-primary), transparent 55%);
 		pointer-events: none;
 		z-index: 1;
 		transform: translateX(0);
 		transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+		clip-path: polygon(
+			0.3rem 0%,
+			calc(100% - 0.3rem) 0%,
+			100% 0.3rem,
+			100% calc(100% - 0.3rem),
+			calc(100% - 0.3rem) 100%,
+			0.3rem 100%,
+			0% calc(100% - 0.3rem),
+			0% 0.3rem
+		);
 	}
 
 	/* Indicator position classes */
@@ -132,16 +149,16 @@
 		z-index: 2;
 		flex: 1;
 		padding: 0.5rem;
-		border-radius: 0.25rem;
 		margin: 0.25rem 0;
 		background: transparent;
-		border: none;
+		border: 2px solid transparent;
 		display: flex;
 		justify-content: center;
 		cursor: pointer;
-
 		color: color-mix(in lch, var(--app-color-dark), transparent 90%);
-		transition: color 0.2s ease;
+		transition:
+			color 0.2s ease,
+			border-color 75ms ease;
 
 		:global {
 			svg {

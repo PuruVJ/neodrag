@@ -78,7 +78,7 @@
 
 <section class="dock-container">
 	<div
-		class={['dock-el', menu_view.open && 'menu-open']}
+		class={['dock-el', 'dock-angular', menu_view.open && 'menu-open dock-angular--bar']}
 		{@attach dockDrag.attachment}
 		{@attach interact_outside(() => menu_view.close())}
 	>
@@ -227,11 +227,7 @@
 	}
 
 	.dock-container {
-		--background-color: color-mix(
-			in lch,
-			var(--secondary-color, var(--app-color-primary)),
-			var(--app-color-mixer) 60%
-		);
+		--background-color: var(--dock-surface);
 
 		display: flex;
 		gap: clamp(2rem, 10vw, 8rem);
@@ -272,17 +268,16 @@
 		flex-direction: column;
 
 		background-color: var(--background-color);
-
+		border: 2px solid var(--dock-border);
 		box-shadow:
-			inset 0 0 0 0.2px color-mix(in lch, var(--gray-1), transparent 30%),
-			0 0 0 0.2px color-mix(in lch, var(--gray-9), transparent 30%),
-			hsla(0, 0%, 0%, 0.3) 2px 5px 19px 7px;
+			var(--dock-accent-glow),
+			inset 0 1px 0 color-mix(in lch, var(--app-color-anti-mixer), transparent 88%),
+			var(--dock-shadow);
+		backdrop-filter: blur(18px) saturate(1.12);
 
 		position: relative;
 
-		padding: 0.3rem;
-
-		border-radius: 25rem;
+		padding: 0.35rem 0.45rem;
 
 		height: 100%;
 
@@ -303,6 +298,8 @@
 		}
 
 		.main {
+			position: relative;
+			z-index: 1;
 			display: flex;
 			height: 100%;
 			width: 100%;
@@ -340,10 +337,24 @@
 		}
 
 		@media (--tablet) {
-			border-radius: 2rem;
-			width: 95%;
+			width: min(96%, 40rem);
 			bottom: 0.5rem;
 			height: auto;
+		}
+
+		&::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			pointer-events: none;
+			background: linear-gradient(
+				135deg,
+				color-mix(in lch, var(--app-color-primary), transparent 88%) 0%,
+				transparent 35%,
+				transparent 65%,
+				color-mix(in lch, var(--app-color-primary), transparent 92%) 100%
+			);
+			opacity: 0.55;
 		}
 	}
 
@@ -379,23 +390,54 @@
 	}
 
 	.divider {
-		height: 100%;
-		width: 0.2px;
-
-		background-color: color-mix(in lch, var(--app-color-dark), transparent 70%);
-
-		margin: 0 4px;
+		align-self: stretch;
+		width: 2px;
+		min-height: 2.25rem;
+		margin: 0.35rem 0.15rem;
+		background: linear-gradient(
+			180deg,
+			transparent,
+			var(--dock-border-strong) 18%,
+			var(--dock-border-strong) 82%,
+			transparent
+		);
 	}
 
 	.handle,
-	.menu {
+	.menu button {
 		height: 100%;
-		width: 4rem;
+		min-width: 3.25rem;
+		padding: 0.65rem;
+		display: grid;
+		place-items: center;
+		font-size: 1.35rem;
+		border: 2px solid transparent;
+		background: transparent;
+		color: color-mix(in lch, var(--app-color-dark), transparent 28%);
+		transition:
+			border-color 75ms ease,
+			color 75ms ease,
+			background-color 75ms ease;
+	}
 
-		padding: 0.75rem;
-		display: flex;
+	.handle:hover,
+	.handle:focus-visible,
+	.menu button:hover,
+	.menu button:focus-visible {
+		border-color: color-mix(in lch, var(--app-color-primary), transparent 45%);
+		background: color-mix(in lch, var(--app-color-primary), transparent 90%);
+		color: var(--app-color-primary);
+	}
 
-		font-size: 1.4rem;
+	.handle {
+		clip-path: polygon(
+			var(--dock-cut-sm) 0%,
+			100% 0%,
+			100% calc(100% - var(--dock-cut-sm)),
+			calc(100% - var(--dock-cut-sm)) 100%,
+			0% 100%,
+			0% var(--dock-cut-sm)
+		);
 
 		@media (--tablet) {
 			display: none;
@@ -403,8 +445,14 @@
 	}
 
 	.menu {
-		display: flex;
-		padding: 0.75rem;
+		display: none;
+
+		@media (--tablet) {
+			display: flex;
+		}
+	}
+
+	.menu button {
 		width: 3rem;
 
 		:global {
@@ -415,14 +463,31 @@
 	}
 
 	.github {
-		display: flex;
+		display: grid;
+		place-items: center;
 		height: 100%;
-		padding: 0.75rem;
-
+		min-width: 3rem;
+		padding: 0.65rem;
+		border: 2px solid transparent;
 		color: color-mix(in lch, var(--app-color-dark), transparent 25%) !important;
+		clip-path: polygon(
+			0% var(--dock-cut-sm),
+			var(--dock-cut-sm) 0%,
+			100% 0%,
+			100% calc(100% - var(--dock-cut-sm)),
+			calc(100% - var(--dock-cut-sm)) 100%,
+			0% 100%
+		);
+		transition:
+			border-color 75ms ease,
+			color 75ms ease,
+			background-color 75ms ease;
 
-		&:hover {
-			color: color-mix(in lch, var(--app-color-dark), transparent 5%) !important;
+		&:hover,
+		&:focus-visible {
+			border-color: color-mix(in lch, var(--app-color-primary), transparent 45%);
+			background: color-mix(in lch, var(--app-color-primary), transparent 90%);
+			color: var(--app-color-primary) !important;
 		}
 
 		:global {

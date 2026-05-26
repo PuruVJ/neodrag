@@ -84,7 +84,10 @@
 	});
 </script>
 
-<button aria-label="Launch {framework} page" class="dock-open-app-button">
+<button
+	aria-label="Launch {framework} page"
+	class={['dock-open-app-button', selected && 'is-selected']}
+>
 	{#if !embedded}
 		<p
 			class={['tooltip', theme.current === 'dark' && 'dark']}
@@ -139,13 +142,28 @@
 		gap: 0.2rem;
 		position: relative;
 
-		padding: 0.75rem;
-		padding-bottom: 7px;
-
-		border-radius: 0.5rem;
+		padding: 0.7rem 0.75rem 6px;
+		border: 2px solid transparent;
+		background: transparent;
+		clip-path: polygon(
+			var(--dock-cut-sm) 0%,
+			calc(100% - var(--dock-cut-sm)) 0%,
+			100% var(--dock-cut-sm),
+			100% calc(100% - var(--dock-cut-sm)),
+			calc(100% - var(--dock-cut-sm)) 100%,
+			var(--dock-cut-sm) 100%,
+			0% calc(100% - var(--dock-cut-sm)),
+			0% var(--dock-cut-sm)
+		);
+		transition:
+			border-color 75ms ease,
+			background-color 75ms ease;
 
 		&:hover,
 		&:focus-visible {
+			border-color: color-mix(in lch, var(--app-color-primary), transparent 50%);
+			background: color-mix(in lch, var(--app-color-primary), transparent 92%);
+
 			.tooltip {
 				display: block;
 			}
@@ -158,6 +176,11 @@
 		}
 	}
 
+	button.is-selected {
+		border-color: var(--app-color-primary);
+		background: color-mix(in lch, var(--app-color-primary), transparent 88%);
+	}
+
 	.embedded-text {
 		color: color-mix(in lch, var(--app-color-light-contrast), transparent 20%);
 		/* font-family: var(--system-font-family); */
@@ -168,47 +191,39 @@
 	}
 
 	.tooltip {
-		--double-border: 0 0 0 0 white;
-
 		white-space: nowrap;
 		line-height: 1;
-
 		position: absolute;
-
-		background-color: var(--background-color);
-
-		padding: 0.5rem 0.875rem;
-		border-radius: 2rem;
-
-		box-shadow:
-			hsla(0deg, 0%, 0%, 30%) 0px 1px 5px 2px,
-			var(--double-border);
-
-		color: var(--app-color-light-contrast);
-		/* font-family: var(--system-font-family); */
-		font-weight: 400;
-		font-size: 15px;
-		letter-spacing: 0.4px;
-
+		background-color: var(--dock-surface-strong);
+		padding: 0.45rem 0.75rem;
+		border: 2px solid var(--dock-border-strong);
+		box-shadow: var(--dock-shadow);
+		color: var(--app-color-dark);
+		font-family: var(--app-font-mono);
+		font-weight: 800;
+		font-size: 0.68rem;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
 		display: none;
-
-		&.dark {
-			--double-border:
-				inset 0 0 0 0.9px color-mix(in lch, var(--app-color-dark), transparent 70%),
-				0 0 0 1.2px color-mix(in lch, var(--app-color-light), transparent 70%);
-		}
+		clip-path: polygon(
+			0.35rem 0%,
+			calc(100% - 0.35rem) 0%,
+			100% 0.35rem,
+			100% calc(100% - 0.35rem),
+			calc(100% - 0.35rem) 100%,
+			0.35rem 100%,
+			0% calc(100% - 0.35rem),
+			0% 0.35rem
+		);
 	}
 
 	.dot {
-		height: 4px;
-		width: 4px;
-
-		margin: 0px;
-
-		border-radius: 50%;
-
-		background-color: var(--app-color-dark);
-
+		height: 3px;
+		width: 1.1rem;
+		margin: 0;
+		border-radius: 0;
+		background-color: var(--app-color-primary);
 		opacity: var(--opacity);
+		clip-path: polygon(0 0, 100% 0, calc(100% - 2px) 100%, 2px 100%);
 	}
 </style>
