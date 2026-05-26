@@ -88,7 +88,7 @@ Returns a `DropHandle` for drop targets. Same reactive `PluginInput` shape as dr
 
 Returns a `ResizeHandle` for resize targets. **Numbers are always px.** CSS unit strings (`'10rem'`, `'50%'`) require opt-in per binding.
 
-**`SizeInput` strings** must be a **single** length (`'10rem'`, `'92vw'`) — not `min()`, `max()`, `clamp()`, or `fr`. TypeScript exposes this as `CssLengthString`; see **[Resize → SizeInput](/plugin/13-resize#sizeinput)** for the full unit list and examples.
+**`SizeInput` strings** must be a **single** length (`'10rem'`, `'92vw'`) — not `min()`, `max()`, `clamp()`, or `fr`. See **[Length & SizeInput](/docs/svelte/reference/length)** for units, types, and examples.
 
 ```typescript
 import { Neodrag, Length } from '@neodrag/core';

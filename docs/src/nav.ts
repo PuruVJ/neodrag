@@ -7,6 +7,9 @@ const migrations_collection = (await getCollection('migration')).sort((a, b) =>
 	a.id > b.id ? 1 : -1,
 );
 const plugin_collection = (await getCollection('plugin')).sort((a, b) => (a.id > b.id ? 1 : -1));
+const reference_collection = (await getCollection('reference')).sort((a, b) =>
+	a.id > b.id ? 1 : -1,
+);
 
 export function get_nav_list(framework: string) {
 	framework = !framework || framework === 'core' ? 'svelte' : framework;
@@ -23,6 +26,13 @@ export function get_nav_list(framework: string) {
 			title: 'plugin',
 			sections: plugin_collection.map((v) => ({
 				slug: `/docs/${framework}/plugin/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
+				title: v.data.nav_title ?? v.data.title,
+			})),
+		},
+		{
+			title: 'reference',
+			sections: reference_collection.map((v) => ({
+				slug: `/docs/${framework}/reference/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
 				title: v.data.nav_title ?? v.data.title,
 			})),
 		},

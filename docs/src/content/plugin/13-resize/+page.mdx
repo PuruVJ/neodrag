@@ -14,38 +14,7 @@ Built-in plugins live under `@neodrag/core/resize` (and framework `/resize` re-e
 
 Numbers in plugin options are always **px**. Strings like `'10rem'` or `'50%'` require `length: new Length()` on the **binding** (not on `Neodrag.shared`).
 
-### SizeInput
-
-Any option typed as `SizeInput` (bounds, handle `size`, grid steps, etc.) accepts:
-
-- a **number** — treated as **px**, or
-- a **single CSS length string** — one numeric token glued to one supported unit.
-
-TypeScript models that as `CssLengthString`:
-
-```typescript
-import type { CssLengthString, CssLengthUnit, SizeInput } from '@neodrag/core';
-
-// `${number}${unit}` — examples that type-check:
-const a: CssLengthString = '10rem';
-const b: CssLengthString = '92vw';
-const c: CssLengthString = '-4px';
-
-// These do NOT satisfy CssLengthString (and throw at runtime if passed anyway):
-// 'min(92vw, 720px)'
-// 'clamp(200px, 50%, 800px)'
-// '1fr' | 'auto' | '10 px' (space before unit)
-```
-
-**Supported units** (same list as `CSS_LENGTH_UNITS` in `@neodrag/core`):
-
-`px` · `%` · `rem` · `em` · `ch` · `ex` · `vw` · `vh` · `vmin` · `vmax` · `svw` · `svh` · `lvw` · `lvh` · `dvw` · `dvh`
-
-**Not supported yet:** CSS math (`min()`, `max()`, `clamp()`, `calc()`), grid `fr`, keywords (`auto`, `fit-content`), or multi-value strings. Use a plain number for a px cap, pick one unit (e.g. `'92vw'`), or compute the limit in JavaScript and pass a number.
-
-**Widened strings:** a value typed as `string` is not checked. Prefer literals, `as const`, or keep the variable typed as `CssLengthString` / `SizeInput`.
-
-**Without `Length`:** only numbers work; unit strings throw with a hint to add `length: new Length()`.
+See **[Length & SizeInput](/docs/svelte/reference/length)** for supported units, TypeScript `CssLengthString` constraints, what is not allowed (`min()`, `clamp()`, …), and where `SizeInput` is used across drag and resize.
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -142,30 +111,15 @@ function Panel() {
 
 - **`new Length({ units: 'preserve' })`** (default): after resize, keep authored units (`50%` stays `%`).
 - **`new Length({ units: 'px' })`**: always write px strings.
+- **`minSize` / `maxSize`** on `Resizable` — see [Length & SizeInput](/docs/svelte/reference/length#minsize--maxsize-on-resizable).
 - **Cancel** (`Escape` via keyboard sensor): restores size at pointer-down.
-
-### `minSize` / `maxSize` on `Resizable`
-
-Framework `Resizable` bindings (and `ResizableOptions` in core) accept bounds without a separate plugin:
-
-```typescript
-new Resizable({
-  length: new Length(),
-  minSize: { width: 220, height: 140 },
-  maxSize: { width: '92vw', height: '82vh' },
-  // minSize: 40 — shorthand: same limit on width and height
-  plugins: [resizeHandles({ edges: 'all' })],
-});
-```
-
-Values follow the same **`SizeInput`** rules above. This injects `sizeBounds` for you; if you also pass `sizeBounds()` in `plugins`, the binding options win.
 
 ## Plugins
 
 | Plugin | Purpose |
 |--------|---------|
 | `resizeHandles` | Creates edge/corner handles (`data-neodrag-resize-handle`) |
-| `sizeBounds` | `minWidth` / `maxWidth` / `minHeight` / `maxHeight`, optional `parent` clamp (or use `minSize` / `maxSize` on `Resizable`) |
+| `sizeBounds` | `minWidth` / `maxWidth` / `minHeight` / `maxHeight`, optional `parent` clamp (or [`minSize` / `maxSize`](/docs/svelte/reference/length#minsize--maxsize-on-resizable) on `Resizable`) |
 | `resizeAxis` | Lock to `'x'`, `'y'`, or `'both'` |
 | `aspectRatio` | Fixed ratio or `'preserve'` initial ratio |
 | `resizeEvents` | `onStart` / `onResize` / `onEnd` with `size`, `sizePx`, `initial` |

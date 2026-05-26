@@ -40,8 +40,21 @@ const plugin = defineCollection({
 	}),
 });
 
+const reference = defineCollection({
+	loader: glob({
+		pattern: '**/+page.mdx',
+		base: './src/content/reference',
+	}),
+	schema: z.object({
+		title: z.string(),
+		tagline: z.string(),
+		nav_title: z.string().optional(),
+	}),
+});
+
 export const collections = {
 	framework,
 	migration,
 	plugin,
+	reference,
 };
