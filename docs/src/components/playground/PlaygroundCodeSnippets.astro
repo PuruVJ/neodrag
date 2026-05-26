@@ -1,0 +1,71 @@
+---
+import { Code } from 'astro/components';
+import type { Framework } from '$helpers/constants';
+import { FRAMEWORK_TABS } from './frameworks';
+import { get_snippet, LANG_BY_FRAMEWORK } from './snippet-templates';
+import { WORLDS, type WorldId } from './worlds';
+
+const SHIKI_THEMES = {
+	light: 'github-light',
+	dark: 'github-dark',
+} as const;
+---
+
+<div class="playground-snippets">
+	{
+		WORLDS.map((world) =>
+			FRAMEWORK_TABS.map((tab) => (
+				<div
+					class="playground-snippet"
+					data-world={world.id}
+					data-framework={tab.id}
+					hidden
+				>
+					<Code
+						code={get_snippet(world.id as WorldId, tab.id as Framework)}
+						lang={LANG_BY_FRAMEWORK[tab.id]}
+						themes={SHIKI_THEMES}
+						wrap
+					/>
+				</div>
+			)),
+		)
+	}
+</div>
+
+<style>
+	.playground-snippets {
+		position: relative;
+		min-height: 100%;
+	}
+
+	.playground-snippet[hidden] {
+		display: none !important;
+	}
+
+	.playground-snippet:not([hidden]) {
+		display: block;
+	}
+
+	.playground-snippet :global(pre.astro-code) {
+		margin: 0;
+		padding: 0;
+		overflow-x: auto;
+		background: transparent !important;
+		font-size: inherit !important;
+		line-height: inherit !important;
+	}
+
+	.playground-snippet :global(pre.astro-code code) {
+		display: block;
+		font-family: var(--app-font-mono);
+		background: transparent;
+		white-space: pre-wrap;
+		word-break: break-word;
+	}
+
+	.playground-snippet :global(.astro-code .line) {
+		display: inline-block;
+		width: 100%;
+	}
+</style>

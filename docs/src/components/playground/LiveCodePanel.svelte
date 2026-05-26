@@ -1,28 +1,29 @@
 <script lang="ts">
 	import type { Framework } from '$helpers/constants';
+	import type { Snippet } from 'svelte';
 	import CheckIcon from '~icons/mdi/check';
 	import ContentCopyIcon from '~icons/mdi/content-copy';
 	import { FRAMEWORK_TABS } from './frameworks';
-	import HighlightedCode from './HighlightedCode.svelte';
-	import { get_snippet, LANG_BY_FRAMEWORK } from './snippet-templates';
+	import { get_snippet } from './snippet-templates';
 	import type { WorldId } from './worlds';
 
 	type Props = {
 		world: WorldId;
 		framework: Framework;
 		onframework: (id: Framework) => void;
+		snippets?: Snippet;
 	};
 
-	const { world, framework, onframework }: Props = $props();
+	const { world, framework, onframework, snippets }: Props = $props();
 
-	const snippet = $derived(get_snippet(world, framework));
-	const lang = $derived(LANG_BY_FRAMEWORK[framework]);
+	const snippet_text = $derived(get_snippet(world, framework));
 
 	let copied = $state(false);
 	let copy_timer: ReturnType<typeof setTimeout> | undefined;
+	let snippets_host: HTMLDivElement | undefined;
 
 	async function copy_snippet() {
-		await navigator.clipboard.writeText(snippet);
+		await navigator.clipboard.writeText(snippet_text);
 		copied = true;
 		clearTimeout(copy_timer);
 		copy_timer = setTimeout(() => (copied = false), 1600);
@@ -31,6 +32,22 @@
 	const docs_href = $derived(
 		FRAMEWORK_TABS.find((t) => t.id === framework)?.docsPath ?? '/docs/svelte',
 	);
+
+	function sync_visible_snippet() {
+		if (!snippets_host) return;
+
+		for (const block of snippets_host.querySelectorAll<HTMLElement>('.playground-snippet')) {
+			const match =
+				block.dataset.world === world && block.dataset.framework === framework;
+			block.toggleAttribute('hidden', !match);
+		}
+	}
+
+	$effect(() => {
+		world;
+		framework;
+		sync_visible_snippet();
+	});
 </script>
 
 <aside class="code-panel" aria-label="Code for this scene">
@@ -63,10 +80,10 @@
 		{/each}
 	</div>
 
-	<div class="code-body">
-		{#key `${world}-${framework}`}
-			<HighlightedCode code={snippet} {lang} />
-		{/key}
+	<div class="code-body" bind:this={snippets_host}>
+		{#if snippets}
+			{@render snippets()}
+		{/if}
 	</div>
 </aside>
 
@@ -189,5 +206,7 @@
 		padding: 0.75rem 0.85rem;
 		border-radius: 0.6rem;
 		background-color: color-mix(in lch, var(--app-color-dark), transparent 94%);
+		font-size: clamp(0.78rem, 1.2vw, 0.9rem);
+		line-height: 1.5;
 	}
 </style>

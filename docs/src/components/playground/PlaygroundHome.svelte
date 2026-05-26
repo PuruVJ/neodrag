@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { browser } from '$helpers/utils';
 	import { theme } from '$state/user-preferences.svelte';
 	import LiveCodePanel from './LiveCodePanel.svelte';
@@ -11,6 +12,12 @@
 		parse_world_from_hash,
 		type WorldId,
 	} from './worlds';
+
+	type Props = {
+		snippets?: Snippet;
+	};
+
+	const { snippets }: Props = $props();
 
 	theme.current;
 
@@ -50,7 +57,7 @@
 
 		<div class="playground-divider divider" aria-hidden="true"></div>
 
-		<LiveCodePanel {world} {framework} onframework={(id) => (framework = id)} />
+		<LiveCodePanel {world} {framework} onframework={(id) => (framework = id)} {snippets} />
 	</section>
 </div>
 
