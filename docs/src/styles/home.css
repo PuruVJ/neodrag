@@ -4,10 +4,14 @@
 	--pg-muted: color-mix(in lch, var(--pg-fg), transparent 32%);
 	--pg-muted-soft: color-mix(in lch, var(--pg-fg), transparent 50%);
 	--pg-tint: var(--app-color-anti-mixer);
-	--pg-panel: color-mix(in lch, var(--pg-tint), transparent 96%);
-	--pg-panel-strong: color-mix(in lch, var(--pg-tint), transparent 92%);
-	--pg-border: color-mix(in lch, var(--pg-fg), transparent 78%);
-	--pg-border-strong: color-mix(in lch, var(--pg-fg), transparent 62%);
+	--pg-grid-cell: 3.25rem;
+	--pg-grid-line: color-mix(in lch, var(--pg-fg), transparent 84%);
+	--pg-grid-major: color-mix(in lch, var(--pg-accent), transparent 62%);
+	--pg-grid-dot: color-mix(in lch, var(--pg-accent), transparent 78%);
+	--pg-panel: color-mix(in lch, var(--app-color-shell), var(--pg-accent) 2.5%);
+	--pg-panel-strong: color-mix(in lch, var(--app-color-shell), var(--pg-accent) 4%);
+	--pg-border: color-mix(in lch, var(--pg-fg), transparent 72%);
+	--pg-border-strong: color-mix(in lch, var(--pg-fg), transparent 55%);
 	--pg-well: color-mix(in lch, var(--pg-fg), transparent 88%);
 	--pg-well-inset: color-mix(in lch, var(--pg-tint), transparent 82%);
 	--pg-code-bg: color-mix(in lch, var(--pg-fg), transparent 90%);
@@ -31,6 +35,9 @@
 }
 
 body[data-theme='dark'] .home-playground {
+	--pg-grid-line: color-mix(in lch, var(--pg-tint), transparent 90%);
+	--pg-grid-major: color-mix(in lch, var(--pg-accent), transparent 72%);
+	--pg-grid-dot: color-mix(in lch, var(--pg-accent), transparent 82%);
 	--pg-panel: color-mix(in lch, var(--pg-tint), transparent 97%);
 	--pg-panel-strong: color-mix(in lch, var(--pg-tint), transparent 94%);
 	--pg-well: color-mix(in lch, var(--pg-tint), transparent 90%);
@@ -59,35 +66,71 @@ body[data-theme='dark'] .home-playground {
 	position: fixed;
 	inset: 0;
 	z-index: 0;
+	overflow: hidden;
 	background-color: var(--app-color-shell);
-	background-image:
-		radial-gradient(ellipse 140% 100% at 50% -35%, color-mix(in lch, var(--pg-accent), transparent 72%), transparent 58%),
-		radial-gradient(ellipse 90% 70% at 100% 40%, color-mix(in lch, var(--pg-accent), transparent 88%), transparent 52%),
-		radial-gradient(ellipse 70% 55% at 0% 75%, color-mix(in lch, var(--pg-accent), transparent 92%), transparent 48%),
-		radial-gradient(ellipse 120% 80% at 50% 120%, color-mix(in lch, var(--pg-fg), transparent 94%), transparent 55%),
-		repeating-linear-gradient(
-			108deg,
-			transparent,
-			transparent 2px,
-			color-mix(in lch, var(--pg-fg), transparent 95.5%) 2px,
-			color-mix(in lch, var(--pg-fg), transparent 95.5%) 3px
-		);
-	background-attachment: fixed;
 }
 
-body[data-theme='dark'] .pg-backdrop {
+.pg-backdrop-grid {
+	position: absolute;
+	inset: 0;
+	background-color: color-mix(in lch, var(--app-color-shell), var(--pg-accent) 3%);
 	background-image:
-		radial-gradient(ellipse 150% 110% at 50% -40%, color-mix(in lch, var(--pg-accent), transparent 65%), transparent 52%),
-		radial-gradient(ellipse 80% 60% at 100% 15%, color-mix(in lch, var(--pg-accent), transparent 82%), transparent 45%),
-		radial-gradient(ellipse 65% 50% at 0% 85%, color-mix(in lch, var(--pg-accent), transparent 88%), transparent 42%),
-		radial-gradient(ellipse 100% 70% at 50% 110%, color-mix(in lch, var(--pg-fg), transparent 96%), transparent 50%),
-		repeating-linear-gradient(
-			108deg,
-			transparent,
-			transparent 2px,
-			color-mix(in lch, var(--pg-tint), transparent 94%) 2px,
-			color-mix(in lch, var(--pg-tint), transparent 94%) 3px
+		radial-gradient(circle at center, var(--pg-grid-dot) 1px, transparent 1px),
+		linear-gradient(var(--pg-grid-major) 1px, transparent 1px),
+		linear-gradient(90deg, var(--pg-grid-major) 1px, transparent 1px),
+		linear-gradient(var(--pg-grid-line) 1px, transparent 1px),
+		linear-gradient(90deg, var(--pg-grid-line) 1px, transparent 1px);
+	background-size:
+		var(--pg-grid-cell) var(--pg-grid-cell),
+		calc(var(--pg-grid-cell) * 4) calc(var(--pg-grid-cell) * 4),
+		calc(var(--pg-grid-cell) * 4) calc(var(--pg-grid-cell) * 4),
+		var(--pg-grid-cell) var(--pg-grid-cell),
+		var(--pg-grid-cell) var(--pg-grid-cell);
+	background-position: center center;
+	mask-image: radial-gradient(ellipse 120% 95% at 50% 42%, black 35%, transparent 88%);
+}
+
+.pg-backdrop-glow {
+	position: absolute;
+	inset: 0;
+	background-image:
+		radial-gradient(ellipse 130% 95% at 50% -28%, color-mix(in lch, var(--pg-accent), transparent 48%), transparent 62%),
+		radial-gradient(ellipse 75% 55% at 100% 18%, color-mix(in lch, var(--pg-accent), transparent 72%), transparent 50%),
+		radial-gradient(ellipse 65% 50% at 0% 72%, color-mix(in lch, var(--pg-accent), transparent 78%), transparent 48%),
+		linear-gradient(
+			165deg,
+			color-mix(in lch, var(--pg-accent), transparent 92%) 0%,
+			transparent 38%,
+			transparent 62%,
+			color-mix(in lch, var(--pg-fg), transparent 96%) 100%
 		);
+}
+
+body[data-theme='dark'] .pg-backdrop-grid {
+	background-color: color-mix(in lch, var(--app-color-shell), var(--pg-accent) 5%);
+	mask-image: radial-gradient(ellipse 115% 90% at 50% 40%, black 30%, transparent 85%);
+}
+
+body[data-theme='dark'] .pg-backdrop-glow {
+	background-image:
+		radial-gradient(ellipse 150% 110% at 50% -38%, color-mix(in lch, var(--pg-accent), transparent 52%), transparent 55%),
+		radial-gradient(ellipse 80% 60% at 100% 12%, color-mix(in lch, var(--pg-accent), transparent 70%), transparent 45%),
+		radial-gradient(ellipse 65% 50% at 0% 82%, color-mix(in lch, var(--pg-accent), transparent 76%), transparent 42%),
+		linear-gradient(180deg, transparent 55%, color-mix(in lch, var(--pg-fg), transparent 97%) 100%);
+}
+
+.pg-backdrop-vignette {
+	position: absolute;
+	inset: 0;
+	background-image:
+		radial-gradient(ellipse 85% 70% at 50% 50%, transparent 42%, color-mix(in lch, var(--app-color-shell), transparent 15%) 100%),
+		linear-gradient(180deg, color-mix(in lch, var(--app-color-shell), transparent 8%) 0%, transparent 18%, transparent 82%, color-mix(in lch, var(--app-color-shell), transparent 12%) 100%);
+}
+
+body[data-theme='dark'] .pg-backdrop-vignette {
+	background-image:
+		radial-gradient(ellipse 90% 75% at 50% 48%, transparent 38%, color-mix(in lch, var(--app-color-shell), transparent 8%) 100%),
+		linear-gradient(180deg, color-mix(in lch, var(--app-color-shell), transparent 25%) 0%, transparent 22%, transparent 78%, color-mix(in lch, var(--app-color-shell), transparent 35%) 100%);
 }
 
 .pg-inner {
@@ -116,9 +159,14 @@ body[data-theme='dark'] .pg-backdrop {
 	font-weight: 900;
 	line-height: 0.88;
 	letter-spacing: -0.08em;
-	color: color-mix(in lch, var(--pg-accent), transparent 82%);
+	color: color-mix(in lch, var(--pg-accent), transparent 78%);
+	text-shadow: 0 0 80px color-mix(in lch, var(--pg-accent), transparent 55%);
 	pointer-events: none;
 	user-select: none;
+}
+
+body:not([data-theme='dark']) .hp-watermark {
+	color: color-mix(in lch, var(--pg-accent), transparent 72%);
 }
 
 .hp-masthead-main {
@@ -251,7 +299,8 @@ body[data-theme='dark'] .pg-backdrop {
 	text-decoration: none;
 	color: var(--pg-muted);
 	border: 2px solid var(--pg-border);
-	background: color-mix(in lch, var(--pg-tint), transparent 96%);
+	background: color-mix(in lch, var(--app-color-shell), transparent 22%);
+	backdrop-filter: blur(8px);
 	transition:
 		border-color 75ms ease,
 		color 75ms ease,
@@ -383,11 +432,23 @@ body[data-theme='dark'] .pg-backdrop {
 	min-height: min(88vh, 52rem);
 	padding: clamp(1.15rem, 3vw, 2rem);
 	scroll-margin-top: 5.5rem;
-	background: var(--pg-panel);
+	background: color-mix(in lch, var(--pg-panel), transparent 6%);
 	border: 2px solid var(--pg-border);
 	box-shadow:
-		0 0 0 1px color-mix(in lch, var(--pg-accent), transparent 90%),
-		0 24px 48px -32px color-mix(in lch, var(--pg-fg), transparent 88%);
+		0 0 0 1px color-mix(in lch, var(--pg-accent), transparent 82%),
+		0 1px 0 color-mix(in lch, var(--pg-tint), transparent 92%) inset,
+		0 28px 56px -36px color-mix(in lch, var(--pg-fg), transparent 84%);
+	backdrop-filter: blur(14px) saturate(1.15);
+}
+
+body:not([data-theme='dark']) .hp-scenario-section {
+	background: color-mix(in lch, var(--app-color-shell), transparent 14%);
+	border-color: color-mix(in lch, var(--pg-accent), transparent 78%);
+	box-shadow:
+		0 0 0 1px color-mix(in lch, var(--pg-accent), transparent 70%),
+		0 1px 0 color-mix(in lch, var(--pg-tint), transparent 88%) inset,
+		0 32px 64px -40px color-mix(in lch, var(--pg-accent), transparent 82%),
+		0 12px 32px -24px color-mix(in lch, var(--pg-fg), transparent 90%);
 }
 
 .hp-scenario-section.is-soon .hp-play-grid {
@@ -625,10 +686,20 @@ body[data-theme='dark'] .pg-backdrop {
 	min-height: min(100%, 24rem);
 	position: relative;
 	overflow: hidden;
-	background: var(--pg-well);
+	background-color: var(--pg-well);
+	background-image:
+		linear-gradient(var(--pg-grid-line) 1px, transparent 1px),
+		linear-gradient(90deg, var(--pg-grid-line) 1px, transparent 1px);
+	background-size: var(--pg-grid-cell) var(--pg-grid-cell);
 	border: 2px solid var(--pg-border);
 	border-radius: 0.5rem;
-	box-shadow: inset 0 2px 0 var(--pg-well-inset);
+	box-shadow:
+		inset 0 2px 0 var(--pg-well-inset),
+		inset 0 0 0 1px color-mix(in lch, var(--pg-accent), transparent 88%);
+}
+
+body:not([data-theme='dark']) .home-playground .playground-well {
+	background-color: color-mix(in lch, var(--app-color-shell), var(--pg-accent) 4%);
 }
 
 .home-playground .playground-window {

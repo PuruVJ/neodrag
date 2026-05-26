@@ -17,7 +17,11 @@
 </script>
 
 <div class="home-playground">
-	<div class="pg-backdrop" aria-hidden="true"></div>
+	<div class="pg-backdrop" aria-hidden="true">
+		<div class="pg-backdrop-grid"></div>
+		<div class="pg-backdrop-glow"></div>
+		<div class="pg-backdrop-vignette"></div>
+	</div>
 
 	<div class="pg-inner">
 		<PlaygroundIntro />
