@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Framework } from '$helpers/constants';
 	import type { Snippet } from 'svelte';
+	import type { Action } from 'svelte/action';
 	import CheckIcon from '~icons/mdi/check';
 	import ContentCopyIcon from '~icons/mdi/content-copy';
 	import { FRAMEWORK_TABS } from './frameworks';
@@ -42,11 +43,26 @@
 		}
 	}
 
-	$effect(() => {
-		world;
-		framework;
+	const bind_code_host: Action<
+		HTMLDivElement,
+		{ world: WorldId; framework: Framework }
+	> = (node, params) => {
+		snippets_host = node;
 		sync_visible_snippet();
-	});
+
+		return {
+			update(next) {
+				if (!next || (next.world === params?.world && next.framework === params?.framework)) {
+					return;
+				}
+				params = next;
+				sync_visible_snippet();
+			},
+			destroy() {
+				snippets_host = undefined;
+			},
+		};
+	};
 </script>
 
 <aside class="hp-code-panel" aria-label="Code for this scene">
@@ -79,14 +95,17 @@
 				class="hp-tab"
 				class:is-selected={framework === tab.id}
 				data-framework={tab.id}
-				onclick={() => onframework(tab.id)}
+				onclick={() => {
+					onframework(tab.id);
+					queueMicrotask(sync_visible_snippet);
+				}}
 			>
 				{tab.label}
 			</button>
 		{/each}
 	</div>
 
-	<div class="hp-code-body" bind:this={snippets_host}>
+	<div class="hp-code-body" use:bind_code_host={{ world, framework }}>
 		{#if snippets}
 			{@render snippets()}
 		{/if}

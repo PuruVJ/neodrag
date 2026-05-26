@@ -1,115 +1,103 @@
 <script lang="ts">
-	import type { ThemeValue } from '$state/user-preferences.svelte.ts';
+	import type { ThemeValue } from '$state/user-preferences.svelte';
 	import { onMount } from 'svelte';
 	import { on } from 'svelte/events';
-	import { get, type Writable, writable } from 'svelte/store';
 	import PawIcon from '~icons/mdi/paw';
 
 	let showCustomCursor = $state(false);
 	let cursorColor: ThemeValue['current'] | undefined = $state('dark');
-
 	let coordsCursor = $state({ x: 0, y: 0 });
-
-	let isTouchDevice = globalThis.matchMedia('(hover: none)').matches;
-
 	let mounted = $state(false);
 
-	function handleMouseMove(e: MouseEvent) {
-		if (isTouchDevice) return;
+	const is_touch_device =
+		typeof globalThis.matchMedia === 'function' &&
+		globalThis.matchMedia('(hover: none)').matches;
 
-		coordsCursor ??= { x: 0, y: 0 };
-
+	function handle_mouse_move(e: MouseEvent) {
+		if (is_touch_device) return;
 		coordsCursor.x = e.clientX;
 		coordsCursor.y = e.clientY;
 	}
 
-	function querySelectorAllLive<T extends HTMLElement = HTMLElement>(
-		element: HTMLElement,
-		selector: string,
-	): Writable<T[]> {
-		// Initialize results with current nodes.
-		const result = writable(Array.from<T>(element.querySelectorAll(selector)));
+	function bind_paw_targets() {
+		const cleanups: (() => void)[] = [];
+		const els = document.querySelectorAll<HTMLElement>(
+			'[data-paw-cursor="true"], [data-paw-cursor="false"]',
+		);
 
-		// Create observer instance.
-		const observer = new MutationObserver(function (mutations) {
-			mutations.forEach(function (mutation) {
-				if (mutation.type === 'attributes' || mutation.type === 'childList') {
-					if ((mutation.target as HTMLElement).matches?.(selector))
-						result.set([...get(result), mutation.target as T]);
+		for (const el of els) {
+			let initial_cursor = '';
+
+			const on_over = (e: MouseEvent) => {
+				e.stopPropagation();
+
+				if (el.dataset.pawCursor === 'true') {
+					showCustomCursor = true;
+
+					if (el.dataset.pawColor) {
+						cursorColor = el.dataset.pawColor as ThemeValue['current'];
+					}
+
+					initial_cursor = getComputedStyle(el).cursor;
+					el.style.cursor = 'none';
+				} else {
+					showCustomCursor = false;
+					if (initial_cursor) el.style.cursor = initial_cursor;
 				}
+			};
+
+			const on_out = () => {
+				showCustomCursor = false;
+				if (initial_cursor) el.style.cursor = initial_cursor;
+				cursorColor = undefined;
+			};
+
+			el.addEventListener('mouseover', on_over, { capture: true, passive: true });
+			el.addEventListener('mouseout', on_out, { passive: true });
+
+			cleanups.push(() => {
+				el.removeEventListener('mouseover', on_over, { capture: true });
+				el.removeEventListener('mouseout', on_out);
 			});
+		}
+
+		return cleanups;
+	}
+
+	onMount(() => {
+		mounted = true;
+
+		if (is_touch_device) return;
+
+		let paw_cleanups = bind_paw_targets();
+
+		const observer = new MutationObserver(() => {
+			for (const cleanup of paw_cleanups) cleanup();
+			paw_cleanups = bind_paw_targets();
 		});
 
-		// Set up observer.
-		observer.observe(element, {
+		observer.observe(document.body, {
 			childList: true,
 			subtree: true,
 			attributes: true,
 			attributeFilter: ['data-paw-cursor', 'data-paw-color'],
 		});
 
-		return result;
-	}
+		const stop_move = on(window, 'mousemove', handle_mouse_move, { passive: true });
 
-	let pawCursorEls = $derived(
-		globalThis.document && !isTouchDevice
-			? querySelectorAllLive(document.body, '[data-paw-cursor="true"], [data-paw-cursor="false"]')
-			: writable([]),
-	);
-
-	$effect(() => {
-		if (isTouchDevice) return;
-
-		for (const el of $pawCursorEls) {
-			let initialCursor = '';
-			el.addEventListener(
-				'mouseover',
-				(e) => {
-					e.stopPropagation();
-
-					if (el.dataset.pawCursor === 'true') {
-						showCustomCursor = true;
-
-						if (el.dataset.pawColor) {
-							cursorColor = el.dataset.pawColor as ThemeValue['current'];
-						}
-
-						initialCursor = getComputedStyle(el).cursor;
-						el.style.cursor = 'none';
-					} else {
-						showCustomCursor = false;
-						initialCursor && (el.style.cursor = initialCursor);
-					}
-				},
-				{ capture: true, passive: true },
-			);
-			el.addEventListener(
-				'mouseout',
-				() => {
-					showCustomCursor = false;
-					initialCursor && (el.style.cursor = initialCursor);
-
-					cursorColor = undefined;
-				},
-				{ passive: true },
-			);
-		}
-	});
-
-	onMount(() => {
-		mounted = true;
-	});
-
-	$effect(() => {
-		return on(window, 'mousemove', handleMouseMove, { passive: true });
+		return () => {
+			observer.disconnect();
+			for (const cleanup of paw_cleanups) cleanup();
+			stop_move();
+		};
 	});
 </script>
 
 <div
 	class="cursor"
-	style:top="{coordsCursor?.y ?? 0}px"
-	style:left="{coordsCursor?.x ?? 0}px"
-	style:--opacity={showCustomCursor && coordsCursor ? 1 : 0}
+	style:top="{coordsCursor.y}px"
+	style:left="{coordsCursor.x}px"
+	style:--opacity={showCustomCursor ? 1 : 0}
 	style:--color="var(--app-color-{cursorColor ?? 'dark'})"
 	style:display={mounted ? 'block' : 'none'}
 >

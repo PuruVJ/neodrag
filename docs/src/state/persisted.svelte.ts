@@ -1,12 +1,9 @@
 import { browser } from '$helpers/utils.ts';
-import { on } from 'svelte/events';
-import { createSubscriber } from 'svelte/reactivity';
 import { parse, type ZodMiniType } from 'zod/v4-mini';
-import { auto_destroy_effect_root } from './auto-destroy-effect-root.svelte.ts';
 
 export type Serde = {
-	stringify: (value: any) => string;
-	parse: (value: string) => any;
+	stringify: (value: unknown) => string;
+	parse: (value: string) => unknown;
 };
 
 const default_serde: Serde = {
@@ -26,7 +23,7 @@ function get_value_from_storage(key: string, shape: ZodMiniType<any>, serde = de
 			found: true,
 			value: parse(shape, serde.parse(value)),
 		};
-	} catch (e) {
+	} catch {
 		localStorage.removeItem(key);
 
 		return {
@@ -38,47 +35,28 @@ function get_value_from_storage(key: string, shape: ZodMiniType<any>, serde = de
 
 export class Persisted<T extends ZodMiniType> {
 	#current = $state<ExtractZodType<T>>(undefined as ExtractZodType<T>);
-	#subscribe: () => void;
 	#key: string;
+	#shape: T;
+	#serde: Serde;
 
 	constructor(key: string, initial: ExtractZodType<T>, shape: T, serde = default_serde) {
 		this.#current = initial;
 		this.#key = key;
+		this.#shape = shape;
+		this.#serde = serde;
 
 		if (browser) {
-			const val = get_value_from_storage(key, shape, serde);
-			if (val.found) {
-				this.#current = val.value;
-			}
+			this.reload_from_storage();
 		}
+	}
 
-		// Create subscriber that only triggers for this specific key
-		this.#subscribe = createSubscriber((update) => {
-			return on(window, 'storage', (e: StorageEvent) => {
-				if (e.key === this.#key) {
-					const val = get_value_from_storage(this.#key, shape, serde);
-					if (val.found) {
-						this.#current = val.value;
-						update();
-					}
-				}
-			});
-		});
+	reload_from_storage() {
+		if (!browser) return;
 
-		auto_destroy_effect_root(() => {
-			let is_first_run = true;
-
-			$effect(() => {
-				this.#subscribe();
-
-				const current = $state.snapshot(this.#current);
-				if (!is_first_run) {
-					localStorage.setItem(key, serde.stringify(current));
-				}
-
-				is_first_run = false;
-			});
-		});
+		const val = get_value_from_storage(this.#key, this.#shape, this.#serde);
+		if (val.found) {
+			this.#current = val.value;
+		}
 	}
 
 	get current() {
@@ -87,5 +65,9 @@ export class Persisted<T extends ZodMiniType> {
 
 	set current(value: ExtractZodType<T>) {
 		this.#current = value;
+
+		if (browser) {
+			localStorage.setItem(this.#key, this.#serde.stringify(value));
+		}
 	}
 }

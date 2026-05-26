@@ -6,6 +6,7 @@ import '../css/globals.css';
 import { get_nav_list } from '$/nav';
 import Dock from '$components/nav/Dock.svelte';
 import PawCursor from '$components/PawCursor.svelte';
+import ThemeSync from '$components/ThemeSync.svelte';
 import { SEO } from 'astro-seo';
 import { ClientRouter } from 'astro:transitions';
 
@@ -89,6 +90,8 @@ const nav_list = get_nav_list(framework as any);
 
 			do_it();
 		</script>
+
+		<ThemeSync client:load />
 
 		<div>
 			<Dock

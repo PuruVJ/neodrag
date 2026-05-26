@@ -1,7 +1,8 @@
+import { browser } from '$helpers/utils';
 import { MediaQuery } from 'svelte/reactivity';
-import { Persisted } from './persisted.svelte';
-import { auto_destroy_effect_root } from './auto-destroy-effect-root.svelte';
+import { on } from 'svelte/events';
 import * as z from 'zod/v4/mini';
+import { Persisted } from './persisted.svelte';
 
 const schema = z.object({
 	current: z.enum(['light', 'dark']),
@@ -10,9 +11,12 @@ const schema = z.object({
 
 export type ThemeValue = z.infer<typeof schema>;
 
-function apply_theme_to_dom(new_theme: string) {
-	document.body.dataset.theme = new_theme;
+export function apply_theme_to_dom(new_theme: string) {
+	if (typeof document !== 'undefined') {
+		document.body.dataset.theme = new_theme;
+	}
 }
+
 class Theme {
 	#persisted = new Persisted(
 		'neodrag:theme',
@@ -33,22 +37,34 @@ class Theme {
 		return this.#persisted.current.preference;
 	});
 
-	constructor() {
-		auto_destroy_effect_root(() => {
-			$effect(() => {
-				this.#current;
+	#runtime_started = false;
+	#stop_runtime: (() => void) | null = null;
 
-				requestAnimationFrame(() => {
-					if (document.startViewTransition) {
-						document.startViewTransition(async () => {
-							apply_theme_to_dom(this.#current);
-						});
-					} else {
-						apply_theme_to_dom(this.#current);
-					}
-				});
-			});
+	start_runtime() {
+		if (!browser || this.#runtime_started) return;
+		this.#runtime_started = true;
+
+		const media = window.matchMedia('(prefers-color-scheme: dark)');
+		const on_media = () => apply_theme_to_dom(this.#current);
+
+		media.addEventListener('change', on_media);
+		const stop_storage = on(window, 'storage', (e) => {
+			if (e.key === 'neodrag:theme') {
+				this.#persisted.reload_from_storage();
+				apply_theme_to_dom(this.#current);
+			}
 		});
+
+		this.#stop_runtime = () => {
+			media.removeEventListener('change', on_media);
+			stop_storage();
+		};
+	}
+
+	stop_runtime() {
+		this.#stop_runtime?.();
+		this.#stop_runtime = null;
+		this.#runtime_started = false;
 	}
 
 	get current() {
@@ -65,7 +81,15 @@ class Theme {
 		if (value !== 'system') {
 			this.#persisted.current.current = value;
 		}
+
+		if (browser && this.#runtime_started) {
+			apply_theme_to_dom(this.#current);
+		}
 	}
 }
 
 export const theme = new Theme();
+
+export function init_theme_runtime() {
+	theme.start_runtime();
+}

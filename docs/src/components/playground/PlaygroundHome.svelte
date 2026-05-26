@@ -1,8 +1,8 @@
 <script lang="ts">
 	import '@fontsource-variable/inter';
 	import type { Snippet } from 'svelte';
+	import { onMount } from 'svelte';
 	import { browser } from '$helpers/utils';
-	import { theme } from '$state/user-preferences.svelte';
 	import LiveCodePanel from './LiveCodePanel.svelte';
 	import PlaygroundIntro from './PlaygroundIntro.svelte';
 	import PlaygroundStage from './PlaygroundStage.svelte';
@@ -20,8 +20,6 @@
 
 	const { snippets }: Props = $props();
 
-	theme.current;
-
 	let world = $state<WorldId>(DEFAULT_WORLD);
 	let framework = $state<Framework>(DEFAULT_FRAMEWORK);
 
@@ -38,8 +36,7 @@
 		}
 	}
 
-	$effect(() => {
-		if (!browser) return;
+	onMount(() => {
 		sync_from_hash();
 		const on_hash = () => sync_from_hash();
 		window.addEventListener('hashchange', on_hash);
