@@ -60,8 +60,7 @@ const nav_list = get_nav_list(framework as any);
 	<body data-framework={framework} class:list={[{ 'docs-route': is_docs_route }]}>
 		{
 			is_docs_route && (
-				<div class="site-backdrop" aria-hidden="true">
-					<div class="site-grid-layer" />
+				<div class="site-backdrop" aria-hidden="true" transition:persist="docs-glow">
 					<div class="site-glow-layer" />
 					<div class="site-vignette-layer" />
 				</div>

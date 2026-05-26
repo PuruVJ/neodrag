@@ -19,8 +19,14 @@ const nav_list = get_nav_list(framework as any);
 
 <MetaThemeColor client:load />
 <Layout title={title}>
+	<div
+		class="pointer-events-none fixed inset-0 z-0 docs-grid-backdrop"
+		aria-hidden="true"
+		transition:persist="docs-grid"
+	></div>
+
 	<section
-		class="relative z-10 h-dvh w-full overflow-x-hidden overflow-y-auto scroll-smooth max-[967px]:grid max-[967px]:grid-cols-1"
+		class="relative z-[1] h-dvh w-full overflow-x-hidden overflow-y-auto scroll-smooth max-[967px]:grid max-[967px]:grid-cols-1"
 		id="docs-container"
 	>
 		<aside

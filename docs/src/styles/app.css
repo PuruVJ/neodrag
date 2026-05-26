@@ -107,13 +107,31 @@
 			var(--secondary-color),
 			var(--app-color-mixer) 35%
 		);
+		--docs-grid-line: color-mix(in lch, var(--color-brand), transparent 72%);
+		--docs-grid-major: color-mix(in lch, var(--color-brand), transparent 56%);
+		--docs-grid-dot: color-mix(in lch, var(--color-brand), transparent 65%);
 		@apply overflow-hidden;
 		background-color: var(--app-color-shell);
-		background-image: radial-gradient(
-			ellipse 120% 80% at 88% 0%,
-			color-mix(in lch, var(--secondary-color), transparent 94%) 0%,
-			transparent 58%
-		);
+		background-image:
+			radial-gradient(
+				ellipse 120% 80% at 88% 0%,
+				color-mix(in lch, var(--secondary-color), transparent 94%) 0%,
+				transparent 58%
+			),
+			radial-gradient(circle at center, var(--docs-grid-dot) 1px, transparent 1px),
+			linear-gradient(var(--docs-grid-major) 1px, transparent 1px),
+			linear-gradient(90deg, var(--docs-grid-major) 1px, transparent 1px),
+			linear-gradient(var(--docs-grid-line) 1px, transparent 1px),
+			linear-gradient(90deg, var(--docs-grid-line) 1px, transparent 1px);
+		background-size:
+			100% 100%,
+			var(--spacing-grid) var(--spacing-grid),
+			calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
+			calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
+			var(--spacing-grid) var(--spacing-grid),
+			var(--spacing-grid) var(--spacing-grid);
+		background-position: center;
+		background-attachment: fixed;
 	}
 
 	:is(a[href], a[href]:visited):where(:not(.unstyled)) {
@@ -143,6 +161,11 @@
 
 @layer components {
 	.site-backdrop {
+		display: none;
+	}
+
+	body.docs-route .site-backdrop {
+		display: block;
 		position: fixed;
 		inset: 0;
 		z-index: 0;
@@ -152,38 +175,31 @@
 	.site-grid-layer {
 		position: absolute;
 		inset: 0;
-		--pg-grid-line: color-mix(in lch, var(--color-brand), transparent 86%);
-		--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 74%);
-		--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 84%);
-		background-color: transparent;
-		background-image:
-			radial-gradient(circle at center, var(--pg-grid-dot) 1px, transparent 1px),
-			linear-gradient(var(--pg-grid-major) 1px, transparent 1px),
-			linear-gradient(90deg, var(--pg-grid-major) 1px, transparent 1px),
-			linear-gradient(var(--pg-grid-line) 1px, transparent 1px),
-			linear-gradient(90deg, var(--pg-grid-line) 1px, transparent 1px);
-		background-size:
-			var(--spacing-grid) var(--spacing-grid),
-			calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
-			calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
-			var(--spacing-grid) var(--spacing-grid),
-			var(--spacing-grid) var(--spacing-grid);
-		background-position: center;
-		mask-image: radial-gradient(ellipse 125% 100% at 50% 38%, black 55%, transparent 92%);
+		background: transparent;
 	}
 
-	body.docs-route .site-grid-layer {
-		--pg-grid-line: color-mix(in lch, var(--color-brand), transparent 80%);
-		--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 66%);
-		--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 78%);
-		mask-image: radial-gradient(ellipse 140% 105% at 50% 42%, black 68%, transparent 96%);
+	body.docs-route .site-glow-layer {
+		position: absolute;
+		inset: 0;
+		opacity: 0.65;
 	}
 
 	body.docs-route .site-vignette-layer {
-		opacity: 0.45;
+		position: absolute;
+		inset: 0;
+		opacity: 0.25;
 	}
 
-	body.docs-route #docs-container {
+	body.docs-route #docs-container,
+	body.docs-route #docs-container main,
+	body.docs-route #docs-container article {
+		background: transparent;
+	}
+
+	body.docs-route > div {
+		position: relative;
+		z-index: 1;
+		min-height: 100dvh;
 		background: transparent;
 	}
 
@@ -282,6 +298,22 @@
 
 	.dock-angular-bevel--brand > .dock-angular-bevel__fill {
 		background: color-mix(in lch, var(--color-brand), transparent 90%);
+	}
+
+	.docs-grid-backdrop {
+		background-image:
+			radial-gradient(circle at center, var(--docs-grid-dot) 1px, transparent 1px),
+			linear-gradient(var(--docs-grid-major) 1px, transparent 1px),
+			linear-gradient(90deg, var(--docs-grid-major) 1px, transparent 1px),
+			linear-gradient(var(--docs-grid-line) 1px, transparent 1px),
+			linear-gradient(90deg, var(--docs-grid-line) 1px, transparent 1px);
+		background-size:
+			var(--spacing-grid) var(--spacing-grid),
+			calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
+			calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
+			var(--spacing-grid) var(--spacing-grid),
+			var(--spacing-grid) var(--spacing-grid);
+		background-position: center;
 	}
 
 	.site-glow-layer,
@@ -397,7 +429,7 @@
 	}
 
 	.docs-sidebar-panel {
-		@apply border-r border-[var(--color-border)] bg-[color-mix(in_lch,var(--app-color-shell),transparent_4%)] backdrop-blur-[8px];
+		@apply border-r border-[var(--color-border)] bg-[color-mix(in_lch,var(--app-color-shell),transparent_55%)] backdrop-blur-[6px];
 	}
 
 	.docs-prose {
@@ -436,16 +468,10 @@
 	}
 }
 
-body[data-theme='dark'] .site-grid-layer {
-	--pg-grid-line: color-mix(in lch, var(--color-brand), transparent 88%);
-	--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 76%);
-	--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 86%);
-}
-
-body[data-theme='dark'].docs-route .site-grid-layer {
-	--pg-grid-line: color-mix(in lch, var(--color-brand), transparent 84%);
-	--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 70%);
-	--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 82%);
+body[data-theme='dark'].docs-route {
+	--docs-grid-line: color-mix(in lch, var(--color-brand), transparent 78%);
+	--docs-grid-major: color-mix(in lch, var(--color-brand), transparent 62%);
+	--docs-grid-dot: color-mix(in lch, var(--color-brand), transparent 72%);
 }
 
 @import './home.css' layer(components);
