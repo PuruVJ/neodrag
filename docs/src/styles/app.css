@@ -315,6 +315,18 @@
 		margin-right: 0.35rem;
 	}
 
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border-width: 0;
+	}
+
 	.site-section-break {
 		@apply flex items-center gap-4 py-2 font-mono text-sm font-black text-fg-muted;
 	}

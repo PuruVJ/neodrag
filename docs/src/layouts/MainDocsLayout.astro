@@ -37,33 +37,30 @@ const version = {
 		@neodrag / {framework} · docs desk
 	</p>
 
-	<h1 class="m-0! max-w-full font-extrabold tracking-[-0.03em]">
-		{
-			is_framework_only_page ? (
-				<>
-					@neodrag/<span style={`color: var(--app-color-brand-${framework})`}>{framework}</span>
-				</>
-			) : (
-				title
-			)
-		}
-	</h1>
+	{
+		is_framework_only_page ? (
+			<h1 class="sr-only">@neodrag/{framework}</h1>
+		) : (
+			<h1 class="m-0! max-w-full font-extrabold tracking-[-0.03em]">{title}</h1>
+		)
+	}
 
 	{
 		is_framework_only_page ? (
-			<div class="mb-4 flex flex-wrap gap-2">
-				<span class="dock-angular-bevel dock-angular-bevel--sm dock-angular-bevel--brand inline-block">
-					<span
-						class="dock-angular-bevel__fill inline-block px-3 py-2 font-mono text-sm font-bold"
-					>
+			<div class="mb-4 flex flex-wrap items-center gap-3">
+				<p class="m-0 max-w-full text-[clamp(1.15rem,2.2vw,1.35rem)] leading-[1.55] font-semibold text-fg">
+					{tagline}
+				</p>
+				<span class="dock-angular-bevel dock-angular-bevel--sm dock-angular-bevel--brand inline-block shrink-0">
+					<span class="dock-angular-bevel__fill inline-block px-3 py-2 font-mono text-sm font-bold">
 						{version}
 					</span>
 				</span>
 			</div>
-		) : null
+		) : (
+			<p class="text-[clamp(1.05rem,2vw,1.15rem)] leading-[1.55] text-fg-muted">{tagline}</p>
+		)
 	}
-
-	<p class="text-[clamp(1.05rem,2vw,1.15rem)] leading-[1.55] text-fg-muted">{tagline}</p>
 
 	<slot />
 </DocsLayout>
