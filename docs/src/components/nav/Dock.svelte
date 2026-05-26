@@ -344,7 +344,7 @@
 		@media (--tablet) {
 			border-radius: 2rem;
 			width: 95%;
-			bottom: 1rem;
+			bottom: 0.5rem;
 			height: auto;
 		}
 	}

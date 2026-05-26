@@ -1,4 +1,6 @@
 <script lang="ts">
+	import FeatureContainer from './FeatureContainer.svelte';
+
 	import squircle from '$/worklet/squircle.js?url';
 	import { typingEffect } from '$attachments/typingEffect.svelte';
 	import { browser } from '$helpers/utils';
@@ -62,34 +64,132 @@
 
 <svelte:window onmousemove={handle_mouse_move} />
 
-<div class="container">
-	{#key heading_text}
-		<p class="h3" class:hidden={false} {@attach typingEffect(60)}>
-			{browser ? heading_text : ''}
-		</p>
-	{/key}
+<FeatureContainer unstyled unscaled>
+	<section class="tagline">
+		<div class="intro">
+			<div class="top">
+				<h1>Neodrag</h1>
+				<p class="h4">One draggable to rule them all</p>
+			</div>
 
-	<div
-		class="box"
-		class:wiggles={box_wiggles}
-		{@attach heroDrag.attachment}
-	>
-		<div class="paw">
-			<PawIcon />
+			<div class="group">
+				<a href="/docs/svelte">Getting Started</a>
+				<a href="https://github.com/puruvj/neodrag" target="_blank" rel="external"> Github </a>
+			</div>
 		</div>
-	</div>
 
-	<div
-		class="cursor"
-		style:translate="calc({coords_cursor?.x ?? 0}px - 50%) calc({coords_cursor?.y ?? 0}px - 50%)
-		0.000001px"
-		style:--opacity={show_custom_cursor && coords_cursor ? 1 : 0}
-	>
-		<PawIcon style="font-size: 2rem;" />
-	</div>
-</div>
+		<div class="demo">
+			<div class="container">
+				{#key heading_text}
+					<p class="h3 typewriter-text" class:hidden={false} {@attach typingEffect(60)}>
+						{browser ? heading_text : ''}
+					</p>
+				{/key}
+
+				<div
+					class="box"
+					class:wiggles={box_wiggles}
+					data-paw-cursor="true"
+					{@attach heroDrag.attachment}
+				>
+					<div class="paw">
+						<PawIcon />
+					</div>
+				</div>
+
+				<div
+					class="cursor"
+					style:translate="calc({coords_cursor?.x ?? 0}px - 50%) calc({coords_cursor?.y ?? 0}px -
+					50%) 0.000001px"
+					style:--opacity={show_custom_cursor && coords_cursor ? 1 : 0}
+				>
+					<PawIcon style="font-size: 2rem;" />
+				</div>
+			</div>
+		</div>
+	</section>
+</FeatureContainer>
 
 <style>
+	.tagline {
+		display: grid;
+		box-sizing: border-box;
+		grid-template-columns: auto 1fr;
+		align-items: center;
+		gap: 5rem;
+		padding: 1rem 0;
+		min-height: 85dvh;
+		width: 100% !important;
+		scroll-snap-align: start;
+		scroll-snap-stop: always;
+
+		.demo {
+			height: 100%;
+		}
+
+		@media (max-width: 1223px) {
+			grid-template-columns: 1fr;
+			grid-template-rows: auto 1fr;
+			gap: 3rem;
+			align-items: initial;
+		}
+
+		h1,
+		p {
+			margin: 0;
+		}
+
+		h1 {
+			background-image: var(--app-color-primary-gradient);
+			background-clip: text;
+			-webkit-text-fill-color: transparent;
+			font-size: clamp(3rem, 20vw, 8rem);
+			line-height: 1.28;
+			width: max-content;
+		}
+
+		p {
+			font-size: clamp(1rem, 5vw, 2rem);
+		}
+	}
+
+	.intro {
+		display: grid;
+		gap: 4rem;
+
+		@media (max-width: 1223px) {
+			gap: 1rem;
+		}
+	}
+
+	.group {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		margin-top: 1rem;
+
+		a[href] {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			gap: 1rem;
+			padding: 1rem 2rem;
+			border-radius: 1rem !important;
+			font-size: 1.4rem;
+			text-align: center;
+			color: var(--app-color-primary);
+
+			&:hover {
+				color: var(--app-color-primary-contrast);
+			}
+
+			@media (max-width: 768px) {
+				font-size: 1rem;
+				padding: 0.5rem 1rem;
+			}
+		}
+	}
+
 	.container {
 		position: relative;
 
@@ -106,10 +206,6 @@
 		place-content: center;
 		gap: 2rem;
 
-		@media (max-width: 1223px) {
-			height: 80vh;
-		}
-
 		&,
 		& * {
 			cursor: none;
@@ -124,7 +220,7 @@
 		}
 	}
 
-	p {
+	.typewriter-text {
 		position: absolute;
 		top: 25%;
 
@@ -143,6 +239,10 @@
 
 		&.hidden {
 			opacity: 0;
+		}
+
+		@media (max-height: 900px) {
+			top: 10%;
 		}
 	}
 
@@ -185,11 +285,6 @@
 		}
 
 		&:hover {
-			.paw {
-				opacity: 1;
-				transform: scale(1);
-			}
-
 			& ~ .cursor {
 				display: none;
 			}
@@ -235,9 +330,7 @@
 			right: calc(0.03 * var(--size));
 			bottom: calc(0.03 * var(--size));
 
-			/* width: 61%; */
 			min-width: clamp(calc(0.61 * 4rem), calc(0.61 * 20vw), calc(0.61 * 12rem));
-			/* height: auto; */
 		}
 
 		:global(svg path) {

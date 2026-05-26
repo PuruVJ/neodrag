@@ -11,6 +11,10 @@ const reference_collection = (await getCollection('reference')).sort((a, b) =>
 	a.id > b.id ? 1 : -1,
 );
 
+export const plugins_list = plugin_collection
+	.map((v) => v.id.replace(/\d{2}-(.+)\/page/, '$1'))
+	.filter((v) => v !== 'introduction');
+
 export function get_nav_list(framework: string) {
 	framework = !framework || framework === 'core' ? 'svelte' : framework;
 

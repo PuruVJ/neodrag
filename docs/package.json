@@ -1,7 +1,7 @@
 {
 	"name": "docs",
 	"type": "module",
-	"version": "0.0.15-next.8",
+	"version": "0.0.15-next.4",
 	"private": true,
 	"scripts": {
 		"dev": "astro dev",
@@ -14,6 +14,7 @@
 		"@fontsource-variable/eb-garamond": "^5.2.5",
 		"@fontsource-variable/jetbrains-mono": "^5.2.5",
 		"@fontsource/plus-jakarta-sans": "^5.0.18",
+		"@neodrag/core": "workspace:*",
 		"@neodrag/svelte": "workspace:*",
 		"astro-seo": "^0.8.4",
 		"lightningcss": "^1.30.1",

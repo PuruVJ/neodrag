@@ -1,37 +1,15 @@
 <script lang="ts">
-	import { copy } from '$attachments/copy';
-	import type { Framework } from '$helpers/constants';
-	import { cubicOut } from 'svelte/easing';
-	import { fade, fly } from 'svelte/transition';
-	import IconCopyToClipboard from '~icons/material-symbols/content-copy-outline-rounded';
-	import IconCopyToClipboardFilled from '~icons/material-symbols/content-copy-rounded';
 	import FrameworkPolygon from './FrameworkPolygon.svelte';
 
-	let selected_framework: Framework = $state('svelte');
+	type Props = {
+		children: import('svelte').Snippet;
+	};
 
-	let copied = $state(false);
-
-	$effect(() => {
-		if (copied === true) {
-			setTimeout(() => {
-				copied = false;
-			}, 1000);
-		}
-	});
+	let { children }: Props = $props();
 </script>
 
 <div class="intro">
-	<h2>Multi-framework</h2>
-	<p>
-		One tool, endless possibilities: integrate with Svelte, Vue, React, Solid, and more. <br /><br
-		/>
-		<span style="color: hsla(var(--app-color-dark-hsl), 0.8)"
-			>Core logic is implemented only once, so you can use Neodrag in different frameworks, and get
-			the same predictible behavior</span
-		>
-	</p>
-
-	<div style="height: 2rem"></div>
+	<!-- <div style="height: 2rem"></div>
 
 	<code>
 		npm install @neodrag/
@@ -55,7 +33,7 @@
 				onCopy: () => (copied = true),
 			})}
 		>
-			<!-- {#key copied} -->
+
 			<div>
 				{#if copied}
 					<span transition:fade={{ easing: cubicOut }}>
@@ -67,13 +45,13 @@
 					</span>
 				{/if}
 			</div>
-			<!-- {/key} -->
+
 		</button>
-	</code>
+	</code> -->
 </div>
 
 <div>
-	<FrameworkPolygon onselect={({ framework }) => (selected_framework = framework)} />
+	<FrameworkPolygon {children} />
 </div>
 
 <style>
@@ -82,8 +60,22 @@
 		align-content: center;
 	}
 
-	h2 {
-		margin-top: 0;
+	s {
+		/* display: inline-block; */
+		position: relative;
+		text-decoration: none;
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 60%;
+			left: 0;
+
+			width: 100%;
+			height: 2px;
+
+			background-color: var(--app-color-primary);
+		}
 	}
 
 	p {
