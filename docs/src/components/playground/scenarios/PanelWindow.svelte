@@ -16,12 +16,15 @@
 </script>
 
 <article
-	class="panel playground-surface"
+	class="panel playground-dock-surface"
 	style:--stack={stack}
 	{@attach drag.attachment}
 >
+	<div class="grip" aria-hidden="true">
+		<span></span><span></span><span></span><span></span><span></span><span></span>
+	</div>
 	<header class="panel-head">
-		<h2 class="h4">{title}</h2>
+		<h2>{title}</h2>
 	</header>
 	<p>{body}</p>
 </article>
@@ -31,38 +34,57 @@
 
 	.panel {
 		position: absolute;
-		width: min(14rem, 72%);
+		width: min(18rem, 78%);
 		padding: 0;
-		border-radius: 1.15rem;
+		border-radius: 1.1rem;
 		overflow: hidden;
 		touch-action: none;
 		cursor: grab;
 
-		top: calc(18% + var(--stack) * 12%);
-		left: calc(22% + var(--stack) * 14%);
+		top: calc(14% + var(--stack) * 10%);
+		left: calc(16% + var(--stack) * 12%);
 
 		&:active {
 			cursor: grabbing;
+			box-shadow:
+				inset 0 0 0 0.2px color-mix(in lch, var(--gray-1), transparent 30%),
+				0 0 0 0.2px color-mix(in lch, var(--gray-9), transparent 30%),
+				hsla(0, 0%, 0%, 0.35) 8px 24px 48px 8px;
 		}
 	}
 
+	.grip {
+		display: flex;
+		justify-content: center;
+		gap: 3px;
+		padding: 0.45rem 0.5rem 0.15rem;
+		opacity: 0.45;
+	}
+
+	.grip span {
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: color-mix(in lch, var(--app-color-dark), transparent 40%);
+	}
+
 	.panel-head {
-		padding: 0.65rem 0.9rem;
-		border-bottom: 0.2px solid color-mix(in lch, var(--app-color-dark), transparent 82%);
+		padding: 0.35rem 1.1rem 0.65rem;
 	}
 
 	.panel-head h2 {
 		margin: 0;
-		font-size: 0.95rem;
+		font-family: var(--app-font-heading);
+		font-size: 1.15rem;
 		font-weight: 600;
-		color: color-mix(in lch, var(--app-color-dark), transparent 8%);
+		color: color-mix(in lch, var(--app-color-dark), transparent 5%);
 	}
 
 	p {
 		margin: 0;
-		padding: 0.75rem 0.9rem 1rem;
-		font-size: 0.88rem;
-		line-height: 1.45;
-		color: color-mix(in lch, var(--app-color-dark), transparent 25%);
+		padding: 0 1.1rem 1.25rem;
+		font-size: 0.95rem;
+		line-height: 1.55;
+		color: color-mix(in lch, var(--app-color-dark), transparent 22%);
 	}
 </style>

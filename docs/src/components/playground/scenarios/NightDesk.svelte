@@ -25,18 +25,30 @@
 		position: relative;
 		width: 100%;
 		height: 100%;
-		min-height: 16rem;
-		padding: 1.25rem;
-		border-radius: 1.25rem;
+		min-height: 100%;
+		padding: clamp(1.5rem, 4vw, 2.5rem);
+		box-sizing: border-box;
 		overflow: hidden;
 
-		background:
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 92%);
+		background-image:
 			radial-gradient(
-				120% 80% at 12% 0%,
-				color-mix(in lch, var(--app-color-primary), transparent 88%),
-				transparent 55%
+				ellipse 90% 70% at 20% 0%,
+				color-mix(in lch, var(--app-color-primary), transparent 78%),
+				transparent 60%
 			),
-			color-mix(in lch, var(--app-color-shell), var(--app-color-primary) 4%);
-		box-shadow: inset 0 0 0 0.2px color-mix(in lch, var(--gray-9), transparent 85%);
+			linear-gradient(
+				color-mix(in lch, var(--app-color-dark), transparent 96%) 1px,
+				transparent 1px
+			),
+			linear-gradient(
+				90deg,
+				color-mix(in lch, var(--app-color-dark), transparent 96%) 1px,
+				transparent 1px
+			);
+		background-size:
+			auto,
+			28px 28px,
+			28px 28px;
 	}
 </style>

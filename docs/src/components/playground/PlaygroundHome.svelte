@@ -4,7 +4,6 @@
 	import LiveCodePanel from './LiveCodePanel.svelte';
 	import PlaygroundIntro from './PlaygroundIntro.svelte';
 	import PlaygroundStage from './PlaygroundStage.svelte';
-	import ScenarioStrip from './ScenarioStrip.svelte';
 	import { DEFAULT_FRAMEWORK } from './frameworks';
 	import type { Framework } from '$helpers/constants';
 	import {
@@ -40,68 +39,81 @@
 	});
 </script>
 
-<div class="playground-home">
-	<PlaygroundIntro {world} />
+<div class="home-playground">
+	<PlaygroundIntro {world} onworld={select_world} />
 
-	<div class="workspace">
-		<ScenarioStrip active={world} onselect={select_world} />
-		<PlaygroundStage {world} />
+	<section class="play-canvas playground-dock-surface" aria-label="Try dragging">
+		<div class="stage-column">
+			<p class="stage-hint">Drag the cards — bounds stay inside the desk.</p>
+			<PlaygroundStage {world} />
+		</div>
+
+		<div class="playground-hairline divider" aria-hidden="true"></div>
+
 		<LiveCodePanel {world} {framework} onframework={(id) => (framework = id)} />
-	</div>
+	</section>
 </div>
 
 <style>
-	.playground-home {
+	@import './playground-chrome.css';
+
+	.home-playground {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
 		width: 100%;
-		max-width: 1400px;
+		max-width: min(1600px, 100%);
 		margin: 0 auto;
-		padding: 1rem 0 7rem;
-		min-height: min(100dvh, 100%);
+		padding: clamp(0.75rem, 2vw, 1.5rem) clamp(1rem, 3vw, 2.5rem) 8rem;
 		box-sizing: border-box;
+		min-height: calc(100dvh - 6rem);
 	}
 
-	.workspace {
+	.play-canvas {
 		display: grid;
-		grid-template-columns: auto 1fr min(26rem, 38vw);
-		gap: 0.75rem;
+		grid-template-columns: minmax(0, 1fr) 1px minmax(320px, 34vw);
+		gap: 0;
 		flex: 1;
-		min-height: clamp(18rem, 52vh, 34rem);
+		min-height: clamp(28rem, 62vh, 44rem);
+		border-radius: clamp(1.25rem, 2vw, 2rem);
+		overflow: hidden;
+	}
+
+	.stage-column {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		min-height: 0;
+		padding: clamp(1rem, 2.5vw, 1.75rem);
+	}
+
+	.stage-hint {
+		margin: 0 0 0.75rem;
+		font-family: var(--app-font-mono);
+		font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+		color: color-mix(in lch, var(--app-color-dark), transparent 38%);
+	}
+
+	.divider {
+		width: 1px;
+		height: auto;
+		align-self: stretch;
 	}
 
 	@media (max-width: 1100px) {
-		.workspace {
-			grid-template-columns: auto 1fr;
-			grid-template-rows: 1fr auto;
-		}
-
-		.workspace :global(.code-panel) {
-			grid-column: 1 / -1;
-			max-height: 14rem;
-		}
-	}
-
-	@media (max-width: 720px) {
-		.workspace {
+		.play-canvas {
 			grid-template-columns: 1fr;
+			grid-template-rows: 1fr auto;
+			min-height: clamp(24rem, 55vh, 36rem);
 		}
 
-		.workspace :global(.strip) {
-			flex-direction: row;
-		}
-
-		.workspace :global(.strip ul) {
-			flex-direction: row;
-			flex-wrap: wrap;
-			justify-content: center;
-		}
-
-		.workspace :global(.strip button) {
+		.divider {
 			width: auto;
-			flex-direction: row;
-			padding: 0.45rem 0.7rem;
+			height: 1px;
+		}
+
+		.home-playground :global(.code-panel) {
+			max-height: none;
+			min-height: 16rem;
 		}
 	}
 </style>

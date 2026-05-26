@@ -9,81 +9,70 @@
 	const { active, onselect }: Props = $props();
 </script>
 
-<nav class="strip playground-surface" aria-label="Scenarios">
-	<ul>
-		{#each WORLDS as world (world.id)}
-			<li>
-				<button
-					type="button"
-					class:selected={active === world.id}
-					class:locked={!world.available}
-					disabled={!world.available}
-					title={world.available ? world.tagline : `${world.label} — coming soon`}
-					onclick={() => world.available && onselect(world.id)}
-				>
-					<span class="glyph" aria-hidden="true">{world.glyph}</span>
-					<span class="label">{world.label}</span>
-				</button>
-			</li>
-		{/each}
-	</ul>
+<nav class="scenes" aria-label="Playground scenarios">
+	{#each WORLDS as world (world.id)}
+		<button
+			type="button"
+			class:selected={active === world.id}
+			class:locked={!world.available}
+			disabled={!world.available}
+			title={world.available ? world.tagline : 'Coming soon'}
+			onclick={() => world.available && onselect(world.id)}
+		>
+			<span class="name">{world.label}</span>
+			{#if !world.available}
+				<span class="soon">Soon</span>
+			{/if}
+		</button>
+	{/each}
 </nav>
 
 <style>
-	@import './playground-chrome.css';
-
-	.strip {
-		padding: 0.45rem;
-		border-radius: 1.25rem;
-		height: fit-content;
-	}
-
-	ul {
-		list-style: none;
-		margin: 0;
-		padding: 0;
+	.scenes {
 		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		justify-content: flex-end;
 	}
 
 	button {
-		display: flex;
-		flex-direction: column;
+		display: inline-flex;
 		align-items: center;
-		gap: 0.2rem;
-		width: 4.25rem;
-		padding: 0.5rem 0.35rem;
-		border-radius: 0.85rem;
-		color: color-mix(in lch, var(--app-color-dark), transparent 15%);
+		gap: 0.4rem;
+		padding: 0.5rem 1rem;
+		border-radius: 999px;
+		font-size: 0.82rem;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		color: color-mix(in lch, var(--app-color-dark), transparent 22%);
+		background: color-mix(in lch, var(--app-color-dark), transparent 94%);
 		transition:
-			background-color 150ms ease,
-			transform 150ms ease;
+			background-color 160ms ease,
+			color 160ms ease,
+			box-shadow 160ms ease;
 
 		&:hover:not(:disabled) {
-			background: color-mix(in lch, var(--app-color-shell), transparent 55%);
+			color: color-mix(in lch, var(--app-color-dark), transparent 5%);
+			background: color-mix(in lch, var(--app-color-dark), transparent 88%);
 		}
 
 		&.selected {
-			background: color-mix(in lch, var(--app-color-primary), transparent 75%);
-			color: var(--app-color-primary);
+			color: var(--app-color-primary-contrast);
+			background: var(--app-color-primary);
+			box-shadow: 0 4px 18px color-mix(in lch, var(--app-color-primary), transparent 50%);
 		}
 
 		&.locked {
-			opacity: 0.45;
+			opacity: 0.5;
 			cursor: not-allowed;
 		}
 	}
 
-	.glyph {
-		font-size: 1.35rem;
-		line-height: 1;
-	}
-
-	.label {
-		font-size: 0.62rem;
-		font-weight: 600;
-		text-align: center;
-		line-height: 1.2;
+	.soon {
+		font-size: 0.65rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		opacity: 0.7;
 	}
 </style>

@@ -33,24 +33,10 @@
 	);
 </script>
 
-<aside class="code-panel playground-surface" aria-label="Code for this scene">
-	<div class="toolbar">
-		<div class="tabs" role="tablist" aria-label="Framework">
-			{#each FRAMEWORK_TABS as tab (tab.id)}
-				<button
-					type="button"
-					role="tab"
-					aria-selected={framework === tab.id}
-					class:selected={framework === tab.id}
-					data-framework={tab.id}
-					onclick={() => onframework(tab.id)}
-				>
-					{tab.label}
-				</button>
-			{/each}
-		</div>
-
-		<div class="toolbar-actions">
+<aside class="code-panel" aria-label="Code for this scene">
+	<header class="code-head">
+		<span class="label">Source</span>
+		<div class="head-actions">
 			<button type="button" class="icon-btn" title="Copy snippet" onclick={copy_snippet}>
 				{#if copied}
 					<CheckIcon />
@@ -58,8 +44,23 @@
 					<ContentCopyIcon />
 				{/if}
 			</button>
-			<a class="docs-link" href={docs_href}>Docs</a>
+			<a class="docs-link unstyled" href={docs_href}>Docs →</a>
 		</div>
+	</header>
+
+	<div class="tabs" role="tablist" aria-label="Framework">
+		{#each FRAMEWORK_TABS as tab (tab.id)}
+			<button
+				type="button"
+				role="tab"
+				aria-selected={framework === tab.id}
+				class:selected={framework === tab.id}
+				data-framework={tab.id}
+				onclick={() => onframework(tab.id)}
+			>
+				{tab.label}
+			</button>
+		{/each}
 	</div>
 
 	<div class="code-body">
@@ -70,44 +71,81 @@
 </aside>
 
 <style>
-	@import './playground-chrome.css';
-
 	.code-panel {
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
 		min-height: 0;
-		border-radius: 1.5rem;
-		overflow: hidden;
+		padding: clamp(1rem, 2.5vw, 1.5rem);
+		background: color-mix(in lch, var(--app-color-shell), var(--app-color-dark) 3%);
 	}
 
-	.toolbar {
+	.code-head {
 		display: flex;
-		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
-		gap: 0.5rem;
-		padding: 0.45rem 0.55rem;
-		border-bottom: 0.2px solid color-mix(in lch, var(--app-color-dark), transparent 80%);
+		gap: 1rem;
+		margin-bottom: 0.85rem;
+	}
+
+	.label {
+		font-family: var(--app-font-heading);
+		font-size: 1.15rem;
+		color: color-mix(in lch, var(--app-color-dark), transparent 10%);
+	}
+
+	.head-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+	}
+
+	.icon-btn {
+		display: grid;
+		place-items: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 0.6rem;
+		color: color-mix(in lch, var(--app-color-dark), transparent 20%);
+		background: color-mix(in lch, var(--app-color-dark), transparent 92%);
+
+		:global(svg) {
+			width: 1.15rem;
+			height: 1.15rem;
+		}
+	}
+
+	.docs-link {
+		font-size: 0.88rem;
+		font-weight: 600;
+		color: var(--app-color-primary) !important;
 	}
 
 	.tabs {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.2rem;
+		gap: 0.35rem;
+		margin-bottom: 1rem;
+		padding-bottom: 0.85rem;
+		border-bottom: 0.2px solid color-mix(in lch, var(--app-color-dark), transparent 85%);
 	}
 
 	.tabs button {
-		padding: 0.35rem 0.65rem;
-		border-radius: 999px;
-		font-size: 0.75rem;
+		padding: 0.4rem 0.85rem;
+		border-radius: 0.5rem;
+		font-size: 0.8rem;
 		font-weight: 600;
-		color: color-mix(in lch, var(--app-color-dark), transparent 30%);
+		font-family: var(--app-font-mono);
+		color: color-mix(in lch, var(--app-color-dark), transparent 35%);
 		transition: background-color 150ms ease;
 
+		&:hover {
+			background: color-mix(in lch, var(--app-color-dark), transparent 92%);
+		}
+
 		&.selected {
-			color: var(--app-color-primary);
-			background: color-mix(in lch, var(--app-color-primary), transparent 82%);
+			background: color-mix(in lch, var(--app-color-dark), transparent 88%);
+			color: color-mix(in lch, var(--app-color-dark), transparent 5%);
 		}
 
 		&[data-framework='svelte'].selected {
@@ -127,40 +165,10 @@
 		}
 	}
 
-	.toolbar-actions {
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-	}
-
-	.icon-btn {
-		display: grid;
-		place-items: center;
-		width: 2rem;
-		height: 2rem;
-		border-radius: 0.5rem;
-		color: color-mix(in lch, var(--app-color-dark), transparent 25%);
-
-		:global(svg) {
-			width: 1.1rem;
-			height: 1.1rem;
-		}
-	}
-
-	.docs-link {
-		padding: 0.35rem 0.75rem;
-		border-radius: 999px;
-		font-size: 0.75rem;
-		font-weight: 600;
-		text-decoration: none;
-		color: var(--app-color-primary-contrast);
-		background: var(--app-color-primary);
-	}
-
 	.code-body {
 		flex: 1;
-		min-height: 0;
+		min-height: 12rem;
 		overflow: auto;
-		padding: 0.85rem 1rem 1.1rem;
+		padding: 0.25rem 0;
 	}
 </style>

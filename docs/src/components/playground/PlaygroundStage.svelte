@@ -11,28 +11,17 @@
 	const Scene = $derived(WORLD_COMPONENTS[world]);
 </script>
 
-<section class="stage-wrap playground-surface" aria-label="Live demo">
-	<div class="stage-inner">
-		<Scene world={meta} />
-	</div>
-</section>
+<div class="stage">
+	<Scene world={meta} />
+</div>
 
 <style>
-	@import './playground-chrome.css';
-
-	.stage-wrap {
-		flex: 1 1 auto;
-		min-width: 0;
-		min-height: 0;
-		padding: 0.45rem;
-		border-radius: 1.5rem;
-		display: flex;
-	}
-
-	.stage-inner {
+	.stage {
 		flex: 1;
 		min-height: 0;
-		border-radius: 1.15rem;
+		min-width: 0;
+		position: relative;
+		border-radius: 1rem;
 		overflow: hidden;
 	}
 </style>

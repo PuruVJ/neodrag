@@ -9,35 +9,38 @@
 </script>
 
 <div class="coming-soon">
-	<span class="glyph" aria-hidden="true">{world.glyph}</span>
-	<p class="h3">{world.label}</p>
-	<p>{world.tagline}</p>
-	<p class="muted">Coming soon — pick Night desk to play now.</p>
+	<p class="h2">{world.label}</p>
+	<p class="lede">{world.tagline}</p>
+	<p class="muted">This world is on the way. Night desk is ready to play now.</p>
 </div>
 
 <style>
 	.coming-soon {
 		display: grid;
-		place-items: center;
+		place-content: center;
 		align-content: center;
-		gap: 0.5rem;
+		justify-items: center;
+		gap: 0.75rem;
 		min-height: 100%;
-		padding: 2rem;
+		padding: 3rem;
 		text-align: center;
 	}
 
-	.glyph {
-		font-size: 2.5rem;
-		line-height: 1;
+	.h2 {
+		margin: 0;
+		font-size: clamp(1.75rem, 5vw, 2.5rem);
 	}
 
-	p {
+	.lede {
 		margin: 0;
+		font-size: 1.15rem;
+		color: color-mix(in lch, var(--app-color-dark), transparent 20%);
 	}
 
 	.muted {
+		margin: 0;
 		font-family: var(--app-font-mono);
-		font-size: 0.85rem;
+		font-size: 0.9rem;
 		color: color-mix(in lch, var(--app-color-dark), transparent 40%);
 	}
 </style>

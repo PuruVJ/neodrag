@@ -1,115 +1,142 @@
 <script lang="ts">
 	import { DEFAULT_WORLD, WORLDS, type WorldId } from './worlds';
+	import ScenarioStrip from './ScenarioStrip.svelte';
 
 	type Props = {
 		world?: WorldId;
+		onworld?: (id: WorldId) => void;
 	};
 
-	const { world = DEFAULT_WORLD }: Props = $props();
+	const { world = DEFAULT_WORLD, onworld }: Props = $props();
 
 	const world_meta = $derived(WORLDS.find((w) => w.id === world));
 </script>
 
-<header class="intro playground-surface">
-	<div class="copy">
-		<p class="eyebrow">Everything&rsquo;s a plugin</p>
+<header class="masthead">
+	<div class="brand">
 		<h1>Neodrag</h1>
-		<p class="lede">One draggable to rule them all — drag the scene, then peek at the code.</p>
+		<p class="tagline h4">One draggable to rule them all</p>
+		<p class="plugin-line">Everything&rsquo;s a plugin — mostly built-ins, plus your own.</p>
 		{#if world_meta}
-			<p class="scene-hint">{world_meta.glyph} {world_meta.tagline}</p>
+			<p class="scene-caption">{world_meta.label} · {world_meta.tagline}</p>
 		{/if}
 	</div>
 
-	<div class="actions">
-		<a class="cta primary" href="/docs/svelte">Getting started</a>
-		<a class="cta" href="https://github.com/PuruVJ/neodrag" target="_blank" rel="external">
-			GitHub
-		</a>
+	<div class="masthead-side">
+		<div class="actions">
+			<a class="cta primary" href="/docs/svelte">Getting started</a>
+			<a class="cta ghost" href="https://github.com/PuruVJ/neodrag" target="_blank" rel="external">
+				GitHub
+			</a>
+		</div>
+
+		{#if onworld}
+			<ScenarioStrip active={world} onselect={onworld} />
+		{/if}
 	</div>
 </header>
 
 <style>
-	@import './playground-chrome.css';
-
-	.intro {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: flex-end;
-		justify-content: space-between;
-		gap: 1.25rem 2rem;
-
-		padding: 1.25rem 1.5rem;
-		border-radius: 1.5rem;
-	}
-
-	.copy {
+	.masthead {
 		display: grid;
-		gap: 0.35rem;
-		min-width: min(100%, 18rem);
+		grid-template-columns: 1fr auto;
+		align-items: end;
+		gap: clamp(2rem, 6vw, 5rem);
+		padding: clamp(0.5rem, 2vw, 1.5rem) 0 clamp(1.5rem, 4vw, 2.5rem);
+		min-height: 0;
 	}
 
-	.eyebrow {
-		margin: 0;
-		font-family: var(--app-font-mono);
-		font-size: 0.8rem;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		color: color-mix(in lch, var(--app-color-dark), transparent 35%);
+	.brand {
+		display: grid;
+		gap: 0.5rem;
+		max-width: 42rem;
 	}
 
 	h1 {
 		margin: 0;
-		font-size: clamp(2rem, 5vw, 2.75rem);
+		font-size: clamp(3rem, 14vw, 7.5rem);
+		line-height: 1.05;
 		background-image: var(--app-color-primary-gradient);
 		background-clip: text;
 		-webkit-text-fill-color: transparent;
-		line-height: 1.1;
+		width: max-content;
 	}
 
-	.lede,
-	.scene-hint {
+	.tagline {
 		margin: 0;
-		max-width: 36ch;
-		color: color-mix(in lch, var(--app-color-dark), transparent 20%);
+		font-size: clamp(1.1rem, 3.5vw, 2rem);
+		color: color-mix(in lch, var(--app-color-dark), transparent 8%);
 	}
 
-	.lede {
-		font-size: 1.05rem;
+	.plugin-line,
+	.scene-caption {
+		margin: 0;
+		font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+		color: color-mix(in lch, var(--app-color-dark), transparent 32%);
 	}
 
-	.scene-hint {
-		font-size: 0.9rem;
+	.scene-caption {
 		font-family: var(--app-font-mono);
+		font-size: 0.9rem;
+		margin-top: 0.25rem;
+	}
+
+	.masthead-side {
+		display: grid;
+		gap: 1.25rem;
+		justify-items: end;
+		min-width: min(100%, 22rem);
 	}
 
 	.actions {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.65rem;
+		gap: 0.75rem;
+		justify-content: flex-end;
 	}
 
 	.cta {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0.55rem 1.1rem;
-		border-radius: 999px;
-		font-size: 0.95rem;
+		padding: 0.85rem 1.75rem;
+		border-radius: 1rem;
+		font-size: clamp(1rem, 2vw, 1.35rem);
 		font-weight: 600;
 		text-decoration: none;
-		color: color-mix(in lch, var(--app-color-dark), transparent 10%);
-		background: color-mix(in lch, var(--app-color-shell), transparent 35%);
-		box-shadow:
-			inset 0 0 0 0.2px color-mix(in lch, var(--gray-9), transparent 50%),
-			0 1px 2px hsla(0, 0%, 0%, 0.08);
-
-		&.primary {
-			color: var(--app-color-primary-contrast);
-			background: var(--app-color-primary);
-		}
+		transition:
+			transform 160ms ease,
+			filter 160ms ease;
 
 		&:hover {
-			filter: brightness(1.03);
+			transform: translateY(-1px);
+		}
+	}
+
+	.cta.primary {
+		color: var(--app-color-primary-contrast);
+		background: var(--app-color-primary);
+		box-shadow: 0 10px 32px color-mix(in lch, var(--app-color-primary), transparent 55%);
+	}
+
+	.cta.ghost {
+		color: var(--app-color-primary);
+		background: color-mix(in lch, var(--app-color-primary), transparent 92%);
+	}
+
+	@media (max-width: 960px) {
+		.masthead {
+			grid-template-columns: 1fr;
+			align-items: start;
+		}
+
+		.masthead-side {
+			justify-items: start;
+			width: 100%;
+		}
+
+		.actions {
+			justify-content: flex-start;
 		}
 	}
 </style>
