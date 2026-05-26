@@ -62,8 +62,17 @@ describe('resize plugins', () => {
 		expect(e.style.top).toBe('0px');
 		expect(e.style.bottom).toBe('0px');
 		expect(e.style.cursor).toBe('ew-resize');
-		expect(se.style.width).toBe('12px');
-		expect(se.style.height).toBe('12px');
+		expect(se.style.width).toBe('24px');
+		expect(se.style.height).toBe('24px');
+		expect(se.style.cursor).toBe('nwse-resize');
+	});
+
+	it('resizeHandles honor cornerSize for diagonal hit targets', () => {
+		engine.resizable(box, [resizeHandles({ edges: ['sw'], size: 8, cornerSize: 20 })]);
+		const sw = box.querySelector(`[${RESIZE_HANDLE_ATTR}="sw"]`) as HTMLElement;
+		expect(sw.style.width).toBe('20px');
+		expect(sw.style.height).toBe('20px');
+		expect(sw.style.cursor).toBe('nesw-resize');
 	});
 
 	it('resizeAxis locks width on y-only resize', () => {

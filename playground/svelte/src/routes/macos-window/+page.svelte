@@ -17,7 +17,7 @@
 		engine,
 		length,
 		plugins: [
-			resizeHandles({ edges: 'all', size: 10 }),
+			resizeHandles({ edges: 'all', size: 10, cornerSize: 22 }),
 			sizeBounds({
 				minWidth: 220,
 				minHeight: 140,
@@ -115,6 +115,13 @@
 		z-index: 1000;
 	}
 
+	.window-shell :global([data-neodrag-resize-handle='ne']),
+	.window-shell :global([data-neodrag-resize-handle='nw']),
+	.window-shell :global([data-neodrag-resize-handle='se']),
+	.window-shell :global([data-neodrag-resize-handle='sw']) {
+		z-index: 1001;
+	}
+
 	.window {
 		width: 100%;
 		height: 100%;
@@ -142,7 +149,7 @@
 
 	.titlebar-body {
 		position: absolute;
-		inset: 10px 0 0;
+		inset: 10px 22px 0;
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;

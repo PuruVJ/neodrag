@@ -24,9 +24,9 @@ const CURSOR_BY_EDGE: Record<ResizeEdge, string> = {
 	sw: 'nesw-resize',
 };
 
-function edgePosition(edge: ResizeEdge, size: number, inset: number) {
+function edgePosition(edge: ResizeEdge, size: number, cornerSize: number, inset: number) {
 	const base = `position:absolute;touch-action:none;z-index:100;box-sizing:border-box;pointer-events:auto;`;
-	const corner = `width:${size}px;height:${size}px;`;
+	const corner = `width:${cornerSize}px;height:${cornerSize}px;`;
 	switch (edge) {
 		case 'n':
 			return `${base}left:0;right:0;top:${inset}px;height:${size}px;cursor:${CURSOR_BY_EDGE.n}`;
@@ -37,13 +37,13 @@ function edgePosition(edge: ResizeEdge, size: number, inset: number) {
 		case 'w':
 			return `${base}top:0;bottom:0;left:${inset}px;width:${size}px;cursor:${CURSOR_BY_EDGE.w}`;
 		case 'ne':
-			return `${base}${corner}top:${inset}px;right:${inset}px;z-index:101;cursor:${CURSOR_BY_EDGE.ne}`;
+			return `${base}${corner}top:${inset}px;right:${inset}px;z-index:110;cursor:${CURSOR_BY_EDGE.ne}`;
 		case 'nw':
-			return `${base}${corner}top:${inset}px;left:${inset}px;z-index:101;cursor:${CURSOR_BY_EDGE.nw}`;
+			return `${base}${corner}top:${inset}px;left:${inset}px;z-index:110;cursor:${CURSOR_BY_EDGE.nw}`;
 		case 'se':
-			return `${base}${corner}bottom:${inset}px;right:${inset}px;z-index:101;cursor:${CURSOR_BY_EDGE.se}`;
+			return `${base}${corner}bottom:${inset}px;right:${inset}px;z-index:110;cursor:${CURSOR_BY_EDGE.se}`;
 		case 'sw':
-			return `${base}${corner}bottom:${inset}px;left:${inset}px;z-index:101;cursor:${CURSOR_BY_EDGE.sw}`;
+			return `${base}${corner}bottom:${inset}px;left:${inset}px;z-index:110;cursor:${CURSOR_BY_EDGE.sw}`;
 	}
 }
 
@@ -51,6 +51,7 @@ export const resizeHandles = defineResizePlugin(
 	(options?: {
 		edges?: ResizeEdge[] | 'all';
 		size?: SizeInput;
+		cornerSize?: SizeInput;
 		inset?: number;
 	}) => {
 		const edges = options?.edges === 'all' || !options?.edges ? ALL_EDGES : options.edges;
@@ -72,13 +73,19 @@ export const resizeHandles = defineResizePlugin(
 					sizeContext(root, 'width'),
 					8,
 				);
+				const cornerSizePx = resolveSizeInput(
+					ctx.length,
+					options?.cornerSize ?? Math.max(handleSizePx * 2, 16),
+					sizeContext(root, 'width'),
+					Math.max(handleSizePx * 2, 16),
+				);
 
 				const created: HTMLElement[] = [];
 				for (const edge of edges) {
 					const handle = document.createElement('div');
 					handle.setAttribute(RESIZE_HANDLE_ATTR, edge);
 					handle.setAttribute('aria-hidden', 'true');
-					handle.style.cssText = edgePosition(edge, handleSizePx, inset);
+					handle.style.cssText = edgePosition(edge, handleSizePx, cornerSizePx, inset);
 					root.appendChild(handle);
 					created.push(handle);
 				}
