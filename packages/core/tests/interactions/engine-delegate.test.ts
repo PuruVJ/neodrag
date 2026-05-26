@@ -4,7 +4,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Neodrag } from '../../src/engine.ts';
 import { Draggable } from '../../src/draggable-binding.ts';
-import { keyboardSensor, pointerSensor } from '../../src/sensors/index.ts';
+import { KeyboardSensor, PointerSensor } from '../../src/sensors/index.ts';
 
 describe('engine delegate wiring', () => {
 	it('Neodrag constructor does not invoke delegate', () => {
@@ -22,7 +22,9 @@ describe('engine delegate wiring', () => {
 
 	it('Draggable attach invokes delegate once per sensor', () => {
 		const delegate = vi.fn(() => document.documentElement);
-		const engine = new Neodrag({ delegate, sensors: [pointerSensor(), keyboardSensor()] });
+		const engine = new Neodrag({ delegate, defaultSensors: false, dev: false });
+		engine.registerSensor(new PointerSensor());
+		engine.registerSensor(new KeyboardSensor());
 		const binding = new Draggable({ engine, plugins: [] });
 		const node = document.createElement('div');
 		document.body.appendChild(node);

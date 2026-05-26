@@ -28,7 +28,3 @@ export class KeyboardSensor extends SensorBase {
 		};
 	}
 }
-
-export function keyboardSensor(options: KeyboardSensorOptions | null = {}): KeyboardSensor {
-	return new KeyboardSensor(options);
-}

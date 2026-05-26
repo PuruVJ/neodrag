@@ -59,7 +59,3 @@ export class PointerSensor extends SensorBase {
 		};
 	}
 }
-
-export function pointerSensor(options: PointerSensorOptions | null = {}): PointerSensor {
-	return new PointerSensor(options);
-}

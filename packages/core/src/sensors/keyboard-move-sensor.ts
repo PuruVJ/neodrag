@@ -185,10 +185,6 @@ export class KeyboardMoveSensor extends SensorBase {
 	}
 }
 
-export function keyboardMoveSensor(): KeyboardMoveSensor {
-	return new KeyboardMoveSensor();
-}
-
 export function isDraggableKeyboardTarget(el: Element): el is HTMLElement | SVGElement {
 	return (
 		(el instanceof HTMLElement || (is_svg_element(el) && !is_svg_svg_element(el))) &&

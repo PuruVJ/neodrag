@@ -88,19 +88,18 @@ Built-in resize plugins live under `@neodrag/core/resize`. `ResizeCtx.length` re
 
 ### Sensors (input layer)
 
-Pointer and keyboard input are **sensors** on the engine — not hard-coded listeners. Default: `pointerSensor()` + `keyboardSensor()` (Escape cancels).
+Pointer and keyboard input are **sensors** registered on the engine (`registerSensor`), not per-draggable plugins. By default, `new Neodrag()` installs pointer, Escape-cancel, and keyboard-move sensors.
 
 ```typescript
-import { Neodrag, defaultSensors, pointerSensor } from '@neodrag/core';
+import { Neodrag, PointerSensor } from '@neodrag/core';
 
-const engine = new Neodrag({
-  sensors: defaultSensors(),
-  // or pointer-only while building resize / multi-drag sensors:
-  // sensors: [pointerSensor({ buttons: [0] })],
-});
+const engine = new Neodrag(); // defaults installed
+
+const pointerOnly = new Neodrag({ defaultSensors: false });
+pointerOnly.registerSensor(new PointerSensor());
 ```
 
-Custom sensors implement `setup(host) → cleanup` and call `SensorHost` (`onPointerDown`, `onPointerMove`, `onPointerUp`, `cancelActive`). Resize uses handle hit-testing on the existing pointer sensor path; dedicated resize sensors may follow for multi-drag.
+See **[Sensors](/framework/06-sensors)** for `registerSensor`, `unregisterSensor`, custom `SensorBase` subclasses, and built-in keys.
 
 ### Delegate target
 

@@ -6,14 +6,14 @@ tagline: 'Move draggables with the keyboard using a unified InteractionInput pip
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-Keyboard dragging is **additive**: `pointerSensor` stays the default pointer path. A `keyboardMoveSensor` submits `InteractionInput` with `kind: 'keyboard'` (no synthetic `PointerEvent`).
+Keyboard dragging is **additive**: `PointerSensor` stays the default pointer path. `KeyboardMoveSensor` (registered by default on `new Neodrag()`) submits `InteractionInput` with `kind: 'keyboard'` (no synthetic `PointerEvent`).
 
 ## Plugins
 
 - **`keyboardDrag`** — registers step, axis, and hold-repeat tuning on the draggable node.
 - **`ariaDrag`** — `tabindex`, `role`, `aria-grabbed`, optional live region announcements.
 
-Use `defaultSensors()` (includes pointer, Escape cancel, and keyboard move) or add `keyboardMoveSensor()` explicitly.
+Requires a `Neodrag` with `KeyboardMoveSensor` registered (default when `defaultSensors` is not `false`). See [Sensors](/framework/06-sensors).
 
 ## Grab model
 

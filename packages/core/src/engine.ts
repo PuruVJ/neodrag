@@ -47,7 +47,7 @@ import {
 	type InteractionInput,
 	type PointerInteractionInput,
 } from './interaction-input.ts';
-import { defaultSensors } from './sensors/defaults.ts';
+import { installDefaultSensors } from './sensors/defaults.ts';
 import type { Sensor, SensorHost } from './sensors/types.ts';
 import { setDragLastInteraction, setDropHostLastInteraction, setResizeLastInteraction } from './set-last-interaction.ts';
 import { transitionSession } from './state-machine.ts';
@@ -79,7 +79,8 @@ export interface EngineOptions {
 	plugins?: DragPlugin[];
 	dropPlugins?: DropPlugin[];
 	delegate?: () => HTMLElement;
-	sensors?: Sensor[];
+	/** Register pointer, keyboard cancel, and keyboard-move sensors. Default: `true`. */
+	defaultSensors?: boolean;
 	onError?: (error: ErrorInfo) => void;
 	dev?: boolean;
 }
@@ -177,8 +178,9 @@ export class Neodrag {
 		this.#onError = options.onError ?? DEFAULTS.onError;
 		this.#dev = options.dev ?? DEV;
 
-		const initialSensors = options.sensors ?? defaultSensors();
-		for (const sensor of initialSensors) this.registerSensor(sensor);
+		if (options.defaultSensors !== false) {
+			installDefaultSensors((sensor) => this.registerSensor(sensor));
+		}
 
 		this.#sensorHost = {
 			getDelegate: () => this.#resolveDelegateTarget(),

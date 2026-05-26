@@ -4,7 +4,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { ariaDrag, keyboardDrag, MINIMAL_DRAG_PLUGINS, Neodrag } from '../../src/index.ts';
 import { Draggable } from '../../src/draggable-binding.ts';
-import { defaultSensors } from '../../src/sensors/index.ts';
 
 describe('keyboard drag', () => {
 	afterEach(() => {
@@ -12,7 +11,7 @@ describe('keyboard drag', () => {
 	});
 
 	it('moves with arrow keys after space grab', () => {
-		const engine = new Neodrag({ sensors: defaultSensors(), dev: false });
+		const engine = new Neodrag({ dev: false });
 		const binding = new Draggable({
 			engine,
 			plugins: [...MINIMAL_DRAG_PLUGINS, keyboardDrag({ step: 10 }), ariaDrag({ announce: false })],
@@ -32,7 +31,7 @@ describe('keyboard drag', () => {
 	});
 
 	it('escape cancels keyboard session via keyboard sensor', () => {
-		const engine = new Neodrag({ sensors: defaultSensors(), dev: false });
+		const engine = new Neodrag({ dev: false });
 		const binding = new Draggable({
 			engine,
 			plugins: [...MINIMAL_DRAG_PLUGINS, keyboardDrag({ step: 5 })],
@@ -57,7 +56,7 @@ describe('keyboard drag', () => {
 	});
 
 	it('ariaDrag sets grab attributes on keyboard grab', () => {
-		const engine = new Neodrag({ sensors: defaultSensors(), dev: false });
+		const engine = new Neodrag({ dev: false });
 		const binding = new Draggable({
 			engine,
 			plugins: [...MINIMAL_DRAG_PLUGINS, keyboardDrag(), ariaDrag({ label: 'Item' })],

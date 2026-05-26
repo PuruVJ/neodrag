@@ -5,23 +5,32 @@ import { describe, expect, it, vi } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
 import { Draggable } from '../../src/draggable-binding.ts';
 import {
+	KEYBOARD_MOVE_SENSOR_KEY,
+	KEYBOARD_SENSOR_KEY,
+	KeyboardMoveSensor,
 	KeyboardSensor,
+	POINTER_SENSOR_KEY,
 	PointerSensor,
-	defaultSensors,
-	keyboardSensor,
-	pointerSensor,
+	installDefaultSensors,
 } from '../../src/sensors/index.ts';
 
-describe('sensors', () => {
-	it('defaultSensors includes pointer, keyboard cancel, and keyboard move', () => {
-		expect(defaultSensors()).toHaveLength(3);
+describe('sensor registration', () => {
+	it('installs default sensors when defaultSensors is omitted', () => {
+		const engine = new Neodrag({ dev: false });
+		const keys = engine.getSensors().map((s) => s.key);
+		expect(keys).toEqual([POINTER_SENSOR_KEY, KEYBOARD_SENSOR_KEY, KEYBOARD_MOVE_SENSOR_KEY]);
 	});
 
-	it('registerSensor adds sensors on the engine', () => {
-		const engine = new Neodrag({ sensors: [], dev: false });
+	it('installs no sensors when defaultSensors is false', () => {
+		const engine = new Neodrag({ defaultSensors: false, dev: false });
+		expect(engine.getSensors()).toHaveLength(0);
+	});
+
+	it('registerSensor adds a sensor', () => {
+		const engine = new Neodrag({ defaultSensors: false, dev: false });
 		engine.registerSensor(new PointerSensor());
-		engine.registerSensor(new KeyboardSensor());
-		expect(engine.getSensors()).toHaveLength(2);
+		expect(engine.getSensors()).toHaveLength(1);
+		expect(engine.getSensors()[0]).toBeInstanceOf(PointerSensor);
 	});
 
 	it('registerSensor rejects duplicate keys', () => {
@@ -29,19 +38,50 @@ describe('sensors', () => {
 		expect(() => engine.registerSensor(new PointerSensor())).toThrow(/already registered/);
 	});
 
-	it('Neodrag wires sensors on first attach', () => {
-		const engine = new Neodrag({ sensors: [pointerSensor(), keyboardSensor()], dev: false });
+	it('unregisterSensor removes a sensor by key', () => {
+		const engine = new Neodrag({ dev: false });
+		engine.unregisterSensor(KEYBOARD_MOVE_SENSOR_KEY);
+		expect(engine.getSensors().map((s) => s.key)).toEqual([
+			POINTER_SENSOR_KEY,
+			KEYBOARD_SENSOR_KEY,
+		]);
+	});
+
+	it('installDefaultSensors registers the built-in trio', () => {
+		const engine = new Neodrag({ defaultSensors: false, dev: false });
+		installDefaultSensors((sensor) => engine.registerSensor(sensor));
+		expect(engine.getSensors()).toHaveLength(3);
+	});
+
+	it('registerSensor after first attach wires listeners immediately', () => {
+		const engine = new Neodrag({ defaultSensors: false, dev: false });
 		const binding = new Draggable({ engine, plugins: [] });
 		const node = document.createElement('div');
 		document.body.appendChild(node);
 		binding.attach(node);
-		expect(engine).toBeDefined();
+
+		engine.registerSensor(new PointerSensor());
+
+		const rect = node.getBoundingClientRect();
+		document.documentElement.dispatchEvent(
+			new PointerEvent('pointerdown', {
+				bubbles: true,
+				clientX: rect.left + 10,
+				clientY: rect.top + 10,
+				pointerId: 99,
+				button: 0,
+			}),
+		);
+
 		binding.destroy();
 		node.remove();
 	});
+});
 
-	it('custom pointer-only sensor still allows drag', () => {
-		const engine = new Neodrag({ sensors: [pointerSensor()], dev: false });
+describe('sensor behavior', () => {
+	it('pointer sensor allows drag with pointer-only engine', () => {
+		const engine = new Neodrag({ defaultSensors: false, dev: false });
+		engine.registerSensor(new PointerSensor());
 		const binding = new Draggable({ engine, plugins: [] });
 		const node = document.createElement('div');
 		node.style.width = '100px';
@@ -50,37 +90,44 @@ describe('sensors', () => {
 		binding.attach(node);
 
 		const rect = node.getBoundingClientRect();
-		const down = new PointerEvent('pointerdown', {
-			bubbles: true,
-			clientX: rect.left + 10,
-			clientY: rect.top + 10,
-			pointerId: 1,
-			button: 0,
-		});
-		document.documentElement.dispatchEvent(down);
-
-		const move = new PointerEvent('pointermove', {
-			bubbles: true,
-			clientX: rect.left + 60,
-			clientY: rect.top + 60,
-			pointerId: 1,
-		});
-		document.documentElement.dispatchEvent(move);
-
-		const up = new PointerEvent('pointerup', {
-			bubbles: true,
-			clientX: rect.left + 60,
-			clientY: rect.top + 60,
-			pointerId: 1,
-		});
-		document.documentElement.dispatchEvent(up);
+		document.documentElement.dispatchEvent(
+			new PointerEvent('pointerdown', {
+				bubbles: true,
+				clientX: rect.left + 10,
+				clientY: rect.top + 10,
+				pointerId: 1,
+				button: 0,
+			}),
+		);
+		document.documentElement.dispatchEvent(
+			new PointerEvent('pointermove', {
+				bubbles: true,
+				clientX: rect.left + 60,
+				clientY: rect.top + 60,
+				pointerId: 1,
+			}),
+		);
+		document.documentElement.dispatchEvent(
+			new PointerEvent('pointerup', {
+				bubbles: true,
+				clientX: rect.left + 60,
+				clientY: rect.top + 60,
+				pointerId: 1,
+			}),
+		);
 
 		binding.destroy();
 		node.remove();
 	});
 
 	it('keyboard sensor cancels active drag on Escape', () => {
-		const engine = new Neodrag({ sensors: [pointerSensor(), keyboardSensor()], dev: false });
+		const engine = new Neodrag({
+			defaultSensors: false,
+			dev: false,
+		});
+		engine.registerSensor(new PointerSensor());
+		engine.registerSensor(new KeyboardSensor());
+
 		const binding = new Draggable({ engine, plugins: [] });
 		const node = document.createElement('div');
 		document.body.appendChild(node);
@@ -124,7 +171,8 @@ describe('sensors', () => {
 
 	it('delegate is not read until sensor attach', () => {
 		const delegate = vi.fn(() => document.documentElement);
-		new Neodrag({ delegate, sensors: [pointerSensor()] });
+		const engine = new Neodrag({ delegate, defaultSensors: false, dev: false });
+		engine.registerSensor(new PointerSensor());
 		expect(delegate).not.toHaveBeenCalled();
 	});
 });
