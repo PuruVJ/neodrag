@@ -558,6 +558,7 @@ export class Neodrag {
 		inst.inverseScale = this.#inverseScale(inst);
 		inst.initialX = input.clientX - inst.offsetX / inst.inverseScale;
 		inst.initialY = input.clientY - inst.offsetY / inst.inverseScale;
+		inst.syncLiveViews();
 		inst.isInteracting = true;
 		inst.cancelled = false;
 		syncDragSessionPointer(input, inst, null, this.#dropHost);
@@ -577,14 +578,16 @@ export class Neodrag {
 		const inst = this.#activeSource;
 		if (!inst?.isInteracting) return;
 
-		syncDragSessionPointer(input, inst, this.#active, this.#dropHost);
-
 		if (!inst.isDragging) {
+			inst.lastInput = input;
 			if (
 				!passesDragThreshold(inst.thresholdConfig, inst.thresholdSample, inst.dragCtx, input)
 			) {
 				return;
 			}
+
+			syncDragSessionPointer(input, inst, this.#active, this.#dropHost);
+			inst.syncLiveViews();
 
 			const startOk = this.#runStart(inst, inst.dragCtx, input);
 			inst.effects.flush();
@@ -612,11 +615,14 @@ export class Neodrag {
 			} else {
 				inst.pointerCapturedId = KEYBOARD_POINTER_ID;
 			}
+		} else {
+			syncDragSessionPointer(input, inst, this.#active, this.#dropHost);
 		}
 
 		if (isPointerInput(input)) input.native.preventDefault();
 
 		this.#applyDragDelta(inst, input);
+		inst.syncLiveViews();
 
 		if (this.#active) {
 			this.#active.deltaX = inst.deltaX;
@@ -628,6 +634,7 @@ export class Neodrag {
 		inst.offsetY += inst.proposedY;
 		inst.proposedX = 0;
 		inst.proposedY = 0;
+		inst.syncLiveViews();
 		inst.effects.flush();
 		this.#syncDragTransform(inst);
 
@@ -816,6 +823,7 @@ export class Neodrag {
 			if (patch) {
 				if (patch.x !== undefined) inst.proposedX = patch.x;
 				if (patch.y !== undefined) inst.proposedY = patch.y;
+				inst.syncLiveViews();
 			}
 
 			if (inst.cancelled) break;
@@ -942,7 +950,10 @@ export class Neodrag {
 			destroy: (plugin) => this.#destroyOneDragPlugin(inst, plugin),
 			update: (plugin) => plugin.update?.(inst.dragCtx, inst.states.get(plugin.key)),
 		});
-		if (inst.offsetX !== offsetX || inst.offsetY !== offsetY) this.#syncDragTransform(inst);
+		if (inst.offsetX !== offsetX || inst.offsetY !== offsetY) {
+			inst.syncLiveViews();
+			this.#syncDragTransform(inst);
+		}
 		inst.effects.flush();
 	}
 

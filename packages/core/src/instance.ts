@@ -84,10 +84,12 @@ export class DragInstance {
 	thresholdConfig!: ResolvedDragThreshold;
 	thresholdSample: DragThresholdSample = createThresholdSample();
 
-	readonly #liveDelta: { readonly x: number; readonly y: number };
-	readonly #liveProposed: { readonly x: number; readonly y: number };
-	readonly #liveOffset: { readonly x: number; readonly y: number };
-	readonly #liveInitial: { readonly x: number; readonly y: number };
+	readonly live = {
+		delta: { x: 0, y: 0 },
+		proposed: { x: 0, y: 0 },
+		offset: { x: 0, y: 0 },
+		initial: { x: 0, y: 0 },
+	};
 
 	flat: DragPlugin[] = [];
 	lastSlots: import('./types.ts').DragPluginList | null = null;
@@ -125,6 +127,17 @@ export class DragInstance {
 		this.thresholdConfig = resolveDragThreshold(input, this.rootNode, this.lengthAdapter);
 	}
 
+	syncLiveViews() {
+		this.live.delta.x = this.deltaX;
+		this.live.delta.y = this.deltaY;
+		this.live.proposed.x = this.proposedX;
+		this.live.proposed.y = this.proposedY;
+		this.live.offset.x = this.offsetX;
+		this.live.offset.y = this.offsetY;
+		this.live.initial.x = this.initialX;
+		this.live.initial.y = this.initialY;
+	}
+
 	constructor(
 		node: HTMLElement | SVGElement,
 		idleSession: DragSession,
@@ -136,59 +149,18 @@ export class DragInstance {
 		this.cachedRootNodeRect = node.getBoundingClientRect();
 		this.#session = idleSession;
 		this.setThreshold(undefined);
+		this.syncLiveViews();
 
 		const inst = this;
-		this.#liveDelta = {
-			get x() {
-				return inst.deltaX;
-			},
-			get y() {
-				return inst.deltaY;
-			},
-		};
-		this.#liveProposed = {
-			get x() {
-				return inst.proposedX;
-			},
-			get y() {
-				return inst.proposedY;
-			},
-		};
-		this.#liveOffset = {
-			get x() {
-				return inst.offsetX;
-			},
-			get y() {
-				return inst.offsetY;
-			},
-		};
-		this.#liveInitial = {
-			get x() {
-				return inst.initialX;
-			},
-			get y() {
-				return inst.initialY;
-			},
-		};
 		this.dragCtx = {
-			get delta() {
-				return inst.#liveDelta;
-			},
-			get proposed() {
-				return inst.#liveProposed;
-			},
-			get offset() {
-				return inst.#liveOffset;
-			},
-			get offsetPx() {
-				return inst.#liveOffset;
-			},
+			delta: inst.live.delta,
+			proposed: inst.live.proposed,
+			offset: inst.live.offset,
+			offsetPx: inst.live.offset,
 			get offsetAuthored() {
 				return inst.offsetAuthored ?? undefined;
 			},
-			get initial() {
-				return inst.#liveInitial;
-			},
+			initial: inst.live.initial,
 			get isDragging() {
 				return inst.isDragging;
 			},
@@ -231,6 +203,7 @@ export class DragInstance {
 				} else {
 					inst.offsetAuthored = null;
 				}
+				inst.syncLiveViews();
 			},
 			setVisual(node) {
 				inst.setVisual(node);
