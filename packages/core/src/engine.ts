@@ -19,6 +19,8 @@ import { DEFAULT_DRAG_PLUGINS, DEFAULTS } from './defaults.ts';
 import { applyDragTransform, type TransformApplier } from './apply-transform.ts';
 import { DropTargetTracker, type DropTargetHost } from './drop-targets.ts';
 import { createDragSession, resolveEndReason } from './session.ts';
+import { defaultSensors } from './sensors/defaults.ts';
+import type { Sensor, SensorHost } from './sensors/types.ts';
 import { transitionSession } from './state-machine.ts';
 import {
 	assertNamedPluginKeys,
@@ -48,6 +50,7 @@ export interface EngineOptions {
 	plugins?: DragPlugin[];
 	dropPlugins?: DropPlugin[];
 	delegate?: () => HTMLElement;
+	sensors?: Sensor[];
 	onError?: (error: ErrorInfo) => void;
 	dev?: boolean;
 }
@@ -79,13 +82,10 @@ export class Neodrag {
 	#activeSource: DragInstance | null = null;
 	#activePointerId: number | null = null;
 
-	#listenersInitialized = false;
-	#listenerDelegate: HTMLElement | null = null;
-	#boundOnDown: ((e: PointerEvent) => void) | null = null;
-	#boundOnKeyDown: ((e: KeyboardEvent) => void) | null = null;
-	#boundOnMove: ((e: PointerEvent) => void) | null = null;
-	#boundOnUp: ((e: PointerEvent) => void) | null = null;
-	#pointerSessionAbort: AbortController | null = null;
+	#sensorsInitialized = false;
+	#sensorCleanups: (() => void)[] = [];
+	#pointerDisarm: (() => void) | null = null;
+	#sensors: Sensor[];
 
 	#lastTarget: Element | null = null;
 	#lastResult: HTMLElement | SVGElement | null = null;
@@ -110,6 +110,8 @@ export class Neodrag {
 		session: null!,
 	};
 
+	readonly #sensorHost: SensorHost;
+
 	constructor(options: EngineOptions = {}) {
 		this.#dropHostBridge = {
 			getDropCount: () => this.#dropCount,
@@ -124,8 +126,20 @@ export class Neodrag {
 		this.#defaultDragPlugins = options.plugins ?? DEFAULT_DRAG_PLUGINS;
 		this.#defaultDropPlugins = options.dropPlugins ?? [];
 		this.#delegate = options.delegate;
+		this.#sensors = options.sensors ?? defaultSensors();
 		this.#onError = options.onError ?? DEFAULTS.onError;
 		this.#dev = options.dev ?? DEV;
+
+		this.#sensorHost = {
+			getDelegate: () => this.#resolveDelegateTarget(),
+			setPointerDisarm: (disarm) => {
+				this.#pointerDisarm = disarm;
+			},
+			onPointerDown: (e) => this.#onPointerDown(e),
+			onPointerMove: (e) => this.#onPointerMove(e),
+			onPointerUp: (e) => this.#onPointerUp(e),
+			cancelActive: (reason) => this.#cancelSession(reason),
+		};
 	}
 
 	#createIdleActive(): ActiveSession {
@@ -178,7 +192,7 @@ export class Neodrag {
 			);
 		}
 
-		this.#initListeners();
+		this.#initSensors();
 
 		const inst = new DragInstance(node, this.#ensureIdleSession());
 		inst.applyTransform = options.applyTransform;
@@ -196,7 +210,7 @@ export class Neodrag {
 	}
 
 	droppable(node: HTMLElement | SVGElement, plugins: DropPluginList = []): DropHandle {
-		this.#initListeners();
+		this.#initSensors();
 
 		const inst = new DropInstance(node, this.#dropHost);
 		inst.lastSlots = plugins;
@@ -263,7 +277,7 @@ export class Neodrag {
 	}
 
 	dispose() {
-		this.#disarmPointerSession();
+		this.#pointerDisarm?.();
 		this.#endActiveInteraction('cancel');
 		for (const inst of this.#dragSources.values()) this.#destroyDrag(inst);
 		for (const inst of this.#dropTargets.values()) this.#destroyDrop(inst);
@@ -271,7 +285,7 @@ export class Neodrag {
 		this.#dropTargets.clear();
 		this.#dropCount = 0;
 		this.#soleDrop = null;
-		this.#removeGlobalListeners();
+		this.#teardownSensors();
 	}
 
 	#beginSession(source: DragInstance, e: PointerEvent) {
@@ -315,53 +329,19 @@ export class Neodrag {
 		return (this.#delegate ?? DEFAULTS.delegate)();
 	}
 
-	#initListeners() {
-		if (this.#listenersInitialized) return;
-		const target = this.#resolveDelegateTarget();
-		this.#listenerDelegate = target;
-		this.#boundOnDown = this.#onPointerDown.bind(this);
-		this.#boundOnKeyDown = this.#onKeyDown.bind(this);
-		this.#boundOnMove = this.#onPointerMove.bind(this);
-		this.#boundOnUp = this.#onPointerUp.bind(this);
-
-		listen(target, 'pointerdown', this.#boundOnDown, { passive: true, capture: true });
-		listen(target, 'keydown', this.#boundOnKeyDown, { passive: true });
-
-		this.#listenersInitialized = true;
-	}
-
-	#removeGlobalListeners() {
-		if (!this.#listenersInitialized || !this.#listenerDelegate) return;
-		const target = this.#listenerDelegate;
-		const capture = { capture: true } as EventListenerOptions;
-		if (this.#boundOnDown) target.removeEventListener('pointerdown', this.#boundOnDown, capture);
-		if (this.#boundOnKeyDown) target.removeEventListener('keydown', this.#boundOnKeyDown);
-		this.#listenersInitialized = false;
-		this.#listenerDelegate = null;
-		this.#boundOnDown = null;
-		this.#boundOnKeyDown = null;
-		this.#boundOnMove = null;
-		this.#boundOnUp = null;
-	}
-
-	#armPointerSession() {
-		if (this.#pointerSessionAbort) return;
-		const target = this.#listenerDelegate ?? this.#resolveDelegateTarget();
-		const signal = (this.#pointerSessionAbort = new AbortController()).signal;
-		listen(target, 'pointermove', this.#boundOnMove!, { passive: false, capture: true, signal });
-		listen(target, 'pointerup', this.#boundOnUp!, { passive: true, capture: true, signal });
-		listen(target, 'pointercancel', this.#boundOnUp!, { passive: true, capture: true, signal });
-	}
-
-	#disarmPointerSession() {
-		this.#pointerSessionAbort?.abort();
-		this.#pointerSessionAbort = null;
-	}
-
-	#onKeyDown(e: KeyboardEvent) {
-		if (e.key === 'Escape' && this.#active) {
-			this.#cancelSession('cancel');
+	#initSensors() {
+		if (this.#sensorsInitialized) return;
+		for (const sensor of this.#sensors) {
+			this.#sensorCleanups.push(sensor.setup(this.#sensorHost));
 		}
+		this.#sensorsInitialized = true;
+	}
+
+	#teardownSensors() {
+		for (const cleanup of this.#sensorCleanups) cleanup();
+		this.#sensorCleanups.length = 0;
+		this.#sensorsInitialized = false;
+		this.#pointerDisarm = null;
 	}
 
 	#onPointerDown(e: PointerEvent) {
@@ -384,7 +364,6 @@ export class Neodrag {
 		this.#dropHost.lastEvent = e;
 		this.#dropTracker.reset();
 		this.#beginSession(inst, e);
-		this.#armPointerSession();
 	}
 
 	#onPointerMove(e: PointerEvent) {
@@ -520,7 +499,7 @@ export class Neodrag {
 		this.#activeSessionView = null;
 		this.#dropHost.session = this.#ensureIdleSession();
 		inst.bindSession(this.#ensureIdleSession());
-		this.#disarmPointerSession();
+		this.#pointerDisarm?.();
 		this.#dropTracker.reset();
 	}
 
@@ -558,7 +537,7 @@ export class Neodrag {
 		this.#activeSessionView = null;
 		this.#dropHost.session = this.#ensureIdleSession();
 		inst.bindSession(this.#ensureIdleSession());
-		this.#disarmPointerSession();
+		this.#pointerDisarm?.();
 		this.#dropTracker.reset();
 	}
 

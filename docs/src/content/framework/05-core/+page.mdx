@@ -59,9 +59,25 @@ Returns a `DragHandle`. `plugins` is `DragPlugin[]` or `() => DragPlugin[]`; fra
 
 Returns a `DropHandle` for drop targets. Same reactive `PluginInput` shape as drag (`DropPlugin[]` or `() => DropPlugin[]`).
 
+### Sensors (input layer)
+
+Pointer and keyboard input are **sensors** on the engine — not hard-coded listeners. Default: `pointerSensor()` + `keyboardSensor()` (Escape cancels).
+
+```typescript
+import { Neodrag, defaultSensors, pointerSensor } from '@neodrag/core';
+
+const engine = new Neodrag({
+  sensors: defaultSensors(),
+  // or pointer-only while building resize / multi-drag sensors:
+  // sensors: [pointerSensor({ buttons: [0] })],
+});
+```
+
+Custom sensors implement `setup(host) → cleanup` and call `SensorHost` (`onPointerDown`, `onPointerMove`, `onPointerUp`, `cancelActive`). Resize handles and multi-drag will add new sensors on this layer.
+
 ### Delegate target
 
-`delegate` runs when the first draggable or droppable attaches (e.g. `{@attach drag.attachment}`). Neodrag is browser-only — wire it on elements that exist in the DOM.
+`delegate` is read when sensors attach (first draggable/droppable). Neodrag is browser-only — wire it on elements that exist in the DOM.
 
 Pass a custom delegate when you use `new Neodrag()` directly:
 

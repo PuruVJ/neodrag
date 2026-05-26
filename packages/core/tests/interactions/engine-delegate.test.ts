@@ -4,6 +4,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Neodrag } from '../../src/engine.ts';
 import { Draggable } from '../../src/draggable-binding.ts';
+import { keyboardSensor, pointerSensor } from '../../src/sensors/index.ts';
 
 describe('engine delegate wiring', () => {
 	it('Neodrag constructor does not invoke delegate', () => {
@@ -19,14 +20,14 @@ describe('engine delegate wiring', () => {
 		expect(delegate).not.toHaveBeenCalled();
 	});
 
-	it('Draggable attach invokes delegate once', () => {
+	it('Draggable attach invokes delegate once per sensor', () => {
 		const delegate = vi.fn(() => document.documentElement);
-		const engine = new Neodrag({ delegate });
+		const engine = new Neodrag({ delegate, sensors: [pointerSensor(), keyboardSensor()] });
 		const binding = new Draggable({ engine, plugins: [] });
 		const node = document.createElement('div');
 		document.body.appendChild(node);
 		binding.attach(node);
-		expect(delegate).toHaveBeenCalledTimes(1);
+		expect(delegate).toHaveBeenCalledTimes(2);
 		binding.destroy();
 		node.remove();
 	});

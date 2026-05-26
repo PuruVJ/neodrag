@@ -35,3 +35,12 @@ export type { DragEventData } from './plugins.ts';
 export { DEFAULTS, DEFAULT_DRAG_PLUGINS, MINIMAL_DRAG_PLUGINS } from './defaults.ts';
 export { autoScroll } from './plugins.ts';
 export { presetDockHandle, presetKanbanCard, presetListItem } from './presets.ts';
+export {
+	defaultSensors,
+	pointerSensor,
+	keyboardSensor,
+	type Sensor,
+	type SensorHost,
+	type PointerSensorOptions,
+	type KeyboardSensorOptions,
+} from './sensors/index.ts';
