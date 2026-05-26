@@ -47,96 +47,41 @@
 	});
 </script>
 
-<div class="home-playground" data-theme={active_theme}>
+<div class="home-playground relative isolate flex min-h-[calc(100dvh-6rem)] w-full max-w-6xl flex-col px-3 pb-32 font-sans text-fg box-border sm:px-8" data-theme={active_theme}>
 	<div class="pg-backdrop" aria-hidden="true"></div>
 
-	<div class="pg-inner">
+	<div class="relative z-[1] flex flex-col">
 		<PlaygroundIntro {world} onworld={select_world} />
 
-		<section class="pg-section play-canvas" aria-label="Try dragging">
-			<header class="pg-section-head">
-				<span class="pg-kicker"><span aria-hidden="true">▍</span> try it</span>
-				<span class="pg-meta">drag · source</span>
+		<section
+			class="play-canvas flex min-h-[clamp(28rem,62vh,44rem)] flex-1 flex-col gap-[var(--pg-section-gap,1.25rem)] border-[0.2px] border-[var(--pg-border)] bg-[var(--pg-panel)] p-4 sm:p-7"
+			aria-label="Try dragging"
+		>
+			<header
+				class="flex items-baseline justify-between gap-4 border-b-[0.2px] border-[var(--pg-border-strong)] pb-2.5 font-mono text-[clamp(0.62rem,1.2vw,0.7rem)] font-semibold tracking-[0.18em] uppercase"
+			>
+				<span class="inline-flex items-baseline gap-1.5 text-primary">
+					<span aria-hidden="true">▍</span>
+					try it
+				</span>
+				<span class="font-medium text-[var(--pg-muted-soft)]">drag · source</span>
 			</header>
 
-			<p class="pg-section-hint">Drag the windows — they stay inside the desk.</p>
+			<p class="m-0 font-mono text-[clamp(0.75rem,1.4vw,0.85rem)] text-[var(--pg-muted)]">
+				Drag the windows — they stay inside the desk.
+			</p>
 
-			<div class="play-canvas-grid">
-				<div class="stage-column">
+			<div
+				class="play-canvas-grid grid min-h-[clamp(22rem,52vh,40rem)] flex-1 grid-cols-1 max-[1100px]:grid-rows-[1fr_auto] min-[1101px]:grid-cols-[minmax(0,1fr)_1px_minmax(300px,36%)]"
+			>
+				<div class="stage-column flex min-h-0 min-w-0 flex-col max-[1100px]:pb-3 min-[1101px]:pr-5">
 					<PlaygroundStage {world} />
 				</div>
 
-				<div class="playground-divider divider" aria-hidden="true"></div>
+				<div class="playground-divider max-[1100px]:h-px min-[1101px]:w-px" aria-hidden="true"></div>
 
 				<LiveCodePanel {world} {framework} onframework={(id) => (framework = id)} {snippets} />
 			</div>
 		</section>
 	</div>
 </div>
-
-<style>
-	@import './playground-home.css';
-	@import './playground-chrome.css';
-
-	.home-playground {
-		display: flex;
-		flex-direction: column;
-		width: 100%;
-		max-width: min(72rem, 100%);
-		margin: 0 auto;
-		padding: clamp(0.75rem, 2vw, 1.25rem) clamp(0.75rem, 3vw, 2rem) 8rem;
-		box-sizing: border-box;
-		min-height: calc(100dvh - 6rem);
-	}
-
-	.play-canvas {
-		flex: 1;
-		min-height: clamp(28rem, 62vh, 44rem);
-	}
-
-	.play-canvas-grid {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) 1px minmax(300px, 36%);
-		gap: 0;
-		flex: 1;
-		min-height: clamp(22rem, 52vh, 40rem);
-	}
-
-	.stage-column {
-		display: flex;
-		flex-direction: column;
-		min-width: 0;
-		min-height: 0;
-		padding-right: clamp(0.75rem, 2vw, 1.25rem);
-	}
-
-	.divider {
-		width: 1px;
-		height: auto;
-		align-self: stretch;
-	}
-
-	@media (max-width: 1100px) {
-		.play-canvas-grid {
-			grid-template-columns: 1fr;
-			grid-template-rows: 1fr auto;
-			min-height: clamp(22rem, 50vh, 34rem);
-		}
-
-		.stage-column {
-			padding-right: 0;
-			padding-bottom: 0.75rem;
-		}
-
-		.divider {
-			width: auto;
-			height: 1px;
-		}
-
-		.home-playground :global(.code-panel) {
-			min-height: 16rem;
-			padding-left: 0 !important;
-			padding-top: 0.75rem !important;
-		}
-	}
-</style>

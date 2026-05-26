@@ -25,54 +25,24 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <article
-	class="window playground-window"
+	class="playground-window window absolute w-[min(17rem,76%)] touch-none cursor-grab active:cursor-grabbing"
 	style:--stack={stack}
 	style:z-index={z}
+	style:top="calc(16% + var(--stack) * 11%)"
+	style:left="calc(14% + var(--stack) * 13%)"
 	{@attach drag.attachment}
 	onpointerdown={onactivate}
 >
 	<div class="playground-window-chrome">
-		<span class="window-title">{title}</span>
+		<span
+			class="window-title font-mono text-[0.8rem] font-bold tracking-[0.06em] text-[color-mix(in_lch,var(--app-color-dark),transparent_10%)] uppercase"
+		>
+			{title}
+		</span>
 	</div>
-	<div class="window-body">
-		<p>{body}</p>
+	<div class="px-[1.1rem] pt-4 pb-[1.15rem]">
+		<p class="m-0 text-[0.95rem] leading-[1.55] text-[color-mix(in_lch,var(--app-color-dark),transparent_22%)]">
+			{body}
+		</p>
 	</div>
 </article>
-
-<style>
-	@import '../playground-chrome.css';
-
-	.window {
-		position: absolute;
-		width: min(17rem, 76%);
-		touch-action: none;
-		cursor: grab;
-
-		top: calc(16% + var(--stack) * 11%);
-		left: calc(14% + var(--stack) * 13%);
-
-		&:active {
-			cursor: grabbing;
-		}
-	}
-
-	.window-title {
-		font-family: var(--app-font-mono);
-		font-size: 0.8rem;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		color: color-mix(in lch, var(--app-color-dark), transparent 10%);
-	}
-
-	.window-body {
-		padding: 1rem 1.1rem 1.15rem;
-	}
-
-	.window-body p {
-		margin: 0;
-		font-size: 0.95rem;
-		line-height: 1.55;
-		color: color-mix(in lch, var(--app-color-dark), transparent 22%);
-	}
-</style>

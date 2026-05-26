@@ -11,7 +11,7 @@ const SHIKI_THEMES = {
 } as const;
 ---
 
-<div class="playground-snippets">
+<div class="playground-snippets relative min-h-full">
 	{
 		WORLDS.map((world) =>
 			FRAMEWORK_TABS.map((tab) => (
@@ -32,40 +32,3 @@ const SHIKI_THEMES = {
 		)
 	}
 </div>
-
-<style>
-	.playground-snippets {
-		position: relative;
-		min-height: 100%;
-	}
-
-	.playground-snippet[hidden] {
-		display: none !important;
-	}
-
-	.playground-snippet:not([hidden]) {
-		display: block;
-	}
-
-	.playground-snippet :global(pre.astro-code) {
-		margin: 0;
-		padding: 0;
-		overflow-x: auto;
-		background: transparent !important;
-		font-size: inherit !important;
-		line-height: inherit !important;
-	}
-
-	.playground-snippet :global(pre.astro-code code) {
-		display: block;
-		font-family: var(--app-font-mono);
-		background: transparent;
-		white-space: pre-wrap;
-		word-break: break-word;
-	}
-
-	.playground-snippet :global(.astro-code .line) {
-		display: inline-block;
-		width: 100%;
-	}
-</style>
