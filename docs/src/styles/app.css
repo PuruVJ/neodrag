@@ -209,6 +209,38 @@
 }
 
 @layer components {
+	.site-vignette-layer {
+		background-image:
+			radial-gradient(
+				ellipse 85% 70% at 50% 50%,
+				transparent 42%,
+				color-mix(in lch, var(--app-color-shell), transparent 15%) 100%
+			),
+			linear-gradient(
+				180deg,
+				color-mix(in lch, var(--app-color-shell), transparent 8%) 0%,
+				transparent 18%,
+				transparent 82%,
+				color-mix(in lch, var(--app-color-shell), transparent 12%) 100%
+			);
+	}
+
+	body[data-theme='dark'] .site-vignette-layer {
+		background-image:
+			radial-gradient(
+				ellipse 90% 75% at 50% 48%,
+				transparent 38%,
+				color-mix(in lch, var(--app-color-shell), transparent 8%) 100%
+			),
+			linear-gradient(
+				180deg,
+				color-mix(in lch, var(--app-color-shell), transparent 25%) 0%,
+				transparent 22%,
+				transparent 78%,
+				color-mix(in lch, var(--app-color-shell), transparent 35%) 100%
+			);
+	}
+
 	.site-glow-layer {
 		background-image:
 			radial-gradient(
@@ -267,6 +299,30 @@
 		max-width: none !important;
 		width: auto !important;
 		height: auto !important;
+	}
+
+	@media (max-width: 767px) {
+		.dock-host {
+			--spacing-dock-cut: 0.7rem;
+		}
+	}
+
+	.docs-shell {
+		@apply relative z-10 mx-auto w-full max-w-[min(84rem,100%)] px-[clamp(0.85rem,3.5vw,2.5rem)] pt-[clamp(0.75rem,2vw,1.25rem)] pb-24 max-md:pb-20;
+	}
+
+	.docs-shell :where(h1, h2, h3, h4, h5, .h1, .h2, .h3) {
+		font-family: var(--font-sans) !important;
+		font-weight: 800;
+		letter-spacing: -0.03em;
+	}
+
+	.docs-article-panel {
+		@apply px-[clamp(1rem,3vw,1.75rem)] py-[clamp(1.25rem,3vw,2rem)];
+	}
+
+	.docs-sidebar-panel {
+		@apply border-r-2 border-[var(--color-border)] bg-[color-mix(in_lch,var(--app-color-shell),transparent_12%)] shadow-[0_0_0_1px_color-mix(in_lch,var(--color-brand),transparent_82%)] backdrop-blur-[14px] backdrop-saturate-[1.12];
 	}
 
 	.docs-prose {

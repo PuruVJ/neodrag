@@ -22,6 +22,7 @@ const nav_list = get_nav_list(framework as any);
 	<div class="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
 		<div class="site-grid-layer absolute inset-0"></div>
 		<div class="site-glow-layer absolute inset-0"></div>
+		<div class="site-vignette-layer absolute inset-0"></div>
 	</div>
 
 	<section
@@ -29,25 +30,31 @@ const nav_list = get_nav_list(framework as any);
 		id="docs-container"
 	>
 		<aside
-			class="fixed z-10 hidden h-full w-[300px] overflow-y-auto border-r-2 border-[var(--color-border)] bg-[color-mix(in_lch,var(--app-color-shell),transparent_8%)] backdrop-blur-md min-[968px]:block"
+			class="docs-sidebar-panel fixed z-10 hidden h-full w-[300px] overflow-y-auto min-[968px]:block"
 		>
 			<Nav framework={framework} pathname={Astro.url.pathname} nav_list={nav_list} />
 		</aside>
 
 		<main
-			class="relative min-h-dvh w-full min-w-0 pt-10 pr-4 pb-8 pl-4 min-[968px]:w-[calc(100%-300px)] min-[968px]:pl-[332px]"
+			class="docs-shell relative min-h-dvh w-full min-w-0 min-[968px]:w-[calc(100%-300px)] min-[968px]:pl-[300px]"
 		>
-			<article class="docs-prose pb-12">
+			<article class="docs-article-panel site-panel docs-prose">
 				<slot />
 
-				<footer class="mt-12 flex w-full justify-center">
-					<span class="flex items-center gap-2 font-mono text-sm text-fg-muted">
+				<div class="site-section-break mt-12" aria-hidden="true">
+					<span class="site-section-break-line"></span>
+					<span class="font-mono text-sm font-black">§</span>
+					<span class="site-section-break-line"></span>
+				</div>
+
+				<footer class="mt-6 flex w-full justify-center">
+					<span class="font-mono text-xs tracking-[0.12em] text-fg-muted uppercase">
 						&copy; 2021-{new Date().getUTCFullYear()}
 						<a
 							href="https://x.com/puruvjdev"
 							target="blank"
 							rel="noopener noreferrer"
-							class="unstyled font-semibold text-brand"
+							class="unstyled font-extrabold text-brand normal-case"
 						>
 							Puru Vijay</a
 						>

@@ -2,7 +2,6 @@
 /* @import 'open-props/normalize.min.css'; */
 @import './normalize.css';
 @import './themes.css';
-@import '../styles/dock.css';
 
 /* @import './include-media'; */
 * {

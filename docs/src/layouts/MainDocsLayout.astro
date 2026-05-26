@@ -33,7 +33,11 @@ const version = {
 ---
 
 <DocsLayout title={title} headings={headings} framework={framework}>
-	<h1 class="m-0! max-w-full">
+	<p class="site-kicker mb-3">
+		@neodrag / {framework} · docs desk
+	</p>
+
+	<h1 class="m-0! max-w-full font-extrabold tracking-[-0.03em]">
 		{
 			is_framework_only_page ? (
 				<>
@@ -57,7 +61,7 @@ const version = {
 		) : null
 	}
 
-	<p>{tagline}</p>
+	<p class="text-[clamp(1.05rem,2vw,1.15rem)] leading-[1.55] text-fg-muted">{tagline}</p>
 
 	<slot />
 </DocsLayout>

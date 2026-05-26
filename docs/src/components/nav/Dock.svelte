@@ -84,12 +84,12 @@
 ></div>
 
 <section
-	class="pointer-events-none fixed bottom-4 left-0 z-[1000] flex h-24 w-full items-end justify-center gap-[clamp(2rem,10vw,8rem)] p-1.5 max-md:bottom-0 max-md:h-16 max-md:p-0"
+	class="dock-host pointer-events-none fixed bottom-4 left-0 z-[1000] flex h-24 w-full items-end justify-center gap-[clamp(2rem,10vw,8rem)] p-1.5 max-md:bottom-0 max-md:h-16 max-md:justify-stretch max-md:gap-0 max-md:p-0"
 >
 	<div
 		class={[
-			'dock-surface dock-angular pointer-events-auto relative flex h-full flex-col items-end overflow-visible border-2 border-[var(--dock-border)] bg-[var(--dock-surface)] p-1.5 shadow-[var(--dock-accent-glow),inset_0_1px_0_color-mix(in_lch,var(--app-color-anti-mixer),transparent_88%),var(--dock-shadow)] backdrop-blur-[18px] backdrop-saturate-[1.12] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,color-mix(in_lch,var(--color-brand),transparent_88%)_0%,transparent_35%,transparent_65%,color-mix(in_lch,var(--color-brand),transparent_92%)_100%)] before:opacity-55 before:content-[""]',
-			menu_view.open && 'dock-angular-bar max-md:h-auto max-md:w-[min(96%,40rem)]',
+			'dock-surface pointer-events-auto relative flex h-full w-full flex-col items-end overflow-visible border-2 border-[var(--dock-border)] bg-[var(--dock-surface)] p-1.5 shadow-[var(--dock-accent-glow),inset_0_1px_0_color-mix(in_lch,var(--app-color-anti-mixer),transparent_88%),var(--dock-shadow)] backdrop-blur-[18px] backdrop-saturate-[1.12] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,color-mix(in_lch,var(--color-brand),transparent_88%)_0%,transparent_35%,transparent_65%,color-mix(in_lch,var(--color-brand),transparent_92%)_100%)] before:opacity-55 before:content-[""] max-md:dock-angular-bar max-md:rounded-none max-md:border-x-0 max-md:border-b-0 md:dock-angular md:w-auto',
+			menu_view.open && 'max-md:h-auto',
 		]}
 		{@attach dockDrag.attachment}
 		{@attach interact_outside(() => menu_view.close())}
@@ -125,10 +125,12 @@
 				</div>
 			</div>
 
-			<div class="hidden w-full items-center max-md:flex">
-				<a href="/" class="unstyled ml-2 flex items-center gap-2">
-					<img src="/logo.svg" alt="Neodrag" class="h-8 w-8" />
-					<span class="h3 m-0 font-heading">Neodrag</span>
+			<div class="hidden h-full min-h-16 w-full items-center max-md:flex">
+				<a href="/" class="unstyled ml-3 flex items-center gap-2.5">
+					<img src="/logo.svg" alt="Neodrag" class="h-9 w-9" />
+					<span class="m-0 font-sans text-lg font-extrabold tracking-[-0.02em] text-fg"
+						>Neodrag</span
+					>
 				</a>
 				<span class="flex-1"></span>
 				{@render github()}
