@@ -74,9 +74,6 @@ importers:
       '@astrojs/markdown-remark':
         specifier: ^7.1.2
         version: 7.1.2
-      '@fontsource-variable/eb-garamond':
-        specifier: ^5.2.5
-        version: 5.2.6
       '@fontsource-variable/inter':
         specifier: ^5.2.8
         version: 5.2.8
@@ -1147,9 +1144,6 @@ packages:
 
   '@floating-ui/utils@0.2.9':
     resolution: {integrity: sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==}
-
-  '@fontsource-variable/eb-garamond@5.2.6':
-    resolution: {integrity: sha512-7WNOTFudWYYSiTmaRlTQO0GwS8UQeCVzrluVsRQY5ueDlrUzCwlCQdbGJ4IxGchYqgqB4ehOqX3jjTxBpJyNeA==}
 
   '@fontsource-variable/inter@5.2.8':
     resolution: {integrity: sha512-kOfP2D+ykbcX/P3IFnokOhVRNoTozo5/JxhAIVYLpea/UBmCQ/YWPBfWIDuBImXX/15KH+eKh4xpEUyS2sQQGQ==}
@@ -5534,8 +5528,6 @@ snapshots:
       '@floating-ui/utils': 0.2.9
 
   '@floating-ui/utils@0.2.9': {}
-
-  '@fontsource-variable/eb-garamond@5.2.6': {}
 
   '@fontsource-variable/inter@5.2.8': {}
 

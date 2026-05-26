@@ -18,7 +18,7 @@
 			class="unstyled m-1 flex items-center gap-2 font-semibold text-fg min-[968px]:m-4"
 		>
 			<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" class="w-12" />
-			<span class="h3 m-0 font-heading text-xl">Neodrag</span>
+			<span class="h3 m-0 text-xl">Neodrag</span>
 		</a>
 	{/if}
 

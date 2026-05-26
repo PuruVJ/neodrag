@@ -39,7 +39,9 @@ body {
 :is(h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5) {
 	width: max-content;
 	color: var(--app-color-dark);
-	font-family: var(--app-font-heading);
+	font-family: var(--app-font-main);
+	font-weight: 800;
+	letter-spacing: -0.03em;
 	text-transform: balanced;
 	margin: 0.75em 0 0.25em;
 	max-width: 100%;

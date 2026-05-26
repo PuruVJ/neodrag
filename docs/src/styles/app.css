@@ -3,7 +3,6 @@
 
 @theme inline {
 	--font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
-	--font-heading: 'EB Garamond Variable', ui-serif, Georgia, serif;
 	--font-mono: 'Jetbrains mono Variable', ui-monospace, monospace;
 
 	--color-fg: var(--app-color-dark);
@@ -47,8 +46,7 @@
 	}
 
 	:is(h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5) {
-		@apply max-w-full font-heading text-balance text-fg;
-		font-family: var(--font-heading);
+		@apply max-w-full font-sans font-extrabold text-balance tracking-[-0.03em] text-fg;
 	}
 
 	h1,
@@ -309,12 +307,6 @@
 
 	.docs-shell {
 		@apply relative z-10 mx-auto w-full max-w-[min(84rem,100%)] px-[clamp(0.85rem,3.5vw,2.5rem)] pt-[clamp(0.75rem,2vw,1.25rem)] pb-24 max-md:pb-20;
-	}
-
-	.docs-shell :where(h1, h2, h3, h4, h5, .h1, .h2, .h3) {
-		font-family: var(--font-sans) !important;
-		font-weight: 800;
-		letter-spacing: -0.03em;
 	}
 
 	.docs-article-panel {

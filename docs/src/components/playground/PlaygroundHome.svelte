@@ -1,5 +1,4 @@
 <script lang="ts">
-	import '@fontsource-variable/inter';
 	import type { Snippet } from 'svelte';
 	import PlaygroundIntro from './PlaygroundIntro.svelte';
 	import ScenarioSection from './ScenarioSection.svelte';
