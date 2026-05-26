@@ -1,15 +1,5 @@
 <script lang="ts">
-	import { DEFAULT_WORLD, WORLDS, type WorldId } from './worlds';
-	import ScenarioStrip from './ScenarioStrip.svelte';
-
-	type Props = {
-		world?: WorldId;
-		onworld?: (id: WorldId) => void;
-	};
-
-	const { world = DEFAULT_WORLD, onworld }: Props = $props();
-
-	const world_meta = $derived(WORLDS.find((w) => w.id === world));
+	import { WORLDS } from './worlds';
 </script>
 
 <header class="hp-masthead">
@@ -38,14 +28,28 @@
 			drop, sort, bounds, grid, and whatever you bolt on next.
 		</p>
 
-		{#if world_meta}
-			<p class="hp-scene-line">
-				<span class="hp-scene-label">scene</span>
-				{world_meta.label}
-				<span class="hp-scene-dot">·</span>
-				{world_meta.tagline}
+		<nav class="hp-scenario-index" aria-label="Scenarios on this page">
+			<p class="hp-scenario-index-label">
+				<span aria-hidden="true">▍</span>
+				scenarios — scroll or jump
 			</p>
-		{/if}
+			<div class="hp-scenario-index-links">
+				{#each WORLDS as world, i (world.id)}
+					<a
+						href="#{world.id}"
+						class="hp-scenario-index-link"
+						class:is-soon={!world.available}
+						aria-current={world.available ? undefined : 'false'}
+					>
+						<span class="hp-scenario-idx" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+						<span class="hp-scenario-label">{world.label}</span>
+						{#if !world.available}
+							<span class="hp-scenario-soon">soon</span>
+						{/if}
+					</a>
+				{/each}
+			</div>
+		</nav>
 
 		<div class="hp-actions">
 			<a class="hp-cta hp-cta-primary unstyled" href="/docs/svelte">Getting started</a>
@@ -59,14 +63,4 @@
 			</a>
 		</div>
 	</div>
-
-	{#if onworld}
-		<div class="hp-scenarios-panel">
-			<p class="hp-scenarios-label">
-				<span aria-hidden="true">▍</span>
-				scenarios
-			</p>
-			<ScenarioStrip active={world} onselect={onworld} />
-		</div>
-	{/if}
 </header>

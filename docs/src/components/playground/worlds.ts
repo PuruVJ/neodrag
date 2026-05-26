@@ -66,8 +66,8 @@ export const WORLD_COMPONENTS: Record<WorldId, Component> = {
 };
 
 export function parse_world_from_hash(hash: string): WorldId | null {
-	const id = hash.replace(/^#/, '');
-	if (WORLDS.some((w) => w.id === id && w.available)) {
+	const id = hash.replace(/^#/, '').trim();
+	if (WORLDS.some((w) => w.id === id)) {
 		return id as WorldId;
 	}
 	return null;

@@ -22,6 +22,7 @@
 	width: 100%;
 	max-width: min(84rem, 100%);
 	min-height: calc(100dvh - 6rem);
+	scroll-padding-top: 5.5rem;
 	margin: 0 auto;
 	padding: clamp(0.5rem, 1.5vw, 1rem) clamp(0.85rem, 3.5vw, 2.5rem) 8rem;
 	box-sizing: border-box;
@@ -101,18 +102,8 @@ body[data-theme='dark'] .pg-backdrop {
 
 .hp-masthead {
 	position: relative;
-	display: grid;
-	grid-template-columns: 1fr;
-	gap: clamp(1.75rem, 5vw, 3rem);
-	padding: clamp(0.5rem, 2vw, 1.25rem) 0 clamp(1.5rem, 4vw, 2.75rem);
+	padding: clamp(0.5rem, 2vw, 1.25rem) 0 clamp(1rem, 2.5vw, 1.75rem);
 	overflow: visible;
-}
-
-@media (min-width: 900px) {
-	.hp-masthead {
-		grid-template-columns: 1fr minmax(16rem, 24rem);
-		align-items: start;
-	}
 }
 
 .hp-watermark {
@@ -225,24 +216,83 @@ body[data-theme='dark'] .pg-backdrop {
 	color: var(--pg-fg);
 }
 
-.hp-scene-line {
-	margin: 0.1rem 0 0;
-	font-family: var(--app-font-mono);
-	font-size: clamp(0.78rem, 1.5vw, 0.88rem);
-	font-weight: 600;
-	color: var(--pg-muted);
+.hp-scenario-index {
+	display: grid;
+	gap: 0.55rem;
+	margin-top: 0.35rem;
+	padding-top: 0.85rem;
+	border-top: 2px solid var(--pg-border);
 }
 
-.hp-scene-label {
+.hp-scenario-index-label {
+	margin: 0;
+	font-family: var(--app-font-mono);
+	font-size: var(--pg-kicker);
+	font-weight: 800;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
 	color: var(--pg-accent);
+}
+
+.hp-scenario-index-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.hp-scenario-index-link {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.4rem;
+	padding: 0.45rem 0.7rem;
+	font-family: var(--app-font-mono);
+	font-size: clamp(0.72rem, 1.3vw, 0.8rem);
+	font-weight: 700;
+	text-decoration: none;
+	color: var(--pg-muted);
+	border: 2px solid var(--pg-border);
+	background: color-mix(in lch, var(--pg-tint), transparent 96%);
+	transition:
+		border-color 75ms ease,
+		color 75ms ease,
+		background-color 75ms ease,
+		transform 75ms ease;
+}
+
+.hp-scenario-index-link:hover,
+.hp-scenario-index-link:focus-visible {
+	color: var(--pg-fg);
+	border-color: color-mix(in lch, var(--pg-accent), transparent 40%);
+	background: color-mix(in lch, var(--pg-accent), transparent 90%);
+	transform: translateY(-1px);
+}
+
+.hp-scenario-index-link:target,
+.hp-scenario-index-link:focus-visible {
+	color: var(--pg-accent);
+	border-color: var(--pg-accent);
+}
+
+.hp-scenario-index-link.is-soon {
+	opacity: 0.72;
+}
+
+.hp-scenario-index-link .hp-scenario-idx {
+	font-weight: 900;
+	font-variant-numeric: tabular-nums;
+	color: var(--pg-muted-soft);
+}
+
+.hp-scenario-index-link .hp-scenario-label {
+	font-weight: 800;
+}
+
+.hp-scenario-index-link .hp-scenario-soon {
+	font-size: 0.58rem;
 	font-weight: 800;
 	text-transform: uppercase;
-	letter-spacing: 0.14em;
-	margin-right: 0.4rem;
-}
-
-.hp-scene-dot {
-	opacity: 0.45;
+	letter-spacing: 0.1em;
+	opacity: 0.85;
 }
 
 .hp-actions {
@@ -299,94 +349,10 @@ body[data-theme='dark'] .pg-backdrop {
 	background: color-mix(in lch, var(--pg-accent), transparent 90%) !important;
 }
 
-.hp-scenarios-panel {
-	display: grid;
-	gap: 0.75rem;
-	padding: clamp(1rem, 2.5vw, 1.35rem);
-	background: var(--pg-panel);
-	border: 2px solid var(--pg-border);
-	box-shadow: 0 0 0 1px color-mix(in lch, var(--pg-accent), transparent 92%);
-}
-
-@media (min-width: 900px) {
-	.hp-scenarios-panel {
-		margin-top: 3.25rem;
-	}
-}
-
-.hp-scenarios-label {
-	margin: 0;
-	font-family: var(--app-font-mono);
-	font-size: var(--pg-kicker);
-	font-weight: 800;
-	letter-spacing: 0.2em;
-	text-transform: uppercase;
-	color: var(--pg-accent);
-}
-
-.hp-scenarios {
+.hp-scenarios-stack {
 	display: flex;
 	flex-direction: column;
-	gap: 0.2rem;
-}
-
-.hp-scenario-btn {
-	display: grid;
-	grid-template-columns: 2.5rem 1fr auto;
-	align-items: baseline;
-	gap: 0.55rem;
-	padding: 0.6rem 0.65rem;
-	text-align: left;
-	font-family: var(--app-font-mono);
-	font-size: clamp(0.78rem, 1.4vw, 0.84rem);
-	border: 2px solid transparent;
-	color: var(--pg-muted);
-	background: transparent;
-	transition:
-		background-color 75ms ease,
-		border-color 75ms ease,
-		color 75ms ease,
-		padding-left 75ms ease;
-}
-
-.hp-scenario-btn:hover:not(:disabled):not(.is-selected) {
-	color: var(--pg-fg);
-	background: color-mix(in lch, var(--pg-accent), transparent 90%);
-	border-color: color-mix(in lch, var(--pg-accent), transparent 65%);
-	padding-left: 0.85rem;
-}
-
-.hp-scenario-btn.is-selected {
-	color: var(--app-color-primary-contrast);
-	background: var(--pg-accent);
-	border-color: color-mix(in lch, var(--pg-accent), black 18%);
-}
-
-.hp-scenario-btn.is-selected .hp-scenario-idx {
-	color: color-mix(in lch, var(--app-color-primary-contrast), transparent 22%);
-}
-
-.hp-scenario-btn:disabled {
-	opacity: 0.38;
-	cursor: not-allowed;
-}
-
-.hp-scenario-idx {
-	font-weight: 900;
-	font-variant-numeric: tabular-nums;
-	color: var(--pg-muted-soft);
-}
-
-.hp-scenario-label {
-	font-weight: 800;
-}
-
-.hp-scenario-soon {
-	font-size: 0.62rem;
-	font-weight: 800;
-	text-transform: uppercase;
-	letter-spacing: 0.12em;
-	opacity: 0.85;
+	gap: 0;
 }
 
 .hp-section-break {
@@ -410,18 +376,37 @@ body[data-theme='dark'] .pg-backdrop {
 	letter-spacing: 0.05em;
 }
 
-.hp-play-section {
+.hp-scenario-section {
 	display: flex;
-	flex: 1;
 	flex-direction: column;
 	gap: var(--pg-section-gap);
-	min-height: clamp(30rem, 66vh, 46rem);
+	min-height: min(88vh, 52rem);
 	padding: clamp(1.15rem, 3vw, 2rem);
+	scroll-margin-top: 5.5rem;
 	background: var(--pg-panel);
 	border: 2px solid var(--pg-border);
 	box-shadow:
 		0 0 0 1px color-mix(in lch, var(--pg-accent), transparent 90%),
 		0 24px 48px -32px color-mix(in lch, var(--pg-fg), transparent 88%);
+}
+
+.hp-scenario-section.is-soon .hp-play-grid {
+	opacity: 0.88;
+}
+
+.hp-scenario-section.is-soon .playground-well {
+	border-style: dashed;
+}
+
+.hp-scenario-section:target {
+	border-color: color-mix(in lch, var(--pg-accent), transparent 35%);
+	box-shadow:
+		0 0 0 1px color-mix(in lch, var(--pg-accent), transparent 75%),
+		0 24px 48px -28px color-mix(in lch, var(--pg-accent), transparent 82%);
+}
+
+.hp-section-meta-dot {
+	opacity: 0.45;
 }
 
 .hp-section-head {
