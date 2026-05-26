@@ -102,7 +102,7 @@
 			<div class="hidden w-full max-md:block">
 				{#if menu_view.open}
 					<div class="w-full" transition:slide={{ duration: 400, easing: expoOut }}>
-						<div class="max-h-[48vh] overflow-y-auto">
+						<div class="dock-menu-scroll max-h-[48vh] overflow-y-auto">
 							<Nav compact {pathname} {nav_list} onclick={() => menu_view.toggle()} />
 						</div>
 						<div>{@render framework_selector(true)}</div>
