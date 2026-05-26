@@ -1,8 +1,8 @@
-import { keyboardMoveSensor } from './keyboard-move.ts';
-import { keyboardSensor } from './keyboard.ts';
-import { pointerSensor } from './pointer.ts';
+import { KeyboardMoveSensor } from './keyboard-move-sensor.ts';
+import { KeyboardSensor } from './keyboard-sensor.ts';
+import { PointerSensor } from './pointer-sensor.ts';
 import type { Sensor } from './types.ts';
 
 export function defaultSensors(): Sensor[] {
-	return [pointerSensor(), keyboardSensor(), keyboardMoveSensor()];
+	return [new PointerSensor(), new KeyboardSensor(), new KeyboardMoveSensor()];
 }

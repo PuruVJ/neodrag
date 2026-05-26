@@ -4,11 +4,29 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
 import { Draggable } from '../../src/draggable-binding.ts';
-import { defaultSensors, keyboardSensor, pointerSensor } from '../../src/sensors/index.ts';
+import {
+	KeyboardSensor,
+	PointerSensor,
+	defaultSensors,
+	keyboardSensor,
+	pointerSensor,
+} from '../../src/sensors/index.ts';
 
 describe('sensors', () => {
 	it('defaultSensors includes pointer, keyboard cancel, and keyboard move', () => {
 		expect(defaultSensors()).toHaveLength(3);
+	});
+
+	it('registerSensor adds sensors on the engine', () => {
+		const engine = new Neodrag({ sensors: [], dev: false });
+		engine.registerSensor(new PointerSensor());
+		engine.registerSensor(new KeyboardSensor());
+		expect(engine.getSensors()).toHaveLength(2);
+	});
+
+	it('registerSensor rejects duplicate keys', () => {
+		const engine = new Neodrag({ dev: false });
+		expect(() => engine.registerSensor(new PointerSensor())).toThrow(/already registered/);
 	});
 
 	it('Neodrag wires sensors on first attach', () => {

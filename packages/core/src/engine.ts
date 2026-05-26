@@ -126,9 +126,9 @@ export class Neodrag {
 	#activePointerId: number | null = null;
 
 	#sensorsInitialized = false;
-	#sensorCleanups: (() => void)[] = [];
+	#sensorCleanups = new Map<symbol, () => void>();
 	#pointerDisarm: (() => void) | null = null;
-	#sensors: Sensor[];
+	#sensors: Sensor[] = [];
 
 	#lastTarget: Element | null = null;
 	#lastResult: HTMLElement | SVGElement | null = null;
@@ -174,9 +174,11 @@ export class Neodrag {
 		this.#defaultDropPlugins = options.dropPlugins ?? [];
 		this.#defaultResizePlugins = DEFAULT_RESIZE_PLUGINS;
 		this.#delegate = options.delegate;
-		this.#sensors = options.sensors ?? defaultSensors();
 		this.#onError = options.onError ?? DEFAULTS.onError;
 		this.#dev = options.dev ?? DEV;
+
+		const initialSensors = options.sensors ?? defaultSensors();
+		for (const sensor of initialSensors) this.registerSensor(sensor);
 
 		this.#sensorHost = {
 			getDelegate: () => this.#resolveDelegateTarget(),
@@ -452,17 +454,46 @@ export class Neodrag {
 		return (this.#delegate ?? DEFAULTS.delegate)();
 	}
 
+	registerSensor(sensor: Sensor): this {
+		if (this.#sensors.some((s) => s.key === sensor.key)) {
+			const label = sensor.key.description ?? 'sensor';
+			throw new Error(`Sensor already registered: ${label}`);
+		}
+		this.#sensors.push(sensor);
+		if (this.#sensorsInitialized) {
+			this.#sensorCleanups.set(sensor.key, sensor.setup(this.#sensorHost));
+		}
+		return this;
+	}
+
+	unregisterSensor(key: symbol): this {
+		const index = this.#sensors.findIndex((s) => s.key === key);
+		if (index === -1) return this;
+		this.#sensors.splice(index, 1);
+		const cleanup = this.#sensorCleanups.get(key);
+		if (cleanup) {
+			cleanup();
+			this.#sensorCleanups.delete(key);
+		}
+		return this;
+	}
+
+	getSensors(): readonly Sensor[] {
+		return this.#sensors;
+	}
+
 	#initSensors() {
 		if (this.#sensorsInitialized) return;
 		for (const sensor of this.#sensors) {
-			this.#sensorCleanups.push(sensor.setup(this.#sensorHost));
+			if (this.#sensorCleanups.has(sensor.key)) continue;
+			this.#sensorCleanups.set(sensor.key, sensor.setup(this.#sensorHost));
 		}
 		this.#sensorsInitialized = true;
 	}
 
 	#teardownSensors() {
-		for (const cleanup of this.#sensorCleanups) cleanup();
-		this.#sensorCleanups.length = 0;
+		for (const cleanup of this.#sensorCleanups.values()) cleanup();
+		this.#sensorCleanups.clear();
 		this.#sensorsInitialized = false;
 		this.#pointerDisarm = null;
 	}

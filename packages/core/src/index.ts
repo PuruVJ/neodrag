@@ -73,6 +73,13 @@ export {
 	invalidateSortableLayoutForNode,
 } from './sortable/index.ts';
 export {
+	SensorBase,
+	PointerSensor,
+	KeyboardSensor,
+	KeyboardMoveSensor,
+	POINTER_SENSOR_KEY,
+	KEYBOARD_SENSOR_KEY,
+	KEYBOARD_MOVE_SENSOR_KEY,
 	defaultSensors,
 	pointerSensor,
 	keyboardSensor,

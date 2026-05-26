@@ -11,6 +11,7 @@ export interface SensorHost {
 }
 
 export interface Sensor {
+	readonly key: symbol;
 	setup(host: SensorHost): () => void;
 }
 
