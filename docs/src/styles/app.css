@@ -31,6 +31,7 @@
 	html {
 		@apply h-full w-full scroll-smooth antialiased;
 		scroll-padding-top: 5.5rem;
+		color-scheme: light;
 	}
 
 	body {
@@ -39,6 +40,41 @@
 		color: var(--app-color-dark);
 		font-family: var(--font-sans);
 		accent-color: var(--app-color-primary);
+	}
+
+	body[data-theme='dark'] {
+		color-scheme: dark;
+	}
+
+	@media (pointer: fine) {
+		* {
+			scrollbar-width: thin;
+			scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+		}
+
+		*::-webkit-scrollbar {
+			width: 0.65rem;
+			height: 0.65rem;
+		}
+
+		*::-webkit-scrollbar-track {
+			background: var(--scrollbar-track);
+		}
+
+		*::-webkit-scrollbar-thumb {
+			background-color: var(--scrollbar-thumb);
+			border: 2px solid transparent;
+			background-clip: padding-box;
+			border-radius: 0;
+		}
+
+		*::-webkit-scrollbar-thumb:hover {
+			background-color: var(--scrollbar-thumb-hover);
+		}
+
+		*::-webkit-scrollbar-corner {
+			background: transparent;
+		}
 	}
 
 	button {
