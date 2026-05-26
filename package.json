@@ -29,7 +29,7 @@
 		"playwright": "^1.53.1",
 		"prettier-plugin-astro": "^0.14.1",
 		"prettier-plugin-svelte": "^3.4.0",
-		"svelte": "^5.34.7",
+		"svelte": "^5.43.6",
 		"tsdown": "catalog:",
 		"tsx": "^4.20.3",
 		"turbo": "^2.5.4",
