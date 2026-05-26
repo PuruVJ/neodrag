@@ -2,11 +2,8 @@ import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import svelte from '@astrojs/svelte';
-import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
-import browserslist from 'browserslist';
 import { h } from 'hastscript';
-import { browserslistToTargets } from 'lightningcss';
 import rehypeAutolinkHeadings, { type Options } from 'rehype-autolink-headings';
 import UnpluginIcons from 'unplugin-icons/vite';
 
@@ -73,26 +70,18 @@ export default defineConfig({
 	},
 
 	vite: {
-		plugins: [tailwindcss(), UnpluginIcons({ autoInstall: true, compiler: 'svelte' })],
+		plugins: [UnpluginIcons({ autoInstall: true, compiler: 'svelte' })],
 
 		optimizeDeps: {
 			exclude: ['@neodrag/*'],
 		},
 
 		css: {
-			transformer: 'lightningcss',
-			lightningcss: {
-				targets: browserslistToTargets(browserslist(['defaults'])),
-				drafts: {
-					customMedia: true,
-				},
-			},
+			devSourcemap: true,
 		},
 
 		build: {
 			minify: 'terser',
-			cssMinify: 'lightningcss',
-
 			rollupOptions: {
 				output: {},
 			},
