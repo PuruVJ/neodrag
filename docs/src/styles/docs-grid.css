@@ -1,0 +1,45 @@
+body.docs-route .site-backdrop {
+	display: none !important;
+}
+
+body.docs-route::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	--docs-grid-line: color-mix(in lch, var(--color-brand), transparent 70%);
+	--docs-grid-major: color-mix(in lch, var(--color-brand), transparent 52%);
+	--docs-grid-dot: color-mix(in lch, var(--color-brand), transparent 62%);
+	background-image:
+		radial-gradient(circle at center, var(--docs-grid-dot) 1px, transparent 1px),
+		linear-gradient(var(--docs-grid-major) 1px, transparent 1px),
+		linear-gradient(90deg, var(--docs-grid-major) 1px, transparent 1px),
+		linear-gradient(var(--docs-grid-line) 1px, transparent 1px),
+		linear-gradient(90deg, var(--docs-grid-line) 1px, transparent 1px);
+	background-size:
+		3.25rem 3.25rem,
+		13rem 13rem,
+		13rem 13rem,
+		3.25rem 3.25rem,
+		3.25rem 3.25rem;
+	background-position: center;
+}
+
+body[data-theme='dark'].docs-route::before {
+	--docs-grid-line: color-mix(in lch, var(--color-brand), transparent 76%);
+	--docs-grid-major: color-mix(in lch, var(--color-brand), transparent 58%);
+	--docs-grid-dot: color-mix(in lch, var(--color-brand), transparent 68%);
+}
+
+body.docs-route > div {
+	position: relative;
+	z-index: 1;
+	background: transparent;
+}
+
+#docs-container,
+#docs-container main,
+#docs-container article {
+	background: transparent !important;
+}

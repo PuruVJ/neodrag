@@ -107,31 +107,13 @@
 			var(--secondary-color),
 			var(--app-color-mixer) 35%
 		);
-		--docs-grid-line: color-mix(in lch, var(--color-brand), transparent 72%);
-		--docs-grid-major: color-mix(in lch, var(--color-brand), transparent 56%);
-		--docs-grid-dot: color-mix(in lch, var(--color-brand), transparent 65%);
 		@apply overflow-hidden;
 		background-color: var(--app-color-shell);
-		background-image:
-			radial-gradient(
-				ellipse 120% 80% at 88% 0%,
-				color-mix(in lch, var(--secondary-color), transparent 94%) 0%,
-				transparent 58%
-			),
-			radial-gradient(circle at center, var(--docs-grid-dot) 1px, transparent 1px),
-			linear-gradient(var(--docs-grid-major) 1px, transparent 1px),
-			linear-gradient(90deg, var(--docs-grid-major) 1px, transparent 1px),
-			linear-gradient(var(--docs-grid-line) 1px, transparent 1px),
-			linear-gradient(90deg, var(--docs-grid-line) 1px, transparent 1px);
-		background-size:
-			100% 100%,
-			var(--spacing-grid) var(--spacing-grid),
-			calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
-			calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
-			var(--spacing-grid) var(--spacing-grid),
-			var(--spacing-grid) var(--spacing-grid);
-		background-position: center;
-		background-attachment: fixed;
+		background-image: radial-gradient(
+			ellipse 120% 80% at 88% 0%,
+			color-mix(in lch, var(--secondary-color), transparent 94%) 0%,
+			transparent 58%
+		);
 	}
 
 	:is(a[href], a[href]:visited):where(:not(.unstyled)) {
@@ -175,31 +157,6 @@
 	.site-grid-layer {
 		position: absolute;
 		inset: 0;
-		background: transparent;
-	}
-
-	body.docs-route .site-glow-layer {
-		position: absolute;
-		inset: 0;
-		opacity: 0.65;
-	}
-
-	body.docs-route .site-vignette-layer {
-		position: absolute;
-		inset: 0;
-		opacity: 0.25;
-	}
-
-	body.docs-route #docs-container,
-	body.docs-route #docs-container main,
-	body.docs-route #docs-container article {
-		background: transparent;
-	}
-
-	body.docs-route > div {
-		position: relative;
-		z-index: 1;
-		min-height: 100dvh;
 		background: transparent;
 	}
 
@@ -298,22 +255,6 @@
 
 	.dock-angular-bevel--brand > .dock-angular-bevel__fill {
 		background: color-mix(in lch, var(--color-brand), transparent 90%);
-	}
-
-	.docs-grid-backdrop {
-		background-image:
-			radial-gradient(circle at center, var(--docs-grid-dot) 1px, transparent 1px),
-			linear-gradient(var(--docs-grid-major) 1px, transparent 1px),
-			linear-gradient(90deg, var(--docs-grid-major) 1px, transparent 1px),
-			linear-gradient(var(--docs-grid-line) 1px, transparent 1px),
-			linear-gradient(90deg, var(--docs-grid-line) 1px, transparent 1px);
-		background-size:
-			var(--spacing-grid) var(--spacing-grid),
-			calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
-			calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
-			var(--spacing-grid) var(--spacing-grid),
-			var(--spacing-grid) var(--spacing-grid);
-		background-position: center;
 	}
 
 	.site-glow-layer,
@@ -468,10 +409,5 @@
 	}
 }
 
-body[data-theme='dark'].docs-route {
-	--docs-grid-line: color-mix(in lch, var(--color-brand), transparent 78%);
-	--docs-grid-major: color-mix(in lch, var(--color-brand), transparent 62%);
-	--docs-grid-dot: color-mix(in lch, var(--color-brand), transparent 72%);
-}
-
 @import './home.css' layer(components);
+@import './docs-grid.css';
