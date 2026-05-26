@@ -52,8 +52,10 @@
 
 	const slot_width = $derived(Math.max(base_width + slot_padding_x, width_px.current + slot_padding_x));
 
-	const is_near = $derived(
-		mouse_x !== null && Math.abs(distance) < distance_limit && !prefersReducedMotion.current,
+	const focus_limit = base_width * 0.85;
+
+	const is_focused = $derived(
+		mouse_x !== null && Math.abs(distance) < focus_limit && !prefersReducedMotion.current,
 	);
 
 	let raf: number;
@@ -97,7 +99,7 @@
 	<div
 		class={[
 			'group dock-angular-bevel dock-angular-bevel--sm relative h-14 shrink-0 overflow-visible',
-			(is_near || selected) && 'dock-angular-bevel--brand',
+			(is_focused || selected) && 'dock-angular-bevel--brand',
 		]}
 		style:width="{slot_width}px"
 	>
@@ -109,7 +111,7 @@
 				<div
 					class={[
 						'dock-angular-bevel dock-angular-bevel--sm pointer-events-none absolute z-20 shadow-[var(--dock-shadow)]',
-						is_near ? 'block' : 'hidden group-focus-visible:block',
+						is_focused ? 'block' : 'hidden group-focus-visible:block',
 					]}
 					style:top={`${-32 - Math.max(0, (width_px.current - base_width) * 0.35)}px`}
 				>
@@ -134,7 +136,7 @@
 
 			<div
 				class="absolute bottom-0 left-1/2 z-[1] h-[3px] -translate-x-1/2 transition-opacity duration-100 [clip-path:polygon(0_0,100%_0,calc(100%-2px)_100%,2px_100%)] [background-color:var(--color-brand)]"
-				style="width: {Math.max(18, width_px.current * 0.55)}px; opacity: {selected ? 1 : is_near ? 0.65 : 0}"
+				style="width: {Math.max(18, width_px.current * 0.55)}px; opacity: {is_focused ? 0.65 : selected ? 1 : 0}"
 			></div>
 		</button>
 	</div>
