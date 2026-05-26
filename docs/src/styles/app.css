@@ -433,23 +433,58 @@
 	}
 
 	@media (min-width: 768px) {
-		body.docs-route .dock-host > .dock-angular-bevel,
-		body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
+		body.docs-route .dock-host > .dock-angular-bevel {
+			clip-path: none;
+			background: transparent;
 			overflow: visible;
+			isolation: isolate;
+		}
+
+		body.docs-route .dock-host > .dock-angular-bevel::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			z-index: 0;
+			pointer-events: none;
+			background: color-mix(in oklch, var(--color-brand), transparent 32%);
+			clip-path: polygon(
+				var(--bevel-cut) 0%,
+				calc(100% - var(--bevel-cut)) 0%,
+				100% var(--bevel-cut),
+				100% calc(100% - var(--bevel-cut)),
+				calc(100% - var(--bevel-cut)) 100%,
+				var(--bevel-cut) 100%,
+				0% calc(100% - var(--bevel-cut)),
+				0% var(--bevel-cut)
+			);
+		}
+
+		body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
+			clip-path: none;
+			overflow: visible;
+			position: relative;
+			z-index: 1;
 		}
 
 		body.docs-route .dock-toolbar {
 			height: 3.5rem;
+			overflow: visible;
+		}
+
+		body.docs-route .dock-zoom {
+			overflow: visible;
 		}
 
 		body.docs-route .dock-shell-fill .dock-angular-bevel.dock-surface {
 			margin: 0;
 			height: 3.5rem;
 			max-height: 3.5rem;
+			clip-path: none;
 		}
 
 		body.docs-route .dock-shell-fill .dock-angular-bevel,
 		body.docs-route .dock-shell-fill .dock-angular-bevel__fill {
+			clip-path: none;
 			overflow: visible;
 		}
 	}
