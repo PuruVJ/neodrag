@@ -67,13 +67,15 @@
 		vue: VueIcon,
 	};
 
+	const dockDrag = new Draggable({
+		plugins: [controls({ allow: ControlFrom.selector('.handle') })],
+	});
+
 	const is_tablet = new MediaQuery('(max-width: 967px)');
 
 	onMount(() => {
 		return on(window, 'astro:after-swap', (e) => console.log(e));
 	});
-
-	const drag_0 = new Draggable({ plugins: [controls({ allow: ControlFrom.selector('.handle') })] });
 </script>
 
 <div class={['overlay', menu_view.open && 'visible']}></div>
@@ -81,7 +83,7 @@
 <section class="dock-container">
 	<div
 		class={['dock-el', menu_view.open && 'menu-open']}
-		{@attach drag_0.attachment}
+		{@attach dockDrag.attachment}
 		{@attach interact_outside(() => menu_view.close())}
 	>
 		<div class="mobile expanded-menu">

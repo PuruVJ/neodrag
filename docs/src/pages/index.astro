@@ -1,18 +1,30 @@
 ---
 import Layout from '$layouts/Layout.astro';
+import PlaygroundCodeSnippets from '$components/playground/PlaygroundCodeSnippets.astro';
 import PlaygroundHome from '$components/playground/PlaygroundHome.svelte';
 ---
 
 <Layout title="Neodrag: One draggable to rule them all">
-	<PlaygroundHome client:load />
+	<main id="main-content">
+		<PlaygroundHome client:load>
+			<PlaygroundCodeSnippets slot="snippets" />
+		</PlaygroundHome>
+	</main>
 </Layout>
 
 <style is:global>
-	html:has(#playground-home) {
-		overflow: hidden;
+	html {
+		overflow-x: hidden;
 	}
+</style>
 
-	html:has(#playground-home) body {
-		overflow: hidden;
+<style scoped>
+	main {
+		position: relative;
+		z-index: 2;
+		width: 100%;
+		max-width: 100%;
+		padding: 0;
+		box-sizing: border-box;
 	}
 </style>
