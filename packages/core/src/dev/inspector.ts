@@ -48,12 +48,17 @@ export function createInteractionInspector(
 		}
 		const session = snapshot.session;
 		const sessionLine = session
-			? `session: ${session.state} · Δ(${session.deltaX.toFixed(0)}, ${session.deltaY.toFixed(0)}) · over:${session.overTargets}`
-			: 'session: idle';
+			? `drag: ${session.state} · Δ(${session.deltaX.toFixed(0)}, ${session.deltaY.toFixed(0)}) · over:${session.overTargets}`
+			: 'drag: idle';
+		const resize = snapshot.resizeSession;
+		const resizeLine = resize
+			? `resize: ${resize.state} · ${resize.width.toFixed(0)}×${resize.height.toFixed(0)} · Δw:${resize.deltaWidth.toFixed(0)} Δh:${resize.deltaHeight.toFixed(0)} · ${resize.anchor}`
+			: 'resize: idle';
 		panel.textContent = [
 			title,
-			`drag: ${snapshot.dragTargets} · drop: ${snapshot.dropTargets}`,
+			`targets · drag:${snapshot.dragTargets} drop:${snapshot.dropTargets} resize:${snapshot.resizeTargets}`,
 			sessionLine,
+			resizeLine,
 		].join('\n');
 	};
 
