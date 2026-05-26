@@ -335,6 +335,18 @@
 		@apply h-px flex-1 bg-[var(--color-border)];
 	}
 
+	.dock-mobile-action,
+	.dock-mobile-action:hover,
+	.dock-mobile-action:focus-visible {
+		background: transparent !important;
+	}
+
+	.dock-mobile-framework,
+	.dock-mobile-framework:hover,
+	.dock-mobile-framework:focus-visible {
+		background: transparent !important;
+	}
+
 	.dock-surface {
 		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 84%);
 		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 78%);

@@ -30,14 +30,16 @@
 
 <div
 	class={[
-		'dock-angular-bevel dock-angular-bevel--sm dock-surface relative h-12',
-		embedded ? 'm-0' : 'm-1',
+		embedded
+			? 'relative mx-2 mb-2 h-12'
+			: 'dock-angular-bevel dock-angular-bevel--sm dock-surface relative m-1 h-12',
 	]}
 >
 	<div
 		class={[
-			'dock-angular-bevel__fill relative flex bg-[color-mix(in_lch,var(--app-color-dark),transparent_96%)]',
-			embedded ? 'px-1 pb-1' : 'px-1',
+			embedded
+				? 'relative flex bg-transparent px-1 pb-1'
+				: 'dock-angular-bevel__fill relative flex bg-[color-mix(in_lch,var(--app-color-dark),transparent_96%)] px-1',
 			thumbnail && '!bg-transparent',
 		]}
 	>

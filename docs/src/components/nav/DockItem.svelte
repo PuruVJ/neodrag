@@ -73,6 +73,24 @@
 	});
 </script>
 
+{#if embedded}
+	<button
+		aria-label="Launch {framework} page"
+		class="dock-mobile-framework unstyled relative flex w-full flex-col items-center justify-center gap-1 bg-transparent px-2 py-2"
+	>
+		<span
+			class={[
+				'flex items-center justify-center text-[1.35rem] [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current',
+				selected
+					? 'text-brand'
+					: 'text-[color-mix(in_lch,var(--app-color-dark),transparent_28%)]',
+			]}
+		>
+			<Icon height={28} width={28} />
+		</span>
+		<p class="m-0 text-[13px] font-normal tracking-wide capitalize text-fg-muted">{framework}</p>
+	</button>
+{:else}
 <div
 	class={[
 		'group dock-angular-bevel dock-angular-bevel--sm relative',
@@ -83,7 +101,7 @@
 		aria-label="Launch {framework} page"
 		class={[
 			'dock-angular-bevel__fill relative flex w-full flex-col items-center justify-end gap-1 bg-transparent transition-[padding] duration-75',
-			embedded ? 'px-2 pt-2 pb-1' : 'px-2 pt-2 pb-1',
+			'px-2 pt-2 pb-1',
 		]}
 		style:padding-bottom={embedded ? undefined : `${6 + Math.max(0, (width_px.current - base_width) * 0.15)}px`}
 	>
@@ -114,17 +132,10 @@
 		/>
 	</span>
 
-	{#if embedded}
-		<p
-			class="m-0 text-[13px] font-normal tracking-wide text-[color-mix(in_lch,var(--app-color-light-contrast),transparent_20%)] capitalize"
-		>
-			{framework}
-		</p>
-	{/if}
-
 	<div
 		class="h-[3px] bg-brand transition-opacity duration-100 [clip-path:polygon(0_0,100%_0,calc(100%-2px)_100%,2px_100%)]"
 		style="width: {Math.max(18, width_px.current * 0.55)}px; opacity: {selected ? 1 : is_near ? 0.65 : 0}"
 	></div>
 	</button>
 </div>
+{/if}

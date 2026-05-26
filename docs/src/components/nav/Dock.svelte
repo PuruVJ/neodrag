@@ -140,33 +140,44 @@
 						>
 					</a>
 					<span class="flex-1"></span>
-					{@render github()}
-					<div class="dock-angular-bevel dock-angular-bevel--sm">
-						<button
-							type="button"
-							class="{dock_btn} dock-angular-bevel__fill w-12 [&_svg]:!w-7"
-							onclick={() => menu_view.toggle()}
-						>
-							<MenuIcon />
-						</button>
-					</div>
+					{@render github(true)}
+					<button
+						type="button"
+						class="{dock_btn} dock-mobile-action unstyled w-12 [&_svg]:!w-7"
+						aria-expanded={menu_view.open}
+						aria-label={menu_view.open ? 'Close menu' : 'Open menu'}
+						onclick={() => menu_view.toggle()}
+					>
+						<MenuIcon />
+					</button>
 				</div>
 			</div>
 		</div>
 	</div>
 </section>
 
-{#snippet github()}
-	<div class="dock-angular-bevel dock-angular-bevel--sm h-full">
+{#snippet github(mobile = false)}
+	{#if mobile}
 		<a
 			href="https://github.com/PuruVJ/neodrag"
 			target="_blank"
 			rel="external"
-			class="{dock_btn} dock-angular-bevel__fill unstyled !text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_svg]:h-auto [&_svg]:w-8 [&_svg]:max-md:w-7 [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current"
+			class="{dock_btn} dock-mobile-action unstyled !text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_svg]:h-auto [&_svg]:w-8 [&_svg]:max-md:w-7 [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current"
 		>
 			<GithubIcon />
 		</a>
-	</div>
+	{:else}
+		<div class="dock-angular-bevel dock-angular-bevel--sm h-full">
+			<a
+				href="https://github.com/PuruVJ/neodrag"
+				target="_blank"
+				rel="external"
+				class="{dock_btn} dock-angular-bevel__fill unstyled !text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_svg]:h-auto [&_svg]:w-8 [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current"
+			>
+				<GithubIcon />
+			</a>
+		</div>
+	{/if}
 {/snippet}
 
 {#snippet framework_selector(embedded = false)}
