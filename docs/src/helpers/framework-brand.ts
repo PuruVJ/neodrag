@@ -19,14 +19,10 @@ export function critical_framework_css(framework: FrameworkRoute) {
 	const token = framework_brand_var(framework);
 	const lch = BRAND_LCH[framework];
 
-	return `html{--app-color-anti-mixer:black;--app-color-shell:hsl(200,8%,100%)}
-html[data-theme=dark]{--app-color-anti-mixer:white;--app-color-shell:#101213}
+	return `html{--app-color-anti-mixer:black;--app-color-shell:hsl(200,8%,100%);--app-color-shell-mix:hsl(200,8%,100%)}
+html[data-theme=dark]{--app-color-anti-mixer:white;--app-color-shell:#101213;--app-color-shell-mix:lch(8.2% 2.8 252)}
 html[data-framework=${framework}]{${token}:color-mix(in lch,${lch},var(--app-color-anti-mixer) 15%);--color-brand:var(${token});--secondary-color:var(${token})}
-html[data-framework=${framework}] .docs-page-grid{--docs-grid-accent:var(${token});background-color:color-mix(in lch,var(--app-color-shell),var(${token}) 1.75%)}
-html[data-theme=dark][data-framework=${framework}] .docs-page-grid{background-color:color-mix(in oklch,var(--app-color-shell),var(${token}) 2.25%)}
-html[data-framework=${framework}] .dock-host,html[data-framework=${framework}] .dock-surface{--color-brand:var(${token});--secondary-color:var(${token})}
-body.docs-route .dock-surface{--dock-surface:color-mix(in oklch,var(--app-color-shell) 97%,var(--color-brand) 3%);--dock-border:color-mix(in oklch,var(--color-brand),transparent 78%)}
-html[data-theme=dark] body.docs-route .dock-surface{--dock-surface:color-mix(in oklch,var(--app-color-shell) 94%,var(--color-brand) 6%);--dock-border:color-mix(in oklch,var(--color-brand),transparent 82%)}
-body.docs-route .dock-host>.dock-angular-bevel{background:var(--dock-border)}
-body.docs-route .dock-host>.dock-angular-bevel>.dock-shell-fill.dock-angular-bevel__fill{background:var(--dock-surface)}`;
+html[data-framework=${framework}] .docs-page-grid{--docs-grid-accent:var(${token});background-color:color-mix(in lch,var(--app-color-shell-mix),var(${token}) 1.75%)}
+html[data-theme=dark][data-framework=${framework}] .docs-page-grid{background-color:color-mix(in lch,var(--app-color-shell-mix),var(${token}) 2.25%)}
+html[data-framework=${framework}] .dock-host,html[data-framework=${framework}] .dock-surface{--color-brand:var(${token});--secondary-color:var(${token})}`;
 }

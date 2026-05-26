@@ -223,7 +223,7 @@
 		--bevel-cut: var(--spacing-dock-cut-sm);
 	}
 
-	.dock-angular-bevel__fill:not(.dock-shell-fill) {
+	.dock-angular-bevel__fill {
 		height: 100%;
 		width: 100%;
 		background: var(--dock-surface, color-mix(in lch, var(--app-color-shell), transparent 8%));
@@ -411,30 +411,53 @@
 	}
 
 	body.docs-route .dock-host > .dock-angular-bevel {
-		background: var(--dock-border);
+		background: color-mix(in lch, var(--color-brand), transparent 58%);
 	}
 
 	body.docs-route .dock-surface {
-		--dock-surface: color-mix(in oklch, var(--app-color-shell) 97%, var(--color-brand) 3%);
-		--dock-border: color-mix(in oklch, var(--color-brand), transparent 78%);
-		--dock-border-strong: color-mix(in oklch, var(--color-brand), transparent 72%);
-		--dock-shadow: 0 20px 44px -26px color-mix(in lch, var(--app-color-dark), transparent 88%);
+		--dock-surface: unset;
+		--dock-border: color-mix(in lch, var(--color-brand), transparent 68%);
+		--dock-border-strong: color-mix(in lch, var(--color-brand), transparent 58%);
+		--dock-shadow: 0 20px 44px -26px color-mix(in lch, var(--color-brand), transparent 78%);
 	}
 
 	html[data-theme='dark'] body.docs-route .dock-surface {
-		--dock-surface: color-mix(in oklch, var(--app-color-shell) 94%, var(--color-brand) 6%);
-		--dock-border: color-mix(in oklch, var(--color-brand), transparent 82%);
-		--dock-border-strong: color-mix(in oklch, var(--color-brand), transparent 76%);
-		--dock-shadow: 0 22px 48px -24px color-mix(in lch, var(--app-color-dark), transparent 90%);
+		--dock-border: color-mix(in lch, var(--color-brand), transparent 72%);
+		--dock-border-strong: color-mix(in lch, var(--color-brand), transparent 62%);
+		--dock-shadow: 0 22px 48px -24px color-mix(in lch, var(--color-brand), transparent 74%);
 	}
 
 	body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
-		width: 100%;
-		background: var(--dock-surface);
+		background: color-mix(in lch, var(--app-color-shell), var(--color-brand) 18%);
+	}
+
+	html[data-theme='dark'] body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
+		background: color-mix(in lch, var(--app-color-shell), var(--color-brand) 22%);
+	}
+
+	body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill::after {
+		content: '';
+		pointer-events: none;
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+		opacity: 0.45;
+		background-image: linear-gradient(
+			135deg,
+			color-mix(in lch, var(--color-brand), transparent 92%) 0%,
+			transparent 42%,
+			transparent 58%,
+			color-mix(in lch, var(--color-brand), transparent 94%) 100%
+		);
+	}
+
+	body.docs-route .theme-switcher-track {
+		background: color-mix(in lch, var(--app-color-shell), var(--color-brand) 10%);
 	}
 
 	@media (min-width: 768px) {
-		body.docs-route .dock-host > .dock-angular-bevel {
+		body.docs-route .dock-host > .dock-angular-bevel,
+		html[data-theme='dark'] body.docs-route .dock-host > .dock-angular-bevel {
 			clip-path: none;
 			background: transparent;
 			overflow: visible;
@@ -447,7 +470,7 @@
 			inset: 0;
 			z-index: 0;
 			pointer-events: none;
-			background: var(--dock-border);
+			background: color-mix(in lch, var(--color-brand), transparent 58%);
 			clip-path: polygon(
 				var(--bevel-cut) 0%,
 				calc(100% - var(--bevel-cut)) 0%,
@@ -460,15 +483,54 @@
 			);
 		}
 
-		body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
+		body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill,
+		html[data-theme='dark'] body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
 			clip-path: none;
 			overflow: visible;
 			position: relative;
 			z-index: 1;
+			background: transparent;
+		}
+
+		body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			z-index: 0;
+			pointer-events: none;
+			background: color-mix(in lch, var(--app-color-shell), var(--color-brand) 18%);
+			clip-path: polygon(
+				calc(var(--bevel-cut) + var(--bevel-width)) var(--bevel-width),
+				calc(100% - var(--bevel-cut) - var(--bevel-width)) var(--bevel-width),
+				calc(100% - var(--bevel-width)) calc(var(--bevel-cut) + var(--bevel-width)),
+				calc(100% - var(--bevel-width)) calc(100% - var(--bevel-cut) - var(--bevel-width)),
+				calc(100% - var(--bevel-cut) - var(--bevel-width)) calc(100% - var(--bevel-width)),
+				calc(var(--bevel-cut) + var(--bevel-width)) calc(100% - var(--bevel-width)),
+				var(--bevel-width) calc(100% - var(--bevel-cut) - var(--bevel-width)),
+				var(--bevel-width) calc(var(--bevel-cut) + var(--bevel-width))
+			);
+		}
+
+		html[data-theme='dark'] body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill::before {
+			background: color-mix(in lch, var(--app-color-shell), var(--color-brand) 22%);
+		}
+
+		body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill::after {
+			clip-path: polygon(
+				calc(var(--bevel-cut) + var(--bevel-width)) var(--bevel-width),
+				calc(100% - var(--bevel-cut) - var(--bevel-width)) var(--bevel-width),
+				calc(100% - var(--bevel-width)) calc(var(--bevel-cut) + var(--bevel-width)),
+				calc(100% - var(--bevel-width)) calc(100% - var(--bevel-cut) - var(--bevel-width)),
+				calc(100% - var(--bevel-cut) - var(--bevel-width)) calc(100% - var(--bevel-width)),
+				calc(var(--bevel-cut) + var(--bevel-width)) calc(100% - var(--bevel-width)),
+				var(--bevel-width) calc(100% - var(--bevel-cut) - var(--bevel-width)),
+				var(--bevel-width) calc(var(--bevel-cut) + var(--bevel-width))
+			);
 		}
 
 		body.docs-route .dock-toolbar {
-			height: 3.5rem;
+			position: relative;
+			z-index: 2;
 			overflow: visible;
 		}
 
@@ -476,33 +538,11 @@
 			overflow: visible;
 		}
 
-		body.docs-route .dock-shell-fill .dock-angular-bevel.dock-surface {
-			margin: 0;
-			height: 3.5rem;
-			max-height: 3.5rem;
-			clip-path: none;
-		}
-
 		body.docs-route .dock-shell-fill .dock-angular-bevel,
 		body.docs-route .dock-shell-fill .dock-angular-bevel__fill {
 			clip-path: none;
 			overflow: visible;
 		}
-	}
-
-	body.docs-route .dock-shell-fill .dock-angular-bevel,
-	body.docs-route .dock-shell-fill .dock-angular-bevel--brand {
-		background: transparent;
-	}
-
-	body.docs-route .dock-shell-fill .dock-angular-bevel__fill,
-	body.docs-route .dock-shell-fill .dock-angular-bevel--brand > .dock-angular-bevel__fill,
-	body.docs-route .dock-shell-fill .theme-switcher-track {
-		background: transparent !important;
-	}
-
-	body.docs-route .dock-shell-fill .theme-switcher-track > .pointer-events-none {
-		background: color-mix(in lch, var(--color-brand), transparent 82%) !important;
 	}
 
 	body.docs-route .dock-zoom :global(svg),

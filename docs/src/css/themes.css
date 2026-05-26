@@ -31,6 +31,7 @@ html[data-theme='light'] {
 	--app-color-light-contrast: var(--app-color-dark);
 
 	--app-color-shell: hsl(200, 8%, 100%);
+	--app-color-shell-mix: hsl(200, 8%, 100%);
 	--app-color-shell-contrast: color-mix(in lch, var(--app-color-shell), black 10%);
 
 	--scrollbar-track: transparent;
@@ -72,6 +73,7 @@ html[data-theme='dark'] {
 	--app-color-dark: hsl(210, 17%, 95%);
 
 	--app-color-shell: #101213;
+	--app-color-shell-mix: lch(8.2% 2.8 252);
 	--app-color-shell-contrast: var(--gray-1);
 
 	--app-color-primary: lch(68.02% 48.05 14.68);
