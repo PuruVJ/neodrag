@@ -195,27 +195,18 @@
 </section>
 
 {#snippet github(mobile = false)}
-	{#if mobile}
-		<a
-			href="https://github.com/PuruVJ/neodrag"
-			target="_blank"
-			rel="external"
-			class="{dock_btn} dock-mobile-action unstyled !text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_svg]:h-auto [&_svg]:w-8 [&_svg]:max-md:w-7 [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current"
-		>
-			<GithubIcon />
-		</a>
-	{:else}
-		<div class="dock-angular-bevel dock-angular-bevel--sm h-full">
-			<a
-				href="https://github.com/PuruVJ/neodrag"
-				target="_blank"
-				rel="external"
-				class="{dock_btn} dock-angular-bevel__fill unstyled !text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_svg]:h-auto [&_svg]:w-8 [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current"
-			>
-				<GithubIcon />
-			</a>
-		</div>
-	{/if}
+	<a
+		href="https://github.com/PuruVJ/neodrag"
+		target="_blank"
+		rel="external"
+		class={[
+			dock_btn,
+			'unstyled shrink-0 !text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_path]:!text-current [&_g]:!text-current [&_svg]:!size-[1.35rem] [&_svg]:!max-w-none [&_svg]:shrink-0 [&_svg]:!text-current',
+			mobile && 'dock-mobile-action [&_svg]:max-md:!size-7',
+		]}
+	>
+		<GithubIcon />
+	</a>
 {/snippet}
 
 {#snippet framework_selector(embedded = false)}

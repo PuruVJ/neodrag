@@ -430,11 +430,7 @@
 	body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
 		height: 100%;
 		width: 100%;
-		background: color-mix(in oklch, var(--app-color-shell), var(--color-brand) 18%);
-	}
-
-	html[data-theme='dark'] body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
-		background: color-mix(in oklch, var(--app-color-shell), var(--color-brand) 22%);
+		background: transparent;
 	}
 
 	body.docs-route .dock-shell-fill .dock-angular-bevel__fill {
@@ -443,21 +439,6 @@
 
 	body.docs-route .dock-shell-fill .dock-angular-bevel--brand > .dock-angular-bevel__fill {
 		background: var(--chip-fill);
-	}
-
-	body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill::before {
-		content: '';
-		pointer-events: none;
-		position: absolute;
-		inset: 0;
-		opacity: 0.45;
-		background-image: linear-gradient(
-			135deg,
-			color-mix(in lch, var(--color-brand), transparent 92%) 0%,
-			transparent 42%,
-			transparent 58%,
-			color-mix(in lch, var(--color-brand), transparent 94%) 100%
-		);
 	}
 
 	body.docs-route .dock-zoom :global(svg),
