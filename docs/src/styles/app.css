@@ -415,6 +415,7 @@
 	}
 
 	body.docs-route .dock-surface {
+		--dock-surface: unset;
 		--dock-border: color-mix(in lch, var(--color-brand), transparent 68%);
 		--dock-border-strong: color-mix(in lch, var(--color-brand), transparent 58%);
 		--dock-shadow: 0 20px 44px -26px color-mix(in lch, var(--color-brand), transparent 78%);

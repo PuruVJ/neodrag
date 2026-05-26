@@ -16,6 +16,7 @@
 		framework_from_path,
 	} from '$helpers/framework-route';
 	import { FRAMEWORKS, type Framework } from '$helpers/constants';
+	import { framework_brand_var } from '$helpers/framework-brand';
 	import { Draggable } from '@neodrag/svelte';
 	import { ControlFrom, controls } from '@neodrag/svelte/plugins';
 	import { prefetch } from 'astro:prefetch';
@@ -29,6 +30,7 @@
 
 	type Props = {
 		pathname: string;
+		framework?: Framework | 'core';
 		nav_by_framework: Record<string, NavList>;
 	};
 
@@ -48,7 +50,12 @@
 		}
 	}
 
-	const { pathname: initial_pathname, nav_by_framework }: Props = $props();
+	const { pathname: initial_pathname, framework: route_framework, nav_by_framework }: Props =
+		$props();
+
+	const dock_brand = $derived(
+		route_framework ? `var(${framework_brand_var(route_framework)})` : undefined,
+	);
 
 	const frameworks: Framework[] = ['solid', 'react', 'svelte', 'vue', 'vanilla'];
 
@@ -116,6 +123,8 @@
 
 <section
 	class="dock-host pointer-events-none fixed bottom-4 left-0 z-[1000] flex h-24 w-full items-end justify-center gap-[clamp(2rem,10vw,8rem)] p-1.5 max-md:bottom-0 max-md:h-auto max-md:min-h-16 max-md:justify-stretch max-md:gap-0 max-md:p-0"
+	style:--color-brand={dock_brand}
+	style:--secondary-color={dock_brand}
 >
 	<div
 		class="dock-angular-bevel dock-surface pointer-events-auto relative w-full overflow-visible shadow-[var(--dock-shadow)] max-md:h-auto max-md:min-h-16 md:h-full md:w-auto"

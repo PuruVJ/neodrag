@@ -6,6 +6,7 @@ import '../styles/app.css';
 import { get_nav_list } from '$/nav';
 import Dock from '$components/nav/Dock.svelte';
 import PawCursor from '$components/PawCursor.svelte';
+import { critical_framework_css } from '$helpers/framework-brand';
 import { framework_from_path, is_docs_path } from '$helpers/framework-route';
 import { SEO } from 'astro-seo';
 import { ClientRouter } from 'astro:transitions';
@@ -78,6 +79,7 @@ const nav_by_framework = Object.fromEntries(
 				apply_docs_framework_from_path(location.pathname);
 			})();
 		</script>
+		{framework && <style is:inline set:html={critical_framework_css(framework)} />}
 		<ClientRouter fallback="swap" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/png" href="/favicon.png" />
@@ -110,7 +112,17 @@ const nav_by_framework = Object.fromEntries(
 	</head>
 
 	<body class:list={[{ 'docs-route': is_docs_route }]}>
-		{is_docs_route && <div class="docs-page-grid" aria-hidden="true" />}
+		{
+			is_docs_route && (
+				<div
+					class="docs-page-grid"
+					aria-hidden="true"
+					style={framework
+						? `--docs-grid-accent: var(--app-color-brand-${framework})`
+						: undefined}
+				/>
+			)
+		}
 		<script is:inline data-astro-rerun>
 			function apply_docs_route_context() {
 				const match = location.pathname.match(/\/docs\/(svelte|react|solid|vanilla|vue|core)/i);
@@ -153,6 +165,7 @@ const nav_by_framework = Object.fromEntries(
 		<div>
 			<Dock
 				pathname={Astro.url.pathname}
+				framework={framework}
 				nav_by_framework={nav_by_framework}
 				client:load
 			/>
