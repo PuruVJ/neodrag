@@ -65,7 +65,6 @@ html[data-theme='light'] {
 }
 
 html[data-theme='dark'] {
-	/* Keep it in word only */
 	--app-color-mixer: black;
 	--app-color-anti-mixer: white;
 
@@ -87,7 +86,6 @@ html[data-theme='dark'] .astro-code,
 html[data-theme='dark'] .astro-code span {
 	color: var(--shiki-dark) !important;
 	background-color: var(--shiki-dark-bg) !important;
-	/* Optional, if you also want font styles */
 	font-style: var(--shiki-dark-font-style);
 	font-weight: var(--shiki-dark-font-weight);
 	text-decoration: var(--shiki-dark-text-decoration);

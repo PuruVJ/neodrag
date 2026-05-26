@@ -1,7 +1,3 @@
-body.docs-route .site-backdrop {
-	display: none !important;
-}
-
 .docs-page-grid {
 	pointer-events: none;
 	position: fixed;

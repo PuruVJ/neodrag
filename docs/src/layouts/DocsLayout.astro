@@ -14,7 +14,7 @@ type Props = {
 };
 
 const { title, headings, framework } = Astro.props;
-const nav_list = get_nav_list(framework as any);
+const nav_list = get_nav_list(framework);
 ---
 
 <MetaThemeColor client:load />

@@ -18,7 +18,7 @@ const { title } = Astro.props;
 const framework = /\/docs\/(svelte|react|solid|vanilla|vue|core)/gi.exec(Astro.url.pathname)?.[1];
 const is_docs_route = Astro.url.pathname.startsWith('/docs');
 
-const nav_list = get_nav_list(framework as any);
+const nav_list = get_nav_list(framework ?? '');
 ---
 
 <!doctype html>
@@ -34,21 +34,27 @@ const nav_list = get_nav_list(framework as any);
 					try {
 						return JSON.parse(storage_value) ?? DEFAULT;
 					} catch {
+						localStorage.removeItem('neodrag:theme');
 						return DEFAULT;
 					}
 				}
 
-				const local_theme = parse_theme_storage(
-					typeof localStorage !== 'undefined' ? localStorage.getItem('neodrag:theme') : null,
-				);
-
-				let theme = local_theme.current;
-				if (local_theme.preference === 'system') {
-					theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				function resolve_theme() {
+					const local_theme = parse_theme_storage(localStorage.getItem('neodrag:theme'));
+					if (local_theme.preference === 'system') {
+						return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+					}
+					return local_theme.current;
 				}
 
-				document.documentElement.dataset.theme = theme;
-				document.documentElement.style.colorScheme = theme;
+				function apply_neodrag_theme() {
+					const theme = resolve_theme();
+					document.documentElement.dataset.theme = theme;
+					document.documentElement.style.colorScheme = theme;
+				}
+
+				window.__neodrag_apply_theme = apply_neodrag_theme;
+				apply_neodrag_theme();
 			})();
 		</script>
 		<ClientRouter fallback="swap" />
@@ -85,45 +91,14 @@ const nav_list = get_nav_list(framework as any);
 	<body data-framework={framework} class:list={[{ 'docs-route': is_docs_route }]}>
 		{is_docs_route && <div class="docs-page-grid" aria-hidden="true" />}
 		<script is:inline data-astro-rerun>
-			function parse_theme_storage(storage_value) {
-				const DEFAULT = {
-					current: 'light',
-					preference: 'system',
-				};
-
-				if (!storage_value) return DEFAULT;
-
-				let parsed = null;
-				try {
-					parsed = JSON.parse(storage_value);
-				} catch {
-					localStorage.removeItem('neodrag:theme');
-				}
-
-				return parsed ?? DEFAULT;
-			}
-
-			function apply_neodrag_theme() {
-				const local_theme = parse_theme_storage(localStorage.getItem('neodrag:theme'));
-
-				let theme = local_theme.current;
-				if (local_theme.preference === 'system') {
-					theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-				}
-
-				document.documentElement.dataset.theme = theme;
-				document.documentElement.style.colorScheme = theme;
-				if (document.body) document.body.dataset.theme = theme;
-			}
-
-			apply_neodrag_theme();
-
-			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', apply_neodrag_theme);
-			window.addEventListener('storage', (event) => {
-				if (event.key === 'neodrag:theme') apply_neodrag_theme();
+			window.__neodrag_apply_theme?.();
+			matchMedia('(prefers-color-scheme: dark)').addEventListener(
+				'change',
+				window.__neodrag_apply_theme,
+			);
+			addEventListener('storage', (event) => {
+				if (event.key === 'neodrag:theme') window.__neodrag_apply_theme?.();
 			});
-
-			window.__neodrag_apply_theme = apply_neodrag_theme;
 		</script>
 
 		<div>

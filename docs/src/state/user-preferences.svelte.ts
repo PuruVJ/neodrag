@@ -16,7 +16,6 @@ export function apply_theme_to_dom(new_theme: string) {
 
 	document.documentElement.dataset.theme = new_theme;
 	document.documentElement.style.colorScheme = new_theme;
-	document.body.dataset.theme = new_theme;
 }
 
 class Theme {
