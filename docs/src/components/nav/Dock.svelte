@@ -79,6 +79,11 @@
 	}
 
 	$effect(() => {
+		pathname;
+		apply_docs_route_context(pathname);
+	});
+
+	$effect(() => {
 		sync_route_from_location();
 		document.addEventListener('astro:page-load', sync_route_from_location);
 		return () => document.removeEventListener('astro:page-load', sync_route_from_location);
@@ -118,7 +123,7 @@
 		{@attach interact_outside(() => menu_view.close())}
 	>
 		<div
-			class="dock-angular-bevel__fill relative flex w-full min-h-0 flex-col items-end overflow-hidden backdrop-blur-[14px] backdrop-saturate-[1.08] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,color-mix(in_lch,var(--color-brand),transparent_94%)_0%,transparent_40%,transparent_60%,color-mix(in_lch,var(--color-brand),transparent_96%)_100%)] before:opacity-35 before:content-[''] max-md:min-h-16 max-md:p-0 md:h-full md:overflow-visible md:p-1.5"
+			class="dock-shell-fill dock-angular-bevel__fill relative flex w-full min-h-0 flex-col items-end overflow-hidden backdrop-blur-[14px] backdrop-saturate-[1.08] max-md:min-h-16 max-md:p-0 md:h-full md:overflow-visible md:p-1.5"
 		>
 			{#if menu_view.open}
 				<div
