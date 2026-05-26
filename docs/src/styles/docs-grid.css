@@ -3,38 +3,37 @@ body.docs-route .site-backdrop {
 }
 
 .docs-page-grid {
-	--docs-grid-cell: 3.25rem;
-	--docs-grid-line: color-mix(in lch, var(--grid-accent), transparent 96%);
-	--docs-grid-major: color-mix(in lch, var(--grid-accent), transparent 91%);
-	--docs-grid-dot: color-mix(in lch, var(--grid-accent), transparent 95%);
-
 	pointer-events: none;
 	position: fixed;
 	inset: 0;
 	z-index: 0;
 	overflow: hidden;
 	background-color: var(--app-color-shell);
+}
+
+.docs-page-grid::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	opacity: 0.032;
 	background-image:
-		radial-gradient(circle at center, var(--docs-grid-dot) 1px, transparent 1px),
-		linear-gradient(var(--docs-grid-major) 1px, transparent 1px),
-		linear-gradient(90deg, var(--docs-grid-major) 1px, transparent 1px),
-		linear-gradient(var(--docs-grid-line) 1px, transparent 1px),
-		linear-gradient(90deg, var(--docs-grid-line) 1px, transparent 1px);
+		radial-gradient(circle at center, var(--grid-accent) 1px, transparent 1px),
+		linear-gradient(var(--grid-accent) 1px, transparent 1px),
+		linear-gradient(90deg, var(--grid-accent) 1px, transparent 1px),
+		linear-gradient(var(--grid-accent) 1px, transparent 1px),
+		linear-gradient(90deg, var(--grid-accent) 1px, transparent 1px);
 	background-size:
-		var(--docs-grid-cell) var(--docs-grid-cell),
-		calc(var(--docs-grid-cell) * 4) calc(var(--docs-grid-cell) * 4),
-		calc(var(--docs-grid-cell) * 4) calc(var(--docs-grid-cell) * 4),
-		var(--docs-grid-cell) var(--docs-grid-cell),
-		var(--docs-grid-cell) var(--docs-grid-cell);
+		3.25rem 3.25rem,
+		13rem 13rem,
+		13rem 13rem,
+		3.25rem 3.25rem,
+		3.25rem 3.25rem;
 	background-position: center center;
 	mask-image: radial-gradient(ellipse 105% 88% at 50% 44%, black 16%, transparent 74%);
 }
 
-body[data-theme='dark'] .docs-page-grid {
-	--docs-grid-line: color-mix(in lch, var(--grid-accent), transparent 97%);
-	--docs-grid-major: color-mix(in lch, var(--grid-accent), transparent 93%);
-	--docs-grid-dot: color-mix(in lch, var(--grid-accent), transparent 96%);
-	background-color: var(--app-color-shell);
+html[data-theme='dark'] .docs-page-grid::before {
+	opacity: 0.045;
 	mask-image: radial-gradient(ellipse 100% 85% at 50% 42%, black 14%, transparent 70%);
 }
 

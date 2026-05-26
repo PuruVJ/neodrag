@@ -7,8 +7,8 @@
 	--app-font-heading: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 }
 
-body,
-body[data-theme='light'] {
+html,
+html[data-theme='light'] {
 	--app-color-mixer: white;
 	--app-color-anti-mixer: black;
 
@@ -64,7 +64,7 @@ body[data-theme='light'] {
 	);
 }
 
-body[data-theme='dark'] {
+html[data-theme='dark'] {
 	/* Keep it in word only */
 	--app-color-mixer: black;
 	--app-color-anti-mixer: white;
@@ -83,8 +83,8 @@ body[data-theme='dark'] {
 	--scrollbar-thumb-hover: color-mix(in lch, var(--app-color-dark), transparent 72%);
 }
 
-body[data-theme='dark'] .astro-code,
-body[data-theme='dark'] .astro-code span {
+html[data-theme='dark'] .astro-code,
+html[data-theme='dark'] .astro-code span {
 	color: var(--shiki-dark) !important;
 	background-color: var(--shiki-dark-bg) !important;
 	/* Optional, if you also want font styles */

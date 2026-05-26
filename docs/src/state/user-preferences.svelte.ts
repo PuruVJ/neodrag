@@ -12,9 +12,11 @@ const schema = z.object({
 export type ThemeValue = z.infer<typeof schema>;
 
 export function apply_theme_to_dom(new_theme: string) {
-	if (typeof document !== 'undefined') {
-		document.body.dataset.theme = new_theme;
-	}
+	if (typeof document === 'undefined') return;
+
+	document.documentElement.dataset.theme = new_theme;
+	document.documentElement.style.colorScheme = new_theme;
+	document.body.dataset.theme = new_theme;
 }
 
 class Theme {

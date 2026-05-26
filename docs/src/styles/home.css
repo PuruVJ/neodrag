@@ -34,7 +34,7 @@
 	color: var(--pg-fg);
 }
 
-body[data-theme='dark'] .home-playground {
+html[data-theme='dark'] .home-playground {
 	--pg-grid-line: color-mix(in lch, var(--pg-accent), transparent 93%);
 	--pg-grid-major: color-mix(in lch, var(--pg-accent), transparent 84%);
 	--pg-grid-dot: color-mix(in lch, var(--pg-accent), transparent 91%);
@@ -106,12 +106,12 @@ body[data-theme='dark'] .home-playground {
 		);
 }
 
-body[data-theme='dark'] .pg-backdrop-grid {
+html[data-theme='dark'] .pg-backdrop-grid {
 	background-color: color-mix(in lch, var(--app-color-shell), var(--pg-accent) 2%);
 	mask-image: radial-gradient(ellipse 115% 90% at 50% 40%, black 30%, transparent 85%);
 }
 
-body[data-theme='dark'] .pg-backdrop-glow {
+html[data-theme='dark'] .pg-backdrop-glow {
 	background-image:
 		radial-gradient(ellipse 150% 110% at 50% -38%, color-mix(in lch, var(--pg-accent), transparent 90%), transparent 58%),
 		radial-gradient(ellipse 80% 60% at 100% 12%, color-mix(in lch, var(--pg-accent), transparent 94%), transparent 48%),
@@ -127,7 +127,7 @@ body[data-theme='dark'] .pg-backdrop-glow {
 		linear-gradient(180deg, color-mix(in lch, var(--app-color-shell), transparent 8%) 0%, transparent 18%, transparent 82%, color-mix(in lch, var(--app-color-shell), transparent 12%) 100%);
 }
 
-body[data-theme='dark'] .pg-backdrop-vignette {
+html[data-theme='dark'] .pg-backdrop-vignette {
 	background-image:
 		radial-gradient(ellipse 90% 75% at 50% 48%, transparent 38%, color-mix(in lch, var(--app-color-shell), transparent 8%) 100%),
 		linear-gradient(180deg, color-mix(in lch, var(--app-color-shell), transparent 25%) 0%, transparent 22%, transparent 78%, color-mix(in lch, var(--app-color-shell), transparent 35%) 100%);
@@ -165,7 +165,7 @@ body[data-theme='dark'] .pg-backdrop-vignette {
 	user-select: none;
 }
 
-body:not([data-theme='dark']) .hp-watermark {
+html:not([data-theme='dark']) .hp-watermark {
 	color: color-mix(in lch, var(--pg-accent), transparent 72%);
 }
 
@@ -441,7 +441,7 @@ body:not([data-theme='dark']) .hp-watermark {
 	backdrop-filter: blur(14px) saturate(1.15);
 }
 
-body:not([data-theme='dark']) .hp-scenario-section {
+html:not([data-theme='dark']) .hp-scenario-section {
 	background: color-mix(in lch, var(--app-color-shell), transparent 14%);
 	border-color: color-mix(in lch, var(--pg-accent), transparent 78%);
 	box-shadow:
@@ -698,7 +698,7 @@ body:not([data-theme='dark']) .hp-scenario-section {
 		inset 0 0 0 1px color-mix(in lch, var(--pg-accent), transparent 88%);
 }
 
-body:not([data-theme='dark']) .home-playground .playground-well {
+html:not([data-theme='dark']) .home-playground .playground-well {
 	background-color: color-mix(in lch, var(--app-color-shell), var(--pg-accent) 4%);
 }
 

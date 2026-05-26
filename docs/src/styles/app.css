@@ -42,7 +42,7 @@
 		accent-color: var(--app-color-primary);
 	}
 
-	body[data-theme='dark'] {
+	html[data-theme='dark'] {
 		color-scheme: dark;
 	}
 
@@ -315,7 +315,7 @@
 			);
 	}
 
-	body[data-theme='dark'] .site-vignette-layer {
+	html[data-theme='dark'] .site-vignette-layer {
 		background-image:
 			radial-gradient(
 				ellipse 90% 75% at 50% 48%,
@@ -379,7 +379,7 @@
 		--dock-shadow: 0 16px 40px -28px color-mix(in lch, var(--app-color-dark), transparent 88%);
 	}
 
-	body[data-theme='dark'] .dock-surface {
+	html[data-theme='dark'] .dock-surface {
 		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 86%);
 		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 80%);
 		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--app-color-primary) 8%);

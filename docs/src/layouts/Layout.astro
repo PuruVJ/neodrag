@@ -24,9 +24,34 @@ const nav_list = get_nav_list(framework as any);
 <!doctype html>
 <html lang="en">
 	<head>
-		<ClientRouter fallback="swap" />
-
 		<meta charset="UTF-8" />
+		<script is:inline>
+			(function () {
+				const DEFAULT = { current: 'light', preference: 'system' };
+
+				function parse_theme_storage(storage_value) {
+					if (!storage_value) return DEFAULT;
+					try {
+						return JSON.parse(storage_value) ?? DEFAULT;
+					} catch {
+						return DEFAULT;
+					}
+				}
+
+				const local_theme = parse_theme_storage(
+					typeof localStorage !== 'undefined' ? localStorage.getItem('neodrag:theme') : null,
+				);
+
+				let theme = local_theme.current;
+				if (local_theme.preference === 'system') {
+					theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				}
+
+				document.documentElement.dataset.theme = theme;
+				document.documentElement.style.colorScheme = theme;
+			})();
+		</script>
+		<ClientRouter fallback="swap" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/png" href="/favicon.png" />
 		<meta name="generator" content={Astro.generator} />
@@ -86,7 +111,9 @@ const nav_list = get_nav_list(framework as any);
 					theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 				}
 
-				document.body.dataset.theme = theme;
+				document.documentElement.dataset.theme = theme;
+				document.documentElement.style.colorScheme = theme;
+				if (document.body) document.body.dataset.theme = theme;
 			}
 
 			apply_neodrag_theme();
