@@ -6,7 +6,8 @@ import type { PointerSensorOptions, SensorHost } from './types.ts';
 export const POINTER_SENSOR_KEY = Symbol('neodrag.sensor.pointer');
 
 export class PointerSensor extends SensorBase {
-	readonly key = POINTER_SENSOR_KEY;
+	static readonly key = POINTER_SENSOR_KEY;
+	readonly key = PointerSensor.key;
 	readonly #buttons: number[];
 
 	constructor(options: PointerSensorOptions | null = {}) {

@@ -1,4 +1,4 @@
-import { get_node_style, is_null, set_node_dataset, set_node_key_style } from './utils.ts';
+import { get_node_style, set_node_dataset, set_node_key_style } from './utils.ts';
 import { resolveSizeInput, sizeContext } from './length-contract.ts';
 import type { SizeInput } from './length-runtime.ts';
 import { BoundsFrom, validateBounds, type BoundFromFunction } from './lib/bounds-from.ts';
@@ -7,7 +7,6 @@ import { isPointerInput, nativePointerEvent } from './interaction-input.ts';
 import type { InteractionInput } from './interaction-input.ts';
 import { defineDragPlugin, defineDropPlugin, type DragCtx, type DragPlugin, type DropCtx } from './types.ts';
 
-const THRESHOLD_KEY = Symbol('neodrag.threshold');
 const STATE_MARKER_KEY = Symbol('neodrag.stateMarker');
 const IGNORE_MULTITOUCH_KEY = Symbol('neodrag.ignoreMultitouch');
 const APPLY_USER_SELECT_KEY = Symbol('neodrag.applyUserSelectHack');
@@ -471,84 +470,6 @@ export const dragData = defineDragPlugin(<T,>(getData: () => T) => ({
 		ctx.session.data = getData();
 	},
 }));
-
-export const threshold = defineDragPlugin(
-	(options?: { delay?: number; distance?: SizeInput } | null) => {
-	const enabled = !is_null(options);
-	const resolved = enabled
-		? {
-				delay: options?.delay ?? 0,
-				distance: options?.distance ?? 3,
-			}
-		: null;
-
-	if (resolved) {
-		if (resolved.delay < 0) throw new Error('delay must be >= 0');
-	}
-
-	return {
-		key: THRESHOLD_KEY,
-		phase: 'pre' as const,
-
-		init(ctx) {
-			const distancePx =
-				resolved?.distance != null
-					? resolveSizeInput(
-							ctx.length,
-							resolved.distance,
-							sizeContext(ctx.rootNode, 'width'),
-							3,
-						)
-					: 3;
-			if (distancePx < 0) throw new Error('distance must be >= 0');
-			return {
-				enabled,
-				started: false,
-				start_time: 0,
-				start_x: 0,
-				start_y: 0,
-				options: resolved ? { delay: resolved.delay, distance: distancePx } : null,
-			};
-		},
-
-		start(ctx, state, input) {
-			if (!state.enabled) return true;
-			if (ctx.isDragging) return true;
-
-			if (input.kind === 'keyboard' || input.kind === 'programmatic') return true;
-
-			if (!isPointerInput(input)) return true;
-			const event = input.native;
-
-			if (!state.started) {
-				if (!ctx.rootNode.contains(event.target as Node)) {
-					ctx.cancel();
-					return false;
-				}
-				state.started = true;
-				state.start_time = Date.now();
-				state.start_x = input.clientX;
-				state.start_y = input.clientY;
-			}
-
-			if (state.options?.delay) {
-				if (Date.now() - state.start_time < state.options.delay) return false;
-			}
-
-			if (state.options?.distance) {
-				const dx = input.clientX - state.start_x;
-				const dy = input.clientY - state.start_y;
-				if (dx * dx + dy * dy <= state.options.distance ** 2) return false;
-			}
-
-			return true;
-		},
-
-		end(_ctx, state) {
-			state.started = false;
-		},
-	};
-});
 
 export const scrollLock = defineDragPlugin(
 	(

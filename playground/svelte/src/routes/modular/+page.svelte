@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { Draggable } from '@neodrag/svelte'
-	import { ControlFrom, controls, events, position, threshold, scrollLock } from '@neodrag/svelte/plugins';
-
-	let element = $state<HTMLElement>();
+	import { ControlFrom, controls, events, position, scrollLock } from '@neodrag/svelte/plugins';
 
 	let current_position = $state({ x: 0, y: 0 });
 
@@ -21,11 +19,15 @@
 			allow: ControlFrom.selector('.handle'),
 		}),
 		events(),
-		threshold({
-			// delay: 300,
-		}),
 		scrollLock(),
 	]);
+
+	const drag = new Draggable({
+		plugins: options,
+		threshold: {
+			// delay: 300,
+		},
+	});
 </script>
 
 <br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
@@ -41,8 +43,7 @@
 </label>
 
 <div
-	use:draggable={options}
-	bind:this={element}
+	{@attach drag.attachment}
 	style="width: 100px; height: 100px; background: cyan;"
 >
 	Hello

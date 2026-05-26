@@ -16,7 +16,7 @@ import {
   PointerSensor,
   KeyboardSensor,
   KeyboardMoveSensor,
-  KEYBOARD_MOVE_SENSOR_KEY,
+  KeyboardMoveSensor,
   installDefaultSensors,
 } from '@neodrag/core';
 
@@ -29,7 +29,7 @@ pointerOnly.registerSensor(new PointerSensor({ buttons: [0] }));
 
 // Trim a default
 const trimmed = new Neodrag();
-trimmed.unregisterSensor(KEYBOARD_MOVE_SENSOR_KEY);
+trimmed.unregisterSensor(KeyboardMoveSensor.key);
 
 // Re-install built-ins after opting out
 const custom = new Neodrag({ defaultSensors: false });

@@ -51,9 +51,34 @@ new Neodrag({
 
 Use `Neodrag.shared` when you do not need a custom default plugin stack.
 
-### `draggable(node, plugins?)`
+### `draggable(node, plugins?, options?)`
 
 Returns a `DragHandle`. `plugins` is `DragPlugin[]` or `() => DragPlugin[]`; framework wrappers reconcile changes via `handle.update()`.
+
+**Threshold** (movement / delay before drag starts) is configured per binding, not as a plugin:
+
+```typescript
+import { Draggable } from '@neodrag/core';
+
+const drag = new Draggable({
+  plugins: [axis('x')],
+  threshold: { distance: 10, delay: 100 },
+});
+
+const immediate = new Draggable({ plugins: [], threshold: null });
+```
+
+| `threshold` | Behavior |
+|-------------|----------|
+| omitted | Default: **3px** distance, **0ms** delay |
+| `null` | Start dragging on the first move |
+| `{ delay?, distance? }` | Custom threshold |
+
+Low-level API:
+
+```typescript
+engine.draggable(node, plugins, { threshold: { distance: 8 } });
+```
 
 ### `droppable(node, plugins?)`
 

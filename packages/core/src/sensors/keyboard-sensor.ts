@@ -5,7 +5,8 @@ import type { KeyboardSensorOptions, SensorHost } from './types.ts';
 export const KEYBOARD_SENSOR_KEY = Symbol('neodrag.sensor.keyboard');
 
 export class KeyboardSensor extends SensorBase {
-	readonly key = KEYBOARD_SENSOR_KEY;
+	static readonly key = KEYBOARD_SENSOR_KEY;
+	readonly key = KeyboardSensor.key;
 	readonly #cancelKeys: Set<string>;
 
 	constructor(options: KeyboardSensorOptions | null = {}) {

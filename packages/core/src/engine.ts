@@ -53,6 +53,11 @@ import type { Sensor, SensorHost } from './sensors/types.ts';
 import { syncDragSessionPointer, syncResizeSessionPointer } from './sync-session-pointer.ts';
 import { transitionSession } from './state-machine.ts';
 import {
+	passesDragThreshold,
+	resetThresholdSample,
+	type DragThresholdInput,
+} from './threshold.ts';
+import {
 	assertNamedPluginKeys,
 	type DragCtx,
 	type DragPlugin,
@@ -245,7 +250,11 @@ export class Neodrag {
 	draggable(
 		node: HTMLElement | SVGElement,
 		plugins: DragPluginList = [],
-		options: { applyTransform?: TransformApplier; length?: LengthAdapter } = {},
+		options: {
+			applyTransform?: TransformApplier;
+			length?: LengthAdapter;
+			threshold?: DragThresholdInput;
+		} = {},
 	): DragHandle {
 		if (is_svg_svg_element(node)) {
 			throw new Error(
@@ -261,6 +270,7 @@ export class Neodrag {
 			options.length ?? numberStub,
 		);
 		inst.applyTransform = options.applyTransform;
+		inst.setThreshold(options.threshold);
 		inst.lastSlots = plugins;
 		inst.slotStaticCache = [];
 		const resolved = resolvePluginList(plugins, inst.slotStaticCache, false);
@@ -420,6 +430,7 @@ export class Neodrag {
 	}
 
 	#beginSession(source: DragInstance, input: InteractionInput) {
+		resetThresholdSample(source.thresholdSample);
 		const rect = source.rootNode.getBoundingClientRect();
 		this.#active = {
 			state: transitionSession('idle', { type: 'pointerdown' }),
@@ -569,6 +580,12 @@ export class Neodrag {
 		syncDragSessionPointer(input, inst, this.#active, this.#dropHost);
 
 		if (!inst.isDragging) {
+			if (
+				!passesDragThreshold(inst.thresholdConfig, inst.thresholdSample, inst.dragCtx, input)
+			) {
+				return;
+			}
+
 			const startOk = this.#runStart(inst, inst.dragCtx, input);
 			inst.effects.flush();
 			if (!startOk) {
@@ -755,6 +772,7 @@ export class Neodrag {
 		inst.isDragging = false;
 		inst.cancelled = false;
 		inst.pointerCapturedId = null;
+		resetThresholdSample(inst.thresholdSample);
 		this.#active = null;
 		this.#activeSource = null;
 		this.#activePointerId = null;

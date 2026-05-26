@@ -130,9 +130,23 @@ describe('Chromium perf suite', () => {
 		minimalEngine.draggable(minimalBox, []);
 
 		results.push(
-			runBench('steady-state · MINIMAL_DRAG_PLUGINS · 12-step drag', 300, 30, () => {
+			runBench('steady-state · empty plugin list · 12-step drag', 300, 30, () => {
 				resetElementPosition(minimalBox);
 				dragSteps(minimalBox, DRAG.fromX, DRAG.fromY, DRAG.toX, DRAG.toY, DRAG.steps);
+			}),
+		);
+
+		const pendingBox = createBox('100px', '360px');
+		const pendingEngine = new Neodrag({ dev: false });
+		pendingEngine.draggable(pendingBox, []);
+		results.push(
+			runBench('pending · sub-threshold pointermoves × 20', 200, 20, () => {
+				resetElementPosition(pendingBox);
+				pointer(pendingBox, 'pointerdown', DRAG.fromX, DRAG.fromY);
+				for (let i = 1; i <= 20; i++) {
+					pointer(pendingBox, 'pointermove', DRAG.fromX + i * 0.1, DRAG.fromY);
+				}
+				pointer(pendingBox, 'pointerup', DRAG.fromX + 2, DRAG.fromY);
 			}),
 		);
 
@@ -190,7 +204,7 @@ describe('Chromium perf suite', () => {
 		console.table(table);
 		console.log('\nComparisons:');
 		console.log(' ·', ratioLabel(results[1]!, results[0]!));
-		console.log(' ·', ratioLabel(results[5]!, results[4]!));
+		console.log(' ·', ratioLabel(results[6]!, results[5]!));
 		const report = toReport(results);
 		await commands.writeFile(LATEST_REL, `${JSON.stringify(report, null, 2)}\n`);
 
@@ -221,21 +235,23 @@ describe('Chromium perf suite', () => {
 
 		const defaultDrag = results[0]!;
 		const minimalDrag = results[1]!;
-		const legacyIndex = results[4]!;
-		const mapIndex = results[5]!;
+		const legacyIndex = results[5]!;
+		const mapIndex = results[6]!;
 
 		expect(defaultDrag.medianMs).toBeLessThan(20);
 		expect(minimalDrag.medianMs).toBeLessThan(20);
 		expect(mapIndex.meanMs).toBeLessThan(legacyIndex.meanMs);
 
-		const sortableOver = results[6]!;
+		const sortableOver = results[7]!;
 		expect(sortableOver.meanMs).toBeLessThan(2.2);
 		expect(sortableOver.p99Ms).toBeLessThan(10);
 
 		defaultEngine.dispose();
 		minimalEngine.dispose();
+		pendingEngine.dispose();
 		box.remove();
 		minimalBox.remove();
+		pendingBox.remove();
 		microRoot.remove();
 		container.remove();
 	});

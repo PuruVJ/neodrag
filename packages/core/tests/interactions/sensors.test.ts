@@ -40,7 +40,7 @@ describe('sensor registration', () => {
 
 	it('unregisterSensor removes a sensor by key', () => {
 		const engine = new Neodrag({ dev: false });
-		engine.unregisterSensor(KEYBOARD_MOVE_SENSOR_KEY);
+		engine.unregisterSensor(KeyboardMoveSensor.key);
 		expect(engine.getSensors().map((s) => s.key)).toEqual([
 			POINTER_SENSOR_KEY,
 			KEYBOARD_SENSOR_KEY,

@@ -3,7 +3,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MINIMAL_DRAG_PLUGINS, Neodrag, numberStub, pointerToInput } from '../../src/index.ts';
-import { ControlFrom, controls, grid, threshold } from '../../src/plugins.ts';
+import { ControlFrom, controls, grid } from '../../src/plugins.ts';
 
 describe('grid plugin', () => {
 	it('skips X snapping when step is 0 but still snaps Y', () => {
@@ -91,13 +91,16 @@ describe('controls allow handle moves root', () => {
 		handle.getBoundingClientRect = () => new DOMRect(372, 208, 48, 40);
 
 		const engine = new Neodrag({ plugins: MINIMAL_DRAG_PLUGINS, dev: false });
-		engine.draggable(root, [
-			threshold(null),
-			controls(
-				{ allow: ControlFrom.selector('.handle') },
-				(ctx) => ctx.hook === 'init' || ctx.hook === 'start',
-			),
-		]);
+		engine.draggable(
+			root,
+			[
+				controls(
+					{ allow: ControlFrom.selector('.handle') },
+					(ctx) => ctx.hook === 'init' || ctx.hook === 'start',
+				),
+			],
+			{ threshold: null },
+		);
 
 		const downX = 396;
 		const downY = 228;

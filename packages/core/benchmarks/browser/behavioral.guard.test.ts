@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { DEFAULTS, Neodrag } from '../../src/index.ts';
-import { events, position, threshold } from '../../src/plugins.ts';
+import { events, position } from '../../src/plugins.ts';
 import {
 	assertTranslate,
 	createBox,
@@ -42,7 +42,9 @@ describe('Chromium behavioral guards', () => {
 			plugins: [position({ current: { x: 0, y: 0 } })],
 			dev: false,
 		});
-		const handle = engine.draggable(box, [threshold(null)]);
+		const handle = engine.draggable(box, [position({ current: { x: 0, y: 0 } })], {
+			threshold: null,
+		});
 		dragSteps(box, DRAG.fromX, DRAG.fromY, DRAG.toX, DRAG.toY, DRAG.steps);
 		await flushEffects();
 		assertTranslate(box, DRAG.expected);

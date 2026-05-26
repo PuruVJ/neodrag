@@ -3,7 +3,6 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineDropPlugin, Neodrag } from '../../src/index.ts';
-import { threshold } from '../../src/plugins.ts';
 
 function patchPointerCapture() {
 	const proto = HTMLElement.prototype;
@@ -51,7 +50,7 @@ describe('drop target rAF coalescing', () => {
 			},
 		}))();
 
-		const engine = new Neodrag({ plugins: [threshold(null)], dev: false });
+		const engine = new Neodrag({ dev: false });
 		const zone = document.createElement('div');
 		zone.style.cssText = 'position:absolute;left:0;top:0;width:400px;height:400px';
 		const box = document.createElement('div');
@@ -60,7 +59,7 @@ describe('drop target rAF coalescing', () => {
 		document.body.appendChild(zone);
 
 		engine.droppable(zone, [dropPlugin]);
-		engine.draggable(box, []);
+		engine.draggable(box, [], { threshold: null });
 
 		document.elementFromPoint = () => box;
 

@@ -2,7 +2,6 @@ import {
 	applyUserSelectHack,
 	ignoreMultitouch,
 	stateMarker,
-	threshold,
 	touchAction,
 } from './plugins.ts';
 import type { EngineOptions } from './engine.ts';
@@ -13,11 +12,10 @@ export const DEFAULT_DRAG_PLUGINS: DragPlugin[] = [
 	ignoreMultitouch,
 	stateMarker,
 	applyUserSelectHack,
-	threshold(),
 	touchAction,
 ];
 
-export const MINIMAL_DRAG_PLUGINS: DragPlugin[] = [threshold()];
+export const MINIMAL_DRAG_PLUGINS: DragPlugin[] = [];
 
 export const DEFAULTS: Required<Pick<EngineOptions, 'plugins' | 'delegate' | 'onError'>> = {
 	plugins: DEFAULT_DRAG_PLUGINS,

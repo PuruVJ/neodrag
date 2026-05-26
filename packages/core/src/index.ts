@@ -5,7 +5,19 @@ export {
 	PluginListResolver,
 	resolvedPluginsUnchanged,
 } from './resolve-plugins.ts';
-export { Draggable, DroppableBinding, type DraggableOptions, type TransformApplier } from './draggable-binding.ts';
+export {
+	Draggable,
+	DroppableBinding,
+	type DraggableOptions,
+	type DragThresholdInput,
+	type DragThresholdOptions,
+	type TransformApplier,
+} from './draggable-binding.ts';
+export {
+	DEFAULT_DRAG_THRESHOLD,
+	resolveDragThreshold,
+	type ResolvedDragThreshold,
+} from './threshold.ts';
 export { Resizable, type ResizableOptions } from './resizable-binding.ts';
 export type { ResizeApplier } from './apply-resize.ts';
 export { BindingHandle, DragHandle, DropHandle, ResizeHandle, type NeodragHost } from './handles.ts';

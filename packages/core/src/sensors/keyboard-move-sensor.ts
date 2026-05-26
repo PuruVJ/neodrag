@@ -49,7 +49,8 @@ function isGrabKey(key: string, grabKey: string): boolean {
 }
 
 export class KeyboardMoveSensor extends SensorBase {
-	readonly key = KEYBOARD_MOVE_SENSOR_KEY;
+	static readonly key = KEYBOARD_MOVE_SENSOR_KEY;
+	readonly key = KeyboardMoveSensor.key;
 
 	protected attach(host: SensorHost): () => void {
 		const target = host.getDelegate();

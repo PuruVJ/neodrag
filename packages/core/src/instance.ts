@@ -15,6 +15,13 @@ import type {
 	SessionKey,
 	SessionPrivateStore,
 } from './types.ts';
+import {
+	createThresholdSample,
+	resolveDragThreshold,
+	type DragThresholdInput,
+	type DragThresholdSample,
+	type ResolvedDragThreshold,
+} from './threshold.ts';
 
 export class SessionPrivate implements SessionPrivateStore {
 	#store = new Map<symbol, unknown>();
@@ -74,6 +81,9 @@ export class DragInstance {
 	visualNode: HTMLElement | SVGElement;
 	pointerCapturedId: number | null = null;
 
+	thresholdConfig!: ResolvedDragThreshold;
+	thresholdSample: DragThresholdSample = createThresholdSample();
+
 	readonly #liveDelta: { readonly x: number; readonly y: number };
 	readonly #liveProposed: { readonly x: number; readonly y: number };
 	readonly #liveOffset: { readonly x: number; readonly y: number };
@@ -111,6 +121,10 @@ export class DragInstance {
 	pendingUpdate: import('./types.ts').DragPluginList | null = null;
 	applyTransform?: TransformApplier;
 
+	setThreshold(input: DragThresholdInput) {
+		this.thresholdConfig = resolveDragThreshold(input, this.rootNode, this.lengthAdapter);
+	}
+
 	constructor(
 		node: HTMLElement | SVGElement,
 		idleSession: DragSession,
@@ -121,6 +135,7 @@ export class DragInstance {
 		this.lengthAdapter = lengthAdapter;
 		this.cachedRootNodeRect = node.getBoundingClientRect();
 		this.#session = idleSession;
+		this.setThreshold(undefined);
 
 		const inst = this;
 		this.#liveDelta = {

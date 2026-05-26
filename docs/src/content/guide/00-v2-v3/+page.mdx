@@ -414,8 +414,8 @@ const instance = Neodrag.shared.draggable(element, [
 | v2 Option                    | v3 Plugin                    | Purpose              |
 | ---------------------------- | ---------------------------- | -------------------- |
 | `grid: [20, 20]`             | `grid([20, 20])`             | Snap to grid         |
-| `threshold: { distance: 5 }` | `threshold({ distance: 5 })` | Movement threshold   |
-| `threshold: { delay: 100 }`  | `threshold({ delay: 100 })`  | Time delay threshold |
+| `threshold: { distance: 5 }` | `new Draggable({ threshold: { distance: 5 }, plugins: [] })` | Per-binding option (not a plugin) |
+| `threshold: { delay: 100 }`  | `new Draggable({ threshold: { delay: 100 }, plugins: [] })`  | Time delay threshold |
 
 ### Controls and Interaction
 
