@@ -28,18 +28,27 @@
 				<div class="site-kicker mb-2">{title}</div>
 				{#each sections as { slug, title }}
 					<li class={compact ? 'py-0.5' : 'py-1'}>
-						<a
-							href={slug}
-							aria-current={aria_current_val(slug)}
-							class={[
-								'unstyled block border-2 border-transparent px-3 py-1.5 font-mono text-sm font-semibold text-[color-mix(in_lch,var(--app-color-dark),transparent_12%)] transition-[background-color,border-color,color] duration-75 dock-angular-chip',
-								aria_current_val(slug) === 'page' &&
-									'border-brand bg-[color-mix(in_lch,var(--color-brand),transparent_88%)] font-extrabold text-fg',
-							]}
-							{onclick}
-						>
-							{title}
-						</a>
+						{#if aria_current_val(slug) === 'page'}
+							<div class="dock-angular-bevel dock-angular-bevel--sm dock-angular-bevel--brand">
+								<a
+									href={slug}
+									aria-current="page"
+									class="unstyled dock-angular-bevel__fill block px-3 py-1.5 font-mono text-sm font-extrabold text-fg"
+									{onclick}
+								>
+									{title}
+								</a>
+							</div>
+						{:else}
+							<a
+								href={slug}
+								aria-current="false"
+								class="unstyled block px-3 py-1.5 font-mono text-sm font-semibold text-[color-mix(in_lch,var(--app-color-dark),transparent_12%)] transition-[color] duration-75 hover:text-fg"
+								{onclick}
+							>
+								{title}
+							</a>
+						{/if}
 					</li>
 				{/each}
 			</ul>

@@ -11,8 +11,8 @@
 	--color-primary: var(--app-color-primary);
 	--color-primary-contrast: var(--app-color-primary-contrast);
 	--color-brand: var(--secondary-color, var(--app-color-primary));
-	--color-border: color-mix(in lch, var(--app-color-dark), transparent 72%);
-	--color-border-strong: color-mix(in lch, var(--app-color-dark), transparent 55%);
+	--color-border: color-mix(in lch, var(--app-color-dark), transparent 88%);
+	--color-border-strong: color-mix(in lch, var(--app-color-dark), transparent 82%);
 	--color-panel: color-mix(in lch, var(--app-color-shell), var(--color-brand) 5%);
 	--color-well: color-mix(in lch, var(--app-color-dark), transparent 88%);
 
@@ -141,67 +141,126 @@
 	}
 }
 
-@utility dock-angular {
-	border-radius: 0;
-	clip-path: polygon(
-		var(--spacing-dock-cut) 0%,
-		calc(100% - var(--spacing-dock-cut)) 0%,
-		100% var(--spacing-dock-cut),
-		100% calc(100% - var(--spacing-dock-cut)),
-		calc(100% - var(--spacing-dock-cut)) 100%,
-		var(--spacing-dock-cut) 100%,
-		0% calc(100% - var(--spacing-dock-cut)),
-		0% var(--spacing-dock-cut)
-	);
-}
-
-@utility dock-angular-bar {
-	--spacing-dock-cut: 0.7rem;
-	clip-path: polygon(
-		var(--spacing-dock-cut) 0%,
-		calc(100% - var(--spacing-dock-cut)) 0%,
-		100% var(--spacing-dock-cut),
-		100% 100%,
-		0% 100%,
-		0% var(--spacing-dock-cut)
-	);
-}
-
-@utility dock-angular-chip {
-	border-radius: 0;
-	clip-path: polygon(
-		var(--spacing-dock-cut-sm) 0%,
-		calc(100% - var(--spacing-dock-cut-sm)) 0%,
-		100% var(--spacing-dock-cut-sm),
-		100% calc(100% - var(--spacing-dock-cut-sm)),
-		calc(100% - var(--spacing-dock-cut-sm)) 100%,
-		var(--spacing-dock-cut-sm) 100%,
-		0% calc(100% - var(--spacing-dock-cut-sm)),
-		0% var(--spacing-dock-cut-sm)
-	);
-}
-
-@utility site-grid-layer {
-	--pg-grid-line: color-mix(in lch, var(--color-brand), transparent 91%);
-	--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 80%);
-	--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 89%);
-	background-color: color-mix(in lch, var(--app-color-shell), var(--color-brand) 1.25%);
-	background-image:
-		radial-gradient(circle at center, var(--pg-grid-dot) 1px, transparent 1px),
-		linear-gradient(var(--pg-grid-major) 1px, transparent 1px),
-		linear-gradient(90deg, var(--pg-grid-major) 1px, transparent 1px),
-		linear-gradient(var(--pg-grid-line) 1px, transparent 1px),
-		linear-gradient(90deg, var(--pg-grid-line) 1px, transparent 1px);
-	background-size:
-		var(--spacing-grid) var(--spacing-grid),
-		calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
-		calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
-		var(--spacing-grid) var(--spacing-grid),
-		var(--spacing-grid) var(--spacing-grid);
-	mask-image: radial-gradient(ellipse 120% 95% at 50% 42%, black 35%, transparent 88%);
-}
-
 @layer components {
+	.site-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 0;
+		pointer-events: none;
+	}
+
+	.site-grid-layer {
+		position: absolute;
+		inset: 0;
+		--pg-grid-line: color-mix(in lch, var(--color-brand), transparent 86%);
+		--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 74%);
+		--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 84%);
+		background-color: transparent;
+		background-image:
+			radial-gradient(circle at center, var(--pg-grid-dot) 1px, transparent 1px),
+			linear-gradient(var(--pg-grid-major) 1px, transparent 1px),
+			linear-gradient(90deg, var(--pg-grid-major) 1px, transparent 1px),
+			linear-gradient(var(--pg-grid-line) 1px, transparent 1px),
+			linear-gradient(90deg, var(--pg-grid-line) 1px, transparent 1px);
+		background-size:
+			var(--spacing-grid) var(--spacing-grid),
+			calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
+			calc(var(--spacing-grid) * 4) calc(var(--spacing-grid) * 4),
+			var(--spacing-grid) var(--spacing-grid),
+			var(--spacing-grid) var(--spacing-grid);
+		background-position: center;
+		mask-image: radial-gradient(ellipse 125% 100% at 50% 38%, black 55%, transparent 92%);
+	}
+
+	body.docs-route .site-grid-layer {
+		--pg-grid-line: color-mix(in lch, var(--color-brand), transparent 80%);
+		--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 66%);
+		--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 78%);
+		mask-image: radial-gradient(ellipse 140% 105% at 50% 42%, black 68%, transparent 96%);
+	}
+
+	body.docs-route .site-vignette-layer {
+		opacity: 0.45;
+	}
+
+	body.docs-route #docs-container {
+		background: transparent;
+	}
+
+	.dock-angular-bevel {
+		--bevel-cut: var(--spacing-dock-cut);
+		--bevel-width: 1px;
+		padding: var(--bevel-width);
+		background: var(--dock-border, var(--color-border));
+		clip-path: polygon(
+			var(--bevel-cut) 0%,
+			calc(100% - var(--bevel-cut)) 0%,
+			100% var(--bevel-cut),
+			100% calc(100% - var(--bevel-cut)),
+			calc(100% - var(--bevel-cut)) 100%,
+			var(--bevel-cut) 100%,
+			0% calc(100% - var(--bevel-cut)),
+			0% var(--bevel-cut)
+		);
+	}
+
+	.dock-angular-bevel--bar {
+		--bevel-cut: 0.7rem;
+		clip-path: polygon(
+			var(--bevel-cut) 0%,
+			calc(100% - var(--bevel-cut)) 0%,
+			100% var(--bevel-cut),
+			100% 100%,
+			0% 100%,
+			0% var(--bevel-cut)
+		);
+	}
+
+	.dock-angular-bevel--sm {
+		--bevel-cut: var(--spacing-dock-cut-sm);
+	}
+
+	.dock-angular-bevel__fill {
+		height: 100%;
+		width: 100%;
+		background: var(--dock-surface, color-mix(in lch, var(--app-color-shell), transparent 8%));
+		clip-path: polygon(
+			calc(var(--bevel-cut) + var(--bevel-width)) var(--bevel-width),
+			calc(100% - var(--bevel-cut) - var(--bevel-width)) var(--bevel-width),
+			calc(100% - var(--bevel-width)) calc(var(--bevel-cut) + var(--bevel-width)),
+			calc(100% - var(--bevel-width)) calc(100% - var(--bevel-cut) - var(--bevel-width)),
+			calc(100% - var(--bevel-cut) - var(--bevel-width)) calc(100% - var(--bevel-width)),
+			calc(var(--bevel-cut) + var(--bevel-width)) calc(100% - var(--bevel-width)),
+			var(--bevel-width) calc(100% - var(--bevel-cut) - var(--bevel-width)),
+			var(--bevel-width) calc(var(--bevel-cut) + var(--bevel-width))
+		);
+	}
+
+	.dock-angular-bevel--bar > .dock-angular-bevel__fill {
+		clip-path: polygon(
+			calc(var(--bevel-cut) + var(--bevel-width)) var(--bevel-width),
+			calc(100% - var(--bevel-cut) - var(--bevel-width)) var(--bevel-width),
+			calc(100% - var(--bevel-width)) calc(var(--bevel-cut) + var(--bevel-width)),
+			calc(100% - var(--bevel-width)) calc(100% - var(--bevel-width)),
+			var(--bevel-width) calc(100% - var(--bevel-width)),
+			var(--bevel-width) calc(var(--bevel-cut) + var(--bevel-width))
+		);
+	}
+
+	.dock-angular-bevel--brand {
+		background: color-mix(in lch, var(--color-brand), transparent 55%);
+	}
+
+	.dock-angular-bevel--brand > .dock-angular-bevel__fill {
+		background: color-mix(in lch, var(--color-brand), transparent 90%);
+	}
+
+	.site-glow-layer,
+	.site-vignette-layer {
+		position: absolute;
+		inset: 0;
+	}
+
 	.site-vignette-layer {
 		background-image:
 			radial-gradient(
@@ -238,7 +297,7 @@
 		background-image:
 			radial-gradient(
 				ellipse 130% 95% at 50% -28%,
-				color-mix(in lch, var(--color-brand), transparent 92%),
+				color-mix(in lch, var(--color-brand), transparent 94%),
 				transparent 68%
 			),
 			radial-gradient(
@@ -254,7 +313,7 @@
 	}
 
 	.site-panel {
-		@apply border-2 border-[var(--color-border)] bg-[color-mix(in_lch,var(--app-color-shell),transparent_12%)] shadow-[0_0_0_1px_color-mix(in_lch,var(--color-brand),transparent_82%),0_28px_56px_-36px_color-mix(in_lch,var(--app-color-dark),transparent_84%)] backdrop-blur-[14px] backdrop-saturate-[1.12];
+		@apply border border-[var(--color-border)] bg-[color-mix(in_lch,var(--app-color-shell),transparent_6%)] shadow-[0_24px_48px_-40px_color-mix(in_lch,var(--app-color-dark),transparent_90%)] backdrop-blur-[10px] backdrop-saturate-[1.05];
 	}
 
 	.site-kicker {
@@ -271,21 +330,21 @@
 	}
 
 	.site-section-break-line {
-		@apply h-px flex-1 bg-[var(--color-border-strong)];
+		@apply h-px flex-1 bg-[var(--color-border)];
 	}
 
 	.dock-surface {
-		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 68%);
-		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 52%);
-		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--app-color-primary) 6%);
-		--dock-accent-glow: 0 0 0 1px color-mix(in lch, var(--app-color-primary), transparent 65%);
-		--dock-shadow: 0 20px 48px -20px color-mix(in lch, var(--app-color-dark), transparent 78%);
+		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 84%);
+		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 78%);
+		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--app-color-primary) 4%);
+		--dock-accent-glow: none;
+		--dock-shadow: 0 16px 40px -28px color-mix(in lch, var(--app-color-dark), transparent 88%);
 	}
 
 	body[data-theme='dark'] .dock-surface {
-		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 75%);
-		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 58%);
-		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--app-color-primary) 12%);
+		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 86%);
+		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 80%);
+		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--app-color-primary) 8%);
 	}
 
 	.dock-zoom :global(svg) {
@@ -305,15 +364,15 @@
 	}
 
 	.docs-article-panel {
-		@apply px-[clamp(1rem,3vw,1.75rem)] py-[clamp(1.25rem,3vw,2rem)];
+		@apply max-w-[min(68ch,100%)] px-0 py-[clamp(0.5rem,2vw,1rem)];
 	}
 
 	.docs-sidebar-panel {
-		@apply border-r-2 border-[var(--color-border)] bg-[color-mix(in_lch,var(--app-color-shell),transparent_12%)] shadow-[0_0_0_1px_color-mix(in_lch,var(--color-brand),transparent_82%)] backdrop-blur-[14px] backdrop-saturate-[1.12];
+		@apply border-r border-[var(--color-border)] bg-[color-mix(in_lch,var(--app-color-shell),transparent_4%)] backdrop-blur-[8px];
 	}
 
 	.docs-prose {
-		@apply max-w-[min(68ch,100%)];
+		@apply max-w-none;
 	}
 
 	.docs-prose :where(p, a) {
@@ -321,8 +380,8 @@
 	}
 
 	.docs-prose :where(pre.astro-code) {
-		@apply my-6 w-full max-w-full overflow-x-auto rounded-none border-2 border-[var(--color-border-strong)] p-4 text-[clamp(0.85rem,1.5vw,1rem)] leading-normal;
-		background-color: color-mix(in lch, var(--app-color-dark), transparent 94%);
+		@apply my-6 w-full max-w-full overflow-x-auto rounded-none border border-[var(--color-border)] p-4 text-[clamp(0.85rem,1.5vw,1rem)] leading-normal;
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 96%);
 	}
 
 	.docs-prose :where(pre.astro-code code) {
@@ -342,16 +401,21 @@
 	}
 
 	blockquote {
-		@apply rounded-r-lg border-l-4 border-fg py-2 pl-4;
-		background-color: color-mix(in lch, var(--app-color-dark), transparent 95%);
+		@apply rounded-r-lg border-l border-[var(--color-border-strong)] py-2 pl-4;
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 97%);
 	}
 }
 
 body[data-theme='dark'] .site-grid-layer {
-	--pg-grid-line: color-mix(in lch, var(--color-brand), transparent 93%);
-	--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 84%);
-	--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 91%);
-	background-color: color-mix(in lch, var(--app-color-shell), var(--color-brand) 2%);
+	--pg-grid-line: color-mix(in lch, var(--color-brand), transparent 88%);
+	--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 76%);
+	--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 86%);
+}
+
+body[data-theme='dark'].docs-route .site-grid-layer {
+	--pg-grid-line: color-mix(in lch, var(--color-brand), transparent 84%);
+	--pg-grid-major: color-mix(in lch, var(--color-brand), transparent 70%);
+	--pg-grid-dot: color-mix(in lch, var(--color-brand), transparent 82%);
 }
 
 @import './home.css' layer(components);

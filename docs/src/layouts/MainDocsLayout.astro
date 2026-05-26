@@ -52,10 +52,12 @@ const version = {
 	{
 		is_framework_only_page ? (
 			<div class="mb-4 flex flex-wrap gap-2">
-				<span
-					class="dock-angular-chip inline-block border-2 border-[color-mix(in_lch,var(--color-brand),transparent_55%)] bg-[color-mix(in_lch,var(--color-brand),transparent_90%)] px-3 py-2 font-mono text-sm font-bold text-[color-mix(in_lch,var(--color-brand),var(--app-color-anti-mixer)_35%)]"
-				>
-					{version}
+				<span class="dock-angular-bevel dock-angular-bevel--sm dock-angular-bevel--brand inline-block">
+					<span
+						class="dock-angular-bevel__fill inline-block px-3 py-2 font-mono text-sm font-bold text-[color-mix(in_lch,var(--color-brand),var(--app-color-anti-mixer)_35%)]"
+					>
+						{version}
+					</span>
 				</span>
 			</div>
 		) : null

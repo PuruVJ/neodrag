@@ -25,16 +25,22 @@
 	const SelectedIcon = $derived(ICONS[theme.preference]);
 
 	const btn =
-		'relative z-[2] flex flex-1 justify-center border-2 border-transparent bg-transparent p-2 text-[color-mix(in_lch,var(--app-color-dark),transparent_90%)] transition-[color,border-color] duration-200 hover:text-[color-mix(in_lch,var(--app-color-dark),transparent_70%)] [&_svg]:block [&_svg]:!w-[1.6rem] [&_svg]:shrink-0';
+		'relative z-[2] flex flex-1 justify-center bg-transparent p-2 text-[color-mix(in_lch,var(--app-color-dark),transparent_90%)] transition-[color] duration-200 hover:text-[color-mix(in_lch,var(--app-color-dark),transparent_70%)] [&_svg]:block [&_svg]:!w-[1.6rem] [&_svg]:shrink-0';
 </script>
 
 <div
 	class={[
-		'dock-angular-chip dock-surface relative flex h-12 border-2 border-[var(--dock-border)] bg-[color-mix(in_lch,var(--app-color-dark),transparent_94%)]',
-		embedded ? 'm-0 px-1 pb-1' : 'm-1 px-1',
-		thumbnail && 'bg-transparent',
+		'dock-angular-bevel dock-angular-bevel--sm dock-surface relative h-12',
+		embedded ? 'm-0' : 'm-1',
 	]}
 >
+	<div
+		class={[
+			'dock-angular-bevel__fill relative flex bg-[color-mix(in_lch,var(--app-color-dark),transparent_96%)]',
+			embedded ? 'px-1 pb-1' : 'px-1',
+			thumbnail && '!bg-transparent',
+		]}
+	>
 	{#if thumbnail}
 		<button type="button" class={btn} {onclick}>
 			<SelectedIcon />
@@ -42,7 +48,7 @@
 	{:else}
 		<div
 			class={[
-				'dock-angular-chip pointer-events-none absolute top-[0.3rem] left-[0.32rem] z-[1] h-[calc(100%-0.6rem)] w-[calc(33.333%-0.2rem)] border border-[color-mix(in_lch,var(--color-brand),transparent_55%)] bg-[color-mix(in_lch,var(--color-brand),transparent_82%)] transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
+				'pointer-events-none absolute top-[0.35rem] left-[0.36rem] z-[1] h-[calc(100%-0.7rem)] w-[calc(33.333%-0.22rem)] bg-[color-mix(in_lch,var(--color-brand),transparent_82%)] transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] [clip-path:polygon(0.35rem_0,calc(100%-0.35rem)_0,100%_0.35rem,100%_calc(100%-0.35rem),calc(100%-0.35rem)_100%,0.35rem_100%,0_calc(100%-0.35rem),0_0.35rem)]',
 				theme.preference === 'light' && 'translate-x-0',
 				theme.preference === 'system' && 'translate-x-full',
 				theme.preference === 'dark' && 'translate-x-[200%]',
@@ -80,4 +86,5 @@
 			<MoonIcon width="1.6rem" height="1.6rem" fill="currentColor" />
 		</button>
 	{/if}
+	</div>
 </div>

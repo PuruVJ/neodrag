@@ -73,28 +73,34 @@
 	});
 </script>
 
-<button
-	aria-label="Launch {framework} page"
+<div
 	class={[
-		'group dock-angular-chip relative flex flex-col items-center justify-end gap-1 border-2 border-transparent bg-transparent transition-[border-color,background-color,padding] duration-75',
-		embedded ? 'px-2 pt-2 pb-1' : 'px-2 pt-2 pb-1',
-		is_near &&
-			'border-[color-mix(in_lch,var(--color-brand),transparent_45%)] bg-[color-mix(in_lch,var(--color-brand),transparent_92%)]',
-		selected &&
-			'border-brand bg-[color-mix(in_lch,var(--color-brand),transparent_88%)]',
+		'group dock-angular-bevel dock-angular-bevel--sm relative',
+		(is_near || selected) && 'dock-angular-bevel--brand',
 	]}
-	style:padding-bottom={embedded ? undefined : `${6 + Math.max(0, (width_px.current - base_width) * 0.15)}px`}
 >
+	<button
+		aria-label="Launch {framework} page"
+		class={[
+			'dock-angular-bevel__fill relative flex w-full flex-col items-center justify-end gap-1 bg-transparent transition-[padding] duration-75',
+			embedded ? 'px-2 pt-2 pb-1' : 'px-2 pt-2 pb-1',
+		]}
+		style:padding-bottom={embedded ? undefined : `${6 + Math.max(0, (width_px.current - base_width) * 0.15)}px`}
+	>
 	{#if !embedded}
-		<p
+		<div
 			class={[
-				'dock-angular-chip pointer-events-none absolute z-10 border-2 border-[var(--dock-border-strong)] bg-[var(--dock-surface)] px-3 py-1.5 font-mono text-[0.68rem] font-extrabold tracking-[0.14em] text-fg uppercase shadow-[var(--dock-shadow)]',
+				'dock-angular-bevel dock-angular-bevel--sm pointer-events-none absolute z-10 shadow-[var(--dock-shadow)]',
 				is_near ? 'block' : 'hidden group-focus-visible:block',
 			]}
-			style:top={`${-28 - Math.max(0, (width_px.current - base_width) * 0.35)}px`}
+			style:top={`${-32 - Math.max(0, (width_px.current - base_width) * 0.35)}px`}
 		>
-			{framework}
-		</p>
+			<p
+				class="dock-angular-bevel__fill m-0 px-3 py-1.5 font-mono text-[0.68rem] font-extrabold tracking-[0.14em] text-fg uppercase"
+			>
+				{framework}
+			</p>
+		</div>
 	{/if}
 
 	<span
@@ -120,4 +126,5 @@
 		class="h-[3px] bg-brand transition-opacity duration-100 [clip-path:polygon(0_0,100%_0,calc(100%-2px)_100%,2px_100%)]"
 		style="width: {Math.max(18, width_px.current * 0.55)}px; opacity: {selected ? 1 : is_near ? 0.65 : 0}"
 	></div>
-</button>
+	</button>
+</div>

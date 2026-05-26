@@ -19,14 +19,8 @@ const nav_list = get_nav_list(framework as any);
 
 <MetaThemeColor client:load />
 <Layout title={title}>
-	<div class="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
-		<div class="site-grid-layer absolute inset-0"></div>
-		<div class="site-glow-layer absolute inset-0"></div>
-		<div class="site-vignette-layer absolute inset-0"></div>
-	</div>
-
 	<section
-		class="relative z-10 h-auto w-full overflow-x-hidden overflow-y-auto scroll-smooth max-[967px]:grid max-[967px]:grid-cols-1"
+		class="relative z-10 h-dvh w-full overflow-x-hidden overflow-y-auto scroll-smooth max-[967px]:grid max-[967px]:grid-cols-1"
 		id="docs-container"
 	>
 		<aside
@@ -38,7 +32,7 @@ const nav_list = get_nav_list(framework as any);
 		<main
 			class="docs-shell relative min-h-dvh w-full min-w-0 min-[968px]:w-[calc(100%-300px)] min-[968px]:pl-[300px]"
 		>
-			<article class="docs-article-panel site-panel docs-prose">
+			<article class="docs-article-panel docs-prose">
 				<slot />
 
 				<div class="site-section-break mt-12" aria-hidden="true">

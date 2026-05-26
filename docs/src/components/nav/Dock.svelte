@@ -73,7 +73,7 @@
 	const enable_dock_zoom = new MediaQuery('(min-width: 768px)');
 
 	const dock_btn =
-		'grid h-full min-w-[3.25rem] place-items-center border-2 border-transparent bg-transparent p-2.5 text-[1.35rem] text-[color-mix(in_lch,var(--app-color-dark),transparent_28%)] transition-[border-color,color,background-color] duration-75 hover:border-[color-mix(in_lch,var(--color-brand),transparent_45%)] hover:bg-[color-mix(in_lch,var(--color-brand),transparent_90%)] hover:text-brand focus-visible:border-[color-mix(in_lch,var(--color-brand),transparent_45%)] focus-visible:bg-[color-mix(in_lch,var(--color-brand),transparent_90%)] focus-visible:text-brand';
+		'grid h-full min-w-[3.25rem] place-items-center bg-transparent p-2.5 text-[1.35rem] text-[color-mix(in_lch,var(--app-color-dark),transparent_28%)] transition-[color,background-color] duration-75 hover:text-brand focus-visible:text-brand';
 </script>
 
 <div
@@ -88,69 +88,85 @@
 >
 	<div
 		class={[
-			'dock-surface pointer-events-auto relative flex h-full w-full flex-col items-end overflow-visible border-2 border-[var(--dock-border)] bg-[var(--dock-surface)] p-1.5 shadow-[var(--dock-accent-glow),inset_0_1px_0_color-mix(in_lch,var(--app-color-anti-mixer),transparent_88%),var(--dock-shadow)] backdrop-blur-[18px] backdrop-saturate-[1.12] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,color-mix(in_lch,var(--color-brand),transparent_88%)_0%,transparent_35%,transparent_65%,color-mix(in_lch,var(--color-brand),transparent_92%)_100%)] before:opacity-55 before:content-[""] max-md:dock-angular-bar max-md:rounded-none max-md:border-x-0 max-md:border-b-0 md:dock-angular md:w-auto',
-			menu_view.open && 'max-md:h-auto',
+			'dock-angular-bevel dock-surface pointer-events-auto relative h-full w-full overflow-visible shadow-[var(--dock-shadow)] max-md:dock-angular-bevel--bar md:w-auto',
 		]}
 		{@attach dockDrag.attachment}
 		{@attach interact_outside(() => menu_view.close())}
 	>
-		<div class="hidden w-full max-md:block">
-			{#if menu_view.open}
-				<div class="w-full" transition:slide={{ duration: 400, easing: expoOut }}>
-					<div class="max-h-[48vh] overflow-y-auto">
-						<Nav compact {pathname} {nav_list} onclick={() => menu_view.toggle()} />
+		<div
+			class={[
+				'dock-angular-bevel__fill relative flex flex-col items-end overflow-visible backdrop-blur-[14px] backdrop-saturate-[1.08] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,color-mix(in_lch,var(--color-brand),transparent_94%)_0%,transparent_40%,transparent_60%,color-mix(in_lch,var(--color-brand),transparent_96%)_100%)] before:opacity-35 before:content-[""]',
+				menu_view.open ? 'max-md:p-0' : 'p-1.5',
+			]}
+		>
+			<div class="hidden w-full max-md:block">
+				{#if menu_view.open}
+					<div class="w-full" transition:slide={{ duration: 400, easing: expoOut }}>
+						<div class="max-h-[48vh] overflow-y-auto">
+							<Nav compact {pathname} {nav_list} onclick={() => menu_view.toggle()} />
+						</div>
+						<div>{@render framework_selector(true)}</div>
+						<div><ThemeSwitcher embedded /></div>
 					</div>
-					<div>{@render framework_selector(true)}</div>
-					<div><ThemeSwitcher embedded /></div>
-				</div>
-			{/if}
-		</div>
-
-		<div class="relative z-[1] flex h-full w-full max-md:h-full">
-			<div class="hidden items-end max-md:hidden md:flex">
-				{@render framework_selector(false)}
-				<div
-					class="mx-0.5 my-1.5 w-0.5 min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
-				></div>
-				<ThemeSwitcher />
-				<div
-					class="mx-0.5 my-1.5 w-0.5 min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
-				></div>
-				{@render github()}
-				<div
-					class="mx-0.5 my-1.5 w-0.5 min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
-				></div>
-				<div class="{dock_btn} handle dock-angular-chip" data-paw-cursor="true">
-					<GridIcon />
-				</div>
+				{/if}
 			</div>
 
-			<div class="hidden h-full min-h-16 w-full items-center max-md:flex">
-				<a href="/" class="unstyled ml-3 flex items-center gap-2.5">
-					<img src="/logo.svg" alt="Neodrag" class="h-9 w-9" />
-					<span class="m-0 font-sans text-lg font-extrabold tracking-[-0.02em] text-fg"
-						>Neodrag</span
-					>
-				</a>
-				<span class="flex-1"></span>
-				{@render github()}
-				<button type="button" class="{dock_btn} w-12 [&_svg]:!w-7" onclick={() => menu_view.toggle()}>
-					<MenuIcon />
-				</button>
+			<div class="relative z-[1] flex h-full w-full max-md:h-full">
+				<div class="hidden items-end max-md:hidden md:flex">
+					{@render framework_selector(false)}
+					<div
+						class="mx-0.5 my-1.5 w-px min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
+					></div>
+					<ThemeSwitcher />
+					<div
+						class="mx-0.5 my-1.5 w-px min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
+					></div>
+					{@render github()}
+					<div
+						class="mx-0.5 my-1.5 w-px min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
+					></div>
+					<div class="dock-angular-bevel dock-angular-bevel--sm handle" data-paw-cursor="true">
+						<div class="{dock_btn} dock-angular-bevel__fill">
+							<GridIcon />
+						</div>
+					</div>
+				</div>
+
+				<div class="hidden h-full min-h-16 w-full items-center max-md:flex">
+					<a href="/" class="unstyled ml-3 flex items-center gap-2.5">
+						<img src="/logo.svg" alt="Neodrag" class="h-9 w-9" />
+						<span class="m-0 font-sans text-lg font-extrabold tracking-[-0.02em] text-fg"
+							>Neodrag</span
+						>
+					</a>
+					<span class="flex-1"></span>
+					{@render github()}
+					<div class="dock-angular-bevel dock-angular-bevel--sm">
+						<button
+							type="button"
+							class="{dock_btn} dock-angular-bevel__fill w-12 [&_svg]:!w-7"
+							onclick={() => menu_view.toggle()}
+						>
+							<MenuIcon />
+						</button>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
 </section>
 
 {#snippet github()}
-	<a
-		href="https://github.com/PuruVJ/neodrag"
-		target="_blank"
-		rel="external"
-		class="{dock_btn} dock-angular-chip unstyled !text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_svg]:h-auto [&_svg]:w-8 [&_svg]:max-md:w-7 [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current"
-	>
-		<GithubIcon />
-	</a>
+	<div class="dock-angular-bevel dock-angular-bevel--sm h-full">
+		<a
+			href="https://github.com/PuruVJ/neodrag"
+			target="_blank"
+			rel="external"
+			class="{dock_btn} dock-angular-bevel__fill unstyled !text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)] [&_svg]:h-auto [&_svg]:w-8 [&_svg]:max-md:w-7 [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current"
+		>
+			<GithubIcon />
+		</a>
+	</div>
 {/snippet}
 
 {#snippet framework_selector(embedded = false)}
