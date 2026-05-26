@@ -79,10 +79,7 @@
 	}
 
 	$effect(() => {
-		pathname = initial_pathname;
-	});
-
-	$effect(() => {
+		sync_route_from_location();
 		document.addEventListener('astro:page-load', sync_route_from_location);
 		return () => document.removeEventListener('astro:page-load', sync_route_from_location);
 	});

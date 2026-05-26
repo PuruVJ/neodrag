@@ -21,6 +21,27 @@
 	--spacing-dock-cut-sm: 0.55rem;
 }
 
+@layer utilities {
+	.text-brand {
+		color: var(--color-brand);
+	}
+
+	.hover\:text-brand:hover,
+	.focus-visible\:text-brand:focus-visible {
+		color: var(--color-brand);
+	}
+
+	.from-brand {
+		--tw-gradient-from: var(--color-brand);
+		--tw-gradient-stops: var(
+			--tw-gradient-via-stops,
+			var(--tw-gradient-position),
+			var(--tw-gradient-from) var(--tw-gradient-from-position),
+			var(--tw-gradient-to) var(--tw-gradient-to-position)
+		);
+	}
+}
+
 @layer base {
 	*,
 	::after,
@@ -113,32 +134,32 @@
 		box-shadow: 0 0 0 4px color-mix(in lch, var(--color-brand), transparent 75%);
 	}
 
-	:is(html, body)[data-framework='svelte'] {
+	html[data-framework='svelte'] {
 		--secondary-color: var(--app-color-brand-svelte);
 		--color-brand: var(--app-color-brand-svelte);
 	}
 
-	:is(html, body)[data-framework='vue'] {
+	html[data-framework='vue'] {
 		--secondary-color: var(--app-color-brand-vue);
 		--color-brand: var(--app-color-brand-vue);
 	}
 
-	:is(html, body)[data-framework='react'] {
+	html[data-framework='react'] {
 		--secondary-color: var(--app-color-brand-react);
 		--color-brand: var(--app-color-brand-react);
 	}
 
-	:is(html, body)[data-framework='solid'] {
+	html[data-framework='solid'] {
 		--secondary-color: var(--app-color-brand-solid);
 		--color-brand: var(--app-color-brand-solid);
 	}
 
-	:is(html, body)[data-framework='vanilla'] {
+	html[data-framework='vanilla'] {
 		--secondary-color: var(--app-color-brand-vanilla);
 		--color-brand: var(--app-color-brand-vanilla);
 	}
 
-	:is(html, body)[data-framework='core'] {
+	html[data-framework='core'] {
 		--secondary-color: var(--app-color-primary);
 		--color-brand: var(--app-color-primary);
 	}
@@ -159,7 +180,8 @@
 	}
 
 	:is(a[href], a[href]:visited):where(:not(.unstyled)) {
-		@apply font-semibold text-brand no-underline;
+		@apply font-semibold no-underline;
+		color: var(--color-brand);
 		background-image: linear-gradient(
 			transparent 50%,
 			color-mix(in lch, var(--color-brand), transparent 65%) 50%
@@ -307,7 +329,8 @@
 	}
 
 	.site-kicker {
-		@apply font-mono text-[0.68rem] font-extrabold tracking-[0.2em] text-brand uppercase;
+		@apply font-mono text-[0.68rem] font-extrabold tracking-[0.2em] uppercase;
+		color: var(--color-brand);
 	}
 
 	.site-kicker::before {

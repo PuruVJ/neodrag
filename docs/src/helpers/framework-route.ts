@@ -14,12 +14,15 @@ export function is_docs_path(path: string) {
 export function apply_docs_route_context(path = location.pathname) {
 	const framework = framework_from_path(path);
 	const is_docs = is_docs_path(path);
+	const root = document.documentElement;
 
 	if (framework) {
-		document.documentElement.dataset.framework = framework;
+		root.dataset.framework = framework;
 	} else {
-		delete document.documentElement.dataset.framework;
+		delete root.dataset.framework;
 	}
+
+	delete document.body.dataset.framework;
 
 	document.body.classList.toggle('docs-route', is_docs);
 }

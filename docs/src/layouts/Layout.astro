@@ -61,6 +61,21 @@ const nav_by_framework = Object.fromEntries(
 
 				window.__neodrag_apply_theme = apply_neodrag_theme;
 				apply_neodrag_theme();
+
+				const FRAMEWORK_PATH_RE = /\/docs\/(svelte|react|solid|vanilla|vue|core)/i;
+
+				function apply_docs_framework_from_path(pathname) {
+					const match = FRAMEWORK_PATH_RE.exec(pathname);
+					const framework = match?.[1];
+
+					if (framework) {
+						document.documentElement.dataset.framework = framework;
+					} else {
+						delete document.documentElement.dataset.framework;
+					}
+				}
+
+				apply_docs_framework_from_path(location.pathname);
 			})();
 		</script>
 		<ClientRouter fallback="swap" />
@@ -94,7 +109,7 @@ const nav_by_framework = Object.fromEntries(
 		/>
 	</head>
 
-	<body data-framework={framework} class:list={[{ 'docs-route': is_docs_route }]}>
+	<body class:list={[{ 'docs-route': is_docs_route }]}>
 		{is_docs_route && <div class="docs-page-grid" aria-hidden="true" />}
 		<script is:inline data-astro-rerun>
 			function apply_docs_route_context() {
@@ -108,6 +123,7 @@ const nav_by_framework = Object.fromEntries(
 					delete document.documentElement.dataset.framework;
 				}
 
+				delete document.body.dataset.framework;
 				document.body.classList.toggle('docs-route', is_docs);
 			}
 

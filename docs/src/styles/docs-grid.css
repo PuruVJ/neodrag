@@ -37,27 +37,27 @@ body.docs-route {
 	--grid-accent: var(--app-color-primary);
 }
 
-:is(html, body)[data-framework='svelte'] {
+html[data-framework='svelte'] {
 	--grid-accent: var(--app-color-brand-svelte);
 }
 
-:is(html, body)[data-framework='react'] {
+html[data-framework='react'] {
 	--grid-accent: var(--app-color-brand-react);
 }
 
-:is(html, body)[data-framework='vue'] {
+html[data-framework='vue'] {
 	--grid-accent: var(--app-color-brand-vue);
 }
 
-:is(html, body)[data-framework='solid'] {
+html[data-framework='solid'] {
 	--grid-accent: var(--app-color-brand-solid);
 }
 
-:is(html, body)[data-framework='vanilla'] {
+html[data-framework='vanilla'] {
 	--grid-accent: var(--app-color-brand-vanilla);
 }
 
-:is(html, body)[data-framework='core'] {
+html[data-framework='core'] {
 	--grid-accent: var(--app-color-primary);
 }
 
