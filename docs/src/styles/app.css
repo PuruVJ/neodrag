@@ -188,7 +188,7 @@
 	}
 
 	.dock-angular-bevel {
-		--bevel-cut: var(--spacing-dock-cut);
+		--bevel-cut: var(--spacing-dock-cut-sm);
 		--bevel-width: 1px;
 		padding: var(--bevel-width);
 		background: var(--dock-border, var(--color-border));
@@ -200,18 +200,6 @@
 			calc(100% - var(--bevel-cut)) 100%,
 			var(--bevel-cut) 100%,
 			0% calc(100% - var(--bevel-cut)),
-			0% var(--bevel-cut)
-		);
-	}
-
-	.dock-angular-bevel--bar {
-		--bevel-cut: 0.7rem;
-		clip-path: polygon(
-			var(--bevel-cut) 0%,
-			calc(100% - var(--bevel-cut)) 0%,
-			100% var(--bevel-cut),
-			100% 100%,
-			0% 100%,
 			0% var(--bevel-cut)
 		);
 	}
@@ -236,7 +224,19 @@
 		);
 	}
 
-	.dock-angular-bevel--bar > .dock-angular-bevel__fill {
+	.dock-host > .dock-angular-bevel {
+		--bevel-cut: 0.7rem;
+		clip-path: polygon(
+			var(--bevel-cut) 0%,
+			calc(100% - var(--bevel-cut)) 0%,
+			100% var(--bevel-cut),
+			100% 100%,
+			0% 100%,
+			0% var(--bevel-cut)
+		);
+	}
+
+	.dock-host > .dock-angular-bevel > .dock-angular-bevel__fill {
 		clip-path: polygon(
 			calc(var(--bevel-cut) + var(--bevel-width)) var(--bevel-width),
 			calc(100% - var(--bevel-cut) - var(--bevel-width)) var(--bevel-width),
@@ -247,15 +247,17 @@
 		);
 	}
 
-	@media (max-width: 767px) {
+	@media (min-width: 768px) {
 		.dock-host > .dock-angular-bevel {
-			--bevel-cut: 0.7rem;
+			--bevel-cut: var(--spacing-dock-cut);
 			clip-path: polygon(
 				var(--bevel-cut) 0%,
 				calc(100% - var(--bevel-cut)) 0%,
 				100% var(--bevel-cut),
-				100% 100%,
-				0% 100%,
+				100% calc(100% - var(--bevel-cut)),
+				calc(100% - var(--bevel-cut)) 100%,
+				var(--bevel-cut) 100%,
+				0% calc(100% - var(--bevel-cut)),
 				0% var(--bevel-cut)
 			);
 		}
@@ -265,8 +267,10 @@
 				calc(var(--bevel-cut) + var(--bevel-width)) var(--bevel-width),
 				calc(100% - var(--bevel-cut) - var(--bevel-width)) var(--bevel-width),
 				calc(100% - var(--bevel-width)) calc(var(--bevel-cut) + var(--bevel-width)),
-				calc(100% - var(--bevel-width)) calc(100% - var(--bevel-width)),
-				var(--bevel-width) calc(100% - var(--bevel-width)),
+				calc(100% - var(--bevel-width)) calc(100% - var(--bevel-cut) - var(--bevel-width)),
+				calc(100% - var(--bevel-cut) - var(--bevel-width)) calc(100% - var(--bevel-width)),
+				calc(var(--bevel-cut) + var(--bevel-width)) calc(100% - var(--bevel-width)),
+				var(--bevel-width) calc(100% - var(--bevel-cut) - var(--bevel-width)),
 				var(--bevel-width) calc(var(--bevel-cut) + var(--bevel-width))
 			);
 		}
