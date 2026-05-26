@@ -83,6 +83,6 @@ export const LANG_BY_FRAMEWORK: Record<Framework, string> = {
 	svelte: 'svelte',
 	react: 'tsx',
 	vue: 'vue',
-	solid: 'tsx',
+	solid: 'jsx',
 	vanilla: 'ts',
 };

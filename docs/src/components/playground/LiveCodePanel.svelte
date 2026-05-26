@@ -184,7 +184,10 @@
 
 	.code-body {
 		flex: 1;
-		min-height: 12rem;
+		min-height: 14rem;
 		overflow: auto;
+		padding: 0.75rem 0.85rem;
+		border-radius: 0.6rem;
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 94%);
 	}
 </style>

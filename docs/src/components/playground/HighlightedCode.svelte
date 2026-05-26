@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { theme } from '$state/user-preferences.svelte';
-	import { codeToHtml } from 'shiki';
+	import { highlight_playground_code } from './shiki';
 
 	type Props = {
 		code: string;
@@ -12,14 +12,11 @@
 	let html = $state('');
 
 	$effect(() => {
-		const shiki_theme = theme.current === 'dark' ? 'github-dark' : 'github-light';
+		theme.current;
 
 		let cancelled = false;
 
-		codeToHtml(code, {
-			lang,
-			theme: shiki_theme,
-		}).then((result) => {
+		highlight_playground_code(code, lang).then((result) => {
 			if (!cancelled) html = result;
 		});
 
@@ -33,7 +30,7 @@
 	{#if html}
 		{@html html}
 	{:else}
-		<pre class="fallback"><code>{code}</code></pre>
+		<pre class="fallback astro-code"><code>{code}</code></pre>
 	{/if}
 </div>
 
@@ -41,26 +38,39 @@
 	.highlighted-code {
 		margin: 0;
 		overflow: auto;
-		font-size: 0.78rem;
-		line-height: 1.55;
+		font-size: clamp(0.78rem, 1.2vw, 0.9rem);
+		line-height: 1.5;
 	}
 
-	.highlighted-code :global(pre) {
+	/* Match docs code blocks — dual theme via themes.css on .astro-code */
+	.highlighted-code :global(pre.astro-code) {
 		margin: 0;
 		padding: 0;
-		background: transparent !important;
+		overflow-x: auto;
+		font-size: inherit !important;
+		line-height: inherit !important;
+		background-color: transparent !important;
 	}
 
-	.highlighted-code :global(code) {
+	.highlighted-code :global(pre.astro-code code) {
+		display: block;
 		font-family: var(--app-font-mono);
-		white-space: pre-wrap;
-		word-break: break-word;
+		background-color: transparent;
+		white-space: pre;
+		word-break: normal;
+	}
+
+	.highlighted-code :global(.astro-code .line) {
+		display: inline-block;
+		width: 100%;
 	}
 
 	.fallback {
 		margin: 0;
+		padding: 0;
 		font-family: var(--app-font-mono);
 		font-size: inherit;
-		white-space: pre-wrap;
+		white-space: pre;
+		background: transparent;
 	}
 </style>
