@@ -39,6 +39,40 @@ export { DEFAULT_RESIZE_PLUGINS } from './resize-defaults.ts';
 export { autoScroll } from './plugins.ts';
 export { presetDockHandle, presetKanbanCard, presetListItem } from './presets.ts';
 export {
+	Length,
+	Unit,
+	type LengthOptions,
+	type CssUnit,
+	parseLengthString,
+	lengthContext,
+	pxToUnit,
+	resolveUnit,
+	readBoxSizePx,
+	readAuthoredAxis,
+	formatPx,
+	stripFloat,
+	defineLengthAdapter,
+	delegateLengthAdapter,
+} from './length/index.ts';
+export type {
+	LengthAdapter,
+	AuthoredSizePair,
+	LengthUnitsMode,
+	LengthAxis,
+	LengthResolveContext,
+	SizeInput,
+} from './length-runtime.ts';
+export {
+	numberStub,
+	resolveSizeInput,
+	sizeContext,
+	isLengthAdapter,
+} from './length-contract.ts';
+export {
+	invalidateSortableLayout,
+	invalidateSortableLayoutForNode,
+} from './sortable/index.ts';
+export {
 	defaultSensors,
 	pointerSensor,
 	keyboardSensor,

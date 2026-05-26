@@ -1,15 +1,19 @@
 import { Neodrag } from './engine.ts';
 import type { DragHandle, DropHandle, ResizeHandle } from './handles.ts';
+import { numberStub } from './length-contract.ts';
+import type { LengthAdapter } from './length-runtime.ts';
 import { PluginListResolver, resolvedPluginsUnchanged } from './resolve-plugins.ts';
 import type { PluginSlot } from './types.ts';
 
 export type PluginBindingOptions<P extends { key: symbol }> = {
 	engine?: Neodrag;
+	length?: LengthAdapter;
 	plugins: readonly PluginSlot<P>[];
 	register: (
 		engine: Neodrag,
 		node: HTMLElement | SVGElement,
 		resolved: P[],
+		binding: { length: LengthAdapter },
 	) => DragHandle | DropHandle | ResizeHandle;
 	attachIdempotency?: 'node-and-handle' | 'handle-node';
 };
@@ -23,11 +27,13 @@ export class PluginBinding<P extends { key: symbol }> {
 	#lastResolved: P[] | null = null;
 	readonly #register: PluginBindingOptions<P>['register'];
 	readonly #attachIdempotency: NonNullable<PluginBindingOptions<P>['attachIdempotency']>;
+	readonly #length: LengthAdapter;
 
 	readonly attachment: (node: HTMLElement | SVGElement) => void | (() => void);
 
 	constructor(options: PluginBindingOptions<P>) {
 		this.#engineOption = options.engine;
+		this.#length = options.length ?? numberStub;
 		this.#resolver = new PluginListResolver(options.plugins);
 		this.#register = options.register;
 		this.#attachIdempotency = options.attachIdempotency ?? 'handle-node';
@@ -59,7 +65,9 @@ export class PluginBinding<P extends { key: symbol }> {
 			? this.#resolver.resolveAttach()
 			: this.#resolver.resolveFull();
 		this.#lastResolved = resolved;
-		this.#handle = this.#register(this.#resolveEngine(), node, resolved);
+		this.#handle = this.#register(this.#resolveEngine(), node, resolved, {
+			length: this.#length,
+		});
 	}
 
 	detach() {

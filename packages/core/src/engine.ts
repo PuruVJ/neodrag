@@ -6,11 +6,10 @@ import {
 	type DropCtxHost,
 	SessionPrivate,
 } from './instance.ts';
-import {
-	ActiveResizeSession,
-	ResizeInstance,
-	readSizePx,
-} from './resize-instance.ts';
+import { numberStub } from './length-contract.ts';
+import type { LengthAdapter } from './length-runtime.ts';
+import { ActiveResizeSession, ResizeInstance } from './resize-instance.ts';
+import { invalidateSortableLayoutForNode } from './sortable/index.ts';
 import { DragHandle, DropHandle, ResizeHandle } from './handles.ts';
 import { applyResize, type ResizeApplier } from './apply-resize.ts';
 import { DEFAULT_RESIZE_PLUGINS } from './resize-defaults.ts';
@@ -36,6 +35,7 @@ import {
 	pluginsLayoutChanged,
 } from './plugin-lifecycle.ts';
 import { sortByPhase } from './phase.ts';
+import { DROP_HIT_EXPAND_KEY } from './plugins.ts';
 import { DEFAULT_DRAG_PLUGINS, DEFAULTS } from './defaults.ts';
 import { applyDragTransform, type TransformApplier } from './apply-transform.ts';
 import { DropTargetTracker, type DropTargetHost } from './drop-targets.ts';
@@ -223,7 +223,7 @@ export class Neodrag {
 	draggable(
 		node: HTMLElement | SVGElement,
 		plugins: DragPluginList = [],
-		options: { applyTransform?: TransformApplier } = {},
+		options: { applyTransform?: TransformApplier; length?: LengthAdapter } = {},
 	): DragHandle {
 		if (is_svg_svg_element(node)) {
 			throw new Error(
@@ -233,7 +233,11 @@ export class Neodrag {
 
 		this.#initSensors();
 
-		const inst = new DragInstance(node, this.#ensureIdleSession());
+		const inst = new DragInstance(
+			node,
+			this.#ensureIdleSession(),
+			options.length ?? numberStub,
+		);
 		inst.applyTransform = options.applyTransform;
 		inst.lastSlots = plugins;
 		inst.slotStaticCache = [];
@@ -251,7 +255,7 @@ export class Neodrag {
 	resizable(
 		node: HTMLElement | SVGElement,
 		plugins: ResizePluginList = [],
-		options: { applyResize?: ResizeApplier } = {},
+		options: { applyResize?: ResizeApplier; length?: LengthAdapter } = {},
 	): ResizeHandle {
 		if (is_svg_svg_element(node)) {
 			throw new Error(
@@ -261,7 +265,11 @@ export class Neodrag {
 
 		this.#initSensors();
 
-		const inst = new ResizeInstance(node, this.#ensureIdleResizeSession());
+		const inst = new ResizeInstance(
+			node,
+			this.#ensureIdleResizeSession(),
+			options.length ?? numberStub,
+		);
 		inst.applyResize = options.applyResize;
 		inst.lastSlots = plugins;
 		inst.slotStaticCache = [];
@@ -276,10 +284,14 @@ export class Neodrag {
 		});
 	}
 
-	droppable(node: HTMLElement | SVGElement, plugins: DropPluginList = []): DropHandle {
+	droppable(
+		node: HTMLElement | SVGElement,
+		plugins: DropPluginList = [],
+		options: { length?: LengthAdapter } = {},
+	): DropHandle {
 		this.#initSensors();
 
-		const inst = new DropInstance(node, this.#dropHost);
+		const inst = new DropInstance(node, this.#dropHost, options.length ?? numberStub);
 		inst.lastSlots = plugins;
 		inst.slotStaticCache = [];
 		const resolved = resolvePluginList(plugins, inst.slotStaticCache, false);
@@ -456,11 +468,10 @@ export class Neodrag {
 			inst.cachedRootNodeRect = inst.rootNode.getBoundingClientRect();
 			inst.cachedTargetRect = inst.targetNode.getBoundingClientRect();
 			inst.inverseScale = this.#inverseScaleResize(inst);
-			const size = readSizePx(inst.targetNode);
-			inst.width = size.width;
-			inst.height = size.height;
-			inst.initialWidth = size.width;
-			inst.initialHeight = size.height;
+			inst.loadSizeFromNode();
+			inst.initialWidth = inst.width;
+			inst.initialHeight = inst.height;
+			inst.initialAuthored = inst.lengthAdapter.cloneAuthored(inst.unitPreserve);
 			inst.initialPointerX = e.clientX;
 			inst.initialPointerY = e.clientY;
 			inst.anchor = anchor;
@@ -942,12 +953,23 @@ export class Neodrag {
 			{ phase: 'init', plugin: { key: plugin.key, hook: 'init' }, node: inst.rootNode },
 			() => {
 				const state = plugin.init!(inst.dropCtx);
-				if (state !== undefined) inst.states.set(plugin.key, state);
+				if (state !== undefined) {
+					inst.states.set(plugin.key, state);
+					if (plugin.key === DROP_HIT_EXPAND_KEY) {
+						inst.hitExpandPx = state as {
+							top: number;
+							right: number;
+							bottom: number;
+							left: number;
+						};
+					}
+				}
 			},
 		);
 	}
 
 	#destroyOneDropPlugin(inst: DropInstance, plugin: DropPlugin) {
+		if (plugin.key === DROP_HIT_EXPAND_KEY) inst.hitExpandPx = null;
 		if (!plugin.destroy) {
 			inst.states.delete(plugin.key);
 			return;
@@ -1156,8 +1178,12 @@ export class Neodrag {
 		if (reason === 'cancel') {
 			inst.width = inst.initialWidth;
 			inst.height = inst.initialHeight;
+			inst.displaySize = inst.lengthAdapter.cloneAuthored(inst.initialAuthored);
+			inst.unitPreserve = inst.lengthAdapter.cloneAuthored(inst.initialAuthored);
 			this.#syncResize(inst);
 			inst.effects.flush();
+		} else {
+			invalidateSortableLayoutForNode(inst.targetNode);
 		}
 
 		inst.isInteracting = false;
@@ -1355,8 +1381,10 @@ export class Neodrag {
 	}
 
 	#syncResize(inst: ResizeInstance) {
+		inst.syncDisplaySize();
 		applyResize(
 			inst.targetNode,
+			inst.displaySize,
 			{ width: inst.width, height: inst.height },
 			inst.anchor,
 			inst.applyResize,

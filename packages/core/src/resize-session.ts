@@ -20,6 +20,9 @@ export function createResizeSession(active: ActiveResizeSession): ResizeSession 
 			return { width: active.deltaWidth, height: active.deltaHeight };
 		},
 		get size() {
+			return { width: `${active.width}px`, height: `${active.height}px` };
+		},
+		get sizePx() {
 			return { width: active.width, height: active.height };
 		},
 		get data() {

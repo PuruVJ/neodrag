@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { MINIMAL_DRAG_PLUGINS, Neodrag } from '../../src/index.ts';
+import { MINIMAL_DRAG_PLUGINS, Neodrag, numberStub } from '../../src/index.ts';
 import { ControlFrom, controls, grid, threshold } from '../../src/plugins.ts';
 
 describe('grid plugin', () => {
@@ -10,6 +10,8 @@ describe('grid plugin', () => {
 		const plugin = grid([0, 10]);
 		const ctx = {
 			proposed: { x: 7, y: 7 },
+			rootNode: document.createElement('div'),
+			length: numberStub,
 		} as Parameters<NonNullable<typeof plugin.drag>>[0];
 		const patch = plugin.drag!(ctx, undefined as never, undefined as never);
 		expect(patch).toEqual({ y: 10 });

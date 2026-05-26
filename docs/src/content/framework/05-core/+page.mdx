@@ -59,22 +59,32 @@ Returns a `DragHandle`. `plugins` is `DragPlugin[]` or `() => DragPlugin[]`; fra
 
 Returns a `DropHandle` for drop targets. Same reactive `PluginInput` shape as drag (`DropPlugin[]` or `() => DropPlugin[]`).
 
-### `resizable(node, plugins?)`
+### `resizable(node, plugins?, options?)`
 
-Returns a `ResizeHandle` for resize targets. Sizes are **px only** in v1. Built-in plugins live under `@neodrag/core/resize` (`resizeHandles`, `sizeBounds`, `aspectRatio`, `resizeEvents`, presets). Cancel restores the size at pointer-down (`Escape` uses the keyboard sensor).
+Returns a `ResizeHandle` for resize targets. **Numbers are always px.** CSS unit strings (`'10rem'`, `'50%'`) require opt-in per binding:
 
 ```typescript
-import { Neodrag } from '@neodrag/core';
+import { Neodrag, Length } from '@neodrag/core';
 import { resizeHandles, sizeBounds } from '@neodrag/core/resize';
 
 const engine = Neodrag.shared;
-engine.resizable(panel, [
-  resizeHandles({ edges: ['e', 's', 'se'] }),
-  sizeBounds({ minWidth: 120, minHeight: 80 }),
-]);
+engine.resizable(
+  panel,
+  [
+    resizeHandles({ edges: ['e', 's', 'se'], size: '0.75rem' }),
+    sizeBounds({ minWidth: '10rem', minHeight: 80 }),
+  ],
+  { length: new Length({ units: 'preserve' }) },
+);
 ```
 
-Resize handles take pointer priority over drag on the same node when both are bound. Drop hit-testing follows layout after resize.
+`length` is **not** on `Neodrag` / `Neodrag.shared` — each `draggable` / `resizable` / `Droppable` binding can pass its own adapter. Framework wrappers: `new Resizable({ length: new Length(), plugins: [...] })`.
+
+- **`new Length({ units: 'preserve' })`** (default): keep `%` / `rem` on `width` / `height` after resize.
+- **`new Length({ units: 'px' })`**: always write px strings.
+- **Custom adapters**: implement `LengthAdapter` or use `defineLengthAdapter` / `delegateLengthAdapter` with helpers (`parseLengthString`, `resolveUnit`, `lengthContext`, …) from `@neodrag/core`.
+
+Built-in resize plugins live under `@neodrag/core/resize`. `ResizeCtx.length` resolves plugin sizes; `size` / `initial` are CSS strings, `sizePx` is layout px. Cancel restores authored size at pointer-down (`Escape` uses the keyboard sensor).
 
 ### Sensors (input layer)
 
@@ -144,5 +154,31 @@ console.log(Neodrag.shared.instances.size);
 ## Framework packages
 
 See the framework docs for `{@attach draggable.attachment}`, `{@attach droppable.attachment}`, `{@attach resizable.attachment}`, `useDraggable`, `useDroppable`, `useResizable`, `vDraggable`, `vDroppable`, and `vResizable`. All use this core engine.
+
+### Custom length adapters
+
+```typescript
+import {
+  Length,
+  defineLengthAdapter,
+  parseLengthString,
+  resolveUnit,
+  lengthContext,
+  type LengthAdapter,
+} from '@neodrag/core';
+
+export const designTokenLength: LengthAdapter = defineLengthAdapter({
+  units: 'preserve',
+  resolvePx(value, ctx) {
+    if (typeof value === 'number') return value;
+    if (value.startsWith('token-')) return resolveDesignToken(value);
+    const { value: n, unit } = parseLengthString(value);
+    return resolveUnit(n, unit, lengthContext(ctx.element, ctx.axis));
+  },
+  readAuthoredPair: (node) => new Length().readAuthoredPair(node),
+  commitAuthored: (px, preserve, node) => new Length().commitAuthored(px, preserve, node),
+  cloneAuthored: (pair) => ({ ...pair }),
+});
+```
 
 Import built-in plugins from `@neodrag/core/plugins` (not from `@neodrag/svelte` / `@neodrag/react` main entries). Framework packages expose `@neodrag/*/plugins` re-exports for convenience only.

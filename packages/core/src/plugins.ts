@@ -1,4 +1,6 @@
 import { get_node_style, is_null, set_node_dataset, set_node_key_style } from './utils.ts';
+import { resolveSizeInput, sizeContext } from './length-contract.ts';
+import type { SizeInput } from './length-runtime.ts';
 import { BoundsFrom, validateBounds, type BoundFromFunction } from './lib/bounds-from.ts';
 import { clamp } from './lib/math.ts';
 import { defineDragPlugin, defineDropPlugin, type DragCtx, type DragPlugin, type DropCtx } from './types.ts';
@@ -19,6 +21,7 @@ const DRAG_DATA_KEY = Symbol('neodrag.dragData');
 const ACCEPTS_KEY = Symbol('neodrag.accepts');
 const HIGHLIGHT_KEY = Symbol('neodrag.highlight');
 const ON_DROP_KEY = Symbol('neodrag.onDrop');
+const DROP_HIT_EXPAND_KEY = Symbol('neodrag.dropHitExpand');
 const SCROLL_LOCK_KEY = Symbol('neodrag.scrollLock');
 const GHOST_KEY = Symbol('neodrag.ghost');
 const AUTO_SCROLL_KEY = Symbol('neodrag.autoScroll');
@@ -121,15 +124,23 @@ export const axis = defineDragPlugin((value?: 'x' | 'y' | null) => ({
 const snap = (val: number, step: number) => (step === 0 ? 0 : Math.round(val / step) * step);
 
 export const grid = defineDragPlugin(
-	(values?: [x: number | null | undefined, y: number | null | undefined] | null) => ({
+	(values?: [x: SizeInput | null | undefined, y: SizeInput | null | undefined] | null) => ({
 		key: GRID_KEY,
 		phase: 'resolve',
 
 		drag(ctx) {
 			if (!values) return;
+			const wCtx = sizeContext(ctx.rootNode, 'width');
+			const hCtx = sizeContext(ctx.rootNode, 'height');
 			const patch: { x?: number; y?: number } = {};
-			if (values[0] != null && values[0] > 0) patch.x = snap(ctx.proposed.x, values[0]);
-			if (values[1] != null && values[1] > 0) patch.y = snap(ctx.proposed.y, values[1]);
+			if (values[0] != null && values[0] !== 0) {
+				const stepX = resolveSizeInput(ctx.length, values[0], wCtx, 0);
+				if (stepX > 0) patch.x = snap(ctx.proposed.x, stepX);
+			}
+			if (values[1] != null && values[1] !== 0) {
+				const stepY = resolveSizeInput(ctx.length, values[1], hCtx, 0);
+				if (stepY > 0) patch.y = snap(ctx.proposed.y, stepY);
+			}
 			if (patch.x !== undefined || patch.y !== undefined) return patch;
 		},
 	}),
@@ -141,9 +152,9 @@ type BoundsHook = 'init' | 'start' | 'drag';
 
 function recomputeBounds(
 	value: BoundFromFunction,
-	ctx: { rootNode: HTMLElement | SVGElement; cachedRootNodeRect: DOMRect },
+	ctx: import('./types.ts').DragCtx,
 ) {
-	const bounds = value({ rootNode: ctx.rootNode });
+	const bounds = value({ rootNode: ctx.rootNode, length: ctx.length });
 	validateBounds(bounds, ctx.cachedRootNodeRect.width, ctx.cachedRootNodeRect.height);
 	return bounds;
 }
@@ -205,22 +216,22 @@ export const bounds = defineDragPlugin(
 );
 
 export type PositionOptions = {
-	current?: { x: number; y: number } | null;
-	default?: { x: number; y: number } | null;
+	current?: { x: SizeInput; y: SizeInput } | null;
+	default?: { x: SizeInput; y: SizeInput } | null;
 };
 
-function applyPosition(
-	ctx: {
-		isInteracting: boolean;
-		offset: { x: number; y: number };
-		setForcedPosition: (x: number, y: number) => void;
-	},
-	opts: PositionOptions | null,
-) {
+function applyPosition(ctx: import('./types.ts').DragCtx, opts: PositionOptions | null) {
 	if (ctx.isInteracting) return;
 	const x = opts?.current?.x ?? opts?.default?.x ?? ctx.offset.x;
 	const y = opts?.current?.y ?? opts?.default?.y ?? ctx.offset.y;
-	if (x !== ctx.offset.x || y !== ctx.offset.y) ctx.setForcedPosition(x, y);
+	const wCtx = sizeContext(ctx.rootNode, 'width');
+	const hCtx = sizeContext(ctx.rootNode, 'height');
+	if (
+		resolveSizeInput(ctx.length, x, wCtx, ctx.offset.x) !== ctx.offset.x ||
+		resolveSizeInput(ctx.length, y, hCtx, ctx.offset.y) !== ctx.offset.y
+	) {
+		ctx.setForcedPosition(x, y);
+	}
 }
 
 export const position = defineDragPlugin((options: PositionOptions | null = null) => ({
@@ -237,7 +248,8 @@ export const position = defineDragPlugin((options: PositionOptions | null = null
 }));
 
 export type DragEventData = Readonly<{
-	offset: Readonly<{ x: number; y: number }>;
+	offset: Readonly<{ x: SizeInput; y: SizeInput }>;
+	offsetPx: Readonly<{ x: number; y: number }>;
 	rootNode: HTMLElement | SVGElement;
 	visualNode: HTMLElement | SVGElement;
 	event: PointerEvent;
@@ -245,7 +257,11 @@ export type DragEventData = Readonly<{
 
 function eventPayload(ctx: DragCtx, e: PointerEvent): DragEventData {
 	return {
-		offset: { x: ctx.offset.x, y: ctx.offset.y },
+		offset: {
+			x: ctx.offsetAuthored?.x ?? ctx.offset.x,
+			y: ctx.offsetAuthored?.y ?? ctx.offset.y,
+		},
+		offsetPx: { x: ctx.offset.x, y: ctx.offset.y },
 		rootNode: ctx.rootNode,
 		visualNode: ctx.session.visual.node,
 		event: e,
@@ -444,7 +460,8 @@ export const dragData = defineDragPlugin(<T,>(getData: () => T) => ({
 	},
 }));
 
-export const threshold = defineDragPlugin((options?: { delay?: number; distance?: number } | null) => {
+export const threshold = defineDragPlugin(
+	(options?: { delay?: number; distance?: SizeInput } | null) => {
 	const enabled = !is_null(options);
 	const resolved = enabled
 		? {
@@ -455,21 +472,30 @@ export const threshold = defineDragPlugin((options?: { delay?: number; distance?
 
 	if (resolved) {
 		if (resolved.delay < 0) throw new Error('delay must be >= 0');
-		if (resolved.distance < 0) throw new Error('distance must be >= 0');
 	}
 
 	return {
 		key: THRESHOLD_KEY,
 		phase: 'pre' as const,
 
-		init() {
+		init(ctx) {
+			const distancePx =
+				resolved?.distance != null
+					? resolveSizeInput(
+							ctx.length,
+							resolved.distance,
+							sizeContext(ctx.rootNode, 'width'),
+							3,
+						)
+					: 3;
+			if (distancePx < 0) throw new Error('distance must be >= 0');
 			return {
 				enabled,
 				started: false,
 				start_time: 0,
 				start_x: 0,
 				start_y: 0,
-				options: resolved,
+				options: resolved ? { delay: resolved.delay, distance: distancePx } : null,
 			};
 		},
 
@@ -593,7 +619,7 @@ export const scrollLock = defineDragPlugin(
 export const autoScroll = defineDragPlugin(
 	(
 		options: {
-			margin?: number;
+			margin?: SizeInput;
 			maxSpeed?: number;
 			container?: HTMLElement | (() => HTMLElement);
 		} | null = {},
@@ -601,9 +627,18 @@ export const autoScroll = defineDragPlugin(
 		key: AUTO_SCROLL_KEY,
 		phase: 'drag',
 
-		init() {
+		init(ctx) {
+			const marginPx =
+				options?.margin != null
+					? resolveSizeInput(
+							ctx.length,
+							options.margin,
+							sizeContext(ctx.rootNode, 'height'),
+							48,
+						)
+					: 48;
 			return {
-				margin: options?.margin ?? 48,
+				margin: marginPx,
 				maxSpeed: options?.maxSpeed ?? 24,
 				container: options?.container,
 			};
@@ -724,6 +759,32 @@ export const onDrop = defineDropPlugin(<T,>(handler: (data: T, ctx: DropCtx) => 
 		handler(ctx.session.data as T, ctx);
 	},
 }));
+
+export const dropHitExpand = defineDropPlugin(
+	(padding: {
+		top?: SizeInput;
+		left?: SizeInput;
+		right?: SizeInput;
+		bottom?: SizeInput;
+	} = {}) => ({
+		key: DROP_HIT_EXPAND_KEY,
+		phase: 'pre' as const,
+
+		init(ctx) {
+			const node = ctx.rootNode;
+			const resolve = (value: SizeInput | undefined, axis: 'width' | 'height') =>
+				value != null ? resolveSizeInput(ctx.length, value, sizeContext(node, axis), 0) : 0;
+			return {
+				top: resolve(padding.top, 'height'),
+				left: resolve(padding.left, 'width'),
+				right: resolve(padding.right, 'width'),
+				bottom: resolve(padding.bottom, 'height'),
+			};
+		},
+	}),
+);
+
+export { DROP_HIT_EXPAND_KEY };
 
 export {
 	hasReactiveSlots,

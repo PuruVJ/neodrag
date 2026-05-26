@@ -1,3 +1,5 @@
+import type { LengthAdapter } from '../length-runtime.ts';
+import type { SizeInput } from '../length-runtime.ts';
 import type { SessionState } from '../types.ts';
 
 export type ResizeEdge =
@@ -20,7 +22,8 @@ export interface ResizeSession<T = unknown> {
 	readonly anchor: ResizeEdge;
 	readonly pointer: { readonly x: number; readonly y: number };
 	readonly delta: { readonly width: number; readonly height: number };
-	readonly size: { readonly width: number; readonly height: number };
+	readonly size: { readonly width: string; readonly height: string };
+	readonly sizePx: { readonly width: number; readonly height: number };
 	data: T;
 	cancel(): void;
 }
@@ -28,8 +31,11 @@ export interface ResizeSession<T = unknown> {
 export interface ResizeCtx {
 	readonly delta: { width: number; height: number };
 	readonly proposed: { width: number; height: number };
-	readonly size: { width: number; height: number };
-	readonly initial: { width: number; height: number };
+	readonly size: { width: string; height: string };
+	readonly sizePx: { width: number; height: number };
+	readonly initial: { width: string; height: string };
+	readonly initialPx: { width: number; height: number };
+	readonly length: LengthAdapter;
 	readonly anchor: ResizeEdge;
 	readonly isResizing: boolean;
 	readonly isInteracting: boolean;
@@ -42,7 +48,7 @@ export interface ResizeCtx {
 	readonly session: ResizeSession;
 	effect(fn: () => void): void;
 	cancel(): void;
-	setForcedSize(width: number, height: number): void;
+	setForcedSize(width: SizeInput, height: SizeInput): void;
 }
 
 export interface ResizePlugin<S = unknown> {

@@ -1,1 +1,1 @@
-export { accepts, highlight, onDrop } from './plugins.ts';
+export { accepts, highlight, onDrop, dropHitExpand } from './plugins.ts';

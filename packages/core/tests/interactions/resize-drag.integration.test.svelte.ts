@@ -5,12 +5,33 @@ import ResizeDragTest from '../components/ResizeDragTest.svelte';
 import { dragAndDrop, startCursorTracking, stopCursorTracking } from '../mouse.ts';
 import { sleepAndWaitForEffects, translate } from '../utils.ts';
 
+function patchPointerCapture() {
+	const proto = HTMLElement.prototype;
+	const prev = {
+		set: proto.setPointerCapture,
+		release: proto.releasePointerCapture,
+		has: proto.hasPointerCapture,
+	};
+	proto.setPointerCapture = function () {};
+	proto.releasePointerCapture = function () {};
+	proto.hasPointerCapture = () => false;
+	return () => {
+		proto.setPointerCapture = prev.set;
+		proto.releasePointerCapture = prev.release;
+		proto.hasPointerCapture = prev.has;
+	};
+}
+
 describe('resize + drag integration', () => {
+	let restoreCapture: (() => void) | undefined;
+
 	beforeEach(() => {
+		restoreCapture = patchPointerCapture();
 		startCursorTracking();
 	});
 
 	afterEach(() => {
+		restoreCapture?.();
 		stopCursorTracking();
 	});
 

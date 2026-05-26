@@ -1,3 +1,6 @@
+import { numberStub, resolveSizeInput } from '../length-contract.ts';
+import { lengthContext } from '../length/utils.ts';
+import type { LengthAdapter, SizeInput } from '../length-runtime.ts';
 import { dragData } from '../plugins.ts';
 import { defineDropPlugin, defineDragPlugin } from '../types.ts';
 
@@ -32,6 +35,8 @@ export interface SortableOptions<T> {
 	group?: string;
 	onAdd?: (item: T, meta: { fromIndex: number; toIndex: number }) => void;
 	onRemove?: (item: T, meta: { toIndex: number }) => void;
+	edgeThreshold?: SizeInput;
+	length?: LengthAdapter;
 }
 
 interface SortableContext<T> {
@@ -58,6 +63,21 @@ function registerSortable<T>(ctx: SortableContext<T>) {
 
 function invalidateMidsCache<T>(ctx: SortableContext<T>) {
 	ctx.midsCache = null;
+}
+
+export function invalidateSortableLayoutForNode(node: HTMLElement | SVGElement) {
+	for (const ctx of sortableById.values()) {
+		for (const el of ctx.nodesByKey.values()) {
+			if (el === node) {
+				invalidateMidsCache(ctx);
+				return;
+			}
+		}
+	}
+}
+
+export function invalidateSortableLayout(invalidate: () => void) {
+	invalidate();
 }
 
 export function applySortableReorder<T>(
@@ -125,10 +145,23 @@ function computeIndex<T>(
 		else hi = mid;
 	}
 
+	let edgeThresholdPx = 0;
+	if (ctx.opts.edgeThreshold != null) {
+		const adapter = ctx.opts.length ?? numberStub;
+		const ref = ctx.nodesByKey.get(list[0]?.key ?? '') ?? document.documentElement;
+		const axis = strategy === 'horizontal' ? 'x' : 'y';
+		edgeThresholdPx = resolveSizeInput(
+			adapter,
+			ctx.opts.edgeThreshold,
+			lengthContext(ref, axis),
+			0,
+		);
+	}
+
 	for (let i = lo; i < n; i++) {
 		const entry = list[i]!;
 		if (entry.key === excludeKey) continue;
-		if (pos < entry.mid) return entry.index;
+		if (pos < entry.mid - edgeThresholdPx) return entry.index;
 	}
 	return len;
 }

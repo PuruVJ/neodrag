@@ -1,3 +1,6 @@
+import type { LengthAdapter } from './length-runtime.ts';
+import type { SizeInput } from './length-runtime.ts';
+
 export type EndReason = 'drop' | 'no-target' | 'cancel';
 
 export type SessionState = 'idle' | 'pending' | 'active' | 'completed' | 'cancelled';
@@ -49,6 +52,9 @@ export interface DragCtx {
 	readonly delta: { x: number; y: number };
 	readonly proposed: { x: number; y: number };
 	readonly offset: { x: number; y: number };
+	readonly offsetPx: { x: number; y: number };
+	readonly offsetAuthored?: { x: SizeInput; y: SizeInput };
+	readonly length: LengthAdapter;
 	readonly initial: { x: number; y: number };
 	readonly isDragging: boolean;
 	readonly isInteracting: boolean;
@@ -58,7 +64,7 @@ export interface DragCtx {
 	readonly session: DragSession;
 	effect(fn: () => void): void;
 	cancel(): void;
-	setForcedPosition(x: number, y: number): void;
+	setForcedPosition(x: SizeInput, y: SizeInput): void;
 	setVisual(node: HTMLElement | SVGElement): void;
 }
 
@@ -69,6 +75,7 @@ export interface DropCtx {
 	readonly cachedRootNodeRect: DOMRect;
 	readonly lastEvent: PointerEvent | null;
 	readonly isOver: boolean;
+	readonly length: LengthAdapter;
 	effect(fn: () => void): void;
 }
 

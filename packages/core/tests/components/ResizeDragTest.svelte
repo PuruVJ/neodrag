@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Neodrag } from '../../src/index.ts';
+	import { Length, Neodrag } from '../../src/index.ts';
 	import { controls, ControlFrom } from '../../src/plugins.ts';
 	import { resizeHandles, sizeBounds } from '../../src/resize/index.ts';
 	import { onMount } from 'svelte';
@@ -8,7 +8,9 @@
 	const engine = new Neodrag({ dev: false });
 
 	onMount(() => {
-		engine.resizable(card, [resizeHandles({ edges: ['e'], size: 12 }), sizeBounds({ minWidth: 80 })]);
+		engine.resizable(card, [resizeHandles({ edges: ['e'], size: 12 }), sizeBounds({ minWidth: 80 })], {
+			length: new Length(),
+		});
 		engine.draggable(card, [controls({ allow: ControlFrom.selector('[data-drag-handle]') })]);
 		return () => engine.dispose();
 	});

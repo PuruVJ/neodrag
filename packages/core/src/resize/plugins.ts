@@ -1,3 +1,5 @@
+import { resolveSizeInput, sizeContext } from '../length-contract.ts';
+import type { SizeInput } from '../length-runtime.ts';
 import { clamp } from '../lib/math.ts';
 import { defineResizePlugin, RESIZE_HANDLE_ATTR, type ResizeEdge } from './types.ts';
 
@@ -19,8 +21,6 @@ const CURSOR_BY_EDGE: Record<ResizeEdge, string> = {
 	se: 'nwse-resize',
 	sw: 'nesw-resize',
 };
-
-type ResizeHandlesState = { created: HTMLElement[] };
 
 function edgePosition(edge: ResizeEdge, size: number, inset: number) {
 	const half = size / 2;
@@ -49,11 +49,10 @@ function edgePosition(edge: ResizeEdge, size: number, inset: number) {
 export const resizeHandles = defineResizePlugin(
 	(options?: {
 		edges?: ResizeEdge[] | 'all';
-		size?: number;
+		size?: SizeInput;
 		inset?: number;
 	}) => {
 		const edges = options?.edges === 'all' || !options?.edges ? ALL_EDGES : options.edges;
-		const handleSize = options?.size ?? 8;
 		const inset = options?.inset ?? 0;
 
 		return {
@@ -66,19 +65,26 @@ export const resizeHandles = defineResizePlugin(
 				const prev = getComputedStyle(root).position;
 				if (prev === 'static') root.style.position = 'relative';
 
+				const handleSizePx = resolveSizeInput(
+					ctx.length,
+					options?.size ?? 8,
+					sizeContext(root, 'width'),
+					8,
+				);
+
 				const created: HTMLElement[] = [];
 				for (const edge of edges) {
 					const handle = document.createElement('div');
 					handle.setAttribute(RESIZE_HANDLE_ATTR, edge);
 					handle.setAttribute('aria-hidden', 'true');
-					handle.style.cssText = edgePosition(edge, handleSize, inset);
+					handle.style.cssText = edgePosition(edge, handleSizePx, inset);
 					root.appendChild(handle);
 					created.push(handle);
 				}
 				return { created };
 			},
 
-			destroy(ctx, state: ResizeHandlesState | undefined) {
+			destroy(_ctx, state: { created: HTMLElement[] } | undefined) {
 				if (!state?.created.length) return;
 				for (const el of state.created) el.remove();
 			},
@@ -86,24 +92,32 @@ export const resizeHandles = defineResizePlugin(
 	},
 );
 
-type SizeBoundsState = Record<string, never>;
-
 export const sizeBounds = defineResizePlugin(
 	(options?: {
-		minWidth?: number;
-		maxWidth?: number;
-		minHeight?: number;
-		maxHeight?: number;
+		minWidth?: SizeInput;
+		maxWidth?: SizeInput;
+		minHeight?: SizeInput;
+		maxHeight?: SizeInput;
 		parent?: boolean | HTMLElement;
 	}) => ({
 		key: SIZE_BOUNDS_KEY,
 		phase: 'resolve' as const,
 
 		resize(ctx) {
-			const minW = options?.minWidth ?? 0;
-			const maxW = options?.maxWidth ?? Number.POSITIVE_INFINITY;
-			const minH = options?.minHeight ?? 0;
-			const maxH = options?.maxHeight ?? Number.POSITIVE_INFINITY;
+			const wCtx = sizeContext(ctx.targetNode, 'width');
+			const hCtx = sizeContext(ctx.targetNode, 'height');
+			const minW =
+				options?.minWidth != null ? resolveSizeInput(ctx.length, options.minWidth, wCtx, 0) : 0;
+			const maxW =
+				options?.maxWidth != null
+					? resolveSizeInput(ctx.length, options.maxWidth, wCtx, Number.POSITIVE_INFINITY)
+					: Number.POSITIVE_INFINITY;
+			const minH =
+				options?.minHeight != null ? resolveSizeInput(ctx.length, options.minHeight, hCtx, 0) : 0;
+			const maxH =
+				options?.maxHeight != null
+					? resolveSizeInput(ctx.length, options.maxHeight, hCtx, Number.POSITIVE_INFINITY)
+					: Number.POSITIVE_INFINITY;
 
 			let maxWidth = maxW;
 			let maxHeight = maxH;
@@ -120,14 +134,14 @@ export const sizeBounds = defineResizePlugin(
 				}
 			}
 
-			const targetW = ctx.size.width + ctx.proposed.width;
-			const targetH = ctx.size.height + ctx.proposed.height;
+			const targetW = ctx.sizePx.width + ctx.proposed.width;
+			const targetH = ctx.sizePx.height + ctx.proposed.height;
 			const width = clamp(targetW, minW, maxWidth);
 			const height = clamp(targetH, minH, maxHeight);
 
 			return {
-				width: width - ctx.size.width,
-				height: height - ctx.size.height,
+				width: width - ctx.sizePx.width,
+				height: height - ctx.sizePx.height,
 			};
 		},
 	}),
@@ -150,26 +164,27 @@ export const aspectRatio = defineResizePlugin((ratio?: number | 'preserve') => (
 	resize(ctx) {
 		const r =
 			ratio === 'preserve' || ratio === undefined
-				? ctx.initial.width / ctx.initial.height
+				? ctx.initialPx.width / ctx.initialPx.height
 				: ratio;
 		if (!Number.isFinite(r) || r <= 0) return;
 
-		const targetW = ctx.size.width + ctx.proposed.width;
-		const targetH = ctx.size.height + ctx.proposed.height;
+		const targetW = ctx.sizePx.width + ctx.proposed.width;
+		const targetH = ctx.sizePx.height + ctx.proposed.height;
 		const fromWidth = Math.abs(ctx.proposed.width) >= Math.abs(ctx.proposed.height);
 
 		if (fromWidth) {
 			const height = targetW / r;
-			return { height: height - ctx.size.height };
+			return { height: height - ctx.sizePx.height };
 		}
 		const width = targetH * r;
-		return { width: width - ctx.size.width };
+		return { width: width - ctx.sizePx.width };
 	},
 }));
 
 export type ResizeEventData = {
-	size: { width: number; height: number };
-	initial: { width: number; height: number };
+	size: { width: string; height: string };
+	sizePx: { width: number; height: number };
+	initial: { width: string; height: string };
 	anchor: ResizeEdge;
 	rootNode: HTMLElement | SVGElement;
 	event: PointerEvent;
@@ -202,6 +217,7 @@ export const resizeEvents = defineResizePlugin(
 function eventData(ctx: import('./types.ts').ResizeCtx, event: PointerEvent): ResizeEventData {
 	return {
 		size: { width: ctx.size.width, height: ctx.size.height },
+		sizePx: { width: ctx.sizePx.width, height: ctx.sizePx.height },
 		initial: { width: ctx.initial.width, height: ctx.initial.height },
 		anchor: ctx.anchor,
 		rootNode: ctx.rootNode,

@@ -170,6 +170,18 @@ export class DropTargetTracker {
 	}
 
 	#containsPointer(drop: DropInstance, x: number, y: number) {
+		const expand = drop.hitExpandPx;
+		if (expand) {
+			const r = drop.rootNode.getBoundingClientRect();
+			if (
+				x >= r.left - expand.left &&
+				x <= r.right + expand.right &&
+				y >= r.top - expand.top &&
+				y <= r.bottom + expand.bottom
+			) {
+				return true;
+			}
+		}
 		const el = document.elementFromPoint(x, y);
 		if (!el) return false;
 		let current: Element | null = el;

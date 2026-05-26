@@ -216,3 +216,17 @@ function App() {
   );
 }
 ```
+
+## Resizable
+
+```tsx
+import { useRef } from 'react';
+import { useResizable } from '@neodrag/react';
+import { resizeHandles, sizeBounds } from '@neodrag/react/resize';
+
+function Panel() {
+  const ref = useRef<HTMLDivElement>(null);
+  useResizable(ref, [resizeHandles({ edges: ['e', 's', 'se'] }), sizeBounds({ minWidth: 120 })]);
+  return <div ref={ref} style={{ width: 200, height: 120 }} />;
+}
+```

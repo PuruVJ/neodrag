@@ -1,4 +1,7 @@
 import { EffectScheduler } from './effects.ts';
+import { numberStub, resolveSizeInput, sizeContext } from './length-contract.ts';
+import type { LengthAdapter } from './length-runtime.ts';
+import type { SizeInput } from './length-runtime.ts';
 import { phaseChain, pushByPhase } from './phase.ts';
 import type { TransformApplier } from './apply-transform.ts';
 import type {
@@ -56,6 +59,8 @@ export class DragInstance {
 	proposedY = 0;
 	offsetX = 0;
 	offsetY = 0;
+	offsetAuthored: { x: SizeInput; y: SizeInput } | null = null;
+	lengthAdapter: LengthAdapter = numberStub;
 	initialX = 0;
 	initialY = 0;
 	inverseScale = 1;
@@ -104,9 +109,14 @@ export class DragInstance {
 	pendingUpdate: import('./types.ts').DragPluginList | null = null;
 	applyTransform?: TransformApplier;
 
-	constructor(node: HTMLElement | SVGElement, idleSession: DragSession) {
+	constructor(
+		node: HTMLElement | SVGElement,
+		idleSession: DragSession,
+		lengthAdapter: LengthAdapter = numberStub,
+	) {
 		this.rootNode = node;
 		this.visualNode = node;
+		this.lengthAdapter = lengthAdapter;
 		this.cachedRootNodeRect = node.getBoundingClientRect();
 		this.#session = idleSession;
 
@@ -153,6 +163,12 @@ export class DragInstance {
 			get offset() {
 				return inst.#liveOffset;
 			},
+			get offsetPx() {
+				return inst.#liveOffset;
+			},
+			get offsetAuthored() {
+				return inst.offsetAuthored ?? undefined;
+			},
 			get initial() {
 				return inst.#liveInitial;
 			},
@@ -172,6 +188,9 @@ export class DragInstance {
 			get session() {
 				return inst.#session;
 			},
+			get length() {
+				return inst.lengthAdapter;
+			},
 			effect(fn) {
 				inst.effects.schedule(fn);
 			},
@@ -180,8 +199,18 @@ export class DragInstance {
 				inst.#sessionCancel?.();
 			},
 			setForcedPosition(x, y) {
-				inst.offsetX = x;
-				inst.offsetY = y;
+				const wCtx = sizeContext(inst.rootNode, 'width');
+				const hCtx = sizeContext(inst.rootNode, 'height');
+				inst.offsetX = resolveSizeInput(inst.lengthAdapter, x, wCtx, inst.offsetX);
+				inst.offsetY = resolveSizeInput(inst.lengthAdapter, y, hCtx, inst.offsetY);
+				if (typeof x === 'string' || typeof y === 'string') {
+					inst.offsetAuthored = {
+						x: typeof x === 'string' ? x : inst.offsetX,
+						y: typeof y === 'string' ? y : inst.offsetY,
+					};
+				} else {
+					inst.offsetAuthored = null;
+				}
 			},
 			setVisual(node) {
 				inst.setVisual(node);
@@ -266,6 +295,8 @@ export class DropInstance {
 	states = new Map<symbol, unknown>();
 	failed = new Set<symbol>();
 	isOver = false;
+	hitExpandPx: { top: number; right: number; bottom: number; left: number } | null = null;
+	lengthAdapter: LengthAdapter = numberStub;
 
 	isProcessingExternalUpdate = false;
 	isUpdating = false;
@@ -290,8 +321,13 @@ export class DropInstance {
 	resolveDrop: import('./types.ts').DropPlugin[] = [];
 	postDrop: import('./types.ts').DropPlugin[] = [];
 
-	constructor(node: HTMLElement | SVGElement, host: DropCtxHost) {
+	constructor(
+		node: HTMLElement | SVGElement,
+		host: DropCtxHost,
+		lengthAdapter: LengthAdapter = numberStub,
+	) {
 		this.rootNode = node;
+		this.lengthAdapter = lengthAdapter;
 		this.cachedRootNodeRect = node.getBoundingClientRect();
 		this.#host = host;
 
@@ -312,6 +348,9 @@ export class DropInstance {
 			},
 			get isOver() {
 				return inst.isOver;
+			},
+			get length() {
+				return inst.lengthAdapter;
 			},
 			effect(fn) {
 				inst.effects.schedule(fn);

@@ -1,7 +1,13 @@
 import { EffectScheduler } from './effects.ts';
 import { phaseChain, pushByPhase } from './phase.ts';
 import type { ResizeApplier } from './apply-resize.ts';
+import { numberStub, resolveSizeInput, sizeContext } from './length-contract.ts';
+import type { AuthoredSizePair, LengthAdapter } from './length-runtime.ts';
+import type { SizeInput } from './length-runtime.ts';
+import { readBoxSizePx } from './length/utils.ts';
 import type { ResizeCtx, ResizePlugin, ResizeSession } from './resize/types.ts';
+
+export { readBoxSizePx as readSizePx };
 
 export interface ActiveResizeSession {
 	state: ResizeSession['state'];
@@ -19,17 +25,14 @@ export interface ActiveResizeSession {
 	startedAt: number;
 }
 
-export function readSizePx(node: HTMLElement | SVGElement): { width: number; height: number } {
-	const rect = node.getBoundingClientRect();
-	return { width: rect.width, height: rect.height };
-}
-
 export class ResizeInstance {
 	rootNode: HTMLElement | SVGElement;
 	targetNode: HTMLElement | SVGElement;
 	handleNode: HTMLElement | null = null;
 	controller = new AbortController();
 	effects = new EffectScheduler();
+
+	lengthAdapter: LengthAdapter = numberStub;
 
 	deltaWidth = 0;
 	deltaHeight = 0;
@@ -39,6 +42,9 @@ export class ResizeInstance {
 	height = 0;
 	initialWidth = 0;
 	initialHeight = 0;
+	displaySize: AuthoredSizePair = { width: '0px', height: '0px' };
+	unitPreserve: AuthoredSizePair = { width: '0px', height: '0px' };
+	initialAuthored: AuthoredSizePair = { width: '0px', height: '0px' };
 	initialPointerX = 0;
 	initialPointerY = 0;
 	anchor: ResizeSession['anchor'] = 'se';
@@ -53,8 +59,10 @@ export class ResizeInstance {
 
 	readonly #liveDelta: { readonly width: number; readonly height: number };
 	readonly #liveProposed: { readonly width: number; readonly height: number };
-	readonly #liveSize: { readonly width: number; readonly height: number };
-	readonly #liveInitial: { readonly width: number; readonly height: number };
+	readonly #liveSize: { readonly width: string; readonly height: string };
+	readonly #liveSizePx: { readonly width: number; readonly height: number };
+	readonly #liveInitial: { readonly width: string; readonly height: string };
+	readonly #liveInitialPx: { readonly width: number; readonly height: number };
 
 	flat: ResizePlugin[] = [];
 	lastSlots: import('./resize/types.ts').ResizePluginList | null = null;
@@ -88,15 +96,18 @@ export class ResizeInstance {
 	pendingUpdate: import('./resize/types.ts').ResizePluginList | null = null;
 	applyResize?: ResizeApplier;
 
-	constructor(node: HTMLElement | SVGElement, idleSession: ResizeSession) {
+	constructor(
+		node: HTMLElement | SVGElement,
+		idleSession: ResizeSession,
+		lengthAdapter: LengthAdapter = numberStub,
+	) {
 		this.rootNode = node;
 		this.targetNode = node;
-		const size = readSizePx(node);
-		this.width = size.width;
-		this.height = size.height;
+		this.lengthAdapter = lengthAdapter;
 		this.cachedRootNodeRect = node.getBoundingClientRect();
 		this.cachedTargetRect = this.cachedRootNodeRect;
 		this.#session = idleSession;
+		this.loadSizeFromNode();
 
 		const inst = this;
 		this.#liveDelta = {
@@ -117,6 +128,14 @@ export class ResizeInstance {
 		};
 		this.#liveSize = {
 			get width() {
+				return inst.displaySize.width;
+			},
+			get height() {
+				return inst.displaySize.height;
+			},
+		};
+		this.#liveSizePx = {
+			get width() {
 				return inst.width;
 			},
 			get height() {
@@ -124,6 +143,14 @@ export class ResizeInstance {
 			},
 		};
 		this.#liveInitial = {
+			get width() {
+				return inst.initialAuthored.width;
+			},
+			get height() {
+				return inst.initialAuthored.height;
+			},
+		};
+		this.#liveInitialPx = {
 			get width() {
 				return inst.initialWidth;
 			},
@@ -141,8 +168,17 @@ export class ResizeInstance {
 			get size() {
 				return inst.#liveSize;
 			},
+			get sizePx() {
+				return inst.#liveSizePx;
+			},
 			get initial() {
 				return inst.#liveInitial;
+			},
+			get initialPx() {
+				return inst.#liveInitialPx;
+			},
+			get length() {
+				return inst.lengthAdapter;
 			},
 			get anchor() {
 				return inst.anchor;
@@ -180,10 +216,28 @@ export class ResizeInstance {
 				inst.#sessionCancel?.();
 			},
 			setForcedSize(width, height) {
-				inst.width = width;
-				inst.height = height;
+				const wCtx = sizeContext(inst.targetNode, 'width');
+				const hCtx = sizeContext(inst.targetNode, 'height');
+				inst.width = resolveSizeInput(inst.lengthAdapter, width, wCtx, inst.width);
+				inst.height = resolveSizeInput(inst.lengthAdapter, height, hCtx, inst.height);
 			},
 		};
+	}
+
+	syncDisplaySize() {
+		this.displaySize = this.lengthAdapter.commitAuthored(
+			{ width: this.width, height: this.height },
+			this.unitPreserve,
+			this.targetNode,
+		);
+	}
+
+	loadSizeFromNode() {
+		const px = readBoxSizePx(this.targetNode);
+		this.width = px.width;
+		this.height = px.height;
+		this.unitPreserve = this.lengthAdapter.readAuthoredPair(this.targetNode);
+		this.displaySize = this.lengthAdapter.cloneAuthored(this.unitPreserve);
 	}
 
 	bindSession(session: ResizeSession, onCancel?: () => void) {

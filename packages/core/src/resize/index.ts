@@ -18,3 +18,4 @@ export {
 	type ResizeEventData,
 } from './plugins.ts';
 export { presetPanel, presetCornerBox, presetSplitPane } from './presets.ts';
+export type { SizeInput } from '../length-runtime.ts';
