@@ -1,5 +1,33 @@
 # scripts
 
+## 1.0.1-next.7
+
+### Patch Changes
+
+- Updated dependencies [[`f221917`](https://github.com/PuruVJ/neodrag/commit/f221917bb2c59031384c8667c240fa6aaef2e917)]:
+  - @neodrag/core@3.0.0-next.8
+
+## 1.0.1-next.6
+
+### Patch Changes
+
+- Updated dependencies [[`a3a20b0`](https://github.com/PuruVJ/neodrag/commit/a3a20b03a5ebcd804ee9c1de7028aaaf424bc5cc)]:
+  - @neodrag/core@3.0.0-next.7
+
+## 1.0.1-next.5
+
+### Patch Changes
+
+- Updated dependencies [[`45e637d`](https://github.com/PuruVJ/neodrag/commit/45e637d2fd0518ebd7b3f6fbf4cf722345b73ee8)]:
+  - @neodrag/core@3.0.0-next.6
+
+## 1.0.1-next.4
+
+### Patch Changes
+
+- Updated dependencies [[`8c1ad10`](https://github.com/PuruVJ/neodrag/commit/8c1ad10c857078d4b82d14b01ba3e2c5954792da), [`8c1ad10`](https://github.com/PuruVJ/neodrag/commit/8c1ad10c857078d4b82d14b01ba3e2c5954792da)]:
+  - @neodrag/core@3.0.0-next.5
+
 ## 1.0.1-next.3
 
 ### Patch Changes

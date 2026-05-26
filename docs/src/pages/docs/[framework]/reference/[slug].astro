@@ -1,0 +1,35 @@
+---
+import { FRAMEWORKS } from '$helpers/constants';
+import MainDocsLayout from '$layouts/MainDocsLayout.astro';
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+
+const { slug, framework } = Astro.params;
+
+const reference_collection = await getCollection('reference');
+const reference_entry = reference_collection.find(
+	(f) => f.id.replace(/\d{2}-(.+)\/page/, '$1') === slug,
+);
+
+if (!reference_entry) {
+	return;
+}
+
+const { Content, headings } = await render(reference_entry);
+
+export const getStaticPaths = (async () => {
+	const reference_collection = await getCollection('reference');
+
+	return reference_collection
+		.map((f) =>
+			FRAMEWORKS.map(({ name }) => ({
+				params: { slug: f.id.replace(/\d{2}-(.+)\/page/, '$1'), framework: name },
+			})),
+		)
+		.flat();
+}) satisfies GetStaticPaths;
+---
+
+<MainDocsLayout {...reference_entry.data} headings={headings} framework={framework}>
+	<Content />
+</MainDocsLayout>

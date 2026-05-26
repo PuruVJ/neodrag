@@ -1,5 +1,33 @@
 # @neodrag/playground-svelte
 
+## 0.0.2-next.8
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @neodrag/svelte@3.0.0-next.8
+
+## 0.0.2-next.7
+
+### Patch Changes
+
+- Updated dependencies [[`a3a20b0`](https://github.com/PuruVJ/neodrag/commit/a3a20b03a5ebcd804ee9c1de7028aaaf424bc5cc)]:
+  - @neodrag/svelte@3.0.0-next.7
+
+## 0.0.2-next.6
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @neodrag/svelte@3.0.0-next.6
+
+## 0.0.2-next.5
+
+### Patch Changes
+
+- Updated dependencies [[`8c1ad10`](https://github.com/PuruVJ/neodrag/commit/8c1ad10c857078d4b82d14b01ba3e2c5954792da), [`8c1ad10`](https://github.com/PuruVJ/neodrag/commit/8c1ad10c857078d4b82d14b01ba3e2c5954792da)]:
+  - @neodrag/svelte@3.0.0-next.5
+
 ## 0.0.2-next.4
 
 ### Patch Changes

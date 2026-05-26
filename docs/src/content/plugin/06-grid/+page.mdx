@@ -21,24 +21,30 @@ grid([null, 15]); // Only snap vertically every 15px
 
 ```svelte
 <script>
-  import { grid } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { grid } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [grid([20, 20])] });
+	const drag_1 = new Draggable({ plugins: [grid([50, 30])] });
+	const drag_2 = new Draggable({ plugins: [grid([25, null])] });
+	const drag_3 = new Draggable({ plugins: [grid([null, 20])] });
 </script>
 
 <!-- Square 20px grid -->
-<div {@attach draggable([grid([20, 20])])}>Snaps to 20px squares</div>
+<div {@attach drag_0.attachment}>Snaps to 20px squares</div>
 
 <!-- Rectangular grid -->
-<div {@attach draggable([grid([50, 30])])}>
+<div {@attach drag_1.attachment}>
   Snaps to 50x30px rectangles
 </div>
 
 <!-- Horizontal-only snapping -->
-<div {@attach draggable([grid([25, null])])}>
+<div {@attach drag_2.attachment}>
   Only snaps horizontally
 </div>
 
 <!-- Vertical-only snapping -->
-<div {@attach draggable([grid([null, 20])])}>
+<div {@attach drag_3.attachment}>
   Only snaps vertically
 </div>
 ```
@@ -134,17 +140,17 @@ function GridExamples() {
 <div slot="vanilla">
 
 ```typescript
-import { grid, Draggable } from '@neodrag/vanilla';
+import { grid, Neodrag } from '@neodrag/vanilla';
 
 const square = document.getElementById('square');
 const rect = document.getElementById('rect');
 const horizontal = document.getElementById('horizontal');
 const vertical = document.getElementById('vertical');
 
-new Draggable(square, [grid([20, 20])]);
-new Draggable(rect, [grid([50, 30])]);
-new Draggable(horizontal, [grid([25, null])]);
-new Draggable(vertical, [grid([null, 20])]);
+Neodrag.shared.draggable(square, [grid([20, 20])]);
+Neodrag.shared.draggable(rect, [grid([50, 30])]);
+Neodrag.shared.draggable(horizontal, [grid([25, null])]);
+Neodrag.shared.draggable(vertical, [grid([null, 20])]);
 ```
 
 </div>
@@ -157,17 +163,17 @@ new Draggable(vertical, [grid([null, 20])]);
 
 ```svelte
 <script>
-  import { grid, Compartment } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { grid } from '@neodrag/svelte/plugins';
 
   let gridSize = $state(20);
   let enableSnap = $state(true);
 
-  const gridComp = Compartment.of(() =>
-    enableSnap ? grid([gridSize, gridSize]) : grid([null, null]),
-  );
+  
+	const drag_0 = new Draggable({ plugins: [() => [gridComp]] });
 </script>
 
-<div {@attach draggable(() => [gridComp])}>
+<div {@attach drag_0.attachment}>
   Grid: {enableSnap ? `${gridSize}px` : 'disabled'}
 </div>
 
@@ -194,19 +200,14 @@ new Draggable(vertical, [grid([null, 20])]);
 
 ```tsx
 import { useState, useRef } from 'react';
-import { grid, useDraggable, useCompartment } from '@neodrag/react';
+import { grid, useDraggable } from '@neodrag/react';
 
 function DynamicGrid() {
   const ref = useRef<HTMLDivElement>(null);
   const [gridSize, setGridSize] = useState(20);
   const [enableSnap, setEnableSnap] = useState(true);
 
-  const gridComp = useCompartment(
-    () =>
-      enableSnap ? grid([gridSize, gridSize]) : grid([null, null]),
-    [gridSize, enableSnap],
-  );
-
+  
   useDraggable(ref, () => [gridComp]);
 
   return (
@@ -247,16 +248,11 @@ function DynamicGrid() {
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { grid, vDraggable, useCompartment } from '@neodrag/vue';
+import { grid, vDraggable } from '@neodrag/vue';
 
 const gridSize = ref(20);
 const enableSnap = ref(true);
 
-const gridComp = useCompartment(() =>
-  enableSnap.value
-    ? grid([gridSize.value, gridSize.value])
-    : grid([null, null]),
-);
 </script>
 
 <template>
@@ -293,7 +289,6 @@ import { createSignal } from 'solid-js';
 import {
   grid,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function DynamicGrid() {
@@ -303,12 +298,7 @@ function DynamicGrid() {
   const [gridSize, setGridSize] = createSignal(20);
   const [enableSnap, setEnableSnap] = createSignal(true);
 
-  const gridComp = createCompartment(() =>
-    enableSnap()
-      ? grid([gridSize(), gridSize()])
-      : grid([null, null]),
-  );
-
+  
   useDraggable(element, [gridComp]);
 
   return (
@@ -347,21 +337,18 @@ function DynamicGrid() {
 <div slot="vanilla">
 
 ```typescript
-import { grid, Draggable, Compartment } from '@neodrag/vanilla';
+import { grid, Neodrag } from '@neodrag/vanilla';
 
 let gridSize = 20;
 let enableSnap = true;
 
-const gridComp = new Compartment(() =>
-  enableSnap ? grid([gridSize, gridSize]) : grid([null, null]),
-);
 
 const element = document.getElementById('element');
 const sizeSlider = document.getElementById('size-slider');
 const snapToggle = document.getElementById('snap-toggle');
 const statusEl = document.getElementById('status');
 
-new Draggable(element, () => [gridComp]);
+Neodrag.shared.draggable(element, () => [gridComp]);
 
 function updateStatus() {
   statusEl.textContent = enableSnap ? `${gridSize}px` : 'disabled';
@@ -393,19 +380,24 @@ snapToggle.addEventListener('change', (e) => {
 
 ```svelte
 <script>
-  import { grid } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { grid } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [grid([100, 20])] });
+	const drag_1 = new Draggable({ plugins: [grid([60, null])] });
+	const drag_2 = new Draggable({ plugins: [grid([80, 120])] });
 </script>
 
 <!-- Wide columns, short rows -->
-<div {@attach draggable([grid([100, 20])])}>100x20px grid</div>
+<div {@attach drag_0.attachment}>100x20px grid</div>
 
 <!-- Timeline-style: hourly columns -->
-<div {@attach draggable([grid([60, null])])}>
+<div {@attach drag_1.attachment}>
   60px intervals (hourly)
 </div>
 
 <!-- Calendar-style: daily columns, weekly rows -->
-<div {@attach draggable([grid([80, 120])])}>Daily x Weekly</div>
+<div {@attach drag_2.attachment}>Daily x Weekly</div>
 ```
 
 </div>
@@ -491,15 +483,15 @@ function AsymmetricGrids() {
 <div slot="vanilla">
 
 ```typescript
-import { grid, Draggable } from '@neodrag/vanilla';
+import { grid, Neodrag } from '@neodrag/vanilla';
 
 const wide = document.getElementById('wide');
 const timeline = document.getElementById('timeline');
 const calendar = document.getElementById('calendar');
 
-new Draggable(wide, [grid([100, 20])]);
-new Draggable(timeline, [grid([60, null])]);
-new Draggable(calendar, [grid([80, 120])]);
+Neodrag.shared.draggable(wide, [grid([100, 20])]);
+Neodrag.shared.draggable(timeline, [grid([60, null])]);
+Neodrag.shared.draggable(calendar, [grid([80, 120])]);
 ```
 
 </div>
@@ -512,24 +504,26 @@ new Draggable(calendar, [grid([80, 120])]);
 
 ```svelte
 <script>
-  import { grid, Compartment } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { grid } from '@neodrag/svelte/plugins';
 
   let screenWidth = $state(window.innerWidth);
 
   // 12-column responsive grid
   const columnWidth = $derived(screenWidth / 12);
-  const responsiveGrid = Compartment.of(() =>
-    grid([columnWidth, 40]),
+  const responsiveGrid = grid([columnWidth, 40]),
   );
 
   function handleResize() {
     screenWidth = window.innerWidth;
   }
+
+	const drag_0 = new Draggable({ plugins: [() => [responsiveGrid]] });
 </script>
 
 <svelte:window on:resize={handleResize} />
 
-<div {@attach draggable(() => [responsiveGrid])}>
+<div {@attach drag_0.attachment}>
   Responsive 12-column grid
   <br />
   Column: {Math.round(columnWidth)}px
@@ -542,7 +536,7 @@ new Draggable(calendar, [grid([80, 120])]);
 
 ```tsx
 import { useState, useEffect, useRef } from 'react';
-import { grid, useDraggable, useCompartment } from '@neodrag/react';
+import { grid, useDraggable } from '@neodrag/react';
 
 function ResponsiveGrid() {
   const ref = useRef<HTMLDivElement>(null);
@@ -580,14 +574,13 @@ function ResponsiveGrid() {
 ```vue
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { grid, vDraggable, useCompartment } from '@neodrag/vue';
+import { grid, vDraggable } from '@neodrag/vue';
 
 const screenWidth = ref(window.innerWidth);
 
 // 12-column responsive grid
 const columnWidth = computed(() => screenWidth.value / 12);
-const responsiveGrid = useCompartment(() =>
-  grid([columnWidth.value, 40]),
+const responsiveGrid = grid([columnWidth.value, 40]),
 );
 
 function handleResize() {
@@ -621,7 +614,6 @@ import { createSignal, onMount, onCleanup } from 'solid-js';
 import {
   grid,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function ResponsiveGrid() {
@@ -634,8 +626,7 @@ function ResponsiveGrid() {
 
   // 12-column responsive grid
   const columnWidth = () => screenWidth() / 12;
-  const responsiveGrid = createCompartment(() =>
-    grid([columnWidth(), 40]),
+  const responsiveGrid = grid([columnWidth(), 40]),
   );
 
   const handleResize = () => setScreenWidth(window.innerWidth);
@@ -665,19 +656,18 @@ function ResponsiveGrid() {
 <div slot="vanilla">
 
 ```typescript
-import { grid, Draggable, Compartment } from '@neodrag/vanilla';
+import { grid, Neodrag } from '@neodrag/vanilla';
 
 let screenWidth = window.innerWidth;
 
 const getColumnWidth = () => screenWidth / 12;
-const responsiveGrid = new Compartment(() =>
-  grid([getColumnWidth(), 40]),
+const responsiveGrid = grid([getColumnWidth(), 40]),
 );
 
 const element = document.getElementById('element');
 const statusEl = document.getElementById('status');
 
-new Draggable(element, () => [responsiveGrid]);
+Neodrag.shared.draggable(element, () => [responsiveGrid]);
 
 function handleResize() {
   screenWidth = window.innerWidth;
@@ -739,7 +729,7 @@ const iconGrid = [
 
 The grid plugin modifies movement by snapping to grid points:
 
-1. **Calculate grid position** - Uses `Math.ceil(value / gridSize) * gridSize` to find the next grid point
+1. **Calculate grid position** - Uses `Math.round(value / gridSize) * gridSize` to find the next grid point
 2. **Apply to proposed movement** - Modifies `ctx.proposed.x` and `ctx.proposed.y`
 3. **Null values skip snapping** - `null` means free movement on that axis
 4. **Runs during drag** - Continuously snaps while dragging
@@ -755,8 +745,8 @@ function grid(size: [number | null, number | null]): Plugin;
 **Parameters:**
 
 - `size` - Array with `[x, y]` grid dimensions
-  - `number` - Grid size in pixels for that axis
-  - `null` - No grid snapping for that axis
+- `number` - Grid size in pixels for that axis
+- `null` - No grid snapping for that axis
 
 **Usage patterns:**
 

@@ -1,5 +1,6 @@
 <script>
-	import { draggable, events, position } from '@neodrag/svelte';
+	import { Draggable } from '@neodrag/svelte'
+	import { events, position } from '@neodrag/svelte/plugins';
 
 	let pos = $state({ x: 0, y: 0 });
 
@@ -18,9 +19,11 @@
 		}),
 		// disabled(),
 	]);
+
+	const drag_0 = new Draggable({ plugins: options });
 </script>
 
-<div {@attach draggable(options)}>I can be moved with the slider too</div>
+<div {@attach drag_0.attachment}>I can be moved with the slider too</div>
 X:
 <input type="range" min="0" max="300" bind:value={pos.x} />
 Y:

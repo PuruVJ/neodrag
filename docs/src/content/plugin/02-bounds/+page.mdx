@@ -20,17 +20,21 @@ bounds(BoundsFrom.element(el)); // Stay in specific element
 
 ```svelte
 <script>
-  import { bounds, BoundsFrom } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [bounds(BoundsFrom.viewport())] });
+	const drag_1 = new Draggable({ plugins: [bounds(BoundsFrom.parent())] });
 </script>
 
 <!-- Stay within viewport -->
-<div {@attach draggable([bounds(BoundsFrom.viewport())])}>
+<div {@attach drag_0.attachment}>
   Can't leave the screen
 </div>
 
 <!-- Stay within parent -->
 <div class="container">
-  <div {@attach draggable([bounds(BoundsFrom.parent())])}>
+  <div {@attach drag_1.attachment}>
     Contained child
   </div>
 </div>
@@ -118,13 +122,13 @@ function BoundedElements() {
 <div slot="vanilla">
 
 ```typescript
-import { bounds, BoundsFrom, Draggable } from '@neodrag/vanilla';
+import { bounds, BoundsFrom, Neodrag } from '@neodrag/vanilla';
 
 const viewportElement = document.getElementById('viewport-bound');
 const parentElement = document.getElementById('parent-bound');
 
-new Draggable(viewportElement, [bounds(BoundsFrom.viewport())]);
-new Draggable(parentElement, [bounds(BoundsFrom.parent())]);
+Neodrag.shared.draggable(viewportElement, [bounds(BoundsFrom.viewport())]);
+Neodrag.shared.draggable(parentElement, [bounds(BoundsFrom.parent())]);
 ```
 
 </div>
@@ -139,17 +143,11 @@ new Draggable(parentElement, [bounds(BoundsFrom.parent())]);
 
 ```svelte
 <script>
-  import { bounds, BoundsFrom } from '@neodrag/svelte';
-</script>
+  import { Draggable } from '@neodrag/svelte'
+	import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
-<!-- Basic viewport bounds -->
-<div {@attach draggable([bounds(BoundsFrom.viewport())])}>
-  Stay in window
-</div>
-
-<!-- Viewport with padding -->
-<div
-  {@attach draggable([
+	const drag_0 = new Draggable({ plugins: [bounds(BoundsFrom.viewport())] });
+	const drag_1 = new Draggable({ plugins: [
     bounds(
       BoundsFrom.viewport({
         top: 20,
@@ -158,7 +156,17 @@ new Draggable(parentElement, [bounds(BoundsFrom.parent())]);
         bottom: 20,
       }),
     ),
-  ])}
+  ] });
+</script>
+
+<!-- Basic viewport bounds -->
+<div {@attach drag_0.attachment}>
+  Stay in window
+</div>
+
+<!-- Viewport with padding -->
+<div
+  {@attach drag_1.attachment}
 >
   20px padding from edges
 </div>
@@ -264,13 +272,13 @@ function ViewportBounds() {
 <div slot="vanilla">
 
 ```typescript
-import { bounds, BoundsFrom, Draggable } from '@neodrag/vanilla';
+import { bounds, BoundsFrom, Neodrag } from '@neodrag/vanilla';
 
 const basic = document.getElementById('basic');
 const padded = document.getElementById('padded');
 
-new Draggable(basic, [bounds(BoundsFrom.viewport())]);
-new Draggable(padded, [
+Neodrag.shared.draggable(basic, [bounds(BoundsFrom.viewport())]);
+Neodrag.shared.draggable(padded, [
   bounds(
     BoundsFrom.viewport({
       top: 20,
@@ -292,14 +300,18 @@ new Draggable(padded, [
 
 ```svelte
 <script>
-  import { bounds, BoundsFrom } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
   let container;
+
+	const drag_0 = new Draggable({ plugins: [bounds(() => BoundsFrom.element(container))] });
+	const drag_1 = new Draggable({ plugins: [bounds(BoundsFrom.selector('#drop-zone'))] });
 </script>
 
 <div bind:this={container} class="boundary-container">
   <div
-    {@attach draggable([bounds(() => BoundsFrom.element(container))])}
+    {@attach drag_0.attachment}
   >
     Bound to container
   </div>
@@ -308,7 +320,7 @@ new Draggable(padded, [
 <!-- Using selector -->
 <div class="zone" id="drop-zone">
   <div
-    {@attach draggable([bounds(BoundsFrom.selector('#drop-zone'))])}
+    {@attach drag_1.attachment}
   >
     Bound by selector
   </div>
@@ -421,14 +433,14 @@ function ElementBounds() {
 <div slot="vanilla">
 
 ```typescript
-import { bounds, BoundsFrom, Draggable } from '@neodrag/vanilla';
+import { bounds, BoundsFrom, Neodrag } from '@neodrag/vanilla';
 
 const container = document.getElementById('container');
 const bounded = document.getElementById('bounded');
 const selector = document.getElementById('selector');
 
-new Draggable(bounded, [bounds(() => BoundsFrom.element(container))]);
-new Draggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
+Neodrag.shared.draggable(bounded, [bounds(() => BoundsFrom.element(container))]);
+Neodrag.shared.draggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
 ```
 
 </div>
@@ -441,7 +453,8 @@ new Draggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
 
 ```svelte
 <script>
-  import { draggable, bounds } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { bounds } from '@neodrag/svelte/plugins';
 
   // Custom circular boundary
   function circularBounds() {
@@ -465,13 +478,16 @@ new Draggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
       [window.innerWidth - padding, window.innerHeight - padding],
     ];
   }
+
+	const drag_0 = new Draggable({ plugins: [bounds(circularBounds)] });
+	const drag_1 = new Draggable({ plugins: [bounds(timeBounds)] });
 </script>
 
-<div {@attach draggable([bounds(circularBounds)])}>
+<div {@attach drag_0.attachment}>
   Circular boundary
 </div>
 
-<div {@attach draggable([bounds(timeBounds)])}>Animated boundary</div>
+<div {@attach drag_1.attachment}>Animated boundary</div>
 ```
 
 </div>
@@ -618,7 +634,7 @@ function CustomBounds() {
 <div slot="vanilla">
 
 ```typescript
-import { bounds, Draggable } from '@neodrag/vanilla';
+import { bounds, Neodrag } from '@neodrag/vanilla';
 
 const circular = document.getElementById('circular');
 const time = document.getElementById('time');
@@ -646,8 +662,8 @@ function timeBounds() {
   ];
 }
 
-new Draggable(circular, [bounds(circularBounds)]);
-new Draggable(time, [bounds(timeBounds)]);
+Neodrag.shared.draggable(circular, [bounds(circularBounds)]);
+Neodrag.shared.draggable(time, [bounds(timeBounds)]);
 ```
 
 </div>
@@ -665,7 +681,7 @@ bounds(boundaryFunction, (ctx) => {
 
 bounds(boundaryFunction, (ctx) => {
   // Only recompute at start and end
-  return ctx.hook === 'dragStart' || ctx.hook === 'dragEnd';
+  return ctx.hook === 'start' || ctx.hook === 'end';
 });
 ```
 
@@ -679,9 +695,10 @@ The bounds plugin calculates the allowed movement area and clamps the proposed p
 
 The boundary function is called:
 
-- On drag start (always)
-- During drag (if `shouldRecompute` returns true)
-- On drag end (if `shouldRecompute` returns true)
+- On setup (if `shouldRecompute` returns true for `'setup'`)
+- On drag start (if `shouldRecompute` returns true for `'start'`)
+- During drag (if `shouldRecompute` returns true for `'drag'`)
+- On drag end (if `shouldRecompute` returns true for `'end'`)
 
 ## API Reference
 
@@ -689,7 +706,7 @@ The boundary function is called:
 function bounds(
   boundsFn: () => [[number, number], [number, number]],
   shouldRecompute?: (ctx: {
-    hook: 'dragStart' | 'drag' | 'dragEnd';
+    hook: 'setup' | 'start' | 'drag' | 'end';
   }) => boolean,
 ): Plugin;
 ```

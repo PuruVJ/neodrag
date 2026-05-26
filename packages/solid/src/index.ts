@@ -1,102 +1,268 @@
-import { DEFAULTS, DraggableFactory } from '@neodrag/core';
 import {
-	Compartment,
-	DragEventData,
-	PluginContext,
-	PluginResolver,
-	unstable_definePlugin,
-	type Plugin,
-} from '@neodrag/core/plugins';
-import type { Accessor, Setter } from 'solid-js';
-import { createEffect, createRenderEffect, createSignal, untrack } from 'solid-js';
+	Draggable as CoreDraggable,
+	DroppableBinding,
+	Resizable as CoreResizable,
+	Neodrag,
+	hasReactiveSlots,
+	type DragEventData,
+	type DragPlugin,
+	type DragPluginList,
+	type DropPluginList,
+	type ResizePluginList,
+} from '@neodrag/core';
+import { defineDragPlugin } from '@neodrag/core/plugins';
+import type { Accessor } from 'solid-js';
+import { createEffect, createSignal, onCleanup, untrack } from 'solid-js';
 
-const draggable_factory = new DraggableFactory(DEFAULTS);
+export type { DragEventData, DragPluginList, ResizePluginList };
+export { Neodrag, CoreDraggable as Draggable, CoreResizable as Resizable };
 
-interface DragState extends DragEventData {
+export type DragSyncMode = 'full' | 'start-end' | false;
+
+export interface DragState extends DragEventData {
 	isDragging: boolean;
 }
 
-const default_drag_state: DragState = {
+const defaultDragState: DragState = {
 	offset: { x: 0, y: 0 },
 	rootNode: null as unknown as HTMLElement,
-	currentNode: null as unknown as HTMLElement,
+	visualNode: null as unknown as HTMLElement,
 	isDragging: false,
 	event: null as unknown as PointerEvent,
 };
 
-const state_sync = unstable_definePlugin((set_state: Setter<DragState>) => {
-	const update_state = (
-		ctx: PluginContext,
-		event: PointerEvent,
-		overrides: Partial<DragState> = {},
-	) =>
-		ctx.effect.immediate(() =>
-			set_state((prev) => ({
-				...prev,
-				offset: { ...ctx.offset },
+const createSyncPlugin = (setState: (state: DragState) => void, mode: DragSyncMode) =>
+	defineDragPlugin(() => ({
+		key: Symbol('neodrag.solid-state-sync'),
+		phase: 'post',
+		skipOnCancel: true,
+
+		start(ctx, _, event) {
+			setState({
+				offset: { x: ctx.offset.x, y: ctx.offset.y },
 				rootNode: ctx.rootNode,
-				currentNode: ctx.currentlyDraggedNode,
+				visualNode: ctx.session.visual.node,
+				isDragging: true,
 				event,
-				...overrides,
-			})),
-		);
+			});
+		},
 
-	return {
-		name: 'sss', // solid-state-sync
-		priority: -1000,
-		cancelable: false,
-		start: (ctx, _state, event) => update_state(ctx, event, { isDragging: true }),
-		drag: (ctx, _state, event) => update_state(ctx, event),
-		end: (ctx, _state, event) => update_state(ctx, event, { isDragging: false }),
-	};
-});
+		drag(ctx, _, event) {
+			if (mode !== 'full') return;
+			setState({
+				offset: { x: ctx.offset.x, y: ctx.offset.y },
+				rootNode: ctx.rootNode,
+				visualNode: ctx.session.visual.node,
+				isDragging: true,
+				event,
+			});
+		},
 
-function resolve_plugins(
-	plugins: Accessor<Plugin[]> | ReturnType<PluginResolver>,
-	state_sync_plugin: Plugin,
-) {
-	const p = typeof plugins === 'function' ? plugins() : () => plugins;
+		end(ctx, _, event) {
+			setState({
+				offset: { x: ctx.offset.x, y: ctx.offset.y },
+				rootNode: ctx.rootNode,
+				visualNode: ctx.session.visual.node,
+				isDragging: false,
+				event,
+			});
+		},
+	}))();
 
-	if (typeof p === 'function') {
-		return () => p().concat(state_sync_plugin);
-	} else {
-		return p.concat(state_sync_plugin);
-	}
+function withSync(plugins: DragPluginList, sync: DragPlugin): DragPluginList {
+	return [...plugins, sync];
 }
 
-function wrapper(draggableFactory: DraggableFactory) {
-	return (
-		element: Accessor<HTMLElement | SVGElement | null | undefined>,
-		plugins: Accessor<Plugin[]> | ReturnType<PluginResolver> = () => [],
-	) => {
-		const [drag_state, set_drag_state] = createSignal<DragState>(default_drag_state);
-		const state_sync_plugin = state_sync(set_drag_state);
+export function useDraggable(
+	slots?: DragPluginList,
+	options?: { syncState?: DragSyncMode },
+): [Accessor<DragState>, (node: HTMLElement | SVGElement | null) => void];
+
+export function useDraggable(
+	element: Accessor<HTMLElement | SVGElement | null | undefined>,
+	slots: DragPluginList,
+	options?: { syncState?: DragSyncMode },
+): [Accessor<DragState>];
+
+export function useDraggable(
+	elementOrSlots: Accessor<HTMLElement | SVGElement | null | undefined> | DragPluginList = [],
+	maybeSlotsOrOptions?: DragPluginList | { syncState?: DragSyncMode },
+	maybeOptions?: { syncState?: DragSyncMode },
+) {
+	const isElementForm = typeof elementOrSlots === 'function';
+	const options = (
+		isElementForm ? maybeOptions : maybeSlotsOrOptions
+	) as { syncState?: DragSyncMode } | undefined;
+	const syncMode: DragSyncMode = options?.syncState ?? 'start-end';
+
+	const [dragState, setDragState] = createSignal<DragState>(defaultDragState);
+	const sync = createSyncPlugin(setDragState, syncMode);
+
+	const slots = (): DragPluginList =>
+		isElementForm ? (maybeSlotsOrOptions as DragPluginList) : (elementOrSlots as DragPluginList);
+
+	const binding = new CoreDraggable({
+		plugins: untrack(() => withSync(slots(), sync)),
+	});
+
+	const attachRef = (node: HTMLElement | SVGElement | null) => {
+		if (!node) {
+			binding.detach();
+			return;
+		}
+		binding.attach(node);
+	};
+
+	if (isElementForm) {
+		const element = elementOrSlots as Accessor<HTMLElement | SVGElement | null | undefined>;
 
 		createEffect(() => {
 			const node = element();
-			if (!node) return;
-
-			return draggableFactory.draggable(
-				node,
-				untrack(() => resolve_plugins(plugins, state_sync_plugin)),
-			);
+			if (!node) {
+				binding.detach();
+				return;
+			}
+			untrack(() => binding.attach(node));
+			onCleanup(() => binding.detach());
 		});
 
-		return drag_state;
-	};
-}
+		createEffect(() => {
+			const list = withSync(slots(), sync);
+			if (!hasReactiveSlots(list)) return;
+			binding.update(list);
+		});
 
-export const useDraggable = wrapper(draggable_factory);
+		onCleanup(() => binding.destroy());
+		return [dragState];
+	}
 
-export function createCompartment<T extends Plugin>(reactive: () => T) {
-	const compartment = new Compartment(() => untrack(reactive));
-
-	createRenderEffect(() => {
-		compartment.current = reactive();
+	createEffect(() => {
+		const list = withSync(slots(), sync);
+		if (!hasReactiveSlots(list)) return;
+		binding.update(list);
 	});
 
-	return compartment;
+	onCleanup(() => binding.destroy());
+
+	return [dragState, attachRef] as const;
 }
 
-export * from '@neodrag/core/plugins';
-export const instances = draggable_factory.instances;
+export function useDroppable(slots?: DropPluginList): [
+	undefined,
+	(node: HTMLElement | SVGElement | null) => void,
+];
+
+export function useDroppable(
+	element: Accessor<HTMLElement | SVGElement | null | undefined>,
+	slots: DropPluginList,
+): [undefined];
+
+export function useDroppable(
+	elementOrSlots: Accessor<HTMLElement | SVGElement | null | undefined> | DropPluginList = [],
+	maybeSlots: DropPluginList = [],
+) {
+	const isElementForm = typeof elementOrSlots === 'function';
+	const slots = (): DropPluginList =>
+		isElementForm ? maybeSlots : (elementOrSlots as DropPluginList);
+
+	const binding = new DroppableBinding({ plugins: untrack(() => slots()) });
+
+	const attachRef = (node: HTMLElement | SVGElement | null) => {
+		if (!node) {
+			binding.detach();
+			return;
+		}
+		binding.attach(node);
+	};
+
+	if (isElementForm) {
+		const element = elementOrSlots as Accessor<HTMLElement | SVGElement | null | undefined>;
+
+		createEffect(() => {
+			const node = element();
+			if (!node) {
+				binding.detach();
+				return;
+			}
+			untrack(() => binding.attach(node));
+			onCleanup(() => binding.detach());
+		});
+
+		createEffect(() => {
+			if (!hasReactiveSlots(slots())) return;
+			binding.update(slots());
+		});
+
+		onCleanup(() => binding.destroy());
+		return [undefined];
+	}
+
+	createEffect(() => {
+		if (!hasReactiveSlots(slots())) return;
+		binding.update(slots());
+	});
+
+	onCleanup(() => binding.destroy());
+
+	return [undefined, attachRef] as const;
+}
+
+export function useResizable(slots?: ResizePluginList): [
+	undefined,
+	(node: HTMLElement | SVGElement | null) => void,
+];
+
+export function useResizable(
+	element: Accessor<HTMLElement | SVGElement | null | undefined>,
+	slots: ResizePluginList,
+): [undefined];
+
+export function useResizable(
+	elementOrSlots: Accessor<HTMLElement | SVGElement | null | undefined> | ResizePluginList = [],
+	maybeSlots: ResizePluginList = [],
+) {
+	const isElementForm = typeof elementOrSlots === 'function';
+	const slots = (): ResizePluginList =>
+		isElementForm ? maybeSlots : (elementOrSlots as ResizePluginList);
+
+	const binding = new CoreResizable({ plugins: untrack(() => slots()) });
+
+	const attachRef = (node: HTMLElement | SVGElement | null) => {
+		if (!node) {
+			binding.detach();
+			return;
+		}
+		binding.attach(node);
+	};
+
+	if (isElementForm) {
+		const element = elementOrSlots as Accessor<HTMLElement | SVGElement | null | undefined>;
+
+		createEffect(() => {
+			const node = element();
+			if (!node) {
+				binding.detach();
+				return;
+			}
+			untrack(() => binding.attach(node));
+			onCleanup(() => binding.detach());
+		});
+
+		createEffect(() => {
+			if (!hasReactiveSlots(slots())) return;
+			binding.update(slots());
+		});
+
+		onCleanup(() => binding.destroy());
+		return [undefined];
+	}
+
+	createEffect(() => {
+		if (!hasReactiveSlots(slots())) return;
+		binding.update(slots());
+	});
+
+	onCleanup(() => binding.destroy());
+
+	return [undefined, attachRef] as const;
+}

@@ -1,0 +1,185 @@
+---
+title: 'Length & SizeInput'
+nav_title: 'Length'
+tagline: 'CSS length strings, TypeScript constraints, and the Length adapter for drag and resize.'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+Neodrag does pointer math in **pixels**. When you want plugin options or DOM size to use **CSS lengths** (`rem`, `%`, `vw`, …), opt in with a **`Length`** adapter on each binding (`Draggable`, `Resizable`, `Droppable`) — not on `Neodrag.shared`.
+
+## SizeInput
+
+Many APIs accept a `SizeInput`:
+
+- a **number** → always **px** (no `Length` required), or
+- a **`CssLengthString`** → one numeric token immediately followed by one [supported unit](#supported-units) (requires `length: new Length()` on that binding).
+
+TypeScript models strings as:
+
+```typescript
+import type { CssLengthString, CssLengthUnit, SizeInput } from '@neodrag/core';
+import { CSS_LENGTH_UNITS, isCssLengthUnit } from '@neodrag/core';
+
+// Valid CssLengthString examples:
+const a: CssLengthString = '10px';
+const b: CssLengthString = '1.5rem';
+const c: CssLengthString = '-4px';
+const d: CssLengthString = '92vw';
+
+const size: SizeInput = 120; // px
+const bound: SizeInput = '10rem';
+```
+
+### Supported units
+
+These match `CSS_LENGTH_UNITS` in `@neodrag/core` (parser and types stay in sync):
+
+| Category | Units |
+|----------|--------|
+| Absolute | `px` |
+| Font-relative | `rem`, `em`, `ch`, `ex` |
+| Viewport | `vw`, `vh`, `vmin`, `vmax`, `svw`, `svh`, `lvw`, `lvh`, `dvw`, `dvh` |
+| Container-relative | `%` (resolved against the relevant axis on the parent / context) |
+
+### Not supported (types or runtime)
+
+| Form | Example | What to do instead |
+|------|---------|-------------------|
+| CSS math | `'min(92vw, 720px)'`, `'clamp(200px, 50%, 800px)'`, `'calc(...)'` | Use one unit (`'92vw'`), a **number** (px), or compute in JS |
+| Grid / layout keywords | `'1fr'`, `'auto'`, `'fit-content'` | Not parseable as `SizeInput` |
+| Malformed | `'10 px'` (space), `'tenpx'` | Fix formatting |
+
+Runtime parsing uses the same rules: invalid strings throw from `Length.resolvePx()` with `Neodrag Length: invalid length "…"`.
+
+### Widened `string`
+
+TypeScript only checks **literal** and narrowly typed values:
+
+```typescript
+const fromApi: string = '10rem';
+// Used as SizeInput — no compile error; runtime may still work if the string is valid.
+```
+
+Prefer literals, `as const`, or annotate as `CssLengthString` / `SizeInput` when you control the type.
+
+## Length adapter
+
+```typescript
+import { Length } from '@neodrag/core';
+
+const length = new Length({ units: 'preserve' }); // default
+const lengthPx = new Length({ units: 'px' });
+```
+
+| Mode | Behavior |
+|------|----------|
+| `'preserve'` (default) | After resize, keep authored units on `width` / `height` (`50%` stays `%`). |
+| `'px'` | Always write px strings to the DOM. |
+
+Pass `length` on the **binding**, not the engine:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Length } from '@neodrag/core';
+  import { Resizable, resizeHandles } from '@neodrag/svelte/resize';
+
+  const resize = new Resizable({
+    length: new Length({ units: 'preserve' }),
+    minSize: { width: 220, height: 140 },
+    maxSize: { width: '92vw', height: '82vh' },
+    plugins: [resizeHandles({ edges: 'all' })],
+  });
+</script>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { Length } from '@neodrag/core';
+import { Resizable, resizeHandles } from '@neodrag/react/resize';
+
+const resize = new Resizable({
+  length: new Length({ units: 'preserve' }),
+  maxSize: { width: '92vw', height: '82vh' },
+  plugins: [resizeHandles({ edges: 'all' })],
+});
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { Length } from '@neodrag/core';
+import { Resizable, resizeHandles } from '@neodrag/vue/resize';
+
+const resize = new Resizable({
+  length: new Length({ units: 'preserve' }),
+  plugins: [resizeHandles({ edges: ['e'] })],
+});
+</script>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { Length } from '@neodrag/core';
+import { Resizable, useResizable, resizeHandles } from '@neodrag/solid';
+
+const resize = new Resizable({
+  length: new Length(),
+  plugins: [resizeHandles({ edges: ['e'] })],
+});
+const [, ref] = useResizable(resize);
+```
+
+</div>
+</FrameworkSwitch>
+
+**Without `Length`:** only numeric `SizeInput` works. Unit strings throw with a message to add `length: new Length()`.
+
+## Where `SizeInput` appears
+
+| Area | Examples |
+|------|----------|
+| **Resize** | `resizeHandles({ size, cornerSize })`, `sizeBounds({ minWidth, … })`, `Resizable` **`minSize` / `maxSize`** |
+| **Drag** | `grid([stepX, stepY])`, `bounds` margins, `threshold({ distance })`, `position` offsets |
+| **Custom plugins** | Any option you type as `SizeInput` and resolve with `ctx.length` / `resolveSizeInput` |
+
+### `minSize` / `maxSize` on `Resizable`
+
+Bounds without a separate plugin:
+
+```typescript
+new Resizable({
+  length: new Length(),
+  minSize: { width: 220, height: 140 },
+  maxSize: { width: '92vw', height: '82vh' },
+  plugins: [resizeHandles({ edges: 'all' })],
+});
+
+// Shorthand: same limit on width and height
+new Resizable({ length: new Length(), minSize: 40, plugins: [...] });
+```
+
+This injects `sizeBounds` internally. If you also pass `sizeBounds()` in `plugins`, the binding options take precedence.
+
+## Custom adapters
+
+Implement `LengthAdapter` or use `defineLengthAdapter` / `delegateLengthAdapter`. Helpers: `parseLengthString`, `resolveUnit`, `lengthContext`, `readBoxSizePx` from `@neodrag/core`.
+
+Custom `resolvePx` may accept tokens outside `CssLengthString` (e.g. design-system names); the built-in `Length` class only accepts `SizeInput` as documented here.
+
+## Related
+
+- **[Resize](/docs/svelte/plugin/resize)** — handles, bounds, presets
+- **[Core](/docs/core)** — `engine.resizable`, `engine.draggable`, sensors

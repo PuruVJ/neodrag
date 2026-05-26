@@ -8,6 +8,8 @@ tagline: 'A lightweight directive to make your elements draggable.'
 npm i @neodrag/core@next @neodrag/vue@next
 ```
 
+Import built-in plugins from `@neodrag/core/plugins` or `@neodrag/vue/plugins`. Drop and sortable helpers are under `@neodrag/vue/drop` (`sortable`, `sortableItemPlugins`). Use `v-droppable` with the same reactive plugin input as `v-draggable`.
+
 ## Usage
 
 Basic usage
@@ -26,7 +28,8 @@ With plugins
 
 ```vue
 <script setup>
-import { vDraggable, axis, grid } from '@neodrag/vue';
+import { vDraggable } from '@neodrag/vue';
+import { axis, grid } from '@neodrag/vue/plugins';
 </script>
 
 <template>
@@ -55,11 +58,10 @@ For dynamic behavior that changes during runtime:
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { vDraggable, axis, useCompartment } from '@neodrag/vue';
+import { vDraggable, axis } from '@neodrag/vue';
 
 const currentAxis = ref('x');
 
-const axisComp = useCompartment(() => axis(currentAxis.value));
 
 const plugins = () => [axisComp];
 </script>
@@ -85,20 +87,12 @@ import {
   bounds,
   BoundsFrom,
   grid,
-  useCompartment,
 } from '@neodrag/vue';
 
 const currentAxis = ref('x');
 const gridSize = ref(20);
 const enableBounds = ref(false);
 
-const axisComp = useCompartment(() => axis(currentAxis.value));
-const gridComp = useCompartment(() =>
-  grid([gridSize.value, gridSize.value]),
-);
-const boundsComp = useCompartment(() =>
-  enableBounds.value ? bounds(BoundsFrom.parent()) : null,
-);
 
 const plugins = () => [axisComp, gridComp, boundsComp];
 </script>

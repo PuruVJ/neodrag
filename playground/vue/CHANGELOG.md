@@ -1,5 +1,40 @@
 # demo
 
+## 0.0.11-next.9
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @neodrag/vue@3.0.0-next.9
+
+## 0.0.11-next.8
+
+### Patch Changes
+
+- Updated dependencies [[`a3a20b0`](https://github.com/PuruVJ/neodrag/commit/a3a20b03a5ebcd804ee9c1de7028aaaf424bc5cc)]:
+  - @neodrag/vue@3.0.0-next.8
+
+## 0.0.11-next.7
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @neodrag/vue@3.0.0-next.7
+
+## 0.0.11-next.6
+
+### Patch Changes
+
+- Updated dependencies [[`2f9d410`](https://github.com/PuruVJ/neodrag/commit/2f9d410b5b3ec7885e8ac67af9e15ca5663052ca)]:
+  - @neodrag/vue@3.0.0-next.6
+
+## 0.0.11-next.5
+
+### Patch Changes
+
+- Updated dependencies [[`8c1ad10`](https://github.com/PuruVJ/neodrag/commit/8c1ad10c857078d4b82d14b01ba3e2c5954792da), [`8c1ad10`](https://github.com/PuruVJ/neodrag/commit/8c1ad10c857078d4b82d14b01ba3e2c5954792da)]:
+  - @neodrag/vue@3.0.0-next.5
+
 ## 0.0.11-next.4
 
 ### Patch Changes

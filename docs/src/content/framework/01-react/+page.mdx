@@ -8,6 +8,8 @@ tagline: 'A lightweight react hook to make your elements draggable.'
 npm i @neodrag/core@next @neodrag/react@next
 ```
 
+Import built-in plugins from `@neodrag/core/plugins` or `@neodrag/react/plugins`. Sortable lists use `@neodrag/react/drop` — prefer `useSortable` (stable instance + container `dropRef`) and `useSortableItem` per row. Low-level `sortable()` is still available when you want full control.
+
 ## Usage
 
 Basic usage
@@ -28,7 +30,8 @@ With plugins
 
 ```tsx
 import { useRef } from 'react';
-import { useDraggable, axis, grid } from '@neodrag/react';
+import { useDraggable } from '@neodrag/react';
+import { axis, grid } from '@neodrag/react/plugins';
 
 function App() {
   const draggableRef = useRef<HTMLDivElement>(null);
@@ -85,17 +88,13 @@ For dynamic behavior that changes during runtime:
 
 ```tsx
 import { useRef, useState } from 'react';
-import { useDraggable, axis, useCompartment } from '@neodrag/react';
+import { useDraggable, axis } from '@neodrag/react';
 
 function App() {
   const elementRef = useRef<HTMLDivElement>(null);
   const [currentAxis, setCurrentAxis] = useState<'x' | 'y'>('x');
 
-  const axisCompartment = useCompartment(
-    () => axis(currentAxis),
-    [currentAxis],
-  );
-
+  
   useDraggable(elementRef, () => [axisCompartment]);
 
   return (
@@ -123,7 +122,6 @@ import {
   bounds,
   BoundsFrom,
   grid,
-  useCompartment,
 } from '@neodrag/react';
 
 function App() {
@@ -132,19 +130,7 @@ function App() {
   const [gridSize, setGridSize] = useState(20);
   const [enableBounds, setEnableBounds] = useState(false);
 
-  const axisComp = useCompartment(
-    () => axis(currentAxis),
-    [currentAxis],
-  );
-  const gridComp = useCompartment(
-    () => grid([gridSize, gridSize]),
-    [gridSize],
-  );
-  const boundsComp = useCompartment(
-    () => (enableBounds ? bounds(BoundsFrom.parent()) : null),
-    [enableBounds],
-  );
-
+      
   useDraggable(elementRef, () => [axisComp, gridComp, boundsComp]);
 
   return (
@@ -228,5 +214,19 @@ function App() {
       <div className="no-drag">❌ Can't drag from here</div>
     </div>
   );
+}
+```
+
+## Resizable
+
+```tsx
+import { useRef } from 'react';
+import { useResizable } from '@neodrag/react';
+import { resizeHandles, sizeBounds } from '@neodrag/react/resize';
+
+function Panel() {
+  const ref = useRef<HTMLDivElement>(null);
+  useResizable(ref, [resizeHandles({ edges: ['e', 's', 'se'] }), sizeBounds({ minWidth: 120 })]);
+  return <div ref={ref} style={{ width: 200, height: 120 }} />;
 }
 ```

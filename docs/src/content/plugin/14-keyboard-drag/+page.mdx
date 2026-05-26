@@ -1,0 +1,52 @@
+---
+title: 'keyboard-drag'
+nav_title: 'Keyboard drag'
+tagline: 'Move draggables with the keyboard using a unified InteractionInput pipeline.'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+Keyboard dragging is **additive**: `PointerSensor` stays the default pointer path. `KeyboardMoveSensor` (registered by default on `new Neodrag()`) submits `InteractionInput` with `kind: 'keyboard'` (no synthetic `PointerEvent`).
+
+## Plugins
+
+- **`keyboardDrag`** — registers step, axis, and hold-repeat tuning on the draggable node.
+- **`ariaDrag`** — `tabindex`, `role`, `aria-grabbed`, optional live region announcements.
+
+Requires a `Neodrag` with `KeyboardMoveSensor` registered (default when `defaultSensors` is not `false`). See [Sensors](/framework/06-sensors).
+
+## Grab model
+
+1. Focus the draggable.
+2. **Space** toggles grab.
+3. **Arrow keys** move by `step` (with slow → fast repeat after `speedupDelay`).
+4. **Space** again or **Escape** ends the session.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { keyboardDrag, ariaDrag } from '@neodrag/core';
+  import { Draggable } from '@neodrag/svelte';
+
+  const drag = new Draggable({
+    plugins: [
+      keyboardDrag({ step: 8, fastStep: 24 }),
+      ariaDrag({ label: 'Card', liveRegion: () => document.getElementById('live') }),
+    ],
+  });
+</script>
+
+<div id="live" class="sr-only" aria-live="polite"></div>
+<div tabindex="0" {@attach drag.attachment}>Card</div>
+```
+
+</div>
+</FrameworkSwitch>
+
+## InteractionInput
+
+Plugin hooks receive `input: InteractionInput` instead of `PointerEvent`. Use `input.clientX` / `input.clientY` for all kinds, or `input.kind === 'pointer'` when you need hit-testing on `input.native`.
+
+See `@neodrag/core/interaction` for builders (`pointerToInput`, `keyboardToInput`) and guards.

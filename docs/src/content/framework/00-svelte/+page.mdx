@@ -1,10 +1,10 @@
 ---
 title: '@neodrag/svelte'
 nav_title: 'svelte'
-tagline: 'A lightweight Svelte Attachment to make your elements draggable.'
+tagline: 'A lightweight Svelte attachment to make your elements draggable.'
 ---
 
-A lightweight Svelte library to make your elements draggable using Svelte 5 attachments or legacy actions.
+A lightweight Svelte library to make your elements draggable with Svelte 5 **attachments** and the `{@attach}` syntax.
 
 ## Installation
 
@@ -12,137 +12,139 @@ A lightweight Svelte library to make your elements draggable using Svelte 5 atta
 npm i @neodrag/core@next @neodrag/svelte@next
 ```
 
-## Svelte 5 Usage (Recommended)
+Requires **Svelte 5**.
 
-Neodrag for Svelte 5 uses the new **attachments** feature with the `{@attach}` syntax for better performance and reactivity.
+## Plugins
 
-### Basic Usage
+Import built-in drag plugins from `@neodrag/core/plugins` or `@neodrag/svelte/plugins` (not the main `@neodrag/svelte` entry). Drop and sortable helpers live under `@neodrag/svelte/drop`.
+
+## Usage
+
+Create a **`Draggable`** once in `<script>` (stable attachment), then attach it. Use **static** plugins in the array; wrap only dynamic parts in `() =>`:
+
+### Basic
 
 ```svelte
 <script>
-  import { draggable } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  
+
+  const drag = new Draggable({ plugins: [] });
 </script>
 
-<div {@attach draggable()}>Drag me around!</div>
+<div {@attach drag.attachment}>Drag me around!</div>
 ```
 
-### With Plugins
+### With plugins
 
 ```svelte
 <script>
-  import {
-    draggable,
-    axis,
-    grid,
-    bounds,
-    BoundsFrom,
-  } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  import { axis, grid, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
+
+  const dragX = new Draggable({ plugins: [axis('x'), grid([20, 20])] });
+  const dragBounds = new Draggable({ plugins: [bounds(BoundsFrom.parent())] });
 </script>
 
-<div {@attach draggable([axis('x'), grid([20, 20])])}>
-  Horizontal only, snapped to 20px grid
-</div>
+<div {@attach dragX.attachment}>Horizontal only, snapped to 20px grid</div>
 
-<div {@attach draggable([bounds(BoundsFrom.parent())])}>
-  Constrained to parent element
-</div>
+<div {@attach dragBounds.attachment}>Constrained to parent element</div>
 ```
 
-### Reactive Plugins with Compartments
-
-Svelte 5's reactivity integrates seamlessly with Neodrag's compartments:
+### Reactive plugins
 
 ```svelte
 <script>
-  import { draggable, axis, Compartment } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  import { axis, position } from '@neodrag/svelte/plugins';
 
-  let currentAxis = $state('x');
+  let pos = $state({ x: 0, y: 0 });
 
-  // Compartment automatically updates when currentAxis changes
-  const axisCompartment = Compartment.of(() => axis(currentAxis));
+  const drag = new Draggable({
+    plugins: [axis('x'), () => position({ current: pos })],
+  });
 </script>
 
-<div {@attach draggable(() => [axisCompartment])}>
+<div {@attach drag.attachment}>…</div>
+```
+
+### Reactive axis switching
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+  import { axis } from '@neodrag/svelte/plugins';
+
+  let currentAxis = $state<'x' | 'y'>('x');
+
+  const drag = new Draggable({
+    plugins: [() => axis(currentAxis)],
+  });
+</script>
+
+<div {@attach drag.attachment}>
   Currently draggable on: {currentAxis} axis
 </div>
 
-<button
-  onclick={() => (currentAxis = currentAxis === 'x' ? 'y' : 'x')}
->
+<button onclick={() => (currentAxis = currentAxis === 'x' ? 'y' : 'x')}>
   Switch to {currentAxis === 'x' ? 'Y' : 'X'} axis
 </button>
 ```
 
-> NOTE: Compartment.of is reactive, its function body is run inside a `$effect.pre`.
+## Advanced examples
 
-## Advanced Examples
-
-### Draggable Modal with Handle
+### Draggable modal with handle
 
 ```svelte
 <script>
-  import {
-    draggable,
-    controls,
-    ControlFrom,
-    bounds,
-    BoundsFrom,
-    events,
-  } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  import { controls, ControlFrom, bounds, BoundsFrom, events } from '@neodrag/svelte/plugins';
 
   let dragPosition = $state({ x: 0, y: 0 });
+
+  const drag = new Draggable({
+    plugins: [
+      controls({ allow: ControlFrom.selector('.drag-handle') }),
+      bounds(BoundsFrom.viewport()),
+      events({
+        onDrag: (data) => {
+          dragPosition = data.offset;
+        },
+      }),
+    ],
+  });
 </script>
 
-<div
-  {@attach draggable([
-    controls({ allow: ControlFrom.selector('.drag-handle') }),
-    bounds(BoundsFrom.viewport()),
-    events({
-      onDrag: (data) => {
-        dragPosition = data.offset;
-      },
-    }),
-  ])}
->
+<div {@attach drag.attachment}>
   <div class="drag-handle">⋮⋮ Drag Handle</div>
   <div>Modal Content</div>
   <div>
-    Position: x:{dragPosition.x.toFixed(0)}, y:{dragPosition.y.toFixed(
-      0,
-    )}
+    Position: x:{dragPosition.x.toFixed(0)}, y:{dragPosition.y.toFixed(0)}
   </div>
 </div>
 ```
 
-### Dynamic Grid Snapping
+### Dynamic grid snapping
 
 ```svelte
 <script>
-  import {
-    draggable,
-    grid,
-    axis,
-    Compartment,
-  } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  import { grid, axis } from '@neodrag/svelte/plugins';
 
   let gridSize = $state(20);
-  let lockAxis = $state('both');
+  let lockAxis = $state<'both' | 'x' | 'y'>('both');
 
-  const gridCompartment = Compartment.of(() =>
-    grid([gridSize, gridSize]),
-  );
-  const axisCompartment = Compartment.of(() => axis(lockAxis));
+  const drag = new Draggable({
+    plugins: [
+      () => grid([gridSize, gridSize]),
+      () => (lockAxis === 'both' ? axis(null) : axis(lockAxis)),
+    ],
+  });
 </script>
 
 <label>
   Grid size: {gridSize}px
-  <input
-    type="range"
-    bind:value={gridSize}
-    min="10"
-    max="50"
-    step="5"
-  />
+  <input type="range" bind:value={gridSize} min="10" max="50" step="5" />
 </label>
 
 <label>
@@ -154,21 +156,17 @@ Svelte 5's reactivity integrates seamlessly with Neodrag's compartments:
   </select>
 </label>
 
-<div {@attach draggable(() => [gridCompartment, axisCompartment])}>
+<div {@attach drag.attachment}>
   Grid: {gridSize}px, Axis: {lockAxis}
 </div>
 ```
 
-### Card Stack with Events
+### Card stack with events
 
 ```svelte
 <script>
-  import {
-    draggable,
-    events,
-    bounds,
-    BoundsFrom,
-  } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  import { events, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
   let cards = $state([
     { id: 1, title: 'Task 1' },
@@ -176,20 +174,22 @@ Svelte 5's reactivity integrates seamlessly with Neodrag's compartments:
     { id: 3, title: 'Task 3' },
   ]);
 
-  let dragState = $state(null);
-</script>
+  let dragState = $state<{
+    cardId: number;
+    isDragging?: boolean;
+    position?: { x: number; y: number };
+  } | null>(null);
 
-{#each cards as card (card.id)}
-  <div
-    {@attach draggable([
+  const cardDrag = new Draggable({
+    plugins: [
       bounds(BoundsFrom.parent()),
       events({
         onDragStart: () => {
-          dragState = { cardId: card.id, isDragging: true };
+          dragState = { cardId: 0, isDragging: true };
         },
         onDrag: (data) => {
           dragState = {
-            cardId: card.id,
+            cardId: dragState?.cardId ?? 0,
             position: data.offset,
           };
         },
@@ -197,133 +197,99 @@ Svelte 5's reactivity integrates seamlessly with Neodrag's compartments:
           dragState = null;
         },
       }),
-    ])}
+    ],
+  });
+</script>
+
+{#each cards as card (card.id)}
+  <div
+    {@attach cardDrag.attachment}
+    onpointerdown={() => {
+      dragState = { cardId: card.id, isDragging: true };
+    }}
   >
     {card.title}
     {#if dragState?.cardId === card.id}
-      - Dragging at ({dragState.position?.x.toFixed(0)}, {dragState.position?.y.toFixed(
-        0,
-      )})
+      - Dragging at ({dragState.position?.x.toFixed(0)}, {dragState.position?.y.toFixed(0)})
     {/if}
   </div>
 {/each}
-
-{#if dragState}
-  <p>Currently dragging card {dragState.cardId}</p>
-{/if}
 ```
 
-## TypeScript Support
-
-Neodrag provides full TypeScript support for Svelte:
+## TypeScript
 
 ```svelte
 <script lang="ts">
-  import {
-    draggable,
-    axis,
-    bounds,
-    BoundsFrom,
-    type Plugin,
-    type DragEventData,
-  } from '@neodrag/svelte';
+  import { Draggable, type DragEventData } from '@neodrag/svelte';
+  import { axis, bounds, BoundsFrom, events, type Plugin } from '@neodrag/svelte/plugins';
 
   let dragData = $state<DragEventData | null>(null);
 
-  const plugins: Plugin[] = [
-    axis('x'),
-    bounds(BoundsFrom.viewport()),
-    events({
-      onDrag: (data: DragEventData) => {
-        dragData = data;
-      },
-    }),
-  ];
+  const drag = new Draggable({
+    plugins: [
+      axis('x'),
+      bounds(BoundsFrom.viewport()),
+      events({
+        onDrag: (data: DragEventData) => {
+          dragData = data;
+        },
+      }),
+    ] satisfies Plugin[],
+  });
 </script>
 
-<div {@attach draggable(plugins)}>TypeScript-enabled dragging</div>
+<div {@attach drag.attachment}>TypeScript-enabled dragging</div>
 ```
 
-## Legacy Svelte 3/4 Support
+## Shared engine (optional)
 
-For projects still using Svelte 4, import the legacy action:
-
-### Basic Legacy Usage
+Most apps only need `new Draggable({ plugins })`. For a custom default plugin stack or debugging, use the `Neodrag` class:
 
 ```svelte
 <script>
-  import {
-    legacyDraggable,
-    axis,
-    grid,
-  } from '@neodrag/svelte/legacy';
+  import { Draggable, Neodrag } from '@neodrag/svelte';
+  import { axis } from '@neodrag/svelte/plugins';
+
+  const engine = new Neodrag({
+    onError: (e) => console.error(e),
+  });
+
+  const drag = new Draggable({ plugins: [axis('x')], engine });
+
+  console.log(engine.instances.size);
 </script>
 
-<!-- ⚠️ Legacy action syntax for Svelte 4 -->
-<div use:legacyDraggable={[axis('x'), grid([10, 10])]}>
-  Drag me (Svelte 4)
-</div>
+<div {@attach drag.attachment}>Custom engine instance</div>
 ```
 
-### Legacy with Events
+`Draggable` uses `Neodrag.shared` by default. Pass a custom `engine` when you need separate engines on one page (uncommon).
+
+## Drop zones
+
+For drag-and-drop targets, import from `@neodrag/svelte/drop` and use `Droppable` the same way as `Draggable`:
 
 ```svelte
 <script>
-  import { legacyDraggable, events } from '@neodrag/svelte';
+  import { Droppable } from '@neodrag/svelte/drop';
+  import { highlight } from '@neodrag/core/drop/plugins';
 
-  let position = { x: 0, y: 0 };
+  const drop = new Droppable({ plugins: [highlight({ overClass: 'over' })] });
 </script>
 
-<div
-  use:legacyDraggable={[
-    events({
-      onDrag: (data) => {
-        position = data.offset;
-      },
-    }),
-  ]}
->
-  Position: {position.x}, {position.y}
-</div>
+<div {@attach drop.attachment}>Drop here</div>
 ```
 
-### Compartments
-
-`Compartment.of` is not available in the legacy action, you must manually mutate the compartment
-
-```ts
-import { legacyDraggable, Compartment } from '@neodrag/svelte/legacy';
-
-let currentAxis = 'x';
-const axisCompartment = new Compartment(() => axis(currentAxis));
-
-$: axisCompartment.current = axis(currentAxis);
-
-function toggleAxis() {
-  currentAxis = currentAxis === 'x' ? 'y' : 'x';
-}
-```
-
-### Deprecation Notice
-
-The `legacyDraggable` action is **deprecated** and will be removed in **Neodrag v4**. Please migrate to Svelte 5 and use the new `{@attach draggable()}` syntax for:
-
-- Better performance
-- Improved reactivity
-- Conditional application support
-- Component spreading support
-- Future-proof compatibility
-
-## Migration from Legacy
-
-**Svelte 4 (Legacy):**
+## Resizable
 
 ```svelte
-<div use:legacyDraggable={[axis('x')]}>Drag me</div>
-```
+<script>
+  import { Resizable } from '@neodrag/svelte/resize';
+  import { resizeHandles, sizeBounds } from '@neodrag/svelte/resize';
 
-**Svelte 5 (Recommended):**
+  const resize = new Resizable({
+    plugins: [resizeHandles({ edges: ['e', 's'] }), sizeBounds({ minWidth: 100 })],
+  });
+</script>
 
-```svelte
-<div {@attach draggable([axis('x')])}>Drag me</div>
+<div {@attach resize.attachment} style="width:200px;height:120px">Resize me</div>
 ```

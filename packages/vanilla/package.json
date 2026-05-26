@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/vanilla",
-	"version": "3.0.0-next.4",
+	"version": "3.0.0-next.9",
 	"description": "JS library to add dragging to your apps 😉",
 	"unpkg": "./dist/umd/index.js",
 	"jsdelivr": "./dist/umd/index.js",
@@ -15,17 +15,42 @@
 			"import": "./src/index.ts",
 			"default": "./src/index.ts"
 		},
+		"./plugins": {
+			"types": "./src/plugins.ts",
+			"import": "./src/plugins.ts",
+			"default": "./src/plugins.ts"
+		},
+		"./drop": {
+			"types": "./src/drop.ts",
+			"import": "./src/drop.ts"
+		},
+		"./resize": {
+			"types": "./src/resize.ts",
+			"import": "./src/resize.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
 		"exports": {
 			".": {
 				"types": "./dist/index.d.ts",
-				"import": {
-					"production": "./dist/min/index.js",
-					"development": "./dist/index.js"
-				},
-				"default": "./dist/min/index.js"
+				"import": "./dist/index.js",
+				"default": "./dist/index.js"
+			},
+			"./plugins": {
+				"types": "./dist/plugins.d.ts",
+				"import": "./dist/plugins.js",
+				"default": "./dist/plugins.js"
+			},
+			"./drop": {
+				"types": "./dist/drop.d.ts",
+				"import": "./dist/drop.js",
+				"default": "./dist/drop.js"
+			},
+			"./resize": {
+				"types": "./dist/resize.d.ts",
+				"import": "./dist/resize.js",
+				"default": "./dist/resize.js"
 			},
 			"./package.json": "./package.json"
 		}
@@ -54,13 +79,17 @@
 	},
 	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/vanilla#readme",
 	"scripts": {
-		"compile": "tsup",
-		"compile:watch": "tsup --watch",
+		"compile": "tsdown",
+		"compile:watch": "tsdown --watch",
 		"prepublishOnly": "turbo compile",
 		"pub": "pnpm compile && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm compile && pnpm publish --dry-run --no-git-checks --access public"
 	},
 	"peerDependencies": {
 		"@neodrag/core": "workspace:*"
+	},
+	"devDependencies": {
+		"@neodrag/core": "workspace:*",
+		"tsdown": "catalog:"
 	}
 }

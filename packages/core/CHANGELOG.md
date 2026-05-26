@@ -1,5 +1,40 @@
 # @neodrag/core
 
+## 3.0.0-next.8
+
+### Patch Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`f221917`](https://github.com/PuruVJ/neodrag/commit/f221917bb2c59031384c8667c240fa6aaef2e917) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Fix floating-point precision bug in drag calculations at large coordinates (issue #232)
+
+  This fix addresses a critical precision issue where dragging elements at large coordinates with small movements caused floating-point precision loss, resulting in incorrect element positioning. The delta calculation has been optimized to use inverse scale compensation, and the expensive inverse_scale calculation is now cached as an instance property for improved performance.
+
+  - Fixed precision loss in delta calculations at large coordinates
+  - Optimized performance by caching inverse_scale calculation
+  - Added comprehensive cross-browser tests to detect precision bugs
+  - Tests now properly fail with buggy code and pass with the fix applied
+
+## 3.0.0-next.7
+
+### Patch Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`a3a20b0`](https://github.com/PuruVJ/neodrag/commit/a3a20b03a5ebcd804ee9c1de7028aaaf424bc5cc) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Fix types of Compartment
+
+## 3.0.0-next.6
+
+### Major Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`45e637d`](https://github.com/PuruVJ/neodrag/commit/45e637d2fd0518ebd7b3f6fbf4cf722345b73ee8) Thanks [@PuruVJ](https://github.com/PuruVJ)! - breaking: switch grid from ceil to round
+
+## 3.0.0-next.5
+
+### Minor Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`8c1ad10`](https://github.com/PuruVJ/neodrag/commit/8c1ad10c857078d4b82d14b01ba3e2c5954792da) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Add shouldRecompute to controls
+
+### Patch Changes
+
+- [#182](https://github.com/PuruVJ/neodrag/pull/182) [`8c1ad10`](https://github.com/PuruVJ/neodrag/commit/8c1ad10c857078d4b82d14b01ba3e2c5954792da) Thanks [@PuruVJ](https://github.com/PuruVJ)! - redo shouldRecompute to incldue setup, and rename to start, drag and end
+
 ## 3.0.0-next.4
 
 ### Minor Changes

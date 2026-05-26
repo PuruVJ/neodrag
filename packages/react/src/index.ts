@@ -1,88 +1,341 @@
-import { DEFAULTS, DraggableFactory } from '@neodrag/core';
 import {
-	Compartment,
-	DragEventData,
-	PluginContext,
-	PluginInput,
-	unstable_definePlugin,
-	type Plugin,
-} from '@neodrag/core/plugins';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+	Draggable as CoreDraggable,
+	DroppableBinding,
+	Resizable as CoreResizable,
+	Neodrag,
+	hasReactiveSlots,
+	type DragEventData,
+	type DragPlugin,
+	type DragPluginList,
+	type DropPluginList,
+	type ResizeApplier,
+	type ResizePluginList,
+} from '@neodrag/core';
+import { defineDragPlugin } from '@neodrag/core/plugins';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-const factory = new DraggableFactory(DEFAULTS);
+export type { DragEventData, DragPluginList, ResizeApplier, ResizePluginList };
+export { Neodrag, CoreDraggable as Draggable, CoreResizable as Resizable };
 
-interface DragState extends DragEventData {
+export interface DragState extends DragEventData {
 	isDragging: boolean;
 }
+
+export type DragSyncMode = 'full' | 'start-end' | false;
 
 const defaultState: DragState = {
 	offset: { x: 0, y: 0 },
 	rootNode: null as unknown as HTMLElement,
-	currentNode: null as unknown as HTMLElement,
+	visualNode: null as unknown as HTMLElement,
 	isDragging: false,
 	event: null as unknown as PointerEvent,
 };
 
-const create_sync_plugin = (setState: React.Dispatch<React.SetStateAction<DragState>>) => {
-	const update_state = (
-		ctx: PluginContext,
-		event: PointerEvent,
-		overrides: Partial<DragState> = {},
-	) =>
-		ctx.effect.immediate(() =>
-			setState((prev) => ({
-				...prev,
-				offset: { ...ctx.offset },
+const createSyncPlugin = (
+	setState: React.Dispatch<React.SetStateAction<DragState>>,
+	mode: DragSyncMode,
+) =>
+	defineDragPlugin(() => ({
+		key: Symbol('neodrag.react-state-sync'),
+		phase: 'post',
+		skipOnCancel: true,
+
+		start(ctx, _, event) {
+			setState({
+				offset: { x: ctx.offset.x, y: ctx.offset.y },
 				rootNode: ctx.rootNode,
-				currentNode: ctx.currentlyDraggedNode,
+				visualNode: ctx.session.visual.node,
+				isDragging: true,
 				event,
-				...overrides,
-			})),
-		);
+			});
+		},
 
-	return unstable_definePlugin(() => ({
-		name: 'rss', // react-state-sync
-		priority: -1000,
-		cancelable: false,
-		liveUpdate: true,
-		start: (ctx, _, event) => update_state(ctx, event, { isDragging: true }),
-		drag: (ctx, _, event) => update_state(ctx, event),
-		end: (ctx, _, event) => update_state(ctx, event, { isDragging: false }),
-	}));
-};
+		drag(ctx, _, event) {
+			if (mode !== 'full') return;
+			setState({
+				offset: { x: ctx.offset.x, y: ctx.offset.y },
+				rootNode: ctx.rootNode,
+				visualNode: ctx.session.visual.node,
+				isDragging: true,
+				event,
+			});
+		},
 
-const resolve_plugins = (plugins: PluginInput, sync_plugin: Plugin) =>
-	typeof plugins === 'function' ? () => plugins().concat(sync_plugin) : plugins.concat(sync_plugin);
+		end(ctx, _, event) {
+			setState({
+				offset: { x: ctx.offset.x, y: ctx.offset.y },
+				rootNode: ctx.rootNode,
+				visualNode: ctx.session.visual.node,
+				isDragging: false,
+				event,
+			});
+		},
+	}))();
 
-export const wrapper =
-	(draggableFactory: DraggableFactory) =>
-	(ref: React.RefObject<HTMLElement | SVGElement | null>, plugins: PluginInput = []) => {
-		const [state, set_state] = useState<DragState>(defaultState);
-		const sync_plugin = useRef(create_sync_plugin(set_state));
-		const resolvedPlugins = useRef(resolve_plugins(plugins, sync_plugin.current));
-
-		useEffect(() => {
-			if (!ref.current) return;
-			return draggableFactory.draggable(ref.current, resolvedPlugins.current);
-		}, []);
-
-		return state;
-	};
-
-export function useCompartment(reactive: () => Plugin, deps?: React.DependencyList) {
-	const compartment = useRef<Compartment>();
-
-	if (!compartment.current) {
-		compartment.current = new Compartment(reactive);
-	}
-
-	useLayoutEffect(() => {
-		compartment.current!.current = reactive();
-	}, deps);
-
-	return compartment.current;
+function withSync(plugins: DragPluginList, sync: DragPlugin | null): DragPluginList {
+	if (!sync) return plugins;
+	return [...plugins, sync];
 }
 
-export const useDraggable = wrapper(factory);
-export * from '@neodrag/core/plugins';
-export const instances = factory.instances;
+type UseDraggableSlots = DragPluginList;
+
+function useDraggableBinding(
+	slots: UseDraggableSlots,
+	withState: boolean,
+	syncMode: DragSyncMode,
+	externalRef?: React.RefObject<HTMLElement | SVGElement | null>,
+) {
+	const [state, setState] = useState<DragState>(defaultState);
+	const sync = useRef(withState && syncMode ? createSyncPlugin(setState, syncMode) : null);
+	const bindingRef = useRef<CoreDraggable | null>(null);
+	const slotsRef = useRef(slots);
+	slotsRef.current = slots;
+
+	const pluginList = withSync(slots, sync.current);
+
+	if (!bindingRef.current) {
+		bindingRef.current = new CoreDraggable({ plugins: pluginList });
+	}
+
+	const attachRef = useCallback((node: HTMLElement | SVGElement | null) => {
+		const binding = bindingRef.current;
+		if (!binding) return;
+		if (!node) {
+			binding.detach();
+			return;
+		}
+		binding.attach(node);
+	}, []);
+
+	useLayoutEffect(() => {
+		const binding = bindingRef.current;
+		if (!binding) return;
+		const list = withSync(slotsRef.current, sync.current);
+		if (!hasReactiveSlots(list)) return;
+		binding.update(list);
+	});
+
+	useEffect(() => () => bindingRef.current?.destroy(), []);
+
+	useLayoutEffect(() => {
+		if (!externalRef) return;
+		attachRef(externalRef.current);
+	});
+
+	useEffect(() => {
+		if (!externalRef) return;
+		let cancelled = false;
+		const tryAttach = () => {
+			if (cancelled) return;
+			if (externalRef.current) {
+				attachRef(externalRef.current);
+				return;
+			}
+			requestAnimationFrame(tryAttach);
+		};
+		tryAttach();
+		return () => {
+			cancelled = true;
+			attachRef(null);
+		};
+	}, [externalRef, attachRef]);
+
+	return {
+		ref: attachRef,
+		state: withState ? state : defaultState,
+	};
+}
+
+export function useDraggable(
+	slots?: UseDraggableSlots,
+	options?: { syncState?: DragSyncMode },
+): {
+	ref: (node: HTMLElement | SVGElement | null) => void;
+	state: DragState;
+};
+
+export function useDraggable(
+	ref: React.RefObject<HTMLElement | SVGElement | null>,
+	slots?: UseDraggableSlots,
+	options?: { syncState?: DragSyncMode },
+): DragState;
+
+export function useDraggable(
+	refOrSlots: React.RefObject<HTMLElement | SVGElement | null> | UseDraggableSlots = [],
+	maybeSlotsOrOptions?: UseDraggableSlots | { syncState?: DragSyncMode },
+	maybeOptions?: { syncState?: DragSyncMode },
+) {
+	const isRefForm =
+		refOrSlots !== null &&
+		typeof refOrSlots === 'object' &&
+		'current' in refOrSlots &&
+		!Array.isArray(refOrSlots);
+
+	const options = (
+		isRefForm ? maybeOptions : maybeSlotsOrOptions
+	) as { syncState?: DragSyncMode } | undefined;
+	const syncMode = options?.syncState ?? 'start-end';
+
+	if (isRefForm) {
+		const ref = refOrSlots as React.RefObject<HTMLElement | SVGElement | null>;
+		const slots = (maybeSlotsOrOptions as UseDraggableSlots) ?? [];
+		const { state } = useDraggableBinding(slots, true, syncMode, ref);
+		return state;
+	}
+
+	const slots = refOrSlots as UseDraggableSlots;
+	const { ref, state } = useDraggableBinding(slots, true, syncMode);
+	return { ref, state };
+}
+
+export function useDroppable(slots?: DropPluginList): {
+	ref: (node: HTMLElement | SVGElement | null) => void;
+};
+
+export function useDroppable(
+	ref: React.RefObject<HTMLElement | SVGElement | null>,
+	slots?: DropPluginList,
+): void;
+
+export function useDroppable(
+	refOrSlots: React.RefObject<HTMLElement | SVGElement | null> | DropPluginList = [],
+	maybeSlots: DropPluginList = [],
+) {
+	const isRefForm =
+		refOrSlots !== null &&
+		typeof refOrSlots === 'object' &&
+		'current' in refOrSlots &&
+		!Array.isArray(refOrSlots);
+
+	const slots = (isRefForm ? maybeSlots : refOrSlots) as DropPluginList;
+	const externalRef = isRefForm
+		? (refOrSlots as React.RefObject<HTMLElement | SVGElement | null>)
+		: undefined;
+
+	const bindingRef = useRef<DroppableBinding | null>(null);
+	const slotsRef = useRef(slots);
+	slotsRef.current = slots;
+
+	if (!bindingRef.current) {
+		bindingRef.current = new DroppableBinding({ plugins: slots });
+	}
+
+	const attachRef = useCallback((node: HTMLElement | SVGElement | null) => {
+		const binding = bindingRef.current;
+		if (!binding) return;
+		if (!node) {
+			binding.detach();
+			return;
+		}
+		binding.attach(node);
+	}, []);
+
+	useLayoutEffect(() => {
+		if (!hasReactiveSlots(slotsRef.current)) return;
+		bindingRef.current?.update(slotsRef.current);
+	});
+
+	useEffect(() => () => bindingRef.current?.destroy(), []);
+
+	useLayoutEffect(() => {
+		if (!externalRef) return;
+		attachRef(externalRef.current);
+	});
+
+	useEffect(() => {
+		if (!externalRef) return;
+		let cancelled = false;
+		const tryAttach = () => {
+			if (cancelled) return;
+			if (externalRef.current) {
+				attachRef(externalRef.current);
+				return;
+			}
+			requestAnimationFrame(tryAttach);
+		};
+		tryAttach();
+		return () => {
+			cancelled = true;
+			attachRef(null);
+		};
+	}, [externalRef, attachRef]);
+
+	if (isRefForm) return;
+	return { ref: attachRef };
+}
+
+export function useResizable(slots?: ResizePluginList): {
+	ref: (node: HTMLElement | SVGElement | null) => void;
+};
+
+export function useResizable(
+	ref: React.RefObject<HTMLElement | SVGElement | null>,
+	slots?: ResizePluginList,
+): void;
+
+export function useResizable(
+	refOrSlots: React.RefObject<HTMLElement | SVGElement | null> | ResizePluginList = [],
+	maybeSlots: ResizePluginList = [],
+) {
+	const isRefForm =
+		refOrSlots !== null &&
+		typeof refOrSlots === 'object' &&
+		'current' in refOrSlots &&
+		!Array.isArray(refOrSlots);
+
+	const slots = (isRefForm ? maybeSlots : refOrSlots) as ResizePluginList;
+	const externalRef = isRefForm
+		? (refOrSlots as React.RefObject<HTMLElement | SVGElement | null>)
+		: undefined;
+
+	const bindingRef = useRef<CoreResizable | null>(null);
+	const slotsRef = useRef(slots);
+	slotsRef.current = slots;
+
+	if (!bindingRef.current) {
+		bindingRef.current = new CoreResizable({ plugins: slots });
+	}
+
+	const attachRef = useCallback((node: HTMLElement | SVGElement | null) => {
+		const binding = bindingRef.current;
+		if (!binding) return;
+		if (!node) {
+			binding.detach();
+			return;
+		}
+		binding.attach(node);
+	}, []);
+
+	useLayoutEffect(() => {
+		if (!hasReactiveSlots(slotsRef.current)) return;
+		bindingRef.current?.update(slotsRef.current);
+	});
+
+	useEffect(() => () => bindingRef.current?.destroy(), []);
+
+	useLayoutEffect(() => {
+		if (!externalRef) return;
+		attachRef(externalRef.current);
+	});
+
+	useEffect(() => {
+		if (!externalRef) return;
+		let cancelled = false;
+		const tryAttach = () => {
+			if (cancelled) return;
+			if (externalRef.current) {
+				attachRef(externalRef.current);
+				return;
+			}
+			requestAnimationFrame(tryAttach);
+		};
+		tryAttach();
+		return () => {
+			cancelled = true;
+			attachRef(null);
+		};
+	}, [externalRef, attachRef]);
+
+	if (isRefForm) return;
+	return { ref: attachRef };
+}

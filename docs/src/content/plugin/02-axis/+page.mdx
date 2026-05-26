@@ -20,17 +20,22 @@ axis(null); // Free movement (removes constraint)
 
 ```svelte
 <script>
-  import { axis } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { axis } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [axis('x')] });
+	const drag_1 = new Draggable({ plugins: [axis('y')] });
+	const drag_2 = new Draggable({ plugins: [axis(null)] });
 </script>
 
 <!-- Horizontal slider -->
-<div {@attach draggable([axis('x')])}>Horizontal only</div>
+<div {@attach drag_0.attachment}>Horizontal only</div>
 
 <!-- Vertical scrollbar -->
-<div {@attach draggable([axis('y')])}>Vertical only</div>
+<div {@attach drag_1.attachment}>Vertical only</div>
 
 <!-- Free movement -->
-<div {@attach draggable([axis(null)])}>Any direction</div>
+<div {@attach drag_2.attachment}>Any direction</div>
 ```
 
 </div>
@@ -114,15 +119,15 @@ function AxisExamples() {
 <div slot="vanilla">
 
 ```typescript
-import { axis, Draggable } from '@neodrag/vanilla';
+import { axis, Neodrag } from '@neodrag/vanilla';
 
 const horizontal = document.getElementById('horizontal');
 const vertical = document.getElementById('vertical');
 const free = document.getElementById('free');
 
-new Draggable(horizontal, [axis('x')]);
-new Draggable(vertical, [axis('y')]);
-new Draggable(free, [axis(null)]);
+Neodrag.shared.draggable(horizontal, [axis('x')]);
+Neodrag.shared.draggable(vertical, [axis('y')]);
+Neodrag.shared.draggable(free, [axis(null)]);
 ```
 
 </div>
@@ -135,13 +140,15 @@ new Draggable(free, [axis(null)]);
 
 ```svelte
 <script>
-  import { draggable, axis, Compartment } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { axis } from '@neodrag/svelte/plugins';
 
   let currentAxis = $state('x');
-  const axisComp = Compartment.of(() => axis(currentAxis));
+  
+	const drag_0 = new Draggable({ plugins: [() => [axisComp]] });
 </script>
 
-<div {@attach draggable(() => [axisComp])}>
+<div {@attach drag_0.attachment}>
   Currently locked to: {currentAxis} axis
 </div>
 
@@ -158,17 +165,13 @@ new Draggable(free, [axis(null)]);
 
 ```tsx
 import { useState, useRef } from 'react';
-import { axis, useDraggable, useCompartment } from '@neodrag/react';
+import { axis, useDraggable } from '@neodrag/react';
 
 function DynamicAxis() {
   const ref = useRef<HTMLDivElement>(null);
   const [currentAxis, setCurrentAxis] = useState<'x' | 'y'>('x');
 
-  const axisComp = useCompartment(
-    () => axis(currentAxis),
-    [currentAxis],
-  );
-
+  
   useDraggable(ref, () => [axisComp]);
 
   return (
@@ -193,10 +196,9 @@ function DynamicAxis() {
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { axis, vDraggable, useCompartment } from '@neodrag/vue';
+import { axis, vDraggable } from '@neodrag/vue';
 
 const currentAxis = ref('x');
-const axisComp = useCompartment(() => axis(currentAxis.value));
 
 function switchAxis() {
   currentAxis.value = currentAxis.value === 'x' ? 'y' : 'x';
@@ -224,15 +226,13 @@ import { createSignal } from 'solid-js';
 import {
   axis,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function DynamicAxis() {
   const [ref, setRef] = createSignal<HTMLElement | null>(null);
   const [currentAxis, setCurrentAxis] = createSignal<'x' | 'y'>('x');
 
-  const axisComp = createCompartment(() => axis(currentAxis()));
-
+  
   useDraggable(ref, [axisComp]);
 
   function switchAxis() {
@@ -257,16 +257,15 @@ function DynamicAxis() {
 <div slot="vanilla">
 
 ```typescript
-import { axis, Draggable, Compartment } from '@neodrag/vanilla';
+import { axis, Neodrag } from '@neodrag/vanilla';
 
 let currentAxis = 'x';
-const axisComp = new Compartment(() => axis(currentAxis));
 
 const element = document.getElementById('draggable');
 const button = document.getElementById('switch-button');
 const display = document.getElementById('axis-display');
 
-new Draggable(element, () => [axisComp]);
+Neodrag.shared.draggable(element, () => [axisComp]);
 
 button.addEventListener('click', () => {
   currentAxis = currentAxis === 'x' ? 'y' : 'x';
@@ -287,13 +286,8 @@ button.addEventListener('click', () => {
 
 ```svelte
 <script>
-  import {
-    draggable,
-    axis,
-    bounds,
-    BoundsFrom,
-    events,
-  } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { axis, bounds, BoundsFrom, events } from '@neodrag/svelte/plugins';
 
   let track;
   let handle;
@@ -305,17 +299,19 @@ button.addEventListener('click', () => {
       value = Math.round((data.offset.x / trackWidth) * 100);
     }
   }
+
+	const drag_0 = new Draggable({ plugins: [
+      axis('x'),
+      bounds(() => BoundsFrom.element(track)),
+      events({ onDrag: handleDrag }),
+    ] });
 </script>
 
 <div bind:this={track} class="track">
   <div
     bind:this={handle}
     class="handle"
-    {@attach draggable([
-      axis('x'),
-      bounds(() => BoundsFrom.element(track)),
-      events({ onDrag: handleDrag }),
-    ])}
+    {@attach drag_0.attachment}
   />
 </div>
 <p>Value: {value}%</p>
@@ -459,7 +455,7 @@ import {
   bounds,
   BoundsFrom,
   events,
-  Draggable,
+  Neodrag,
 } from '@neodrag/vanilla';
 
 const track = document.getElementById('track');
@@ -472,7 +468,7 @@ function handleDrag(data) {
   valueDisplay.textContent = `${value}%`;
 }
 
-new Draggable(handle, [
+Neodrag.shared.draggable(handle, [
   axis('x'),
   bounds(BoundsFrom.element(track)),
   events({ onDrag: handleDrag }),

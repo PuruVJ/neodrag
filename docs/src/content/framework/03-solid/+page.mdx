@@ -8,6 +8,8 @@ tagline: 'A lightweight directive to make your elements draggable.'
 npm i @neodrag/core@next @neodrag/solid@next
 ```
 
+Import built-in plugins from `@neodrag/core/plugins` or `@neodrag/solid/plugins`. Drop and sortable helpers live under `@neodrag/solid/drop` (`useDroppable`, `sortable`, `useSortableItem`).
+
 ## Usage
 
 Basic usage
@@ -25,7 +27,7 @@ export const App: Component = () => {
 };
 ```
 
-> Note: Neodrag uses `useDraggable` instead of `createDraggable` because it's built on a shared [DraggableFactory](/docs/core#solid) instance from `@neodrag/core`, providing consistent APIs across all frameworks and better performance through shared event delegation.
+> Note: `@neodrag/solid` uses a shared engine from `@neodrag/core` with one set of delegated pointer listeners for the page, which keeps behavior consistent across frameworks and scales better with many draggables.
 
 With plugins
 
@@ -94,7 +96,6 @@ import { createSignal } from 'solid-js';
 import {
   useDraggable,
   axis,
-  createCompartment,
 } from '@neodrag/solid';
 
 export const App: Component = () => {
@@ -102,10 +103,7 @@ export const App: Component = () => {
     createSignal<HTMLElement | null>(null);
   const [currentAxis, setCurrentAxis] = createSignal<'x' | 'y'>('x');
 
-  const axisCompartment = createCompartment(() =>
-    axis(currentAxis()),
-  );
-
+  
   useDraggable(draggableRef, [axisCompartment]);
 
   return (
@@ -133,7 +131,6 @@ import {
   bounds,
   BoundsFrom,
   grid,
-  createCompartment,
 } from '@neodrag/solid';
 
 export const App: Component = () => {
@@ -143,14 +140,7 @@ export const App: Component = () => {
   const [gridSize, setGridSize] = createSignal(20);
   const [enableBounds, setEnableBounds] = createSignal(false);
 
-  const axisComp = createCompartment(() => axis(currentAxis()));
-  const gridComp = createCompartment(() =>
-    grid([gridSize(), gridSize()]),
-  );
-  const boundsComp = createCompartment(() =>
-    enableBounds() ? bounds(BoundsFrom.parent()) : null,
-  );
-
+      
   useDraggable(draggableRef, [axisComp, gridComp, boundsComp]);
 
   return (

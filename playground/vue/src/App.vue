@@ -1,14 +1,8 @@
 <script setup lang="ts">
-import { events, position, useCompartment, vDraggable } from '@neodrag/vue';
-import { ref, watchEffect } from 'vue';
+import { events, position, vDraggable } from '@neodrag/vue';
+import { ref } from 'vue';
 
 const pos = ref({ x: 0, y: 0 });
-
-const position_compartment = useCompartment(() =>
-	position({ current: { x: pos.value.x, y: pos.value.y } }),
-);
-
-watchEffect(() => console.log(pos.value));
 </script>
 
 <template>
@@ -16,7 +10,7 @@ watchEffect(() => console.log(pos.value));
 		class="box"
 		v-draggable="
 			() => [
-				position_compartment,
+				position({ current: pos }),
 				events({
 					onDrag: ({ offset }) => {
 						pos.x = offset.x;

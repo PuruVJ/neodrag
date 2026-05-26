@@ -24,7 +24,7 @@ One draggable to rule em all
 - 🧩 **Plugin-based** - Mix and match only what you need
 - ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
 - 🎯 **Framework agnostic** - Works with any JavaScript environment
-- 🔄 **Reactive** - `Compartment` for reactive plugin updates
+- 🔄 **Reactive** - pass `() => plugins`; the wrapper reconciles automatically
 
 # Installing
 
@@ -60,16 +60,15 @@ const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
 const dragInstance = new Draggable(document.querySelector('#drag'), plugins);
 ```
 
-Reactive plugins with Compartments
+Reactive plugins with reactive plugin factoriess
 
 ```typescript
-import { Draggable, axis, Compartment } from '@neodrag/vanilla';
+import { Draggable, axis } from '@neodrag/vanilla';
 
-const axisCompartment = new Compartment(() => axis('x'));
-const dragInstance = new Draggable(document.querySelector('#drag'), () => [axisCompartment]);
+const dragInstance = new Draggable(document.querySelector('#drag'), () => [axisreactive plugin factories]);
 
-// Update the axisCompartment. Automatically applies to the drag instance
-axisCompartment.current = axis('y');
+// Update the axisreactive plugin factories. Automatically applies to the drag instance
+axisreactive plugin factories.current = axis('y');
 ```
 
 Cleanup
@@ -109,7 +108,7 @@ For quick prototyping or projects without build tools:
 </script>
 ```
 
-### CDN with Reactive Compartments
+### CDN with Reactive reactive plugin factoriess
 
 ```html
 <script src="https://unpkg.com/@neodrag/vanilla@next/dist/umd/index.js"></script>
@@ -119,15 +118,15 @@ For quick prototyping or projects without build tools:
 
 <script>
 	var currentAxis = 'x';
-	var axisCompartment = new NeoDrag.Compartment(() => NeoDrag.axis(currentAxis));
+	var axisreactive plugin factories = new NeoDrag.reactive plugin factories(() => NeoDrag.axis(currentAxis));
 
 	var reactiveInstance = new NeoDrag.Draggable(document.getElementById('reactive-drag'), () => [
-		axisCompartment,
+		axisreactive plugin factories,
 	]);
 
 	function switchAxis() {
 		currentAxis = currentAxis === 'x' ? 'y' : 'x';
-		axisCompartment.current = NeoDrag.axis(currentAxis);
+		axisreactive plugin factories.current = NeoDrag.axis(currentAxis);
 	}
 </script>
 ```

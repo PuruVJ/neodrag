@@ -19,27 +19,24 @@ position({ default: { x: 0, y: 0 } }); // Set initial position
 
 ```svelte
 <script>
-  import { draggable, position, Compartment } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { position } from '@neodrag/svelte/plugins';
 
   let currentPos = $state({ x: 100, y: 50 });
   let defaultPos = $state({ x: 0, y: 0 });
 
-  // Reactive compartments for changing values
-  const currentPosComp = Compartment.of(() =>
-    position({ current: currentPos }),
-  );
-  const defaultPosComp = Compartment.of(() =>
-    position({ default: defaultPos }),
-  );
+    
+	const drag_0 = new Draggable({ plugins: [() => [position({ current: currentPos })]] });
+	const drag_1 = new Draggable({ plugins: [() => [position({ default: defaultPos })]] });
 </script>
 
 <!-- Force element to specific position -->
-<div {@attach draggable(() => [currentPosComp])}>
+<div {@attach drag_0.attachment}>
   Controlled position
 </div>
 
 <!-- Set initial position only -->
-<div {@attach draggable(() => [defaultPosComp])}>
+<div {@attach drag_1.attachment}>
   Initial position, then user controls
 </div>
 ```
@@ -53,7 +50,6 @@ import { useRef, useState } from 'react';
 import {
   position,
   useDraggable,
-  useCompartment,
 } from '@neodrag/react';
 
 function PositionExample() {
@@ -62,20 +58,11 @@ function PositionExample() {
 
   const [currentPos, setCurrentPos] = useState({ x: 100, y: 50 });
 
-  // Reactive compartments for changing values
-  const currentPosComp = useCompartment(
-    () => position({ current: currentPos }),
-    [currentPos],
-  );
-
+  
   // Static position can be used directly
-  const defaultPosComp = useCompartment(
-    () => position({ default: { x: 0, y: 0 } }),
-    [],
-  );
-
-  useDraggable(controlledRef, () => [currentPosComp]);
-  useDraggable(initialRef, () => [defaultPosComp]);
+  
+  useDraggable(controlledRef, () => [position({ current: currentPos })]);
+  useDraggable(initialRef, () => [position({ default: defaultPos })]);
 
   return (
     <div>
@@ -96,18 +83,12 @@ function PositionExample() {
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { position, vDraggable, useCompartment } from '@neodrag/vue';
+import { position, vDraggable } from '@neodrag/vue';
 
 const currentPos = ref({ x: 100, y: 50 });
 const defaultPos = ref({ x: 0, y: 0 });
 
 // Reactive compartments for changing values
-const currentPosComp = useCompartment(() =>
-  position({ current: currentPos.value }),
-);
-const defaultPosComp = useCompartment(() =>
-  position({ default: defaultPos.value }),
-);
 
 function moveElement() {
   currentPos.value = { x: 200, y: 100 };
@@ -115,9 +96,9 @@ function moveElement() {
 </script>
 
 <template>
-  <div v-draggable="() => [currentPosComp]">Controlled position</div>
+  <div v-draggable="() => [position({ current: currentPos })]">Controlled position</div>
 
-  <div v-draggable="() => [defaultPosComp]">
+  <div v-draggable="() => [position({ default: defaultPos })]">
     Initial position, then user controls
   </div>
 
@@ -134,7 +115,6 @@ import { createSignal } from 'solid-js';
 import {
   position,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function PositionExample() {
@@ -144,16 +124,9 @@ function PositionExample() {
     createSignal<HTMLElement | null>(null);
   const [currentPos, setCurrentPos] = createSignal({ x: 100, y: 50 });
 
-  // Reactive compartments for changing values
-  const currentPosComp = createCompartment(() =>
-    position({ current: currentPos() }),
-  );
-  const defaultPosComp = createCompartment(() =>
-    position({ default: { x: 0, y: 0 } }),
-  );
-
+    
   // Note: Solid uses array format, not function format
-  useDraggable(controlledRef, [currentPosComp]);
+  useDraggable(controlledRef, () => [position({ current: currentPos() })]);
   useDraggable(initialRef, [defaultPosComp]);
 
   return (
@@ -175,27 +148,24 @@ function PositionExample() {
 <div slot="vanilla">
 
 ```typescript
-import { Draggable, position, Compartment } from '@neodrag/vanilla';
+import { Neodrag, position } from '@neodrag/vanilla';
 
 const element = document.querySelector('#draggable');
 let currentPos = { x: 100, y: 50 };
 
 // Reactive compartment for changing values
-const currentPosComp = new Compartment(() =>
-  position({ current: currentPos }),
-);
 
 // Controlled position
-const controlled = new Draggable(element, () => [currentPosComp]);
+const controlled = Neodrag.shared.draggable(element, () => [position({ current: currentPos })]);
 
 // Move programmatically
 function moveElement() {
   currentPos = { x: 200, y: 100 };
-  currentPosComp.current = position({ current: currentPos });
+  handle.update(build());
 }
 
 // Static initial position can be used directly
-const initial = new Draggable(element, [
+const initial = Neodrag.shared.draggable(element, [
   position({ default: { x: 0, y: 0 } }),
 ]);
 ```
@@ -210,24 +180,12 @@ const initial = new Draggable(element, [
 
 ```svelte
 <script>
-  import {
-    draggable,
-    position,
-    events,
-    Compartment,
-  } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { position, events } from '@neodrag/svelte/plugins';
 
   let elementPosition = $state({ x: 50, y: 50 });
 
-  // Reactive compartments for changing values
-  const positionComp = Compartment.of(() =>
-    position({ current: elementPosition }),
-  );
-  const eventsComp = Compartment.of(() =>
-    events({
-      onDrag: (data) => {
-        elementPosition = data.offset;
-        savePosition(elementPosition);
+            savePosition(elementPosition);
       },
     }),
   );
@@ -236,9 +194,11 @@ const initial = new Draggable(element, [
   function savePosition(pos) {
     localStorage.setItem('elementPosition', JSON.stringify(pos));
   }
+
+	const drag_0 = new Draggable({ plugins: [() => [position({ current: elementPosition }), events({ onDrag: (data) => { elementPosition = data.offset; savePosition(elementPosition); } })]] });
 </script>
 
-<div {@attach draggable(() => [positionComp, eventsComp])}>
+<div {@attach drag_0.attachment}>
   Position synced with state
 </div>
 
@@ -255,7 +215,6 @@ import {
   position,
   events,
   useDraggable,
-  useCompartment,
 } from '@neodrag/react';
 
 function SyncedPosition() {
@@ -265,18 +224,8 @@ function SyncedPosition() {
     y: 50,
   });
 
-  // Reactive compartments for changing values
-  const positionComp = useCompartment(
-    () => position({ current: elementPosition }),
-    [elementPosition],
-  );
-
-  const eventsComp = useCompartment(
-    () =>
-      events({
-        onDrag: (data) => {
-          setElementPosition(data.offset);
-          localStorage.setItem(
+  
+            localStorage.setItem(
             'elementPosition',
             JSON.stringify(data.offset),
           );
@@ -285,7 +234,7 @@ function SyncedPosition() {
     [setElementPosition],
   );
 
-  useDraggable(ref, () => [positionComp, eventsComp]);
+  useDraggable(ref, () => [position({ current: elementPosition }), events({ onDrag: (data) => { elementPosition = data.offset; } })]);
 
   return (
     <div>
@@ -309,7 +258,6 @@ import {
   position,
   events,
   vDraggable,
-  useCompartment,
 } from '@neodrag/vue';
 
 const elementPosition = ref({ x: 50, y: 50 });
@@ -323,16 +271,10 @@ function updatePosition(data) {
 }
 
 // Reactive compartments for changing values
-const positionComp = useCompartment(() =>
-  position({ current: elementPosition.value }),
-);
-const eventsComp = useCompartment(() =>
-  events({ onDrag: updatePosition }),
-);
 </script>
 
 <template>
-  <div v-draggable="() => [positionComp, eventsComp]">
+  <div v-draggable="() => [position({ current: elementPosition }), events({ onDrag: (data) => { elementPosition = data.offset; } })]">
     Position synced with state
   </div>
 
@@ -352,7 +294,6 @@ import {
   position,
   events,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function SyncedPosition() {
@@ -362,15 +303,7 @@ function SyncedPosition() {
     y: 50,
   });
 
-  // Reactive compartments for changing values
-  const positionComp = createCompartment(() =>
-    position({ current: elementPosition() }),
-  );
-  const eventsComp = createCompartment(() =>
-    events({
-      onDrag: (data) => {
-        setElementPosition(data.offset);
-        localStorage.setItem(
+            localStorage.setItem(
           'elementPosition',
           JSON.stringify(data.offset),
         );
@@ -379,7 +312,7 @@ function SyncedPosition() {
   );
 
   // Note: Solid uses array format, not function format
-  useDraggable(divRef, [positionComp, eventsComp]);
+  useDraggable(divRef, () => [position({ current: elementPosition() }), events({ onDrag: (data) => setElementPosition(data.offset) })]);
 
   return (
     <div>
@@ -398,22 +331,14 @@ function SyncedPosition() {
 
 ```typescript
 import {
-  Draggable,
+  Neodrag,
   position,
   events,
-  Compartment,
 } from '@neodrag/vanilla';
 
 let elementPosition = { x: 50, y: 50 };
 
 // Reactive compartments for changing values
-const positionComp = new Compartment(() =>
-  position({ current: elementPosition }),
-);
-const eventsComp = new Compartment(() =>
-  events({
-    onDrag: (data) => {
-      elementPosition = data.offset;
       localStorage.setItem(
         'elementPosition',
         JSON.stringify(data.offset),
@@ -421,14 +346,12 @@ const eventsComp = new Compartment(() =>
       updateDisplay();
 
       // Update position compartment to reflect new position
-      positionComp.current = position({ current: elementPosition });
+      /* wrapper reconciles via () => [...] */
     },
   }),
 );
 
-const instance = new Draggable(element, () => [
-  positionComp,
-  eventsComp,
+const instance = Neodrag.shared.draggable(element, () => [
 ]);
 
 function updateDisplay() {
@@ -481,20 +404,7 @@ const formation = [
 ];
 
 // Use compartments for each element's position
-const leaderPosComp = new Compartment(() =>
-  position({ current: leaderPos }),
-);
-const follower1PosComp = new Compartment(() =>
-  position({ current: follower1Pos }),
-);
-const follower2PosComp = new Compartment(() =>
-  position({ current: follower2Pos }),
-);
 
-const leaderEventsComp = new Compartment(() =>
-  events({
-    onDrag: (data) => {
-      leaderPos = data.offset;
 
       // Update followers
       formation.forEach((item) => {
@@ -520,10 +430,6 @@ const targets = [
   { x: 300, y: 50 },
 ];
 
-const snapEventsComp = new Compartment(() =>
-  events({
-    onDragEnd: (data) => {
-      const snapDistance = 20;
       const nearest = targets.find((target) => {
         const distance = Math.sqrt(
           Math.pow(data.offset.x - target.x, 2) +
@@ -552,13 +458,10 @@ const staticPlugins = [
 ];
 
 // Reactive position needs compartment
-const positionComp = new Compartment(() =>
-  position({ current: { x: 100, y: 50 } }),
-);
 
 // Combine in plugins array
 const plugins = () => [
-  positionComp, // High priority - runs first
+  position({ current: leaderPos }), // High priority - runs first
   ...staticPlugins,
 ];
 ```

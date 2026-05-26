@@ -24,7 +24,7 @@ One draggable to rule em all
 - 🧩 **Plugin-based** - Mix and match only what you need
 - ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
 - 🎯 **Vue 3 Native** - Built for Vue 3 composition API with `v-draggable` directive
-- 🔄 **Reactive** - `useCompartment` for reactive plugin updates
+- 🔄 **Reactive** - pass `() => plugins`; the wrapper reconciles automatically
 
 # Installing
 
@@ -72,15 +72,14 @@ const plugins: Plugin[] = [axis('y'), grid([10, 10])];
 </template>
 ```
 
-Reactive plugins with useCompartment
+Reactive plugins with reactive plugin factories
 
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { vDraggable, axis, useCompartment } from '@neodrag/vue';
+import { vDraggable, axis } from '@neodrag/vue';
 
 const currentAxis = ref('x');
-const axisComp = useCompartment(() => axis(currentAxis.value));
 
 const plugins = () => [axisComp];
 </script>

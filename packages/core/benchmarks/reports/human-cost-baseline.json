@@ -1,0 +1,1690 @@
+{
+  "recordedAt": "2026-05-26T10:59:52.223Z",
+  "note": "Engine instrumentation (profile:true). Spans are inclusive/nested. unattributed ≈ harness + DOM + gaps.",
+  "scenarios": [
+    {
+      "id": "drag-move-by-delta",
+      "group": "drag",
+      "wall": {
+        "name": "drag/drag-move-by-delta",
+        "iterations": 40,
+        "hz": 2259.886999561593,
+        "meanMs": 0.4425000011920929,
+        "medianMs": 0.40000003576278687,
+        "p99Ms": 0.6000000238418579,
+        "minMs": 0.2999999523162842,
+        "maxMs": 0.6000000238418579
+      },
+      "snapshot": {
+        "wallMs": 17.700000047683716,
+        "spans": {
+          "bind.install": {
+            "totalMs": 0.3999999165534973,
+            "count": 40,
+            "meanMs": 0.009999997913837433,
+            "pctOfWall": 2.259886528112426
+          },
+          "syncTransform": {
+            "totalMs": 0.7999999523162842,
+            "count": 640,
+            "meanMs": 0.001249999925494194,
+            "pctOfWall": 4.519773729723662
+          },
+          "interaction.start": {
+            "totalMs": 1.800000011920929,
+            "count": 40,
+            "meanMs": 0.04500000029802322,
+            "pctOfWall": 10.169491565377047
+          },
+          "threshold.check": {
+            "totalMs": 0,
+            "count": 80,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "interaction.move": {
+            "totalMs": 3.3999999165534973,
+            "count": 640,
+            "meanMs": 0.005312499869614839,
+            "pctOfWall": 19.20903902482437
+          },
+          "session.syncPointer": {
+            "totalMs": 0.19999998807907104,
+            "count": 640,
+            "meanMs": 0.0003124999813735485,
+            "pctOfWall": 1.1299434324309154
+          },
+          "runStart": {
+            "totalMs": 0.10000002384185791,
+            "count": 40,
+            "meanMs": 0.002500000596046448,
+            "pctOfWall": 0.56497188459016
+          },
+          "applyDragDelta": {
+            "totalMs": 0.19999998807907104,
+            "count": 600,
+            "meanMs": 0.0003333333134651184,
+            "pctOfWall": 1.1299434324309154
+          },
+          "runDrag": {
+            "totalMs": 0.2999999523162842,
+            "count": 600,
+            "meanMs": 0.0004999999205271403,
+            "pctOfWall": 1.694914980271671
+          },
+          "runEnd": {
+            "totalMs": 0.5,
+            "count": 40,
+            "meanMs": 0.0125,
+            "pctOfWall": 2.824858749451991
+          },
+          "interaction.end": {
+            "totalMs": 0.9000000357627869,
+            "count": 40,
+            "meanMs": 0.02250000089406967,
+            "pctOfWall": 5.084745951063226
+          },
+          "bind.destroy": {
+            "totalMs": 0.40000003576278687,
+            "count": 40,
+            "meanMs": 0.010000000894069671,
+            "pctOfWall": 2.2598872016112352
+          }
+        },
+        "attributedMs": 8.999999821186066,
+        "unattributedMs": 8.70000022649765
+      },
+      "enginePctOfWall": 56.249993853271555,
+      "topSpans": [
+        {
+          "span": "interaction.move",
+          "totalMs": 0.08499999791383743,
+          "pctOfWall": 21.249997578561523,
+          "count": 640,
+          "callsPerRun": 16,
+          "meanMs": 0.005312499869614839
+        },
+        {
+          "span": "interaction.start",
+          "totalMs": 0.04500000029802322,
+          "pctOfWall": 11.249999068677509,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.04500000029802322
+        },
+        {
+          "span": "interaction.end",
+          "totalMs": 0.02250000089406967,
+          "pctOfWall": 5.6249997206032525,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.02250000089406967
+        },
+        {
+          "span": "syncTransform",
+          "totalMs": 0.019999998807907104,
+          "pctOfWall": 4.999999254942007,
+          "count": 640,
+          "callsPerRun": 16,
+          "meanMs": 0.001249999925494194
+        },
+        {
+          "span": "runEnd",
+          "totalMs": 0.0125,
+          "pctOfWall": 3.1249997206032525,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.0125
+        },
+        {
+          "span": "bind.destroy",
+          "totalMs": 0.010000000894069671,
+          "pctOfWall": 2.5,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.010000000894069671
+        },
+        {
+          "span": "bind.install",
+          "totalMs": 0.009999997913837433,
+          "pctOfWall": 2.499999254942007,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.009999997913837433
+        },
+        {
+          "span": "runDrag",
+          "totalMs": 0.007499998807907105,
+          "pctOfWall": 1.8749995343387542,
+          "count": 600,
+          "callsPerRun": 15,
+          "meanMs": 0.0004999999205271403
+        },
+        {
+          "span": "session.syncPointer",
+          "totalMs": 0.004999999701976776,
+          "pctOfWall": 1.2499998137355017,
+          "count": 640,
+          "callsPerRun": 16,
+          "meanMs": 0.0003124999813735485
+        },
+        {
+          "span": "applyDragDelta",
+          "totalMs": 0.004999999701976776,
+          "pctOfWall": 1.2499998137355017,
+          "count": 600,
+          "callsPerRun": 15,
+          "meanMs": 0.0003333333134651184
+        },
+        {
+          "span": "runStart",
+          "totalMs": 0.002500000596046448,
+          "pctOfWall": 0.6250000931322491,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.002500000596046448
+        },
+        {
+          "span": "threshold.check",
+          "totalMs": 0,
+          "pctOfWall": 0,
+          "count": 80,
+          "callsPerRun": 2,
+          "meanMs": 0
+        }
+      ]
+    },
+    {
+      "id": "drag-disabled",
+      "group": "drag",
+      "wall": {
+        "name": "drag/drag-disabled",
+        "iterations": 40,
+        "hz": 3225.806473321151,
+        "meanMs": 0.3099999979138374,
+        "medianMs": 0.30000001192092896,
+        "p99Ms": 0.40000003576278687,
+        "minMs": 0.19999998807907104,
+        "maxMs": 0.40000003576278687
+      },
+      "snapshot": {
+        "wallMs": 12.399999916553497,
+        "spans": {
+          "bind.install": {
+            "totalMs": 1.2999999523162842,
+            "count": 40,
+            "meanMs": 0.032499998807907104,
+            "pctOfWall": 10.483870653747642
+          },
+          "syncTransform": {
+            "totalMs": 0.10000002384185791,
+            "count": 40,
+            "meanMs": 0.002500000596046448,
+            "pctOfWall": 0.8064518106033366
+          },
+          "interaction.start": {
+            "totalMs": 0.7000001072883606,
+            "count": 40,
+            "meanMs": 0.017500002682209016,
+            "pctOfWall": 5.645162193540735
+          },
+          "threshold.check": {
+            "totalMs": 0.09999996423721313,
+            "count": 320,
+            "meanMs": 0.00031249988824129106,
+            "pctOfWall": 0.8064513299207142
+          },
+          "session.syncPointer": {
+            "totalMs": 0,
+            "count": 360,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "runStart": {
+            "totalMs": 0.20000004768371582,
+            "count": 320,
+            "meanMs": 0.000625000149011612,
+            "pctOfWall": 1.6129036212066732
+          },
+          "interaction.move": {
+            "totalMs": 0.8999999165534973,
+            "count": 320,
+            "meanMs": 0.002812499739229679,
+            "pctOfWall": 7.258063892016918
+          },
+          "runEnd": {
+            "totalMs": 0.5999999046325684,
+            "count": 40,
+            "meanMs": 0.01499999761581421,
+            "pctOfWall": 4.83870894088953
+          },
+          "interaction.end": {
+            "totalMs": 0.6999999284744263,
+            "count": 40,
+            "meanMs": 0.017499998211860657,
+            "pctOfWall": 5.645160751492867
+          }
+        },
+        "attributedMs": 4.599999845027924,
+        "unattributedMs": 7.800000071525574
+      },
+      "enginePctOfWall": 38.33333051866966,
+      "topSpans": [
+        {
+          "span": "bind.install",
+          "totalMs": 0.032499998807907104,
+          "pctOfWall": 10.833332505491079,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.032499998807907104
+        },
+        {
+          "span": "interaction.move",
+          "totalMs": 0.022499997913837434,
+          "pctOfWall": 7.499999006589293,
+          "count": 320,
+          "callsPerRun": 8,
+          "meanMs": 0.002812499739229679
+        },
+        {
+          "span": "interaction.start",
+          "totalMs": 0.017500002682209016,
+          "pctOfWall": 5.833333995607138,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.017500002682209016
+        },
+        {
+          "span": "interaction.end",
+          "totalMs": 0.017499998211860657,
+          "pctOfWall": 5.833332505491078,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.017499998211860657
+        },
+        {
+          "span": "runEnd",
+          "totalMs": 0.01499999761581421,
+          "pctOfWall": 4.999999006589293,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.01499999761581421
+        },
+        {
+          "span": "runStart",
+          "totalMs": 0.005000001192092896,
+          "pctOfWall": 1.6666669978035689,
+          "count": 320,
+          "callsPerRun": 8,
+          "meanMs": 0.000625000149011612
+        },
+        {
+          "span": "syncTransform",
+          "totalMs": 0.002500000596046448,
+          "pctOfWall": 0.8333334989017844,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.002500000596046448
+        },
+        {
+          "span": "threshold.check",
+          "totalMs": 0.0024999991059303285,
+          "pctOfWall": 0.833333002196431,
+          "count": 320,
+          "callsPerRun": 8,
+          "meanMs": 0.00031249988824129106
+        },
+        {
+          "span": "session.syncPointer",
+          "totalMs": 0,
+          "pctOfWall": 0,
+          "count": 360,
+          "callsPerRun": 9,
+          "meanMs": 0
+        }
+      ]
+    },
+    {
+      "id": "drag-axis-x",
+      "group": "drag",
+      "wall": {
+        "name": "drag/drag-axis-x",
+        "iterations": 40,
+        "hz": 2941.1764912126796,
+        "meanMs": 0.33999999761581423,
+        "medianMs": 0.30000001192092896,
+        "p99Ms": 0.5,
+        "minMs": 0.19999998807907104,
+        "maxMs": 0.5
+      },
+      "snapshot": {
+        "wallMs": 13.599999904632568,
+        "spans": {
+          "bind.install": {
+            "totalMs": 0.9000000953674316,
+            "count": 40,
+            "meanMs": 0.022500002384185792,
+            "pctOfWall": 6.617647806459651
+          },
+          "syncTransform": {
+            "totalMs": 1.0000001192092896,
+            "count": 440,
+            "meanMs": 0.0022727275436574762,
+            "pctOfWall": 7.352942104570599
+          },
+          "interaction.start": {
+            "totalMs": 0.40000003576278687,
+            "count": 40,
+            "meanMs": 0.010000000894069671,
+            "pctOfWall": 2.94117675417435
+          },
+          "threshold.check": {
+            "totalMs": 0,
+            "count": 40,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "session.syncPointer": {
+            "totalMs": 0.10000002384185791,
+            "count": 440,
+            "meanMs": 0.000227272781458768,
+            "pctOfWall": 0.7352942981109499
+          },
+          "runStart": {
+            "totalMs": 0.30000001192092896,
+            "count": 40,
+            "meanMs": 0.007500000298023224,
+            "pctOfWall": 2.2058824560634
+          },
+          "applyDragDelta": {
+            "totalMs": 0,
+            "count": 400,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "runDrag": {
+            "totalMs": 0.5999999642372131,
+            "count": 400,
+            "meanMs": 0.0014999999105930327,
+            "pctOfWall": 4.41176447385735
+          },
+          "interaction.move": {
+            "totalMs": 2.400000035762787,
+            "count": 400,
+            "meanMs": 0.006000000089406967,
+            "pctOfWall": 17.64705921023775
+          },
+          "runEnd": {
+            "totalMs": 0.20000004768371582,
+            "count": 40,
+            "meanMs": 0.005000001192092896,
+            "pctOfWall": 1.4705885962218999
+          },
+          "interaction.end": {
+            "totalMs": 0.6000000834465027,
+            "count": 40,
+            "meanMs": 0.015000002086162567,
+            "pctOfWall": 4.41176535039625
+          }
+        },
+        "attributedMs": 6.500000417232513,
+        "unattributedMs": 7.099999487400055
+      },
+      "enginePctOfWall": 54.16666799121428,
+      "topSpans": [
+        {
+          "span": "interaction.move",
+          "totalMs": 0.06000000089406967,
+          "pctOfWall": 19.999999503294646,
+          "count": 400,
+          "callsPerRun": 10,
+          "meanMs": 0.006000000089406967
+        },
+        {
+          "span": "syncTransform",
+          "totalMs": 0.02500000298023224,
+          "pctOfWall": 8.333333995607138,
+          "count": 440,
+          "callsPerRun": 11,
+          "meanMs": 0.0022727275436574762
+        },
+        {
+          "span": "bind.install",
+          "totalMs": 0.022500002384185792,
+          "pctOfWall": 7.500000496705354,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.022500002384185792
+        },
+        {
+          "span": "interaction.end",
+          "totalMs": 0.015000002086162567,
+          "pctOfWall": 5.000000496705353,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.015000002086162567
+        },
+        {
+          "span": "runDrag",
+          "totalMs": 0.014999999105930329,
+          "pctOfWall": 4.999999503294647,
+          "count": 400,
+          "callsPerRun": 10,
+          "meanMs": 0.001499999910593033
+        },
+        {
+          "span": "interaction.start",
+          "totalMs": 0.010000000894069671,
+          "pctOfWall": 3.333333498901784,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.010000000894069671
+        },
+        {
+          "span": "runStart",
+          "totalMs": 0.007500000298023224,
+          "pctOfWall": 2.5,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.007500000298023224
+        },
+        {
+          "span": "runEnd",
+          "totalMs": 0.005000001192092896,
+          "pctOfWall": 1.6666669978035689,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.005000001192092896
+        },
+        {
+          "span": "session.syncPointer",
+          "totalMs": 0.002500000596046448,
+          "pctOfWall": 0.8333334989017844,
+          "count": 440,
+          "callsPerRun": 11,
+          "meanMs": 0.000227272781458768
+        },
+        {
+          "span": "threshold.check",
+          "totalMs": 0,
+          "pctOfWall": 0,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0
+        },
+        {
+          "span": "applyDragDelta",
+          "totalMs": 0,
+          "pctOfWall": 0,
+          "count": 400,
+          "callsPerRun": 10,
+          "meanMs": 0
+        }
+      ]
+    },
+    {
+      "id": "drag-bounds-parent",
+      "group": "drag",
+      "wall": {
+        "name": "drag/drag-bounds-parent",
+        "iterations": 40,
+        "hz": 2597.4026014238248,
+        "meanMs": 0.3849999994039536,
+        "medianMs": 0.3999999761581421,
+        "p99Ms": 0.5,
+        "minMs": 0.19999998807907104,
+        "maxMs": 0.5
+      },
+      "snapshot": {
+        "wallMs": 15.399999976158142,
+        "spans": {
+          "bind.install": {
+            "totalMs": 1.2999999523162842,
+            "count": 40,
+            "meanMs": 0.032499998807907104,
+            "pctOfWall": 8.441558144992912
+          },
+          "syncTransform": {
+            "totalMs": 0.5999999642372131,
+            "count": 440,
+            "meanMs": 0.0013636362823573026,
+            "pctOfWall": 3.8961036699098486
+          },
+          "interaction.start": {
+            "totalMs": 1.1000000834465027,
+            "count": 40,
+            "meanMs": 0.027500002086162566,
+            "pctOfWall": 7.142857695775927
+          },
+          "threshold.check": {
+            "totalMs": 0,
+            "count": 40,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "session.syncPointer": {
+            "totalMs": 0.10000002384185791,
+            "count": 440,
+            "meanMs": 0.000227272781458768,
+            "pctOfWall": 0.6493508051732156
+          },
+          "runStart": {
+            "totalMs": 1.3000001907348633,
+            "count": 40,
+            "meanMs": 0.03250000476837158,
+            "pctOfWall": 8.441559693165507
+          },
+          "applyDragDelta": {
+            "totalMs": 0,
+            "count": 400,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "runDrag": {
+            "totalMs": 0.3999999761581421,
+            "count": 400,
+            "meanMs": 0.0009999999403953552,
+            "pctOfWall": 2.5974024466065657
+          },
+          "interaction.move": {
+            "totalMs": 2.6000001430511475,
+            "count": 400,
+            "meanMs": 0.006500000357627869,
+            "pctOfWall": 16.88311783815842
+          },
+          "runEnd": {
+            "totalMs": 0.10000002384185791,
+            "count": 40,
+            "meanMs": 0.002500000596046448,
+            "pctOfWall": 0.6493508051732156
+          },
+          "interaction.end": {
+            "totalMs": 0.20000004768371582,
+            "count": 40,
+            "meanMs": 0.005000001192092896,
+            "pctOfWall": 1.2987016103464313
+          }
+        },
+        "attributedMs": 7.7000004053115845,
+        "unattributedMs": 7.699999570846558
+      },
+      "enginePctOfWall": 48.12500540167125,
+      "topSpans": [
+        {
+          "span": "interaction.move",
+          "totalMs": 0.06500000357627869,
+          "pctOfWall": 16.25000186264526,
+          "count": 400,
+          "callsPerRun": 10,
+          "meanMs": 0.006500000357627869
+        },
+        {
+          "span": "runStart",
+          "totalMs": 0.03250000476837158,
+          "pctOfWall": 8.125001676380734,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.03250000476837158
+        },
+        {
+          "span": "bind.install",
+          "totalMs": 0.032499998807907104,
+          "pctOfWall": 8.125000186264526,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.032499998807907104
+        },
+        {
+          "span": "interaction.start",
+          "totalMs": 0.027500002086162566,
+          "pctOfWall": 6.87500093132263,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.027500002086162566
+        },
+        {
+          "span": "syncTransform",
+          "totalMs": 0.014999999105930329,
+          "pctOfWall": 3.75,
+          "count": 440,
+          "callsPerRun": 11,
+          "meanMs": 0.0013636362823573026
+        },
+        {
+          "span": "runDrag",
+          "totalMs": 0.009999999403953552,
+          "pctOfWall": 2.5,
+          "count": 400,
+          "callsPerRun": 10,
+          "meanMs": 0.0009999999403953552
+        },
+        {
+          "span": "interaction.end",
+          "totalMs": 0.005000001192092896,
+          "pctOfWall": 1.250000372529052,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.005000001192092896
+        },
+        {
+          "span": "session.syncPointer",
+          "totalMs": 0.002500000596046448,
+          "pctOfWall": 0.625000186264526,
+          "count": 440,
+          "callsPerRun": 11,
+          "meanMs": 0.000227272781458768
+        },
+        {
+          "span": "runEnd",
+          "totalMs": 0.002500000596046448,
+          "pctOfWall": 0.625000186264526,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.002500000596046448
+        },
+        {
+          "span": "threshold.check",
+          "totalMs": 0,
+          "pctOfWall": 0,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0
+        },
+        {
+          "span": "applyDragDelta",
+          "totalMs": 0,
+          "pctOfWall": 0,
+          "count": 400,
+          "callsPerRun": 10,
+          "meanMs": 0
+        }
+      ]
+    },
+    {
+      "id": "drop-once-matching",
+      "group": "drop",
+      "wall": {
+        "name": "drop/drop-once-matching",
+        "iterations": 40,
+        "hz": 2010.05024764397,
+        "meanMs": 0.49750000089406965,
+        "medianMs": 0.5,
+        "p99Ms": 0.6000000238418579,
+        "minMs": 0.3999999761581421,
+        "maxMs": 0.6000000238418579
+      },
+      "snapshot": {
+        "wallMs": 19.900000035762787,
+        "spans": {
+          "bind.install": {
+            "totalMs": 0.4999999403953552,
+            "count": 40,
+            "meanMs": 0.01249999850988388,
+            "pctOfWall": 2.512562510034135
+          },
+          "syncTransform": {
+            "totalMs": 0.9999999403953552,
+            "count": 520,
+            "meanMs": 0.0019230768084526062,
+            "pctOfWall": 5.0251253195890975
+          },
+          "interaction.start": {
+            "totalMs": 0.800000011920929,
+            "count": 40,
+            "meanMs": 0.020000000298023225,
+            "pctOfWall": 4.020100555192106
+          },
+          "threshold.check": {
+            "totalMs": 0.09999996423721313,
+            "count": 40,
+            "meanMs": 0.0024999991059303285,
+            "pctOfWall": 0.5025123821984959
+          },
+          "session.syncPointer": {
+            "totalMs": 0.09999996423721313,
+            "count": 520,
+            "meanMs": 0.00019230762353310217,
+            "pctOfWall": 0.5025123821984959
+          },
+          "runStart": {
+            "totalMs": 0.20000004768371582,
+            "count": 40,
+            "meanMs": 0.005000001192092896,
+            "pctOfWall": 1.005025363438647
+          },
+          "applyDragDelta": {
+            "totalMs": 0,
+            "count": 480,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "runDrag": {
+            "totalMs": 0.10000002384185791,
+            "count": 480,
+            "meanMs": 0.00020833338300387064,
+            "pctOfWall": 0.5025126817193235
+          },
+          "drop.queue": {
+            "totalMs": 0.699999988079071,
+            "count": 480,
+            "meanMs": 0.0014583333084980646,
+            "pctOfWall": 3.517587873472782
+          },
+          "interaction.move": {
+            "totalMs": 2.8999999165534973,
+            "count": 480,
+            "meanMs": 0.006041666492819786,
+            "pctOfWall": 14.572863876089622
+          },
+          "drop.hook": {
+            "totalMs": 0,
+            "count": 160,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "drop.update": {
+            "totalMs": 3,
+            "count": 40,
+            "meanMs": 0.075,
+            "pctOfWall": 15.075376857329776
+          },
+          "drop.flush": {
+            "totalMs": 3.099999964237213,
+            "count": 40,
+            "meanMs": 0.07749999910593033,
+            "pctOfWall": 15.57788923952827
+          },
+          "runEnd": {
+            "totalMs": 0.5,
+            "count": 40,
+            "meanMs": 0.0125,
+            "pctOfWall": 2.5125628095549626
+          },
+          "interaction.end": {
+            "totalMs": 4,
+            "count": 40,
+            "meanMs": 0.1,
+            "pctOfWall": 20.1005024764397
+          }
+        },
+        "attributedMs": 16.99999976158142,
+        "unattributedMs": 2.900000274181366
+      },
+      "enginePctOfWall": 84.9999988079071,
+      "topSpans": [
+        {
+          "span": "interaction.end",
+          "totalMs": 0.1,
+          "pctOfWall": 20,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.1
+        },
+        {
+          "span": "drop.flush",
+          "totalMs": 0.07749999910593033,
+          "pctOfWall": 15.499999821186067,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.07749999910593033
+        },
+        {
+          "span": "drop.update",
+          "totalMs": 0.075,
+          "pctOfWall": 15,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.075
+        },
+        {
+          "span": "interaction.move",
+          "totalMs": 0.07249999791383743,
+          "pctOfWall": 14.499999582767487,
+          "count": 480,
+          "callsPerRun": 12,
+          "meanMs": 0.006041666492819786
+        },
+        {
+          "span": "syncTransform",
+          "totalMs": 0.02499999850988388,
+          "pctOfWall": 4.999999701976776,
+          "count": 520,
+          "callsPerRun": 13,
+          "meanMs": 0.0019230768084526062
+        },
+        {
+          "span": "interaction.start",
+          "totalMs": 0.020000000298023225,
+          "pctOfWall": 4.000000059604645,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.020000000298023225
+        },
+        {
+          "span": "drop.queue",
+          "totalMs": 0.017499999701976778,
+          "pctOfWall": 3.4999999403953557,
+          "count": 480,
+          "callsPerRun": 12,
+          "meanMs": 0.0014583333084980648
+        },
+        {
+          "span": "runEnd",
+          "totalMs": 0.0125,
+          "pctOfWall": 2.5,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.0125
+        },
+        {
+          "span": "bind.install",
+          "totalMs": 0.01249999850988388,
+          "pctOfWall": 2.499999701976776,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.01249999850988388
+        },
+        {
+          "span": "runStart",
+          "totalMs": 0.005000001192092896,
+          "pctOfWall": 1.000000238418579,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.005000001192092896
+        },
+        {
+          "span": "runDrag",
+          "totalMs": 0.002500000596046448,
+          "pctOfWall": 0.5000001192092896,
+          "count": 480,
+          "callsPerRun": 12,
+          "meanMs": 0.00020833338300387067
+        },
+        {
+          "span": "threshold.check",
+          "totalMs": 0.0024999991059303285,
+          "pctOfWall": 0.4999998211860657,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.0024999991059303285
+        }
+      ]
+    },
+    {
+      "id": "drop-highlight-over",
+      "group": "drop",
+      "wall": {
+        "name": "drop/drop-highlight-over",
+        "iterations": 40,
+        "hz": 2453.9877372401997,
+        "meanMs": 0.4074999988079071,
+        "medianMs": 0.3999999761581421,
+        "p99Ms": 0.5999999642372131,
+        "minMs": 0.2999999523162842,
+        "maxMs": 0.5999999642372131
+      },
+      "snapshot": {
+        "wallMs": 16.299999952316284,
+        "spans": {
+          "bind.install": {
+            "totalMs": 0.5999998450279236,
+            "count": 40,
+            "meanMs": 0.014999996125698089,
+            "pctOfWall": 3.6809806551113615
+          },
+          "syncTransform": {
+            "totalMs": 0.7000000476837158,
+            "count": 80,
+            "meanMs": 0.008750000596046447,
+            "pctOfWall": 4.294478832708484
+          },
+          "interaction.start": {
+            "totalMs": 0.5999999642372131,
+            "count": 40,
+            "meanMs": 0.014999999105930329,
+            "pctOfWall": 3.6809813864566983
+          },
+          "threshold.check": {
+            "totalMs": 0,
+            "count": 40,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "session.syncPointer": {
+            "totalMs": 0.09999996423721313,
+            "count": 80,
+            "meanMs": 0.0012499995529651642,
+            "pctOfWall": 0.6134967149064489
+          },
+          "runStart": {
+            "totalMs": 0.30000001192092896,
+            "count": 40,
+            "meanMs": 0.007500000298023224,
+            "pctOfWall": 1.8404908760646834
+          },
+          "applyDragDelta": {
+            "totalMs": 0,
+            "count": 40,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "runDrag": {
+            "totalMs": 0,
+            "count": 40,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "drop.queue": {
+            "totalMs": 0.30000007152557373,
+            "count": 40,
+            "meanMs": 0.007500001788139343,
+            "pctOfWall": 1.8404912417373516
+          },
+          "interaction.move": {
+            "totalMs": 1.1000001430511475,
+            "count": 40,
+            "meanMs": 0.027500003576278687,
+            "pctOfWall": 6.7484671550249535
+          },
+          "drop.hook": {
+            "totalMs": 0.19999998807907104,
+            "count": 160,
+            "meanMs": 0.001249999925494194,
+            "pctOfWall": 1.226993795485566
+          },
+          "drop.update": {
+            "totalMs": 2.700000047683716,
+            "count": 40,
+            "meanMs": 0.0675000011920929,
+            "pctOfWall": 16.564417518909483
+          },
+          "drop.flush": {
+            "totalMs": 2.899999976158142,
+            "count": 40,
+            "meanMs": 0.07249999940395355,
+            "pctOfWall": 17.79141094872238
+          },
+          "runEnd": {
+            "totalMs": 0.6000000238418579,
+            "count": 40,
+            "meanMs": 0.015000000596046448,
+            "pctOfWall": 3.680981752129367
+          },
+          "interaction.end": {
+            "totalMs": 3.899999976158142,
+            "count": 40,
+            "meanMs": 0.09749999940395356,
+            "pctOfWall": 23.92638029182288
+          }
+        },
+        "attributedMs": 14.000000059604645,
+        "unattributedMs": 2.2999998927116394
+      },
+      "enginePctOfWall": 87.50000558793577,
+      "topSpans": [
+        {
+          "span": "interaction.end",
+          "totalMs": 0.09749999940395356,
+          "pctOfWall": 24.375001303851683,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.09749999940395356
+        },
+        {
+          "span": "drop.flush",
+          "totalMs": 0.07249999940395355,
+          "pctOfWall": 18.125000931322628,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.07249999940395355
+        },
+        {
+          "span": "drop.update",
+          "totalMs": 0.0675000011920929,
+          "pctOfWall": 16.875001303851683,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.0675000011920929
+        },
+        {
+          "span": "interaction.move",
+          "totalMs": 0.027500003576278687,
+          "pctOfWall": 6.875001303851683,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.027500003576278687
+        },
+        {
+          "span": "syncTransform",
+          "totalMs": 0.017500001192092895,
+          "pctOfWall": 4.375000558793578,
+          "count": 80,
+          "callsPerRun": 2,
+          "meanMs": 0.008750000596046447
+        },
+        {
+          "span": "runEnd",
+          "totalMs": 0.015000000596046448,
+          "pctOfWall": 3.750000372529052,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.015000000596046448
+        },
+        {
+          "span": "interaction.start",
+          "totalMs": 0.014999999105930329,
+          "pctOfWall": 3.75,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.014999999105930329
+        },
+        {
+          "span": "bind.install",
+          "totalMs": 0.014999996125698089,
+          "pctOfWall": 3.749999254941896,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.014999996125698089
+        },
+        {
+          "span": "drop.queue",
+          "totalMs": 0.007500001788139343,
+          "pctOfWall": 1.875000558793578,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.007500001788139343
+        },
+        {
+          "span": "runStart",
+          "totalMs": 0.007500000298023224,
+          "pctOfWall": 1.875000186264526,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.007500000298023224
+        },
+        {
+          "span": "drop.hook",
+          "totalMs": 0.004999999701976776,
+          "pctOfWall": 1.25,
+          "count": 160,
+          "callsPerRun": 4,
+          "meanMs": 0.001249999925494194
+        },
+        {
+          "span": "session.syncPointer",
+          "totalMs": 0.0024999991059303285,
+          "pctOfWall": 0.624999813735474,
+          "count": 80,
+          "callsPerRun": 2,
+          "meanMs": 0.0012499995529651642
+        }
+      ]
+    },
+    {
+      "id": "sortable-reorder",
+      "group": "sortable",
+      "wall": {
+        "name": "sortable/sortable-reorder",
+        "iterations": 40,
+        "hz": 1520.912543392238,
+        "meanMs": 0.6575000017881394,
+        "medianMs": 0.699999988079071,
+        "p99Ms": 0.800000011920929,
+        "minMs": 0.5,
+        "maxMs": 0.800000011920929
+      },
+      "snapshot": {
+        "wallMs": 26.300000071525574,
+        "spans": {
+          "bind.install": {
+            "totalMs": 1.899999737739563,
+            "count": 120,
+            "meanMs": 0.015833331147829692,
+            "pctOfWall": 7.2243335839251595
+          },
+          "syncTransform": {
+            "totalMs": 0.6999998688697815,
+            "count": 760,
+            "meanMs": 0.0009210524590391862,
+            "pctOfWall": 2.661596452342431
+          },
+          "interaction.start": {
+            "totalMs": 0.8000001311302185,
+            "count": 40,
+            "meanMs": 0.020000003278255463,
+            "pctOfWall": 3.041825585378461
+          },
+          "threshold.check": {
+            "totalMs": 0,
+            "count": 40,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "session.syncPointer": {
+            "totalMs": 0.09999996423721313,
+            "count": 680,
+            "meanMs": 0.00014705877093707813,
+            "pctOfWall": 0.3802279998678817
+          },
+          "runStart": {
+            "totalMs": 0.2999999523162842,
+            "count": 40,
+            "meanMs": 0.007499998807907105,
+            "pctOfWall": 1.1406842262372747
+          },
+          "applyDragDelta": {
+            "totalMs": 0.10000002384185791,
+            "count": 640,
+            "meanMs": 0.000156250037252903,
+            "pctOfWall": 0.3802282265015114
+          },
+          "runDrag": {
+            "totalMs": 0.40000009536743164,
+            "count": 640,
+            "meanMs": 0.000625000149011612,
+            "pctOfWall": 1.5209129060060456
+          },
+          "drop.queue": {
+            "totalMs": 0.30000007152557373,
+            "count": 640,
+            "meanMs": 0.00046875011175870893,
+            "pctOfWall": 1.140684679504534
+          },
+          "interaction.move": {
+            "totalMs": 3.2000001668930054,
+            "count": 640,
+            "meanMs": 0.005000000260770321,
+            "pctOfWall": 12.167300981712065
+          },
+          "drop.hook": {
+            "totalMs": 1.2000000476837158,
+            "count": 160,
+            "meanMs": 0.007500000298023224,
+            "pctOfWall": 4.5627378114836175
+          },
+          "drop.update": {
+            "totalMs": 4.1000001430511475,
+            "count": 40,
+            "meanMs": 0.10250000357627868,
+            "pctOfWall": 15.58935411369115
+          },
+          "drop.flush": {
+            "totalMs": 4.1000001430511475,
+            "count": 40,
+            "meanMs": 0.10250000357627868,
+            "pctOfWall": 15.58935411369115
+          },
+          "runEnd": {
+            "totalMs": 0.30000001192092896,
+            "count": 40,
+            "meanMs": 0.007500000298023224,
+            "pctOfWall": 1.1406844528709044
+          },
+          "interaction.end": {
+            "totalMs": 5.200000166893005,
+            "count": 40,
+            "meanMs": 0.13000000417232513,
+            "pctOfWall": 19.771863698673258
+          }
+        },
+        "attributedMs": 22.700000524520874,
+        "unattributedMs": 3.5999995470046997
+      },
+      "enginePctOfWall": 81.07143182535566,
+      "topSpans": [
+        {
+          "span": "interaction.end",
+          "totalMs": 0.13000000417232513,
+          "pctOfWall": 18.571429483744577,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.13000000417232513
+        },
+        {
+          "span": "drop.update",
+          "totalMs": 0.10250000357627868,
+          "pctOfWall": 14.642857903120483,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.10250000357627868
+        },
+        {
+          "span": "drop.flush",
+          "totalMs": 0.10250000357627868,
+          "pctOfWall": 14.642857903120483,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.10250000357627868
+        },
+        {
+          "span": "interaction.move",
+          "totalMs": 0.08000000417232514,
+          "pctOfWall": 11.428572219245302,
+          "count": 640,
+          "callsPerRun": 16,
+          "meanMs": 0.005000000260770321
+        },
+        {
+          "span": "bind.install",
+          "totalMs": 0.047499993443489076,
+          "pctOfWall": 6.785713464629879,
+          "count": 120,
+          "callsPerRun": 3,
+          "meanMs": 0.015833331147829692
+        },
+        {
+          "span": "drop.hook",
+          "totalMs": 0.030000001192092896,
+          "pctOfWall": 4.285714528998554,
+          "count": 160,
+          "callsPerRun": 4,
+          "meanMs": 0.007500000298023224
+        },
+        {
+          "span": "interaction.start",
+          "totalMs": 0.020000003278255463,
+          "pctOfWall": 2.857143374121928,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.020000003278255463
+        },
+        {
+          "span": "syncTransform",
+          "totalMs": 0.017499996721744536,
+          "pctOfWall": 2.49999957425253,
+          "count": 760,
+          "callsPerRun": 19,
+          "meanMs": 0.0009210524590391861
+        },
+        {
+          "span": "runDrag",
+          "totalMs": 0.010000002384185792,
+          "pctOfWall": 1.4285717934978315,
+          "count": 640,
+          "callsPerRun": 16,
+          "meanMs": 0.000625000149011612
+        },
+        {
+          "span": "drop.queue",
+          "totalMs": 0.007500001788139343,
+          "pctOfWall": 1.0714288451233736,
+          "count": 640,
+          "callsPerRun": 16,
+          "meanMs": 0.00046875011175870893
+        },
+        {
+          "span": "runEnd",
+          "totalMs": 0.007500000298023224,
+          "pctOfWall": 1.0714286322496385,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.007500000298023224
+        },
+        {
+          "span": "runStart",
+          "totalMs": 0.007499998807907105,
+          "pctOfWall": 1.0714284193759036,
+          "count": 40,
+          "callsPerRun": 1,
+          "meanMs": 0.007499998807907105
+        }
+      ]
+    },
+    {
+      "id": "engine-two-dragables",
+      "group": "engine",
+      "wall": {
+        "name": "engine/engine-two-dragables",
+        "iterations": 40,
+        "hz": 1970.4433601677656,
+        "meanMs": 0.5074999973177909,
+        "medianMs": 0.5,
+        "p99Ms": 0.699999988079071,
+        "minMs": 0.30000001192092896,
+        "maxMs": 0.699999988079071
+      },
+      "snapshot": {
+        "wallMs": 20.29999989271164,
+        "spans": {
+          "bind.install": {
+            "totalMs": 1.3000000715255737,
+            "count": 80,
+            "meanMs": 0.016250000894069673,
+            "pctOfWall": 6.403941272887967
+          },
+          "syncTransform": {
+            "totalMs": 1.5,
+            "count": 1280,
+            "meanMs": 0.001171875,
+            "pctOfWall": 7.3891626006291204
+          },
+          "interaction.start": {
+            "totalMs": 1.7000000476837158,
+            "count": 80,
+            "meanMs": 0.021250000596046446,
+            "pctOfWall": 8.374384515608156
+          },
+          "threshold.check": {
+            "totalMs": 0,
+            "count": 160,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "interaction.move": {
+            "totalMs": 4.300000071525574,
+            "count": 1280,
+            "meanMs": 0.0033593750558793545,
+            "pctOfWall": 21.182266474146207
+          },
+          "session.syncPointer": {
+            "totalMs": 0.30000001192092896,
+            "count": 1280,
+            "meanMs": 0.00023437500931322575,
+            "pctOfWall": 1.4778325788496123
+          },
+          "runStart": {
+            "totalMs": 0.5,
+            "count": 80,
+            "meanMs": 0.00625,
+            "pctOfWall": 2.4630542002097067
+          },
+          "applyDragDelta": {
+            "totalMs": 0.4999999403953552,
+            "count": 1200,
+            "meanMs": 0.00041666661699612937,
+            "pctOfWall": 2.4630539065907655
+          },
+          "runDrag": {
+            "totalMs": 0.5,
+            "count": 1200,
+            "meanMs": 0.0004166666666666667,
+            "pctOfWall": 2.4630542002097067
+          },
+          "runEnd": {
+            "totalMs": 0.30000001192092896,
+            "count": 80,
+            "meanMs": 0.003750000149011612,
+            "pctOfWall": 1.4778325788496123
+          },
+          "interaction.end": {
+            "totalMs": 0.6000000238418579,
+            "count": 80,
+            "meanMs": 0.007500000298023224,
+            "pctOfWall": 2.9556651576992246
+          }
+        },
+        "attributedMs": 11.500000178813934,
+        "unattributedMs": 8.799999713897705
+      },
+      "enginePctOfWall": 57.50000089406967,
+      "topSpans": [
+        {
+          "span": "interaction.move",
+          "totalMs": 0.10750000178813934,
+          "pctOfWall": 21.50000035762787,
+          "count": 1280,
+          "callsPerRun": 32,
+          "meanMs": 0.0033593750558793545
+        },
+        {
+          "span": "interaction.start",
+          "totalMs": 0.04250000119209289,
+          "pctOfWall": 8.500000238418579,
+          "count": 80,
+          "callsPerRun": 2,
+          "meanMs": 0.021250000596046446
+        },
+        {
+          "span": "syncTransform",
+          "totalMs": 0.0375,
+          "pctOfWall": 7.5,
+          "count": 1280,
+          "callsPerRun": 32,
+          "meanMs": 0.001171875
+        },
+        {
+          "span": "bind.install",
+          "totalMs": 0.032500001788139346,
+          "pctOfWall": 6.5000003576278695,
+          "count": 80,
+          "callsPerRun": 2,
+          "meanMs": 0.016250000894069673
+        },
+        {
+          "span": "interaction.end",
+          "totalMs": 0.015000000596046448,
+          "pctOfWall": 3.0000001192092896,
+          "count": 80,
+          "callsPerRun": 2,
+          "meanMs": 0.007500000298023224
+        },
+        {
+          "span": "runStart",
+          "totalMs": 0.0125,
+          "pctOfWall": 2.5,
+          "count": 80,
+          "callsPerRun": 2,
+          "meanMs": 0.00625
+        },
+        {
+          "span": "runDrag",
+          "totalMs": 0.0125,
+          "pctOfWall": 2.5,
+          "count": 1200,
+          "callsPerRun": 30,
+          "meanMs": 0.0004166666666666667
+        },
+        {
+          "span": "applyDragDelta",
+          "totalMs": 0.01249999850988388,
+          "pctOfWall": 2.499999701976776,
+          "count": 1200,
+          "callsPerRun": 30,
+          "meanMs": 0.0004166666169961293
+        },
+        {
+          "span": "session.syncPointer",
+          "totalMs": 0.007500000298023224,
+          "pctOfWall": 1.5000000596046448,
+          "count": 1280,
+          "callsPerRun": 32,
+          "meanMs": 0.00023437500931322575
+        },
+        {
+          "span": "runEnd",
+          "totalMs": 0.007500000298023224,
+          "pctOfWall": 1.5000000596046448,
+          "count": 80,
+          "callsPerRun": 2,
+          "meanMs": 0.003750000149011612
+        },
+        {
+          "span": "threshold.check",
+          "totalMs": 0,
+          "pctOfWall": 0,
+          "count": 160,
+          "callsPerRun": 4,
+          "meanMs": 0
+        }
+      ]
+    },
+    {
+      "id": "steady-drag-loop",
+      "group": "hot",
+      "wall": {
+        "name": "hot/steady-drag-loop",
+        "iterations": 15,
+        "hz": 76.56967839337241,
+        "meanMs": 13.060000002384186,
+        "medianMs": 13.100000023841858,
+        "p99Ms": 13.800000011920929,
+        "minMs": 12.200000047683716,
+        "maxMs": 13.800000011920929
+      },
+      "snapshot": {
+        "wallMs": 195.9000000357628,
+        "spans": {
+          "bind.install": {
+            "totalMs": 0,
+            "count": 15,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "syncTransform": {
+            "totalMs": 26.09999966621399,
+            "count": 28815,
+            "meanMs": 0.0009057782289159809,
+            "pctOfWall": 13.323123870060883
+          },
+          "interaction.start": {
+            "totalMs": 12.600000083446503,
+            "count": 1800,
+            "meanMs": 0.007000000046359168,
+            "pctOfWall": 6.431853027639761
+          },
+          "threshold.check": {
+            "totalMs": 0,
+            "count": 1800,
+            "meanMs": 0,
+            "pctOfWall": 0
+          },
+          "session.syncPointer": {
+            "totalMs": 5.599999725818634,
+            "count": 30600,
+            "meanMs": 0.00018300652698753707,
+            "pctOfWall": 2.8586011867260432
+          },
+          "runStart": {
+            "totalMs": 0.20000004768371582,
+            "count": 1800,
+            "meanMs": 0.00011111113760206435,
+            "pctOfWall": 0.10209292886534178
+          },
+          "applyDragDelta": {
+            "totalMs": 3.299999952316284,
+            "count": 28800,
+            "meanMs": 0.00011458333167764876,
+            "pctOfWall": 1.6845329003133478
+          },
+          "runDrag": {
+            "totalMs": 3.8000001907348633,
+            "count": 28800,
+            "meanMs": 0.00013194445106718276,
+            "pctOfWall": 1.9397652833288153
+          },
+          "interaction.move": {
+            "totalMs": 66.60000079870224,
+            "count": 28800,
+            "meanMs": 0.0023125000277327166,
+            "pctOfWall": 33.99693761436651
+          },
+          "runEnd": {
+            "totalMs": 0.4999999403953552,
+            "count": 1800,
+            "meanMs": 0.00027777774466408625,
+            "pctOfWall": 0.2552322308851848
+          },
+          "interaction.end": {
+            "totalMs": 4.399999916553497,
+            "count": 1800,
+            "meanMs": 0.002444444398085276,
+            "pctOfWall": 2.246043856942445
+          }
+        },
+        "attributedMs": 123.10000032186508,
+        "unattributedMs": 72.7999997138977
+      },
+      "enginePctOfWall": 62.646310482353385,
+      "topSpans": [
+        {
+          "span": "interaction.move",
+          "totalMs": 4.440000053246816,
+          "pctOfWall": 33.893130115771484,
+          "count": 28800,
+          "callsPerRun": 1920,
+          "meanMs": 0.0023125000277327166
+        },
+        {
+          "span": "syncTransform",
+          "totalMs": 1.7399999777475992,
+          "pctOfWall": 13.282442554052047,
+          "count": 28815,
+          "callsPerRun": 1921,
+          "meanMs": 0.0009057782289159809
+        },
+        {
+          "span": "interaction.start",
+          "totalMs": 0.8400000055631002,
+          "pctOfWall": 6.412213771254269,
+          "count": 1800,
+          "callsPerRun": 120,
+          "meanMs": 0.007000000046359168
+        },
+        {
+          "span": "session.syncPointer",
+          "totalMs": 0.3733333150545756,
+          "pctOfWall": 2.849872628817657,
+          "count": 30600,
+          "callsPerRun": 2040,
+          "meanMs": 0.00018300652698753707
+        },
+        {
+          "span": "interaction.end",
+          "totalMs": 0.29333332777023313,
+          "pctOfWall": 2.239185704094425,
+          "count": 1800,
+          "callsPerRun": 120,
+          "meanMs": 0.002444444398085276
+        },
+        {
+          "span": "runDrag",
+          "totalMs": 0.2533333460489909,
+          "pctOfWall": 1.9338423327322667,
+          "count": 28800,
+          "callsPerRun": 1920,
+          "meanMs": 0.00013194445106718276
+        },
+        {
+          "span": "applyDragDelta",
+          "totalMs": 0.21999999682108562,
+          "pctOfWall": 1.6793892856541068,
+          "count": 28800,
+          "callsPerRun": 1920,
+          "meanMs": 0.00011458333167764876
+        },
+        {
+          "span": "runEnd",
+          "totalMs": 0.03333332935969035,
+          "pctOfWall": 0.25445289541239735,
+          "count": 1800,
+          "callsPerRun": 120,
+          "meanMs": 0.00027777774466408625
+        },
+        {
+          "span": "runStart",
+          "totalMs": 0.013333336512247721,
+          "pctOfWall": 0.10178119456474193,
+          "count": 1800,
+          "callsPerRun": 120,
+          "meanMs": 0.00011111113760206435
+        },
+        {
+          "span": "bind.install",
+          "totalMs": 0,
+          "pctOfWall": 0,
+          "count": 15,
+          "callsPerRun": 1,
+          "meanMs": 0
+        },
+        {
+          "span": "threshold.check",
+          "totalMs": 0,
+          "pctOfWall": 0,
+          "count": 1800,
+          "callsPerRun": 120,
+          "meanMs": 0
+        }
+      ]
+    }
+  ]
+}

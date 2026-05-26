@@ -23,14 +23,20 @@ controls({
 
 ```svelte
 <script>
-  import { controls, ControlFrom } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { controls, ControlFrom } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [
+    controls({ allow: ControlFrom.selector('.header') }),
+  ] });
+	const drag_1 = new Draggable({ plugins: [
+    controls({ block: ControlFrom.selector('button') }),
+  ] });
 </script>
 
 <!-- Only header can initiate dragging -->
 <div
-  {@attach draggable([
-    controls({ allow: ControlFrom.selector('.header') }),
-  ])}
+  {@attach drag_0.attachment}
 >
   <div class="header">Drag handle</div>
   <div class="content">Content (not draggable)</div>
@@ -38,9 +44,7 @@ controls({
 
 <!-- Anywhere except buttons -->
 <div
-  {@attach draggable([
-    controls({ block: ControlFrom.selector('button') }),
-  ])}
+  {@attach drag_1.attachment}
 >
   <p>Drag anywhere in this area</p>
   <button>Can't drag from here</button>
@@ -122,12 +126,8 @@ import { createSignal } from 'solid-js';
 import { controls, ControlFrom, useDraggable } from '@neodrag/solid';
 
 function ControlledDragging() {
-  const [allowRef, setAllowRef] = createSignal<HTMLElement | null>(
-    null,
-  );
-  const [blockRef, setBlockRef] = createSignal<HTMLElement | null>(
-    null,
-  );
+  const [allowRef, setAllowRef] = createSignal();
+  const [blockRef, setBlockRef] = createSignal();
 
   useDraggable(allowRef, [
     controls({ allow: ControlFrom.selector('.header') }),
@@ -157,16 +157,15 @@ function ControlledDragging() {
 <div slot="vanilla">
 
 ```typescript
-import { controls, ControlFrom, Draggable } from '@neodrag/vanilla';
+import { controls, ControlFrom, Neodrag } from '@neodrag/vanilla';
 
-const allowElement = document.getElementById('allow-only');
-const blockElement = document.getElementById('block-some');
+const allowElement = document.getElementById('allow-example');
+const blockElement = document.getElementById('block-example');
 
-new Draggable(allowElement, [
+Neodrag.shared.draggable(allowElement, [
   controls({ allow: ControlFrom.selector('.header') }),
 ]);
-
-new Draggable(blockElement, [
+Neodrag.shared.draggable(blockElement, [
   controls({ block: ControlFrom.selector('button') }),
 ]);
 ```
@@ -174,665 +173,29 @@ new Draggable(blockElement, [
 </div>
 </FrameworkSwitch>
 
-## ControlFrom Utilities
+## Complex Control Scenarios
 
-### Selector-Based Controls
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-```svelte
-<script>
-  import { controls, ControlFrom } from '@neodrag/svelte';
-</script>
-
-<!-- Single selector -->
-<div
-  {@attach draggable([
-    controls({ allow: ControlFrom.selector('.handle') }),
-  ])}
->
-  <div class="handle">Drag me</div>
-  <div>Not draggable</div>
-</div>
-
-<!-- Multiple selectors -->
-<div
-  {@attach draggable([
-    controls({
-      allow: ControlFrom.selector('.handle, .title, .grip'),
-    }),
-  ])}
->
-  <div class="title">Title bar</div>
-  <div class="handle">Handle</div>
-  <div class="grip">⋮⋮</div>
-  <div class="content">Content</div>
-</div>
-
-<!-- Block specific elements -->
-<div
-  {@attach draggable([
-    controls({
-      block: ControlFrom.selector('button, input, select'),
-    }),
-  ])}
->
-  <p>Draggable area</p>
-  <button>Button (blocked)</button>
-  <input placeholder="Input (blocked)" />
-</div>
-```
-
-</div>
-
-<div slot="react">
-
-```tsx
-import { useRef } from 'react';
-import { controls, ControlFrom, useDraggable } from '@neodrag/react';
-
-function SelectorControls() {
-  const singleRef = useRef<HTMLDivElement>(null);
-  const multiRef = useRef<HTMLDivElement>(null);
-  const blockRef = useRef<HTMLDivElement>(null);
-
-  useDraggable(singleRef, [
-    controls({ allow: ControlFrom.selector('.handle') }),
-  ]);
-
-  useDraggable(multiRef, [
-    controls({
-      allow: ControlFrom.selector('.handle, .title, .grip'),
-    }),
-  ]);
-
-  useDraggable(blockRef, [
-    controls({
-      block: ControlFrom.selector('button, input, select'),
-    }),
-  ]);
-
-  return (
-    <div>
-      <div ref={singleRef}>
-        <div className="handle">Drag me</div>
-        <div>Not draggable</div>
-      </div>
-
-      <div ref={multiRef}>
-        <div className="title">Title bar</div>
-        <div className="handle">Handle</div>
-        <div className="grip">⋮⋮</div>
-        <div className="content">Content</div>
-      </div>
-
-      <div ref={blockRef}>
-        <p>Draggable area</p>
-        <button>Button (blocked)</button>
-        <input placeholder="Input (blocked)" />
-      </div>
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<script setup>
-import { controls, ControlFrom, vDraggable } from '@neodrag/vue';
-
-const singleAllow = [
-  controls({ allow: ControlFrom.selector('.handle') }),
-];
-const multiAllow = [
-  controls({ allow: ControlFrom.selector('.handle, .title, .grip') }),
-];
-const blockSome = [
-  controls({ block: ControlFrom.selector('button, input, select') }),
-];
-</script>
-
-<template>
-  <div>
-    <div v-draggable="singleAllow">
-      <div class="handle">Drag me</div>
-      <div>Not draggable</div>
-    </div>
-
-    <div v-draggable="multiAllow">
-      <div class="title">Title bar</div>
-      <div class="handle">Handle</div>
-      <div class="grip">⋮⋮</div>
-      <div class="content">Content</div>
-    </div>
-
-    <div v-draggable="blockSome">
-      <p>Draggable area</p>
-      <button>Button (blocked)</button>
-      <input placeholder="Input (blocked)" />
-    </div>
-  </div>
-</template>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-import { createSignal } from 'solid-js';
-import { controls, ControlFrom, useDraggable } from '@neodrag/solid';
-
-function SelectorControls() {
-  const [singleRef, setSingleRef] = createSignal<HTMLElement | null>(
-    null,
-  );
-  const [multiRef, setMultiRef] = createSignal<HTMLElement | null>(
-    null,
-  );
-  const [blockRef, setBlockRef] = createSignal<HTMLElement | null>(
-    null,
-  );
-
-  useDraggable(singleRef, [
-    controls({ allow: ControlFrom.selector('.handle') }),
-  ]);
-
-  useDraggable(multiRef, [
-    controls({
-      allow: ControlFrom.selector('.handle, .title, .grip'),
-    }),
-  ]);
-
-  useDraggable(blockRef, [
-    controls({
-      block: ControlFrom.selector('button, input, select'),
-    }),
-  ]);
-
-  return (
-    <div>
-      <div ref={setSingleRef}>
-        <div class="handle">Drag me</div>
-        <div>Not draggable</div>
-      </div>
-
-      <div ref={setMultiRef}>
-        <div class="title">Title bar</div>
-        <div class="handle">Handle</div>
-        <div class="grip">⋮⋮</div>
-        <div class="content">Content</div>
-      </div>
-
-      <div ref={setBlockRef}>
-        <p>Draggable area</p>
-        <button>Button (blocked)</button>
-        <input placeholder="Input (blocked)" />
-      </div>
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vanilla">
-
-```typescript
-import { controls, ControlFrom, Draggable } from '@neodrag/vanilla';
-
-const single = document.getElementById('single-allow');
-const multi = document.getElementById('multi-allow');
-const block = document.getElementById('block-some');
-
-new Draggable(single, [
-  controls({ allow: ControlFrom.selector('.handle') }),
-]);
-
-new Draggable(multi, [
-  controls({ allow: ControlFrom.selector('.handle, .title, .grip') }),
-]);
-
-new Draggable(block, [
-  controls({ block: ControlFrom.selector('button, input, select') }),
-]);
-```
-
-</div>
-</FrameworkSwitch>
-
-### Element-Based Controls
+### Modal with Multiple Rules
 
 <FrameworkSwitch>
 <div slot="svelte">
 
 ```svelte
 <script>
-  import { controls, ControlFrom } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { controls, ControlFrom, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
-  let handleElement;
-  let blockElement;
-</script>
-
-<div
-  {@attach draggable([
-    controls({
-      allow: () => ControlFrom.elements([handleElement]),
-    }),
-  ])}
->
-  <div bind:this={handleElement}>Specific handle element</div>
-  <div>Not draggable</div>
-</div>
-
-<div
-  {@attach draggable([
-    controls({
-      block: () => ControlFrom.elements([blockElement]),
-    }),
-  ])}
->
-  <p>Draggable area</p>
-  <div bind:this={blockElement}>Blocked element</div>
-</div>
-```
-
-</div>
-
-<div slot="react">
-
-```tsx
-import { useRef } from 'react';
-import { controls, ControlFrom, useDraggable } from '@neodrag/react';
-
-function ElementControls() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const handleRef = useRef<HTMLDivElement>(null);
-  const blockContainerRef = useRef<HTMLDivElement>(null);
-  const blockRef = useRef<HTMLDivElement>(null);
-
-  useDraggable(containerRef, [
-    controls({
-      allow: () => ControlFrom.elements([handleRef.current!]),
-    }),
-  ]);
-
-  useDraggable(blockContainerRef, [
-    controls({
-      block: () => ControlFrom.elements([blockRef.current!]),
-    }),
-  ]);
-
-  return (
-    <div>
-      <div ref={containerRef}>
-        <div ref={handleRef}>Specific handle element</div>
-        <div>Not draggable</div>
-      </div>
-
-      <div ref={blockContainerRef}>
-        <p>Draggable area</p>
-        <div ref={blockRef}>Blocked element</div>
-      </div>
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<script setup>
-import { ref } from 'vue';
-import { controls, ControlFrom, vDraggable } from '@neodrag/vue';
-
-const handleElement = ref();
-const blockElement = ref();
-
-const allowControls = () => [
-  controls({
-    allow: () => ControlFrom.elements([handleElement.value]),
-  }),
-];
-
-const blockControls = () => [
-  controls({
-    block: () => ControlFrom.elements([blockElement.value]),
-  }),
-];
-</script>
-
-<template>
-  <div>
-    <div v-draggable="allowControls">
-      <div ref="handleElement">Specific handle element</div>
-      <div>Not draggable</div>
-    </div>
-
-    <div v-draggable="blockControls">
-      <p>Draggable area</p>
-      <div ref="blockElement">Blocked element</div>
-    </div>
-  </div>
-</template>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-import { createSignal } from 'solid-js';
-import { controls, ControlFrom, useDraggable } from '@neodrag/solid';
-
-function ElementControls() {
-  const [container, setContainer] = createSignal<HTMLElement | null>(
-    null,
-  );
-  const [handle, setHandle] = createSignal<HTMLElement | null>(null);
-  const [blockContainer, setBlockContainer] =
-    createSignal<HTMLElement | null>(null);
-  const [block, setBlock] = createSignal<HTMLElement | null>(null);
-
-  useDraggable(container, [
-    controls({ allow: () => ControlFrom.elements([handle()!]) }),
-  ]);
-
-  useDraggable(blockContainer, [
-    controls({ block: () => ControlFrom.elements([block()!]) }),
-  ]);
-
-  return (
-    <div>
-      <div ref={setContainer}>
-        <div ref={setHandle}>Specific handle element</div>
-        <div>Not draggable</div>
-      </div>
-
-      <div ref={setBlockContainer}>
-        <p>Draggable area</p>
-        <div ref={setBlock}>Blocked element</div>
-      </div>
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vanilla">
-
-```typescript
-import { controls, ControlFrom, Draggable } from '@neodrag/vanilla';
-
-const container = document.getElementById('container');
-const handle = document.getElementById('handle');
-const blockContainer = document.getElementById('block-container');
-const blockElement = document.getElementById('block-element');
-
-new Draggable(container, [
-  controls({ allow: () => ControlFrom.elements([handle]) }),
-]);
-
-new Draggable(blockContainer, [
-  controls({ block: () => ControlFrom.elements([blockElement]) }),
-]);
-```
-
-</div>
-</FrameworkSwitch>
-
-## Advanced Control Logic
-
-### Priority Handling
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-```svelte
-<script>
-  import { controls, ControlFrom } from '@neodrag/svelte';
-</script>
-
-<!-- Allow wins when zones overlap -->
-<div
-  {@attach draggable([
-    controls({
-      allow: ControlFrom.selector('.drag-zone'),
-      block: ControlFrom.selector('.no-drag'),
-      priority: 'allow',
-    }),
-  ])}
->
-  <div class="drag-zone">
-    Drag zone
-    <div class="no-drag">Allow wins here</div>
-  </div>
-</div>
-
-<!-- Block wins when zones overlap -->
-<div
-  {@attach draggable([
-    controls({
-      allow: ControlFrom.selector('.drag-zone'),
-      block: ControlFrom.selector('.no-drag'),
-      priority: 'block',
-    }),
-  ])}
->
-  <div class="drag-zone">
-    Drag zone
-    <div class="no-drag">Block wins here</div>
-  </div>
-</div>
-```
-
-</div>
-
-<div slot="react">
-
-```tsx
-import { useRef } from 'react';
-import { controls, ControlFrom, useDraggable } from '@neodrag/react';
-
-function PriorityControls() {
-  const allowWinsRef = useRef<HTMLDivElement>(null);
-  const blockWinsRef = useRef<HTMLDivElement>(null);
-
-  useDraggable(allowWinsRef, [
-    controls({
-      allow: ControlFrom.selector('.drag-zone'),
-      block: ControlFrom.selector('.no-drag'),
-      priority: 'allow',
-    }),
-  ]);
-
-  useDraggable(blockWinsRef, [
-    controls({
-      allow: ControlFrom.selector('.drag-zone'),
-      block: ControlFrom.selector('.no-drag'),
-      priority: 'block',
-    }),
-  ]);
-
-  return (
-    <div>
-      <div ref={allowWinsRef}>
-        <div className="drag-zone">
-          Drag zone
-          <div className="no-drag">Allow wins here</div>
-        </div>
-      </div>
-
-      <div ref={blockWinsRef}>
-        <div className="drag-zone">
-          Drag zone
-          <div className="no-drag">Block wins here</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vue">
-
-```vue
-<script setup>
-import { controls, ControlFrom, vDraggable } from '@neodrag/vue';
-
-const allowWins = [
-  controls({
-    allow: ControlFrom.selector('.drag-zone'),
-    block: ControlFrom.selector('.no-drag'),
-    priority: 'allow',
-  }),
-];
-
-const blockWins = [
-  controls({
-    allow: ControlFrom.selector('.drag-zone'),
-    block: ControlFrom.selector('.no-drag'),
-    priority: 'block',
-  }),
-];
-</script>
-
-<template>
-  <div>
-    <div v-draggable="allowWins">
-      <div class="drag-zone">
-        Drag zone
-        <div class="no-drag">Allow wins here</div>
-      </div>
-    </div>
-
-    <div v-draggable="blockWins">
-      <div class="drag-zone">
-        Drag zone
-        <div class="no-drag">Block wins here</div>
-      </div>
-    </div>
-  </div>
-</template>
-```
-
-</div>
-
-<div slot="solid">
-
-```tsx
-import { createSignal } from 'solid-js';
-import { controls, ControlFrom, useDraggable } from '@neodrag/solid';
-
-function PriorityControls() {
-  const [allowWins, setAllowWins] = createSignal<HTMLElement | null>(
-    null,
-  );
-  const [blockWins, setBlockWins] = createSignal<HTMLElement | null>(
-    null,
-  );
-
-  useDraggable(allowWins, [
-    controls({
-      allow: ControlFrom.selector('.drag-zone'),
-      block: ControlFrom.selector('.no-drag'),
-      priority: 'allow',
-    }),
-  ]);
-
-  useDraggable(blockWins, [
-    controls({
-      allow: ControlFrom.selector('.drag-zone'),
-      block: ControlFrom.selector('.no-drag'),
-      priority: 'block',
-    }),
-  ]);
-
-  return (
-    <div>
-      <div ref={setAllowWins}>
-        <div class="drag-zone">
-          Drag zone
-          <div class="no-drag">Allow wins here</div>
-        </div>
-      </div>
-
-      <div ref={setBlockWins}>
-        <div class="drag-zone">
-          Drag zone
-          <div class="no-drag">Block wins here</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-</div>
-
-<div slot="vanilla">
-
-```typescript
-import { controls, ControlFrom, Draggable } from '@neodrag/vanilla';
-
-const allowWins = document.getElementById('allow-wins');
-const blockWins = document.getElementById('block-wins');
-
-new Draggable(allowWins, [
-  controls({
-    allow: ControlFrom.selector('.drag-zone'),
-    block: ControlFrom.selector('.no-drag'),
-    priority: 'allow',
-  }),
-]);
-
-new Draggable(blockWins, [
-  controls({
-    allow: ControlFrom.selector('.drag-zone'),
-    block: ControlFrom.selector('.no-drag'),
-    priority: 'block',
-  }),
-]);
-```
-
-</div>
-</FrameworkSwitch>
-
-## Real-World Examples
-
-### Modal with Header Handle
-
-<FrameworkSwitch>
-<div slot="svelte">
-
-```svelte
-<script>
-  import {
-    draggable,
-    controls,
-    ControlFrom,
-    bounds,
-    BoundsFrom,
-  } from '@neodrag/svelte';
-</script>
-
-<div
-  {@attach draggable([
+	const drag_0 = new Draggable({ plugins: [
     controls({
       allow: ControlFrom.selector('.modal-header'),
       block: ControlFrom.selector('.modal-close, .modal-body button'),
     }),
     bounds(BoundsFrom.viewport()),
-  ])}
+  ] });
+</script>
+
+<div
+  {@attach drag_0.attachment}
 >
   <div class="modal-header">
     <h3>Modal Title</h3>
@@ -968,7 +331,7 @@ function DraggableModal() {
 
 ```typescript
 import {
-  Draggable,
+  Neodrag,
   controls,
   ControlFrom,
   bounds,
@@ -977,7 +340,7 @@ import {
 
 const modal = document.getElementById('modal');
 
-new Draggable(modal, [
+Neodrag.shared.draggable(modal, [
   controls({
     allow: ControlFrom.selector('.modal-header'),
     block: ControlFrom.selector('.modal-close, .modal-body button'),
@@ -989,14 +352,88 @@ new Draggable(modal, [
 </div>
 </FrameworkSwitch>
 
+## Dynamic Control Zones
+
+For controls that change during interaction, specify when to recalculate zones:
+
+```typescript
+// Recompute zones on every drag event (for dynamic UIs)
+controls(
+  {
+    allow: ControlFrom.selector('.handle'),
+    block: ControlFrom.selector('.disabled'),
+  },
+  (ctx) => ctx.hook === 'drag',
+);
+
+// Only recompute at drag start (better performance)
+controls(
+  {
+    allow: ControlFrom.selector('.handle'),
+  },
+  (ctx) => ctx.hook === 'start',
+);
+
+// Recompute during setup and start
+controls(
+  {
+    allow: ControlFrom.selector('.handle'),
+  },
+  (ctx) => ctx.hook === 'setup' || ctx.hook === 'start',
+);
+```
+
+### Conditional Control Zones
+
+```typescript
+controls(
+  {
+    allow: (root) => {
+      if (isEditMode) {
+        return ControlFrom.selector('.edit-handle')(root);
+      } else {
+        return ControlFrom.selector('.view-handle')(root);
+      }
+    },
+  },
+  (ctx) => {
+    // Recompute when mode changes
+    return ctx.hook === 'setup' || ctx.hook === 'start';
+  },
+);
+```
+
+### Context-Aware Controls
+
+```typescript
+controls(
+  {
+    allow: ControlFrom.selector('.handle'),
+    block: (root) => {
+      // Block controls based on current state
+      return ControlFrom.selector(
+        isCtrlPressed ? '.ctrl-block' : '.normal-block',
+      )(root);
+    },
+  },
+  (ctx) => {
+    // Recompute on key events during drag
+    return ctx.hook === 'drag';
+  },
+);
+```
+
 ## How It Works
 
 The controls plugin manages drag initiation permissions:
 
 1. **Finds control zones** on setup by querying the DOM
-2. **Checks click position** in `shouldStart` hook
-3. **Determines permission** based on which zones contain the click point
-4. **Returns boolean** to allow/prevent drag start
+2. **Recomputes zones** based on `shouldRecompute` function during different hooks
+3. **Checks click position** in `shouldStart` hook
+4. **Determines permission** based on which zones contain the click point
+5. **Returns boolean** to allow/prevent drag start
+
+**Zone recomputation**: Control zones are recalculated when `shouldRecompute` returns true for the current hook.
 
 **Zone priority logic:**
 
@@ -1004,25 +441,67 @@ The controls plugin manages drag initiation permissions:
 - If click is in both allow and block zones → use `priority` option
 - Smaller (nested) zones take precedence over larger ones
 
+## Performance Considerations
+
+When using dynamic control zones:
+
+```typescript
+// ❌ Expensive - queries DOM on every drag event
+controls(
+  {
+    allow: ControlFrom.selector('.complex-selector:nth-child(odd)'),
+  },
+  (ctx) => ctx.hook === 'drag',
+);
+
+// ✅ Better - cache zones, only recompute when needed
+controls(
+  {
+    allow: ControlFrom.selector('.handle'),
+  },
+  (ctx) => {
+    // Only recompute if DOM structure might have changed
+    return ctx.hook === 'setup' || ctx.hook === 'start';
+  },
+);
+
+// ✅ Best - static zones for better performance
+controls({
+  allow: ControlFrom.selector('.handle'),
+}); // Uses default setup-only recomputation
+```
+
 ## API Reference
 
 ```typescript
-function controls(options?: {
-  allow?: ReturnType<
-    typeof ControlFrom.selector | typeof ControlFrom.elements
-  >;
-  block?: ReturnType<
-    typeof ControlFrom.selector | typeof ControlFrom.elements
-  >;
-  priority?: 'allow' | 'block';
-}): Plugin;
+function controls(
+  options?: {
+    allow?: ReturnType<
+      typeof ControlFrom.selector | typeof ControlFrom.elements
+    >;
+    block?: ReturnType<
+      typeof ControlFrom.selector | typeof ControlFrom.elements
+    >;
+    priority?: 'allow' | 'block';
+  } | null,
+  shouldRecompute?: (ctx: {
+    hook: 'setup' | 'start' | 'drag' | 'end';
+  }) => boolean,
+): Plugin;
 ```
 
-**Options:**
+**Parameters:**
 
-- `allow` - Control zones that can initiate dragging
-- `block` - Control zones that cannot initiate dragging
-- `priority` - Which wins when zones overlap ('allow' | 'block')
+- `options` - Control configuration object
+  - `allow` - Elements that can initiate dragging
+  - `block` - Elements that cannot initiate dragging
+  - `priority` - Which takes precedence in overlapping zones ('allow' | 'block')
+- `shouldRecompute` - When to recalculate control zones. Receives a context object with the current hook name.
+  - Default: `(ctx) => ctx.hook === 'setup'` (recompute on plugin initialization only)
+  - `'setup'` - Plugin initialization
+  - `'start'` - Drag start
+  - `'drag'` - During dragging
+  - `'end'` - Drag end
 
 **ControlFrom utilities:**
 

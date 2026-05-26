@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/vue",
-	"version": "3.0.0-next.4",
+	"version": "3.0.0-next.9",
 	"description": "Vue library to add dragging to your apps 😉",
 	"type": "module",
 	"files": [
@@ -13,17 +13,44 @@
 			"import": "./src/index.ts",
 			"default": "./src/index.ts"
 		},
+		"./plugins": {
+			"types": "./src/plugins.ts",
+			"import": "./src/plugins.ts",
+			"default": "./src/plugins.ts"
+		},
+		"./drop": {
+			"types": "./src/drop/index.ts",
+			"import": "./src/drop/index.ts",
+			"default": "./src/drop/index.ts"
+		},
+		"./resize": {
+			"types": "./src/resize.ts",
+			"import": "./src/resize.ts",
+			"default": "./src/resize.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
 		"exports": {
 			".": {
 				"types": "./dist/index.d.ts",
-				"import": {
-					"production": "./dist/min/index.js",
-					"development": "./dist/index.js"
-				},
-				"default": "./dist/min/index.js"
+				"import": "./dist/index.js",
+				"default": "./dist/index.js"
+			},
+			"./plugins": {
+				"types": "./dist/plugins.d.ts",
+				"import": "./dist/plugins.js",
+				"default": "./dist/plugins.js"
+			},
+			"./drop": {
+				"types": "./dist/drop/index.d.ts",
+				"import": "./dist/drop/index.js",
+				"default": "./dist/drop/index.js"
+			},
+			"./resize": {
+				"types": "./dist/resize.d.ts",
+				"import": "./dist/resize.js",
+				"default": "./dist/resize.js"
 			},
 			"./package.json": "./package.json"
 		}
@@ -50,14 +77,21 @@
 	},
 	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/vue#readme",
 	"scripts": {
-		"compile": "tsup",
-		"prepublishOnly": "turbo compile"
+		"compile": "tsdown",
+		"prepublishOnly": "turbo compile",
+		"test": "vitest run --config vitest.config.ts"
 	},
 	"peerDependencies": {
 		"@neodrag/core": "workspace:*",
 		"vue": "^3"
 	},
 	"devDependencies": {
+		"@neodrag/core": "workspace:*",
+		"@vitejs/plugin-vue": "^5.2.4",
+		"@vitest/browser": "^3.2.4",
+		"playwright": "^1.53.1",
+		"tsdown": "catalog:",
+		"vitest": "^3.2.4",
 		"vue": "3.5.17"
 	}
 }

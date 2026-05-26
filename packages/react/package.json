@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/react",
-	"version": "3.0.0-next.4",
+	"version": "3.0.0-next.9",
 	"description": "React library to add dragging to your apps 😉",
 	"type": "module",
 	"files": [
@@ -13,6 +13,21 @@
 			"import": "./src/index.ts",
 			"default": "./src/index.ts"
 		},
+		"./plugins": {
+			"types": "./src/plugins.ts",
+			"import": "./src/plugins.ts",
+			"default": "./src/plugins.ts"
+		},
+		"./drop": {
+			"types": "./src/drop/index.ts",
+			"import": "./src/drop/index.ts",
+			"default": "./src/drop/index.ts"
+		},
+		"./resize": {
+			"types": "./src/resize.ts",
+			"import": "./src/resize.ts",
+			"default": "./src/resize.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -21,6 +36,21 @@
 				"types": "./dist/index.d.ts",
 				"import": "./dist/index.js",
 				"default": "./dist/index.js"
+			},
+			"./plugins": {
+				"types": "./dist/plugins.d.ts",
+				"import": "./dist/plugins.js",
+				"default": "./dist/plugins.js"
+			},
+			"./drop": {
+				"types": "./dist/drop/index.d.ts",
+				"import": "./dist/drop/index.js",
+				"default": "./dist/drop/index.js"
+			},
+			"./resize": {
+				"types": "./dist/resize.d.ts",
+				"import": "./dist/resize.js",
+				"default": "./dist/resize.js"
 			},
 			"./package.json": "./package.json"
 		}
@@ -48,10 +78,25 @@
 	},
 	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/react#readme",
 	"scripts": {
-		"compile": "tsup",
-		"prepublishOnly": "turbo compile"
+		"compile": "tsdown",
+		"prepublishOnly": "turbo compile",
+		"test": "vitest run --config vitest.config.ts"
 	},
 	"peerDependencies": {
-		"@neodrag/core": "workspace:*"
+		"@neodrag/core": "workspace:*",
+		"react": "^18 || ^19",
+		"react-dom": "^18 || ^19"
+	},
+	"devDependencies": {
+		"@neodrag/core": "workspace:*",
+		"@types/react": "^18.3.23",
+		"@types/react-dom": "^18.3.7",
+		"@vitejs/plugin-react": "^4.5.2",
+		"@vitest/browser": "^3.2.4",
+		"playwright": "^1.53.1",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"tsdown": "catalog:",
+		"vitest": "^3.2.4"
 	}
 }

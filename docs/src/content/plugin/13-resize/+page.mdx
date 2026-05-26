@@ -1,0 +1,145 @@
+---
+title: 'resize'
+nav_title: 'Resize'
+tagline: 'Resize elements with handles, bounds, and optional CSS length units.'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+Resize is a separate interaction from drag: pointer math stays in **pixels**, while DOM `width` / `height` can stay in **px**, **%**, **rem**, etc. when you opt in with a length adapter.
+
+Built-in plugins live under `@neodrag/core/resize` (and framework `/resize` re-exports).
+
+## Opt-in CSS lengths
+
+Numbers in plugin options are always **px**. Strings like `'10rem'` or `'50%'` require `length: new Length()` on the **binding** (not on `Neodrag.shared`).
+
+See **[Length & SizeInput](/docs/svelte/reference/length)** for supported units, TypeScript `CssLengthString` constraints, what is not allowed (`min()`, `clamp()`, …), and where `SizeInput` is used across drag and resize.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Length } from '@neodrag/core';
+  import { Resizable } from '@neodrag/svelte/resize';
+  import { resizeHandles, sizeBounds } from '@neodrag/svelte/resize';
+
+  const resize = new Resizable({
+    length: new Length({ units: 'preserve' }),
+    plugins: [
+      resizeHandles({ edges: ['e', 's', 'se'], size: '0.75rem' }),
+      sizeBounds({ minWidth: '10rem', maxWidth: '100%' }),
+    ],
+  });
+</script>
+
+<div class="w-1/2 min-w-40" {@attach resize.attachment}>Panel</div>
+```
+
+</div>
+
+<div slot="react">
+
+```tsx
+import { Length } from '@neodrag/core';
+import { Resizable } from '@neodrag/react';
+import { resizeHandles, sizeBounds } from '@neodrag/react/resize';
+import { useRef, useMemo } from 'react';
+
+function Panel() {
+  const ref = useRef<HTMLDivElement>(null);
+  const resize = useMemo(
+    () =>
+      new Resizable({
+        length: new Length({ units: 'preserve' }),
+        plugins: [
+          resizeHandles({ edges: ['e', 's', 'se'] }),
+          sizeBounds({ minWidth: '10rem' }),
+        ],
+      }),
+    [],
+  );
+  return <div ref={(n) => (n ? resize.attach(n) : resize.detach())} className="panel" />;
+}
+```
+
+</div>
+
+<div slot="vue">
+
+```vue
+<script setup>
+import { Length } from '@neodrag/core';
+import { Resizable } from '@neodrag/vue';
+import { resizeHandles, sizeBounds } from '@neodrag/vue/resize';
+
+const resize = new Resizable({
+  length: new Length({ units: 'preserve' }),
+  plugins: [
+    resizeHandles({ edges: ['e'] }),
+    sizeBounds({ minWidth: '10rem' }),
+  ],
+});
+</script>
+
+<template>
+  <div v-resizable="resize" class="panel" />
+</template>
+```
+
+</div>
+
+<div slot="solid">
+
+```tsx
+import { Length } from '@neodrag/core';
+import { resizeHandles, sizeBounds } from '@neodrag/solid/resize';
+import { useResizable } from '@neodrag/solid';
+
+function Panel() {
+  const [, ref] = useResizable(() => [
+    resizeHandles({ edges: ['e'] }),
+    sizeBounds({ minWidth: '10rem' }),
+  ]);
+  return <div ref={ref} class="panel" />;
+}
+```
+
+</div>
+</FrameworkSwitch>
+
+- **`new Length({ units: 'preserve' })`** (default): after resize, keep authored units (`50%` stays `%`).
+- **`new Length({ units: 'px' })`**: always write px strings.
+- **`minSize` / `maxSize`** on `Resizable` — see [Length & SizeInput](/docs/svelte/reference/length#minsize--maxsize-on-resizable).
+- **Cancel** (`Escape` via keyboard sensor): restores size at pointer-down.
+
+## Plugins
+
+| Plugin | Purpose |
+|--------|---------|
+| `resizeHandles` | Creates edge/corner handles (`data-neodrag-resize-handle`) |
+| `sizeBounds` | `minWidth` / `maxWidth` / `minHeight` / `maxHeight`, optional `parent` clamp (or [`minSize` / `maxSize`](/docs/svelte/reference/length#minsize--maxsize-on-resizable) on `Resizable`) |
+| `resizeAxis` | Lock to `'x'`, `'y'`, or `'both'` |
+| `aspectRatio` | Fixed ratio or `'preserve'` initial ratio |
+| `resizeEvents` | `onStart` / `onResize` / `onEnd` with `size`, `sizePx`, `initial` |
+
+## Presets
+
+```typescript
+import { presetPanel, presetCornerBox, presetSplitPane } from '@neodrag/core/resize';
+
+presetSplitPane('x'); // east handle + axis lock + min size
+```
+
+## With drag on the same node
+
+Resize handles take **pointer priority** over drag on the same element. Use separate drag handles (e.g. `controls`) or attach drag to a child — see the core resize + drag integration tests.
+
+## Tailwind / utility classes
+
+Neodrag plugins accept **CSS lengths**, not Tailwind class names (`w-10` is not `10px`). Style the element with utilities; pass matching CSS in plugins (`'50%'`, `'10rem'`) or use theme CSS variables. Automatic utility lookup is not built into core.
+
+## Sensors
+
+Resize uses the same **pointer sensor** path as drag. `KeyboardSensor` (default on `Neodrag`) cancels an active resize with `Escape`. Dedicated resize-only sensors are not required for basic use.

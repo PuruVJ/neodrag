@@ -1,60 +1,43 @@
-import type { DraggableFactory } from '@neodrag/core';
+// @ts-nocheck
 import {
-	Compartment as CoreCompartment,
-	type Plugin,
-	type PluginInput,
-} from '@neodrag/core/plugins';
-import { onDestroy } from 'svelte';
+	Draggable as CoreDraggable,
+	Resizable as CoreResizable,
+	Neodrag,
+	type DragPluginList,
+	type ResizePluginList,
+	type EngineOptions,
+} from '@neodrag/core';
 import { Attachment } from 'svelte/attachments';
-import { factory } from './shared';
+import { untrack } from 'svelte';
 
-/**
- * Behaves the same as `$effect.root`, but automatically
- * cleans up the effect inside Svelte components.
- *
- * @returns Cleanup function to manually cleanup the effect.
- */
-export function auto_destroy_effect_root(fn: () => void | VoidFunction) {
-	let cleanup: VoidFunction | null = $effect.root(fn);
+export type NeodragOptions = EngineOptions;
+export { Neodrag, CoreDraggable as DraggableCore, CoreResizable as ResizableCore };
+export type { DragPluginList, ResizePluginList };
 
-	function destroy() {
-		if (cleanup === null) {
-			return;
+export class Draggable extends CoreDraggable {
+	readonly #attachment: Attachment<HTMLElement | SVGElement>;
+
+	constructor(options: ConstructorParameters<typeof CoreDraggable>[0]) {
+		super(options);
+
+		const coreAttachment = this.attachment;
+
+		if (this.hasReactiveSlots) {
+			$effect(() => {
+				this.flushReactive();
+			});
 		}
 
-		cleanup();
-		cleanup = null;
+		this.#attachment = (element) => {
+			const cleanup = untrack(() => {
+				coreAttachment(element);
+				if (this.hasReactiveSlots) this.flushReactive();
+			});
+			return cleanup;
+		};
 	}
 
-	try {
-		onDestroy(destroy);
-	} catch {}
-
-	return destroy;
-}
-
-export const wrapper = (factory: DraggableFactory) => {
-	return (plugins?: PluginInput | undefined): Attachment<HTMLElement> =>
-		(element) =>
-			factory.draggable(element, plugins);
-};
-
-export const draggable = wrapper(factory);
-
-export * from '@neodrag/core/plugins';
-export const instances = factory.instances;
-
-export class Compartment extends CoreCompartment {
-	static of(reactive: () => Plugin) {
-		const compartment = new CoreCompartment(reactive);
-
-		auto_destroy_effect_root(() => {
-			// @ts-ignore
-			$effect.pre(() => {
-				compartment.current = reactive();
-			});
-		});
-
-		return compartment;
+	get attachment(): Attachment<HTMLElement | SVGElement> {
+		return this.#attachment;
 	}
 }

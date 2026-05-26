@@ -10,30 +10,34 @@ npm i @neodrag/core@next @neodrag/vanilla@next
 
 ## Usage
 
-Basic usage
+Use the shared `Neodrag` engine to bind an element. It returns a `Draggable` handle with `destroy()`:
+
+### Basic
 
 ```typescript
-import { Draggable } from '@neodrag/vanilla';
+import { Neodrag } from '@neodrag/vanilla';
 
-const dragInstance = new Draggable(document.querySelector('#drag'));
+const node = document.querySelector('#drag')!;
+const drag = Neodrag.shared.draggable(node);
+
+// later
+drag.destroy();
 ```
 
-With plugins
+### With plugins
 
 ```typescript
-import { Draggable, axis, grid } from '@neodrag/vanilla';
+import { Neodrag, axis, grid } from '@neodrag/vanilla';
 
-const dragInstance = new Draggable(document.querySelector('#drag'), [
-  axis('x'),
-  grid([10, 10]),
-]);
+const node = document.querySelector('#drag')!;
+const drag = Neodrag.shared.draggable(node, [axis('x'), grid([10, 10])]);
 ```
 
-Defining plugins elsewhere with TypeScript
+### Plugins defined elsewhere (TypeScript)
 
 ```typescript
 import {
-  Draggable,
+  Neodrag,
   axis,
   bounds,
   BoundsFrom,
@@ -42,81 +46,58 @@ import {
 
 const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
 
-const dragInstance = new Draggable(
-  document.querySelector('#drag'),
+const drag = Neodrag.shared.draggable(
+  document.querySelector('#drag')!,
   plugins,
 );
 ```
 
-## Reactive Plugins with Compartments
-
-Update plugins dynamically using compartments:
+## Reactive plugins with compartments
 
 ```typescript
-import { Draggable, axis, grid, Compartment } from '@neodrag/vanilla';
+import { Neodrag, axis, grid } from '@neodrag/vanilla';
 
-const axisCompartment = new Compartment(() => axis('x'));
-const dragInstance = new Draggable(
-  document.querySelector('#drag'),
+const drag = Neodrag.shared.draggable(
+  document.querySelector('#drag')!,
   () => [axisCompartment, grid([10, 10])],
 );
 
-// Update the axisCompartment. Automatically applies to the drag instance
 axisCompartment.current = axis('y');
 ```
 
-Multiple reactive compartments
+### Multiple compartments
 
 ```typescript
 import {
-  Draggable,
+  Neodrag,
   axis,
   bounds,
   BoundsFrom,
   grid,
-  Compartment,
 } from '@neodrag/vanilla';
 
 let currentAxis = 'x';
 let gridSize = 20;
 let enableBounds = false;
 
-const axisComp = new Compartment(() => axis(currentAxis));
-const gridComp = new Compartment(() => grid([gridSize, gridSize]));
-const boundsComp = new Compartment(() =>
-  enableBounds ? bounds(BoundsFrom.parent()) : null,
-);
 
-const dragInstance = new Draggable(
-  document.querySelector('#drag'),
+const drag = Neodrag.shared.draggable(
+  document.querySelector('#drag')!,
   () => [axisComp, gridComp, boundsComp],
 );
 
-// Update functions
-function updateAxis(newAxis) {
+function updateAxis(newAxis: 'x' | 'y' | 'both') {
   currentAxis = newAxis;
   axisComp.current = axis(currentAxis);
 }
-
-function updateGridSize(newSize) {
-  gridSize = newSize;
-  gridComp.current = grid([gridSize, gridSize]);
-}
-
-function toggleBounds() {
-  enableBounds = !enableBounds;
-  boundsComp.current = enableBounds
-    ? bounds(BoundsFrom.parent())
-    : null;
-}
 ```
 
-## Event Handling
+## Event handling
 
 ```typescript
-import { Draggable, events } from '@neodrag/vanilla';
+import { Neodrag, events } from '@neodrag/vanilla';
 
-const dragInstance = new Draggable(document.querySelector('#drag'), [
+Neodrag.shared.draggable(document.querySelector('#drag')!, [
   events({
     onDragStart: (data) => console.log('Started:', data.offset),
     onDrag: (data) => console.log('Dragging:', data.offset),
@@ -125,12 +106,12 @@ const dragInstance = new Draggable(document.querySelector('#drag'), [
 ]);
 ```
 
-## Drag Controls
+## Drag controls
 
 ```typescript
-import { Draggable, controls, ControlFrom } from '@neodrag/vanilla';
+import { Neodrag, controls, ControlFrom } from '@neodrag/vanilla';
 
-const dragInstance = new Draggable(document.querySelector('#drag'), [
+Neodrag.shared.draggable(document.querySelector('#drag')!, [
   controls({
     allow: ControlFrom.selector('.drag-handle'),
     block: ControlFrom.selector('.no-drag'),
@@ -138,52 +119,50 @@ const dragInstance = new Draggable(document.querySelector('#drag'), [
 ]);
 ```
 
+## Custom engine
+
+Avoid multiple engines on one page unless you need isolated plugin defaults. Prefer `Neodrag.shared`:
+
+```typescript
+import { Neodrag } from '@neodrag/vanilla';
+
+const engine = new Neodrag({
+  onError: (error) => console.error(error),
+});
+
+const drag = engine.draggable(element, plugins);
+engine.dispose(); // destroys all bindings on this engine
+```
+
 ## Cleanup
 
 ```typescript
-// Clean up when done
-dragInstance.destroy();
+drag.destroy(); // single element
+// or
+engine.dispose(); // entire engine
 ```
 
-## Using via CDN
-
-For users who prefer not to install the package and instead use it directly in their projects via a CDN, you can include `@neodrag/vanilla` directly in your HTML files. This is particularly useful for quick prototyping or projects where you want to avoid a build step.
-
-### Using Unpkg
-
-Include the library in your HTML using the following `<script>` tag. This will load the latest version of `@neodrag/vanilla` directly from unpkg:
+## CDN (Unpkg / jsDelivr)
 
 ```html
 <script src="https://unpkg.com/@neodrag/vanilla@next/dist/umd/index.js"></script>
 ```
 
-### Using jsDelivr
-
-Alternatively, you can use jsDelivr as a CDN to load `@neodrag/vanilla`. Include the following line in your HTML:
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/@neodrag/vanilla@next/dist/umd/index.js"></script>
-```
-
-### Usage with CDN
-
-After including the library via a CDN, `@neodrag/vanilla` will be available as a global variable `NeoDrag`. Here's how you can use it to make an element draggable:
-
 ```html
 <div id="drag">Drag me!</div>
 <script>
-  var dragInstance = new NeoDrag.Draggable(
+  var drag = NeoDrag.Neodrag.shared.draggable(
     document.getElementById('drag'),
   );
 </script>
 ```
 
-### CDN with Plugins
+### CDN with plugins
 
 ```html
 <div id="constrained-drag">Constrained dragging</div>
 <script>
-  var constrainedInstance = new NeoDrag.Draggable(
+  NeoDrag.Neodrag.shared.draggable(
     document.getElementById('constrained-drag'),
     [
       NeoDrag.axis('x'),
@@ -194,7 +173,7 @@ After including the library via a CDN, `@neodrag/vanilla` will be available as a
 </script>
 ```
 
-### CDN with Compartments
+### CDN with compartments
 
 ```html
 <div id="reactive-drag">Reactive dragging</div>
@@ -202,13 +181,15 @@ After including the library via a CDN, `@neodrag/vanilla` will be available as a
 
 <script>
   var currentAxis = 'x';
-  var axisCompartment = new NeoDrag.Compartment(() =>
-    NeoDrag.axis(currentAxis),
-  );
+  var axisCompartment = new NeoDrag.Compartment(function () {
+    return NeoDrag.axis(currentAxis);
+  });
 
-  var reactiveInstance = new NeoDrag.Draggable(
+  NeoDrag.Neodrag.shared.draggable(
     document.getElementById('reactive-drag'),
-    () => [axisCompartment],
+    function () {
+      return [axisCompartment];
+    },
   );
 
   function switchAxis() {
@@ -218,4 +199,4 @@ After including the library via a CDN, `@neodrag/vanilla` will be available as a
 </script>
 ```
 
-This method allows you to use `@neodrag/vanilla` without any build tools or npm installations, directly in your browser.
+The global `NeoDrag` namespace re-exports plugins (`axis`, `grid`, `Compartment`, etc.) and the `Neodrag` engine class.

@@ -5,7 +5,8 @@
 	import { typingEffect } from '$attachments/typingEffect.svelte';
 	import { browser } from '$helpers/utils';
 	import { theme } from '$state/user-preferences.svelte';
-	import { bounds, BoundsFrom, Compartment, draggable, events, position } from '@neodrag/svelte';
+	import { Draggable } from '@neodrag/svelte';
+	import { bounds, BoundsFrom, events, position } from '@neodrag/svelte/plugins';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
@@ -27,7 +28,24 @@
 
 	let drag_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
 
-	const position_compartment = Compartment.of(() => position({ current: drag_position.current }));
+	const heroDrag = new Draggable({
+		plugins: [
+			bounds(BoundsFrom.parent()),
+			() => position({ current: drag_position.current }),
+			() =>
+				events({
+					onDragStart: () => {
+						box_wiggles = false;
+					},
+					onDrag: ({ offset }) => {
+						drag_position.set({ x: offset.x, y: offset.y }, { duration: 0 });
+					},
+					onDragEnd: () => {
+						drag_position.target = { x: 0, y: 0 };
+					},
+				}),
+		],
+	});
 
 	function handle_mouse_move(e: MouseEvent) {
 		coords_cursor ??= { x: 0, y: 0 };
@@ -72,21 +90,7 @@
 					class="box"
 					class:wiggles={box_wiggles}
 					data-paw-cursor="true"
-					{@attach draggable(() => [
-						bounds(BoundsFrom.parent()),
-						position_compartment,
-						events({
-							onDragStart: () => {
-								box_wiggles = false;
-							},
-							onDrag: ({ offset }) => {
-								drag_position.set({ x: offset.x, y: offset.y }, { duration: 0 });
-							},
-							onDragEnd: () => {
-								drag_position.target = { x: 0, y: 0 };
-							},
-						}),
-					])}
+					{@attach heroDrag.attachment}
 				>
 					<div class="paw">
 						<PawIcon />
@@ -113,7 +117,6 @@
 		grid-template-columns: auto 1fr;
 		align-items: center;
 		gap: 5rem;
-		/* margin-bottom: 6rem; */
 		padding: 1rem 0;
 		min-height: 85dvh;
 		width: 100% !important;
@@ -128,8 +131,6 @@
 			grid-template-columns: 1fr;
 			grid-template-rows: auto 1fr;
 			gap: 3rem;
-			/* gap: 1rem; */
-			/* margin-bottom: 35rem; */
 			align-items: initial;
 		}
 
@@ -329,9 +330,7 @@
 			right: calc(0.03 * var(--size));
 			bottom: calc(0.03 * var(--size));
 
-			/* width: 61%; */
 			min-width: clamp(calc(0.61 * 4rem), calc(0.61 * 20vw), calc(0.61 * 12rem));
-			/* height: auto; */
 		}
 
 		:global(svg path) {

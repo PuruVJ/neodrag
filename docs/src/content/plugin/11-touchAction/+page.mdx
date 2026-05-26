@@ -23,24 +23,30 @@ touchAction(false); // Don't set touch-action (browser default)
 
 ```svelte
 <script>
-  import { touchAction } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { touchAction } from '@neodrag/svelte/plugins';
+
+	const drag_0 = new Draggable({ plugins: [touchAction('manipulation')] });
+	const drag_1 = new Draggable({ plugins: [touchAction('none')] });
+	const drag_2 = new Draggable({ plugins: [touchAction('pan-y')] });
+	const drag_3 = new Draggable({ plugins: [touchAction(false)] });
 </script>
 
 <!-- Default manipulation mode -->
-<div {@attach draggable([touchAction('manipulation')])}>
+<div {@attach drag_0.attachment}>
   Touch-optimized dragging
 </div>
 
 <!-- Disable all browser touch behaviors -->
-<div {@attach draggable([touchAction('none')])}>Pure drag only</div>
+<div {@attach drag_1.attachment}>Pure drag only</div>
 
 <!-- Allow vertical scrolling while preventing horizontal -->
-<div {@attach draggable([touchAction('pan-y')])}>
+<div {@attach drag_2.attachment}>
   Vertical scroll + drag
 </div>
 
 <!-- Don't set touch-action property -->
-<div {@attach draggable([touchAction(false)])}>
+<div {@attach drag_3.attachment}>
   Browser default behavior
 </div>
 ```
@@ -138,17 +144,17 @@ function TouchActionExamples() {
 <div slot="vanilla">
 
 ```typescript
-import { Draggable, touchAction } from '@neodrag/vanilla';
+import { Neodrag, touchAction } from '@neodrag/vanilla';
 
 const manipulation = document.getElementById('manipulation');
 const none = document.getElementById('none');
 const panY = document.getElementById('pan-y');
 const defaultElement = document.getElementById('default');
 
-new Draggable(manipulation, [touchAction('manipulation')]);
-new Draggable(none, [touchAction('none')]);
-new Draggable(panY, [touchAction('pan-y')]);
-new Draggable(defaultElement, [touchAction(false)]);
+Neodrag.shared.draggable(manipulation, [touchAction('manipulation')]);
+Neodrag.shared.draggable(none, [touchAction('none')]);
+Neodrag.shared.draggable(panY, [touchAction('pan-y')]);
+Neodrag.shared.draggable(defaultElement, [touchAction(false)]);
 ```
 
 </div>
@@ -201,19 +207,20 @@ touchAction(null); // Same as false
 
 ```svelte
 <script>
-  import { touchAction, Compartment } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte'
+	import { touchAction } from '@neodrag/svelte/plugins';
 
   let mode = $state('manipulation');
   let allowScroll = $state(false);
 
-  const touchActionComp = Compartment.of(() => {
-    if (mode === 'disabled') return touchAction(false);
-    if (allowScroll) return touchAction('pan-y');
+      if (allowScroll) return touchAction('pan-y');
     return touchAction(mode);
   });
+
+	const drag_0 = new Draggable({ plugins: [() => [touchActionComp]] });
 </script>
 
-<div {@attach draggable(() => [touchActionComp])}>
+<div {@attach drag_0.attachment}>
   Current mode: {mode}
   {allowScroll ? ' (scroll enabled)' : ''}
 </div>
@@ -250,7 +257,6 @@ import { useRef, useState } from 'react';
 import {
   touchAction,
   useDraggable,
-  useCompartment,
 } from '@neodrag/react';
 
 function DynamicTouchAction() {
@@ -258,9 +264,7 @@ function DynamicTouchAction() {
   const [mode, setMode] = useState('manipulation');
   const [allowScroll, setAllowScroll] = useState(false);
 
-  const touchActionComp = useCompartment(() => {
-    if (mode === 'disabled') return touchAction(false);
-    if (allowScroll) return touchAction('pan-y');
+      if (allowScroll) return touchAction('pan-y');
     return touchAction(mode);
   }, [mode, allowScroll]);
 
@@ -313,13 +317,11 @@ function DynamicTouchAction() {
 ```vue
 <script setup>
 import { ref, computed } from 'vue';
-import { touchAction, useCompartment } from '@neodrag/vue';
+import { touchAction } from '@neodrag/vue';
 
 const mode = ref('manipulation');
 const allowScroll = ref(false);
 
-const touchActionComp = useCompartment(() => {
-  if (mode.value === 'disabled') return touchAction(false);
   if (allowScroll.value) return touchAction('pan-y');
   return touchAction(mode.value);
 }, [mode, allowScroll]);
@@ -366,7 +368,6 @@ import { createSignal } from 'solid-js';
 import {
   touchAction,
   useDraggable,
-  createCompartment,
 } from '@neodrag/solid';
 
 function DynamicTouchAction() {
@@ -374,9 +375,7 @@ function DynamicTouchAction() {
   const [allowScroll, setAllowScroll] = createSignal(false);
   const [elementRef, setElementRef] = createSignal();
 
-  const touchActionComp = createCompartment(() => {
-    if (mode() === 'disabled') return touchAction(false);
-    if (allowScroll()) return touchAction('pan-y');
+      if (allowScroll()) return touchAction('pan-y');
     return touchAction(mode());
   });
 
@@ -428,9 +427,8 @@ function DynamicTouchAction() {
 
 ```typescript
 import {
-  Draggable,
+  Neodrag,
   touchAction,
-  Compartment,
 } from '@neodrag/vanilla';
 
 const element = document.getElementById('draggable');
@@ -441,8 +439,6 @@ const valueDisplay = document.getElementById('value-display');
 let mode = 'manipulation';
 let allowScroll = false;
 
-const touchActionComp = new Compartment(() => {
-  if (mode === 'disabled') return touchAction(false);
   if (allowScroll) return touchAction('pan-y');
   return touchAction(mode);
 });
@@ -456,7 +452,7 @@ function updateDisplay() {
   valueDisplay.textContent = `CSS: touch-action: ${value}`;
 }
 
-new Draggable(element, () => [touchActionComp]);
+Neodrag.shared.draggable(element, () => [touchActionComp]);
 
 modeSelect.addEventListener('change', (e) => {
   mode = e.target.value;

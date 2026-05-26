@@ -1,603 +1,316 @@
-import { get_node_style, is_null, set_node_dataset, set_node_key_style } from './utils.ts';
+import { get_node_style, set_node_dataset, set_node_key_style } from './utils.ts';
+import { resolveSizeInput, sizeContext } from './length-contract.ts';
+import type { SizeInput } from './length-runtime.ts';
+import { BoundsFrom, validateBounds, type BoundFromFunction } from './lib/bounds-from.ts';
+import { clamp } from './lib/math.ts';
+import { isPointerInput, nativePointerEvent } from './interaction-input.ts';
+import type { InteractionInput } from './interaction-input.ts';
+import { defineDragPlugin, defineDropPlugin, type DragCtx, type DragPlugin, type DropCtx } from './types.ts';
 
-export interface PluginContext {
-	delta: { x: number; y: number };
-	proposed: { x: number | null; y: number | null };
-	offset: { x: number; y: number };
-	initial: { x: number; y: number };
-	isDragging: boolean;
-	isInteracting: boolean;
-	rootNode: HTMLElement | SVGElement;
-	lastEvent: PointerEvent | null;
-	cachedRootNodeRect: DOMRect;
-	currentlyDraggedNode: HTMLElement | SVGElement;
-	effect: {
-		immediate: (fn: () => void) => void;
-		paint: (fn: () => void) => void;
-	};
-	propose: (x: number | null, y: number | null) => void;
-	cancel: () => void;
-	preventStart: () => void;
-	setForcedPosition: (x: number, y: number) => void;
-}
+const STATE_MARKER_KEY = Symbol('neodrag.stateMarker');
+const IGNORE_MULTITOUCH_KEY = Symbol('neodrag.ignoreMultitouch');
+const APPLY_USER_SELECT_KEY = Symbol('neodrag.applyUserSelectHack');
+const TOUCH_ACTION_KEY = Symbol('neodrag.touchAction');
+const AXIS_KEY = Symbol('neodrag.axis');
+const GRID_KEY = Symbol('neodrag.grid');
+const BOUNDS_KEY = Symbol('neodrag.bounds');
+const POSITION_KEY = Symbol('neodrag.position');
+const DISABLED_KEY = Symbol('neodrag.disabled');
+const CONTROLS_KEY = Symbol('neodrag.controls');
+const EVENTS_KEY = Symbol('neodrag.events');
+const DRAG_DATA_KEY = Symbol('neodrag.dragData');
+const ACCEPTS_KEY = Symbol('neodrag.accepts');
+const HIGHLIGHT_KEY = Symbol('neodrag.highlight');
+const ON_DROP_KEY = Symbol('neodrag.onDrop');
+const DROP_HIT_EXPAND_KEY = Symbol('neodrag.dropHitExpand');
+const SCROLL_LOCK_KEY = Symbol('neodrag.scrollLock');
+const GHOST_KEY = Symbol('neodrag.ghost');
+const AUTO_SCROLL_KEY = Symbol('neodrag.autoScroll');
 
-export interface Plugin<State = any> {
-	name: string;
-	priority?: number;
-	liveUpdate?: boolean;
-	cancelable?: boolean;
-	setup?: (ctx: PluginContext) => State;
-	shouldStart?: (ctx: PluginContext, state: State, event: PointerEvent) => boolean;
-	start?: (ctx: PluginContext, state: State, event: PointerEvent) => void;
-	drag?: (ctx: PluginContext, state: State, event: PointerEvent) => void;
-	end?: (ctx: PluginContext, state: State, event: PointerEvent) => void;
-	cleanup?: (ctx: PluginContext, state: State) => void;
-}
+type MultitouchState = { active_pointers: Set<number> };
+type StateMarkerState = { count: number };
+type UserSelectState = { body_user_select_val: string };
 
-// Type definitions for the new plugin system
-export type PluginResolver = () => (Plugin | Compartment)[];
-export type PluginInput = Plugin[] | PluginResolver;
+export const ignoreMultitouch: DragPlugin<MultitouchState> = {
+	key: IGNORE_MULTITOUCH_KEY,
 
-export class Compartment {
-	#current?: Plugin;
-	#subscribers: Set<(plugin: Plugin | undefined) => void>;
-	#updating: boolean = false;
-
-	constructor(initial?: () => Plugin) {
-		this.#current = initial ? initial() : undefined;
-		this.#subscribers = new Set();
-	}
-
-	get current(): Plugin | undefined {
-		return this.#current;
-	}
-
-	set current(plugin: Plugin | undefined) {
-		if (plugin === this.#current) return;
-
-		// Prevent recursive updates
-		if (this.#updating) return;
-
-		this.#updating = true;
-		this.#current = plugin;
-
-		// Notify subscribers with the new plugin (which could be undefined)
-		this.#subscribers.forEach((callback) => callback(plugin));
-
-		this.#updating = false;
-	}
-
-	subscribe(callback: (plugin: Plugin | undefined) => void) {
-		this.#subscribers.add(callback);
-		return () => this.#subscribers.delete(callback);
-	}
-}
-
-export function unstable_definePlugin<State, Args extends unknown[]>(
-	fn: (...args: Args) => Plugin<State>,
-) {
-	return fn;
-}
-
-export const ignoreMultitouch = unstable_definePlugin((value: boolean = true) => ({
-	name: 'neodrag:ignoreMultitouch',
-
-	setup() {
-		return {
-			active_pointers: new Set<number>(),
-		};
+	init() {
+		return { active_pointers: new Set<number>() };
 	},
 
-	start(ctx, state, event) {
-		ctx.effect.paint(() => {
-			state.active_pointers.add(event.pointerId);
-
-			if (value && state.active_pointers.size > 1) {
-				event.preventDefault();
-			}
-		});
+	start(ctx, state, input) {
+		if (!isPointerInput(input)) return;
+		const event = input.native;
+		state.active_pointers.add(event.pointerId);
+		if (state.active_pointers.size > 1) event.preventDefault();
 	},
 
 	drag(ctx, state) {
-		if (value && state.active_pointers.size > 1) {
-			ctx.cancel();
-		}
+		if (state.active_pointers.size > 1) ctx.cancel();
 	},
 
-	end(_ctx, state, event) {
-		state.active_pointers.delete(event.pointerId);
+	end(_ctx, state, input) {
+		if (!isPointerInput(input)) return;
+		state.active_pointers.delete(input.native.pointerId);
 	},
-}));
+};
 
-export const stateMarker = unstable_definePlugin(() => ({
-	name: 'neodrag:stateMarker',
-	cancelable: false,
+export const stateMarker: DragPlugin<StateMarkerState> = {
+	key: STATE_MARKER_KEY,
+	phase: 'post',
+	skipOnCancel: true,
 
-	setup(ctx) {
+	init(ctx) {
 		set_node_dataset(ctx.rootNode, 'neodrag', '');
 		set_node_dataset(ctx.rootNode, 'neodrag-state', 'idle');
 		set_node_dataset(ctx.rootNode, 'neodrag-count', '0');
-
-		return {
-			count: 0,
-		};
+		return { count: 0 };
 	},
 
 	start(ctx) {
-		ctx.effect.paint(() => {
-			set_node_dataset(ctx.rootNode, 'neodrag-state', 'dragging');
-		});
+		set_node_dataset(ctx.rootNode, 'neodrag-state', 'dragging');
 	},
 
 	end(ctx, state) {
 		set_node_dataset(ctx.rootNode, 'neodrag-state', 'idle');
-		set_node_dataset(ctx.rootNode, 'neodrag-count', ++state.count);
-	},
-}));
-
-// Degree of Freedom X and Y
-export const axis = unstable_definePlugin((value?: 'x' | 'y' | undefined | null) => ({
-	name: 'neodrag:axis',
-
-	drag(ctx) {
-		// Let dragging go on if axis is undefined
-		if (!value) return;
-
-		ctx.propose(value === 'x' ? ctx.proposed.x : null, value === 'y' ? ctx.proposed.y : null);
-	},
-}));
-
-export const applyUserSelectHack = unstable_definePlugin(
-	(value: boolean | undefined | null = true) => ({
-		name: 'neodrag:applyUserSelectHack',
-		cancelable: false,
-
-		setup() {
-			return {
-				body_user_select_val: '',
-			};
-		},
-
-		start(ctx, state) {
-			ctx.effect.paint(() => {
-				if (value) {
-					state.body_user_select_val =
-						get_node_style(document.body, 'user-select') ??
-						// Safari sucks. It doesn't work with getPropertyValue or setProperty if it has prefix,
-						// And safari never implemened unvendored user-select
-						document.body.style.webkitUserSelect ??
-						'';
-
-					set_node_key_style(document.body, 'user-select', 'none');
-					document.body.style.webkitUserSelect = 'none';
-				}
-			});
-		},
-
-		end(_ctx, state) {
-			if (value) {
-				set_node_key_style(document.body, 'user-select', state.body_user_select_val);
-				document.body.style.webkitUserSelect = state.body_user_select_val;
-			}
-		},
-	}),
-);
-
-const calc = (val: number, snap: number) => (snap === 0 ? 0 : Math.ceil(val / snap) * snap);
-
-function snap_to_grid(
-	snaps: [number | null | undefined, number | null | undefined] | undefined | null,
-	pending_x: number | null,
-	pending_y: number | null,
-) {
-	const x = pending_x && snaps?.[0] ? calc(pending_x, snaps?.[0]) : pending_x;
-	const y = pending_y && snaps?.[1] ? calc(pending_y, snaps?.[1]) : pending_y;
-
-	return [x, y] as const;
-}
-
-export const grid = unstable_definePlugin(
-	(values?: [x: number | null | undefined, y: number | null | undefined] | undefined | null) => ({
-		name: 'neodrag:grid',
-
-		drag(ctx) {
-			ctx.propose(...snap_to_grid(values, ctx.proposed.x, ctx.proposed.y));
-		},
-	}),
-);
-
-export const disabled = unstable_definePlugin((value: boolean = true) => ({
-	name: 'neodrag:disabled',
-	shouldStart() {
-		return !value;
-	},
-}));
-
-function apply_transform(
-	ctx: PluginContext,
-	func?: (args: { offset: { x: number; y: number }; rootNode: HTMLElement | SVGElement }) => void,
-) {
-	const is_svg = ctx.rootNode instanceof SVGElement;
-
-	ctx.effect.paint(() => {
-		if (func) {
-			return func({
-				offset: { ...ctx.offset },
-				rootNode: ctx.rootNode,
-			});
-		}
-
-		if (is_svg) {
-			const element = ctx.rootNode as SVGGraphicsElement;
-			const svg = element.ownerSVGElement;
-			if (!svg) return;
-
-			const translation = svg.createSVGTransform();
-
-			translation.setTranslate(ctx.offset.x, ctx.offset.y);
-
-			const transform = element.transform.baseVal;
-			transform.clear();
-			transform.appendItem(translation);
-			// debugger;
-		} else {
-			set_node_key_style(
-				ctx.rootNode,
-				'translate',
-				`${ctx.offset.x}px ${ctx.offset.y}px 0.000000001px`,
-			);
-		}
-	});
-}
-
-export const transform = unstable_definePlugin(
-	(
-		func?: (args: { offset: { x: number; y: number }; rootNode: HTMLElement | SVGElement }) => void,
-	) => ({
-		name: 'neodrag:transform',
-		priority: -1000,
-		cancelable: false,
-		liveUpdate: true,
-
-		setup(ctx) {
-			apply_transform(ctx, func);
-		},
-
-		drag(ctx) {
-			apply_transform(ctx, func);
-		},
-	}),
-);
-
-type BoundFromFunction = (data: {
-	root_node: HTMLElement | SVGElement;
-}) => [[x1: number, y1: number], [x2: number, y2: number]];
-
-export const BoundsFrom = {
-	element(
-		element: HTMLElement,
-		padding?: { top?: number; left?: number; right?: number; bottom?: number },
-	): BoundFromFunction {
-		return () => {
-			const rect = element.getBoundingClientRect();
-
-			if (rect.left === 0 && rect.right === 0 && rect.top === 0 && rect.bottom === 0) {
-				throw new Error(
-					'bounds element has no dimensions. This may happen due to display:contents',
-				);
-			}
-
-			return [
-				[rect.left + (padding?.left ?? 0), rect.top + (padding?.top ?? 0)],
-				[rect.right - (padding?.right ?? 0), rect.bottom - (padding?.bottom ?? 0)],
-			];
-		};
-	},
-
-	selector(
-		selector: string,
-		padding?: {
-			top?: number;
-			left?: number;
-			right?: number;
-			bottom?: number;
-		},
-		root?: HTMLElement,
-	): BoundFromFunction {
-		return (ctx) => {
-			const element = (root ?? document).querySelector<HTMLElement>(selector);
-			if (!element)
-				throw new Error(`bounds selector ${selector} did not match any elements in the DOM`);
-
-			return BoundsFrom.element(element, padding)(ctx);
-		};
-	},
-
-	viewport(padding?: {
-		top?: number;
-		left?: number;
-		right?: number;
-		bottom?: number;
-	}): BoundFromFunction {
-		return (_ctx) => {
-			// The viewport bounds are always relative to the current visible area,
-			// regardless of scroll position. The viewport always starts at (0,0)
-			// and extends to the window's inner dimensions.
-			const bounds = {
-				top: 0 + (padding?.top ?? 0),
-				left: 0 + (padding?.left ?? 0),
-				right: window.innerWidth - (padding?.right ?? 0),
-				bottom: window.innerHeight - (padding?.bottom ?? 0),
-			};
-
-			// Validate bounds
-			if (bounds.right <= bounds.left || bounds.bottom <= bounds.top) {
-				throw new Error(
-					'Viewport bounds are invalid after applying padding. Check your padding values.',
-				);
-			}
-
-			return [
-				[bounds.left, bounds.top],
-				[bounds.right, bounds.bottom],
-			];
-		};
-	},
-
-	parent(padding?: {
-		top?: number;
-		left?: number;
-		right?: number;
-		bottom?: number;
-	}): BoundFromFunction {
-		return (ctx) => {
-			// console.log(
-			// 	(ctx.root_node.parentNode as HTMLElement).getBoundingClientRect(),
-			// 	BoundsFrom.element(ctx.root_node.parentNode as HTMLElement, padding)(ctx),
-			// );
-			return BoundsFrom.element(ctx.root_node.parentElement as HTMLElement, padding)(ctx);
-		};
+		set_node_dataset(ctx.rootNode, 'neodrag-count', String(++state.count));
 	},
 };
 
-const clamp = (val: number, min: number, max: number) => Math.min(max, Math.max(min, val));
-export const bounds = unstable_definePlugin(
+export const applyUserSelectHack: DragPlugin<UserSelectState> = {
+	key: APPLY_USER_SELECT_KEY,
+	phase: 'post',
+	skipOnCancel: true,
+
+	init() {
+		return { body_user_select_val: '' };
+	},
+
+	start(ctx, state) {
+		state.body_user_select_val =
+			get_node_style(document.body, 'user-select') ??
+			document.body.style.webkitUserSelect ??
+			'';
+		set_node_key_style(document.body, 'user-select', 'none');
+		document.body.style.webkitUserSelect = 'none';
+	},
+
+	end(_ctx, state) {
+		set_node_key_style(document.body, 'user-select', state.body_user_select_val);
+		document.body.style.webkitUserSelect = state.body_user_select_val;
+	},
+};
+
+export const touchAction: DragPlugin = {
+	key: TOUCH_ACTION_KEY,
+	phase: 'pre',
+
+	init(ctx) {
+		set_node_key_style(ctx.rootNode, 'touch-action', 'none');
+	},
+};
+
+export const axis = defineDragPlugin((value?: 'x' | 'y' | null) => ({
+	key: AXIS_KEY,
+	phase: 'resolve',
+
+	drag(ctx) {
+		if (!value) return;
+		if (value === 'x') return { y: 0 };
+		return { x: 0 };
+	},
+}));
+
+const snap = (val: number, step: number) => (step === 0 ? 0 : Math.round(val / step) * step);
+
+export const grid = defineDragPlugin(
+	(values?: [x: SizeInput | null | undefined, y: SizeInput | null | undefined] | null) => ({
+		key: GRID_KEY,
+		phase: 'resolve',
+
+		drag(ctx) {
+			if (!values) return;
+			const wCtx = sizeContext(ctx.rootNode, 'width');
+			const hCtx = sizeContext(ctx.rootNode, 'height');
+			const patch: { x?: number; y?: number } = {};
+			if (values[0] != null && values[0] !== 0) {
+				const stepX = resolveSizeInput(ctx.length, values[0], wCtx, 0);
+				if (stepX > 0) patch.x = snap(ctx.proposed.x, stepX);
+			}
+			if (values[1] != null && values[1] !== 0) {
+				const stepY = resolveSizeInput(ctx.length, values[1], hCtx, 0);
+				if (stepY > 0) patch.y = snap(ctx.proposed.y, stepY);
+			}
+			if (patch.x !== undefined || patch.y !== undefined) return patch;
+		},
+	}),
+);
+
+export { BoundsFrom };
+
+type BoundsHook = 'init' | 'start' | 'drag';
+
+function recomputeBounds(
+	value: BoundFromFunction,
+	ctx: import('./types.ts').DragCtx,
+) {
+	const bounds = value({ rootNode: ctx.rootNode, length: ctx.length });
+	validateBounds(bounds, ctx.cachedRootNodeRect.width, ctx.cachedRootNodeRect.height);
+	return bounds;
+}
+
+export const bounds = defineDragPlugin(
 	(
 		value: BoundFromFunction = () => [
 			[0, 0],
 			[0, 0],
 		],
-		shouldRecompute: (ctx: { readonly hook: 'dragStart' | 'drag' | 'dragEnd' }) => boolean = (
-			ctx,
-		) => ctx.hook === 'dragStart',
+		shouldRecompute: (ctx: { hook: BoundsHook }) => boolean = (ctx) => ctx.hook === 'start',
 	) => ({
-		name: 'neodrag:bounds',
+		key: BOUNDS_KEY,
+		phase: 'resolve',
 
-		setup(ctx) {
-			const bounds = value({ root_node: ctx.rootNode });
-			const element_width = ctx.cachedRootNodeRect.width;
-			const element_height = ctx.cachedRootNodeRect.height;
-
-			if (
-				bounds[1][0] - bounds[0][0] < element_width ||
-				bounds[1][1] - bounds[0][1] < element_height
-			) {
-				throw new Error(
-					'Bounds dimensions cannot be smaller than the draggable element dimensions',
-				);
-			}
-
+		init(ctx) {
+			const boundsCoords = shouldRecompute({ hook: 'init' })
+				? recomputeBounds(value, ctx)
+				: ([
+						[0, 0],
+						[window.innerWidth, window.innerHeight],
+					] as [[number, number], [number, number]]);
 			return {
-				bounds,
-				initialElementPosition: {
-					x: ctx.cachedRootNodeRect.left - ctx.offset.x,
-					y: ctx.cachedRootNodeRect.top - ctx.offset.y,
-				},
+				bounds: boundsCoords,
+				initialX: ctx.cachedRootNodeRect.left - ctx.offset.x,
+				initialY: ctx.cachedRootNodeRect.top - ctx.offset.y,
 			};
 		},
 
 		start(ctx, state) {
-			if (shouldRecompute?.({ hook: 'dragStart' })) {
-				state.bounds = value({ root_node: ctx.rootNode });
-
-				// Update the initial position on drag start
-				state.initialElementPosition = {
-					x: ctx.cachedRootNodeRect.left - ctx.offset.x,
-					y: ctx.cachedRootNodeRect.top - ctx.offset.y,
-				};
-			}
+			if (!shouldRecompute({ hook: 'start' })) return;
+			state.bounds = recomputeBounds(value, ctx);
+			state.initialX = ctx.cachedRootNodeRect.left - ctx.offset.x;
+			state.initialY = ctx.cachedRootNodeRect.top - ctx.offset.y;
 		},
 
 		drag(ctx, state) {
 			if (!ctx.isDragging) return;
-			if (shouldRecompute?.({ hook: 'drag' })) {
-				state.bounds = value({ root_node: ctx.rootNode });
+			if (shouldRecompute({ hook: 'drag' })) {
+				state.bounds = recomputeBounds(value, ctx);
 			}
 
-			const bound_coords = state.bounds;
-			const element_width = ctx.cachedRootNodeRect.width;
-			const element_height = ctx.cachedRootNodeRect.height;
-
-			// These are the viewport-coordinate limits of where the element can move
-			const min_viewport_x = bound_coords[0][0];
-			const min_viewport_y = bound_coords[0][1];
-			const max_viewport_x = bound_coords[1][0] - element_width;
-			const max_viewport_y = bound_coords[1][1] - element_height;
-
-			// Get the element's initial viewport position before any dragging started
-			// Using our stored initialElementPosition
-			const initial_viewport_position = state.initialElementPosition;
-
-			// Calculate what the minimum and maximum offsets would be
-			const min_offset_x = min_viewport_x - initial_viewport_position.x;
-			const min_offset_y = min_viewport_y - initial_viewport_position.y;
-			const max_offset_x = max_viewport_x - initial_viewport_position.x;
-			const max_offset_y = max_viewport_y - initial_viewport_position.y;
-
-			// Calculate what the offset would be after this drag
-			const proposed_offset_x = ctx.offset.x + (ctx.proposed.x ?? 0);
-			const proposed_offset_y = ctx.offset.y + (ctx.proposed.y ?? 0);
-
-			// Clamp the offset
-			const clamped_offset_x = clamp(proposed_offset_x, min_offset_x, max_offset_x);
-			const clamped_offset_y = clamp(proposed_offset_y, min_offset_y, max_offset_y);
-
-			// Calculate what delta is needed to achieve the clamped offset
-			const required_delta_x = clamped_offset_x - ctx.offset.x;
-			const required_delta_y = clamped_offset_y - ctx.offset.y;
-
-			// Propose the adjusted delta
-			ctx.propose(
-				ctx.proposed.x !== null ? required_delta_x : null,
-				ctx.proposed.y !== null ? required_delta_y : null,
-			);
-		},
-
-		end(context, state) {
-			if (shouldRecompute?.({ hook: 'dragEnd' })) {
-				state.bounds = value({ root_node: context.rootNode });
-			}
-		},
-	}),
-);
-
-export const threshold = unstable_definePlugin(
-	(options?: { delay?: number; distance?: number } | null) => ({
-		name: 'neodrag:threshold',
-
-		setup() {
-			// Behavior: If options is null, then threshold plugin does nothing
-			// If options is undefined, then threshold plugin uses default options
-			// If options is {}, then threshold plugin uses default options
-			// If options is { delay: 10, distance: 5 }, then threshold plugin uses the provided options
-			const enabled = !is_null(options);
-
-			if (!enabled) return { enabled };
-
-			const _options = { ...(options ?? {}) } as {
-				delay: number;
-				distance: number;
-			};
-			_options.delay ??= 0;
-			_options.distance ??= 3;
-
-			if (_options.delay < 0) throw new Error('delay must be >= 0');
-			if (_options.distance < 0) throw new Error('distance must be >= 0');
+			const w = ctx.cachedRootNodeRect.width;
+			const h = ctx.cachedRootNodeRect.height;
+			const b = state.bounds;
+			const minOx = b[0][0] - state.initialX;
+			const minOy = b[0][1] - state.initialY;
+			const maxOx = b[1][0] - w - state.initialX;
+			const maxOy = b[1][1] - h - state.initialY;
+			const px = ctx.offset.x + ctx.proposed.x;
+			const py = ctx.offset.y + ctx.proposed.y;
 
 			return {
-				enabled,
-				start_time: 0,
-				start_position: { x: 0, y: 0 },
-				options: _options,
+				x: clamp(px, minOx, maxOx) - ctx.offset.x,
+				y: clamp(py, minOy, maxOy) - ctx.offset.y,
 			};
-		},
-
-		shouldStart(_ctx, state, event) {
-			if (state.enabled) {
-				state.start_time = Date.now();
-				state.start_position.x = event.clientX;
-				state.start_position.y = event.clientY;
-			}
-
-			return true;
-		},
-
-		drag(ctx, state, event) {
-			if (!state.enabled) return;
-			if (ctx.isDragging) return;
-
-			// First check if we're still on the draggable element
-			if (!ctx.currentlyDraggedNode.contains(event.target as Node)) {
-				ctx.preventStart();
-				return;
-			}
-
-			if (state.options.delay) {
-				const elapsed = Date.now() - state.start_time;
-				if (elapsed < state.options.delay) {
-					ctx.preventStart();
-					return;
-				}
-			}
-
-			if (state.options.distance) {
-				const delta_x = event.clientX - state.start_position.x;
-				const delta_y = event.clientY - state.start_position.y;
-				const distance = delta_x ** 2 + delta_y ** 2;
-				if (distance <= state.options.distance ** 2) {
-					ctx.preventStart();
-					return;
-				}
-			}
 		},
 	}),
 );
+
+export type PositionOptions = {
+	current?: { x: SizeInput; y: SizeInput } | null;
+	default?: { x: SizeInput; y: SizeInput } | null;
+};
+
+function applyPosition(ctx: import('./types.ts').DragCtx, opts: PositionOptions | null) {
+	if (ctx.isInteracting) return;
+	const x = opts?.current?.x ?? opts?.default?.x ?? ctx.offset.x;
+	const y = opts?.current?.y ?? opts?.default?.y ?? ctx.offset.y;
+	const wCtx = sizeContext(ctx.rootNode, 'width');
+	const hCtx = sizeContext(ctx.rootNode, 'height');
+	if (
+		resolveSizeInput(ctx.length, x, wCtx, ctx.offset.x) !== ctx.offset.x ||
+		resolveSizeInput(ctx.length, y, hCtx, ctx.offset.y) !== ctx.offset.y
+	) {
+		ctx.setForcedPosition(x, y);
+	}
+}
+
+export const position = defineDragPlugin((options: PositionOptions | null = null) => ({
+	key: POSITION_KEY,
+	phase: 'pre',
+
+	init(ctx) {
+		applyPosition(ctx, options);
+	},
+
+	update(ctx) {
+		applyPosition(ctx, options);
+	},
+}));
 
 export type DragEventData = Readonly<{
-	/** How much element moved from its original position horizontally */
-	offset: Readonly<{ x: number; y: number }>;
-
-	/** The node on which the draggable is applied */
+	offset: Readonly<{ x: SizeInput; y: SizeInput }>;
+	offsetPx: Readonly<{ x: number; y: number }>;
 	rootNode: HTMLElement | SVGElement;
-
-	/** The element being dragged */
-	currentNode: HTMLElement | SVGElement;
-
-	/** The pointer event that triggered the drag */
-	event: PointerEvent;
+	visualNode: HTMLElement | SVGElement;
+	input: InteractionInput;
+	pointer: Readonly<{ x: number; y: number }>;
+	event?: PointerEvent;
 }>;
 
-export const events = unstable_definePlugin(
-	(
-		events: {
-			onDragStart?: (data: DragEventData) => void;
-			onDrag?: (data: DragEventData) => void;
-			onDragEnd?: (data: DragEventData) => void;
-		} = {},
-	) => ({
-		name: 'neodrag:events',
-		cancelable: false,
-		liveUpdate: false,
+function eventPayload(ctx: DragCtx, input: InteractionInput): DragEventData {
+	const native = nativePointerEvent(input);
+	return {
+		offset: {
+			x: ctx.offsetAuthored?.x ?? ctx.offset.x,
+			y: ctx.offsetAuthored?.y ?? ctx.offset.y,
+		},
+		offsetPx: { x: ctx.offset.x, y: ctx.offset.y },
+		rootNode: ctx.rootNode,
+		visualNode: ctx.session.visual.node,
+		input,
+		pointer: { x: input.clientX, y: input.clientY },
+		event: native ?? undefined,
+	};
+}
 
-		setup(ctx) {
-			return {
-				offset: ctx.offset,
-				rootNode: ctx.rootNode,
-				currentNode: ctx.currentlyDraggedNode,
-				event: ctx.lastEvent as PointerEvent,
-			};
+export const events = defineDragPlugin(
+	(handlers: {
+		onDragStart?: (data: DragEventData) => void;
+		onDrag?: (data: DragEventData) => void;
+		onDragEnd?: (data: DragEventData) => void;
+	} = {}) => ({
+		key: EVENTS_KEY,
+		phase: 'post',
+		skipOnCancel: true,
+
+		start(ctx, _s, input) {
+			handlers.onDragStart?.(eventPayload(ctx, input));
 		},
 
-		start(ctx, state, event) {
-			ctx.effect.immediate(() => {
-				state.offset = ctx.offset;
-				state.currentNode = ctx.currentlyDraggedNode;
-				state.event = event;
-				events.onDragStart?.(state);
-			});
+		drag(ctx, _s, input) {
+			handlers.onDrag?.(eventPayload(ctx, input));
 		},
 
-		drag(ctx, state, event) {
-			ctx.effect.immediate(() => {
-				state.offset = ctx.offset;
-				state.currentNode = ctx.currentlyDraggedNode;
-				state.event = event;
-
-				events.onDrag?.(state);
-			});
-		},
-
-		end(ctx, state, event) {
-			ctx.effect.immediate(() => {
-				state.offset = ctx.offset;
-				state.currentNode = ctx.currentlyDraggedNode;
-				state.event = event;
-
-				events.onDragEnd?.(state);
-			});
+		end(ctx, _s, input) {
+			handlers.onDragEnd?.(eventPayload(ctx, input));
 		},
 	}),
 );
+
+export type DisabledInput = boolean | (() => boolean);
+
+function readDisabled(input: DisabledInput): boolean {
+	return typeof input === 'function' ? input() : input;
+}
+
+export const disabled = defineDragPlugin((isDisabled: DisabledInput = true) => ({
+	key: DISABLED_KEY,
+	phase: 'pre',
+
+	start() {
+		return !readDisabled(isDisabled);
+	},
+}));
 
 type ControlZone = {
 	element: Element;
@@ -610,28 +323,16 @@ type ControlZone = {
 
 export const ControlFrom = {
 	selector(selector: string): (root: Element) => ControlZone[] {
-		return (root: Element) => ControlFrom.elements(root.querySelectorAll(selector))(root);
+		return (root) => ControlFrom.elements(root.querySelectorAll(selector))(root);
 	},
 
-	elements:
-		(elements: NodeListOf<Element> | (Element | null | undefined)[]) =>
-		(root: Element): ControlZone[] => {
+	elements(elements: NodeListOf<Element> | (Element | null | undefined)[]): (root: Element) => ControlZone[] {
+		return (root) => {
 			const root_rect = root.getBoundingClientRect();
-
-			const data: {
-				element: Element;
-				top: number;
-				right: number;
-				bottom: number;
-				left: number;
-				area: number;
-			}[] = [];
-
+			const data: ControlZone[] = [];
 			for (const el of Array.from(elements)) {
 				if (!el) continue;
-
 				const rect = el.getBoundingClientRect();
-
 				data.push({
 					element: el,
 					top: rect.top - root_rect.top,
@@ -641,12 +342,11 @@ export const ControlFrom = {
 					area: rect.width * rect.height,
 				});
 			}
-
 			return data;
-		},
+		};
+	},
 };
 
-// Helper to check if a zone is nested within another zone
 function is_nested(inner: ControlZone, outer: ControlZone) {
 	return (
 		inner.area < outer.area &&
@@ -657,214 +357,138 @@ function is_nested(inner: ControlZone, outer: ControlZone) {
 	);
 }
 
-// Helper function to find all zones containing a point, sorted by area (smallest first)
-function find_containing_zones(ctx: PluginContext, event: PointerEvent, zones: ControlZone[]) {
-	return zones
-		.filter((zone) => is_point_in_zone(event.clientX, event.clientY, zone, ctx.cachedRootNodeRect))
-		.sort((a, b) => a.area - b.area);
-}
-
 function is_point_in_zone(x: number, y: number, zone: ControlZone, root_rect: DOMRect) {
-	const relative_x = x - root_rect.left;
-	const relative_y = y - root_rect.top;
-
-	return (
-		relative_x >= zone.left &&
-		relative_x <= zone.right &&
-		relative_y >= zone.top &&
-		relative_y <= zone.bottom
-	);
+	const rx = x - root_rect.left;
+	const ry = y - root_rect.top;
+	return rx >= zone.left && rx <= zone.right && ry >= zone.top && ry <= zone.bottom;
 }
 
-export const controls = unstable_definePlugin(
+function find_containing_zones(event: PointerEvent, zones: ControlZone[], root_rect: DOMRect) {
+	const out: ControlZone[] = [];
+	for (let i = 0; i < zones.length; i++) {
+		const z = zones[i]!;
+		if (is_point_in_zone(event.clientX, event.clientY, z, root_rect)) out.push(z);
+	}
+	out.sort((a, b) => a.area - b.area);
+	return out;
+}
+
+function resolve_zone(
+	allow: ControlZone[],
+	block: ControlZone[],
+	allow_defined: boolean,
+	priority: 'allow' | 'block' = 'allow',
+): { zone: ControlZone | null; is_allow: boolean } {
+	if (allow_defined && allow.length === 0) return { zone: null, is_allow: false };
+	if (allow.length === 0 && block.length === 0) return { zone: null, is_allow: allow_defined ? false : true };
+
+	let i = 0;
+	let j = 0;
+	while (i < allow.length || j < block.length) {
+		const a = allow[i];
+		const b = block[j];
+		if (!a) return { zone: b!, is_allow: false };
+		if (!b) return { zone: a, is_allow: true };
+		if (is_nested(a, b)) return { zone: a, is_allow: true };
+		if (is_nested(b, a)) return { zone: b, is_allow: false };
+		if (a.area === b.area && priority === 'block') {
+			j++;
+			return { zone: b, is_allow: false };
+		}
+		if (a.area <= b.area) {
+			i++;
+			return { zone: a, is_allow: true };
+		}
+		j++;
+		return { zone: b, is_allow: false };
+	}
+	return { zone: null, is_allow: allow_defined ? false : true };
+}
+
+export const controls = defineDragPlugin(
 	(
 		options?: {
 			allow?: ReturnType<(typeof ControlFrom)[keyof typeof ControlFrom]>;
 			block?: ReturnType<(typeof ControlFrom)[keyof typeof ControlFrom]>;
 			priority?: 'allow' | 'block';
 		} | null,
+		shouldRecompute: (ctx: { hook: 'init' | 'start' | 'drag' }) => boolean = (ctx) =>
+			ctx.hook === 'init',
 	) => ({
-		name: 'neodrag:controls',
+		key: CONTROLS_KEY,
+		phase: 'pre',
 
-		setup(ctx) {
-			// Sort zones by area (smallest to largest) to handle nesting properly
+		init(ctx) {
+			const compute = () => {
+				const allow = (options?.allow?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area);
+				const block = (options?.block?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area);
+				return { allow, block };
+			};
+			const { allow, block } = compute();
 			return {
-				allow_zones: (options?.allow?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area),
-				block_zones: (options?.block?.(ctx.rootNode) ?? []).sort((a, b) => a.area - b.area),
+				allow,
+				block,
 				priority: options?.priority ?? 'allow',
+				compute,
 			};
 		},
 
-		shouldStart(ctx, state, event) {
-			// Find all containing zones for the click point
-			const containing_allow_zones = find_containing_zones(ctx, event, state.allow_zones);
-			const containing_block_zones = find_containing_zones(ctx, event, state.block_zones);
-
-			// If there are any allow zones defined, only allow dragging within them
-			if (state.allow_zones.length > 0 && containing_allow_zones.length === 0) {
-				return false;
+		start(ctx, state, input) {
+			if (!isPointerInput(input)) return true;
+			const event = input.native;
+			if (shouldRecompute({ hook: 'start' })) {
+				const next = state.compute();
+				state.allow = next.allow;
+				state.block = next.block;
 			}
 
-			// If no zones contain the point and no allow zones are defined,
-			// default behavior based on priority
-			if (containing_allow_zones.length === 0 && containing_block_zones.length === 0) {
-				return state.allow_zones.length === 0 && state.priority === 'allow';
-			}
+			const allow_zones = find_containing_zones(event, state.allow, ctx.cachedRootNodeRect);
+			const block_zones = find_containing_zones(event, state.block, ctx.cachedRootNodeRect);
+			const { zone, is_allow } = resolve_zone(
+				allow_zones,
+				block_zones,
+				state.allow.length > 0,
+				state.priority,
+			);
 
-			// Find the most specific (smallest) zone that should determine the behavior
-			let final_zone: ControlZone | null = null;
-			let is_allow = false;
+			if (!zone) return is_allow;
 
-			// Interleave allow and block zones based on nesting
-			let i = 0,
-				j = 0;
-			while (i < containing_allow_zones.length || j < containing_block_zones.length) {
-				const allow_zone = containing_allow_zones[i];
-				const block_zone = containing_block_zones[j];
-
-				if (!allow_zone) {
-					final_zone = block_zone;
-					is_allow = false;
-					break;
-				}
-
-				if (!block_zone) {
-					final_zone = allow_zone;
-					is_allow = true;
-					break;
-				}
-
-				// Compare zones based on nesting
-				if (is_nested(allow_zone, block_zone)) {
-					final_zone = allow_zone;
-					is_allow = true;
-					break;
-				}
-
-				if (is_nested(block_zone, allow_zone)) {
-					final_zone = block_zone;
-					is_allow = false;
-					break;
-				}
-
-				// If not nested, use the smaller area
-				if (allow_zone.area <= block_zone.area) {
-					final_zone = allow_zone;
-					is_allow = true;
-					i++;
-				} else {
-					final_zone = block_zone;
-					is_allow = false;
-					j++;
-				}
-			}
-
-			// If we found a final determining zone
-			if (final_zone) {
-				if (is_allow) {
-					ctx.currentlyDraggedNode = final_zone.element as HTMLElement;
-					return true;
-				}
-				return false;
-			}
-
-			// Default to priority if no zones were found, but only if no allow zones are defined
-			return state.allow_zones.length === 0 && state.priority === 'allow';
+			return is_allow;
 		},
 	}),
 );
 
-export const position = unstable_definePlugin(
+export const dragData = defineDragPlugin(<T,>(getData: () => T) => ({
+	key: DRAG_DATA_KEY,
+	phase: 'pre',
+
+	start(ctx) {
+		ctx.session.data = getData();
+	},
+}));
+
+export const scrollLock = defineDragPlugin(
 	(
 		options: {
-			current?: { x: number; y: number } | null;
-			default?: { x: number; y: number } | null;
-		} | null = null,
-	) => ({
-		name: 'neodrag:position',
-		priority: 1000,
-		liveUpdate: true,
-
-		setup(ctx) {
-			if (!ctx.isInteracting) {
-				const x = options?.current?.x ?? options?.default?.x ?? ctx.offset.x;
-				const y = options?.current?.y ?? options?.default?.y ?? ctx.offset.y;
-
-				// ✅ Only set if position actually changed
-				if (x !== ctx.offset.x || y !== ctx.offset.y) {
-					ctx.setForcedPosition(x, y);
-				}
-			}
-		},
-	}),
-);
-
-type TouchActionMode =
-	// Keyword values
-	| 'auto'
-	| 'none'
-	| 'pan-x'
-	| 'pan-left'
-	| 'pan-right'
-	| 'pan-y'
-	| 'pan-up'
-	| 'pan-down'
-	| 'pinch-zoom'
-	| 'manipulation'
-
-	// Global values
-	| 'inherit'
-	| 'initial'
-	| 'revert'
-	| 'revert-layer'
-	| 'unset';
-
-export const touchAction = unstable_definePlugin(
-	(mode: TouchActionMode | false | null = 'none') => ({
-		name: 'neodrag:touch-action',
-		cancelable: false,
-		liveUpdate: true,
-
-		setup(ctx) {
-			if (mode !== false && mode !== null) {
-				set_node_key_style(ctx.rootNode, 'touch-action', mode ?? 'none');
-			}
-		},
-	}),
-);
-
-// Scroll-lock plugin that prevents scrolling while dragging
-export const scrollLock = unstable_definePlugin(
-	(
-		options: {
-			lockAxis?: 'x' | 'y' | 'both'; // Which axes to lock scrolling on
-			container?: HTMLElement | (() => HTMLElement); // Custom container to lock
-			allowScrollbar?: boolean; // Whether to allow scrollbar interaction
+			lockAxis?: 'x' | 'y' | 'both';
+			container?: HTMLElement | (() => HTMLElement);
+			allowScrollbar?: boolean;
 		} | null = {},
 	) => ({
-		name: 'neodrag:scrollLock',
+		key: SCROLL_LOCK_KEY,
+		phase: 'pre',
 
-		setup() {
-			const defaults = {
-				lock_axis: 'both',
-				container: document.documentElement,
-				allow_scrollbar: false,
-			};
-
-			const config = { ...defaults, ...options };
-
+		init() {
 			return {
-				config,
-				original_styles: new Map<
+				config: {
+					lockAxis: options?.lockAxis ?? 'both',
+					container: options?.container ?? document.documentElement,
+					allowScrollbar: options?.allowScrollbar ?? false,
+				},
+				originalStyles: new Map<
 					HTMLElement,
-					{
-						user_select: string;
-						touch_action: string;
-						overflow: string;
-					}
+					{ userSelect: string; touchAction: string; overflow: string }
 				>(),
-				container_rect: null as DOMRect | null,
-				last_container_check: 0,
 			};
 		},
 
@@ -874,51 +498,24 @@ export const scrollLock = unstable_definePlugin(
 					? state.config.container()
 					: state.config.container;
 
-			// Reset cache
-			state.container_rect = null;
-			state.last_container_check = 0;
+			ctx.effect(() => {
+				const target = container instanceof HTMLElement ? container : document.body;
+				state.originalStyles.set(target, {
+					userSelect: get_node_style(target, 'user-select'),
+					touchAction: get_node_style(target, 'touch-action'),
+					overflow: get_node_style(target, 'overflow'),
+				});
 
-			ctx.effect.paint(() => {
-				// Store original styles
-				if (container instanceof HTMLElement) {
-					state.original_styles.set(container, {
-						user_select: get_node_style(container, 'user-select'),
-						touch_action: get_node_style(container, 'touch-action'),
-						overflow: get_node_style(container, 'overflow'),
-					});
+				set_node_key_style(target, 'user-select', 'none');
 
-					// Apply scroll locking styles
-					set_node_key_style(container, 'user-select', 'none');
+				if (!state.config.allowScrollbar) {
+					set_node_key_style(target, 'overflow', 'hidden');
+				}
 
-					if (!state.config.allow_scrollbar) {
-						set_node_key_style(container, 'overflow', 'hidden');
-					}
-
-					if (state.config.lock_axis === 'x' || state.config.lock_axis === 'both') {
-						set_node_key_style(container, 'touch-action', 'pan-y');
-					} else if (state.config.lock_axis === 'y') {
-						set_node_key_style(container, 'touch-action', 'pan-x');
-					}
-				} else {
-					// For window, we need to lock the body
-					const body = document.body;
-					state.original_styles.set(body, {
-						user_select: get_node_style(body, 'user-select'),
-						touch_action: get_node_style(body, 'touch-action'),
-						overflow: get_node_style(body, 'overflow'),
-					});
-
-					set_node_key_style(body, 'user-select', 'none');
-
-					if (!state.config.allow_scrollbar) {
-						set_node_key_style(body, 'overflow', 'hidden');
-					}
-
-					if (state.config.lock_axis === 'x' || state.config.lock_axis === 'both') {
-						set_node_key_style(body, 'touch-action', 'pan-y');
-					} else if (state.config.lock_axis === 'y') {
-						set_node_key_style(body, 'touch-action', 'pan-x');
-					}
+				if (state.config.lockAxis === 'x' || state.config.lockAxis === 'both') {
+					set_node_key_style(target, 'touch-action', 'pan-y');
+				} else if (state.config.lockAxis === 'y') {
+					set_node_key_style(target, 'touch-action', 'pan-x');
 				}
 			});
 		},
@@ -929,32 +526,213 @@ export const scrollLock = unstable_definePlugin(
 					? state.config.container()
 					: state.config.container;
 
-			ctx.effect.paint(() => {
+			ctx.effect(() => {
 				const target = container instanceof HTMLElement ? container : document.body;
-				const originalStyles = state.original_styles.get(target);
-
-				if (originalStyles) {
-					set_node_key_style(target, 'user-select', originalStyles.user_select);
-					set_node_key_style(target, 'touch-action', originalStyles.touch_action);
-					set_node_key_style(target, 'overflow', originalStyles.overflow);
+				const original = state.originalStyles.get(target);
+				if (original) {
+					set_node_key_style(target, 'user-select', original.userSelect);
+					set_node_key_style(target, 'touch-action', original.touchAction);
+					set_node_key_style(target, 'overflow', original.overflow);
 				}
-
-				state.original_styles.delete(target);
+				state.originalStyles.delete(target);
 			});
-
-			// Clear cache
-			state.container_rect = null;
-			state.last_container_check = 0;
 		},
 
-		cleanup(_ctx, state) {
-			// Restore any remaining original styles
-			for (const [element, styles] of state.original_styles) {
-				set_node_key_style(element, 'user-select', styles.user_select);
-				set_node_key_style(element, 'touch-action', styles.touch_action);
+		destroy(_ctx, state) {
+			for (const [element, styles] of state.originalStyles) {
+				set_node_key_style(element, 'user-select', styles.userSelect);
+				set_node_key_style(element, 'touch-action', styles.touchAction);
 				set_node_key_style(element, 'overflow', styles.overflow);
 			}
-			state.original_styles.clear();
+			state.originalStyles.clear();
 		},
 	}),
 );
+
+export const autoScroll = defineDragPlugin(
+	(
+		options: {
+			margin?: SizeInput;
+			maxSpeed?: number;
+			container?: HTMLElement | (() => HTMLElement);
+		} | null = {},
+	) => ({
+		key: AUTO_SCROLL_KEY,
+		phase: 'drag',
+
+		init(ctx) {
+			const marginPx =
+				options?.margin != null
+					? resolveSizeInput(
+							ctx.length,
+							options.margin,
+							sizeContext(ctx.rootNode, 'height'),
+							48,
+						)
+					: 48;
+			return {
+				margin: marginPx,
+				maxSpeed: options?.maxSpeed ?? 24,
+				container: options?.container,
+			};
+		},
+
+		drag(_ctx, state, input) {
+			const margin = state.margin;
+			const maxSpeed = state.maxSpeed;
+			const container =
+				typeof state.container === 'function'
+					? state.container()
+					: (state.container ?? document.documentElement);
+			const rect =
+				container === document.documentElement
+					? { top: 0, left: 0, right: window.innerWidth, bottom: window.innerHeight }
+					: container.getBoundingClientRect();
+
+			let dx = 0;
+			let dy = 0;
+			if (input.clientY < rect.top + margin) dy = -maxSpeed;
+			else if (input.clientY > rect.bottom - margin) dy = maxSpeed;
+			if (input.clientX < rect.left + margin) dx = -maxSpeed;
+			else if (input.clientX > rect.right - margin) dx = maxSpeed;
+
+			if (dx === 0 && dy === 0) return;
+			const scrollEl =
+				container === document.documentElement ? document.documentElement : container;
+			scrollEl.scrollTop += dy;
+			scrollEl.scrollLeft += dx;
+		},
+	}),
+);
+
+export const ghost = defineDragPlugin((options: { opacity?: number } = {}) => ({
+	key: GHOST_KEY,
+	phase: 'pre',
+
+	init() {
+		return {
+			ghostElement: null as HTMLElement | SVGElement | null,
+		};
+	},
+
+	start(ctx, state) {
+		const clone = ctx.rootNode.cloneNode(true) as HTMLElement | SVGElement;
+		const rect = ctx.rootNode.getBoundingClientRect();
+		state.ghostElement = clone;
+
+		clone.classList.add('neodrag-ghost');
+		(clone as HTMLElement).style.opacity = String(options.opacity ?? 0.5);
+		clone.style.position = 'fixed';
+		clone.style.pointerEvents = 'none';
+		clone.style.zIndex = '9999';
+		clone.style.margin = '0';
+		clone.style.top = `${rect.top}px`;
+		clone.style.left = `${rect.left}px`;
+		clone.style.width = `${rect.width}px`;
+		clone.style.height = `${rect.height}px`;
+		clone.style.transform = '';
+		(clone as HTMLElement).style.translate = '';
+
+		document.body.appendChild(clone);
+		ctx.setVisual(clone);
+	},
+
+	end(_ctx, state) {
+		state.ghostElement?.remove();
+		state.ghostElement = null;
+	},
+
+	destroy(ctx, state) {
+		state.ghostElement?.remove();
+		state.ghostElement = null;
+		ctx.setVisual(ctx.rootNode);
+	},
+}));
+
+export const accepts = defineDropPlugin(
+	<T,>(predicate: (data: T) => boolean) => ({
+		key: ACCEPTS_KEY,
+		phase: 'pre',
+
+		enter(ctx) {
+			const data = ctx.session.data as T;
+			if (!predicate(data)) return false;
+		},
+	}),
+);
+
+export const highlight = defineDropPlugin(
+	(options: { overClass?: string } = {}) => ({
+		key: HIGHLIGHT_KEY,
+		phase: 'post',
+
+		init() {
+			return { overClass: options.overClass ?? 'neodrag-drop-over' };
+		},
+
+		enter(ctx, state) {
+			ctx.rootNode.classList.add(state.overClass);
+		},
+
+		leave(ctx, state) {
+			ctx.rootNode.classList.remove(state.overClass);
+		},
+
+		destroy(ctx, state) {
+			ctx.rootNode.classList.remove(state.overClass);
+		},
+	}),
+);
+
+export const onDrop = defineDropPlugin(<T,>(handler: (data: T, ctx: DropCtx) => void) => ({
+	key: ON_DROP_KEY,
+	phase: 'post',
+
+	drop(ctx) {
+		handler(ctx.session.data as T, ctx);
+	},
+}));
+
+export const dropHitExpand = defineDropPlugin(
+	(padding: {
+		top?: SizeInput;
+		left?: SizeInput;
+		right?: SizeInput;
+		bottom?: SizeInput;
+	} = {}) => ({
+		key: DROP_HIT_EXPAND_KEY,
+		phase: 'pre' as const,
+
+		init(ctx) {
+			const node = ctx.rootNode;
+			const resolve = (value: SizeInput | undefined, axis: 'width' | 'height') =>
+				value != null ? resolveSizeInput(ctx.length, value, sizeContext(node, axis), 0) : 0;
+			return {
+				top: resolve(padding.top, 'height'),
+				left: resolve(padding.left, 'width'),
+				right: resolve(padding.right, 'width'),
+				bottom: resolve(padding.bottom, 'height'),
+			};
+		},
+	}),
+);
+
+export { DROP_HIT_EXPAND_KEY };
+
+export {
+	hasReactiveSlots,
+	resolvePluginList,
+	PluginListResolver,
+} from './resolve-plugins.ts';
+export {
+	assertNamedPluginKey,
+	assertNamedPluginKeys,
+	defineDragPlugin,
+	defineDropPlugin,
+	pluginKeyLabel,
+	type DragPlugin as Plugin,
+	type DragPluginList,
+	type DropPluginList,
+	type PluginSlot,
+	type DragCtx as PluginContext,
+} from './types.ts';

@@ -1,21 +1,22 @@
 <script>
-	import { draggable, events, position, Compartment } from '@neodrag/svelte';
+	import { Draggable } from '@neodrag/svelte'
+	import { events, position } from '@neodrag/svelte/plugins';
 
 	let pos = $state({ x: 0, y: 0 });
 
-	const position_compartment = Compartment.of(() => position({ current: $state.snapshot(pos) }));
-</script>
-
-<div
-	{@attach draggable(() => [
+	const drag_0 = new Draggable({ plugins: [() => [
 		events({
 			onDrag: ({ offset }) => {
 				pos.x = offset.x;
 				pos.y = offset.y;
 			},
 		}),
-		position_compartment,
-	])}
+		position({ current: pos }),
+	]] });
+</script>
+
+<div
+	{@attach drag_0.attachment}
 >
 	I can be moved with the slider too
 </div>
