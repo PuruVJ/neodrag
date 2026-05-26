@@ -41,27 +41,27 @@ body.docs-route {
 	--grid-accent: var(--app-color-primary);
 }
 
-body.docs-route[data-framework='svelte'] {
+:is(html, body)[data-framework='svelte'] {
 	--grid-accent: var(--app-color-brand-svelte);
 }
 
-body.docs-route[data-framework='react'] {
+:is(html, body)[data-framework='react'] {
 	--grid-accent: var(--app-color-brand-react);
 }
 
-body.docs-route[data-framework='vue'] {
+:is(html, body)[data-framework='vue'] {
 	--grid-accent: var(--app-color-brand-vue);
 }
 
-body.docs-route[data-framework='solid'] {
+:is(html, body)[data-framework='solid'] {
 	--grid-accent: var(--app-color-brand-solid);
 }
 
-body.docs-route[data-framework='vanilla'] {
+:is(html, body)[data-framework='vanilla'] {
 	--grid-accent: var(--app-color-brand-vanilla);
 }
 
-body.docs-route[data-framework='core'] {
+:is(html, body)[data-framework='core'] {
 	--grid-accent: var(--app-color-primary);
 }
 

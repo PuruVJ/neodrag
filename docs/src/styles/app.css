@@ -11,6 +11,7 @@
 	--color-primary: var(--app-color-primary);
 	--color-primary-contrast: var(--app-color-primary-contrast);
 	--color-brand: var(--secondary-color, var(--app-color-primary));
+	--color-accent: var(--color-brand);
 	--color-border: color-mix(in lch, var(--app-color-dark), transparent 88%);
 	--color-border-strong: color-mix(in lch, var(--app-color-dark), transparent 82%);
 	--color-panel: color-mix(in lch, var(--app-color-shell), var(--color-brand) 5%);
@@ -39,7 +40,7 @@
 		background-color: var(--app-color-shell);
 		color: var(--app-color-dark);
 		font-family: var(--font-sans);
-		accent-color: var(--app-color-primary);
+		accent-color: var(--color-brand);
 	}
 
 	html[data-theme='dark'] {
@@ -113,28 +114,34 @@
 		box-shadow: 0 0 0 4px color-mix(in lch, var(--color-brand), transparent 75%);
 	}
 
-	body[data-framework='svelte'] {
+	:is(html, body)[data-framework='svelte'] {
 		--secondary-color: var(--app-color-brand-svelte);
+		--color-brand: var(--app-color-brand-svelte);
 	}
 
-	body[data-framework='vue'] {
+	:is(html, body)[data-framework='vue'] {
 		--secondary-color: var(--app-color-brand-vue);
+		--color-brand: var(--app-color-brand-vue);
 	}
 
-	body[data-framework='react'] {
+	:is(html, body)[data-framework='react'] {
 		--secondary-color: var(--app-color-brand-react);
+		--color-brand: var(--app-color-brand-react);
 	}
 
-	body[data-framework='solid'] {
+	:is(html, body)[data-framework='solid'] {
 		--secondary-color: var(--app-color-brand-solid);
+		--color-brand: var(--app-color-brand-solid);
 	}
 
-	body[data-framework='vanilla'] {
+	:is(html, body)[data-framework='vanilla'] {
 		--secondary-color: var(--app-color-brand-vanilla);
+		--color-brand: var(--app-color-brand-vanilla);
 	}
 
-	body[data-framework='core'] {
+	:is(html, body)[data-framework='core'] {
 		--secondary-color: var(--app-color-primary);
+		--color-brand: var(--app-color-primary);
 	}
 
 	body.docs-route {
@@ -153,10 +160,10 @@
 	}
 
 	:is(a[href], a[href]:visited):where(:not(.unstyled)) {
-		@apply font-semibold text-primary no-underline;
+		@apply font-semibold text-brand no-underline;
 		background-image: linear-gradient(
 			transparent 50%,
-			color-mix(in lch, var(--app-color-primary), transparent 65%) 50%
+			color-mix(in lch, var(--color-brand), transparent 65%) 50%
 		);
 		background-size: 100% 200%;
 		background-position: 0 0;
@@ -167,11 +174,11 @@
 
 		&:hover,
 		&:focus-visible {
-			@apply rounded-sm text-primary-contrast;
+			@apply rounded-sm text-[var(--app-color-anti-mixer)];
 			background-position: 0 100%;
 			background-image: linear-gradient(
 				transparent 50%,
-				color-mix(in lch, var(--app-color-primary), transparent 0%) 50%
+				color-mix(in lch, var(--color-brand), transparent 0%) 50%
 			);
 		}
 	}
@@ -374,7 +381,7 @@
 	.dock-surface {
 		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 84%);
 		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 78%);
-		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--app-color-primary) 4%);
+		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--color-brand) 4%);
 		--dock-accent-glow: none;
 		--dock-shadow: 0 16px 40px -28px color-mix(in lch, var(--app-color-dark), transparent 88%);
 	}
@@ -382,7 +389,7 @@
 	html[data-theme='dark'] .dock-surface {
 		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 86%);
 		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 80%);
-		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--app-color-primary) 8%);
+		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--color-brand) 8%);
 	}
 
 	.dock-zoom :global(svg) {
