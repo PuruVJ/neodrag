@@ -537,11 +537,11 @@
 
 		body.docs-route .dock-zoom {
 			overflow: visible;
-			align-items: center;
+			align-items: flex-end;
 		}
 
 		body.docs-route .dock-toolbar {
-			align-items: center;
+			align-items: flex-end;
 		}
 	}
 
@@ -558,19 +558,9 @@
 	}
 
 	body.docs-route .dock-shell-fill .dock-zoom > a > .group > button {
-		display: flex !important;
-		align-items: center !important;
-		justify-content: center !important;
 		background: transparent !important;
 		clip-path: none;
 		padding: 0;
-	}
-
-	body.docs-route .dock-shell-fill .dock-zoom > a > .group > button > span {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transform-origin: bottom center;
 	}
 
 	body.docs-route .dock-shell-fill .dock-zoom > a > .group > button .dock-angular-bevel.dock-angular-bevel--sm {
