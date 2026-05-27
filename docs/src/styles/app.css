@@ -300,14 +300,14 @@
 	}
 
 	body.docs-route {
-		--chip-border: color-mix(in lch, var(--color-brand), transparent 74%);
-		--chip-fill: color-mix(in lch, var(--app-color-shell), var(--color-brand) 4%);
+		--chip-border: color-mix(in lch, var(--app-color-shell), var(--color-brand) 22%);
+		--chip-fill: color-mix(in lch, var(--app-color-shell), var(--color-brand) 10%);
 		--chip-label: color-mix(in lch, var(--color-brand), var(--app-color-dark) 18%);
 	}
 
 	html[data-theme='dark'] body.docs-route {
-		--chip-border: color-mix(in lch, var(--color-brand), transparent 68%);
-		--chip-fill: color-mix(in oklch, var(--app-color-shell), var(--color-brand) 7%);
+		--chip-border: color-mix(in lch, var(--app-color-shell), var(--color-brand) 26%);
+		--chip-fill: color-mix(in lch, var(--app-color-shell), var(--color-brand) 12%);
 		--chip-label: color-mix(in lch, var(--color-brand), var(--app-color-dark) 8%);
 	}
 
@@ -410,29 +410,33 @@
 		--secondary-color: var(--app-color-primary);
 	}
 
+	body.docs-route .dock-host {
+		--dock-frame: color-mix(in lch, var(--app-color-shell), var(--color-brand) 26%);
+		--dock-fill: color-mix(in lch, var(--app-color-shell), var(--color-brand) 14%);
+		--dock-divider: color-mix(in lch, var(--app-color-dark), transparent 84%);
+		--dock-shadow-color: color-mix(in lch, var(--app-color-dark), transparent 88%);
+	}
+
+	html[data-theme='dark'] body.docs-route .dock-host {
+		--dock-frame: color-mix(in lch, var(--app-color-shell), var(--color-brand) 30%);
+		--dock-fill: color-mix(in lch, var(--app-color-shell), var(--color-brand) 16%);
+		--dock-divider: color-mix(in lch, var(--app-color-dark), transparent 88%);
+		--dock-shadow-color: color-mix(in lch, var(--app-color-dark), transparent 90%);
+	}
+
 	body.docs-route .dock-host > .dock-angular-bevel {
-		background: color-mix(in lch, var(--color-brand), transparent 58%);
+		background: var(--dock-frame);
 	}
 
 	body.docs-route .dock-surface {
 		--dock-surface: unset;
-		--dock-border: color-mix(in lch, var(--color-brand), transparent 68%);
-		--dock-border-strong: color-mix(in lch, var(--color-brand), transparent 58%);
-		--dock-shadow: 0 20px 44px -26px color-mix(in lch, var(--color-brand), transparent 78%);
-	}
-
-	html[data-theme='dark'] body.docs-route .dock-surface {
-		--dock-border: color-mix(in lch, var(--color-brand), transparent 72%);
-		--dock-border-strong: color-mix(in lch, var(--color-brand), transparent 62%);
-		--dock-shadow: 0 22px 48px -24px color-mix(in lch, var(--color-brand), transparent 74%);
+		--dock-border: var(--dock-frame);
+		--dock-border-strong: var(--dock-divider);
+		--dock-shadow: 0 20px 44px -26px var(--dock-shadow-color);
 	}
 
 	body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
-		background: color-mix(in lch, var(--app-color-shell), var(--color-brand) 18%);
-	}
-
-	html[data-theme='dark'] body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
-		background: color-mix(in lch, var(--app-color-shell), var(--color-brand) 22%);
+		background: var(--dock-fill);
 	}
 
 	body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill::after {
@@ -441,18 +445,18 @@
 		position: absolute;
 		inset: 0;
 		z-index: 0;
-		opacity: 0.45;
+		opacity: 0.35;
 		background-image: linear-gradient(
 			135deg,
-			color-mix(in lch, var(--color-brand), transparent 92%) 0%,
-			transparent 42%,
-			transparent 58%,
-			color-mix(in lch, var(--color-brand), transparent 94%) 100%
+			color-mix(in lch, var(--app-color-shell), var(--color-brand) 22%) 0%,
+			transparent 45%,
+			transparent 55%,
+			color-mix(in lch, var(--app-color-shell), var(--color-brand) 20%) 100%
 		);
 	}
 
-	body.docs-route .theme-switcher-track {
-		background: color-mix(in lch, var(--app-color-shell), var(--color-brand) 10%);
+	body.docs-route .theme-switcher-track > .pointer-events-none {
+		background: color-mix(in lch, var(--app-color-shell), var(--color-brand) 18%) !important;
 	}
 
 	@media (min-width: 768px) {
@@ -470,7 +474,7 @@
 			inset: 0;
 			z-index: 0;
 			pointer-events: none;
-			background: color-mix(in lch, var(--color-brand), transparent 58%);
+			background: var(--dock-frame);
 			clip-path: polygon(
 				var(--bevel-cut) 0%,
 				calc(100% - var(--bevel-cut)) 0%,
@@ -498,7 +502,7 @@
 			inset: 0;
 			z-index: 0;
 			pointer-events: none;
-			background: color-mix(in lch, var(--app-color-shell), var(--color-brand) 18%);
+			background: var(--dock-fill);
 			clip-path: polygon(
 				calc(var(--bevel-cut) + var(--bevel-width)) var(--bevel-width),
 				calc(100% - var(--bevel-cut) - var(--bevel-width)) var(--bevel-width),
@@ -509,10 +513,6 @@
 				var(--bevel-width) calc(100% - var(--bevel-cut) - var(--bevel-width)),
 				var(--bevel-width) calc(var(--bevel-cut) + var(--bevel-width))
 			);
-		}
-
-		html[data-theme='dark'] body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill::before {
-			background: color-mix(in lch, var(--app-color-shell), var(--color-brand) 22%);
 		}
 
 		body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill::after {
