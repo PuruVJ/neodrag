@@ -155,7 +155,7 @@
 					<div
 						class="mx-0.5 my-1.5 w-px min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
 					></div>
-					<ThemeSwitcher />
+					<ThemeSwitcher inline />
 					<div
 						class="mx-0.5 my-1.5 w-px min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
 					></div>
@@ -163,14 +163,14 @@
 					<div
 						class="mx-0.5 my-1.5 w-px min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
 					></div>
-					<div
-						class="dock-angular-bevel dock-angular-bevel--sm handle h-14 shrink-0 overflow-visible"
+					<button
+						type="button"
+						class="{dock_btn} handle unstyled shrink-0 overflow-visible"
 						data-paw-cursor="true"
+						aria-label="Drag dock"
 					>
-						<div class="{dock_btn} dock-angular-bevel__fill">
-							<GridIcon />
-						</div>
-					</div>
+						<GridIcon />
+					</button>
 				</div>
 
 				<div class="hidden h-full min-h-16 w-full items-center max-md:flex">
