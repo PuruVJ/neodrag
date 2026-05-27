@@ -537,12 +537,42 @@
 		body.docs-route .dock-zoom {
 			overflow: visible;
 		}
+	}
 
-		body.docs-route .dock-shell-fill .dock-angular-bevel,
-		body.docs-route .dock-shell-fill .dock-angular-bevel__fill {
-			clip-path: none;
-			overflow: visible;
-		}
+	body.docs-route .dock-shell-fill .dock-angular-bevel,
+	body.docs-route .dock-shell-fill .dock-angular-bevel--brand {
+		background: transparent;
+	}
+
+	body.docs-route .dock-shell-fill .dock-angular-bevel__fill,
+	body.docs-route .dock-shell-fill .dock-angular-bevel--brand > .dock-angular-bevel__fill,
+	body.docs-route .dock-shell-fill .theme-switcher-track {
+		background: transparent !important;
+	}
+
+	body.docs-route .dock-shell-fill .dock-zoom > a > .group.dock-angular-bevel--brand {
+		background: transparent;
+	}
+
+	body.docs-route .dock-shell-fill .dock-zoom > a > .group > button.dock-angular-bevel__fill {
+		background: transparent !important;
+	}
+
+	body.docs-route .dock-shell-fill .dock-zoom > a > .group > button .dock-angular-bevel.dock-angular-bevel--sm {
+		background: var(--chip-border);
+	}
+
+	body.docs-route .dock-shell-fill .dock-zoom > a > .group > button .dock-angular-bevel.dock-angular-bevel--sm > .dock-angular-bevel__fill {
+		background: var(--chip-fill);
+		color: var(--chip-label);
+	}
+
+	body.docs-route .theme-switcher-track button {
+		color: color-mix(in lch, var(--app-color-dark), transparent 45%);
+	}
+
+	body.docs-route .theme-switcher-track button:hover {
+		color: color-mix(in lch, var(--app-color-dark), transparent 25%);
 	}
 
 	body.docs-route .dock-zoom :global(svg),
