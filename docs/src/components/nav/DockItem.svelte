@@ -99,7 +99,7 @@
 	<div class="group relative h-14 shrink-0 overflow-visible" style:width="{slot_width}px">
 		<button
 			aria-label="Launch {framework} page"
-			class="relative h-14 min-h-14 w-full overflow-visible bg-transparent px-2"
+			class="relative flex h-14 min-h-14 w-full flex-col items-center justify-end overflow-visible bg-transparent px-2 pb-3"
 		>
 			{#if !embedded}
 				<div
@@ -119,7 +119,7 @@
 			<span
 				bind:this={image_el}
 				class={[
-					'absolute bottom-1 left-1/2 z-[2] flex -translate-x-1/2 origin-bottom items-end justify-center will-change-[width,height] [&_path]:!text-current [&_g]:!text-current [&_svg]:!max-w-none [&_svg]:!text-current',
+					'relative z-[2] flex origin-bottom items-center justify-center will-change-[width,height] [&_path]:!text-current [&_g]:!text-current [&_svg]:!max-w-none [&_svg]:!text-current',
 					selected
 						? 'text-brand'
 						: 'text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)]',
