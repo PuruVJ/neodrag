@@ -240,7 +240,9 @@
 			<a
 				class="unstyled flex shrink-0 origin-bottom items-end overflow-visible"
 				href={replace_framework_from_pathname(name)}
-				onclick={() => menu_view.toggle()}
+				onclick={() => {
+					if (embedded) menu_view.toggle();
+				}}
 			>
 				<DockItem
 					mouse_x={dock_mouse_x}
