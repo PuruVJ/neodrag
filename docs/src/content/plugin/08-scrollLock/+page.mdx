@@ -21,33 +21,27 @@ scrollLock({ allowScrollbar: true }); // Keep scrollbars clickable
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { scrollLock } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { scrollLock } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [scrollLock()] });
-	const drag_1 = new Draggable({ plugins: [scrollLock({ lockAxis: 'x' })] });
-	const drag_2 = new Draggable({ plugins: [
-      scrollLock({ container: () => scrollContainer }),
-    ] });
+  const drag_0 = new Draggable({ plugins: [scrollLock()] });
+  const drag_1 = new Draggable({
+    plugins: [scrollLock({ lockAxis: 'x' })],
+  });
+  const drag_2 = new Draggable({
+    plugins: [scrollLock({ container: () => scrollContainer })],
+  });
 </script>
 
 <!-- Prevent all scrolling while dragging -->
-<div {@attach drag_0.attachment}>
-  Drag me - page won't scroll
-</div>
+<div {@attach drag_0.attachment}>Drag me - page won't scroll</div>
 
 <!-- Only prevent horizontal scrolling -->
-<div {@attach drag_1.attachment}>
-  Vertical scrolling still works
-</div>
+<div {@attach drag_1.attachment}>Vertical scrolling still works</div>
 
 <!-- Target specific container -->
 <div bind:this={scrollContainer} class="scroll-area">
-  <div
-    {@attach drag_2.attachment}
-  >
-    Lock specific container
-  </div>
+  <div {@attach drag_2.attachment}>Lock specific container</div>
 </div>
 ```
 
@@ -125,7 +119,7 @@ const scrollContainer = ref();
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { scrollLock, useDraggable } from '@neodrag/solid';
+import { scrollLock, createDraggable } from '@neodrag/solid';
 
 function ScrollLockExamples() {
   const [fullLock, setFullLock] = createSignal<HTMLElement | null>(
@@ -139,9 +133,9 @@ function ScrollLockExamples() {
   const [scrollArea, setScrollArea] =
     createSignal<HTMLElement | null>(null);
 
-  useDraggable(fullLock, [scrollLock()]);
-  useDraggable(horizontal, [scrollLock({ lockAxis: 'x' })]);
-  useDraggable(container, [
+  createDraggable(fullLock, [scrollLock()]);
+  createDraggable(horizontal, [scrollLock({ lockAxis: 'x' })]);
+  createDraggable(container, [
     scrollLock({ container: () => scrollArea()! }),
   ]);
 
@@ -194,7 +188,7 @@ Neodrag.shared.draggable(container, [
   let allowScrollbar = $state(false);
   let targetContainer = $state(null);
 
-  
+
     return scrollLock({
       lockAxis: lockMode,
       allowScrollbar: allowScrollbar,
@@ -250,7 +244,7 @@ function DynamicScrollLock() {
   >('both');
   const [allowScrollbar, setAllowScrollbar] = useState(false);
 
-  
+
     return scrollLock({
       lockAxis: lockMode,
       allowScrollbar: allowScrollbar,
@@ -356,10 +350,8 @@ const targetContainer = ref();
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  scrollLock,
-  useDraggable,
-} from '@neodrag/solid';
+import { createDraggable } from '@neodrag/solid';
+import { scrollLock } from '@neodrag/solid/plugins';
 
 function DynamicScrollLock() {
   const [element, setElement] = createSignal<HTMLElement | null>(
@@ -372,7 +364,7 @@ function DynamicScrollLock() {
   >('both');
   const [allowScrollbar, setAllowScrollbar] = createSignal(false);
 
-  
+
     return scrollLock({
       lockAxis: lockMode(),
       allowScrollbar: allowScrollbar(),
@@ -380,7 +372,7 @@ function DynamicScrollLock() {
     });
   });
 
-  useDraggable(element, [scrollLockComp]);
+  createDraggable(element, [scrollLockComp]);
 
   return (
     <div>

@@ -268,7 +268,8 @@ export class ResizeInstance {
 		for (const plugin of this.flat) {
 			if (this.failed.has(plugin.key)) continue;
 			const phase = plugin.phase ?? 'resolve';
-			if (plugin.start) this.#pushPhase(this.preStart, this.resolveStart, this.postStart, phase, plugin);
+			if (plugin.start)
+				this.#pushPhase(this.preStart, this.resolveStart, this.postStart, phase, plugin);
 			if (plugin.resize)
 				this.#pushPhase(this.preResize, this.resolveResize, this.postResize, phase, plugin);
 			if (plugin.end) this.#pushPhase(this.preEnd, this.resolveEnd, this.postEnd, phase, plugin);

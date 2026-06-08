@@ -1,16 +1,16 @@
 {
 	"name": "scripts",
-	"private": true,
 	"version": "1.0.1-next.7",
+	"private": true,
 	"description": "",
+	"keywords": [],
+	"license": "ISC",
+	"author": "",
+	"type": "module",
 	"main": "index.js",
 	"scripts": {
 		"sizes": "node --experimental-strip-types sizes.ts"
 	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"type": "module",
 	"dependencies": {
 		"@neodrag/core": "workspace:*",
 		"brotli-size": "^4.0.0",

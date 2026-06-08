@@ -1,0 +1,288 @@
+{
+	"chain": [
+		{
+			"tag": "body",
+			"class": "docs-route",
+			"overflow": "hidden",
+			"overflowY": "hidden",
+			"clipPath": "none",
+			"height": "800px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 0,
+				"bottom": 800,
+				"height": 800
+			},
+			"mayClip": true,
+			"hasClipPath": false
+		}
+	],
+	"chainFull": [
+		{
+			"tag": "span",
+			"class": "absolute bottom-1 left-1/2 z-[2] flex -translate-x-1/2 origin-bottom items-end justify-center will-c",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "39.25px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 727.75,
+				"bottom": 767,
+				"height": 39.25
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		},
+		{
+			"tag": "button",
+			"class": "relative h-14 min-h-14 w-full overflow-visible bg-transparent px-2",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "56px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 715,
+				"bottom": 771,
+				"height": 56
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		},
+		{
+			"tag": "div",
+			"class": "group relative h-14 shrink-0 overflow-visible",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "56px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 715,
+				"bottom": 771,
+				"height": 56
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		},
+		{
+			"tag": "a",
+			"class": "unstyled flex shrink-0 origin-bottom items-end overflow-visible",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "56px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 715,
+				"bottom": 771,
+				"height": 56
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		},
+		{
+			"tag": "div",
+			"class": "dock-zoom flex h-14 shrink-0 items-end justify-center overflow-visible max-md:hidden",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "56px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 715,
+				"bottom": 771,
+				"height": 56
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		},
+		{
+			"tag": "div",
+			"class": "dock-toolbar relative z-[2] hidden max-md:hidden md:flex md:h-14 md:items-end md:overflow-visible",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "56px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 715,
+				"bottom": 771,
+				"height": 56
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		},
+		{
+			"tag": "div",
+			"class": "relative z-[1] flex w-full shrink-0 max-md:h-16 md:items-end md:overflow-visible",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "56px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 715,
+				"bottom": 771,
+				"height": 56
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		},
+		{
+			"tag": "div",
+			"class": "dock-shell-fill dock-angular-bevel__fill relative flex w-full flex-col items-end max-md:min-h-16 max",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "68px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 709,
+				"bottom": 777,
+				"height": 68
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		},
+		{
+			"tag": "div",
+			"class": "dock-angular-bevel dock-surface pointer-events-auto relative w-full overflow-visible shadow-[var(--d",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "70px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 708,
+				"bottom": 778,
+				"height": 70
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		},
+		{
+			"tag": "section",
+			"class": "dock-host pointer-events-none fixed bottom-4 left-0 z-[1000] flex w-full items-end justify-center ga",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "82px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 702,
+				"bottom": 784,
+				"height": 82
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		},
+		{
+			"tag": "astro-island",
+			"class": "",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "auto",
+			"maxHeight": "none",
+			"rect": {
+				"top": 0,
+				"bottom": 0,
+				"height": 0
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		},
+		{
+			"tag": "div",
+			"class": "",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "800px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 0,
+				"bottom": 800,
+				"height": 800
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		},
+		{
+			"tag": "body",
+			"class": "docs-route",
+			"overflow": "hidden",
+			"overflowY": "hidden",
+			"clipPath": "none",
+			"height": "800px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 0,
+				"bottom": 800,
+				"height": 800
+			},
+			"mayClip": true,
+			"hasClipPath": false
+		},
+		{
+			"tag": "html",
+			"class": "",
+			"overflow": "visible",
+			"overflowY": "visible",
+			"clipPath": "none",
+			"height": "800px",
+			"maxHeight": "none",
+			"rect": {
+				"top": 0,
+				"bottom": 800,
+				"height": 800
+			},
+			"mayClip": false,
+			"hasClipPath": false
+		}
+	],
+	"iconRect": {
+		"x": 344.140625,
+		"y": 727.75,
+		"width": 39.25,
+		"height": 39.25,
+		"top": 727.75,
+		"right": 383.390625,
+		"bottom": 767,
+		"left": 344.140625
+	},
+	"svgRect": {
+		"x": 344.140625,
+		"y": 727.75,
+		"width": 39.25,
+		"height": 39.25,
+		"top": 727.75,
+		"right": 383.390625,
+		"bottom": 767,
+		"left": 344.140625
+	},
+	"shellRect": {
+		"x": 330.140625,
+		"y": 709,
+		"width": 619.703125,
+		"height": 68,
+		"top": 709,
+		"right": 949.84375,
+		"bottom": 777,
+		"left": 330.140625
+	},
+	"toolbarRect": {
+		"x": 336.140625,
+		"y": 715,
+		"width": 607.703125,
+		"height": 56,
+		"top": 715,
+		"right": 943.84375,
+		"bottom": 771,
+		"left": 336.140625
+	},
+	"svgAboveShellTop": false,
+	"svgAboveToolbarTop": false
+}

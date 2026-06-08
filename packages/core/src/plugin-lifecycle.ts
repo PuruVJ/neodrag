@@ -1,6 +1,7 @@
 import type { PluginPhase } from './types.ts';
 
 export function mergePluginsByKey<P extends { key: symbol }>(defaults: P[], user: P[]): P[] {
+	if (user.length === 0) return defaults;
 	const byKey = new Map<symbol, P>();
 	for (const plugin of defaults) byKey.set(plugin.key, plugin);
 	for (const plugin of user) byKey.set(plugin.key, plugin);
@@ -34,21 +35,25 @@ export type PluginFlatHost<P extends { key: symbol }> = {
 	rebuildBuckets(): void;
 };
 
-export function diffPluginFlat<P extends { key: symbol }>(host: PluginFlatHost<P>, options: {
-	userPlugins: P[];
-	merge: (user: P[]) => P[];
-	bucketsChanged: (prev: P[], next: P[]) => boolean;
-	init: (plugin: P) => void;
-	destroy: (plugin: P) => void;
-	update: (plugin: P) => void;
-}): void {
+export function diffPluginFlat<P extends { key: symbol }>(
+	host: PluginFlatHost<P>,
+	options: {
+		userPlugins: P[];
+		merge: (user: P[]) => P[];
+		bucketsChanged: (prev: P[], next: P[]) => boolean;
+		init: (plugin: P) => void;
+		destroy: (plugin: P) => void;
+		update: (plugin: P) => void;
+	},
+): void {
 	host.isProcessingExternalUpdate = true;
 	const next = options.merge(options.userPlugins);
 	const prevFlat = host.flat;
-	const prevByKey = new Map(prevFlat.map((plugin) => [plugin.key, plugin]));
+	const nextKeys = new Set<symbol>();
 
 	for (const plugin of next) {
-		const prev = prevByKey.get(plugin.key);
+		nextKeys.add(plugin.key);
+		const prev = host.byKey.get(plugin.key);
 		if (!prev) {
 			host.byKey.set(plugin.key, plugin);
 			options.init(plugin);
@@ -56,12 +61,12 @@ export function diffPluginFlat<P extends { key: symbol }>(host: PluginFlatHost<P
 			options.update(plugin);
 			host.byKey.set(plugin.key, plugin);
 		}
-		prevByKey.delete(plugin.key);
 	}
 
-	for (const orphan of prevByKey.values()) {
-		options.destroy(orphan);
-		host.byKey.delete(orphan.key);
+	for (const plugin of prevFlat) {
+		if (nextKeys.has(plugin.key)) continue;
+		options.destroy(plugin);
+		host.byKey.delete(plugin.key);
 	}
 
 	host.flat = next;

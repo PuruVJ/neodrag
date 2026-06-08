@@ -3,7 +3,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
-import { events, position } from '../../src/plugins.ts';
+import { createDragCallbacksPlugin } from '../../src/drag-callbacks.ts';
+import { position } from '../../src/plugins.ts';
 import {
 	createBox,
 	pointer,
@@ -24,9 +25,7 @@ describe('Reactive Chromium perf suite', () => {
 
 		let tick = 0;
 		const churnBox = createBox();
-		const churnHandle = engine.draggable(churnBox, [
-				position({ current: { x: tick, y: tick } }),
-		]);
+		const churnHandle = engine.draggable(churnBox, [position({ current: { x: tick, y: tick } })]);
 		results.push(
 			runBench('reactive suite · plugin ref churn', 100, 10, () => {
 				tick += 1;
@@ -61,12 +60,12 @@ describe('Reactive Chromium perf suite', () => {
 				remountTick += 1;
 				remountHandle.destroy();
 				remountHandle = engine.draggable(remountBox, [
-								position({ current: { x: remountTick, y: remountTick } }),
+					position({ current: { x: remountTick, y: remountTick } }),
 				]);
 			}),
 		);
 
-		const twoWay = setupTwoWayBinding(Neodrag, position, events, '280px', '220px');
+		const twoWay = setupTwoWayBinding(Neodrag, position, createDragCallbacksPlugin, '280px', '220px');
 		results.push(
 			runBench('reactive suite · two-way idle reconcile', 60, 8, () => {
 				twoWay.pos.x += 1;

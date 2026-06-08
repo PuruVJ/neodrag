@@ -1,24 +1,8 @@
-export { Neodrag, type EngineOptions, type NeodragDebugSnapshot } from './engine.ts';
-export type { EngineCostSnapshot, CostSpanStat } from './engine-profile.ts';
-export {
-	hasReactiveSlots,
-	resolvePluginList,
-	PluginListResolver,
-	resolvedPluginsUnchanged,
-} from './resolve-plugins.ts';
-export {
-	Draggable,
-	DroppableBinding,
-	type DraggableOptions,
-	type DragThresholdInput,
-	type DragThresholdOptions,
-	type TransformApplier,
-} from './draggable-binding.ts';
-export {
-	DEFAULT_DRAG_THRESHOLD,
-	resolveDragThreshold,
-	type ResolvedDragThreshold,
-} from './threshold.ts';
+export { Neodrag, type EngineOptions, type NeodragDebugSnapshot } from './engine/neodrag.ts';
+export { Draggable, type DraggableOptions, type DragEventData } from './draggable-binding.ts';
+export type { TransformApplier } from './apply-transform.ts';
+export type { DragThresholdInput, DragThresholdOptions } from './threshold.ts';
+export { Droppable, type DroppableOptions } from './droppable-binding.ts';
 export {
 	Resizable,
 	composeResizePluginList,
@@ -28,10 +12,9 @@ export {
 	type ResizeSizeBoundsInput,
 	type ResizeSizeInput,
 	type ResolvedResizeSizeBounds,
+	type ResizeApplier,
 } from './resizable-binding.ts';
-export type { ResizeApplier } from './apply-resize.ts';
-export { BindingHandle, DragHandle, DropHandle, ResizeHandle, type NeodragHost } from './handles.ts';
-export { transitionSession } from './state-machine.ts';
+
 export {
 	defineDragPlugin,
 	defineDropPlugin,
@@ -55,11 +38,16 @@ export {
 	assertNamedPluginKey,
 	assertNamedPluginKeys,
 } from './types.ts';
-export type { DragEventData } from './plugins.ts';
 export { DEFAULTS, DEFAULT_DRAG_PLUGINS, MINIMAL_DRAG_PLUGINS } from './defaults.ts';
-export { DEFAULT_RESIZE_PLUGINS } from './resize-defaults.ts';
-export { autoScroll } from './plugins.ts';
-export { presetDockHandle, presetKanbanCard, presetListItem } from './presets.ts';
+export { DEFAULT_RESIZE_PLUGINS, MINIMAL_RESIZE_PLUGINS } from './resize-defaults.ts';
+export { autoScroll, axis, bounds, disabled, grid, position, touchAction } from './plugins.ts';
+export {
+	presetDockHandle,
+	presetKanbanCard,
+	presetListItem,
+	presetLiftedDrag,
+	presetSlotDrop,
+} from './presets/core.ts';
 export {
 	Length,
 	Unit,
@@ -87,47 +75,4 @@ export type {
 	CssLengthUnit,
 } from './length-runtime.ts';
 export { CSS_LENGTH_UNITS, isCssLengthUnit } from './length-runtime.ts';
-export {
-	numberStub,
-	resolveSizeInput,
-	sizeContext,
-	isLengthAdapter,
-} from './length-contract.ts';
-export {
-	invalidateSortableLayout,
-	invalidateSortableLayoutForNode,
-} from './sortable/index.ts';
-export {
-	SensorBase,
-	PointerSensor,
-	KeyboardSensor,
-	KeyboardMoveSensor,
-	POINTER_SENSOR_KEY,
-	KEYBOARD_SENSOR_KEY,
-	KEYBOARD_MOVE_SENSOR_KEY,
-	installDefaultSensors,
-	type Sensor,
-	type SensorHost,
-	type PointerSensorOptions,
-	type KeyboardSensorOptions,
-} from './sensors/index.ts';
-export {
-	KEYBOARD_POINTER_ID,
-	pointerToInput,
-	keyboardToInput,
-	programmaticToInput,
-	submitInteraction,
-	isPointerInput,
-	isKeyboardInput,
-	isProgrammaticInput,
-	nativePointerEvent,
-	interactionPointerId,
-	type InteractionInput,
-	type InteractionKind,
-	type InteractionPhase,
-	type PointerInteractionInput,
-	type KeyboardInteractionInput,
-	type ProgrammaticInteractionInput,
-} from './interaction-input.ts';
-export { keyboardDrag, ariaDrag, KEYBOARD_DRAG_KEY, ARIA_DRAG_KEY } from './a11y/index.ts';
-export type { KeyboardDragOptions, AriaDragOptions } from './a11y/index.ts';
+export { numberStub, resolveSizeInput, sizeContext, isLengthAdapter } from './length-contract.ts';

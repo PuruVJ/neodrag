@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Draggable } from '@neodrag/svelte';
-	import { events, position } from '@neodrag/svelte/plugins';
+	import { Draggable } from '../../src/draggable-binding.ts';
+	import { position } from '../../src/plugins.ts';
+	import { bindTarget } from '../bind-target.ts';
 
 	const {
 		testid = 'draggable',
@@ -11,7 +12,7 @@
 		onReconcile,
 	}: {
 		testid?: string;
-		engine?: import('../../src/engine.ts').Neodrag;
+		engine?: import('../../src/engine/neodrag.ts').Neodrag;
 		initial?: { x: number; y: number };
 		external?: { x: number; y: number } | null;
 		twoWay?: boolean;
@@ -36,22 +37,21 @@
 				pos.y;
 				return position({ current: pos });
 			},
-			...(twoWay
-				? [
-						() =>
-							events({
-								onDrag(data) {
-									pos.x = data.offset.x;
-									pos.y = data.offset.y;
-								},
-							}),
-					]
-				: []),
 		],
+		onDrag: twoWay
+			? (data) => {
+					pos.x = data.offset.x as number;
+					pos.y = data.offset.y as number;
+				}
+			: undefined,
+	});
+
+	$effect(() => {
+		if (drag.hasReactiveSlots) drag.flushReactive();
 	});
 </script>
 
-<div class="box" {@attach drag.attachment} data-testid={testid}></div>
+<div class="box" {@attach bindTarget(drag)} data-testid={testid}></div>
 
 <style>
 	.box {

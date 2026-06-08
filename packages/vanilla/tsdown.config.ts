@@ -2,7 +2,7 @@ import { defineConfig } from 'tsdown';
 
 export default defineConfig([
 	{
-		entry: ['./src/index.ts', './src/drop.ts', './src/resize.ts'],
+		entry: ['./src/index.ts', './src/drop.ts', './src/sortable.ts', './src/resize.ts'],
 		format: 'esm',
 		dts: true,
 		clean: true,

@@ -23,29 +23,25 @@ controls({
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { controls, ControlFrom } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { controls, ControlFrom } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [
-    controls({ allow: ControlFrom.selector('.header') }),
-  ] });
-	const drag_1 = new Draggable({ plugins: [
-    controls({ block: ControlFrom.selector('button') }),
-  ] });
+  const drag_0 = new Draggable({
+    plugins: [controls({ allow: ControlFrom.selector('.header') })],
+  });
+  const drag_1 = new Draggable({
+    plugins: [controls({ block: ControlFrom.selector('button') })],
+  });
 </script>
 
 <!-- Only header can initiate dragging -->
-<div
-  {@attach drag_0.attachment}
->
+<div {@attach drag_0.attachment}>
   <div class="header">Drag handle</div>
   <div class="content">Content (not draggable)</div>
 </div>
 
 <!-- Anywhere except buttons -->
-<div
-  {@attach drag_1.attachment}
->
+<div {@attach drag_1.attachment}>
   <p>Drag anywhere in this area</p>
   <button>Can't drag from here</button>
 </div>
@@ -123,7 +119,7 @@ const blockControls = [
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { controls, ControlFrom, useDraggable } from '@neodrag/solid';
+import { controls, ControlFrom, createDraggable } from '@neodrag/solid';
 
 function ControlledDragging() {
   const [allowRef, setAllowRef] = createSignal();
@@ -182,21 +178,28 @@ Neodrag.shared.draggable(blockElement, [
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { controls, ControlFrom, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import {
+    controls,
+    ControlFrom,
+    bounds,
+    BoundsFrom,
+  } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [
-    controls({
-      allow: ControlFrom.selector('.modal-header'),
-      block: ControlFrom.selector('.modal-close, .modal-body button'),
-    }),
-    bounds(BoundsFrom.viewport()),
-  ] });
+  const drag_0 = new Draggable({
+    plugins: [
+      controls({
+        allow: ControlFrom.selector('.modal-header'),
+        block: ControlFrom.selector(
+          '.modal-close, .modal-body button',
+        ),
+      }),
+      bounds(BoundsFrom.viewport()),
+    ],
+  });
 </script>
 
-<div
-  {@attach drag_0.attachment}
->
+<div {@attach drag_0.attachment}>
   <div class="modal-header">
     <h3>Modal Title</h3>
     <button class="modal-close">×</button>
@@ -291,18 +294,13 @@ const modalPlugins = [
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  useDraggable,
-  controls,
-  ControlFrom,
-  bounds,
-  BoundsFrom,
-} from '@neodrag/solid';
+import { createDraggable } from '@neodrag/solid';
+import { controls, ControlFrom, bounds, BoundsFrom } from '@neodrag/solid/plugins';
 
 function DraggableModal() {
   const [modal, setModal] = createSignal<HTMLElement | null>(null);
 
-  useDraggable(modal, [
+  createDraggable(modal, [
     controls({
       allow: ControlFrom.selector('.modal-header'),
       block: ControlFrom.selector('.modal-close, .modal-body button'),

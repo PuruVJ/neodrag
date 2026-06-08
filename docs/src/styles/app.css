@@ -1,9 +1,14 @@
 @import 'tailwindcss';
 @import '../css/themes.css';
+@import '../css/framework-tokens.css';
 
 @theme inline {
-	--font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
-	--font-mono: 'Jetbrains mono Variable', ui-monospace, monospace;
+	--font-sans:
+		'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+		sans-serif;
+	--font-mono:
+		'JetBrains Mono Variable', ui-monospace, 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono',
+		'Courier New', monospace;
 
 	--color-fg: var(--app-color-dark);
 	--color-fg-muted: color-mix(in lch, var(--app-color-dark), transparent 35%);
@@ -19,6 +24,7 @@
 	--spacing-grid: 3.25rem;
 	--spacing-dock-cut: 0.85rem;
 	--spacing-dock-cut-sm: 0.55rem;
+	--spacing-dock-cut-xs: 0.38rem;
 }
 
 @layer utilities {
@@ -134,45 +140,9 @@
 		box-shadow: 0 0 0 4px color-mix(in lch, var(--color-brand), transparent 75%);
 	}
 
-	html[data-framework='svelte'] {
-		--secondary-color: var(--app-color-brand-svelte);
-		--color-brand: var(--app-color-brand-svelte);
-	}
-
-	html[data-framework='vue'] {
-		--secondary-color: var(--app-color-brand-vue);
-		--color-brand: var(--app-color-brand-vue);
-	}
-
-	html[data-framework='react'] {
-		--secondary-color: var(--app-color-brand-react);
-		--color-brand: var(--app-color-brand-react);
-	}
-
-	html[data-framework='solid'] {
-		--secondary-color: var(--app-color-brand-solid);
-		--color-brand: var(--app-color-brand-solid);
-	}
-
-	html[data-framework='vanilla'] {
-		--secondary-color: var(--app-color-brand-vanilla);
-		--color-brand: var(--app-color-brand-vanilla);
-	}
-
-	html[data-framework='core'] {
-		--secondary-color: var(--app-color-primary);
-		--color-brand: var(--app-color-primary);
-	}
-
 	body.docs-route {
-		--app-color-scrolling-navbar: color-mix(
-			in lch,
-			var(--secondary-color),
-			var(--app-color-mixer) 35%
-		);
 		@apply overflow-hidden;
 		background-color: var(--app-color-shell);
-		background-image: none;
 	}
 
 	:is(a[href], a[href]:visited):where(:not(.unstyled)) {
@@ -221,6 +191,40 @@
 
 	.dock-angular-bevel--sm {
 		--bevel-cut: var(--spacing-dock-cut-sm);
+	}
+
+	.dock-item-tooltip {
+		--bevel-cut: var(--spacing-dock-cut-xs);
+		--bevel-width: 1px;
+		padding: var(--bevel-width);
+		filter: drop-shadow(0 2px 4px rgb(0 0 0 / 0.16)) drop-shadow(0 6px 14px rgb(0 0 0 / 0.2));
+		background: color-mix(in lch, var(--color-brand), transparent 55%);
+		clip-path: polygon(
+			var(--bevel-cut) 0%,
+			calc(100% - var(--bevel-cut)) 0%,
+			100% var(--bevel-cut),
+			100% calc(100% - var(--bevel-cut)),
+			calc(100% - var(--bevel-cut)) 100%,
+			var(--bevel-cut) 100%,
+			0% calc(100% - var(--bevel-cut)),
+			0% var(--bevel-cut)
+		);
+	}
+
+	.dock-item-tooltip__label {
+		display: block;
+		color: var(--color-brand);
+		background: color-mix(in lch, var(--color-brand), transparent 90%);
+		clip-path: polygon(
+			calc(var(--bevel-cut) + var(--bevel-width)) var(--bevel-width),
+			calc(100% - var(--bevel-cut) - var(--bevel-width)) var(--bevel-width),
+			calc(100% - var(--bevel-width)) calc(var(--bevel-cut) + var(--bevel-width)),
+			calc(100% - var(--bevel-width)) calc(100% - var(--bevel-cut) - var(--bevel-width)),
+			calc(100% - var(--bevel-cut) - var(--bevel-width)) calc(100% - var(--bevel-width)),
+			calc(var(--bevel-cut) + var(--bevel-width)) calc(100% - var(--bevel-width)),
+			var(--bevel-width) calc(100% - var(--bevel-cut) - var(--bevel-width)),
+			var(--bevel-width) calc(var(--bevel-cut) + var(--bevel-width))
+		);
 	}
 
 	.dock-angular-bevel__fill {
@@ -299,23 +303,11 @@
 		background: color-mix(in lch, var(--color-brand), transparent 90%);
 	}
 
-	body.docs-route {
-		--chip-border: color-mix(in lch, var(--app-color-shell), var(--color-brand) 22%);
-		--chip-fill: color-mix(in lch, var(--app-color-shell), var(--color-brand) 10%);
-		--chip-label: color-mix(in lch, var(--color-brand), var(--app-color-dark) 18%);
-	}
-
-	html[data-theme='dark'] body.docs-route {
-		--chip-border: color-mix(in lch, var(--app-color-shell), var(--color-brand) 26%);
-		--chip-fill: color-mix(in lch, var(--app-color-shell), var(--color-brand) 12%);
-		--chip-label: color-mix(in lch, var(--color-brand), var(--app-color-dark) 8%);
-	}
-
-	body.docs-route .dock-angular-bevel--brand {
+	html[data-framework] .dock-angular-bevel--brand {
 		background: var(--chip-border);
 	}
 
-	body.docs-route .dock-angular-bevel--brand > .dock-angular-bevel__fill {
+	html[data-framework] .dock-angular-bevel--brand > .dock-angular-bevel__fill {
 		background: var(--chip-fill);
 		color: var(--chip-label);
 	}
@@ -360,68 +352,34 @@
 		background: transparent !important;
 	}
 
-	.dock-mobile-framework,
-	.dock-mobile-framework:hover,
-	.dock-mobile-framework:focus-visible {
-		background: transparent !important;
+	.dock-surface {
+		--dock-border: rgb(0 0 0 / 0.12);
+		--dock-border-strong: rgb(0 0 0 / 0.16);
+		--dock-surface: color-mix(in srgb, var(--app-color-shell), var(--color-brand) 4%);
+		--dock-accent-glow: none;
+		--dock-elevation-filter:
+			drop-shadow(0 2px 4px rgb(0 0 0 / 0.14)) drop-shadow(0 12px 28px rgb(0 0 0 / 0.2));
 	}
 
-	.dock-surface {
-		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 84%);
-		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 78%);
-		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--color-brand) 4%);
-		--dock-accent-glow: none;
-		--dock-shadow: 0 16px 40px -28px color-mix(in lch, var(--app-color-dark), transparent 88%);
+	.dock-host > .dock-angular-bevel.dock-surface.dock-float {
+		box-shadow: none;
+		filter: var(--dock-elevation-filter);
 	}
 
 	html[data-theme='dark'] .dock-surface {
-		--dock-border: color-mix(in lch, var(--app-color-dark), transparent 86%);
-		--dock-border-strong: color-mix(in lch, var(--app-color-dark), transparent 80%);
-		--dock-surface: color-mix(in lch, var(--app-color-shell), var(--color-brand) 8%);
+		--dock-border: rgb(0 0 0 / 0.45);
+		--dock-border-strong: rgb(0 0 0 / 0.55);
+		--dock-surface: color-mix(in srgb, var(--app-color-shell), var(--color-brand) 8%);
+		--dock-elevation-filter:
+			drop-shadow(0 3px 6px rgb(0 0 0 / 0.42)) drop-shadow(0 14px 32px rgb(0 0 0 / 0.58));
 	}
 
-	html[data-framework='svelte'] .dock-host {
-		--color-brand: var(--app-color-brand-svelte);
-		--secondary-color: var(--app-color-brand-svelte);
+	html[data-framework] .dock-host {
+		--dock-divider: rgb(0 0 0 / 0.14);
 	}
 
-	html[data-framework='react'] .dock-host {
-		--color-brand: var(--app-color-brand-react);
-		--secondary-color: var(--app-color-brand-react);
-	}
-
-	html[data-framework='vue'] .dock-host {
-		--color-brand: var(--app-color-brand-vue);
-		--secondary-color: var(--app-color-brand-vue);
-	}
-
-	html[data-framework='solid'] .dock-host {
-		--color-brand: var(--app-color-brand-solid);
-		--secondary-color: var(--app-color-brand-solid);
-	}
-
-	html[data-framework='vanilla'] .dock-host {
-		--color-brand: var(--app-color-brand-vanilla);
-		--secondary-color: var(--app-color-brand-vanilla);
-	}
-
-	html[data-framework='core'] .dock-host {
-		--color-brand: var(--app-color-primary);
-		--secondary-color: var(--app-color-primary);
-	}
-
-	body.docs-route .dock-host {
-		--dock-frame: color-mix(in lch, var(--app-color-shell), var(--color-brand) 26%);
-		--dock-fill: color-mix(in lch, var(--app-color-shell), var(--color-brand) 14%);
-		--dock-divider: color-mix(in lch, var(--app-color-dark), transparent 84%);
-		--dock-shadow-color: color-mix(in lch, var(--app-color-dark), transparent 88%);
-	}
-
-	html[data-theme='dark'] body.docs-route .dock-host {
-		--dock-frame: color-mix(in lch, var(--app-color-shell), var(--color-brand) 30%);
-		--dock-fill: color-mix(in lch, var(--app-color-shell), var(--color-brand) 16%);
-		--dock-divider: color-mix(in lch, var(--app-color-dark), transparent 88%);
-		--dock-shadow-color: color-mix(in lch, var(--app-color-dark), transparent 90%);
+	html[data-theme='dark'][data-framework] .dock-host {
+		--dock-divider: rgb(0 0 0 / 0.4);
 	}
 
 	body.docs-route .dock-host > .dock-angular-bevel {
@@ -430,35 +388,131 @@
 
 	body.docs-route .dock-surface {
 		--dock-surface: unset;
-		--dock-border: var(--dock-frame);
-		--dock-border-strong: var(--dock-divider);
-		--dock-shadow: 0 20px 44px -26px var(--dock-shadow-color);
 	}
 
 	body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
 		background: var(--dock-fill);
 	}
 
-	body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill::after {
+	body.docs-route
+		.dock-host
+		> .dock-angular-bevel
+		> .dock-shell-fill.dock-angular-bevel__fill::after {
 		content: '';
 		pointer-events: none;
 		position: absolute;
 		inset: 0;
 		z-index: 0;
-		opacity: 0.35;
+		opacity: 0.45;
 		background-image: linear-gradient(
 			135deg,
-			color-mix(in lch, var(--app-color-shell), var(--color-brand) 22%) 0%,
-			transparent 45%,
-			transparent 55%,
-			color-mix(in lch, var(--app-color-shell), var(--color-brand) 20%) 100%
+			color-mix(in srgb, var(--framework-dock-tint), transparent 92%) 0%,
+			transparent 42%,
+			transparent 58%,
+			color-mix(in srgb, var(--framework-dock-tint), transparent 94%) 100%
 		);
 	}
 
-	body.docs-route .theme-switcher-inline > .theme-switcher-thumb,
-	body.docs-route .theme-switcher-track > .theme-switcher-thumb {
-		background: color-mix(in lch, var(--app-color-shell), var(--color-brand) 14%) !important;
+	.dock-host .dock-toolbar .theme-switcher-inline,
+	.dock-host .theme-switcher-embedded {
+		--theme-switcher-pad: 0.22rem;
+		--theme-switcher-track-bg: rgb(0 0 0 / 0.06);
+		--theme-switcher-track-ring: rgb(0 0 0 / 0.1);
+		--theme-switcher-thumb-bg: rgb(255 255 255 / 0.94);
+		--theme-switcher-icon-idle: rgb(0 0 0 / 0.4);
+		--theme-switcher-icon-hover: rgb(0 0 0 / 0.62);
+		--theme-switcher-icon-active: rgb(0 0 0 / 0.88);
+		--theme-switcher-thumb-shadow: 0 2px 8px rgb(0 0 0 / 0.14);
 	}
+
+	html[data-theme='dark'] .dock-host .dock-toolbar .theme-switcher-inline,
+	html[data-theme='dark'] .dock-host .theme-switcher-embedded {
+		--theme-switcher-track-bg: rgb(0 0 0 / 0.38);
+		--theme-switcher-track-ring: rgb(0 0 0 / 0.52);
+		--theme-switcher-thumb-bg: rgb(255 255 255 / 0.14);
+		--theme-switcher-icon-idle: rgb(255 255 255 / 0.42);
+		--theme-switcher-icon-hover: rgb(255 255 255 / 0.68);
+		--theme-switcher-icon-active: rgb(255 255 255 / 0.92);
+		--theme-switcher-thumb-shadow: 0 3px 10px rgb(0 0 0 / 0.42);
+	}
+
+	.dock-host .dock-toolbar .theme-switcher-inline .theme-switcher-track--inline,
+	.dock-host .theme-switcher-embedded .theme-switcher-track--embedded {
+		position: relative;
+		display: grid;
+		height: 100%;
+		width: 100%;
+		grid-template-columns: repeat(3, 1fr);
+		align-items: center;
+		padding: var(--theme-switcher-pad);
+		border: none;
+		border-radius: 0.55rem;
+		background: var(--theme-switcher-track-bg) !important;
+		box-shadow: 0 0 0 1px var(--theme-switcher-track-ring);
+	}
+
+	.dock-host .dock-toolbar .theme-switcher-inline .theme-switcher-track--inline > .theme-switcher-thumb,
+	.dock-host .theme-switcher-embedded .theme-switcher-track--embedded > .theme-switcher-thumb {
+		--theme-thumb-slot: calc((100% - (2 * var(--theme-switcher-pad))) / 3);
+		position: absolute;
+		top: var(--theme-switcher-pad);
+		bottom: var(--theme-switcher-pad);
+		left: calc(var(--theme-switcher-pad) + var(--theme-thumb-index, 0) * var(--theme-thumb-slot));
+		z-index: 1;
+		width: var(--theme-thumb-slot);
+		height: auto;
+		box-sizing: border-box;
+		pointer-events: none;
+		border: none;
+		border-radius: 0.55rem;
+		background: var(--theme-switcher-thumb-bg) !important;
+		box-shadow: var(--theme-switcher-thumb-shadow);
+		transition:
+			left 280ms cubic-bezier(0.34, 1.4, 0.64, 1),
+			background-color 200ms ease,
+			box-shadow 200ms ease;
+	}
+
+	.dock-host .theme-switcher-embedded .theme-switcher-track--embedded {
+		overflow: hidden;
+	}
+
+	.dock-host .theme-switcher-embedded .theme-switcher-btn {
+		min-height: 0;
+		height: 100%;
+		padding: 0;
+	}
+
+	.dock-host .theme-switcher-btn {
+		position: relative;
+		z-index: 2;
+		display: flex;
+		min-width: 0;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		background: transparent;
+		padding: 0.45rem 0.35rem;
+		color: var(--theme-switcher-icon-idle, color-mix(in lch, var(--app-color-dark), transparent 38%));
+		transition: color 160ms ease;
+	}
+
+	.dock-host .theme-switcher-btn :global(svg) {
+		display: block;
+		width: 1.6rem;
+		height: 1.6rem;
+		flex-shrink: 0;
+		margin: auto;
+	}
+
+	.dock-host .theme-switcher-btn:hover {
+		color: var(--theme-switcher-icon-hover, color-mix(in lch, var(--app-color-dark), transparent 18%));
+	}
+
+	.dock-host .theme-switcher-btn.is-active {
+		color: var(--theme-switcher-icon-active, var(--app-color-dark));
+	}
+
 
 	@media (min-width: 768px) {
 		body.docs-route .dock-host > .dock-angular-bevel,
@@ -489,7 +543,11 @@
 		}
 
 		body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill,
-		html[data-theme='dark'] body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill {
+		html[data-theme='dark']
+			body.docs-route
+			.dock-host
+			> .dock-angular-bevel
+			> .dock-shell-fill.dock-angular-bevel__fill {
 			clip-path: none;
 			overflow: visible;
 			position: relative;
@@ -497,7 +555,10 @@
 			background: transparent;
 		}
 
-		body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill::before {
+		body.docs-route
+			.dock-host
+			> .dock-angular-bevel
+			> .dock-shell-fill.dock-angular-bevel__fill::before {
 			content: '';
 			position: absolute;
 			inset: 0;
@@ -516,7 +577,10 @@
 			);
 		}
 
-		body.docs-route .dock-host > .dock-angular-bevel > .dock-shell-fill.dock-angular-bevel__fill::after {
+		body.docs-route
+			.dock-host
+			> .dock-angular-bevel
+			> .dock-shell-fill.dock-angular-bevel__fill::after {
 			clip-path: polygon(
 				calc(var(--bevel-cut) + var(--bevel-width)) var(--bevel-width),
 				calc(100% - var(--bevel-cut) - var(--bevel-width)) var(--bevel-width),
@@ -540,17 +604,21 @@
 			align-items: flex-end;
 		}
 
+		body.docs-route .dock-shell-fill .dock-zoom > a > .group > button > span {
+			transform-origin: bottom center;
+		}
+
+		body.docs-route .dock-shell-fill .dock-zoom > a > .group > button > span :global(svg) {
+			transform-origin: bottom center;
+		}
+
 		body.docs-route .dock-toolbar {
 			align-items: flex-end;
 		}
 	}
 
-	body.docs-route .dock-shell-fill .theme-switcher-track {
-		background: transparent !important;
-	}
-
-	body.docs-route .dock-toolbar .dock-angular-bevel,
-	body.docs-route .dock-toolbar .dock-angular-bevel__fill,
+	body.docs-route .dock-toolbar .dock-angular-bevel:not(.dock-item-tooltip),
+	body.docs-route .dock-toolbar .dock-angular-bevel__fill:not(.dock-item-tooltip__label),
 	body.docs-route .dock-shell-fill .dock-zoom > a > .group {
 		background: transparent !important;
 		clip-path: none;
@@ -563,25 +631,36 @@
 		padding: 0;
 	}
 
-	body.docs-route .dock-shell-fill .dock-zoom > a > .group > button .dock-angular-bevel.dock-angular-bevel--sm {
+	body.docs-route .dock-item-tooltip {
 		background: var(--chip-border);
 	}
 
-	body.docs-route .dock-shell-fill .dock-zoom > a > .group > button .dock-angular-bevel.dock-angular-bevel--sm > .dock-angular-bevel__fill {
+	body.docs-route .dock-item-tooltip__label {
 		background: var(--chip-fill);
 		color: var(--chip-label);
 	}
 
-	body.docs-route .theme-switcher-inline .theme-switcher-track button {
-		min-width: 0;
+	body.docs-route .theme-switcher-standalone .theme-switcher-track--standalone {
+		position: relative;
+		display: flex;
+		padding: 0.25rem 0.35rem;
+		border-radius: 0.45rem;
 	}
 
-	body.docs-route .theme-switcher-track button {
-		color: color-mix(in lch, var(--app-color-dark), transparent 45%);
-	}
-
-	body.docs-route .theme-switcher-track button:hover {
-		color: color-mix(in lch, var(--app-color-dark), transparent 25%);
+	body.docs-route .theme-switcher-thumb--standalone {
+		--theme-thumb-slot: calc((100% - 0.7rem) / 3);
+		position: absolute;
+		top: 0.35rem;
+		bottom: 0.35rem;
+		left: calc(0.36rem + var(--theme-thumb-index, 0) * var(--theme-thumb-slot));
+		z-index: 1;
+		width: var(--theme-thumb-slot);
+		pointer-events: none;
+		border: none;
+		border-radius: 0.45rem;
+		background: color-mix(in lch, var(--color-brand), transparent 82%) !important;
+		box-shadow: var(--theme-switcher-thumb-shadow, 0 1px 3px color-mix(in lch, var(--app-color-dark), transparent 86%));
+		transition: left 280ms cubic-bezier(0.34, 1.4, 0.64, 1);
 	}
 
 	body.docs-route .dock-zoom :global(svg),
@@ -601,6 +680,16 @@
 			--spacing-dock-cut: 0.7rem;
 		}
 
+		.dock-surface {
+			--dock-elevation-filter:
+				drop-shadow(0 -2px 4px rgb(0 0 0 / 0.14)) drop-shadow(0 -12px 28px rgb(0 0 0 / 0.22));
+		}
+
+		html[data-theme='dark'] .dock-surface {
+			--dock-elevation-filter:
+				drop-shadow(0 -3px 6px rgb(0 0 0 / 0.42)) drop-shadow(0 -14px 32px rgb(0 0 0 / 0.58));
+		}
+
 		.dock-mobile-menu {
 			overflow: hidden;
 		}
@@ -608,12 +697,112 @@
 		.dock-mobile-menu__body {
 			display: flex;
 			flex-direction: column;
-			gap: 0.5rem;
-			padding: 0.5rem 0.5rem 0.25rem;
 		}
 
-		.dock-mobile-menu__body > :last-child {
-			margin: 0;
+		.dock-menu-scroll {
+			border-bottom: 1px solid var(--dock-divider, var(--color-border));
+			padding: 0.65rem 0.85rem 0.85rem;
+		}
+
+		.dock-menu-scroll > .flex {
+			padding: 0.35rem 0.2rem;
+		}
+
+		.dock-host .dock-menu-scroll.docs-sidebar-panel {
+			font-size: 13px;
+			line-height: 20px;
+		}
+
+		.dock-host .dock-menu-scroll .site-kicker {
+			margin-bottom: 0.55rem;
+			padding-left: 0.35rem;
+		}
+
+		.dock-host .dock-menu-scroll nav ul li > a,
+		.dock-host .dock-menu-scroll .docs-nav-link {
+			display: block;
+			padding: 0.45rem 0.85rem;
+			font-family: var(--font-mono);
+			font-size: 13px;
+			font-weight: 600;
+			line-height: 20px;
+			color: color-mix(in lch, var(--app-color-dark), transparent 12%);
+			transition: color 150ms ease;
+		}
+
+		.dock-host .dock-menu-scroll nav ul li > a:hover,
+		.dock-host .dock-menu-scroll .docs-nav-link:hover {
+			color: var(--docs-text, var(--app-color-dark));
+		}
+
+		.dock-host .dock-menu-scroll nav ul li .dock-angular-bevel--brand a,
+		.dock-host .dock-menu-scroll .docs-nav-link--active {
+			padding: 0.5rem 0.95rem;
+			font-weight: 800;
+			letter-spacing: 0.02em;
+			color: var(--chip-label, var(--color-brand));
+		}
+
+		.dock-host .dock-menu-scroll .docs-nav-divider {
+			margin: 0.85rem 0.35rem;
+		}
+
+		.dock-mobile-menu__footer {
+			display: flex;
+			flex-direction: column;
+			gap: 0.65rem;
+			padding: 0.85rem 0.65rem 1rem;
+		}
+
+		.dock-zoom--embedded {
+			display: grid;
+			grid-template-columns: repeat(5, minmax(0, 1fr));
+			width: 100%;
+			gap: 0.25rem;
+			padding-inline: 0.25rem;
+		}
+
+		.dock-zoom--embedded > a {
+			display: flex;
+			min-width: 0;
+			align-items: stretch;
+		}
+
+		.dock-mobile-menu__footer .theme-switcher-embedded {
+			--dock-mobile-theme-height: 3.5rem;
+			width: 100%;
+			height: var(--dock-mobile-theme-height);
+			min-height: var(--dock-mobile-theme-height);
+			margin-top: 0.15rem;
+		}
+
+		.dock-mobile-menu__footer .theme-switcher-embedded .theme-switcher-track--embedded {
+			height: 100%;
+			min-height: 0;
+			place-items: stretch;
+		}
+
+		.dock-mobile-menu__footer .theme-switcher-embedded .theme-switcher-btn {
+			display: grid;
+			place-items: center;
+		}
+
+		.dock-mobile-menu__footer .theme-switcher-btn.is-active {
+			box-shadow: none;
+		}
+
+		html[data-theme='light'] .dock-mobile-menu__footer .theme-switcher-embedded {
+			--theme-switcher-track-bg: rgb(0 0 0 / 0.14);
+			--theme-switcher-track-ring: rgb(0 0 0 / 0.22);
+			--theme-switcher-thumb-bg: rgb(255 255 255 / 0.98);
+			--theme-switcher-icon-idle: rgb(0 0 0 / 0.45);
+			--theme-switcher-icon-hover: rgb(0 0 0 / 0.68);
+			--theme-switcher-icon-active: rgb(0 0 0 / 0.9);
+			--theme-switcher-thumb-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
+		}
+
+		.dock-menu-scroll .dock-angular-bevel--brand {
+			margin-inline: 0.1rem;
 		}
 	}
 
@@ -633,12 +822,103 @@
 		@apply max-w-none;
 	}
 
-	.docs-prose :where(p, a) {
-		@apply my-6 text-[clamp(1.05rem,2vw,1.2rem)] leading-[1.618];
+	.docs-prose :where(table) {
+		--table-border: var(--color-border);
+		--table-head-bg: var(
+			--chip-fill,
+			color-mix(in lch, var(--app-color-shell), var(--color-brand) 10%)
+		);
+		--table-head-fg: var(
+			--chip-label,
+			color-mix(in lch, var(--color-brand), var(--app-color-dark) 18%)
+		);
+		--table-head-edge: var(
+			--chip-border,
+			color-mix(in lch, var(--app-color-shell), var(--color-brand) 22%)
+		);
+		--table-surface: color-mix(in lch, var(--app-color-shell), transparent 2%);
+		--table-row-alt: color-mix(in lch, var(--app-color-dark), transparent 98.5%);
+
+		display: table;
+		width: 100%;
+		min-width: min(100%, 28rem);
+		margin-block: clamp(1.25rem, 3vw, 2rem);
+		border-collapse: collapse;
+		border: 1px solid var(--table-border);
+		background: var(--table-surface);
+		box-shadow:
+			inset 3px 0 0 var(--color-brand),
+			0 18px 36px -28px color-mix(in lch, var(--app-color-dark), transparent 88%);
+		font-size: clamp(0.88rem, 1.45vw, 0.98rem);
+		line-height: 1.55;
+	}
+
+	.docs-prose :where(table th, table td) {
+		padding: 0.7rem 1rem;
+		text-align: left;
+		vertical-align: top;
+		white-space: normal;
+		word-break: break-word;
+		border-bottom: 1px solid var(--table-border);
+	}
+
+	.docs-prose :where(table thead th) {
+		font-family: var(--font-sans);
+		font-size: 13px;
+		font-weight: 600;
+		line-height: 20px;
+		letter-spacing: 0.01em;
+		text-transform: none;
+		color: var(--table-head-fg);
+		background: var(--table-head-bg);
+		border-bottom: 1px solid var(--table-head-edge);
+	}
+
+	.docs-prose :where(table thead th:not(:last-child)) {
+		box-shadow: inset -1px 0 0 color-mix(in lch, var(--table-head-edge), transparent 35%);
+	}
+
+	.docs-prose :where(table tbody tr:nth-child(even)) {
+		background: var(--table-row-alt);
+	}
+
+	.docs-prose :where(table tbody tr:last-child td) {
+		border-bottom: 0;
+	}
+
+	.docs-prose :where(table tbody td:first-child) {
+		@apply font-semibold text-fg;
+	}
+
+	.docs-prose :where(table tbody td:not(:first-child)) {
+		color: var(--color-fg-muted);
+	}
+
+	.docs-prose :where(table :is(p, a, li)) {
+		margin: 0;
+		font-size: inherit;
+		line-height: inherit;
+	}
+
+	.docs-prose :where(table a) {
+		font-weight: 500;
+		background-image: none;
+	}
+
+	.docs-prose :where(table code) {
+		@apply rounded-sm px-1.5 py-0.5 font-mono text-[0.9em] leading-snug;
+		background-color: color-mix(in lch, var(--app-color-dark), transparent 93%);
+	}
+
+	html[data-theme='dark'] .docs-prose :where(table) {
+		--table-surface: color-mix(in lch, var(--app-color-shell), transparent 0%);
+		--table-row-alt: color-mix(in lch, var(--app-color-dark), transparent 97%);
+		box-shadow:
+			inset 3px 0 0 var(--color-brand),
+			0 20px 40px -30px color-mix(in lch, black, transparent 55%);
 	}
 
 	.docs-prose :where(pre.astro-code) {
-		@apply my-6 w-full max-w-full overflow-x-auto rounded-sm border-0 p-4 text-[clamp(0.85rem,1.5vw,1rem)] leading-normal shadow-none;
 		background-color: color-mix(in lch, var(--app-color-dark), transparent 97%);
 		box-shadow: inset 0 0 0 1px color-mix(in lch, var(--app-color-dark), transparent 90%);
 	}
@@ -651,19 +931,8 @@
 		background-color: color-mix(in lch, var(--app-color-dark), transparent 40%) !important;
 	}
 
-	.docs-prose :where(h1, h2, h3, h4, h5) {
-		@apply flex items-center gap-2;
-	}
-
-	.docs-prose :where(.heading-anchor) {
-		@apply font-mono text-[0.7em] opacity-100 no-underline;
-	}
-
-	blockquote {
-		@apply rounded-r-lg border-l border-[var(--color-border-strong)] py-2 pl-4;
-		background-color: color-mix(in lch, var(--app-color-dark), transparent 97%);
-	}
 }
 
 @import './home.css' layer(components);
 @import './docs-grid.css';
+@import './docs-typography.css';

@@ -89,8 +89,7 @@ export function resolveUnit(value: number, unit: CssUnit, ctx: LengthResolveCont
 		case '%': {
 			const parent = ctx.parentRect ?? readParentRect(ctx.element);
 			if (!parent) return value;
-			const base =
-				ctx.axis === 'width' || ctx.axis === 'x' ? parent.width : parent.height;
+			const base = ctx.axis === 'width' || ctx.axis === 'x' ? parent.width : parent.height;
 			return (value / 100) * base;
 		}
 		case 'vw':

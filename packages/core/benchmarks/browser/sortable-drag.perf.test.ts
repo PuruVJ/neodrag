@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
-import { sortable } from '../../src/drop/index.ts';
+import { Sortable } from '../../src/sortable/index.ts';
 
 import { pointer, resetBody, runBench } from './helpers.ts';
 
@@ -24,7 +24,7 @@ function setupSortableDrag() {
 		container.appendChild(li);
 	}
 
-	const list = sortable({
+	const list = new Sortable({
 		items: () => items,
 		keyBy: (i) => i.id,
 		onReorder: () => {},

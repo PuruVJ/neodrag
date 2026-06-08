@@ -8,20 +8,20 @@ tagline: 'A lightweight directive to make your elements draggable.'
 npm i @neodrag/core@next @neodrag/solid@next
 ```
 
-Import built-in plugins from `@neodrag/core/plugins` or `@neodrag/solid/plugins`. Drop and sortable helpers live under `@neodrag/solid/drop` (`useDroppable`, `sortable`, `useSortableItem`).
+Import built-in plugins from `@neodrag/core/plugins` or `@neodrag/solid/plugins`. Solid uses **`create*`** to attach bindings (`createDraggable`, `createDroppable`, `createSortable`) and **`with*`** to compose plugin lists (`withSortableItemPlugins`). Drop: `@neodrag/solid/drop`. Sortable: `@neodrag/solid/sortable`.
 
 ## Usage
 
 Basic usage
 
 ```tsx
-import { useDraggable } from '@neodrag/solid';
+import { createDraggable } from '@neodrag/solid';
 
 export const App: Component = () => {
   const [draggableRef, setDraggableRef] =
     createSignal<HTMLElement | null>(null);
 
-  useDraggable(draggableRef);
+  createDraggable(draggableRef);
 
   return <div ref={setDraggableRef}>You can drag me</div>;
 };
@@ -32,13 +32,13 @@ export const App: Component = () => {
 With plugins
 
 ```tsx
-import { useDraggable, axis, grid } from '@neodrag/solid';
+import { createDraggable, axis, grid } from '@neodrag/solid';
 
 export const App: Component = () => {
   const [draggableRef, setDraggableRef] =
     createSignal<HTMLElement | null>(null);
 
-  useDraggable(draggableRef, [axis('x'), grid([10, 10])]);
+  createDraggable(draggableRef, [axis('x'), grid([10, 10])]);
 
   return <div ref={setDraggableRef}>Horizontal grid snapping</div>;
 };
@@ -48,7 +48,7 @@ Defining plugins elsewhere with TypeScript
 
 ```tsx
 import {
-  useDraggable,
+  createDraggable,
   axis,
   bounds,
   BoundsFrom,
@@ -60,7 +60,7 @@ export const App: Component = () => {
     createSignal<HTMLElement | null>(null);
 
   const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
-  useDraggable(draggableRef, plugins);
+  createDraggable(draggableRef, plugins);
 
   return <div ref={setDraggableRef}>Type-safe dragging</div>;
 };
@@ -69,12 +69,12 @@ export const App: Component = () => {
 Getting drag state
 
 ```tsx
-import { useDraggable } from '@neodrag/solid';
+import { createDraggable } from '@neodrag/solid';
 
 export const App: Component = () => {
   const [draggableRef, setDraggableRef] =
     createSignal<HTMLElement | null>(null);
-  const dragState = useDraggable(draggableRef);
+  const dragState = createDraggable(draggableRef);
 
   createEffect(() => {
     console.log('Position:', dragState().offset);
@@ -93,18 +93,14 @@ For dynamic behavior that changes during runtime:
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  useDraggable,
-  axis,
-} from '@neodrag/solid';
+import { createDraggable, axis } from '@neodrag/solid';
 
 export const App: Component = () => {
   const [draggableRef, setDraggableRef] =
     createSignal<HTMLElement | null>(null);
   const [currentAxis, setCurrentAxis] = createSignal<'x' | 'y'>('x');
 
-  
-  useDraggable(draggableRef, [axisCompartment]);
+  createDraggable(draggableRef, [axisCompartment]);
 
   return (
     <div>
@@ -126,7 +122,7 @@ Multiple reactive compartments
 ```tsx
 import { createSignal } from 'solid-js';
 import {
-  useDraggable,
+  createDraggable,
   axis,
   bounds,
   BoundsFrom,
@@ -140,8 +136,7 @@ export const App: Component = () => {
   const [gridSize, setGridSize] = createSignal(20);
   const [enableBounds, setEnableBounds] = createSignal(false);
 
-      
-  useDraggable(draggableRef, [axisComp, gridComp, boundsComp]);
+  createDraggable(draggableRef, [axisComp, gridComp, boundsComp]);
 
   return (
     <div>
@@ -183,13 +178,13 @@ export const App: Component = () => {
 ## Event Handling
 
 ```tsx
-import { useDraggable, events } from '@neodrag/solid';
+import { createDraggable, events } from '@neodrag/solid';
 
 export const App: Component = () => {
   const [draggableRef, setDraggableRef] =
     createSignal<HTMLElement | null>(null);
 
-  useDraggable(draggableRef, [
+  createDraggable(draggableRef, [
     events({
       onDragStart: (data) => console.log('Started:', data.offset),
       onDrag: (data) => console.log('Dragging:', data.offset),
@@ -203,16 +198,51 @@ export const App: Component = () => {
 };
 ```
 
+## Sortable lists
+
+```tsx
+import { For } from 'solid-js';
+import { createSortable, createSortableItem, type SortableList } from '@neodrag/solid/sortable';
+
+type Item = { id: string; label: string };
+
+function SortableRow(props: { list: SortableList<Item>; item: Item }) {
+  const [, itemRef] = createSortableItem(props.list, props.item.id);
+  return <li ref={itemRef}>{props.item.label}</li>;
+}
+
+export const App: Component = () => {
+  const [items, setItems] = createSignal<Item[]>([
+    { id: 'a', label: 'Alpha' },
+    { id: 'b', label: 'Beta' },
+  ]);
+
+  const { list, dropRef } = createSortable({
+    items,
+    keyBy: (i) => i.id,
+    onReorder: (next) => setItems(next),
+  });
+
+  return (
+    <ul ref={dropRef}>
+      <For each={items()}>{(item) => <SortableRow list={list} item={item} />}</For>
+    </ul>
+  );
+};
+```
+
+Low-level control: `const list = new Sortable({ items: () => items(), keyBy, onReorder })` then `createDroppable(list.container())` and `createDraggable(withSortableItemPlugins(list, key))` per chip.
+
 ## Drag Controls
 
 ```tsx
-import { useDraggable, controls, ControlFrom } from '@neodrag/solid';
+import { createDraggable, controls, ControlFrom } from '@neodrag/solid';
 
 export const App: Component = () => {
   const [draggableRef, setDraggableRef] =
     createSignal<HTMLElement | null>(null);
 
-  useDraggable(draggableRef, [
+  createDraggable(draggableRef, [
     controls({
       allow: ControlFrom.selector('.drag-handle'),
       block: ControlFrom.selector('.no-drag'),

@@ -29,38 +29,38 @@
 <main class="desktop">
 	<p class="hint">Drag the title bar · resize from edges and corners</p>
 
-	<div class="window-shell" {@attach drag.attachment} {@attach resize.attachment}>
+	<div class="window-shell" {...drag.target} {...resize.frame}>
 		<div class="window">
-		<header class="titlebar">
-			<div class="titlebar-body" data-window-drag>
-				<div class="traffic" aria-hidden="true">
-					<span class="dot close"></span>
-					<span class="dot min"></span>
-					<span class="dot max"></span>
+			<header class="titlebar">
+				<div class="titlebar-body" data-window-drag>
+					<div class="traffic" aria-hidden="true">
+						<span class="dot close"></span>
+						<span class="dot min"></span>
+						<span class="dot max"></span>
+					</div>
+					<span class="title">Finder — Documents</span>
 				</div>
-				<span class="title">Finder — Documents</span>
+			</header>
+			<div class="toolbar">
+				<span class="tb-btn">‹</span>
+				<span class="tb-btn">›</span>
+				<span class="tb-path">Macintosh HD · Documents · Neodrag</span>
 			</div>
-		</header>
-		<div class="toolbar">
-			<span class="tb-btn">‹</span>
-			<span class="tb-btn">›</span>
-			<span class="tb-path">Macintosh HD · Documents · Neodrag</span>
-		</div>
-		<div class="content">
-			<div class="sidebar">
-				<p class="side-label">Favorites</p>
-				<ul>
-					<li class="active">Documents</li>
-					<li>Downloads</li>
-					<li>Desktop</li>
-				</ul>
+			<div class="content">
+				<div class="sidebar">
+					<p class="side-label">Favorites</p>
+					<ul>
+						<li class="active">Documents</li>
+						<li>Downloads</li>
+						<li>Desktop</li>
+					</ul>
+				</div>
+				<div class="files">
+					<div class="file">📁 Playground</div>
+					<div class="file">📄 readme.md</div>
+					<div class="file">📄 notes.txt</div>
+				</div>
 			</div>
-			<div class="files">
-				<div class="file">📁 Playground</div>
-				<div class="file">📄 readme.md</div>
-				<div class="file">📄 notes.txt</div>
-			</div>
-		</div>
 		</div>
 	</div>
 </main>
@@ -70,12 +70,7 @@
 		margin: 0;
 		min-height: 100vh;
 		font-family:
-			-apple-system,
-			BlinkMacSystemFont,
-			'SF Pro Text',
-			'Segoe UI',
-			system-ui,
-			sans-serif;
+			-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
 	}
 
 	.desktop {

@@ -23,32 +23,28 @@ touchAction(false); // Don't set touch-action (browser default)
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { touchAction } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { touchAction } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [touchAction('manipulation')] });
-	const drag_1 = new Draggable({ plugins: [touchAction('none')] });
-	const drag_2 = new Draggable({ plugins: [touchAction('pan-y')] });
-	const drag_3 = new Draggable({ plugins: [touchAction(false)] });
+  const drag_0 = new Draggable({
+    plugins: [touchAction('manipulation')],
+  });
+  const drag_1 = new Draggable({ plugins: [touchAction('none')] });
+  const drag_2 = new Draggable({ plugins: [touchAction('pan-y')] });
+  const drag_3 = new Draggable({ plugins: [touchAction(false)] });
 </script>
 
 <!-- Default manipulation mode -->
-<div {@attach drag_0.attachment}>
-  Touch-optimized dragging
-</div>
+<div {@attach drag_0.attachment}>Touch-optimized dragging</div>
 
 <!-- Disable all browser touch behaviors -->
 <div {@attach drag_1.attachment}>Pure drag only</div>
 
 <!-- Allow vertical scrolling while preventing horizontal -->
-<div {@attach drag_2.attachment}>
-  Vertical scroll + drag
-</div>
+<div {@attach drag_2.attachment}>Vertical scroll + drag</div>
 
 <!-- Don't set touch-action property -->
-<div {@attach drag_3.attachment}>
-  Browser default behavior
-</div>
+<div {@attach drag_3.attachment}>Browser default behavior</div>
 ```
 
 </div>
@@ -115,7 +111,7 @@ import { touchAction } from '@neodrag/vue';
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { touchAction, useDraggable } from '@neodrag/solid';
+import { touchAction, createDraggable } from '@neodrag/solid';
 
 function TouchActionExamples() {
   const [manipulationRef, setManipulationRef] = createSignal();
@@ -365,10 +361,8 @@ const currentValue = computed(() => {
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  touchAction,
-  useDraggable,
-} from '@neodrag/solid';
+import { createDraggable } from '@neodrag/solid';
+import { touchAction } from '@neodrag/solid/plugins';
 
 function DynamicTouchAction() {
   const [mode, setMode] = createSignal('manipulation');

@@ -5,86 +5,47 @@
 		"compile": {
 			"dependsOn": ["^compile"],
 			"outputs": ["dist/**"],
-			"inputs": [
-				"src/**",
-				"tsdown.config.ts",
-				"package.json",
-				"tsconfig.json"
-			]
+			"inputs": ["src/**", "tsdown.config.ts", "package.json", "tsconfig.json"]
 		},
 		"test": {
 			"dependsOn": ["^compile"],
 			"cache": false,
-			"inputs": [
-				"src/**",
-				"tests/**",
-				"benchmarks/**",
-				"vitest*.config.ts",
-				"package.json"
-			]
+			"inputs": ["src/**", "tests/**", "benchmarks/**", "vitest*.config.ts", "package.json"]
 		},
 		"test:webkit": {
 			"dependsOn": ["^compile"],
 			"cache": false,
-			"inputs": [
-				"src/**",
-				"tests/**",
-				"vitest*.config.ts"
-			]
+			"inputs": ["src/**", "tests/**", "vitest*.config.ts"]
 		},
 		"test:firefox": {
 			"dependsOn": ["^compile"],
 			"cache": false,
-			"inputs": [
-				"src/**",
-				"tests/**",
-				"vitest*.config.ts"
-			]
+			"inputs": ["src/**", "tests/**", "vitest*.config.ts"]
 		},
 		"test:chromium": {
 			"dependsOn": ["^compile"],
 			"cache": false,
-			"inputs": [
-				"src/**",
-				"tests/**",
-				"vitest*.config.ts"
-			]
+			"inputs": ["src/**", "tests/**", "vitest*.config.ts"]
 		},
 		"test:unit": {
 			"dependsOn": ["^compile"],
-			"inputs": [
-				"src/**",
-				"tests/interactions/**",
-				"vitest.config.ts"
-			]
+			"inputs": ["src/**", "tests/interactions/**", "vitest.config.ts"]
 		},
 		"test:bench:guard": {
 			"dependsOn": ["^compile"],
 			"cache": false,
-			"inputs": [
-				"src/**",
-				"benchmarks/**",
-				"vitest.bench.browser.config.ts"
-			]
+			"inputs": ["src/**", "benchmarks/**", "vitest.bench.browser.config.ts"]
 		},
 		"test:coverage": {
 			"dependsOn": ["^compile"],
 			"outputs": ["coverage/**"],
 			"cache": false,
-			"inputs": [
-				"src/**",
-				"tests/**",
-				"vitest*.config.ts"
-			]
+			"inputs": ["src/**", "tests/**", "vitest*.config.ts"]
 		},
 		"bench": {
 			"dependsOn": ["^compile"],
 			"cache": false,
-			"inputs": [
-				"src/**",
-				"benchmarks/**",
-				"vitest.bench.browser.config.ts"
-			]
+			"inputs": ["src/**", "benchmarks/**", "vitest.bench.browser.config.ts"]
 		},
 		"sizes": {
 			"dependsOn": ["^compile"],

@@ -45,7 +45,8 @@ function pointer(
 
 function createBox() {
 	const box = document.createElement('div');
-	box.style.cssText = 'position:absolute;left:50px;top:50px;width:80px;height:60px;touch-action:none';
+	box.style.cssText =
+		'position:absolute;left:50px;top:50px;width:80px;height:60px;touch-action:none';
 	document.body.appendChild(box);
 	return box;
 }
@@ -136,7 +137,7 @@ describe('engine session lifecycle', () => {
 	it('destroying the active drag source ends the session', () => {
 		const neodrag = engine();
 		const box = createBox();
-		const handle = 		neodrag.draggable(box, []);
+		const handle = neodrag.draggable(box, []);
 
 		pointer(box, 'pointerdown', 60, 60);
 		pointer(box, 'pointermove', 90, 90);

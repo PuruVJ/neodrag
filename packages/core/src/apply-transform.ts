@@ -18,8 +18,28 @@ function transformCache(node: HTMLElement | SVGElement): TransformCache {
 	return (host[TRANSFORM_CACHE] ??= { x: NaN, y: NaN });
 }
 
+export function clearDragTransform(node: HTMLElement | SVGElement) {
+	const cache = transformCache(node);
+	cache.x = NaN;
+	cache.y = NaN;
+	if (node instanceof SVGElement) {
+		const element = node as SVGGraphicsElement;
+		const t = element.transform.baseVal;
+		for (let i = t.numberOfItems - 1; i >= 0; i--) {
+			if (t.getItem(i).type === SVG_TRANSFORM_TRANSLATE) t.removeItem(i);
+		}
+		return;
+	}
+	(node as HTMLElement).style.translate = '';
+}
+
 export function applyDragTransform(ctx: DragCtx, custom?: TransformApplier) {
-	const targetNode = ctx.isDragging ? ctx.session.visual.node : ctx.rootNode;
+	const visualNode = ctx.session.visual.node;
+	let targetNode = ctx.isDragging ? visualNode : ctx.rootNode;
+	if (ctx.isDragging && visualNode !== ctx.rootNode) {
+		clearDragTransform(ctx.rootNode);
+		if (targetNode === ctx.rootNode) targetNode = visualNode;
+	}
 	if (custom) {
 		custom({ offset: { x: ctx.offset.x, y: ctx.offset.y }, rootNode: targetNode });
 		return;
@@ -52,6 +72,16 @@ export function applyDragTransform(ctx: DragCtx, custom?: TransformApplier) {
 			t.insertItemBefore(translation, 0);
 		}
 	} else {
-		(targetNode as HTMLElement).style.translate = `${x}px ${y}px`;
+		const el = targetNode as HTMLElement;
+		if (ctx.isDragging && el.classList.contains('neodrag-ghost')) {
+			const originLeft = Number(el.dataset.ghostOriginLeft);
+			const originTop = Number(el.dataset.ghostOriginTop);
+			el.style.translate = '';
+			el.style.left = `${originLeft}px`;
+			el.style.top = `${originTop}px`;
+			el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+			return;
+		}
+		el.style.translate = `${x}px ${y}px`;
 	}
 }

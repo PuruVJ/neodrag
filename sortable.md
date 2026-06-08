@@ -20,13 +20,13 @@ Sortable functionality in Neodrag provides drag-to-reorder behavior for lists an
 // Core sortable class
 class Sortable {
   constructor(options?: SortableOptions);
-  
+
   // Returns a draggable plugin for items
   item(): DraggablePlugin;
-  
+
   // Manages a container element
   container(element: HTMLElement): () => void;
-  
+
   // Programmatic API
   reorder(from: number, to: number): void;
   reset(): void;
@@ -38,18 +38,18 @@ interface SortableOptions {
   onSort?: (event: SortEvent) => void;
   onStart?: (event: SortStartEvent) => void;
   onEnd?: (event: SortEndEvent) => void;
-  
+
   // Behavior
   animation?: number; // Duration in ms
   handle?: string; // Selector for drag handle
   filter?: string; // Selector for items to exclude
   preventOnFilter?: boolean;
-  
+
   // Visual
   ghostClass?: string;
   chosenClass?: string;
   dragClass?: string;
-  
+
   // Advanced
   swap?: boolean; // Swap mode instead of insert
   multiDrag?: boolean; // Select and drag multiple
@@ -65,18 +65,18 @@ interface SortableOptions {
 <script>
   import { Draggable } from '@neodrag/svelte';
   import { Sortable } from '@neodrag/svelte/sortable';
-  
+
   // Create sortable instance
   const list = new Sortable({
     onSort: ({ oldIndex, newIndex }) => {
       // Handle reorder
-    }
+    },
   });
 
-	const drag_0 = new Draggable({ plugins: [list.item()] });
-	const drag_1 = new Draggable({ plugins: [sort.item()] });
-	const drag_2 = new Draggable({ plugins:  });
-	const drop_3 = new Droppable({ plugins: [sortable({ onSort })] });
+  const drag_0 = new Draggable({ plugins: [list.item()] });
+  const drag_1 = new Draggable({ plugins: [sort.item()] });
+  const drag_2 = new Draggable({ plugins: [] });
+  const drop_3 = new Droppable({ plugins: [sortable({ onSort })] });
 </script>
 
 <!-- Container -->
@@ -90,7 +90,6 @@ interface SortableOptions {
 </div>
 ```
 
-
 #### React
 
 ```jsx
@@ -101,12 +100,12 @@ function SortableList({ items }) {
   const sortable = useSortable({
     onSort: ({ oldIndex, newIndex }) => {
       // Handle reorder
-    }
+    },
   });
-  
+
   return (
     <div ref={sortable.container}>
-      {items.map(item => (
+      {items.map((item) => (
         <SortableItem key={item.id} sortable={sortable}>
           {item.text}
         </SortableItem>
@@ -117,12 +116,8 @@ function SortableList({ items }) {
 
 function SortableItem({ children, sortable }) {
   const dragRef = useDraggable([sortable.item()]);
-  
-  return (
-    <div ref={dragRef}>
-      {children}
-    </div>
-  );
+
+  return <div ref={dragRef}>{children}</div>;
 }
 ```
 
@@ -131,8 +126,8 @@ function SortableItem({ children, sortable }) {
 ```vue
 <template>
   <div ref="sortable.container">
-    <div 
-      v-for="item in items" 
+    <div
+      v-for="item in items"
       :key="item.id"
       v-draggable="[sortable.item()]"
     >
@@ -148,7 +143,7 @@ import { useSortable } from '@neodrag/vue/sortable';
 const sortable = useSortable({
   onSort: ({ oldIndex, newIndex }) => {
     // Handle reorder
-  }
+  },
 });
 </script>
 ```
@@ -162,7 +157,7 @@ import { Sortable } from '@neodrag/vanilla/sortable';
 const sortable = new Sortable({
   onSort: ({ oldIndex, newIndex }) => {
     // Handle reorder
-  }
+  },
 });
 
 // Setup container
@@ -170,7 +165,7 @@ const container = document.querySelector('.list');
 sortable.container(container);
 
 // Setup items
-container.querySelectorAll('.item').forEach(item => {
+container.querySelectorAll('.item').forEach((item) => {
   draggable(item, [sortable.item()]);
 });
 ```
@@ -213,36 +208,39 @@ interface SortableState {
 For advanced use cases, sortables can be grouped:
 
 ```javascript
-const sortableA = new Sortable({
+const columnA = sortable({
   group: 'shared',
-  onSort: handleSort,
-  onAdd: handleAdd,
-  onRemove: handleRemove
+  items: () => listA,
+  keyBy: (item) => item.id,
+  onReorder: (next) => (listA = next),
+  onTransfer: (item, meta) => moveItem(item, 'a', meta.toIndex),
 });
 
-const sortableB = new Sortable({
+const columnB = sortable({
   group: 'shared',
-  onSort: handleSort,
-  onAdd: handleAdd,
-  onRemove: handleRemove
+  items: () => listB,
+  keyBy: (item) => item.id,
+  onReorder: (next) => (listB = next),
+  onTransfer: (item, meta) => moveItem(item, 'b', meta.toIndex),
 });
 ```
 
 ## Comparison with Current Plugin Approach
 
 ### Current (Plugin)
+
 ```javascript
-droppable([
-  sortable({ onSort })
-])
+droppable([sortable({ onSort })]);
 ```
 
 **Limitations:**
+
 - Sortable doesn't have full control over drag behavior
 - Complex coordination between drag and drop systems
 - Hard to implement sortable-specific features (multi-drag, animations)
 
 ### Proposed (Dedicated Factory)
+
 ```javascript
 const sort = sortable({ onSort });
 // Container gets sortable management
@@ -252,6 +250,7 @@ const sort = sortable({ onSort });
 ```
 
 **Benefits:**
+
 - Clear ownership and separation of concerns
 - Sortable controls its domain completely
 - Still composes with `new Draggable()` for individual items
@@ -260,6 +259,7 @@ const sort = sortable({ onSort });
 ## Features Roadmap
 
 ### Phase 1: Core Functionality
+
 - [x] Basic reordering within container
 - [x] Real-time visual feedback
 - [x] Framework integrations
@@ -267,6 +267,7 @@ const sort = sortable({ onSort });
 - [ ] Drag handle support
 
 ### Phase 2: Enhanced Features
+
 - [ ] Multi-drag selection
 - [ ] Swap mode
 - [ ] Auto-scroll
@@ -274,6 +275,7 @@ const sort = sortable({ onSort });
 - [ ] Grid sorting
 
 ### Phase 3: Advanced
+
 - [ ] Cross-container sorting (groups)
 - [ ] Conditional sorting (validation)
 - [ ] Virtual list support

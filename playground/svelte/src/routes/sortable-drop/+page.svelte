@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Neodrag } from '@neodrag/svelte'
-	
-	import { Droppable, sortable } from '@neodrag/svelte/drop';
+	import { Neodrag } from '@neodrag/svelte';
+
+	import { Droppable, Sortable } from '@neodrag/svelte/drop';
 
 	let items = $state([
 		{ id: '1', text: 'Item 1' },
@@ -11,7 +11,7 @@
 		{ id: '5', text: 'Item 5' },
 	]);
 
-	const list = sortable({
+	const list = new Sortable({
 		items: () => items,
 		keyBy: (item) => item.id,
 		onReorder: (next) => {

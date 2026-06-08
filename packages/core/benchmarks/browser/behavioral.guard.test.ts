@@ -3,7 +3,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import { DEFAULTS, Neodrag } from '../../src/index.ts';
-import { events, position } from '../../src/plugins.ts';
+import { createDragCallbacksPlugin } from '../../src/drag-callbacks.ts';
+import { position } from '../../src/plugins.ts';
 import {
 	assertTranslate,
 	createBox,
@@ -80,11 +81,11 @@ describe('Chromium behavioral guards', () => {
 		const engine = new Neodrag({ dev: false });
 		const pos = { x: 0, y: 0 };
 		const build = () => [
-				position({ current: { x: pos.x, y: pos.y } }),
-			events({
+			position({ current: { x: pos.x, y: pos.y } }),
+			createDragCallbacksPlugin({
 				onDrag(data) {
-					pos.x = data.offset.x;
-					pos.y = data.offset.y;
+					pos.x = data.offset.x as number;
+					pos.y = data.offset.y as number;
 				},
 			}),
 		];
@@ -106,9 +107,7 @@ describe('Chromium behavioral guards', () => {
 		resetBody();
 		const box = createBox('300px', '360px');
 		const engine = new Neodrag({ dev: false });
-		const handle = engine.draggable(box, [
-				position({ current: { x: 0, y: 0 } }),
-		]);
+		const handle = engine.draggable(box, [position({ current: { x: 0, y: 0 } })]);
 
 		handle.update([position({ current: { x: 55, y: 77 } })]);
 		await flushEffects();

@@ -19,9 +19,13 @@
 			},
 		],
 	});
+
+	$effect(() => {
+		if (drag.hasReactiveSlots) drag.flushReactive();
+	});
 </script>
 
-<div class="box" {@attach drag.attachment} data-testid="draggable"></div>
+<div class="box" {...drag.target} data-testid="draggable"></div>
 
 <style>
 	.box {

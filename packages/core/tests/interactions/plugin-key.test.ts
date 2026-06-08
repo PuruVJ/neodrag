@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { Neodrag } from '../../src/engine.ts';
+import { Neodrag } from '../../src/engine/neodrag.ts';
 import { defineDragPlugin, defineDropPlugin } from '../../src/types.ts';
 
 describe('named plugin keys (dev)', () => {

@@ -94,9 +94,21 @@ html[data-theme='dark'] .home-playground {
 	position: absolute;
 	inset: 0;
 	background-image:
-		radial-gradient(ellipse 130% 95% at 50% -28%, color-mix(in lch, var(--pg-accent), transparent 92%), transparent 68%),
-		radial-gradient(ellipse 75% 55% at 100% 18%, color-mix(in lch, var(--pg-accent), transparent 95%), transparent 58%),
-		radial-gradient(ellipse 65% 50% at 0% 72%, color-mix(in lch, var(--pg-accent), transparent 96%), transparent 55%),
+		radial-gradient(
+			ellipse 130% 95% at 50% -28%,
+			color-mix(in lch, var(--pg-accent), transparent 92%),
+			transparent 68%
+		),
+		radial-gradient(
+			ellipse 75% 55% at 100% 18%,
+			color-mix(in lch, var(--pg-accent), transparent 95%),
+			transparent 58%
+		),
+		radial-gradient(
+			ellipse 65% 50% at 0% 72%,
+			color-mix(in lch, var(--pg-accent), transparent 96%),
+			transparent 55%
+		),
 		linear-gradient(
 			165deg,
 			color-mix(in lch, var(--pg-accent), transparent 97%) 0%,
@@ -113,9 +125,21 @@ html[data-theme='dark'] .pg-backdrop-grid {
 
 html[data-theme='dark'] .pg-backdrop-glow {
 	background-image:
-		radial-gradient(ellipse 150% 110% at 50% -38%, color-mix(in lch, var(--pg-accent), transparent 90%), transparent 58%),
-		radial-gradient(ellipse 80% 60% at 100% 12%, color-mix(in lch, var(--pg-accent), transparent 94%), transparent 48%),
-		radial-gradient(ellipse 65% 50% at 0% 82%, color-mix(in lch, var(--pg-accent), transparent 95%), transparent 45%),
+		radial-gradient(
+			ellipse 150% 110% at 50% -38%,
+			color-mix(in lch, var(--pg-accent), transparent 90%),
+			transparent 58%
+		),
+		radial-gradient(
+			ellipse 80% 60% at 100% 12%,
+			color-mix(in lch, var(--pg-accent), transparent 94%),
+			transparent 48%
+		),
+		radial-gradient(
+			ellipse 65% 50% at 0% 82%,
+			color-mix(in lch, var(--pg-accent), transparent 95%),
+			transparent 45%
+		),
 		linear-gradient(180deg, transparent 55%, color-mix(in lch, var(--pg-fg), transparent 98%) 100%);
 }
 
@@ -123,14 +147,34 @@ html[data-theme='dark'] .pg-backdrop-glow {
 	position: absolute;
 	inset: 0;
 	background-image:
-		radial-gradient(ellipse 85% 70% at 50% 50%, transparent 42%, color-mix(in lch, var(--app-color-shell), transparent 15%) 100%),
-		linear-gradient(180deg, color-mix(in lch, var(--app-color-shell), transparent 8%) 0%, transparent 18%, transparent 82%, color-mix(in lch, var(--app-color-shell), transparent 12%) 100%);
+		radial-gradient(
+			ellipse 85% 70% at 50% 50%,
+			transparent 42%,
+			color-mix(in lch, var(--app-color-shell), transparent 15%) 100%
+		),
+		linear-gradient(
+			180deg,
+			color-mix(in lch, var(--app-color-shell), transparent 8%) 0%,
+			transparent 18%,
+			transparent 82%,
+			color-mix(in lch, var(--app-color-shell), transparent 12%) 100%
+		);
 }
 
 html[data-theme='dark'] .pg-backdrop-vignette {
 	background-image:
-		radial-gradient(ellipse 90% 75% at 50% 48%, transparent 38%, color-mix(in lch, var(--app-color-shell), transparent 8%) 100%),
-		linear-gradient(180deg, color-mix(in lch, var(--app-color-shell), transparent 25%) 0%, transparent 22%, transparent 78%, color-mix(in lch, var(--app-color-shell), transparent 35%) 100%);
+		radial-gradient(
+			ellipse 90% 75% at 50% 48%,
+			transparent 38%,
+			color-mix(in lch, var(--app-color-shell), transparent 8%) 100%
+		),
+		linear-gradient(
+			180deg,
+			color-mix(in lch, var(--app-color-shell), transparent 25%) 0%,
+			transparent 22%,
+			transparent 78%,
+			color-mix(in lch, var(--app-color-shell), transparent 35%) 100%
+		);
 }
 
 .pg-inner {
@@ -666,19 +710,16 @@ html:not([data-theme='dark']) .hp-scenario-section {
 	flex: 1;
 	min-height: 15rem;
 	overflow: auto;
-	padding: 1rem 1.05rem;
-	border: 2px solid var(--pg-border-strong);
-	background: var(--pg-code-bg);
-	box-shadow: inset 0 2px 12px color-mix(in lch, var(--pg-fg), transparent 94%);
-	font-size: clamp(0.78rem, 1.2vw, 0.9rem);
-	line-height: 1.55;
 }
 
-.hp-code-body:focus-within {
-	border-color: var(--pg-accent);
+.hp-code-body:focus-within :where(pre.astro-code) {
 	box-shadow:
-		inset 0 2px 12px color-mix(in lch, var(--pg-fg), transparent 94%),
-		0 0 0 4px color-mix(in lch, var(--pg-accent), transparent 82%);
+		inset 0 0 0 1px color-mix(in lch, var(--app-color-dark), transparent 90%),
+		0 0 0 3px color-mix(in lch, var(--color-brand), transparent 78%);
+}
+
+.home-playground .playground-well:has([data-sortable-dragging]) {
+	overflow: visible;
 }
 
 .home-playground .playground-well {
@@ -746,11 +787,687 @@ html:not([data-theme='dark']) .home-playground .playground-well {
 }
 
 .home-playground .desk {
+	background:
+		radial-gradient(
+			circle at 20% 15%,
+			color-mix(in lch, var(--pg-accent), transparent 92%) 0%,
+			transparent 45%
+		),
+		color-mix(in lch, var(--pg-well), var(--pg-fg) 4%);
+}
+
+.home-playground .desk,
+.home-playground .pg-scene {
 	position: relative;
 	width: 100%;
 	height: 100%;
 	min-height: 100%;
 	box-sizing: border-box;
+}
+
+.home-playground .pg-scene-kicker {
+	position: absolute;
+	top: 0.65rem;
+	left: 0.75rem;
+	z-index: 1;
+	margin: 0;
+	padding: 0.2rem 0.45rem;
+	font-family: var(--app-font-mono);
+	font-size: 0.62rem;
+	font-weight: 800;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--pg-muted);
+	pointer-events: none;
+	border: 1px solid var(--pg-border);
+	border-radius: 0.2rem;
+	background: color-mix(in lch, var(--app-color-shell), transparent 35%);
+}
+
+.home-playground :global(.pg-drop-over) {
+	border-color: var(--pg-accent) !important;
+	background: color-mix(in lch, var(--pg-accent), transparent 86%) !important;
+	box-shadow:
+		inset 0 0 0 2px color-mix(in lch, var(--pg-accent), transparent 55%),
+		0 0 24px color-mix(in lch, var(--pg-accent), transparent 70%);
+}
+
+.home-playground :global(.pg-drop-over--success) {
+	border-color: color-mix(in lch, #2ecc71, var(--pg-border) 20%) !important;
+	background: color-mix(in lch, #2ecc71, transparent 84%) !important;
+	box-shadow:
+		inset 0 0 0 2px color-mix(in lch, #2ecc71, transparent 45%),
+		0 0 20px color-mix(in lch, #2ecc71, transparent 65%);
+}
+
+.home-playground .last-mile {
+	background: color-mix(in lch, var(--pg-well), var(--pg-accent) 5%);
+}
+
+.home-playground .last-mile-grid {
+	position: absolute;
+	inset: 0;
+	background-image:
+		linear-gradient(var(--pg-grid-major) 1px, transparent 1px),
+		linear-gradient(90deg, var(--pg-grid-major) 1px, transparent 1px);
+	background-size: 24px 24px;
+	opacity: 0.85;
+	pointer-events: none;
+}
+
+.home-playground .last-mile-city {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+}
+
+.home-playground .last-mile-park {
+	position: absolute;
+	top: 14%;
+	left: 10%;
+	width: 26%;
+	height: 22%;
+	border-radius: 0.5rem;
+	background: color-mix(in lch, #3d9a6a, transparent 55%);
+	border: 2px solid color-mix(in lch, #3d9a6a, transparent 25%);
+}
+
+.home-playground .last-mile-block {
+	position: absolute;
+	pointer-events: auto;
+	cursor: default;
+	border-radius: 0.35rem;
+	background: color-mix(in lch, var(--pg-panel-strong), transparent 10%);
+	border: 2px solid var(--pg-border);
+	box-shadow: inset 0 1px 0 color-mix(in lch, var(--pg-tint), transparent 70%);
+	transition:
+		border-color 0.15s ease,
+		background-color 0.15s ease,
+		box-shadow 0.15s ease;
+}
+
+.home-playground .last-mile-block--north {
+	top: 12%;
+	right: 12%;
+	width: 30%;
+	height: 24%;
+}
+
+.home-playground .last-mile-block--east {
+	top: 40%;
+	right: 8%;
+	width: 22%;
+	height: 28%;
+}
+
+.home-playground .last-mile-block--south {
+	bottom: 12%;
+	left: 18%;
+	width: 44%;
+	height: 22%;
+}
+
+.home-playground .last-mile-route {
+	position: absolute;
+	top: 48%;
+	left: 12%;
+	width: 70%;
+	height: 4px;
+	border-radius: 999px;
+	background: color-mix(in lch, var(--pg-accent), transparent 70%);
+}
+
+.home-playground .last-mile-readout {
+	position: absolute;
+	right: 0.85rem;
+	bottom: 0.75rem;
+	z-index: 1;
+	margin: 0;
+	max-width: 12rem;
+	font-family: var(--app-font-mono);
+	font-size: 0.68rem;
+	font-weight: 700;
+	line-height: 1.45;
+	color: var(--pg-muted);
+	text-align: right;
+	pointer-events: none;
+}
+
+.home-playground .last-mile-van {
+	position: absolute;
+	top: 32%;
+	left: 22%;
+	z-index: 2;
+	display: grid;
+	place-items: center;
+	width: 3.1rem;
+	height: 3.1rem;
+	padding: 0;
+	touch-action: none;
+	cursor: grab;
+	font: inherit;
+	color: var(--pg-fg);
+	background: var(--app-color-shell);
+	border: 2px solid var(--pg-border-strong);
+	border-radius: 0.55rem;
+	box-shadow:
+		0 5px 0 color-mix(in lch, var(--pg-fg), transparent 84%),
+		0 12px 24px -12px color-mix(in lch, var(--pg-fg), transparent 75%);
+}
+
+.home-playground .last-mile-van:active {
+	cursor: grabbing;
+}
+
+.home-playground .last-mile-van-icon {
+	font-size: 1.55rem;
+	line-height: 1;
+}
+
+.home-playground .split-bill {
+	display: grid;
+	grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+	gap: 0.85rem;
+	padding: 2.6rem 0.85rem 0.85rem;
+	background: linear-gradient(
+		160deg,
+		color-mix(in lch, var(--pg-panel), transparent 5%) 0%,
+		color-mix(in lch, var(--pg-well), var(--pg-accent) 4%) 100%
+	);
+}
+
+.home-playground .split-bill-tray {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	border: 2px solid var(--pg-border-strong);
+	border-radius: 0.55rem;
+	background: var(--app-color-shell);
+	box-shadow: 0 10px 28px -18px color-mix(in lch, var(--pg-fg), transparent 78%);
+}
+
+.home-playground .split-bill-tray-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	padding: 0.65rem 0.85rem;
+	border-bottom: 2px solid var(--pg-border);
+	background: var(--pg-panel-strong);
+}
+
+.home-playground .split-bill-tray-title {
+	font-family: var(--app-font-mono);
+	font-size: 0.72rem;
+	font-weight: 800;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+}
+
+.home-playground .split-bill-tray-total {
+	font-weight: 900;
+	color: var(--pg-accent);
+}
+
+.home-playground .split-bill-sortable-list {
+	container-type: inline-size;
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: flex-start;
+	gap: 0.45rem;
+	margin: 0;
+	list-style: none;
+}
+
+.home-playground .split-bill-tray-body {
+	padding: 0.85rem;
+	min-height: 4.5rem;
+}
+
+.home-playground .split-bill-tray-body.is-empty,
+.home-playground .split-bill-zone-body.is-empty {
+	justify-content: center;
+	align-content: center;
+}
+
+@container (max-width: 10.5rem) {
+	.home-playground .split-bill-sortable-list {
+		flex-direction: column;
+		flex-wrap: nowrap;
+	}
+}
+
+.home-playground .split-bill-tray-row,
+.home-playground .split-bill-zone-row {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.home-playground .split-bill-tray-slot {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	min-width: 5.5rem;
+}
+
+.home-playground .split-bill-slot-label {
+	font-family: var(--app-font-mono);
+	font-size: 0.58rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--pg-muted);
+}
+
+.home-playground .split-bill-slot-empty {
+	display: grid;
+	place-items: center;
+	min-height: 2.35rem;
+	padding: 0.35rem 0.5rem;
+	border: 1px dashed var(--pg-border);
+	border-radius: 0.25rem;
+	font-family: var(--app-font-mono);
+	font-size: 0.62rem;
+	color: var(--pg-muted);
+}
+
+.home-playground .split-bill-latte-slot {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	min-height: 3.25rem;
+	margin-bottom: 0.5rem;
+	padding: 0.45rem;
+	border: 2px dashed var(--pg-border);
+	border-radius: 0.3rem;
+	transition:
+		border-color 0.15s ease,
+		background-color 0.15s ease;
+}
+
+.home-playground .split-bill-latte-slot.is-filled {
+	border-style: solid;
+}
+
+.home-playground .split-bill-latte-label {
+	font-family: var(--app-font-mono);
+	font-size: 0.58rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--pg-muted);
+}
+
+.home-playground .split-bill-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	padding: 0.42rem 0.7rem;
+	touch-action: none;
+	cursor: grab;
+	font: inherit;
+	font-size: 0.82rem;
+	font-weight: 800;
+	color: var(--pg-fg);
+	background: color-mix(in lch, var(--app-color-shell), var(--pg-accent) 4%);
+	border: 2px solid var(--pg-border-strong);
+	border-radius: 999px;
+	box-shadow: 0 4px 14px -8px color-mix(in lch, var(--pg-fg), transparent 75%);
+}
+
+.home-playground .split-bill-chip:active {
+	cursor: grabbing;
+}
+
+.home-playground .split-bill-sortable-list {
+	position: relative;
+	z-index: 0;
+	overflow: visible;
+}
+
+.home-playground [data-neodrag-sortable-row]:has([data-neodrag-state='dragging']) {
+	z-index: 1;
+	min-height: 2.35rem;
+}
+
+.home-playground .split-bill-chip[data-neodrag-state='dragging'] {
+	position: relative;
+	z-index: 2;
+	cursor: grabbing;
+	box-shadow: 0 10px 28px -8px color-mix(in lch, var(--pg-fg), transparent 65%);
+}
+
+.home-playground [data-neodrag-sortable-elevated-source] {
+	position: relative;
+	z-index: 10;
+}
+
+.home-playground .split-bill-chip em {
+	font-style: normal;
+	font-family: var(--app-font-mono);
+	font-size: 0.68rem;
+	font-weight: 700;
+	color: var(--pg-accent);
+}
+
+.home-playground .split-bill-food-slot {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	min-height: 2.75rem;
+	padding: 0.45rem;
+	border: 2px dashed var(--pg-border);
+	border-radius: 0.3rem;
+	transition:
+		border-color 0.15s ease,
+		background-color 0.15s ease;
+}
+
+.home-playground .split-bill-chip.is-placed {
+	width: auto;
+	max-width: 100%;
+	align-self: flex-start;
+	justify-content: space-between;
+}
+
+.home-playground .split-bill-empty {
+	margin: 0;
+	width: 100%;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--pg-muted);
+	text-align: center;
+}
+
+.home-playground .split-bill-friends {
+	display: grid;
+	grid-template-rows: 1fr 1fr;
+	gap: 0.65rem;
+	min-height: 0;
+}
+
+.home-playground .split-bill-zone {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	border: 2px dashed var(--pg-border);
+	border-radius: 0.55rem;
+	background: color-mix(in lch, var(--app-color-shell), transparent 20%);
+	transition:
+		border-color 120ms ease,
+		background-color 120ms ease,
+		box-shadow 120ms ease;
+}
+
+.home-playground .split-bill-zone-head {
+	display: flex;
+	align-items: center;
+	gap: 0.45rem;
+	padding: 0.55rem 0.75rem;
+	font-family: var(--app-font-mono);
+	font-size: 0.72rem;
+	font-weight: 800;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	border-bottom: 2px solid var(--pg-border);
+}
+
+.home-playground .split-bill-zone-body {
+	padding: 0.65rem;
+	flex: 1;
+	min-height: 3.5rem;
+}
+
+.home-playground .split-bill-zone-placeholder {
+	margin: 0;
+	padding: 0.5rem;
+	font-family: var(--app-font-mono);
+	font-size: 0.62rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--pg-muted);
+	text-align: center;
+	pointer-events: none;
+}
+
+.home-playground .split-bill-toast {
+	position: absolute;
+	left: 50%;
+	bottom: 0.65rem;
+	z-index: 2;
+	margin: 0;
+	padding: 0.35rem 0.7rem;
+	transform: translateX(-50%);
+	font-family: var(--app-font-mono);
+	font-size: 0.68rem;
+	font-weight: 800;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--pg-accent);
+	border: 1px solid var(--pg-border);
+	border-radius: 0.25rem;
+	background: var(--app-color-shell);
+	pointer-events: none;
+}
+
+.home-playground .fridge-paws {
+	padding: 2.5rem 1rem 1rem;
+	background: linear-gradient(
+		180deg,
+		color-mix(in lch, var(--pg-panel-strong), white 6%) 0%,
+		color-mix(in lch, var(--pg-well), var(--pg-fg) 6%) 100%
+	);
+}
+
+.home-playground .fridge-shell {
+	position: absolute;
+	inset: 0.65rem 0.75rem 3.25rem;
+	border: 3px solid var(--pg-border-strong);
+	border-radius: 0.75rem;
+	background: color-mix(in lch, var(--app-color-shell), var(--pg-accent) 2%);
+	pointer-events: none;
+}
+
+.home-playground .fridge-handle {
+	position: absolute;
+	top: 38%;
+	right: 0.55rem;
+	width: 0.45rem;
+	height: 16%;
+	border-radius: 999px;
+	background: var(--pg-border-strong);
+}
+
+.home-playground .fridge-brand {
+	position: absolute;
+	top: 0.85rem;
+	left: 1rem;
+	font-family: var(--app-font-mono);
+	font-size: 0.64rem;
+	font-weight: 800;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	color: var(--pg-muted);
+}
+
+.home-playground .fridge-magnet-list {
+	position: relative;
+	z-index: 1;
+	list-style: none;
+	margin: 0;
+	padding: 0.5rem 1.25rem 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.55rem;
+}
+
+.home-playground .fridge-magnet-row {
+	margin: 0;
+}
+
+.home-playground .fridge-magnet {
+	width: 100%;
+	padding: 0.65rem 0.85rem;
+	touch-action: none;
+	cursor: grab;
+	font: inherit;
+	font-family: var(--app-font-mono);
+	font-size: 0.92rem;
+	font-weight: 900;
+	text-transform: lowercase;
+	color: var(--pg-fg);
+	background: color-mix(in lch, var(--pg-accent), white 70%);
+	border: 2px solid color-mix(in lch, var(--pg-accent), black 14%);
+	border-radius: 0.3rem;
+	box-shadow:
+		0 3px 0 color-mix(in lch, var(--pg-accent), black 20%),
+		0 8px 16px -10px color-mix(in lch, var(--pg-fg), transparent 72%);
+	transform: rotate(var(--magnet-tilt, 0deg));
+}
+
+.home-playground .fridge-magnet:active {
+	cursor: grabbing;
+}
+
+.home-playground .fridge-order {
+	position: absolute;
+	left: 1rem;
+	right: 1rem;
+	bottom: 0.65rem;
+	z-index: 1;
+	margin: 0;
+	font-family: var(--app-font-mono);
+	font-size: 0.68rem;
+	font-weight: 700;
+	color: var(--pg-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.home-playground .laser-heist {
+	padding: 2.55rem 0.75rem 0.75rem;
+	background: radial-gradient(
+		ellipse 90% 80% at 50% 100%,
+		color-mix(in lch, var(--pg-accent), transparent 90%) 0%,
+		color-mix(in lch, var(--pg-fg), transparent 4%) 100%
+	);
+}
+
+.home-playground .heist-sub {
+	position: relative;
+	z-index: 1;
+	margin: 0 0 0.65rem;
+	padding-left: 0.15rem;
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: var(--pg-muted);
+}
+
+.home-playground .heist-board {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.55rem;
+	height: calc(100% - 1.5rem);
+	min-height: 0;
+}
+
+.home-playground .heist-column {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	border: 2px solid var(--pg-border);
+	border-radius: 0.5rem;
+	background: color-mix(in lch, var(--app-color-shell), transparent 25%);
+}
+
+.home-playground .heist-column--plan {
+	border-top: 3px solid color-mix(in lch, #6b8cff, transparent 20%);
+}
+
+.home-playground .heist-column--sneak {
+	border-top: 3px solid color-mix(in lch, #f5a623, transparent 20%);
+}
+
+.home-playground .heist-column--escape {
+	border-top: 3px solid color-mix(in lch, #3ecf8e, transparent 20%);
+}
+
+.home-playground .heist-column-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.5rem 0.6rem;
+	font-family: var(--app-font-mono);
+	font-size: 0.68rem;
+	font-weight: 800;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	border-bottom: 2px solid var(--pg-border);
+}
+
+.home-playground .heist-count {
+	padding: 0.1rem 0.4rem;
+	border-radius: 999px;
+	background: color-mix(in lch, var(--pg-accent), transparent 88%);
+}
+
+.home-playground .heist-cards {
+	list-style: none;
+	margin: 0;
+	padding: 0.45rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+	flex: 1;
+	min-height: 5rem;
+	overflow: visible;
+}
+
+.home-playground .playground-well:has([data-neodrag-state='dragging']) {
+	overflow: visible;
+}
+
+body.neodrag-ghost-active .hp-scenario-section {
+	backdrop-filter: none;
+}
+
+.home-playground .heist-cards li {
+	margin: 0;
+}
+
+.home-playground .heist-card {
+	width: 100%;
+	padding: 0.55rem 0.65rem;
+	touch-action: none;
+	cursor: grab;
+	font: inherit;
+	font-size: 0.78rem;
+	font-weight: 800;
+	text-align: left;
+	color: var(--pg-fg);
+	background: var(--app-color-shell);
+	border: 2px solid var(--pg-border-strong);
+	border-radius: 0.35rem;
+	box-shadow: 0 6px 16px -12px color-mix(in lch, var(--pg-fg), transparent 78%);
+}
+
+.home-playground .heist-card:active {
+	cursor: grabbing;
+}
+
+@media (max-width: 720px) {
+	.home-playground .split-bill {
+		grid-template-columns: 1fr;
+	}
+
+	.home-playground .heist-board {
+		grid-template-columns: 1fr;
+		height: auto;
+	}
 }
 
 .home-playground .playground-divider {
@@ -766,18 +1483,11 @@ html:not([data-theme='dark']) .home-playground .playground-well {
 }
 
 .home-playground .playground-snippet :where(pre.astro-code) {
-	margin: 0;
-	padding: 0;
 	overflow-x: auto;
-	background: transparent !important;
-	font-size: inherit !important;
-	line-height: inherit !important;
 }
 
 .home-playground .playground-snippet :where(pre.astro-code code) {
 	display: block;
-	font-family: var(--app-font-mono);
-	background: transparent;
 	white-space: pre-wrap;
 	word-break: break-word;
 }

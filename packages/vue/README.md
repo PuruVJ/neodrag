@@ -34,15 +34,41 @@ npm install @neodrag/vue@next
 
 # Usage
 
-Basic usage
+## `useDraggable` + `v-bind` (recommended)
 
 ```vue
 <script setup>
-import { vDraggable } from '@neodrag/vue';
+import { useDraggable } from '@neodrag/vue';
+import { axis, grid } from '@neodrag/vue/plugins';
+
+const { bind, isDragging } = useDraggable({
+  plugins: [axis('x'), grid([10, 10])],
+  onDrag(data) {
+    console.log(data.offset, data.input.kind);
+  },
+});
 </script>
 
 <template>
-	<div v-draggable>I am draggable</div>
+  <div v-bind="bind">Hello</div>
+  <p v-if="isDragging">Dragging…</p>
+</template>
+```
+
+`bind` includes markup attrs (`data-neodrag-*`) and a `ref` that attaches the engine — no extra directive.
+
+## Directive (`v-draggable`)
+
+```vue
+<script setup>
+import { Draggable, vDraggable } from '@neodrag/vue';
+import { axis } from '@neodrag/vue/plugins';
+
+const drag = new Draggable({ plugins: [axis('x')] });
+</script>
+
+<template>
+  <div v-draggable="drag">Hello</div>
 </template>
 ```
 
@@ -54,7 +80,7 @@ import { vDraggable, axis, grid } from '@neodrag/vue';
 </script>
 
 <template>
-	<div v-draggable="[axis('x'), grid([10, 10])]">I am draggable</div>
+  <div v-draggable="[axis('x'), grid([10, 10])]">I am draggable</div>
 </template>
 ```
 
@@ -68,7 +94,7 @@ const plugins: Plugin[] = [axis('y'), grid([10, 10])];
 </script>
 
 <template>
-	<div v-draggable="plugins">I am draggable</div>
+  <div v-draggable="plugins">I am draggable</div>
 </template>
 ```
 
@@ -85,10 +111,12 @@ const plugins = () => [axisComp];
 </script>
 
 <template>
-	<div>
-		<div v-draggable="plugins">Current axis: {{ currentAxis }}</div>
-		<button @click="currentAxis = currentAxis === 'x' ? 'y' : 'x'">Switch Axis</button>
-	</div>
+  <div>
+    <div v-draggable="plugins">Current axis: {{ currentAxis }}</div>
+    <button @click="currentAxis = currentAxis === 'x' ? 'y' : 'x'">
+      Switch Axis
+    </button>
+  </div>
 </template>
 ```
 

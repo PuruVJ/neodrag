@@ -3,7 +3,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
-import { events, position } from '../../src/plugins.ts';
+import { createDragCallbacksPlugin } from '../../src/drag-callbacks.ts';
+import { position } from '../../src/plugins.ts';
 import {
 	createBox,
 	dragSteps,
@@ -17,11 +18,7 @@ import {
 describe('two-way binding perf', () => {
 	it('many idle plugin reconciles stay fast', () => {
 		resetBody();
-		const { engine, box, handle, pos, build } = setupTwoWayBinding(
-			Neodrag,
-			position,
-				events,
-		);
+		const { engine, box, handle, pos, build } = setupTwoWayBinding(Neodrag, position, createDragCallbacksPlugin);
 
 		const stats = runBench('two-way · idle reconcile ×60', 60, 10, () => {
 			pos.x += 1;
@@ -40,7 +37,7 @@ describe('two-way binding perf', () => {
 		const { engine, box, handle, pos, build } = setupTwoWayBinding(
 			Neodrag,
 			position,
-				events,
+			createDragCallbacksPlugin,
 			'100px',
 			'220px',
 		);
@@ -63,7 +60,7 @@ describe('two-way binding perf', () => {
 		const { engine, box, handle, build } = setupTwoWayBinding(
 			Neodrag,
 			position,
-				events,
+			createDragCallbacksPlugin,
 			'280px',
 			'100px',
 		);
@@ -107,12 +104,12 @@ describe('two-way binding perf', () => {
 			const { engine, box, handle, pos, build } = setupTwoWayBinding(
 				Neodrag,
 				position,
-						events,
+				createDragCallbacksPlugin,
 				'280px',
 				'340px',
 			);
 			results.push(
-				runBench('two-way · position + events · idle update', 80, 10, () => {
+				runBench('two-way · position + createDragCallbacksPlugin · idle update', 80, 10, () => {
 					pos.x += 1;
 					pos.y += 1;
 					handle.update(build());

@@ -50,7 +50,9 @@
 		stiffness: 0.14,
 	});
 
-	const slot_width = $derived(Math.max(base_width + slot_padding_x, width_px.current + slot_padding_x));
+	const slot_width = $derived(
+		Math.max(base_width + slot_padding_x, width_px.current + slot_padding_x),
+	);
 
 	const focus_limit = base_width * 0.85;
 
@@ -79,62 +81,91 @@
 </script>
 
 {#if embedded}
-	<button
-		aria-label="Launch {framework} page"
-		class="dock-mobile-framework unstyled relative flex w-full flex-col items-center justify-center gap-1 bg-transparent px-2 py-2"
+	<span
+		class={[
+			'dock-framework-embedded relative flex w-full min-h-[3.5rem] flex-col items-center justify-center gap-1 px-1 pb-2 pt-2',
+			selected && 'is-selected',
+		]}
 	>
+		{#if selected}
+			<span
+				class="dock-angular-bevel dock-angular-bevel--sm dock-angular-bevel--brand pointer-events-none absolute inset-0"
+				aria-hidden="true"
+			>
+				<span class="dock-angular-bevel__fill block h-full w-full"></span>
+			</span>
+		{/if}
+		<span class="relative z-[1] flex w-full flex-col items-center justify-center gap-1">
+			<span
+				class={[
+					'flex size-5 shrink-0 items-center justify-center [&_svg]:m-auto [&_path]:!text-current [&_g]:!text-current [&_svg]:!block [&_svg]:!size-5',
+					selected
+						? 'text-[var(--chip-label,var(--color-brand))]'
+						: 'text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)]',
+				]}
+			>
+				<Icon height={20} width={20} />
+			</span>
+			<span
+				class={[
+					'font-mono text-[0.68rem] capitalize leading-none',
+					selected
+						? 'font-extrabold text-[var(--chip-label,var(--color-brand))]'
+						: 'font-semibold text-[color-mix(in_lch,var(--app-color-dark),transparent_28%)]',
+				]}
+			>{framework}</span>
+		</span>
 		<span
 			class={[
-				'flex items-center justify-center text-[1.35rem] [&_path]:!text-current [&_g]:!text-current [&_svg]:!text-current',
-				selected
-					? 'text-brand'
-					: 'text-[color-mix(in_lch,var(--app-color-dark),transparent_28%)]',
+				'absolute bottom-0 left-1/2 z-[2] h-[3px] -translate-x-1/2 transition-opacity duration-100 [clip-path:polygon(0_0,100%_0,calc(100%-2px)_100%,2px_100%)] [background-color:var(--color-brand)]',
+				selected ? 'w-[55%] opacity-100' : 'w-[40%] opacity-0',
 			]}
-		>
-			<Icon height={28} width={28} />
-		</span>
-		<p class="m-0 text-[13px] font-normal tracking-wide capitalize text-fg-muted">{framework}</p>
-	</button>
+			aria-hidden="true"
+		></span>
+	</span>
 {:else}
 	<div class="group relative h-14 shrink-0 overflow-visible" style:width="{slot_width}px">
 		<button
 			aria-label="Launch {framework} page"
-			class="relative flex h-14 min-h-14 w-full flex-col items-center justify-end overflow-visible bg-transparent px-2 pb-3"
+			class="relative h-14 min-h-14 w-full overflow-visible bg-transparent"
 		>
-			{#if !embedded}
-				<div
-					class={[
-						'dock-angular-bevel dock-angular-bevel--sm pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 shadow-[var(--dock-shadow)]',
-						is_focused ? 'block' : 'hidden group-focus-visible:block',
-					]}
-				>
-					<p
-						class="dock-angular-bevel__fill m-0 px-3 py-1.5 font-mono text-[0.68rem] font-extrabold tracking-[0.14em] text-fg uppercase"
-					>
-						{framework}
-					</p>
-				</div>
-			{/if}
-
 			<span
 				bind:this={image_el}
 				class={[
-					'relative z-[2] flex origin-bottom items-center justify-center will-change-[width,height] [&_path]:!text-current [&_g]:!text-current [&_svg]:!max-w-none [&_svg]:!text-current',
+					'absolute bottom-3 left-1/2 z-[2] flex -translate-x-1/2 origin-bottom will-change-[width,height] [&_path]:!text-current [&_g]:!text-current [&_svg]:!max-w-none [&_svg]:!origin-bottom [&_svg]:!text-current',
 					selected
 						? 'text-brand'
 						: 'text-[color-mix(in_lch,var(--app-color-dark),transparent_25%)]',
 				]}
 			>
+				{#if !embedded}
+					<div
+						class={[
+							'dock-item-tooltip pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 whitespace-nowrap',
+							is_focused ? 'block' : 'hidden group-focus-visible:block',
+						]}
+						aria-hidden="true"
+					>
+						<p class="dock-item-tooltip__label m-0 px-2.5 py-1 text-[0.6875rem] font-semibold tracking-[0.06em] capitalize">
+							{framework}
+						</p>
+					</div>
+				{/if}
+
 				<Icon
 					height={width_px.current}
 					width={width_px.current}
-					style="width: {width_px.current}px; height: {width_px.current}px; max-width: none;"
+					style="width: {width_px.current}px; height: {width_px.current}px; max-width: none; transform-origin: bottom center;"
 				/>
 			</span>
 
 			<div
 				class="absolute bottom-0 left-1/2 z-[1] h-[3px] -translate-x-1/2 transition-opacity duration-100 [clip-path:polygon(0_0,100%_0,calc(100%-2px)_100%,2px_100%)] [background-color:var(--color-brand)]"
-				style="width: {Math.max(18, width_px.current * 0.55)}px; opacity: {is_focused ? 0.65 : selected ? 1 : 0}"
+				style="width: {Math.max(18, width_px.current * 0.55)}px; opacity: {is_focused
+					? 0.65
+					: selected
+						? 1
+						: 0}"
 			></div>
 		</button>
 	</div>

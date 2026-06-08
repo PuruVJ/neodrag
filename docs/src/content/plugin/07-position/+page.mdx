@@ -19,21 +19,22 @@ position({ default: { x: 0, y: 0 } }); // Set initial position
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { position } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { position } from '@neodrag/svelte/plugins';
 
   let currentPos = $state({ x: 100, y: 50 });
   let defaultPos = $state({ x: 0, y: 0 });
 
-    
-	const drag_0 = new Draggable({ plugins: [() => [position({ current: currentPos })]] });
-	const drag_1 = new Draggable({ plugins: [() => [position({ default: defaultPos })]] });
+  const drag_0 = new Draggable({
+    plugins: [() => [position({ current: currentPos })]],
+  });
+  const drag_1 = new Draggable({
+    plugins: [() => [position({ default: defaultPos })]],
+  });
 </script>
 
 <!-- Force element to specific position -->
-<div {@attach drag_0.attachment}>
-  Controlled position
-</div>
+<div {@attach drag_0.attachment}>Controlled position</div>
 
 <!-- Set initial position only -->
 <div {@attach drag_1.attachment}>
@@ -47,10 +48,7 @@ position({ default: { x: 0, y: 0 } }); // Set initial position
 
 ```tsx
 import { useRef, useState } from 'react';
-import {
-  position,
-  useDraggable,
-} from '@neodrag/react';
+import { position, useDraggable } from '@neodrag/react';
 
 function PositionExample() {
   const controlledRef = useRef<HTMLDivElement>(null);
@@ -58,11 +56,12 @@ function PositionExample() {
 
   const [currentPos, setCurrentPos] = useState({ x: 100, y: 50 });
 
-  
   // Static position can be used directly
-  
-  useDraggable(controlledRef, () => [position({ current: currentPos })]);
-  useDraggable(initialRef, () => [position({ default: defaultPos })]);
+
+  createDraggable(controlledRef, () => [
+    position({ current: currentPos }),
+  ]);
+  createDraggable(initialRef, () => [position({ default: defaultPos })]);
 
   return (
     <div>
@@ -96,7 +95,9 @@ function moveElement() {
 </script>
 
 <template>
-  <div v-draggable="() => [position({ current: currentPos })]">Controlled position</div>
+  <div v-draggable="() => [position({ current: currentPos })]">
+    Controlled position
+  </div>
 
   <div v-draggable="() => [position({ default: defaultPos })]">
     Initial position, then user controls
@@ -112,10 +113,7 @@ function moveElement() {
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  position,
-  useDraggable,
-} from '@neodrag/solid';
+import { position, createDraggable } from '@neodrag/solid';
 
 function PositionExample() {
   const [controlledRef, setControlledRef] =
@@ -124,10 +122,11 @@ function PositionExample() {
     createSignal<HTMLElement | null>(null);
   const [currentPos, setCurrentPos] = createSignal({ x: 100, y: 50 });
 
-    
   // Note: Solid uses array format, not function format
-  useDraggable(controlledRef, () => [position({ current: currentPos() })]);
-  useDraggable(initialRef, [defaultPosComp]);
+  createDraggable(controlledRef, () => [
+    position({ current: currentPos() }),
+  ]);
+  createDraggable(initialRef, [defaultPosComp]);
 
   return (
     <div>
@@ -156,7 +155,9 @@ let currentPos = { x: 100, y: 50 };
 // Reactive compartment for changing values
 
 // Controlled position
-const controlled = Neodrag.shared.draggable(element, () => [position({ current: currentPos })]);
+const controlled = Neodrag.shared.draggable(element, () => [
+  position({ current: currentPos }),
+]);
 
 // Move programmatically
 function moveElement() {
@@ -198,9 +199,7 @@ const initial = Neodrag.shared.draggable(element, [
 	const drag_0 = new Draggable({ plugins: [() => [position({ current: elementPosition }), events({ onDrag: (data) => { elementPosition = data.offset; savePosition(elementPosition); } })]] });
 </script>
 
-<div {@attach drag_0.attachment}>
-  Position synced with state
-</div>
+<div {@attach drag_0.attachment}>Position synced with state</div>
 
 <p>Current position: {elementPosition.x}, {elementPosition.y}</p>
 ```
@@ -224,7 +223,7 @@ function SyncedPosition() {
     y: 50,
   });
 
-  
+
             localStorage.setItem(
             'elementPosition',
             JSON.stringify(data.offset),
@@ -254,11 +253,7 @@ function SyncedPosition() {
 ```vue
 <script setup>
 import { ref } from 'vue';
-import {
-  position,
-  events,
-  vDraggable,
-} from '@neodrag/vue';
+import { position, events, vDraggable } from '@neodrag/vue';
 
 const elementPosition = ref({ x: 50, y: 50 });
 
@@ -274,7 +269,18 @@ function updatePosition(data) {
 </script>
 
 <template>
-  <div v-draggable="() => [position({ current: elementPosition }), events({ onDrag: (data) => { elementPosition = data.offset; } })]">
+  <div
+    v-draggable="
+      () => [
+        position({ current: elementPosition }),
+        events({
+          onDrag: (data) => {
+            elementPosition = data.offset;
+          },
+        }),
+      ]
+    "
+  >
     Position synced with state
   </div>
 
@@ -290,11 +296,8 @@ function updatePosition(data) {
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  position,
-  events,
-  useDraggable,
-} from '@neodrag/solid';
+import { createDraggable } from '@neodrag/solid';
+import { position } from '@neodrag/solid/plugins';
 
 function SyncedPosition() {
   const [divRef, setDivRef] = createSignal<HTMLElement | null>(null);
@@ -312,7 +315,7 @@ function SyncedPosition() {
   );
 
   // Note: Solid uses array format, not function format
-  useDraggable(divRef, () => [position({ current: elementPosition() }), events({ onDrag: (data) => setElementPosition(data.offset) })]);
+  createDraggable(divRef, () => [position({ current: elementPosition() }), events({ onDrag: (data) => setElementPosition(data.offset) })]);
 
   return (
     <div>

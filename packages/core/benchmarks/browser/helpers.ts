@@ -76,12 +76,7 @@ export function pointer(
 	);
 }
 
-export function dragElementByDelta(
-	el: HTMLElement,
-	deltaX: number,
-	deltaY: number,
-	steps = 12,
-) {
+export function dragElementByDelta(el: HTMLElement, deltaX: number, deltaY: number, steps = 12) {
 	const rect = el.getBoundingClientRect();
 	const fromX = rect.left + rect.width / 2;
 	const fromY = rect.top + rect.height / 2;
@@ -102,12 +97,7 @@ export function dragSteps(
 		pointer(target, 'pointerdown', fromX, fromY);
 		for (let i = 1; i <= steps; i++) {
 			const t = i / steps;
-			pointer(
-				target,
-				'pointermove',
-				fromX + (toX - fromX) * t,
-				fromY + (toY - fromY) * t,
-			);
+			pointer(target, 'pointermove', fromX + (toX - fromX) * t, fromY + (toY - fromY) * t);
 		}
 		pointer(target, 'pointerup', toX, toY);
 	} finally {
@@ -181,7 +171,7 @@ export function runBench(
 export function formatComparison(results: BenchStats[]) {
 	const rows = results.map((r) => ({
 		benchmark: r.name,
-		'hz': Math.round(r.hz),
+		hz: Math.round(r.hz),
 		'mean (ms)': +r.meanMs.toFixed(3),
 		'median (ms)': +r.medianMs.toFixed(3),
 		'p99 (ms)': +r.p99Ms.toFixed(3),
@@ -209,7 +199,7 @@ export type TwoWayBindingBench = {
 export function setupTwoWayBinding(
 	Neodrag: typeof import('../../src/index.ts').Neodrag,
 	position: typeof import('../../src/index.ts').position,
-	events: typeof import('../../src/index.ts').events,
+	createDragCallbacksPlugin: typeof import('../../src/drag-callbacks.ts').createDragCallbacksPlugin,
 	left?: string,
 	top?: string,
 ): TwoWayBindingBench {
@@ -220,10 +210,10 @@ export function setupTwoWayBinding(
 	const pos = { x: 0, y: 0 };
 	const build = () => [
 		position({ current: { x: pos.x, y: pos.y } }),
-		events({
+		createDragCallbacksPlugin({
 			onDrag(data) {
-				pos.x = data.offset.x;
-				pos.y = data.offset.y;
+				pos.x = data.offset.x as number;
+				pos.y = data.offset.y as number;
 			},
 		}),
 	];
@@ -252,7 +242,11 @@ export function setupManyDraggables(
 	return { root, handles, first: root.firstElementChild as HTMLElement };
 }
 
-export function printBenchReport(title: string, results: BenchStats[], comparisons: [BenchStats, BenchStats][] = []) {
+export function printBenchReport(
+	title: string,
+	results: BenchStats[],
+	comparisons: [BenchStats, BenchStats][] = [],
+) {
 	console.log(`\n=== ${title} ===\n`);
 	console.table(formatComparison(results));
 	if (comparisons.length) {
@@ -260,4 +254,23 @@ export function printBenchReport(title: string, results: BenchStats[], compariso
 		for (const [a, b] of comparisons) console.log(' ·', ratioLabel(a, b));
 	}
 	console.log('\nJSON:', JSON.stringify(results, null, 2));
+}
+
+export function runBenchBatch(
+	cases: { name: string; iterations: number; warmup: number; fn: () => void }[],
+): BenchStats[] {
+	return cases.map((c) => runBench(c.name, c.iterations, c.warmup, c.fn));
+}
+
+export function disposableEngine(
+	Neodrag: typeof import('../../src/index.ts').Neodrag,
+	options: ConstructorParameters<typeof Neodrag>[0] = { dev: false },
+) {
+	const engine = new Neodrag(options);
+	return {
+		engine,
+		dispose() {
+			engine.dispose();
+		},
+	};
 }

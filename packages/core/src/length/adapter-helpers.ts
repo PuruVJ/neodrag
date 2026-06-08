@@ -1,9 +1,7 @@
 import { isLengthAdapter } from '../length-contract.ts';
 import type { LengthAdapter } from '../length-runtime.ts';
 
-export function defineLengthAdapter(
-	impl: LengthAdapter,
-): LengthAdapter {
+export function defineLengthAdapter(impl: LengthAdapter): LengthAdapter {
 	if (!isLengthAdapter(impl)) {
 		throw new Error('Neodrag: defineLengthAdapter requires a complete LengthAdapter');
 	}
@@ -25,7 +23,9 @@ export function delegateLengthAdapter(
 			return partial.readAuthoredPair?.(node) ?? base.readAuthoredPair(node);
 		},
 		commitAuthored(px, preserve, node) {
-			return partial.commitAuthored?.(px, preserve, node) ?? base.commitAuthored(px, preserve, node);
+			return (
+				partial.commitAuthored?.(px, preserve, node) ?? base.commitAuthored(px, preserve, node)
+			);
 		},
 		cloneAuthored(pair) {
 			return partial.cloneAuthored?.(pair) ?? base.cloneAuthored(pair);

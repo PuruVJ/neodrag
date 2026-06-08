@@ -5,7 +5,7 @@
 	inset: 0;
 	z-index: 0;
 	overflow: hidden;
-	background-color: color-mix(in lch, var(--app-color-shell), var(--docs-grid-accent) 1.75%);
+	background-color: color-mix(in oklch, var(--app-color-shell), var(--docs-grid-accent) 1.75%);
 }
 
 html[data-framework='svelte'] .docs-page-grid {
@@ -60,8 +60,16 @@ html[data-framework='core'] .docs-page-grid {
 	position: absolute;
 	inset: 0;
 	background-image:
-		radial-gradient(ellipse 120% 85% at 88% 0%, color-mix(in lch, var(--docs-grid-accent), transparent 90%), transparent 55%),
-		radial-gradient(ellipse 70% 50% at 8% 92%, color-mix(in lch, var(--docs-grid-accent), transparent 94%), transparent 50%);
+		radial-gradient(
+			ellipse 120% 85% at 88% 0%,
+			color-mix(in lch, var(--docs-grid-accent), transparent 90%),
+			transparent 55%
+		),
+		radial-gradient(
+			ellipse 70% 50% at 8% 92%,
+			color-mix(in lch, var(--docs-grid-accent), transparent 94%),
+			transparent 50%
+		);
 	pointer-events: none;
 }
 
@@ -78,8 +86,16 @@ html[data-theme='dark'] .docs-page-grid::before {
 
 html[data-theme='dark'] .docs-page-grid::after {
 	background-image:
-		radial-gradient(ellipse 130% 90% at 88% 0%, color-mix(in lch, var(--docs-grid-accent), transparent 86%), transparent 52%),
-		radial-gradient(ellipse 75% 55% at 6% 95%, color-mix(in lch, var(--docs-grid-accent), transparent 91%), transparent 48%);
+		radial-gradient(
+			ellipse 130% 90% at 88% 0%,
+			color-mix(in lch, var(--docs-grid-accent), transparent 86%),
+			transparent 52%
+		),
+		radial-gradient(
+			ellipse 75% 55% at 6% 95%,
+			color-mix(in lch, var(--docs-grid-accent), transparent 91%),
+			transparent 48%
+		);
 }
 
 body.docs-route > div:not(.docs-page-grid) {

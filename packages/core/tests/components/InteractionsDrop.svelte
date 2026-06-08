@@ -23,7 +23,7 @@
 		return () => h.destroy();
 	};
 	const bindDrag = (n: HTMLElement) => {
-		const h = engine.draggable(n, dragPlugins);
+		const h = engine.draggable(n, dragPlugins, { threshold: null });
 		return () => h.destroy();
 	};
 </script>

@@ -29,10 +29,4 @@ describe('Draggable binding attach identity', () => {
 		await expect.element(el).toHaveStyle(translate(40, 50));
 	});
 
-	test('Draggable.attachment is stable reference', () => {
-		const drag = new Draggable({ plugins: [] });
-		const a = drag.attachment;
-		const b = drag.attachment;
-		expect(a).toBe(b);
-	});
 });

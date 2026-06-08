@@ -37,16 +37,15 @@
 		if (!snippets_host) return;
 
 		for (const block of snippets_host.querySelectorAll<HTMLElement>('.playground-snippet')) {
-			const match =
-				block.dataset.world === world && block.dataset.framework === framework;
+			const match = block.dataset.world === world && block.dataset.framework === framework;
 			block.toggleAttribute('hidden', !match);
 		}
 	}
 
-	const bind_code_host: Action<
-		HTMLDivElement,
-		{ world: WorldId; framework: Framework }
-	> = (node, params) => {
+	const bind_code_host: Action<HTMLDivElement, { world: WorldId; framework: Framework }> = (
+		node,
+		params,
+	) => {
 		snippets_host = node;
 		sync_visible_snippet();
 
@@ -105,7 +104,7 @@
 		{/each}
 	</div>
 
-	<div class="hp-code-body" use:bind_code_host={{ world, framework }}>
+	<div class="hp-code-body docs-prose" use:bind_code_host={{ world, framework }}>
 		{#if snippets}
 			{@render snippets()}
 		{/if}

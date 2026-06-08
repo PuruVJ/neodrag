@@ -1,18 +1,12 @@
-import { events, position as positionPlugin, useDraggable } from '@neodrag/solid';
+import { position as positionPlugin } from '@neodrag/solid/plugins';
+import { createDraggable } from '@neodrag/solid';
 import { Component, createSignal } from 'solid-js';
 
 const App: Component = () => {
 	const [draggableRef, setDraggableRef] = createSignal<HTMLElement>();
 	const [position, setPosition] = createSignal({ x: 0, y: 0 });
 
-	useDraggable(draggableRef, () => [
-		positionPlugin({ current: position() }),
-		events({
-			onDrag({ offset }) {
-				setPosition({ x: offset.x, y: offset.y });
-			},
-		}),
-	]);
+	createDraggable(draggableRef, () => [positionPlugin({ current: position() })]);
 
 	return (
 		<>

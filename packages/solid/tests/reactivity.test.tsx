@@ -2,7 +2,7 @@ import { createSignal } from 'solid-js';
 import { render } from 'solid-js/web';
 import { describe, expect, test } from 'vitest';
 import { axis, position } from '@neodrag/core/plugins';
-import { useDraggable } from '../src/index.ts';
+import { createDraggable } from '../src/index.ts';
 
 function ReactiveBox() {
 	const [x, setX] = createSignal(4);
@@ -12,7 +12,7 @@ function ReactiveBox() {
 		setY(ny);
 	};
 
-	const [, ref] = useDraggable([axis('x'), () => position({ current: { x: x(), y: y() } })]);
+	const [, ref] = createDraggable([axis('x'), () => position({ current: { x: x(), y: y() } })]);
 
 	return (
 		<div
@@ -28,7 +28,7 @@ function translateStyle(el: HTMLElement) {
 }
 
 describe('@neodrag/solid reactivity', () => {
-	test('useDraggable ref and reactive slot update', async () => {
+	test('createDraggable ref and reactive slot update', async () => {
 		const host = document.createElement('div');
 		document.body.appendChild(host);
 
@@ -49,9 +49,9 @@ describe('@neodrag/solid reactivity', () => {
 		host.remove();
 	});
 
-	test('static useDraggable slots', async () => {
+	test('static createDraggable slots', async () => {
 		function Static() {
-			const [, ref] = useDraggable([]);
+			const [, ref] = createDraggable([]);
 			return (
 				<div
 					ref={ref}

@@ -1,0 +1,346 @@
+body.docs-route {
+	--docs-sidebar-width: 300px;
+	--docs-toc-width: 20rem;
+	--docs-font-size: 16px;
+	--docs-line: 28px;
+	--docs-line-tight: 24px;
+	--docs-text: var(--app-color-dark);
+	--docs-text-soft: color-mix(in srgb, var(--app-color-dark) 62%, transparent);
+	--docs-divider: color-mix(in lch, var(--app-color-dark), transparent 90%);
+
+	font-size: var(--docs-font-size);
+	line-height: var(--docs-line-tight);
+	font-weight: 400;
+	font-synthesis: style;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+html[data-theme='dark'] body.docs-route {
+	--docs-text-soft: color-mix(in srgb, var(--app-color-dark) 72%, transparent);
+	--docs-divider: color-mix(in lch, var(--app-color-dark), transparent 84%);
+}
+
+body.docs-route .docs-sidebar-panel {
+	font-size: 13px;
+	line-height: 20px;
+}
+
+body.docs-route .docs-nav-brand span {
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 24px;
+	letter-spacing: -0.01em;
+}
+
+body.docs-route .docs-sidebar-panel .site-kicker {
+	margin-bottom: 0.5rem;
+	padding-left: 0.25rem;
+}
+
+body.docs-route .docs-nav-link {
+	display: block;
+	padding: 0.35rem 0.75rem;
+	font-family: var(--font-mono);
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 20px;
+	color: color-mix(in lch, var(--app-color-dark), transparent 12%);
+	transition: color 150ms ease;
+}
+
+body.docs-route .docs-nav-link:hover {
+	color: var(--docs-text);
+}
+
+body.docs-route .docs-nav-link--active {
+	padding: 0.4rem 0.85rem;
+	font-weight: 800;
+	letter-spacing: 0.02em;
+	color: var(--chip-label, var(--color-brand));
+}
+
+body.docs-route .docs-nav-divider,
+.dock-host .dock-menu-scroll .docs-nav-divider {
+	margin: 1rem 0;
+	height: 2px;
+	border: 0;
+	background: linear-gradient(
+		to right,
+		var(--color-brand),
+		color-mix(in lch, var(--color-brand), transparent 70%),
+		transparent
+	);
+}
+
+body.docs-route .docs-page-title {
+	margin: 0 0 1rem;
+	max-width: 48rem;
+	font-size: 28px;
+	font-weight: 600;
+	line-height: 40px;
+	letter-spacing: -0.02em;
+	color: var(--docs-text);
+}
+
+body.docs-route .docs-lead {
+	margin: 0 0 1.5rem;
+	max-width: 42rem;
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 28px;
+	color: var(--docs-text-soft);
+}
+
+html[data-framework] .docs-version-chip.dock-angular-bevel--brand {
+	background: var(--chip-border);
+}
+
+html[data-framework] .docs-version-chip.dock-angular-bevel--brand > .dock-angular-bevel__fill {
+	background: var(--chip-fill);
+	color: var(--chip-label);
+}
+
+body.docs-route .docs-prose {
+	max-width: 48rem;
+	font-size: var(--docs-font-size);
+	line-height: var(--docs-line);
+	color: var(--docs-text);
+}
+
+body.docs-route .docs-prose :where(p) {
+	margin: 1rem 0;
+	font-size: 1em;
+	line-height: var(--docs-line);
+}
+
+body.docs-route .docs-prose :where(p + p) {
+	margin-top: 1rem;
+}
+
+body.docs-route .docs-prose :where(strong, b) {
+	font-weight: 600;
+}
+
+body.docs-route .docs-prose :where(ul, ol) {
+	margin: 1rem 0;
+	padding-left: 1.35rem;
+}
+
+body.docs-route .docs-prose :where(li) {
+	margin: 0.35rem 0;
+	line-height: var(--docs-line);
+}
+
+body.docs-route .docs-prose :where(li > p) {
+	margin: 0.25rem 0;
+}
+
+body.docs-route .docs-prose :where(h1, h2, h3, h4, h5, h6) {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	max-width: none;
+	font-family: var(--font-sans);
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	color: var(--docs-text);
+	text-wrap: balance;
+}
+
+body.docs-route .docs-prose :where(h1) {
+	margin: 0 0 1rem;
+	font-size: 28px;
+	line-height: 40px;
+}
+
+body.docs-route .docs-prose :where(h2) {
+	margin: 3rem 0 1rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--docs-divider);
+	font-size: 24px;
+	line-height: 32px;
+}
+
+body.docs-route .docs-prose :where(h2:first-child, h1 + h2) {
+	margin-top: 2rem;
+	padding-top: 0;
+	border-top: none;
+}
+
+body.docs-route .docs-prose :where(h3) {
+	margin: 2rem 0 0.5rem;
+	font-size: 20px;
+	line-height: 32px;
+}
+
+body.docs-route .docs-prose :where(h4, h5, h6) {
+	margin: 1.5rem 0 0.5rem;
+	font-size: 18px;
+	line-height: var(--docs-line);
+}
+
+body.docs-route .docs-prose :where(blockquote) {
+	margin: 1rem 0;
+	padding: 0.25rem 0 0.25rem 1rem;
+	border-left: 3px solid var(--docs-divider);
+	border-radius: 0;
+	background: transparent;
+	color: var(--docs-text-soft);
+}
+
+body.docs-route .docs-prose :where(blockquote p) {
+	margin: 0.5rem 0;
+}
+
+body.docs-route .docs-prose :where(hr) {
+	margin: 2rem 0;
+	border: 0;
+	border-top: 1px solid var(--docs-divider);
+}
+
+body.docs-route .docs-prose :where(a:not(.unstyled)) {
+	font-weight: 500;
+	color: var(--color-brand);
+	background-image: none;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+	text-decoration-color: color-mix(in lch, var(--color-brand), transparent 50%);
+	transition:
+		color 150ms ease,
+		text-decoration-color 150ms ease;
+}
+
+body.docs-route .docs-prose :where(a:not(.unstyled):hover, a:not(.unstyled):focus-visible) {
+	color: color-mix(in lch, var(--color-brand), var(--app-color-dark) 10%);
+	background-image: none;
+	border-radius: 0;
+	text-decoration-color: var(--color-brand);
+}
+
+body.docs-route .docs-prose :where(:not(pre) > code) {
+	padding: 0.15em 0.4em;
+	border-radius: 0.25rem;
+	font-family: var(--font-mono);
+	font-size: 0.875em;
+	font-weight: 400;
+	line-height: 1.5;
+	color: var(--color-brand);
+	background-color: color-mix(in lch, var(--app-color-dark), transparent 94%);
+}
+
+html[data-theme='dark'] body.docs-route .docs-prose :where(:not(pre) > code) {
+	background-color: color-mix(in lch, var(--app-color-dark), transparent 90%);
+}
+
+body.docs-route .docs-prose :where(.heading-anchor) {
+	font-family: var(--font-mono);
+	font-size: 0.85em;
+	font-weight: 500;
+	color: var(--docs-text-soft);
+	text-decoration: none;
+}
+
+body.docs-route .docs-prose :where(.heading-anchor:hover) {
+	color: var(--color-brand);
+}
+
+body.docs-route .docs-prose :where(pre.astro-code),
+.hp-code-body.docs-prose :where(pre.astro-code) {
+	margin: 1rem 0;
+	padding: 1rem 1.15rem;
+	border-radius: 0.5rem;
+	font-size: 0.875em;
+	line-height: 1.7;
+}
+
+.hp-code-body.docs-prose :where(pre.astro-code) {
+	margin: 0;
+}
+
+body.docs-route .docs-footer {
+	margin-top: 1.5rem;
+	font-size: 12px;
+	line-height: 20px;
+	letter-spacing: 0.02em;
+	color: var(--docs-text-soft);
+	text-transform: none;
+}
+
+body.docs-route .docs-footer a {
+	font-weight: 600;
+	color: var(--color-brand);
+	text-transform: none;
+}
+
+body.docs-route .docs-prose :where(h2, h3, h4) {
+	scroll-margin-top: 5.5rem;
+}
+
+body.docs-route nav.docs-toc-float {
+	position: fixed;
+	top: clamp(4.5rem, 12vh, 6.5rem);
+	right: clamp(0.85rem, 2.5vw, 2rem);
+	z-index: 8;
+	display: none;
+	width: min(var(--docs-toc-width), 24vw);
+	max-height: min(70dvh, calc(100dvh - 7rem));
+	padding: 0;
+	overflow-x: hidden;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+
+@media (min-width: 1280px) {
+	body.docs-route nav.docs-toc-float {
+		display: block;
+		right: max(
+			clamp(0.85rem, 2.5vw, 2rem),
+			calc(
+				(100vw - var(--docs-sidebar-width) - min(84rem, 100vw - var(--docs-sidebar-width))) / 2 -
+					var(--docs-toc-width) - 0.75rem
+			)
+		);
+	}
+}
+
+body.docs-route .docs-toc-kicker {
+	margin-bottom: 0.75rem;
+}
+
+body.docs-route .docs-toc-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+}
+
+body.docs-route .docs-toc-item[data-depth='3'] .docs-toc-link {
+	padding-left: 0.65rem;
+}
+
+body.docs-route .docs-toc-item[data-depth='4'] .docs-toc-link {
+	padding-left: 1.25rem;
+}
+
+body.docs-route .docs-toc-link {
+	display: block;
+	padding: 0.35rem 0.5rem;
+	border-radius: 0.25rem;
+	font-family: var(--font-mono);
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 1.35;
+	letter-spacing: 0.01em;
+	color: var(--docs-text-soft);
+	text-decoration: none;
+	transition:
+		color 0.15s ease,
+		background-color 0.15s ease;
+}
+
+body.docs-route .docs-toc-link:hover {
+	color: var(--color-brand);
+	background-color: color-mix(in lch, var(--color-brand), transparent 92%);
+}

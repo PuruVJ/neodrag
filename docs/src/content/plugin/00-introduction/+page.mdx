@@ -16,21 +16,24 @@ Want grid snapping? Add `grid()`. Need movement constraints? Use `bounds()`. Wan
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { grid, axis, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import {
+    grid,
+    axis,
+    bounds,
+    BoundsFrom,
+  } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [
-    grid([20, 20]), // Snap to 20px grid
-    axis('x'), // Only move horizontally
-    bounds(BoundsFrom.viewport()), // Stay in viewport
-  ] });
+  const drag_0 = new Draggable({
+    plugins: [
+      grid([20, 20]), // Snap to 20px grid
+      axis('x'), // Only move horizontally
+      bounds(BoundsFrom.viewport()), // Stay in viewport
+    ],
+  });
 </script>
 
-<div
-  {@attach drag_0.attachment}
->
-  Drag me around!
-</div>
+<div {@attach drag_0.attachment}>Drag me around!</div>
 ```
 
 </div>
@@ -90,20 +93,15 @@ const plugins = [
 <div slot="solid">
 
 ```tsx
-import {
-  useDraggable,
-  grid,
-  axis,
-  bounds,
-  BoundsFrom,
-} from '@neodrag/solid';
+import { createDraggable } from '@neodrag/solid';
+import { grid, axis, bounds, BoundsFrom } from '@neodrag/solid/plugins';
 
 function MyComponent() {
   const [element, setElement] = createSignal<HTMLElement | null>(
     null,
   );
 
-  useDraggable(element, [
+  createDraggable(element, [
     grid([20, 20]),
     axis('x'),
     bounds(BoundsFrom.viewport()),
@@ -144,7 +142,7 @@ const instance = Neodrag.shared.draggable(element, [
 - `grid()` - Snap to grid positions
 - `position()` - Set initial or forced positions
 - `scrollLock()` - Prevent page scrolling while dragging
-- `events()` - Handle drag lifecycle events
+- `onDrag` / `onDragStart` / `onDragEnd` on `new Draggable({ ... })` — drag lifecycle callbacks (not a plugin)
 
 ## Reactive plugin lists
 
@@ -155,12 +153,12 @@ For plugins that change based on user interaction, pass a reactive factory:
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { axis } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { axis } from '@neodrag/svelte/plugins';
 
   let currentAxis = $state('x');
-  
-	const drag_0 = new Draggable({ plugins: [() => [axisComp]] });
+
+  const drag_0 = new Draggable({ plugins: [() => [axisComp]] });
 </script>
 
 <div {@attach drag_0.attachment}>Drag me</div>
@@ -177,7 +175,7 @@ import { useDraggable, axis } from '@neodrag/react';
 function DynamicAxis() {
   const [currentAxis, setCurrentAxis] = useState('x');
   const ref = useRef(null);
-  
+
   useDraggable(ref, () => [axisComp]);
 
   return (
@@ -215,18 +213,15 @@ const currentAxis = ref('x');
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  useDraggable,
-  axis,
-} from '@neodrag/solid';
+import { createDraggable, axis } from '@neodrag/solid';
 
 function DynamicAxis() {
   const [element, setElement] = createSignal<HTMLElement | null>(
     null,
   );
   const [currentAxis, setCurrentAxis] = createSignal('x');
-  
-  useDraggable(element, [axisComp]);
+
+  createDraggable(element, [axisComp]);
 
   return (
     <div>
@@ -381,7 +376,6 @@ Plugins can maintain state between lifecycle calls:
 
 ```typescript
 const statefulPlugin = {
-
   setup(ctx) {
     return {
       startTime: null,

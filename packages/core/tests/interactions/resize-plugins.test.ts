@@ -3,12 +3,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
-import {
-	aspectRatio,
-	resizeAxis,
-	resizeEvents,
-	resizeHandles,
-} from '../../src/resize/index.ts';
+import { aspectRatio, resizeAxis, resizeEvents, resizeHandles } from '../../src/resize/index.ts';
 import { RESIZE_HANDLE_ATTR } from '../../src/resize/types.ts';
 
 function pointer(target: EventTarget, type: string, x: number, y: number) {
@@ -112,7 +107,15 @@ describe('resize plugins', () => {
 		const h = 50;
 		box.getBoundingClientRect = mockBox(w, h);
 		handle.getBoundingClientRect = () =>
-			({ left: 90, top: 20, width: 10, height: 10, right: 100, bottom: 30, toJSON: () => ({}) }) as DOMRect;
+			({
+				left: 90,
+				top: 20,
+				width: 10,
+				height: 10,
+				right: 100,
+				bottom: 30,
+				toJSON: () => ({}),
+			}) as DOMRect;
 
 		pointer(handle, 'pointerdown', 95, 25);
 		w = 200;

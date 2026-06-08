@@ -6,7 +6,7 @@
 	import { browser } from '$helpers/utils';
 	import { theme } from '$state/user-preferences.svelte';
 	import { Draggable } from '@neodrag/svelte';
-	import { bounds, BoundsFrom, events, position } from '@neodrag/svelte/plugins';
+	import { bounds, BoundsFrom, position } from '@neodrag/svelte/plugins';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
@@ -29,22 +29,16 @@
 	let drag_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
 
 	const heroDrag = new Draggable({
-		plugins: [
-			bounds(BoundsFrom.parent()),
-			() => position({ current: drag_position.current }),
-			() =>
-				events({
-					onDragStart: () => {
-						box_wiggles = false;
-					},
-					onDrag: ({ offset }) => {
-						drag_position.set({ x: offset.x, y: offset.y }, { duration: 0 });
-					},
-					onDragEnd: () => {
-						drag_position.target = { x: 0, y: 0 };
-					},
-				}),
-		],
+		plugins: [bounds(BoundsFrom.parent()), () => position({ current: drag_position.current })],
+		onDragStart: () => {
+			box_wiggles = false;
+		},
+		onDrag: ({ offset }) => {
+			drag_position.set({ x: offset.x, y: offset.y }, { duration: 0 });
+		},
+		onDragEnd: () => {
+			drag_position.target = { x: 0, y: 0 };
+		},
 	});
 
 	function handle_mouse_move(e: MouseEvent) {
@@ -90,7 +84,7 @@
 					class="box"
 					class:wiggles={box_wiggles}
 					data-paw-cursor="true"
-					{@attach heroDrag.attachment}
+					{...heroDrag.target}
 				>
 					<div class="paw">
 						<PawIcon />

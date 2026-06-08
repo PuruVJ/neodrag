@@ -10,6 +10,16 @@ import {
 } from '../../src/resolve-plugins.ts';
 
 describe('plugin slots resolver', () => {
+	it('PluginListResolver caches static resolveFull across calls', () => {
+		const key = Symbol('p');
+		const p = defineDragPlugin(() => ({ key, name: 'p' }))();
+		const resolver = new PluginListResolver([p]);
+		const a = resolver.resolveFull();
+		const b = resolver.resolveFull();
+		expect(a).toBe(b);
+		expect(a[0]).toBe(p);
+	});
+
 	it('hasReactiveSlots detects function slots', () => {
 		const key = Symbol('a');
 		const p = defineDragPlugin(() => ({ key }))();

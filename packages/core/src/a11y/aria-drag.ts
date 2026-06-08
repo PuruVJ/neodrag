@@ -3,12 +3,14 @@ import { defineDragPlugin } from '../types.ts';
 
 export const ARIA_DRAG_KEY = Symbol('neodrag.ariaDrag');
 
-export type AriaDragAnnounce = boolean | {
-	grab?: boolean;
-	move?: boolean;
-	drop?: boolean;
-	cancel?: boolean;
-};
+export type AriaDragAnnounce =
+	| boolean
+	| {
+			grab?: boolean;
+			move?: boolean;
+			drop?: boolean;
+			cancel?: boolean;
+	  };
 
 export type AriaDragOptions = {
 	role?: string;

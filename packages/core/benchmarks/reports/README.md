@@ -1,11 +1,11 @@
 # Benchmark reports
 
-| File | Tracked in git | Purpose |
-|------|----------------|---------|
-| `baseline.json` | yes | Reference medians for regression checks |
-| `human-cost-baseline.json` | yes | Human-scenario engine cost baselines (`pnpm bench:cost`) |
-| `human-cost.json` | yes | Latest human cost report |
-| `latest.json` | no | Output of the most recent `pnpm bench` run |
+| File                       | Tracked in git | Purpose                                                  |
+| -------------------------- | -------------- | -------------------------------------------------------- |
+| `baseline.json`            | yes            | Reference medians for regression checks                  |
+| `human-cost-baseline.json` | yes            | Human-scenario engine cost baselines (`pnpm bench:cost`) |
+| `human-cost.json`          | yes            | Latest human cost report                                 |
+| `latest.json`              | no             | Output of the most recent `pnpm bench` run               |
 
 After changing performance-sensitive code:
 

@@ -4,8 +4,10 @@ import type { LengthAdapter } from './length-runtime.ts';
 import type { SizeInput } from './length-runtime.ts';
 import { phaseChain, pushByPhase } from './phase.ts';
 import type { TransformApplier } from './apply-transform.ts';
+import type { MarkupAdapter } from './markup-adapter.ts';
 import { nativePointerEvent } from './interaction-input.ts';
 import type { InteractionInput } from './interaction-input.ts';
+import type { DropCollisionStrategy } from './plugins.ts';
 import type {
 	DragCtx,
 	DragPlugin,
@@ -32,6 +34,10 @@ export class SessionPrivate implements SessionPrivateStore {
 
 	set<T>(key: SessionKey<T>, value: T): void {
 		this.#store.set(key.id, value);
+	}
+
+	delete(key: SessionKey<unknown>): void {
+		this.#store.delete(key.id);
 	}
 
 	has(key: SessionKey<unknown>): boolean {
@@ -80,6 +86,8 @@ export class DragInstance {
 	cachedRootNodeRect: DOMRect;
 	visualNode: HTMLElement | SVGElement;
 	pointerCapturedId: number | null = null;
+	markup!: MarkupAdapter;
+	dragEndCount = 0;
 
 	thresholdConfig!: ResolvedDragThreshold;
 	thresholdSample: DragThresholdSample = createThresholdSample();
@@ -168,6 +176,9 @@ export class DragInstance {
 				return inst.isInteracting;
 			},
 			rootNode: inst.rootNode,
+			get markup() {
+				return inst.markup;
+			},
 			get lastInput() {
 				return inst.lastInput;
 			},
@@ -206,7 +217,7 @@ export class DragInstance {
 				inst.syncLiveViews();
 			},
 			setVisual(node) {
-				inst.setVisual(node);
+				inst.#session.setVisual(node);
 			},
 		};
 	}
@@ -217,12 +228,16 @@ export class DragInstance {
 	}
 
 	setVisual(node: HTMLElement | SVGElement) {
-		if (
-			this.pointerCapturedId !== null &&
-			this.visualNode.hasPointerCapture(this.pointerCapturedId)
-		) {
-			this.visualNode.releasePointerCapture(this.pointerCapturedId);
-			node.setPointerCapture(this.pointerCapturedId);
+		const captureId = this.pointerCapturedId;
+		const transferCapture =
+			captureId !== null &&
+			!(
+				node instanceof HTMLElement &&
+				getComputedStyle(node).pointerEvents === 'none'
+			);
+		if (transferCapture && this.visualNode.hasPointerCapture(captureId)) {
+			this.visualNode.releasePointerCapture(captureId);
+			node.setPointerCapture(captureId);
 		}
 		this.visualNode = node;
 	}
@@ -244,8 +259,10 @@ export class DragInstance {
 		for (const plugin of this.flat) {
 			if (this.failed.has(plugin.key)) continue;
 			const phase = plugin.phase ?? 'resolve';
-			if (plugin.start) this.#pushPhase(this.preStart, this.resolveStart, this.postStart, phase, plugin);
-			if (plugin.drag) this.#pushPhase(this.preDrag, this.resolveDrag, this.postDrag, phase, plugin);
+			if (plugin.start)
+				this.#pushPhase(this.preStart, this.resolveStart, this.postStart, phase, plugin);
+			if (plugin.drag)
+				this.#pushPhase(this.preDrag, this.resolveDrag, this.postDrag, phase, plugin);
 			if (plugin.end) this.#pushPhase(this.preEnd, this.resolveEnd, this.postEnd, phase, plugin);
 		}
 
@@ -288,8 +305,12 @@ export class DropInstance {
 	states = new Map<symbol, unknown>();
 	failed = new Set<symbol>();
 	isOver = false;
+	sortableContainerId: symbol | undefined;
 	hitExpandPx: { top: number; right: number; bottom: number; left: number } | null = null;
+	collisionPriority = 0;
+	collisionStrategy: DropCollisionStrategy = 'pointer';
 	lengthAdapter: LengthAdapter = numberStub;
+	markup!: MarkupAdapter;
 
 	isProcessingExternalUpdate = false;
 	isUpdating = false;
@@ -333,6 +354,9 @@ export class DropInstance {
 				return inst.#host.session;
 			},
 			rootNode: inst.rootNode,
+			get markup() {
+				return inst.markup;
+			},
 			get cachedRootNodeRect() {
 				return inst.cachedRootNodeRect;
 			},

@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { MINIMAL_DRAG_PLUGINS, Neodrag } from '../../src/index.ts';
-import { sortable } from '../../src/drop/index.ts';
+import { Sortable } from '../../src/sortable/index.ts';
 
 import { commands } from '@vitest/browser/context';
 import {
@@ -29,11 +29,7 @@ import {
 const DRAG = { fromX: 120, fromY: 120, toX: 220, toY: 220, steps: 12 };
 const SORTABLE_N = 40;
 
-function computeIndexQuerySelector(
-	items: { id: string }[],
-	pointerY: number,
-	excludeKey: string,
-) {
+function computeIndexQuerySelector(items: { id: string }[], pointerY: number, excludeKey: string) {
 	let index = items.length;
 	for (let i = 0; i < items.length; i++) {
 		const key = items[i]!.id;
@@ -74,7 +70,8 @@ function computeIndexMap(
 
 function setupSortable() {
 	const container = document.createElement('ul');
-	container.style.cssText = 'list-style:none;padding:0;margin:0;width:200px;position:absolute;left:40px;top:40px';
+	container.style.cssText =
+		'list-style:none;padding:0;margin:0;width:200px;position:absolute;left:40px;top:40px';
 	document.body.appendChild(container);
 
 	const items = Array.from({ length: SORTABLE_N }, (_, i) => ({ id: String(i + 1) }));
@@ -86,7 +83,7 @@ function setupSortable() {
 		container.appendChild(li);
 	}
 
-	const list = sortable({
+	const list = new Sortable({
 		items: () => items,
 		keyBy: (i) => i.id,
 		onReorder: () => {},

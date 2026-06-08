@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it, vi } from 'vitest';
-import { Neodrag } from '../../src/engine.ts';
+import { Neodrag } from '../../src/engine/neodrag.ts';
 import { Draggable } from '../../src/draggable-binding.ts';
 import { KeyboardSensor, PointerSensor } from '../../src/sensors/index.ts';
 

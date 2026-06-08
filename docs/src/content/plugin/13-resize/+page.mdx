@@ -60,7 +60,12 @@ function Panel() {
       }),
     [],
   );
-  return <div ref={(n) => (n ? resize.attach(n) : resize.detach())} className="panel" />;
+  return (
+    <div
+      ref={(n) => (n ? resize.attach(n) : resize.detach())}
+      className="panel"
+    />
+  );
 }
 ```
 
@@ -95,10 +100,10 @@ const resize = new Resizable({
 ```tsx
 import { Length } from '@neodrag/core';
 import { resizeHandles, sizeBounds } from '@neodrag/solid/resize';
-import { useResizable } from '@neodrag/solid';
+import { createResizable } from '@neodrag/solid';
 
 function Panel() {
-  const [, ref] = useResizable(() => [
+  const [, ref] = createResizable(() => [
     resizeHandles({ edges: ['e'] }),
     sizeBounds({ minWidth: '10rem' }),
   ]);
@@ -116,18 +121,22 @@ function Panel() {
 
 ## Plugins
 
-| Plugin | Purpose |
-|--------|---------|
-| `resizeHandles` | Creates edge/corner handles (`data-neodrag-resize-handle`) |
-| `sizeBounds` | `minWidth` / `maxWidth` / `minHeight` / `maxHeight`, optional `parent` clamp (or [`minSize` / `maxSize`](/docs/svelte/reference/length#minsize--maxsize-on-resizable) on `Resizable`) |
-| `resizeAxis` | Lock to `'x'`, `'y'`, or `'both'` |
-| `aspectRatio` | Fixed ratio or `'preserve'` initial ratio |
-| `resizeEvents` | `onStart` / `onResize` / `onEnd` with `size`, `sizePx`, `initial` |
+| Plugin          | Purpose                                                                                                                                                                               |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resizeHandles` | Creates edge/corner handles (`data-neodrag-resize-handle`)                                                                                                                            |
+| `sizeBounds`    | `minWidth` / `maxWidth` / `minHeight` / `maxHeight`, optional `parent` clamp (or [`minSize` / `maxSize`](/docs/svelte/reference/length#minsize--maxsize-on-resizable) on `Resizable`) |
+| `resizeAxis`    | Lock to `'x'`, `'y'`, or `'both'`                                                                                                                                                     |
+| `aspectRatio`   | Fixed ratio or `'preserve'` initial ratio                                                                                                                                             |
+| `resizeEvents`  | `onStart` / `onResize` / `onEnd` with `size`, `sizePx`, `initial`                                                                                                                     |
 
 ## Presets
 
 ```typescript
-import { presetPanel, presetCornerBox, presetSplitPane } from '@neodrag/core/resize';
+import {
+  presetPanel,
+  presetCornerBox,
+  presetSplitPane,
+} from '@neodrag/core/resize';
 
 presetSplitPane('x'); // east handle + axis lock + min size
 ```

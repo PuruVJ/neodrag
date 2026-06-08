@@ -20,12 +20,12 @@ axis(null); // Free movement (removes constraint)
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { axis } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { axis } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [axis('x')] });
-	const drag_1 = new Draggable({ plugins: [axis('y')] });
-	const drag_2 = new Draggable({ plugins: [axis(null)] });
+  const drag_0 = new Draggable({ plugins: [axis('x')] });
+  const drag_1 = new Draggable({ plugins: [axis('y')] });
+  const drag_2 = new Draggable({ plugins: [axis(null)] });
 </script>
 
 <!-- Horizontal slider -->
@@ -89,7 +89,7 @@ import { axis, vDraggable } from '@neodrag/vue';
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { axis, useDraggable } from '@neodrag/solid';
+import { axis, createDraggable } from '@neodrag/solid';
 
 function AxisExamples() {
   const [horizontalRef, setHorizontalRef] =
@@ -140,12 +140,12 @@ Neodrag.shared.draggable(free, [axis(null)]);
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { axis } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { axis } from '@neodrag/svelte/plugins';
 
   let currentAxis = $state('x');
-  
-	const drag_0 = new Draggable({ plugins: [() => [axisComp]] });
+
+  const drag_0 = new Draggable({ plugins: [() => [axisComp]] });
 </script>
 
 <div {@attach drag_0.attachment}>
@@ -171,7 +171,6 @@ function DynamicAxis() {
   const ref = useRef<HTMLDivElement>(null);
   const [currentAxis, setCurrentAxis] = useState<'x' | 'y'>('x');
 
-  
   useDraggable(ref, () => [axisComp]);
 
   return (
@@ -223,16 +222,12 @@ function switchAxis() {
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  axis,
-  useDraggable,
-} from '@neodrag/solid';
+import { axis, createDraggable } from '@neodrag/solid';
 
 function DynamicAxis() {
   const [ref, setRef] = createSignal<HTMLElement | null>(null);
   const [currentAxis, setCurrentAxis] = createSignal<'x' | 'y'>('x');
 
-  
   useDraggable(ref, [axisComp]);
 
   function switchAxis() {
@@ -286,8 +281,13 @@ button.addEventListener('click', () => {
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { axis, bounds, BoundsFrom, events } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import {
+    axis,
+    bounds,
+    BoundsFrom,
+    events,
+  } from '@neodrag/svelte/plugins';
 
   let track;
   let handle;
@@ -300,11 +300,13 @@ button.addEventListener('click', () => {
     }
   }
 
-	const drag_0 = new Draggable({ plugins: [
+  const drag_0 = new Draggable({
+    plugins: [
       axis('x'),
       bounds(() => BoundsFrom.element(track)),
       events({ onDrag: handleDrag }),
-    ] });
+    ],
+  });
 </script>
 
 <div bind:this={track} class="track">
@@ -343,7 +345,7 @@ function Slider() {
     }
   };
 
-  useDraggable(handleRef, [
+  createDraggable(handleRef, [
     axis('x'),
     bounds(() => BoundsFrom.element(trackRef.current)),
     events({ onDrag: handleDrag }),
@@ -412,9 +414,8 @@ import {
   axis,
   bounds,
   BoundsFrom,
-  events,
-  useDraggable,
-} from '@neodrag/solid';
+} from '@neodrag/solid/plugins';
+import { createDraggable } from '@neodrag/solid';
 
 function Slider() {
   const [track, setTrack] = createSignal<HTMLElement | null>(null);
@@ -428,7 +429,7 @@ function Slider() {
     }
   };
 
-  useDraggable(handle, [
+  createDraggable(handle, [
     axis('x'),
     bounds(() => BoundsFrom.element(track()!)),
     events({ onDrag: handleDrag }),

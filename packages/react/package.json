@@ -2,10 +2,31 @@
 	"name": "@neodrag/react",
 	"version": "3.0.0-next.9",
 	"description": "React library to add dragging to your apps 😉",
-	"type": "module",
+	"keywords": [
+		"drag",
+		"draggable",
+		"neodrag",
+		"performant",
+		"preact",
+		"react",
+		"react-draggable",
+		"small",
+		"tiny"
+	],
+	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/react#readme",
+	"bugs": {
+		"url": "https://github.com/PuruVJ/neodrag/issues"
+	},
+	"license": "MIT",
+	"author": "Puru Vijay",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PuruVJ/neodrag.git"
+	},
 	"files": [
 		"dist/*"
 	],
+	"type": "module",
 	"sideEffects": false,
 	"exports": {
 		".": {
@@ -22,6 +43,11 @@
 			"types": "./src/drop/index.ts",
 			"import": "./src/drop/index.ts",
 			"default": "./src/drop/index.ts"
+		},
+		"./sortable": {
+			"types": "./src/sortable/index.ts",
+			"import": "./src/sortable/index.ts",
+			"default": "./src/sortable/index.ts"
 		},
 		"./resize": {
 			"types": "./src/resize.ts",
@@ -47,6 +73,11 @@
 				"import": "./dist/drop/index.js",
 				"default": "./dist/drop/index.js"
 			},
+			"./sortable": {
+				"types": "./dist/sortable/index.d.ts",
+				"import": "./dist/sortable/index.js",
+				"default": "./dist/sortable/index.js"
+			},
 			"./resize": {
 				"types": "./dist/resize.d.ts",
 				"import": "./dist/resize.js",
@@ -55,37 +86,10 @@
 			"./package.json": "./package.json"
 		}
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/PuruVJ/neodrag.git"
-	},
-	"keywords": [
-		"draggable",
-		"react",
-		"react-draggable",
-		"drag",
-		"neodrag",
-		"preact",
-		"small",
-		"tiny",
-		"performant",
-		"neodrag"
-	],
-	"author": "Puru Vijay",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/PuruVJ/neodrag/issues"
-	},
-	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/react#readme",
 	"scripts": {
 		"compile": "tsdown",
 		"prepublishOnly": "turbo compile",
 		"test": "vitest run --config vitest.config.ts"
-	},
-	"peerDependencies": {
-		"@neodrag/core": "workspace:*",
-		"react": "^18 || ^19",
-		"react-dom": "^18 || ^19"
 	},
 	"devDependencies": {
 		"@neodrag/core": "workspace:*",
@@ -98,5 +102,10 @@
 		"react-dom": "^18.3.1",
 		"tsdown": "catalog:",
 		"vitest": "^3.2.4"
+	},
+	"peerDependencies": {
+		"@neodrag/core": "workspace:*",
+		"react": "^18 || ^19",
+		"react-dom": "^18 || ^19"
 	}
 }

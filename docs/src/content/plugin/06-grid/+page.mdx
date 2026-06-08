@@ -21,32 +21,26 @@ grid([null, 15]); // Only snap vertically every 15px
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { grid } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { grid } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [grid([20, 20])] });
-	const drag_1 = new Draggable({ plugins: [grid([50, 30])] });
-	const drag_2 = new Draggable({ plugins: [grid([25, null])] });
-	const drag_3 = new Draggable({ plugins: [grid([null, 20])] });
+  const drag_0 = new Draggable({ plugins: [grid([20, 20])] });
+  const drag_1 = new Draggable({ plugins: [grid([50, 30])] });
+  const drag_2 = new Draggable({ plugins: [grid([25, null])] });
+  const drag_3 = new Draggable({ plugins: [grid([null, 20])] });
 </script>
 
 <!-- Square 20px grid -->
 <div {@attach drag_0.attachment}>Snaps to 20px squares</div>
 
 <!-- Rectangular grid -->
-<div {@attach drag_1.attachment}>
-  Snaps to 50x30px rectangles
-</div>
+<div {@attach drag_1.attachment}>Snaps to 50x30px rectangles</div>
 
 <!-- Horizontal-only snapping -->
-<div {@attach drag_2.attachment}>
-  Only snaps horizontally
-</div>
+<div {@attach drag_2.attachment}>Only snaps horizontally</div>
 
 <!-- Vertical-only snapping -->
-<div {@attach drag_3.attachment}>
-  Only snaps vertically
-</div>
+<div {@attach drag_3.attachment}>Only snaps vertically</div>
 ```
 
 </div>
@@ -108,7 +102,7 @@ import { grid, vDraggable } from '@neodrag/vue';
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { grid, useDraggable } from '@neodrag/solid';
+import { grid, createDraggable } from '@neodrag/solid';
 
 function GridExamples() {
   const [square, setSquare] = createSignal<HTMLElement | null>(null);
@@ -119,10 +113,10 @@ function GridExamples() {
     null,
   );
 
-  useDraggable(square, [grid([20, 20])]);
-  useDraggable(rect, [grid([50, 30])]);
-  useDraggable(horizontal, [grid([25, null])]);
-  useDraggable(vertical, [grid([null, 20])]);
+  createDraggable(square, [grid([20, 20])]);
+  createDraggable(rect, [grid([50, 30])]);
+  createDraggable(horizontal, [grid([25, null])]);
+  createDraggable(vertical, [grid([null, 20])]);
 
   return (
     <div>
@@ -163,14 +157,13 @@ Neodrag.shared.draggable(vertical, [grid([null, 20])]);
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { grid } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { grid } from '@neodrag/svelte/plugins';
 
   let gridSize = $state(20);
   let enableSnap = $state(true);
 
-  
-	const drag_0 = new Draggable({ plugins: [() => [gridComp]] });
+  const drag_0 = new Draggable({ plugins: [() => [gridComp]] });
 </script>
 
 <div {@attach drag_0.attachment}>
@@ -207,7 +200,6 @@ function DynamicGrid() {
   const [gridSize, setGridSize] = useState(20);
   const [enableSnap, setEnableSnap] = useState(true);
 
-  
   useDraggable(ref, () => [gridComp]);
 
   return (
@@ -252,7 +244,6 @@ import { grid, vDraggable } from '@neodrag/vue';
 
 const gridSize = ref(20);
 const enableSnap = ref(true);
-
 </script>
 
 <template>
@@ -286,10 +277,7 @@ const enableSnap = ref(true);
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  grid,
-  useDraggable,
-} from '@neodrag/solid';
+import { grid, createDraggable } from '@neodrag/solid';
 
 function DynamicGrid() {
   const [element, setElement] = createSignal<HTMLElement | null>(
@@ -298,8 +286,7 @@ function DynamicGrid() {
   const [gridSize, setGridSize] = createSignal(20);
   const [enableSnap, setEnableSnap] = createSignal(true);
 
-  
-  useDraggable(element, [gridComp]);
+  createDraggable(element, [gridComp]);
 
   return (
     <div>
@@ -342,7 +329,6 @@ import { grid, Neodrag } from '@neodrag/vanilla';
 let gridSize = 20;
 let enableSnap = true;
 
-
 const element = document.getElementById('element');
 const sizeSlider = document.getElementById('size-slider');
 const snapToggle = document.getElementById('snap-toggle');
@@ -380,21 +366,19 @@ snapToggle.addEventListener('change', (e) => {
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { grid } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { grid } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [grid([100, 20])] });
-	const drag_1 = new Draggable({ plugins: [grid([60, null])] });
-	const drag_2 = new Draggable({ plugins: [grid([80, 120])] });
+  const drag_0 = new Draggable({ plugins: [grid([100, 20])] });
+  const drag_1 = new Draggable({ plugins: [grid([60, null])] });
+  const drag_2 = new Draggable({ plugins: [grid([80, 120])] });
 </script>
 
 <!-- Wide columns, short rows -->
 <div {@attach drag_0.attachment}>100x20px grid</div>
 
 <!-- Timeline-style: hourly columns -->
-<div {@attach drag_1.attachment}>
-  60px intervals (hourly)
-</div>
+<div {@attach drag_1.attachment}>60px intervals (hourly)</div>
 
 <!-- Calendar-style: daily columns, weekly rows -->
 <div {@attach drag_2.attachment}>Daily x Weekly</div>
@@ -453,7 +437,7 @@ import { grid, vDraggable } from '@neodrag/vue';
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { grid, useDraggable } from '@neodrag/solid';
+import { grid, createDraggable } from '@neodrag/solid';
 
 function AsymmetricGrids() {
   const [wide, setWide] = createSignal<HTMLElement | null>(null);
@@ -464,9 +448,9 @@ function AsymmetricGrids() {
     null,
   );
 
-  useDraggable(wide, [grid([100, 20])]);
-  useDraggable(timeline, [grid([60, null])]);
-  useDraggable(calendar, [grid([80, 120])]);
+  createDraggable(wide, [grid([100, 20])]);
+  createDraggable(timeline, [grid([60, null])]);
+  createDraggable(calendar, [grid([80, 120])]);
 
   return (
     <div>
@@ -611,10 +595,8 @@ onUnmounted(() => {
 
 ```tsx
 import { createSignal, onMount, onCleanup } from 'solid-js';
-import {
-  grid,
-  useDraggable,
-} from '@neodrag/solid';
+import { createDraggable } from '@neodrag/solid';
+import { grid } from '@neodrag/solid/plugins';
 
 function ResponsiveGrid() {
   const [element, setElement] = createSignal<HTMLElement | null>(
@@ -639,7 +621,7 @@ function ResponsiveGrid() {
     window.removeEventListener('resize', handleResize);
   });
 
-  useDraggable(element, [responsiveGrid]);
+  createDraggable(element, [responsiveGrid]);
 
   return (
     <div ref={setElement}>

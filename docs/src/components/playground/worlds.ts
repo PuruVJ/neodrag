@@ -1,13 +1,11 @@
 import type { Component } from 'svelte';
-import ComingSoon from './scenarios/ComingSoon.svelte';
+import FridgePaws from './scenarios/FridgePaws.svelte';
+import LastMile from './scenarios/LastMile.svelte';
+import LaserHeist from './scenarios/LaserHeist.svelte';
 import NightDesk from './scenarios/NightDesk.svelte';
+import SplitBill from './scenarios/SplitBill.svelte';
 
-export type WorldId =
-	| 'night-desk'
-	| 'last-mile'
-	| 'split-bill'
-	| 'fridge-paws'
-	| 'laser-heist';
+export type WorldId = 'night-desk' | 'last-mile' | 'split-bill' | 'fridge-paws' | 'laser-heist';
 
 export type WorldMeta = {
 	id: WorldId;
@@ -22,36 +20,36 @@ export const WORLDS: WorldMeta[] = [
 		id: 'night-desk',
 		label: 'Night desk',
 		glyph: '🌙',
-		tagline: 'Stack and drag floating panels',
+		tagline: 'Bounded panels that stack',
 		available: true,
 	},
 	{
 		id: 'last-mile',
 		label: 'Last mile',
 		glyph: '📦',
-		tagline: 'Route packages on a map',
-		available: false,
+		tagline: 'Grid snap + green drop zones',
+		available: true,
 	},
 	{
 		id: 'split-bill',
 		label: 'Split bill',
 		glyph: '🧾',
-		tagline: 'Drag items between friends',
-		available: false,
+		tagline: 'Latte slots + sortable splits',
+		available: true,
 	},
 	{
 		id: 'fridge-paws',
 		label: 'Fridge paws',
 		glyph: '🐾',
-		tagline: 'Magnetic fridge poetry',
-		available: false,
+		tagline: 'Swap magnets — live poem',
+		available: true,
 	},
 	{
 		id: 'laser-heist',
-		label: 'Laser heist',
+		label: 'Heist board',
 		glyph: '💎',
-		tagline: 'Sneak past moving beams',
-		available: false,
+		tagline: 'Kanban transfer across columns',
+		available: true,
 	},
 ];
 
@@ -59,10 +57,10 @@ export const DEFAULT_WORLD: WorldId = 'night-desk';
 
 export const WORLD_COMPONENTS: Record<WorldId, Component> = {
 	'night-desk': NightDesk,
-	'last-mile': ComingSoon,
-	'split-bill': ComingSoon,
-	'fridge-paws': ComingSoon,
-	'laser-heist': ComingSoon,
+	'last-mile': LastMile,
+	'split-bill': SplitBill,
+	'fridge-paws': FridgePaws,
+	'laser-heist': LaserHeist,
 };
 
 export function parse_world_from_hash(hash: string): WorldId | null {

@@ -2,7 +2,8 @@
  * @vitest-environment jsdom
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { MINIMAL_DRAG_PLUGINS, Neodrag, numberStub, pointerToInput } from '../../src/index.ts';
+import { MINIMAL_DRAG_PLUGINS, Neodrag, numberStub } from '../../src/index.ts';
+import { pointerToInput } from '../../src/interaction-input.ts';
 import { ControlFrom, controls, grid } from '../../src/plugins.ts';
 
 describe('grid plugin', () => {

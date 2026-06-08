@@ -1,32 +1,26 @@
 ---
 import type { MarkdownHeading } from 'astro';
+import type { HTMLAttributes } from 'astro/types';
 
 type Props = {
 	headings: MarkdownHeading[];
-};
+	class?: string;
+} & HTMLAttributes<'nav'>;
 
-const { headings } = Astro.props;
+const { headings, class: className, ...rest } = Astro.props;
 ---
 
-<aside aria-label="Links to sections in this Page" class="grid h-full w-full items-center">
-	<p class="site-kicker mb-3 pl-3">on this page</p>
-	<nav class="border-l border-[var(--color-border)] pl-3">
-		<ul class="m-0 list-none p-0">
-			{
-				headings.map(({ depth, slug, text }) => (
-					<li
-						class="h-[1.4rem] py-0 transition-colors duration-100"
-						style={`padding-left: calc(${(depth - 2) * 0.5}rem)`}
-					>
-						<a
-							href={`#${slug}`}
-							class="unstyled m-0! text-xs! leading-none! text-[color-mix(in_lch,var(--app-color-dark),transparent_30%)] hover:text-brand"
-						>
-							{text}
-						</a>
-					</li>
-				))
-			}
-		</ul>
-	</nav>
-</aside>
+<nav class:list={['docs-toc-nav', className]} aria-label="On this page" {...rest}>
+	<p class="site-kicker docs-toc-kicker">on this page</p>
+	<ul class="docs-toc-list m-0 list-none p-0">
+		{
+			headings.map(({ depth, slug, text }) => (
+				<li class="docs-toc-item" data-depth={depth}>
+					<a href={`#${slug}`} class="docs-toc-link unstyled">
+						{text}
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</nav>

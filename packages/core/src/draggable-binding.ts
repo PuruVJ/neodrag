@@ -1,47 +1,56 @@
-import { Neodrag } from './engine.ts';
-import { PluginBinding } from './plugin-binding.ts';
+import { ensureDraggableEngineExtensions } from './draggable/engine-extensions.ts';
+import { DragNeodrag } from './engine/drag-neodrag.ts';
+import {
+	appendDragCallbackSlots,
+	type DragCallbackHandlers,
+	type DragEventData,
+} from './drag-callbacks.ts';
+import { TargetBinding } from './target-binding.ts';
 import type { TransformApplier } from './apply-transform.ts';
 import type { LengthAdapter } from './length-runtime.ts';
-import type { DragPlugin, DragPluginList, DropPlugin, DropPluginList } from './types.ts';
+import type { MarkupAdapter } from './markup-adapter.ts';
+import type { DragPlugin, DragPluginList, PluginSlot } from './types.ts';
 import type { DragThresholdInput } from './threshold.ts';
 
+export type { DragEventData } from './drag-callbacks.ts';
 export type { DragThresholdInput, DragThresholdOptions } from './threshold.ts';
 export type { TransformApplier };
 
-export interface DraggableOptions {
-	engine?: Neodrag;
+export interface DraggableOptions extends DragCallbackHandlers {
+	engine?: DragNeodrag;
 	plugins: DragPluginList;
 	threshold?: DragThresholdInput;
 	applyTransform?: TransformApplier;
 	length?: LengthAdapter;
+	markup?: MarkupAdapter;
 }
 
-export class Draggable extends PluginBinding<DragPlugin> {
+export class Draggable extends TargetBinding<DragPlugin> {
+	readonly #callbacks: DragCallbackHandlers;
+
 	constructor(options: DraggableOptions) {
+		if (options.plugins.length > 0) ensureDraggableEngineExtensions();
+		const { onDragStart, onDrag, onDragEnd, plugins, ...rest } = options;
+		const callbacks = { onDragStart, onDrag, onDragEnd };
 		const threshold = options.threshold;
 		super({
-			engine: options.engine,
-			length: options.length,
-			plugins: options.plugins,
-			attachIdempotency: 'node-and-handle',
-			register: (engine, node, resolved, binding) =>
+			engine: rest.engine,
+			length: rest.length,
+			markup: rest.markup,
+			plugins: appendDragCallbackSlots(plugins, callbacks),
+			sharedEngine: () => DragNeodrag.shared,
+			register: (engine, node, resolved, ctx) =>
 				engine.draggable(node, resolved, {
-					applyTransform: options.applyTransform,
-					length: binding.length,
+					applyTransform: rest.applyTransform,
+					length: ctx.length,
 					threshold,
+					markup: ctx.markup,
 				}),
 		});
+		this.#callbacks = callbacks;
 	}
-}
 
-export class DroppableBinding extends PluginBinding<DropPlugin> {
-	constructor(options: { engine?: Neodrag; plugins: DropPluginList; length?: LengthAdapter }) {
-		super({
-			engine: options.engine,
-			length: options.length,
-			plugins: options.plugins,
-			register: (engine, node, resolved, binding) =>
-				engine.droppable(node, resolved, { length: binding.length }),
-		});
+	override update(slots?: readonly PluginSlot<DragPlugin>[]) {
+		super.update(slots ? appendDragCallbackSlots(slots, this.#callbacks) : undefined);
 	}
 }

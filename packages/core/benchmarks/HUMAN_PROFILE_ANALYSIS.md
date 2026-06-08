@@ -28,31 +28,31 @@ For deep inspection:
 
 ### Drag
 
-| Test | Dominant work (code path) | Profile signal |
-|------|---------------------------|----------------|
-| **move by delta** | `pointer` → sensor `pointerdown/move/up` → `#onInteractionMove` → threshold → `#runStart` once → `#runDrag` × steps → `syncLiveViews` → `#syncDragTransform` → default plugins (`stateMarker`, `applyUserSelectHack`, `touchAction`) | `#runDrag`, `#applyDragDelta`, `DragInstance` ctor on cold runs |
-| **disabled** | `disabled` `start` returns false on commit → no transform | Mostly `getBoundingClientRect`, test harness |
-| **axis x** | `axis` `drag` zeroes `proposed.y` | Plugin init on first bind (`#initOneDragPlugin`) |
-| **bounds parent** | `bounds` `drag` clamps `proposed` using parent rect; extra layout reads | `recomputeBounds`, `#runDrag` |
+| Test              | Dominant work (code path)                                                                                                                                                                                                            | Profile signal                                                  |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| **move by delta** | `pointer` → sensor `pointerdown/move/up` → `#onInteractionMove` → threshold → `#runStart` once → `#runDrag` × steps → `syncLiveViews` → `#syncDragTransform` → default plugins (`applyUserSelectHack`, `touchAction`) | `#runDrag`, `#applyDragDelta`, `DragInstance` ctor on cold runs |
+| **disabled**      | `disabled` `start` returns false on commit → no transform                                                                                                                                                                            | Mostly `getBoundingClientRect`, test harness                    |
+| **axis x**        | `axis` `drag` zeroes `proposed.y`                                                                                                                                                                                                    | Plugin init on first bind (`#initOneDragPlugin`)                |
+| **bounds parent** | `bounds` `drag` clamps `proposed` using parent rect; extra layout reads                                                                                                                                                              | `recomputeBounds`, `#runDrag`                                   |
 
 ### Drop
 
-| Test | Dominant work | Profile signal |
-|------|---------------|----------------|
-| **onDrop once** | Drag + `DropTargetTracker` RAF → `elementFromPoint` / hit-test → `accepts` → `onDrop` on release | `droppable`, `DropInstance`, `#installDropPlugins`, sensor `disarm` |
-| **highlight over** | `over` hooks + classList on zone during drag | `setProperty`, `#runDropHook`, DOM style |
+| Test               | Dominant work                                                                                    | Profile signal                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| **onDrop once**    | Drag + `DropTargetTracker` RAF → `elementFromPoint` / hit-test → `accepts` → `onDrop` on release | `droppable`, `DropInstance`, `#installDropPlugins`, sensor `disarm` |
+| **highlight over** | `over` hooks + classList on zone during drag                                                     | `setProperty`, `#runDropHook`, DOM style                            |
 
 ### Sortable
 
-| Test | Dominant work | Profile signal |
-|------|---------------|----------------|
-| **reorder** | Sortable plugins + drop tracker + 3 draggables; index recompute on move | `#destroyDrag`, `DropTargetTracker.flush`, `getBoundingClientRect` |
-| **tiny nudge** | Threshold + no index change | Same as drag, less drop churn |
+| Test           | Dominant work                                                           | Profile signal                                                     |
+| -------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **reorder**    | Sortable plugins + drop tracker + 3 draggables; index recompute on move | `#destroyDrag`, `DropTargetTracker.flush`, `getBoundingClientRect` |
+| **tiny nudge** | Threshold + no index change                                             | Same as drag, less drop churn                                      |
 
 ### Engine sharing
 
-| Test | Dominant work | Profile signal |
-|------|---------------|----------------|
+| Test               | Dominant work                                                          | Profile signal                                 |
+| ------------------ | ---------------------------------------------------------------------- | ---------------------------------------------- |
 | **two draggables** | Two `DragInstance`s, shared engine plugins; two full gesture pipelines | `#destroyDrag` when tearing down repeated runs |
 
 ## Where time goes (when not idle)

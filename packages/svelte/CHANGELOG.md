@@ -199,9 +199,9 @@ If you have this in your `tsconfig.json`:
 
 ```json
 {
-	"compilerOptions": {
-		"types": ["@neodrag/svelte/globals"]
-	}
+  "compilerOptions": {
+    "types": ["@neodrag/svelte/globals"]
+  }
 }
 ```
 

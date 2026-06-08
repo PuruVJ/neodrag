@@ -9,7 +9,7 @@ import { DEFAULTS, Neodrag } from '../../src/index.ts';
 import { BoundsFrom, axis, bounds, disabled } from '../../src/plugins.ts';
 import { accepts, highlight, onDrop } from '../../src/drop-plugins.ts';
 import { dragData } from '../../src/plugins.ts';
-import { sortable } from '../../src/drop/index.ts';
+import { Sortable } from '../../src/sortable/index.ts';
 import { formatProfileReport } from './profile-analysis.ts';
 import { profileScenario } from './profile-helpers.ts';
 import { DRAG, humanScenarios } from './human-scenarios.ts';
@@ -125,7 +125,7 @@ describe('Human behavior CPU profiles (Chromium CDP)', () => {
 						container.appendChild(li);
 					}
 					document.body.appendChild(container);
-					const list = sortable({
+					const list = new Sortable({
 						items: () => items,
 						keyBy: (i) => i.id,
 						onReorder: (next) => {

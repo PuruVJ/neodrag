@@ -1,4 +1,4 @@
-import type { Neodrag, NeodragDebugSnapshot } from '../engine.ts';
+import type { Neodrag, NeodragDebugSnapshot } from '../engine/neodrag.ts';
 
 export interface InteractionInspectorOptions {
 	mount?: HTMLElement;

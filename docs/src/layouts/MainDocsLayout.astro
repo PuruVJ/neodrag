@@ -1,4 +1,5 @@
 ---
+import type { MarkdownHeading } from 'astro';
 import { type Framework } from '$helpers/constants';
 import DocsLayout from './DocsLayout.astro';
 import core_package_json from '../../../packages/core/package.json';
@@ -12,13 +13,14 @@ type Props = {
 	title: string;
 	tagline: string;
 	framework: Framework;
+	headings?: MarkdownHeading[];
 };
 
 const is_framework_only_page = /\/docs\/(svelte|react|solid|vanilla|vue|core)$/gi.test(
 	Astro.url.pathname,
 );
 
-const { tagline, title, framework } = Astro.props;
+const { tagline, title, framework, headings = [] } = Astro.props;
 
 const version = {
 	core: core_package_json.version,
@@ -30,7 +32,7 @@ const version = {
 }[framework];
 ---
 
-<DocsLayout title={title} framework={framework}>
+<DocsLayout title={title} framework={framework} {headings}>
 	<p class="site-kicker mb-3">
 		@neodrag / {framework} · docs desk
 	</p>
@@ -39,17 +41,19 @@ const version = {
 		is_framework_only_page ? (
 			<h1 class="sr-only">@neodrag/{framework}</h1>
 		) : (
-			<h1 class="m-0! max-w-full font-extrabold tracking-[-0.03em]">{title}</h1>
+			<h1 class="docs-page-title">{title}</h1>
 		)
 	}
 
 	{
 		is_framework_only_page ? (
 			<div class="mb-4 flex flex-wrap items-center gap-3">
-				<p class="m-0 max-w-full text-[clamp(1.15rem,2.2vw,1.35rem)] leading-[1.55] font-semibold text-fg">
+				<p class="docs-lead">
 					{tagline}
 				</p>
-				<span class="dock-angular-bevel dock-angular-bevel--sm dock-angular-bevel--brand inline-block shrink-0">
+				<span
+					class="docs-version-chip dock-angular-bevel dock-angular-bevel--sm dock-angular-bevel--brand inline-block shrink-0"
+				>
 					<span class="dock-angular-bevel__fill inline-block px-3 py-2 font-mono text-sm font-bold">
 						{version}
 					</span>

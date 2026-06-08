@@ -51,9 +51,25 @@ describe('sizeBounds Length', () => {
 		const handle = box.querySelector(`[${RESIZE_HANDLE_ATTR}="e"]`) as HTMLElement;
 		let w = 200;
 		box.getBoundingClientRect = () =>
-			({ width: w, height: 128, top: 0, left: 0, right: w, bottom: 128, toJSON: () => ({}) }) as DOMRect;
+			({
+				width: w,
+				height: 128,
+				top: 0,
+				left: 0,
+				right: w,
+				bottom: 128,
+				toJSON: () => ({}),
+			}) as DOMRect;
 		handle.getBoundingClientRect = () =>
-			({ left: w - 10, top: 59, width: 10, height: 10, right: w, bottom: 69, toJSON: () => ({}) }) as DOMRect;
+			({
+				left: w - 10,
+				top: 59,
+				width: 10,
+				height: 10,
+				right: w,
+				bottom: 69,
+				toJSON: () => ({}),
+			}) as DOMRect;
 
 		pointer(handle, 'pointerdown', w - 5, 64);
 		w = 80;

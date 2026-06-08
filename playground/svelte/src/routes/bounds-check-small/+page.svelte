@@ -1,5 +1,5 @@
 <script>
-	import { Draggable } from '@neodrag/svelte'
+	import { Draggable } from '@neodrag/svelte';
 	import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
 	const drag_0 = new Draggable({ plugins: [bounds(BoundsFrom.parent())] });

@@ -1,4 +1,3 @@
-import { nativePointerEvent } from '../interaction-input.ts';
 import type { InteractionInput } from '../interaction-input.ts';
 import { resolveSizeInput, sizeContext } from '../length-contract.ts';
 import type { SizeInput } from '../length-runtime.ts';
@@ -198,7 +197,6 @@ export type ResizeEventData = {
 	rootNode: HTMLElement | SVGElement;
 	input: InteractionInput;
 	pointer: Readonly<{ x: number; y: number }>;
-	event?: PointerEvent;
 };
 
 export const resizeEvents = defineResizePlugin(
@@ -226,7 +224,6 @@ export const resizeEvents = defineResizePlugin(
 );
 
 function eventData(ctx: import('./types.ts').ResizeCtx, input: InteractionInput): ResizeEventData {
-	const native = nativePointerEvent(input);
 	return {
 		size: { width: ctx.size.width, height: ctx.size.height },
 		sizePx: { width: ctx.sizePx.width, height: ctx.sizePx.height },
@@ -235,6 +232,5 @@ function eventData(ctx: import('./types.ts').ResizeCtx, input: InteractionInput)
 		rootNode: ctx.rootNode,
 		input,
 		pointer: { x: input.clientX, y: input.clientY },
-		event: native ?? undefined,
 	};
 }

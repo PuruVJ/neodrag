@@ -56,11 +56,7 @@ export const BoundsFrom = {
 		};
 	},
 
-	selector(
-		selector: string,
-		padding?: BoundsPadding,
-		root?: HTMLElement,
-	): BoundFromFunction {
+	selector(selector: string, padding?: BoundsPadding, root?: HTMLElement): BoundFromFunction {
 		return (data) => {
 			const element = (root ?? document).querySelector<HTMLElement>(selector);
 			if (!element)
@@ -87,8 +83,7 @@ export const BoundsFrom = {
 	},
 
 	parent(padding?: BoundsPadding): BoundFromFunction {
-		return (data) =>
-			BoundsFrom.element(data.rootNode.parentElement as HTMLElement, padding)(data);
+		return (data) => BoundsFrom.element(data.rootNode.parentElement as HTMLElement, padding)(data);
 	},
 };
 

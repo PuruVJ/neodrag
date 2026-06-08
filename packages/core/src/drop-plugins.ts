@@ -1,1 +1,9 @@
-export { accepts, highlight, onDrop, dropHitExpand } from './plugins.ts';
+export {
+	accepts,
+	highlight,
+	onDrop,
+	dropHitExpand,
+	collisionPriority,
+	collisionStrategy,
+	type DropCollisionStrategy,
+} from './plugins.ts';

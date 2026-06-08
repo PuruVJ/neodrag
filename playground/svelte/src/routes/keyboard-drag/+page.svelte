@@ -14,7 +14,10 @@
 </script>
 
 <h1>Keyboard drag</h1>
-<p>Focus the card, press <kbd>Space</kbd> to grab, arrows to move, <kbd>Space</kbd> or <kbd>Escape</kbd> to release.</p>
+<p>
+	Focus the card, press <kbd>Space</kbd> to grab, arrows to move, <kbd>Space</kbd> or
+	<kbd>Escape</kbd> to release.
+</p>
 
 <div id="keyboard-drag-live" class="sr-only" aria-live="polite"></div>
 

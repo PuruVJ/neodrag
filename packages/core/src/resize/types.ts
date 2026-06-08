@@ -3,15 +3,7 @@ import type { LengthAdapter } from '../length-runtime.ts';
 import type { SizeInput } from '../length-runtime.ts';
 import type { SessionState } from '../types.ts';
 
-export type ResizeEdge =
-	| 'n'
-	| 's'
-	| 'e'
-	| 'w'
-	| 'ne'
-	| 'nw'
-	| 'se'
-	| 'sw';
+export type ResizeEdge = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
 
 export type SizePatch = { width?: number; height?: number };
 

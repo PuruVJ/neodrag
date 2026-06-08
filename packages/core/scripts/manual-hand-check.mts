@@ -58,9 +58,9 @@ async function runHarness(page: import('playwright').Page) {
 				await drag(page, '[data-testid="item-1"]', 0, dy, 14);
 				await page.waitForTimeout(250);
 				const after = await page.locator('[data-testid="list"] li').allTextContents();
-				const keys = await page.locator('[data-testid="list"] li').evaluateAll((els) =>
-					els.map((el) => el.getAttribute('data-sortable-key')),
-				);
+				const keys = await page
+					.locator('[data-testid="list"] li')
+					.evaluateAll((els) => els.map((el) => el.getAttribute('data-sortable-key')));
 				return { before, after, keys };
 			},
 			check: (r: { keys?: (string | null)[] }) => r.keys?.join(',') === '2,3,1',
@@ -152,7 +152,9 @@ async function main() {
 
 	const exitOk = harnessUrl ? harnessOk : playgroundOk;
 	if (!harnessUrl && !playgroundOk) {
-		console.error('\nNo HARNESS_URL and playground did not pass. Start playground: pnpm dev in playground/svelte');
+		console.error(
+			'\nNo HARNESS_URL and playground did not pass. Start playground: pnpm dev in playground/svelte',
+		);
 	}
 	process.exit(exitOk ? 0 : 1);
 }

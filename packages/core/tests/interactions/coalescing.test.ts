@@ -46,10 +46,7 @@ describe('engine.update coalescing', () => {
 				nest++;
 				maxNest = Math.max(maxNest, nest);
 				if (calls <= 80) {
-					engine.update(node, [
-										position({ current: { x: calls, y: calls } }),
-						makePing(),
-					]);
+					engine.update(node, [position({ current: { x: calls, y: calls } }), makePing()]);
 				}
 				nest--;
 			},

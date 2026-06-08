@@ -8,7 +8,7 @@ function translateStyle(el: HTMLElement) {
 }
 
 describe('@neodrag/vue useDraggable', () => {
-	test('flushReactive tracks reactive slot dependencies', async () => {
+	test('bind ref attaches and reactive slot updates', async () => {
 		const host = document.createElement('div');
 		document.body.appendChild(host);
 
@@ -16,13 +16,11 @@ describe('@neodrag/vue useDraggable', () => {
 
 		const app = createApp({
 			setup() {
-				const drag = useDraggable([() => position({ current: { x: pos.x, y: pos.y } })]);
+				const { bind } = useDraggable([() => position({ current: { x: pos.x, y: pos.y } })]);
 				return () =>
 					h('div', {
+						...bind.value,
 						'data-testid': 'draggable',
-						ref: (el: HTMLElement | null) => {
-							if (el) drag.value.attach(el);
-						},
 					});
 			},
 		});

@@ -8,14 +8,14 @@ Live site: https://bundle-roast.puruvj.dev/
 
 ## Stack
 
-| Layer | Choice |
-|--------|--------|
-| Framework | SvelteKit 2 |
-| CSS | **Tailwind CSS v4** via `@tailwindcss/vite` |
-| Animations | `tw-animate-css` |
+| Layer      | Choice                                                        |
+| ---------- | ------------------------------------------------------------- |
+| Framework  | SvelteKit 2                                                   |
+| CSS        | **Tailwind CSS v4** via `@tailwindcss/vite`                   |
+| Animations | `tw-animate-css`                                              |
 | Components | bits-ui (shadcn-style primitives in `src/lib/components/ui/`) |
-| Utilities | `tailwind-merge`, `tailwind-variants`, `clsx` |
-| Theme | **Dark only** on homepage (`<body class="dark">`) |
+| Utilities  | `tailwind-merge`, `tailwind-variants`, `clsx`                 |
+| Theme      | **Dark only** on homepage (`<body class="dark">`)             |
 
 Fonts in repo (`layout.css`):
 
@@ -31,15 +31,15 @@ User asked for “bolder, Mont type” → interpret as **heavy Inter + mono edi
 
 bundle-roast uses OKLCH tokens in `:root` / `.dark` + `--flame` accent.
 
-| Token | bundle-roast (dark) | Neodrag equivalent (keep) |
-|--------|---------------------|-----------------------------|
-| Page bg | `oklch(0.085 0.005 50)` + grunge layers | `--app-color-shell` dark + subtle texture optional |
-| Accent | `--flame` `oklch(0.78 0.19 55)` | `--app-color-primary` (coral/red — different hue, keep Neodrag) |
-| Text | `--foreground` warm off-white | `--app-color-dark` (in dark theme = light text) |
-| Muted | `--muted-foreground` | `color-mix(dark, transparent ~35–55%)` |
-| Panel surface | `bg-white/[2.5%]` on transparent | `bg-white/[2.5%]` or `color-mix(shell, primary 4%)` |
-| Borders | `border-white/[6%]`, `border-foreground/15` | hairlines, not dock pill shadows |
-| Selection | flame 50% mix | primary-based selection |
+| Token         | bundle-roast (dark)                         | Neodrag equivalent (keep)                                       |
+| ------------- | ------------------------------------------- | --------------------------------------------------------------- |
+| Page bg       | `oklch(0.085 0.005 50)` + grunge layers     | `--app-color-shell` dark + subtle texture optional              |
+| Accent        | `--flame` `oklch(0.78 0.19 55)`             | `--app-color-primary` (coral/red — different hue, keep Neodrag) |
+| Text          | `--foreground` warm off-white               | `--app-color-dark` (in dark theme = light text)                 |
+| Muted         | `--muted-foreground`                        | `color-mix(dark, transparent ~35–55%)`                          |
+| Panel surface | `bg-white/[2.5%]` on transparent            | `bg-white/[2.5%]` or `color-mix(shell, primary 4%)`             |
+| Borders       | `border-white/[6%]`, `border-foreground/15` | hairlines, not dock pill shadows                                |
+| Selection     | flame 50% mix                               | primary-based selection                                         |
 
 **Do not** copy bundle-roast orange flame wholesale — use Neodrag primary for `▍`, links, CTA, focus rings.
 
@@ -76,7 +76,9 @@ Homepage playground: widen stage (`max-w-6xl` or two-column) but keep **section 
 
 ```html
 <section class="flex flex-col gap-4 bg-white/[2.5%] p-6 sm:p-8">
-  <div class="flex justify-between border-b border-foreground/15 pb-2 font-mono text-[0.7rem] uppercase tracking-[0.18em]">
+  <div
+    class="flex justify-between border-b border-foreground/15 pb-2 font-mono text-[0.7rem] uppercase tracking-[0.18em]"
+  >
     <div class="text-flame"><span>▍</span> section title</div>
     <div class="text-muted-foreground/55">right label</div>
   </div>
@@ -129,13 +131,13 @@ Scenario strip → numbered or `▍`-prefixed rows, not emoji sidebar.
 
 ## Typography scale
 
-| Role | Classes |
-|------|---------|
+| Role          | Classes                                               |
+| ------------- | ----------------------------------------------------- |
 | Section label | `font-mono text-[0.7rem] uppercase tracking-[0.18em]` |
-| Body | `text-[15px] leading-[1.55]` on main |
-| H1 | `clamp(3rem–6.5rem) font-extrabold` |
-| H3 feature | `text-base font-extrabold tracking-[-0.01em]` |
-| Footer | `font-mono text-xs` |
+| Body          | `text-[15px] leading-[1.55]` on main                  |
+| H1            | `clamp(3rem–6.5rem) font-extrabold`                   |
+| H3 feature    | `text-base font-extrabold tracking-[-0.01em]`         |
+| Footer        | `font-mono text-xs`                                   |
 
 ---
 
@@ -174,7 +176,9 @@ import tailwindcss from '@tailwindcss/vite';
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--app-font-mono);
   --color-primary: var(--app-color-primary);
-  --color-flame: var(--app-color-primary); /* alias for porting classes */
+  --color-flame: var(
+    --app-color-primary
+  ); /* alias for porting classes */
   /* map other --app-* tokens */
 }
 ```
@@ -185,14 +189,14 @@ Scope Tailwind to homepage wrapper (`.home-tw`) so docs MDX/layout.css stay on l
 
 ## Key files to port patterns from
 
-| File | Purpose |
-|------|---------|
-| `src/routes/layout.css` | Tokens, body texture, theme |
-| `src/routes/+page.svelte` | Homepage structure |
-| `src/lib/components/SectionBreak.svelte` | Section dividers |
-| `src/lib/components/SmartSearch.svelte` | Terminal input |
-| `src/lib/components/TopNav.svelte` | Compact nav chip |
-| `src/app.html` | `class="dark"` |
+| File                                     | Purpose                     |
+| ---------------------------------------- | --------------------------- |
+| `src/routes/layout.css`                  | Tokens, body texture, theme |
+| `src/routes/+page.svelte`                | Homepage structure          |
+| `src/lib/components/SectionBreak.svelte` | Section dividers            |
+| `src/lib/components/SmartSearch.svelte`  | Terminal input              |
+| `src/lib/components/TopNav.svelte`       | Compact nav chip            |
+| `src/app.html`                           | `class="dark"`              |
 
 ---
 

@@ -3,25 +3,24 @@ import { describe, expect, test } from 'vitest';
 import { resizeHandles } from '@neodrag/core/resize';
 import { useResizable } from '../src/index.ts';
 
-describe('@neodrag/vue resizable', () => {
-	test('useResizable attaches to element ref', async () => {
+describe('@neodrag/vue useResizable', () => {
+	test('bind attaches resize handles', async () => {
 		const host = document.createElement('div');
 		document.body.appendChild(host);
 
-		const ResizeHarness = defineComponent({
+		const Panel = defineComponent({
 			setup() {
-				const resize = useResizable([resizeHandles({ edges: ['e'] })]);
+				const { bind } = useResizable([resizeHandles({ edges: ['e'] })]);
 				return () =>
 					h('div', {
+						...bind.value,
 						'data-testid': 'panel',
-						ref: (el: HTMLElement | null) => {
-							if (el) resize.value.attach(el);
-						},
+						style: { width: '120px', height: '80px' },
 					});
 			},
 		});
 
-		const app = createApp(ResizeHarness);
+		const app = createApp(Panel);
 		app.mount(host);
 
 		await new Promise((r) => requestAnimationFrame(() => r(undefined)));

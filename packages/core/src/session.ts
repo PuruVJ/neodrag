@@ -48,7 +48,6 @@ export function createDragSession(
 	};
 }
 
-
 export function resolveEndReason(active: ActiveSession | null, cancelled: boolean): EndReason {
 	if (cancelled || active?.state === 'cancelled') return 'cancel';
 	if (active && active.overTargets.length > 0) return 'drop';

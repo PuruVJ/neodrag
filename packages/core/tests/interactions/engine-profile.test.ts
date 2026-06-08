@@ -15,8 +15,9 @@ describe('engine-profile', () => {
 			recordCostSpan(host, 'b', 1);
 		});
 		const snap = takeCostSnapshot(host, 10);
-		expect(snap.spans.a?.totalMs).toBeGreaterThan(0);
+		expect(snap.spans.a?.count).toBe(1);
 		expect(snap.spans.b?.totalMs).toBe(1);
+		expect(snap.spans.b?.count).toBe(1);
 		expect(snap.attributedMs).toBeGreaterThanOrEqual(1);
 		resetCostProfiling(host);
 		expect(takeCostSnapshot(host, 5).attributedMs).toBe(0);

@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { Neodrag } from '@neodrag/svelte'
-	
-	import { Droppable, sortable } from '@neodrag/svelte/drop';
+	import { Sortable } from '@neodrag/svelte/drop';
 
 	let items = $state(['Apple', 'Banana', 'Cherry', 'Date', 'Elderberry']);
 
-	const list = sortable({
+	const list = new Sortable({
 		items: () => items,
 		keyBy: (item) => item,
 		onReorder: (next) => {
@@ -13,24 +11,14 @@
 		},
 		strategy: 'vertical',
 	});
-
-	const bindDrop = (n: HTMLElement) => {
-		const h = Neodrag.shared.droppable(n, list.container());
-		return () => h.destroy();
-	};
-
-	const bindDrag = (n: HTMLElement, plugins: ReturnType<typeof list.item>) => {
-		const h = Neodrag.shared.draggable(n, [...plugins]);
-		return () => h.destroy();
-	};
 </script>
 
 <h1>Sortable Test</h1>
 <p>Drag items to reorder them.</p>
 
-<div class="sortable-list" {@attach bindDrop}>
+<div class="sortable-list" {...list.container}>
 	{#each items as item (item)}
-		<div class="sortable-item" {@attach (n) => bindDrag(n, list.item(item))}>
+		<div class="sortable-item" {...list.row()} {...list.item(item).target}>
 			<span class="index">{items.indexOf(item) + 1}</span>
 			<span class="name">{item}</span>
 		</div>

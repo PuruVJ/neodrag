@@ -18,7 +18,11 @@ Many APIs accept a `SizeInput`:
 TypeScript models strings as:
 
 ```typescript
-import type { CssLengthString, CssLengthUnit, SizeInput } from '@neodrag/core';
+import type {
+  CssLengthString,
+  CssLengthUnit,
+  SizeInput,
+} from '@neodrag/core';
 import { CSS_LENGTH_UNITS, isCssLengthUnit } from '@neodrag/core';
 
 // Valid CssLengthString examples:
@@ -35,20 +39,20 @@ const bound: SizeInput = '10rem';
 
 These match `CSS_LENGTH_UNITS` in `@neodrag/core` (parser and types stay in sync):
 
-| Category | Units |
-|----------|--------|
-| Absolute | `px` |
-| Font-relative | `rem`, `em`, `ch`, `ex` |
-| Viewport | `vw`, `vh`, `vmin`, `vmax`, `svw`, `svh`, `lvw`, `lvh`, `dvw`, `dvh` |
-| Container-relative | `%` (resolved against the relevant axis on the parent / context) |
+| Category           | Units                                                                |
+| ------------------ | -------------------------------------------------------------------- |
+| Absolute           | `px`                                                                 |
+| Font-relative      | `rem`, `em`, `ch`, `ex`                                              |
+| Viewport           | `vw`, `vh`, `vmin`, `vmax`, `svw`, `svh`, `lvw`, `lvh`, `dvw`, `dvh` |
+| Container-relative | `%` (resolved against the relevant axis on the parent / context)     |
 
 ### Not supported (types or runtime)
 
-| Form | Example | What to do instead |
-|------|---------|-------------------|
-| CSS math | `'min(92vw, 720px)'`, `'clamp(200px, 50%, 800px)'`, `'calc(...)'` | Use one unit (`'92vw'`), a **number** (px), or compute in JS |
-| Grid / layout keywords | `'1fr'`, `'auto'`, `'fit-content'` | Not parseable as `SizeInput` |
-| Malformed | `'10 px'` (space), `'tenpx'` | Fix formatting |
+| Form                   | Example                                                           | What to do instead                                           |
+| ---------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------ |
+| CSS math               | `'min(92vw, 720px)'`, `'clamp(200px, 50%, 800px)'`, `'calc(...)'` | Use one unit (`'92vw'`), a **number** (px), or compute in JS |
+| Grid / layout keywords | `'1fr'`, `'auto'`, `'fit-content'`                                | Not parseable as `SizeInput`                                 |
+| Malformed              | `'10 px'` (space), `'tenpx'`                                      | Fix formatting                                               |
 
 Runtime parsing uses the same rules: invalid strings throw from `Length.resolvePx()` with `Neodrag Length: invalid length "…"`.
 
@@ -72,10 +76,10 @@ const length = new Length({ units: 'preserve' }); // default
 const lengthPx = new Length({ units: 'px' });
 ```
 
-| Mode | Behavior |
-|------|----------|
+| Mode                   | Behavior                                                                   |
+| ---------------------- | -------------------------------------------------------------------------- |
 | `'preserve'` (default) | After resize, keep authored units on `width` / `height` (`50%` stays `%`). |
-| `'px'` | Always write px strings to the DOM. |
+| `'px'`                 | Always write px strings to the DOM.                                        |
 
 Pass `length` on the **binding**, not the engine:
 
@@ -133,13 +137,12 @@ const resize = new Resizable({
 
 ```tsx
 import { Length } from '@neodrag/core';
-import { Resizable, useResizable, resizeHandles } from '@neodrag/solid';
+import { createResizable } from '@neodrag/solid';
+import { resizeHandles } from '@neodrag/solid/resize';
 
-const resize = new Resizable({
-  length: new Length(),
-  plugins: [resizeHandles({ edges: ['e'] })],
-});
-const [, ref] = useResizable(resize);
+const [, ref] = createResizable(() => [
+  resizeHandles({ edges: ['e'] }),
+]);
 ```
 
 </div>
@@ -149,11 +152,11 @@ const [, ref] = useResizable(resize);
 
 ## Where `SizeInput` appears
 
-| Area | Examples |
-|------|----------|
-| **Resize** | `resizeHandles({ size, cornerSize })`, `sizeBounds({ minWidth, … })`, `Resizable` **`minSize` / `maxSize`** |
-| **Drag** | `grid([stepX, stepY])`, `bounds` margins, `threshold({ distance })`, `position` offsets |
-| **Custom plugins** | Any option you type as `SizeInput` and resolve with `ctx.length` / `resolveSizeInput` |
+| Area               | Examples                                                                                                    |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **Resize**         | `resizeHandles({ size, cornerSize })`, `sizeBounds({ minWidth, … })`, `Resizable` **`minSize` / `maxSize`** |
+| **Drag**           | `grid([stepX, stepY])`, `bounds` margins, `threshold({ distance })`, `position` offsets                     |
+| **Custom plugins** | Any option you type as `SizeInput` and resolve with `ctx.length` / `resolveSizeInput`                       |
 
 ### `minSize` / `maxSize` on `Resizable`
 

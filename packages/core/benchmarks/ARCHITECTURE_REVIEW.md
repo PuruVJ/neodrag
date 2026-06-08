@@ -6,14 +6,14 @@ Benchmarks: Chromium suite (`pnpm bench`) vs `benchmarks/reports/baseline.json`.
 
 ## Executive summary
 
-| Area | Verdict |
-|------|---------|
-| Plugin system | Powerful but heavy; threshold gating now engine-internal (good) |
-| `engine.ts` (~1.5k lines) | Triplicated drag/drop/resize paths — largest consolidation opportunity |
-| `DragCtx` | Was double-getter indirection; **flattened to `live` view objects** (benchmarked) |
-| Pending interaction | Was syncing drop host every sub-threshold move; **deferred sync** (benchmarked) |
-| Framework wrappers | Svelte thin; React carries state-sync plugin + hook complexity |
-| Sensors | Class + `registerSensor` is appropriate weight |
+| Area                      | Verdict                                                                           |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| Plugin system             | Powerful but heavy; threshold gating now engine-internal (good)                   |
+| `engine.ts` (~1.5k lines) | Triplicated drag/drop/resize paths — largest consolidation opportunity            |
+| `DragCtx`                 | Was double-getter indirection; **flattened to `live` view objects** (benchmarked) |
+| Pending interaction       | Was syncing drop host every sub-threshold move; **deferred sync** (benchmarked)   |
+| Framework wrappers        | Svelte thin; React carries state-sync plugin + hook complexity                    |
+| Sensors                   | Class + `registerSensor` is appropriate weight                                    |
 
 ## Benchmarked changes (this pass)
 
@@ -23,11 +23,11 @@ Benchmarks: Chromium suite (`pnpm bench`) vs `benchmarks/reports/baseline.json`.
 
 **After:** Pending moves only set `inst.lastInput`; full sync runs when threshold passes or when already dragging.
 
-| Benchmark | Baseline mean | After mean | Δ |
-|-----------|---------------|------------|---|
-| pending · sub-threshold × 20 | 0.1285 ms | ~0.10–0.14 ms | median flat (noise at mean) |
-| steady-state · default drag | 0.0937 ms | ~0.099 ms | no regression vs baseline |
-| sortable over · 40 items | 0.2965 ms | ~0.32 ms | no regression vs baseline |
+| Benchmark                    | Baseline mean | After mean    | Δ                           |
+| ---------------------------- | ------------- | ------------- | --------------------------- |
+| pending · sub-threshold × 20 | 0.1285 ms     | ~0.10–0.14 ms | median flat (noise at mean) |
+| steady-state · default drag  | 0.0937 ms     | ~0.099 ms     | no regression vs baseline   |
+| sortable over · 40 items     | 0.2965 ms     | ~0.32 ms      | no regression vs baseline   |
 
 ### 2. Flat `DragCtx` live views (no nested getters)
 
@@ -35,10 +35,10 @@ Benchmarks: Chromium suite (`pnpm bench`) vs `benchmarks/reports/baseline.json`.
 
 **After:** Mutable `inst.live.delta` synced at hot-path boundaries; `dragCtx.delta` is a direct reference.
 
-| Benchmark | Baseline mean | After mean | Δ |
-|-----------|---------------|------------|---|
-| steady-state · default drag | 0.0937 ms | 0.0937 ms | flat (within noise) |
-| empty plugin list drag | 0.1010 ms | 0.1010 ms | flat |
+| Benchmark                   | Baseline mean | After mean | Δ                   |
+| --------------------------- | ------------- | ---------- | ------------------- |
+| steady-state · default drag | 0.0937 ms     | 0.0937 ms  | flat (within noise) |
+| empty plugin list drag      | 0.1010 ms     | 0.1010 ms  | flat                |
 
 No regressions on idle pointermove or sortable benches.
 
@@ -86,11 +86,11 @@ Config in plugin, input in sensor — coupling smell.
 
 ## Wrapper weight comparison
 
-| Package | Lines (main entry) | Notes |
-|---------|-------------------|--------|
-| Svelte | ~43 | `Attachment` + `$effect` flush — minimal |
-| React | ~341 | Sync plugin, refs, layout effects |
-| Vue/Solid/Vanilla | Similar patterns | Re-export core + thin hooks |
+| Package           | Lines (main entry) | Notes                                    |
+| ----------------- | ------------------ | ---------------------------------------- |
+| Svelte            | ~43                | `Attachment` + `$effect` flush — minimal |
+| React             | ~341               | Sync plugin, refs, layout effects        |
+| Vue/Solid/Vanilla | Similar patterns   | Re-export core + thin hooks              |
 
 **Recommendation:** Document “core `Draggable` first”; hooks are optional sugar.
 

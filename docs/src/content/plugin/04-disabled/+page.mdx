@@ -20,11 +20,11 @@ disabled(false); // Enabled (same as not using plugin)
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { disabled } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { disabled } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [disabled(true)] });
-	const drag_1 = new Draggable({ plugins: [disabled(false)] });
+  const drag_0 = new Draggable({ plugins: [disabled(true)] });
+  const drag_1 = new Draggable({ plugins: [disabled(false)] });
 </script>
 
 <!-- This won't drag at all -->
@@ -71,14 +71,14 @@ import { disabled, vDraggable } from '@neodrag/vue';
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { disabled, useDraggable } from '@neodrag/solid';
+import { disabled, createDraggable } from '@neodrag/solid';
 
 function DisabledExample() {
   const [element, setElement] = createSignal<HTMLElement | null>(
     null,
   );
 
-  useDraggable(element, [disabled(true)]);
+  createDraggable(element, [disabled(true)]);
 
   return <div ref={setElement}>Can't drag me!</div>;
 }
@@ -107,12 +107,12 @@ The real power comes from dynamically enabling/disabling with compartments:
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { disabled } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { disabled } from '@neodrag/svelte/plugins';
 
   let isDragDisabled = $state(false);
-  
-	const drag_0 = new Draggable({ plugins: [() => [disabledComp]] });
+
+  const drag_0 = new Draggable({ plugins: [() => [disabledComp]] });
 </script>
 
 <div {@attach drag_0.attachment}>
@@ -130,16 +130,12 @@ The real power comes from dynamically enabling/disabling with compartments:
 
 ```tsx
 import { useState, useRef } from 'react';
-import {
-  disabled,
-  useDraggable,
-} from '@neodrag/react';
+import { disabled, useDraggable } from '@neodrag/react';
 
 function ToggleDisabled() {
   const ref = useRef<HTMLDivElement>(null);
   const [isDragDisabled, setIsDragDisabled] = useState(false);
 
-  
   useDraggable(ref, () => [disabledComp]);
 
   return (
@@ -189,10 +185,7 @@ function toggleDragging() {
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  disabled,
-  useDraggable,
-} from '@neodrag/solid';
+import { disabled, createDraggable } from '@neodrag/solid';
 
 function ToggleDisabled() {
   const [element, setElement] = createSignal<HTMLElement | null>(
@@ -200,8 +193,7 @@ function ToggleDisabled() {
   );
   const [isDragDisabled, setIsDragDisabled] = createSignal(false);
 
-  
-  useDraggable(element, [disabledComp]);
+  createDraggable(element, [disabledComp]);
 
   function toggleDragging() {
     setIsDragDisabled(!isDragDisabled());
@@ -254,15 +246,15 @@ button.addEventListener('click', () => {
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { disabled } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { disabled } from '@neodrag/svelte/plugins';
 
   let isFormValid = $state(true);
   let isLoading = $state(false);
 
   // Disable dragging when form is invalid or loading
-  
-	const drag_0 = new Draggable({ plugins: [() => [disabledComp]] });
+
+  const drag_0 = new Draggable({ plugins: [() => [disabledComp]] });
 </script>
 
 <div {@attach drag_0.attachment}>
@@ -292,10 +284,7 @@ button.addEventListener('click', () => {
 
 ```tsx
 import { useState, useRef } from 'react';
-import {
-  disabled,
-  useDraggable,
-} from '@neodrag/react';
+import { disabled, useDraggable } from '@neodrag/react';
 
 function ConditionalDisabled() {
   const ref = useRef<HTMLDivElement>(null);
@@ -303,7 +292,7 @@ function ConditionalDisabled() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Disable dragging when form is invalid or loading
-  
+
   useDraggable(ref, () => [disabledComp]);
 
   return (
@@ -380,10 +369,7 @@ const isLoading = ref(false);
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  disabled,
-  useDraggable,
-} from '@neodrag/solid';
+import { disabled, createDraggable } from '@neodrag/solid';
 
 function ConditionalDisabled() {
   const [element, setElement] = createSignal<HTMLElement | null>(
@@ -393,8 +379,8 @@ function ConditionalDisabled() {
   const [isLoading, setIsLoading] = createSignal(false);
 
   // Disable dragging when form is invalid or loading
-  
-  useDraggable(element, [disabledComp]);
+
+  createDraggable(element, [disabledComp]);
 
   return (
     <div>
@@ -438,7 +424,6 @@ import { disabled, Neodrag } from '@neodrag/vanilla';
 let isFormValid = true;
 let isLoading = false;
 
-
 const element = document.getElementById('element');
 const formValidCheckbox = document.getElementById('form-valid');
 const loadingCheckbox = document.getElementById('loading');
@@ -479,7 +464,6 @@ loadingCheckbox.addEventListener('change', (e) => {
 
 ```typescript
 // Disable dragging until all required fields are filled
-
 ```
 
 ### Loading States

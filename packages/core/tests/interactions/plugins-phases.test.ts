@@ -88,7 +88,10 @@ describe('plugin phase buckets', () => {
 
 		expect(inst.dragChain.map((p) => pluginKeyLabel(p.key))).toEqual(['pre', 'resolve', 'post']);
 
-		const input = pointerToInput(new PointerEvent('pointermove', { clientX: 0, clientY: 0 }), 'move');
+		const input = pointerToInput(
+			new PointerEvent('pointermove', { clientX: 0, clientY: 0 }),
+			'move',
+		);
 		for (const plugin of inst.dragChain) {
 			plugin.drag!(inst.dragCtx, inst.states.get(plugin.key), input);
 		}

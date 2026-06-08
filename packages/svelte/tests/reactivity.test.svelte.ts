@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { Draggable } from '@neodrag/svelte';
+import { Draggable, NEODRAG_ATTACH_KEY } from '@neodrag/svelte';
 import { position } from '@neodrag/core/plugins';
 import SvelteReactiveHarness from './SvelteReactiveHarness.svelte';
 import SvelteStaticHarness from './SvelteStaticHarness.svelte';
 import { sleepAndWaitForEffects, translate } from '../../core/tests/utils.ts';
 
 describe('@neodrag/svelte reactivity', () => {
-	test('static Draggable attachment survives rerender', async () => {
+	test('static Draggable spread survives rerender', async () => {
 		const comp = render(SvelteStaticHarness, { tick: 0 });
 		const el = comp.getByTestId('draggable');
 		await sleepAndWaitForEffects();
@@ -27,8 +27,24 @@ describe('@neodrag/svelte reactivity', () => {
 		await expect.element(el).toHaveStyle(translate(30, 40));
 	});
 
-	test('Draggable.attachment is stable', () => {
+	test('isDragging lives on class not target spread', () => {
 		const drag = new Draggable({ plugins: [] });
-		expect(drag.attachment).toBe(drag.attachment);
+		expect(drag.isDragging).toBe(false);
+		expect(Object.hasOwn(drag.target, 'isDragging')).toBe(false);
+		expect(Object.keys(drag.target)).not.toContain('isDragging');
+	});
+
+	test('target includes SSR markup and attach', () => {
+		const drag = new Draggable({ plugins: [] });
+		expect(drag.target.draggable).toBe('false');
+		expect(drag.target.style).toContain('touch-action');
+		expect(drag.target['data-neodrag-state']).toBe('idle');
+		expect(drag.target['data-neodrag-count']).toBe('0');
+		expect(drag.target[NEODRAG_ATTACH_KEY]).toBeTypeOf('function');
+	});
+
+	test('target is stable reference', () => {
+		const drag = new Draggable({ plugins: [] });
+		expect(drag.target).toBe(drag.target);
 	});
 });

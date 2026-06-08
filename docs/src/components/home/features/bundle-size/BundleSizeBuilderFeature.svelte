@@ -10,9 +10,7 @@
 
 	const defaultOptionalDrag = Object.entries(data.drag.keys)
 		.filter(([, name]) => !DRAG_DEFAULT_NAMES.includes(name as (typeof DRAG_DEFAULT_NAMES)[number]))
-		.filter(([, name]) =>
-			['axis', 'grid', 'bounds', 'position', 'events'].includes(name),
-		)
+		.filter(([, name]) => ['axis', 'grid', 'bounds', 'position'].includes(name))
 		.map(([k]) => k);
 
 	let selectedDrag = $state<string[]>([...defaultOptionalDrag]);
@@ -45,7 +43,6 @@
 			.filter((k): k is string => k !== undefined);
 		includeSortable = sortable;
 	}
-
 </script>
 
 <div class="demo">
@@ -65,7 +62,11 @@
 		<p class="size-delta">+{formatBytes(deltaFromDefaults)} over default drag stack</p>
 		<ul class="size-breakdown">
 			<li><span>Default stack</span><span>{formatBytes(dragBaseBytes)}</span></li>
-			<li><span>Your optional drag</span><span>{formatBytes(Math.max(0, dragBytes - dragBaseBytes))}</span></li>
+			<li>
+				<span>Your optional drag</span><span
+					>{formatBytes(Math.max(0, dragBytes - dragBaseBytes))}</span
+				>
+			</li>
 			<li><span>Drop targets</span><span>+{formatBytes(dropMarginal)}</span></li>
 			{#if includeSortable}
 				<li><span>Sortable helper</span><span>+{formatBytes(sortableMarginal)}</span></li>
@@ -93,7 +94,9 @@
 
 	<fieldset class="plugin-group">
 		<legend>Optional drag plugins</legend>
-		<p class="hint">Measured on top of the built-in default stack ({DRAG_DEFAULT_NAMES.join(', ')}).</p>
+		<p class="hint">
+			Measured on top of the built-in default stack ({DRAG_DEFAULT_NAMES.join(', ')}).
+		</p>
 		<div class="checkbox-grid">
 			{#each Object.entries(data.drag.keys) as [key, name]}
 				<label class="checkbox-item" class:selected={selectedDrag.includes(key)}>
@@ -129,7 +132,7 @@
 			<input type="checkbox" bind:checked={includeSortable} class="sr-only" />
 			<span class="checkbox-display">
 				<span class="icon" aria-hidden="true"><TickIcon /></span>
-				<span class="label-text">sortable (from <code>@neodrag/core/drop</code>)</span>
+				<span class="label-text">sortable (from <code>@neodrag/core/sortable</code>)</span>
 			</span>
 		</label>
 	</fieldset>

@@ -14,12 +14,12 @@ Writes `benchmarks/reports/human-cost.json` with per-scenario:
 
 ## Reading the report
 
-| Field | Meaning |
-|-------|---------|
-| `wall` | End-to-end scenario duration |
-| `topSpans` | Largest engine spans by total ms (nested/inclusive) |
-| `attributedMs` | Sum of span totals (often > wall when spans nest) |
-| `unattributedMs` | `wall − attributed` (harness, layout, gaps) |
+| Field            | Meaning                                             |
+| ---------------- | --------------------------------------------------- |
+| `wall`           | End-to-end scenario duration                        |
+| `topSpans`       | Largest engine spans by total ms (nested/inclusive) |
+| `attributedMs`   | Sum of span totals (often > wall when spans nest)   |
+| `unattributedMs` | `wall − attributed` (harness, layout, gaps)         |
 
 Typical drag steady-state hotspots (see `hot/steady-drag-loop`):
 

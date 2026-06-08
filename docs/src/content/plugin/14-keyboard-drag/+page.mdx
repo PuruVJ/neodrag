@@ -33,7 +33,10 @@ Requires a `Neodrag` with `KeyboardMoveSensor` registered (default when `default
   const drag = new Draggable({
     plugins: [
       keyboardDrag({ step: 8, fastStep: 24 }),
-      ariaDrag({ label: 'Card', liveRegion: () => document.getElementById('live') }),
+      ariaDrag({
+        label: 'Card',
+        liveRegion: () => document.getElementById('live'),
+      }),
     ],
   });
 </script>

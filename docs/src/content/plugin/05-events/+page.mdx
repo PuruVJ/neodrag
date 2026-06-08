@@ -1,19 +1,22 @@
 ---
-title: 'events'
-tagline: 'Listen to drag start, drag, and drag end events'
+title: 'Drag callbacks'
+tagline: 'onDragStart, onDrag, and onDragEnd on Draggable'
 ---
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-The `events` plugin provides callbacks that fire during different phases of dragging. Get notified when dragging starts, during movement, and when it ends - perfect for updating UI state, logging, or triggering animations.
+Pass **`onDragStart`**, **`onDrag`**, and **`onDragEnd`** on `new Draggable({ ... })` (Svelte) or the equivalent binding options in other frameworks. Callbacks receive **`DragEventData`**: drag **`offset`**, DOM nodes, and canonical **`input`** (`InteractionInput`) for pointer, keyboard, and programmatic drags.
 
 ```typescript
-events({
+new Draggable({
+  plugins: [/* ... */],
   onDragStart: (data) => console.log('Started dragging'),
   onDrag: (data) => console.log('Moving:', data.offset),
   onDragEnd: (data) => console.log('Finished dragging'),
 });
 ```
+
+The former `events()` plugin export was removed in v3 next — use binding options instead.
 
 ## Basic Usage
 
@@ -22,8 +25,8 @@ events({
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { events } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { events } from '@neodrag/svelte/plugins';
 
   let dragStatus = $state('idle');
   let position = $state({ x: 0, y: 0 });
@@ -42,7 +45,7 @@ events({
     },
   });
 
-	const drag_0 = new Draggable({ plugins: [eventHandlers] });
+  const drag_0 = new Draggable({ plugins: [eventHandlers] });
 </script>
 
 <div {@attach drag_0.attachment}>
@@ -135,7 +138,7 @@ const eventHandlers = [
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { events, useDraggable } from '@neodrag/solid';
+import { events, createDraggable } from '@neodrag/solid';
 
 function EventExample() {
   const [element, setElement] = createSignal<HTMLElement | null>(
@@ -144,7 +147,7 @@ function EventExample() {
   const [dragStatus, setDragStatus] = createSignal('idle');
   const [position, setPosition] = createSignal({ x: 0, y: 0 });
 
-  useDraggable(element, [
+  createDraggable(element, [
     events({
       onDragStart: () => {
         setDragStatus('dragging');
@@ -205,24 +208,36 @@ Neodrag.shared.draggable(element, [
 
 All event callbacks receive a `DragEventData` object with:
 
-- `offset` - Current position `{ x: number, y: number }`
-- `rootNode` - Element with draggable applied
-- `currentNode` - Element being dragged (can change mid-drag)
-- `event` - The pointer event that triggered this callback
+- `offset` — Authored position `{ x, y }` (length-aware units when using `position()`)
+- `offsetPx` — Resolved pixel offset `{ x, y }`
+- `rootNode` — Element the binding is attached to
+- `visualNode` — Element currently being transformed (clone / sortable visual)
+- `input` — **`InteractionInput`** for this frame (`pointer` | `keyboard` | `programmatic`)
+- `pointer` — `{ x, y }` shorthand for `input.clientX` / `input.clientY`
+
+For the native DOM event, branch on `input`:
+
+```typescript
+import { isPointerInput } from '@neodrag/core';
+
+if (isPointerInput(data.input)) {
+  data.input.native.preventDefault();
+}
+```
 
 <FrameworkSwitch>
 <div slot="svelte">
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { events } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { events } from '@neodrag/svelte/plugins';
 
   function logEventData(data) {
     console.log('Position:', data.offset);
     console.log('Root element:', data.rootNode);
-    console.log('Current element:', data.currentNode);
-    console.log('Pointer event:', data.event);
+    console.log('Visual element:', data.visualNode);
+    console.log('Interaction:', data.input.kind);
   }
 
   const eventHandlers = events({
@@ -231,12 +246,10 @@ All event callbacks receive a `DragEventData` object with:
     onDragEnd: logEventData,
   });
 
-	const drag_0 = new Draggable({ plugins: [eventHandlers] });
+  const drag_0 = new Draggable({ plugins: [eventHandlers] });
 </script>
 
-<div {@attach drag_0.attachment}>
-  Check console for event data
-</div>
+<div {@attach drag_0.attachment}>Check console for event data</div>
 ```
 
 </div>
@@ -253,8 +266,8 @@ function EventDataExample() {
   const logEventData = (data) => {
     console.log('Position:', data.offset);
     console.log('Root element:', data.rootNode);
-    console.log('Current element:', data.currentNode);
-    console.log('Pointer event:', data.event);
+    console.log('Visual element:', data.visualNode);
+    console.log('Interaction:', data.input.kind);
   };
 
   useDraggable(ref, [
@@ -280,8 +293,8 @@ import { events, vDraggable } from '@neodrag/vue';
 function logEventData(data) {
   console.log('Position:', data.offset);
   console.log('Root element:', data.rootNode);
-  console.log('Current element:', data.currentNode);
-  console.log('Pointer event:', data.event);
+  console.log('Visual element:', data.visualNode);
+  console.log('Interaction:', data.input.kind);
 }
 
 const eventHandlers = [
@@ -304,7 +317,7 @@ const eventHandlers = [
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { events, useDraggable } from '@neodrag/solid';
+import { events, createDraggable } from '@neodrag/solid';
 
 function EventDataExample() {
   const [element, setElement] = createSignal<HTMLElement | null>(
@@ -314,11 +327,11 @@ function EventDataExample() {
   const logEventData = (data) => {
     console.log('Position:', data.offset);
     console.log('Root element:', data.rootNode);
-    console.log('Current element:', data.currentNode);
-    console.log('Pointer event:', data.event);
+    console.log('Visual element:', data.visualNode);
+    console.log('Interaction:', data.input.kind);
   };
 
-  useDraggable(element, [
+  createDraggable(element, [
     events({
       onDragStart: logEventData,
       onDrag: logEventData,
@@ -342,8 +355,8 @@ const element = document.getElementById('element');
 function logEventData(data) {
   console.log('Position:', data.offset);
   console.log('Root element:', data.rootNode);
-  console.log('Current element:', data.currentNode);
-  console.log('Pointer event:', data.event);
+  console.log('Visual element:', data.visualNode);
+  console.log('Interaction:', data.input.kind);
 }
 
 Neodrag.shared.draggable(element, [
@@ -367,8 +380,8 @@ Neodrag.shared.draggable(element, [
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { events } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { events } from '@neodrag/svelte/plugins';
 
   let position = $state({ x: 0, y: 0 });
   let velocity = $state({ x: 0, y: 0 });
@@ -397,7 +410,7 @@ Neodrag.shared.draggable(element, [
     },
   });
 
-	const drag_0 = new Draggable({ plugins: [trackingHandler] });
+  const drag_0 = new Draggable({ plugins: [trackingHandler] });
 </script>
 
 <div {@attach drag_0.attachment}>
@@ -512,7 +525,7 @@ const trackingHandler = [
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { events, useDraggable } from '@neodrag/solid';
+import { events, createDraggable } from '@neodrag/solid';
 
 function VelocityTracker() {
   const [element, setElement] = createSignal<HTMLElement | null>(
@@ -524,7 +537,7 @@ function VelocityTracker() {
   let lastTime = 0;
   let lastPosition = { x: 0, y: 0 };
 
-  useDraggable(element, [
+  createDraggable(element, [
     events({
       onDrag: (data) => {
         const now = Date.now();
@@ -608,8 +621,8 @@ Neodrag.shared.draggable(element, [
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { events } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { events } from '@neodrag/svelte/plugins';
 
   const saveHandler = events({
     onDragEnd: (data) => {
@@ -625,7 +638,7 @@ Neodrag.shared.draggable(element, [
     },
   });
 
-	const drag_0 = new Draggable({ plugins: [saveHandler] });
+  const drag_0 = new Draggable({ plugins: [saveHandler] });
 </script>
 
 <div {@attach drag_0.attachment}>
@@ -702,14 +715,14 @@ const saveHandler = [
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { events, useDraggable } from '@neodrag/solid';
+import { events, createDraggable } from '@neodrag/solid';
 
 function SavePosition() {
   const [element, setElement] = createSignal<HTMLElement | null>(
     null,
   );
 
-  useDraggable(element, [
+  createDraggable(element, [
     events({
       onDragEnd: (data) => {
         localStorage.setItem(
@@ -838,9 +851,7 @@ function events(options?: {
 
 **DragEventData:**
 
-- `offset` - Current position `{ x: number, y: number }`
-- `rootNode` - Element with draggable applied
-- `currentNode` - Element being dragged
-- `event` - The pointer event that triggered this callback
-
-**Returns:** A plugin object for use with draggable.
+- `offset`, `offsetPx` — drag position (authored + pixels)
+- `rootNode`, `visualNode` — bound vs visual element
+- `input` — `InteractionInput` (use `isPointerInput` / `isKeyboardInput` for native events)
+- `pointer` — `{ x, y }` client coordinates for this frame

@@ -35,7 +35,8 @@ function strip(content, file) {
 	out = out.replace(
 		/import\s*\{([^}]*)\}\s*from\s*['"]\.\.?\/[^'"]+['"]\s*;?/g,
 		(match, imports) => {
-			if (!/\btransform\b/.test(imports) || /TransformApplier|applyTransform/.test(imports)) return match;
+			if (!/\btransform\b/.test(imports) || /TransformApplier|applyTransform/.test(imports))
+				return match;
 			const parts = imports
 				.split(',')
 				.map((p) => p.trim())
@@ -63,7 +64,11 @@ for (const root of roots) {
 	for (const file of walk(abs)) {
 		const raw = fs.readFileSync(file, 'utf8');
 		if (!/\btransform\b/.test(raw)) continue;
-		if (/style\.transform|@keyframes|text-transform|translate3d|applyTransform|TransformApplier|apply-transform/.test(raw))
+		if (
+			/style\.transform|@keyframes|text-transform|translate3d|applyTransform|TransformApplier|apply-transform/.test(
+				raw,
+			)
+		)
 			continue;
 		const next = strip(raw, file);
 		if (next !== raw) {

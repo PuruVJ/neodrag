@@ -1,17 +1,17 @@
 {
 	"name": "@neodrag/playground-vanilla",
-	"private": true,
 	"version": "0.0.1-next.9",
+	"private": true,
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build",
 		"preview": "vite preview"
 	},
+	"dependencies": {
+		"@neodrag/vanilla": "workspace:*"
+	},
 	"devDependencies": {
 		"typescript": "catalog:",
 		"vite": "catalog:"
-	},
-	"dependencies": {
-		"@neodrag/vanilla": "workspace:*"
 	}
 }

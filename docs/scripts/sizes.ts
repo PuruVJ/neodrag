@@ -8,7 +8,6 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 const DRAG_DEFAULTS = [
 	'ignoreMultitouch',
-	'stateMarker',
 	'applyUserSelectHack',
 	'threshold()',
 	'touchAction',
@@ -19,7 +18,6 @@ const DRAG_OPTIONAL = [
 	'grid',
 	'bounds',
 	'position',
-	'events',
 	'disabled',
 	'controls',
 	'scrollLock',
@@ -31,7 +29,6 @@ const DROP_OPTIONAL = ['accepts', 'highlight', 'onDrop'] as const;
 
 const PLUGIN_EXPR: Record<string, string> = {
 	ignoreMultitouch: 'ignoreMultitouch',
-	stateMarker: 'stateMarker',
 	applyUserSelectHack: 'applyUserSelectHack',
 	touchAction: 'touchAction',
 	threshold: 'threshold()',
@@ -39,7 +36,6 @@ const PLUGIN_EXPR: Record<string, string> = {
 	grid: 'grid([10, 10])',
 	bounds: 'bounds()',
 	position: 'position()',
-	events: 'events({})',
 	disabled: 'disabled()',
 	controls: 'controls()',
 	scrollLock: 'scrollLock()',
@@ -60,11 +56,15 @@ export type SizesOutput = {
 	extras: {
 		engineMinimal: number;
 		sortable: number;
+		draggableOnly: number;
 	};
 	presets: Record<string, { bytes: number; drag: string[]; drop: string[]; label: string }>;
 };
 
-function createKeyMap(exports: readonly string[]): { keys: KeyMap; reverse: Record<number, string> } {
+function createKeyMap(exports: readonly string[]): {
+	keys: KeyMap;
+	reverse: Record<number, string>;
+} {
 	const keys: KeyMap = {};
 	const reverse: Record<number, string> = {};
 	exports.forEach((name, index) => {
@@ -127,9 +127,14 @@ async function setupCoreEnvironment(tempDir: string) {
 				sideEffects: false,
 				exports: {
 					'.': './index.js',
+					'./internal': './internal.js',
 					'./plugins': './plugins.js',
 					'./drop': './drop/index.js',
 					'./drop/plugins': './drop/plugins.js',
+					'./sortable': './sortable/index.js',
+					'./draggable': './draggable/index.js',
+					'./resizable': './resizable/index.js',
+					'./presets': './presets.js',
 				},
 			},
 			null,
@@ -138,11 +143,7 @@ async function setupCoreEnvironment(tempDir: string) {
 	);
 }
 
-async function measureEntry(
-	tempDir: string,
-	filename: string,
-	content: string,
-): Promise<number> {
+async function measureEntry(tempDir: string, filename: string, content: string): Promise<number> {
 	const measureDir = join(tempDir, 'measure');
 	const outDir = join(tempDir, 'out');
 	mkdirSync(measureDir, { recursive: true });
@@ -164,7 +165,16 @@ async function measureEntry(
 		minify: true,
 		clean: true,
 		dts: false,
-		deps: { alwaysBundle: ['@neodrag/core'] },
+		deps: {
+			alwaysBundle: [
+				'@neodrag/core',
+				'@neodrag/core/internal',
+				'@neodrag/core/plugins',
+				'@neodrag/core/drop',
+				'@neodrag/core/sortable',
+				'@neodrag/core/draggable',
+			],
+		},
 		logLevel: 'silent',
 	});
 
@@ -181,9 +191,7 @@ async function measureDragCombo(tempDir: string, optional: readonly string[]): P
 	const pluginList = [...DRAG_DEFAULTS, ...optional.map((n) => PLUGIN_EXPR[n] ?? `${n}()`)];
 
 	const importBlock =
-		importList.length > 0
-			? `import { ${importList} } from '@neodrag/core/plugins';\n`
-			: '';
+		importList.length > 0 ? `import { ${importList} } from '@neodrag/core/plugins';\n` : '';
 
 	return measureEntry(
 		tempDir,
@@ -199,9 +207,7 @@ export { engine };
 async function measureDropCombo(tempDir: string, optional: readonly string[]): Promise<number> {
 	const importList = optional.length > 0 ? optional.join(', ') : '';
 	const pluginList =
-		optional.length > 0
-			? optional.map((n) => PLUGIN_EXPR[n] ?? `${n}()`).join(', ')
-			: '';
+		optional.length > 0 ? optional.map((n) => PLUGIN_EXPR[n] ?? `${n}()`).join(', ') : '';
 
 	const importBlock =
 		optional.length > 0
@@ -230,8 +236,18 @@ async function measureExtras(tempDir: string) {
 	const engineMinimal = await measureEntry(
 		tempDir,
 		'minimal',
-		`import { Neodrag } from '@neodrag/core';
-export const engine = new Neodrag({ plugins: [] });
+		`import { DragNeodrag } from '@neodrag/core/internal';
+export const engine = new DragNeodrag({ plugins: [], defaultSensors: false });
+`,
+	);
+
+	const draggableOnly = await measureEntry(
+		tempDir,
+		'draggable-only',
+		`import { Draggable } from '@neodrag/core/draggable';
+import { position } from '@neodrag/core/plugins';
+const binding = new Draggable({ plugins: [position({ current: { x: 0, y: 0 } })] });
+export { binding };
 `,
 	);
 
@@ -239,16 +255,16 @@ export const engine = new Neodrag({ plugins: [] });
 		tempDir,
 		'sortable',
 		`import { Neodrag } from '@neodrag/core';
-import { sortable } from '@neodrag/core/drop';
+import { Sortable } from '@neodrag/core/sortable';
 
 const engine = new Neodrag();
 const list = typeof document !== 'undefined' ? document.createElement('ul') : {};
-const plugins = sortable({ items: () => [], getKey: (i) => i.id });
+const plugins = new Sortable({ items: () => [], keyBy: (i) => i.id, onReorder: () => {} });
 export { engine, plugins };
 `,
 	);
 
-	return { engineMinimal, sortable };
+	return { engineMinimal, sortable, draggableOnly };
 }
 
 async function main() {
@@ -318,9 +334,7 @@ async function main() {
 		},
 		sortableList: {
 			label: 'Defaults + sortable list',
-			bytes:
-				(dragSizes['0'] ?? 0) +
-				Math.max(0, extras.sortable - extras.engineMinimal),
+			bytes: (dragSizes['0'] ?? 0) + Math.max(0, extras.sortable - extras.engineMinimal),
 			drag: [],
 			drop: [],
 		},
@@ -341,6 +355,7 @@ async function main() {
 	console.log(`  drag base (defaults only): ${dragSizes['0']} B brotli`);
 	console.log(`  engine minimal: ${extras.engineMinimal} B`);
 	console.log(`  sortable helper: ${extras.sortable} B`);
+	console.log(`  draggable only: ${extras.draggableOnly} B`);
 
 	rmSync(tempDir, { recursive: true, force: true });
 }

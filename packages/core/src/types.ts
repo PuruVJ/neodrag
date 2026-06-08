@@ -1,6 +1,7 @@
 import type { InteractionInput } from './interaction-input.ts';
 import type { LengthAdapter } from './length-runtime.ts';
 import type { SizeInput } from './length-runtime.ts';
+import type { MarkupAdapter } from './markup-adapter.ts';
 
 export type EndReason = 'drop' | 'no-target' | 'cancel';
 
@@ -13,6 +14,7 @@ export type PluginPhase = 'pre' | 'resolve' | 'post';
 export interface SessionPrivateStore {
 	get<T>(key: SessionKey<T>): T | undefined;
 	set<T>(key: SessionKey<T>, value: T): void;
+	delete(key: SessionKey<unknown>): void;
 	has(key: SessionKey<unknown>): boolean;
 }
 
@@ -60,6 +62,7 @@ export interface DragCtx {
 	readonly isDragging: boolean;
 	readonly isInteracting: boolean;
 	readonly rootNode: HTMLElement | SVGElement;
+	readonly markup: MarkupAdapter;
 	readonly lastInput: InteractionInput | null;
 	readonly lastEvent: PointerEvent | null;
 	readonly cachedRootNodeRect: DOMRect;
@@ -74,6 +77,7 @@ export interface DropCtx {
 	readonly pointer: { x: number; y: number };
 	readonly session: DragSession;
 	readonly rootNode: HTMLElement | SVGElement;
+	readonly markup: MarkupAdapter;
 	readonly cachedRootNodeRect: DOMRect;
 	readonly lastInput: InteractionInput | null;
 	readonly lastEvent: PointerEvent | null;
@@ -82,8 +86,7 @@ export interface DropCtx {
 	effect(fn: () => void): void;
 }
 
-const DEV =
-	typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production';
+const DEV = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production';
 
 export function pluginKeyLabel(key: symbol): string {
 	return key.description ?? 'plugin';
@@ -134,7 +137,6 @@ export type PluginSlot<T> = T | (() => T | T[]);
 
 export type DragPluginList = PluginSlot<DragPlugin>[];
 export type DropPluginList = PluginSlot<DropPlugin>[];
-
 
 export interface ErrorInfo {
 	phase:

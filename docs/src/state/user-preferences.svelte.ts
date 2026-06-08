@@ -45,6 +45,15 @@ class Theme {
 		if (!browser || this.#runtime_started) return;
 		this.#runtime_started = true;
 
+		const stored = this.#persisted.current;
+		if (stored.preference !== 'system' && stored.current !== stored.preference) {
+			this.#persisted.current = {
+				preference: stored.preference,
+				current: stored.preference,
+			};
+		}
+		apply_theme_to_dom(this.#current);
+
 		const media = window.matchMedia('(prefers-color-scheme: dark)');
 		const on_media = () => apply_theme_to_dom(this.#current);
 

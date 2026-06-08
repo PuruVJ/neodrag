@@ -2,10 +2,30 @@
 	"name": "@neodrag/svelte",
 	"version": "3.0.0-next.9",
 	"description": "Svelte Action to add dragging to your apps 😉",
-	"type": "module",
+	"keywords": [
+		"drag",
+		"draggable",
+		"neodrag",
+		"performant",
+		"react-draggable",
+		"small",
+		"svelte",
+		"tiny"
+	],
+	"homepage": "https://neodrag.dev/docs/svelte",
+	"bugs": {
+		"url": "https://github.com/PuruVJ/neodrag/issues"
+	},
+	"license": "MIT",
+	"author": "Puru Vijay",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PuruVJ/neodrag.git"
+	},
 	"files": [
 		"dist/*"
 	],
+	"type": "module",
 	"sideEffects": false,
 	"exports": {
 		".": {
@@ -25,6 +45,12 @@
 			"svelte": "./src/drop/index.svelte.ts",
 			"import": "./src/drop/index.svelte.ts",
 			"default": "./src/drop/index.svelte.ts"
+		},
+		"./sortable": {
+			"types": "./src/sortable/index.svelte.ts",
+			"svelte": "./src/sortable/index.svelte.ts",
+			"import": "./src/sortable/index.svelte.ts",
+			"default": "./src/sortable/index.svelte.ts"
 		},
 		"./resize": {
 			"types": "./src/resize/index.svelte.ts",
@@ -53,6 +79,12 @@
 				"import": "./dist/drop/index.svelte.js",
 				"default": "./dist/drop/index.svelte.js"
 			},
+			"./sortable": {
+				"types": "./dist/sortable/index.svelte.d.ts",
+				"svelte": "./dist/sortable/index.svelte.js",
+				"import": "./dist/sortable/index.svelte.js",
+				"default": "./dist/sortable/index.svelte.js"
+			},
 			"./resize": {
 				"types": "./dist/resize/index.svelte.d.ts",
 				"svelte": "./dist/resize/index.svelte.js",
@@ -67,31 +99,6 @@
 		"prepublishOnly": "turbo compile",
 		"test": "vitest run --config vitest.config.ts"
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/PuruVJ/neodrag.git"
-	},
-	"keywords": [
-		"draggable",
-		"svelte",
-		"react-draggable",
-		"drag",
-		"svelte",
-		"small",
-		"tiny",
-		"performant",
-		"neodrag"
-	],
-	"author": "Puru Vijay",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/PuruVJ/neodrag/issues"
-	},
-	"peerDependencies": {
-		"svelte": "^3 || ^4 || ^5",
-		"@neodrag/core": "workspace:*"
-	},
-	"homepage": "https://neodrag.dev/docs/svelte",
 	"devDependencies": {
 		"@neodrag/core": "workspace:*",
 		"@sveltejs/vite-plugin-svelte": "5.1.0",
@@ -101,5 +108,9 @@
 		"tsdown": "catalog:",
 		"vitest": "^3.2.4",
 		"vitest-browser-svelte": "^1.0.0"
+	},
+	"peerDependencies": {
+		"@neodrag/core": "workspace:*",
+		"svelte": "^3 || ^4 || ^5"
 	}
 }

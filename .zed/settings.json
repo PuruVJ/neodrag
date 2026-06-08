@@ -3,6 +3,58 @@
 // For a full list of overridable settings, and general information on folder-specific settings,
 // see the documentation: https://zed.dev/docs/configuring-zed#settings-files
 {
-	"format_on_save": "prettier",
-	"formatter": "prettier"
+	"lsp": {
+		"oxfmt": {
+			"initialization_options": {
+				"settings": {
+					"run": "onSave"
+				}
+			}
+		}
+	},
+	"prettier": {
+		"allowed": false
+	},
+	"languages": {
+		"CSS": {
+			"format_on_save": "on",
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		},
+		"HTML": {
+			"format_on_save": "on",
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		},
+		"JavaScript": {
+			"format_on_save": "on",
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		},
+		"JSON": {
+			"format_on_save": "on",
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		},
+		"JSONC": {
+			"format_on_save": "on",
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		},
+		"Markdown": {
+			"format_on_save": "on",
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		},
+		"MDX": {
+			"format_on_save": "on",
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		},
+		"TypeScript": {
+			"format_on_save": "on",
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		},
+		"TSX": {
+			"format_on_save": "on",
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		},
+		"Svelte": {
+			"format_on_save": "on",
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		}
+	}
 }

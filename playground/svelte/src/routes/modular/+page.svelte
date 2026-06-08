@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Draggable } from '@neodrag/svelte'
-	import { ControlFrom, controls, events, position, scrollLock } from '@neodrag/svelte/plugins';
+	import { Draggable } from '@neodrag/svelte';
+	import { ControlFrom, controls, position, scrollLock } from '@neodrag/svelte/plugins';
 
 	let current_position = $state({ x: 0, y: 0 });
 
@@ -18,7 +18,6 @@
 		controls({
 			allow: ControlFrom.selector('.handle'),
 		}),
-		events(),
 		scrollLock(),
 	]);
 
@@ -42,10 +41,7 @@
 	<input type="range" bind:value={current_position.y} />
 </label>
 
-<div
-	{@attach drag.attachment}
-	style="width: 100px; height: 100px; background: cyan;"
->
+<div {@attach drag.attachment} style="width: 100px; height: 100px; background: cyan;">
 	Hello
 
 	<br />

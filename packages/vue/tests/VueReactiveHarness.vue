@@ -1,18 +1,18 @@
 <script setup lang="ts">
-	import { Draggable } from '@neodrag/vue';
-	import { position } from '@neodrag/vue/plugins';
-	import { watch } from 'vue';
+import { Draggable } from '../src/draggable.ts';
+import { position } from '@neodrag/vue/plugins';
+import { watch } from 'vue';
 
-	const props = defineProps<{ external: { x: number; y: number } }>();
+const props = defineProps<{ external: { x: number; y: number } }>();
 
-	const drag = new Draggable({
-		plugins: [() => position({ current: { x: props.external.x, y: props.external.y } })],
-	});
+const drag = new Draggable({
+	plugins: [() => position({ current: { x: props.external.x, y: props.external.y } })],
+});
 
-	watch(
-		() => [props.external.x, props.external.y] as const,
-		() => drag.flushReactive(),
-	);
+watch(
+	() => [props.external.x, props.external.y] as const,
+	() => drag.flushReactive(),
+);
 </script>
 
 <template>
@@ -20,9 +20,9 @@
 </template>
 
 <style scoped>
-	.box {
-		width: 100px;
-		height: 100px;
-		background: cyan;
-	}
+.box {
+	width: 100px;
+	height: 100px;
+	background: cyan;
+}
 </style>

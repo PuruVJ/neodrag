@@ -1,17 +1,23 @@
 ---
 import { get_nav_list } from '$/nav';
 import Nav from '$components/docs/Nav.svelte';
+import ToC from '$components/ToC.astro';
 import MetaThemeColor from '$components/MetaThemeColor.svelte';
+import type { MarkdownHeading } from 'astro';
 import type { Framework } from '$helpers/constants';
 import Layout from './Layout.astro';
 
 type Props = {
 	title: string;
 	framework: Framework;
+	headings?: MarkdownHeading[];
 };
 
-const { title, framework } = Astro.props;
+const { title, framework, headings = [] } = Astro.props;
 const nav_list = get_nav_list(framework);
+
+const toc_headings = headings.filter((h) => h.depth >= 2 && h.depth <= 4);
+const show_toc = toc_headings.length > 0;
 ---
 
 <MetaThemeColor client:load />
@@ -38,20 +44,17 @@ const nav_list = get_nav_list(framework);
 					<span class="site-section-break-line"></span>
 				</div>
 
-				<footer class="mt-6 flex w-full justify-center">
-					<span class="font-mono text-xs tracking-[0.12em] text-fg-muted uppercase">
+				<footer class="docs-footer mt-6 flex w-full justify-center">
+					<span>
 						&copy; 2021-{new Date().getUTCFullYear()}
-						<a
-							href="https://x.com/puruvjdev"
-							target="blank"
-							rel="noopener noreferrer"
-							class="unstyled font-extrabold text-brand normal-case"
-						>
+						<a href="https://x.com/puruvjdev" target="blank" rel="noopener noreferrer" class="unstyled">
 							Puru Vijay</a
 						>
 					</span>
 				</footer>
 			</article>
 		</main>
+
+		{show_toc && <ToC headings={toc_headings} class="docs-toc-float" />}
 	</section>
 </Layout>

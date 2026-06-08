@@ -66,3 +66,52 @@ export function is_svg_svg_element(element: Element | EventTarget): element is S
 }
 
 export const is_null = (v: unknown): v is null => Object.is(v, null);
+
+const GHOST_PRESENTATION_PROPS = [
+	'display',
+	'flex-direction',
+	'align-items',
+	'justify-content',
+	'flex-wrap',
+	'gap',
+	'padding-top',
+	'padding-right',
+	'padding-bottom',
+	'padding-left',
+	'border-top',
+	'border-right',
+	'border-bottom',
+	'border-left',
+	'border-radius',
+	'background',
+	'color',
+	'font',
+	'font-size',
+	'font-weight',
+	'font-family',
+	'line-height',
+	'letter-spacing',
+	'text-transform',
+	'box-shadow',
+	'box-sizing',
+	'white-space',
+] as const;
+
+export function mirrorPresentationStyles(source: HTMLElement, target: HTMLElement) {
+	const computed = getComputedStyle(source);
+	for (const prop of GHOST_PRESENTATION_PROPS) {
+		target.style.setProperty(prop, computed.getPropertyValue(prop));
+	}
+}
+
+export function mirrorPresentationTree(source: Element, target: Element) {
+	if (source instanceof HTMLElement && target instanceof HTMLElement) {
+		mirrorPresentationStyles(source, target);
+	}
+	const sourceChildren = source.children;
+	const targetChildren = target.children;
+	for (let i = 0; i < sourceChildren.length; i++) {
+		const child = targetChildren[i];
+		if (child) mirrorPresentationTree(sourceChildren[i]!, child);
+	}
+}

@@ -1,0 +1,130 @@
+html[data-framework='svelte'] {
+	--color-brand: var(--app-color-brand-svelte);
+	--secondary-color: var(--app-color-brand-svelte);
+	--framework-dock-tint: var(--app-color-brand-svelte);
+}
+
+html[data-framework='react'] {
+	--color-brand: var(--app-color-brand-react);
+	--secondary-color: var(--app-color-brand-react);
+	--framework-dock-tint: var(--app-color-brand-react);
+}
+
+html[data-framework='vue'] {
+	--color-brand: var(--app-color-brand-vue);
+	--secondary-color: var(--app-color-brand-vue);
+	--framework-dock-tint: var(--app-color-brand-vue);
+}
+
+html[data-framework='solid'] {
+	--color-brand: var(--app-color-brand-solid);
+	--secondary-color: var(--app-color-brand-solid);
+	--framework-dock-tint: var(--app-color-brand-solid);
+}
+
+html[data-framework='vanilla'] {
+	--color-brand: var(--app-color-brand-vanilla);
+	--secondary-color: var(--app-color-brand-vanilla);
+	--framework-dock-tint: var(--app-color-brand-vanilla-accent);
+}
+
+html[data-framework='core'] {
+	--color-brand: var(--app-color-primary);
+	--secondary-color: var(--app-color-primary);
+	--framework-dock-tint: var(--app-color-primary);
+}
+
+html[data-framework='svelte'] {
+	--framework-body-gradient: var(--app-color-brand-svelte-body-gradient);
+	--framework-navbar: var(--app-color-brand-svelte-navbar);
+	--dock-frame: color-mix(in srgb, var(--framework-dock-tint), transparent 42%);
+	--dock-fill: color-mix(in srgb, var(--app-color-shell), var(--framework-dock-tint) 12%);
+	--chip-border: color-mix(in srgb, var(--framework-dock-tint), transparent 78%);
+	--chip-fill: color-mix(in srgb, var(--framework-dock-tint), transparent 90%);
+	--chip-label: color-mix(in srgb, var(--framework-dock-tint), var(--app-color-dark) 12%);
+}
+
+html[data-framework='react'] {
+	--framework-body-gradient: var(--app-color-brand-react-body-gradient);
+	--framework-navbar: var(--app-color-brand-react-navbar);
+	--dock-frame: color-mix(in srgb, var(--framework-dock-tint), transparent 42%);
+	--dock-fill: color-mix(in srgb, var(--app-color-shell), var(--framework-dock-tint) 12%);
+	--chip-border: color-mix(in srgb, var(--framework-dock-tint), transparent 78%);
+	--chip-fill: color-mix(in srgb, var(--framework-dock-tint), transparent 90%);
+	--chip-label: color-mix(in srgb, var(--framework-dock-tint), var(--app-color-dark) 12%);
+}
+
+html[data-framework='vue'] {
+	--framework-body-gradient: var(--app-color-brand-vue-body-gradient);
+	--framework-navbar: var(--app-color-brand-vue-navbar);
+	--dock-frame: color-mix(in srgb, var(--framework-dock-tint), transparent 42%);
+	--dock-fill: color-mix(in srgb, var(--app-color-shell), var(--framework-dock-tint) 12%);
+	--chip-border: color-mix(in srgb, var(--framework-dock-tint), transparent 78%);
+	--chip-fill: color-mix(in srgb, var(--framework-dock-tint), transparent 90%);
+	--chip-label: color-mix(in srgb, var(--framework-dock-tint), var(--app-color-dark) 12%);
+}
+
+html[data-framework='solid'] {
+	--framework-body-gradient: var(--app-color-brand-solid-body-gradient);
+	--framework-navbar: var(--app-color-brand-solid-navbar);
+	--dock-frame: color-mix(in srgb, var(--framework-dock-tint), transparent 42%);
+	--dock-fill: color-mix(in srgb, var(--app-color-shell), var(--framework-dock-tint) 12%);
+	--chip-border: color-mix(in srgb, var(--framework-dock-tint), transparent 78%);
+	--chip-fill: color-mix(in srgb, var(--framework-dock-tint), transparent 90%);
+	--chip-label: color-mix(in srgb, var(--framework-dock-tint), var(--app-color-dark) 12%);
+}
+
+html[data-framework='vanilla'] {
+	--framework-body-gradient: var(--app-color-brand-vanilla-body-gradient);
+	--framework-navbar: var(--app-color-brand-vanilla-navbar);
+	--dock-frame: color-mix(in srgb, var(--framework-dock-tint), transparent 42%);
+	--dock-fill: color-mix(in srgb, var(--app-color-shell), var(--framework-dock-tint) 14%);
+	--chip-border: color-mix(in srgb, var(--framework-dock-tint), transparent 76%);
+	--chip-fill: color-mix(in srgb, var(--framework-dock-tint), transparent 88%);
+	--chip-label: color-mix(in srgb, var(--framework-dock-tint), var(--app-color-dark) 10%);
+}
+
+html[data-framework='core'] {
+	--framework-body-gradient: var(--app-color-primary-body-gradient);
+	--framework-navbar: var(--app-color-primary-navbar);
+	--dock-frame: color-mix(in srgb, var(--framework-dock-tint), transparent 42%);
+	--dock-fill: color-mix(in srgb, var(--app-color-shell), var(--framework-dock-tint) 12%);
+	--chip-border: color-mix(in srgb, var(--framework-dock-tint), transparent 78%);
+	--chip-fill: color-mix(in srgb, var(--framework-dock-tint), transparent 90%);
+	--chip-label: color-mix(in srgb, var(--framework-dock-tint), var(--app-color-dark) 12%);
+}
+
+html[data-theme='dark'][data-framework='svelte'] {
+	--dock-frame: color-mix(in srgb, var(--framework-dock-tint), transparent 38%);
+	--dock-fill: color-mix(in srgb, var(--app-color-shell), var(--framework-dock-tint) 18%);
+}
+
+html[data-theme='dark'][data-framework='react'] {
+	--dock-frame: color-mix(in srgb, var(--framework-dock-tint), transparent 38%);
+	--dock-fill: color-mix(in srgb, var(--app-color-shell), var(--framework-dock-tint) 18%);
+}
+
+html[data-theme='dark'][data-framework='vue'] {
+	--dock-frame: color-mix(in srgb, var(--framework-dock-tint), transparent 38%);
+	--dock-fill: color-mix(in srgb, var(--app-color-shell), var(--framework-dock-tint) 18%);
+}
+
+html[data-theme='dark'][data-framework='solid'] {
+	--dock-frame: color-mix(in srgb, var(--framework-dock-tint), transparent 38%);
+	--dock-fill: color-mix(in srgb, var(--app-color-shell), var(--framework-dock-tint) 18%);
+}
+
+html[data-theme='dark'][data-framework='vanilla'] {
+	--dock-frame: color-mix(in srgb, var(--framework-dock-tint), transparent 40%);
+	--dock-fill: color-mix(in srgb, var(--app-color-shell), var(--framework-dock-tint) 22%);
+}
+
+html[data-theme='dark'][data-framework='core'] {
+	--dock-frame: color-mix(in srgb, var(--framework-dock-tint), transparent 38%);
+	--dock-fill: color-mix(in srgb, var(--app-color-shell), var(--framework-dock-tint) 18%);
+}
+
+body.docs-route {
+	background-image: var(--framework-body-gradient, none);
+	--app-color-scrolling-navbar: var(--framework-navbar, var(--app-color-primary));
+}

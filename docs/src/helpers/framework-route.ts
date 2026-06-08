@@ -26,6 +26,9 @@ export function apply_docs_framework(framework: string | undefined) {
 }
 
 export function apply_docs_route_context(path = location.pathname) {
-	apply_docs_framework(framework_from_path(path));
-	document.body?.classList.toggle('docs-route', is_docs_path(path));
+	const framework = framework_from_path(path);
+	apply_docs_framework(framework);
+	const is_docs = is_docs_path(path);
+	document.documentElement.classList.toggle('docs-route', is_docs);
+	document.body?.classList.toggle('docs-route', is_docs);
 }

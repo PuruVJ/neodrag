@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { Draggable, type DragPluginList } from '../../src/index.ts';
+	import { bindTarget } from '../bind-target.ts';
 
 	const {
 		testid = 'draggable',
@@ -11,13 +12,13 @@
 		plugins?: DragPluginList;
 		testid?: string;
 		children?: Snippet;
-		engine?: import('../../src/engine.ts').Neodrag;
+		engine?: import('../../src/engine/neodrag.ts').Neodrag;
 	} = $props();
 
 	const drag = new Draggable({ engine, plugins });
 </script>
 
-<div class="box" {@attach drag.attachment} data-testid={testid}>
+<div class="box" {@attach bindTarget(drag)} data-testid={testid}>
 	{@render children?.()}
 </div>
 

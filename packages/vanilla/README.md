@@ -24,7 +24,7 @@ One draggable to rule em all
 - 🧩 **Plugin-based** - Mix and match only what you need
 - ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
 - 🎯 **Framework agnostic** - Works with any JavaScript environment
-- 🔄 **Reactive** - pass `() => plugins`; the wrapper reconciles automatically
+- 🔄 **Reactive** - pass `() => plugins`; the binding reconciles on `update()`
 
 # Installing
 
@@ -34,102 +34,137 @@ npm install @neodrag/vanilla@next
 
 # Usage
 
-Basic usage
+Create a `Draggable` binding, then attach it to a node. By default it uses the shared engine (`Neodrag.shared`) under the hood — you do not need to touch the engine for typical apps.
+
+### Basic
 
 ```typescript
 import { Draggable } from '@neodrag/vanilla';
 
-const dragInstance = new Draggable(document.querySelector('#drag'));
+const drag = new Draggable({ plugins: [] });
+drag.attach(document.querySelector('#drag')!);
+
+// later
+drag.destroy();
 ```
 
-With plugins
+### With plugins
 
 ```typescript
-import { Draggable, axis, grid } from '@neodrag/vanilla';
+import { Draggable } from '@neodrag/vanilla';
+import { axis, grid } from '@neodrag/vanilla/plugins';
 
-const dragInstance = new Draggable(document.querySelector('#drag'), [axis('x'), grid([10, 10])]);
+const drag = new Draggable({
+  plugins: [axis('x'), grid([10, 10])],
+});
+drag.attach(document.querySelector('#drag')!);
 ```
 
-Defining plugins elsewhere with TypeScript
+### Plugins defined elsewhere (TypeScript)
 
 ```typescript
-import { Draggable, axis, bounds, BoundsFrom, type Plugin } from '@neodrag/vanilla';
+import { Draggable, type DragPluginList } from '@neodrag/vanilla';
+import { axis, bounds, BoundsFrom } from '@neodrag/vanilla/plugins';
 
-const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
+const plugins: DragPluginList = [axis('y'), bounds(BoundsFrom.parent())];
 
-const dragInstance = new Draggable(document.querySelector('#drag'), plugins);
+const drag = new Draggable({ plugins });
+drag.attach(document.querySelector('#drag')!);
 ```
 
-Reactive plugins with reactive plugin factoriess
+### Reactive plugins
 
 ```typescript
-import { Draggable, axis } from '@neodrag/vanilla';
+import { Draggable } from '@neodrag/vanilla';
+import { axis } from '@neodrag/vanilla/plugins';
 
-const dragInstance = new Draggable(document.querySelector('#drag'), () => [axisreactive plugin factories]);
+let currentAxis: 'x' | 'y' = 'x';
 
-// Update the axisreactive plugin factories. Automatically applies to the drag instance
-axisreactive plugin factories.current = axis('y');
+const drag = new Draggable({
+  plugins: [() => axis(currentAxis)],
+});
+drag.attach(document.querySelector('#drag')!);
+
+function switchAxis() {
+  currentAxis = currentAxis === 'x' ? 'y' : 'x';
+  drag.update();
+}
 ```
 
-Cleanup
+### Drag callbacks
 
 ```typescript
-// Clean up when done
-dragInstance.destroy();
+import { Draggable } from '@neodrag/vanilla';
+
+const drag = new Draggable({
+  plugins: [],
+  onDragStart: (data) => console.log('Started:', data.offset),
+  onDrag: (data) => console.log('Dragging:', data.offset),
+  onDragEnd: (data) => console.log('Ended:', data.offset),
+});
+drag.attach(document.querySelector('#drag')!);
+```
+
+## Sortable lists
+
+```typescript
+import { Draggable, Droppable } from '@neodrag/vanilla';
+import { Sortable } from '@neodrag/vanilla/sortable';
+
+const items = [{ id: 'a' }, { id: 'b' }];
+const list = new Sortable({
+  items: () => items,
+  keyBy: (i) => i.id,
+  onReorder: (next) => {
+    items.length = 0;
+    items.push(...next);
+  },
+});
+
+const zone = new Droppable({ plugins: list.container() });
+zone.attach(document.querySelector('ul')!);
+
+for (const item of items) {
+  const chip = new Draggable({ plugins: list.item(item.id) });
+  chip.attach(document.querySelector(`[data-id="${item.id}"]`)!);
+}
+```
+
+## Custom engine
+
+Only when you need isolated defaults or error handling:
+
+```typescript
+import { Neodrag, Draggable } from '@neodrag/vanilla';
+import { axis } from '@neodrag/vanilla/plugins';
+
+const engine = new Neodrag({
+  onError: (error) => console.error(error),
+});
+
+const drag = new Draggable({ plugins: [axis('x')], engine });
+drag.attach(document.querySelector('#drag')!);
+
+// engine.dispose(); // tears down all bindings on this engine
 ```
 
 ## Using via CDN
 
 For quick prototyping or projects without build tools:
 
-### Basic CDN Usage
+### Basic CDN usage
 
 ```html
 <script src="https://unpkg.com/@neodrag/vanilla@next/dist/umd/index.js"></script>
 
 <div id="drag">Drag me!</div>
 <script>
-	var dragInstance = new NeoDrag.Draggable(document.getElementById('drag'));
+  var drag = new NeoDrag.Draggable({ plugins: [] });
+  drag.attach(document.getElementById('drag'));
 </script>
 ```
 
-### CDN with Plugins
-
-```html
-<script src="https://unpkg.com/@neodrag/vanilla@next/dist/umd/index.js"></script>
-
-<div id="constrained-drag">Constrained dragging</div>
-<script>
-	var constrainedInstance = new NeoDrag.Draggable(document.getElementById('constrained-drag'), [
-		NeoDrag.axis('x'),
-		NeoDrag.bounds(NeoDrag.BoundsFrom.parent()),
-		NeoDrag.grid([20, 20]),
-	]);
-</script>
-```
-
-### CDN with Reactive reactive plugin factoriess
-
-```html
-<script src="https://unpkg.com/@neodrag/vanilla@next/dist/umd/index.js"></script>
-
-<div id="reactive-drag">Reactive dragging</div>
-<button onclick="switchAxis()">Switch Axis</button>
-
-<script>
-	var currentAxis = 'x';
-	var axisreactive plugin factories = new NeoDrag.reactive plugin factories(() => NeoDrag.axis(currentAxis));
-
-	var reactiveInstance = new NeoDrag.Draggable(document.getElementById('reactive-drag'), () => [
-		axisreactive plugin factories,
-	]);
-
-	function switchAxis() {
-		currentAxis = currentAxis === 'x' ? 'y' : 'x';
-		axisreactive plugin factories.current = NeoDrag.axis(currentAxis);
-	}
-</script>
-```
+Plugin helpers (`axis`, `grid`, etc.) are imported from `@neodrag/vanilla/plugins` in bundled apps. For CDN, load a build that includes the plugins you need or use `@neodrag/core` plugin URLs from your bundler.
 
 <a href="https://next.neodrag.dev/docs/vanilla" style="font-size: 2rem">Read the docs</a>
 

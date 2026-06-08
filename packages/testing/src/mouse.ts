@@ -220,13 +220,13 @@ export async function isCursorOverElement(element: Element): Promise<boolean> {
  * await mouseClick(coords)
  */
 export async function getElementCoords(
-	element: Element | { element(): Element },
+	element: Element | { element(): Element | Promise<Element> },
 ): Promise<{ x: number; y: number }> {
-	// Handle testing library wrappers that have an element() method
-	const domElement =
+	const resolved =
 		'element' in element && typeof element.element === 'function'
-			? element.element()
+			? await element.element()
 			: (element as Element);
+	const domElement = resolved;
 
 	if (!domElement || typeof domElement.getBoundingClientRect !== 'function') {
 		throw new Error(
@@ -460,127 +460,149 @@ export async function mouseDoubleClick(options: Omit<MouseOptions, 'clickCount'>
  * Simple drag and drop - disable pointer capture to avoid Firefox issues
  * Now supports long press functionality
  */
+export type PointerDragOptions = {
+	steps?: number;
+	delay?: number;
+	longpress?: number;
+	/** When false, keeps the pointer down after the last move (for mid-drag assertions). */
+	release?: boolean;
+};
+
+async function resolveDragElement(
+	element: Element | { element(): Element | Promise<Element> },
+): Promise<Element> {
+	if ('element' in element && typeof element.element === 'function') {
+		return element.element();
+	}
+	return element as Element;
+}
+
+export function dispatchPointer(
+	target: Element,
+	type: string,
+	x: number,
+	y: number,
+	buttons: number,
+) {
+	const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+	const validPointerId = isFirefox ? 0 : 1;
+	const props = {
+		bubbles: true,
+		cancelable: true,
+		pointerId: validPointerId,
+		width: 1,
+		height: 1,
+		pressure: buttons ? 0.5 : 0,
+		tangentialPressure: 0,
+		tiltX: 0,
+		tiltY: 0,
+		twist: 0,
+		pointerType: 'mouse' as const,
+		isPrimary: true,
+		view: window,
+		clientX: x,
+		clientY: y,
+		screenX: x,
+		screenY: y,
+		button: 0,
+		buttons,
+	};
+	const event = new PointerEvent(type, props);
+	target.dispatchEvent(event);
+	document.documentElement.dispatchEvent(event);
+}
+
+/**
+ * Pointer drag with optional hold (no pointerup) for testing in-flight drag/drop/sortable state.
+ */
+export async function pointerDrag(
+	element: Element | { element(): Element },
+	delta: { deltaX: number; deltaY: number },
+	options: PointerDragOptions = {},
+): Promise<{ x: number; y: number }> {
+	const { steps = 8, delay = 0, longpress = 0, release = true } = options;
+	const domElement = await resolveDragElement(element);
+	const origin = await getElementCoords(element);
+	const startCoords = { x: origin.x, y: origin.y };
+	const endCoords = {
+		x: startCoords.x + delta.deltaX,
+		y: startCoords.y + delta.deltaY,
+	};
+
+	const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+	const originalSetPointerCapture = HTMLElement.prototype.setPointerCapture;
+	const originalReleasePointerCapture = HTMLElement.prototype.releasePointerCapture;
+
+	if (isFirefox) {
+		HTMLElement.prototype.setPointerCapture = function () {};
+		HTMLElement.prototype.releasePointerCapture = function () {};
+	}
+
+	try {
+		dispatchPointer(domElement, 'pointermove', startCoords.x, startCoords.y, 0);
+		await new Promise((resolve) => setTimeout(resolve, 1));
+
+		dispatchPointer(domElement, 'pointerdown', startCoords.x, startCoords.y, 1);
+
+		if (longpress > 0) {
+			await new Promise((resolve) => setTimeout(resolve, longpress));
+		}
+		if (delay > 0) {
+			await new Promise((resolve) => setTimeout(resolve, delay));
+		}
+
+		for (let i = 1; i <= steps; i++) {
+			const progress = i / steps;
+			const x = startCoords.x + delta.deltaX * progress;
+			const y = startCoords.y + delta.deltaY * progress;
+			dispatchPointer(domElement, 'pointermove', x, y, 1);
+			await new Promise((resolve) => setTimeout(resolve, 1));
+		}
+
+		if (release) {
+			await new Promise((resolve) => setTimeout(resolve, 1));
+			dispatchPointer(domElement, 'pointerup', endCoords.x, endCoords.y, 0);
+		}
+
+		updateCursorPosition(endCoords.x, endCoords.y);
+		return endCoords;
+	} finally {
+		HTMLElement.prototype.setPointerCapture = originalSetPointerCapture;
+		HTMLElement.prototype.releasePointerCapture = originalReleasePointerCapture;
+	}
+}
+
+/** Move the held pointer to viewport coordinates (during an active pointerDrag with release: false). */
+export async function pointerMoveTo(x: number, y: number, steps = 1): Promise<void> {
+	const start = await getCursorPosition();
+	const deltaX = x - start.x;
+	const deltaY = y - start.y;
+	for (let i = 1; i <= steps; i++) {
+		const progress = i / steps;
+		const cx = start.x + deltaX * progress;
+		const cy = start.y + deltaY * progress;
+		dispatchPointer(document.documentElement, 'pointermove', cx, cy, 1);
+		await new Promise((resolve) => setTimeout(resolve, 1));
+	}
+	updateCursorPosition(x, y);
+}
+
+export async function pointerRelease(x?: number, y?: number): Promise<void> {
+	const pos = x != null && y != null ? { x, y } : await getCursorPosition();
+	dispatchPointer(document.documentElement, 'pointerup', pos.x, pos.y, 0);
+	updateCursorPosition(pos.x, pos.y);
+}
+
 export async function dragAndDrop(
 	element: Element | { element(): Element },
 	delta: { deltaX: number; deltaY: number },
 	options: {
 		steps?: number;
 		delay?: number;
-		longpress?: number; // Duration in ms to wait before starting drag
+		longpress?: number;
 	} = {},
 ): Promise<void> {
-	const { steps = 1, delay = 0, longpress = 0 } = options;
-
-	// Get element coords
-	const domElement =
-		'element' in element && typeof element.element === 'function'
-			? element.element()
-			: (element as Element);
-
-	const rect = domElement.getBoundingClientRect();
-	const startCoords = {
-		x: rect.left + rect.width / 2,
-		y: rect.top + rect.height / 2,
-	};
-	const endCoords = {
-		x: startCoords.x + delta.deltaX,
-		y: startCoords.y + delta.deltaY,
-	};
-
-	// Firefox-specific adjustments
-	const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
-	const actualSteps = steps;
-	const stepDelay = 1;
-	const holdDelay = delay;
-
-	// Temporarily disable setPointerCapture to avoid the error
-	const originalSetPointerCapture = HTMLElement.prototype.setPointerCapture;
-	const originalReleasePointerCapture = HTMLElement.prototype.releasePointerCapture;
-
-	if (isFirefox) {
-		HTMLElement.prototype.setPointerCapture = function () {
-			// Do nothing - just prevent the error
-		};
-		HTMLElement.prototype.releasePointerCapture = function () {
-			// Do nothing
-		};
-	}
-
-	try {
-		// Use a valid pointerId
-		const validPointerId = isFirefox ? 0 : 1;
-
-		// Enhanced pointer events with proper properties
-		const baseEventProps = {
-			bubbles: true,
-			cancelable: true,
-			pointerId: validPointerId,
-			width: 1,
-			height: 1,
-			pressure: 0.5,
-			tangentialPressure: 0,
-			tiltX: 0,
-			tiltY: 0,
-			twist: 0,
-			pointerType: 'mouse' as const,
-			isPrimary: true,
-			view: window,
-		};
-
-		// Helper to dispatch pointer events
-		const dispatchPointerEvent = (type: string, x: number, y: number, props: any) => {
-			const event = new PointerEvent(type, {
-				...props,
-				clientX: x,
-				clientY: y,
-				screenX: x,
-				screenY: y,
-			});
-			domElement.dispatchEvent(event);
-			return event;
-		};
-
-		// Move to start position first
-		dispatchPointerEvent('pointermove', startCoords.x, startCoords.y, baseEventProps);
-		await new Promise((resolve) => setTimeout(resolve, 1));
-
-		// Start drag sequence
-		dispatchPointerEvent('pointerdown', startCoords.x, startCoords.y, {
-			...baseEventProps,
-			button: 0,
-			buttons: 1,
-		});
-
-		// Wait for long press duration if specified
-		if (longpress > 0) {
-			await new Promise((resolve) => setTimeout(resolve, longpress));
-		}
-
-		await new Promise((resolve) => setTimeout(resolve, holdDelay));
-
-		// Smooth movement with multiple steps
-		for (let i = 1; i <= actualSteps; i++) {
-			const progress = i / actualSteps;
-			const currentX = startCoords.x + delta.deltaX * progress;
-			const currentY = startCoords.y + delta.deltaY * progress;
-
-			dispatchPointerEvent('pointermove', currentX, currentY, baseEventProps);
-			await new Promise((resolve) => setTimeout(resolve, stepDelay));
-		}
-
-		await new Promise((resolve) => setTimeout(resolve, 1));
-
-		// End drag sequence
-		dispatchPointerEvent('pointerup', endCoords.x, endCoords.y, {
-			...baseEventProps,
-			button: 0,
-			buttons: 0,
-		});
-	} finally {
-		// Restore original functions
-		HTMLElement.prototype.setPointerCapture = originalSetPointerCapture;
-		HTMLElement.prototype.releasePointerCapture = originalReleasePointerCapture;
-	}
+	await pointerDrag(element, delta, { ...options, release: true });
 }
 
 /**

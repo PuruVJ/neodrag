@@ -43,7 +43,11 @@ export function getKeyboardDragConfig(
 
 export function findKeyboardDragRoot(target: EventTarget | null): HTMLElement | SVGElement | null {
 	let el: Element | null =
-		target instanceof Element ? target : target instanceof Node ? (target as Node).parentElement : null;
+		target instanceof Element
+			? target
+			: target instanceof Node
+				? (target as Node).parentElement
+				: null;
 	while (el) {
 		if (registry.has(el as HTMLElement)) return el as HTMLElement | SVGElement;
 		el = el.parentElement;

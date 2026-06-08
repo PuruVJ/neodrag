@@ -1,8 +1,11 @@
 import type { DragPluginList, DropPluginList } from './types.ts';
 import type { ResizePluginList } from './resize/types.ts';
 
-export interface NeodragHost {
+export interface DragHost {
 	update(node: HTMLElement | SVGElement, plugins: DragPluginList): void;
+}
+
+export interface NeodragHost extends DragHost {
 	updateDrop(node: HTMLElement | SVGElement, plugins: DropPluginList): void;
 	updateResize(node: HTMLElement | SVGElement, plugins: ResizePluginList): void;
 }
@@ -41,8 +44,8 @@ export class BindingHandle {
 }
 
 export class DragHandle extends BindingHandle {
-	constructor(engine: NeodragHost, node: HTMLElement | SVGElement, dispose: () => void) {
-		super('drag', engine, node, dispose);
+	constructor(engine: DragHost, node: HTMLElement | SVGElement, dispose: () => void) {
+		super('drag', engine as NeodragHost, node, dispose);
 	}
 }
 

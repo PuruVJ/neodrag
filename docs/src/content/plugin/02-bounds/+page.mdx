@@ -20,23 +20,23 @@ bounds(BoundsFrom.element(el)); // Stay in specific element
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [bounds(BoundsFrom.viewport())] });
-	const drag_1 = new Draggable({ plugins: [bounds(BoundsFrom.parent())] });
+  const drag_0 = new Draggable({
+    plugins: [bounds(BoundsFrom.viewport())],
+  });
+  const drag_1 = new Draggable({
+    plugins: [bounds(BoundsFrom.parent())],
+  });
 </script>
 
 <!-- Stay within viewport -->
-<div {@attach drag_0.attachment}>
-  Can't leave the screen
-</div>
+<div {@attach drag_0.attachment}>Can't leave the screen</div>
 
 <!-- Stay within parent -->
 <div class="container">
-  <div {@attach drag_1.attachment}>
-    Contained child
-  </div>
+  <div {@attach drag_1.attachment}>Contained child</div>
 </div>
 ```
 
@@ -95,7 +95,7 @@ import { bounds, BoundsFrom, vDraggable } from '@neodrag/vue';
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { bounds, BoundsFrom, useDraggable } from '@neodrag/solid';
+import { bounds, BoundsFrom, createDraggable } from '@neodrag/solid';
 
 function BoundedElements() {
   const [viewport, setViewport] = createSignal<HTMLElement | null>(
@@ -103,8 +103,8 @@ function BoundedElements() {
   );
   const [parent, setParent] = createSignal<HTMLElement | null>(null);
 
-  useDraggable(viewport, [bounds(BoundsFrom.viewport())]);
-  useDraggable(parent, [bounds(BoundsFrom.parent())]);
+  createDraggable(viewport, [bounds(BoundsFrom.viewport())]);
+  createDraggable(parent, [bounds(BoundsFrom.parent())]);
 
   return (
     <div>
@@ -127,8 +127,12 @@ import { bounds, BoundsFrom, Neodrag } from '@neodrag/vanilla';
 const viewportElement = document.getElementById('viewport-bound');
 const parentElement = document.getElementById('parent-bound');
 
-Neodrag.shared.draggable(viewportElement, [bounds(BoundsFrom.viewport())]);
-Neodrag.shared.draggable(parentElement, [bounds(BoundsFrom.parent())]);
+Neodrag.shared.draggable(viewportElement, [
+  bounds(BoundsFrom.viewport()),
+]);
+Neodrag.shared.draggable(parentElement, [
+  bounds(BoundsFrom.parent()),
+]);
 ```
 
 </div>
@@ -143,33 +147,31 @@ Neodrag.shared.draggable(parentElement, [bounds(BoundsFrom.parent())]);
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [bounds(BoundsFrom.viewport())] });
-	const drag_1 = new Draggable({ plugins: [
-    bounds(
-      BoundsFrom.viewport({
-        top: 20,
-        left: 20,
-        right: 20,
-        bottom: 20,
-      }),
-    ),
-  ] });
+  const drag_0 = new Draggable({
+    plugins: [bounds(BoundsFrom.viewport())],
+  });
+  const drag_1 = new Draggable({
+    plugins: [
+      bounds(
+        BoundsFrom.viewport({
+          top: 20,
+          left: 20,
+          right: 20,
+          bottom: 20,
+        }),
+      ),
+    ],
+  });
 </script>
 
 <!-- Basic viewport bounds -->
-<div {@attach drag_0.attachment}>
-  Stay in window
-</div>
+<div {@attach drag_0.attachment}>Stay in window</div>
 
 <!-- Viewport with padding -->
-<div
-  {@attach drag_1.attachment}
->
-  20px padding from edges
-</div>
+<div {@attach drag_1.attachment}>20px padding from edges</div>
 ```
 
 </div>
@@ -240,14 +242,14 @@ const paddedBounds = [
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { bounds, BoundsFrom, useDraggable } from '@neodrag/solid';
+import { bounds, BoundsFrom, createDraggable } from '@neodrag/solid';
 
 function ViewportBounds() {
   const [basic, setBasic] = createSignal<HTMLElement | null>(null);
   const [padded, setPadded] = createSignal<HTMLElement | null>(null);
 
-  useDraggable(basic, [bounds(BoundsFrom.viewport())]);
-  useDraggable(padded, [
+  createDraggable(basic, [bounds(BoundsFrom.viewport())]);
+  createDraggable(padded, [
     bounds(
       BoundsFrom.viewport({
         top: 20,
@@ -300,30 +302,26 @@ Neodrag.shared.draggable(padded, [
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
   let container;
 
-	const drag_0 = new Draggable({ plugins: [bounds(() => BoundsFrom.element(container))] });
-	const drag_1 = new Draggable({ plugins: [bounds(BoundsFrom.selector('#drop-zone'))] });
+  const drag_0 = new Draggable({
+    plugins: [bounds(() => BoundsFrom.element(container))],
+  });
+  const drag_1 = new Draggable({
+    plugins: [bounds(BoundsFrom.selector('#drop-zone'))],
+  });
 </script>
 
 <div bind:this={container} class="boundary-container">
-  <div
-    {@attach drag_0.attachment}
-  >
-    Bound to container
-  </div>
+  <div {@attach drag_0.attachment}>Bound to container</div>
 </div>
 
 <!-- Using selector -->
 <div class="zone" id="drop-zone">
-  <div
-    {@attach drag_1.attachment}
-  >
-    Bound by selector
-  </div>
+  <div {@attach drag_1.attachment}>Bound by selector</div>
 </div>
 ```
 
@@ -396,7 +394,7 @@ const selectorBounds = [bounds(BoundsFrom.selector('#drop-zone'))];
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { bounds, BoundsFrom, useDraggable } from '@neodrag/solid';
+import { bounds, BoundsFrom, createDraggable } from '@neodrag/solid';
 
 function ElementBounds() {
   const [container, setContainer] = createSignal<HTMLElement | null>(
@@ -409,10 +407,10 @@ function ElementBounds() {
     null,
   );
 
-  useDraggable(bounded, [
+  createDraggable(bounded, [
     bounds(() => BoundsFrom.element(container()!)),
   ]);
-  useDraggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
+  createDraggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
 
   return (
     <div>
@@ -439,8 +437,12 @@ const container = document.getElementById('container');
 const bounded = document.getElementById('bounded');
 const selector = document.getElementById('selector');
 
-Neodrag.shared.draggable(bounded, [bounds(() => BoundsFrom.element(container))]);
-Neodrag.shared.draggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
+Neodrag.shared.draggable(bounded, [
+  bounds(() => BoundsFrom.element(container)),
+]);
+Neodrag.shared.draggable(selector, [
+  bounds(BoundsFrom.selector('#drop-zone')),
+]);
 ```
 
 </div>
@@ -453,8 +455,8 @@ Neodrag.shared.draggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { bounds } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { bounds } from '@neodrag/svelte/plugins';
 
   // Custom circular boundary
   function circularBounds() {
@@ -479,13 +481,11 @@ Neodrag.shared.draggable(selector, [bounds(BoundsFrom.selector('#drop-zone'))]);
     ];
   }
 
-	const drag_0 = new Draggable({ plugins: [bounds(circularBounds)] });
-	const drag_1 = new Draggable({ plugins: [bounds(timeBounds)] });
+  const drag_0 = new Draggable({ plugins: [bounds(circularBounds)] });
+  const drag_1 = new Draggable({ plugins: [bounds(timeBounds)] });
 </script>
 
-<div {@attach drag_0.attachment}>
-  Circular boundary
-</div>
+<div {@attach drag_0.attachment}>Circular boundary</div>
 
 <div {@attach drag_1.attachment}>Animated boundary</div>
 ```
@@ -586,7 +586,7 @@ const timePlugins = [bounds(timeBounds)];
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { bounds, useDraggable } from '@neodrag/solid';
+import { bounds, createDraggable } from '@neodrag/solid';
 
 function CustomBounds() {
   const [circular, setCircular] = createSignal<HTMLElement | null>(
@@ -617,8 +617,8 @@ function CustomBounds() {
     ] as [[number, number], [number, number]];
   };
 
-  useDraggable(circular, [bounds(circularBounds)]);
-  useDraggable(time, [bounds(timeBounds)]);
+  createDraggable(circular, [bounds(circularBounds)]);
+  createDraggable(time, [bounds(timeBounds)]);
 
   return (
     <div>

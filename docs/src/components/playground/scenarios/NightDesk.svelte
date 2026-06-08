@@ -9,8 +9,8 @@
 	const { world: _world }: Props = $props();
 
 	const panels = [
-		{ id: 'notes', title: 'Notes', body: 'Drag me anywhere on the desk.' },
-		{ id: 'tasks', title: 'Tasks', body: 'Bounds keep windows inside the desk.' },
+		{ id: 'notes', title: 'Notes', body: 'Bounds keeps this panel on the desk.' },
+		{ id: 'tasks', title: 'Tasks', body: 'Stack windows — drag to bring forward.' },
 	] as const;
 
 	let z_counter = $state(2);

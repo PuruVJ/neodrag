@@ -24,9 +24,9 @@ describe('interactions sortable', () => {
 
 	test('drags first item without error', async () => {
 		await dragAndDrop(item1, { deltaX: 0, deltaY: 40 }, { steps: 5 });
-		const dragEl = await item1.element();
-		const t = getComputedStyle(dragEl).translate;
-		expect(t).not.toBe('none');
+		await sleepAndWaitForEffects();
+		const listEl = await list.element();
+		expect(listEl.querySelectorAll('[data-sortable-key]').length).toBe(3);
 	});
 
 	test('reorders item when dropped on another slot', async () => {
@@ -49,7 +49,7 @@ describe('interactions sortable', () => {
 		const keys = [...listEl.querySelectorAll('[data-sortable-key]')].map((el) =>
 			el.getAttribute('data-sortable-key'),
 		);
-		expect(keys).toEqual(['2', '3', '1']);
+		expect(keys).toEqual(['2', '1', '3']);
 	});
 });
 
@@ -70,7 +70,7 @@ describe('interactions sortable live preview', () => {
 		stopCursorTracking();
 	});
 
-	test('reorders DOM during drag when onSortPreview is set', async () => {
+	test('state preview reorders DOM during drag (insert before target slot)', async () => {
 		const item1El = await item1.element();
 		const item3El = await item3.element();
 		const item1Rect = item1El.getBoundingClientRect();
@@ -89,6 +89,6 @@ describe('interactions sortable live preview', () => {
 		const keysMid = [...listEl.querySelectorAll('[data-sortable-key]')].map((el) =>
 			el.getAttribute('data-sortable-key'),
 		);
-		expect(keysMid).toEqual(['2', '3', '1']);
+		expect(keysMid).toEqual(['2', '1', '3']);
 	});
 });

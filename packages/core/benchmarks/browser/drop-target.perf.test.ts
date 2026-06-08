@@ -11,8 +11,7 @@ const ZONE_N = 10;
 function setupSoleDrop() {
 	resetBody();
 	const zone = document.createElement('div');
-	zone.style.cssText =
-		'position:absolute;left:0;top:0;width:500px;height:500px;background:#f0f0f0';
+	zone.style.cssText = 'position:absolute;left:0;top:0;width:500px;height:500px;background:#f0f0f0';
 	const box = document.createElement('div');
 	box.style.cssText =
 		'position:absolute;left:40px;top:40px;width:60px;height:60px;background:#4a9eff;touch-action:none';

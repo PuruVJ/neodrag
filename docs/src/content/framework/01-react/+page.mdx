@@ -8,7 +8,7 @@ tagline: 'A lightweight react hook to make your elements draggable.'
 npm i @neodrag/core@next @neodrag/react@next
 ```
 
-Import built-in plugins from `@neodrag/core/plugins` or `@neodrag/react/plugins`. Sortable lists use `@neodrag/react/drop` — prefer `useSortable` (stable instance + container `dropRef`) and `useSortableItem` per row. Low-level `sortable()` is still available when you want full control.
+Import built-in plugins from `@neodrag/core/plugins` or `@neodrag/react/plugins`. Sortable lists use `@neodrag/react/sortable` — prefer `useSortable` (stable instance + container spread) and `useSortableItem` per row, or `new Sortable()` when you want full control.
 
 ## Usage
 
@@ -94,7 +94,6 @@ function App() {
   const elementRef = useRef<HTMLDivElement>(null);
   const [currentAxis, setCurrentAxis] = useState<'x' | 'y'>('x');
 
-  
   useDraggable(elementRef, () => [axisCompartment]);
 
   return (
@@ -130,7 +129,6 @@ function App() {
   const [gridSize, setGridSize] = useState(20);
   const [enableBounds, setEnableBounds] = useState(false);
 
-      
   useDraggable(elementRef, () => [axisComp, gridComp, boundsComp]);
 
   return (
@@ -226,7 +224,10 @@ import { resizeHandles, sizeBounds } from '@neodrag/react/resize';
 
 function Panel() {
   const ref = useRef<HTMLDivElement>(null);
-  useResizable(ref, [resizeHandles({ edges: ['e', 's', 'se'] }), sizeBounds({ minWidth: 120 })]);
+  useResizable(ref, [
+    resizeHandles({ edges: ['e', 's', 'se'] }),
+    sizeBounds({ minWidth: 120 }),
+  ]);
   return <div ref={ref} style={{ width: 200, height: 120 }} />;
 }
 ```

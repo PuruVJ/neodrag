@@ -8,16 +8,13 @@ export type SizesOutput = {
 	extras: {
 		engineMinimal: number;
 		sortable: number;
+		draggableOnly: number;
 	};
-	presets: Record<
-		string,
-		{ bytes: number; drag: string[]; drop: string[]; label: string }
-	>;
+	presets: Record<string, { bytes: number; drag: string[]; drop: string[]; label: string }>;
 };
 
 export const DRAG_DEFAULT_NAMES = [
 	'ignoreMultitouch',
-	'stateMarker',
 	'applyUserSelectHack',
 	'threshold',
 	'touchAction',

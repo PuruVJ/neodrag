@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { Draggable } from '@neodrag/svelte';
-	import { position } from '@neodrag/svelte/plugins';
+	import { Draggable } from '../../src/draggable-binding.ts';
+	import { position } from '../../src/plugins.ts';
+	import { bindTarget } from '../bind-target.ts';
 
 	const {
 		engine,
 		external = null,
 	}: {
-		engine?: import('../../src/engine.ts').Neodrag;
+		engine?: import('../../src/engine/neodrag.ts').Neodrag;
 		external?: { x: number; y: number } | null;
 	} = $props();
 
@@ -28,9 +29,13 @@
 			},
 		],
 	});
+
+	$effect(() => {
+		if (drag.hasReactiveSlots) drag.flushReactive();
+	});
 </script>
 
-<div class="box" {@attach drag.attachment} data-testid="draggable"></div>
+<div class="box" {@attach bindTarget(drag)} data-testid="draggable"></div>
 
 <style>
 	.box {

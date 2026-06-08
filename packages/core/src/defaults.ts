@@ -1,16 +1,10 @@
-import {
-	applyUserSelectHack,
-	ignoreMultitouch,
-	stateMarker,
-	touchAction,
-} from './plugins.ts';
-import type { EngineOptions } from './engine.ts';
+import { applyUserSelectHack, ignoreMultitouch, touchAction } from './plugins/drag.ts';
+import type { EngineOptions } from './engine/neodrag.ts';
 import type { DragPlugin } from './types.ts';
 import type { ErrorInfo } from './types.ts';
 
 export const DEFAULT_DRAG_PLUGINS: DragPlugin[] = [
 	ignoreMultitouch,
-	stateMarker,
 	applyUserSelectHack,
 	touchAction,
 ];

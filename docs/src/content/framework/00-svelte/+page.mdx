@@ -4,7 +4,7 @@ nav_title: 'svelte'
 tagline: 'A lightweight Svelte attachment to make your elements draggable.'
 ---
 
-A lightweight Svelte library to make your elements draggable with Svelte 5 **attachments** and the `{@attach}` syntax.
+A lightweight Svelte library to make your elements draggable with Svelte 5 **attachments**. Spread `{...drag.target}` onto the element. Plugins and `onDrag*` callbacks go in `new Draggable({ ... })`.
 
 ## Installation
 
@@ -16,23 +16,22 @@ Requires **Svelte 5**.
 
 ## Plugins
 
-Import built-in drag plugins from `@neodrag/core/plugins` or `@neodrag/svelte/plugins` (not the main `@neodrag/svelte` entry). Drop and sortable helpers live under `@neodrag/svelte/drop`.
+Import built-in drag plugins from `@neodrag/core/plugins` or `@neodrag/svelte/plugins` (not the main `@neodrag/svelte` entry). Drop helpers live under `@neodrag/svelte/drop`; sortable under `@neodrag/svelte/sortable`.
 
 ## Usage
 
-Create a **`Draggable`** once in `<script>` (stable attachment), then attach it. Use **static** plugins in the array; wrap only dynamic parts in `() =>`:
+Create a **`Draggable`** once in `<script>` with your plugins, then spread **`{...drag.target}`** on the element. Normal attributes (`class`, `aria-*`, etc.) stay separate. Use **static** plugins in the array; wrap only dynamic parts in `() =>`:
 
 ### Basic
 
 ```svelte
 <script>
   import { Draggable } from '@neodrag/svelte';
-  
 
   const drag = new Draggable({ plugins: [] });
 </script>
 
-<div {@attach drag.attachment}>Drag me around!</div>
+<div {...drag.target}>Drag me around!</div>
 ```
 
 ### With plugins
@@ -40,15 +39,28 @@ Create a **`Draggable`** once in `<script>` (stable attachment), then attach it.
 ```svelte
 <script>
   import { Draggable } from '@neodrag/svelte';
-  import { axis, grid, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
+  import {
+    axis,
+    grid,
+    bounds,
+    BoundsFrom,
+  } from '@neodrag/svelte/plugins';
 
-  const dragX = new Draggable({ plugins: [axis('x'), grid([20, 20])] });
-  const dragBounds = new Draggable({ plugins: [bounds(BoundsFrom.parent())] });
+  const dragX = new Draggable({
+    plugins: [axis('x'), grid([20, 20])],
+  });
+  const dragBounds = new Draggable({
+    plugins: [bounds(BoundsFrom.parent())],
+  });
 </script>
 
-<div {@attach dragX.attachment}>Horizontal only, snapped to 20px grid</div>
+<div {...dragX.target}>
+  Horizontal only, snapped to 20px grid
+</div>
 
-<div {@attach dragBounds.attachment}>Constrained to parent element</div>
+<div {...dragBounds.target}>
+  Constrained to parent element
+</div>
 ```
 
 ### Reactive plugins
@@ -65,7 +77,7 @@ Create a **`Draggable`** once in `<script>` (stable attachment), then attach it.
   });
 </script>
 
-<div {@attach drag.attachment}>…</div>
+<div {...drag.target}>…</div>
 ```
 
 ### Reactive axis switching
@@ -82,11 +94,13 @@ Create a **`Draggable`** once in `<script>` (stable attachment), then attach it.
   });
 </script>
 
-<div {@attach drag.attachment}>
+<div {...drag.target}>
   Currently draggable on: {currentAxis} axis
 </div>
 
-<button onclick={() => (currentAxis = currentAxis === 'x' ? 'y' : 'x')}>
+<button
+  onclick={() => (currentAxis = currentAxis === 'x' ? 'y' : 'x')}
+>
   Switch to {currentAxis === 'x' ? 'Y' : 'X'} axis
 </button>
 ```
@@ -98,7 +112,12 @@ Create a **`Draggable`** once in `<script>` (stable attachment), then attach it.
 ```svelte
 <script>
   import { Draggable } from '@neodrag/svelte';
-  import { controls, ControlFrom, bounds, BoundsFrom, events } from '@neodrag/svelte/plugins';
+  import {
+    controls,
+    ControlFrom,
+    bounds,
+    BoundsFrom,
+  } from '@neodrag/svelte/plugins';
 
   let dragPosition = $state({ x: 0, y: 0 });
 
@@ -106,20 +125,20 @@ Create a **`Draggable`** once in `<script>` (stable attachment), then attach it.
     plugins: [
       controls({ allow: ControlFrom.selector('.drag-handle') }),
       bounds(BoundsFrom.viewport()),
-      events({
-        onDrag: (data) => {
-          dragPosition = data.offset;
-        },
-      }),
     ],
+    onDrag: (data) => {
+      dragPosition = data.offset;
+    },
   });
 </script>
 
-<div {@attach drag.attachment}>
+<div {...drag.target}>
   <div class="drag-handle">⋮⋮ Drag Handle</div>
   <div>Modal Content</div>
   <div>
-    Position: x:{dragPosition.x.toFixed(0)}, y:{dragPosition.y.toFixed(0)}
+    Position: x:{dragPosition.x.toFixed(0)}, y:{dragPosition.y.toFixed(
+      0,
+    )}
   </div>
 </div>
 ```
@@ -144,7 +163,13 @@ Create a **`Draggable`** once in `<script>` (stable attachment), then attach it.
 
 <label>
   Grid size: {gridSize}px
-  <input type="range" bind:value={gridSize} min="10" max="50" step="5" />
+  <input
+    type="range"
+    bind:value={gridSize}
+    min="10"
+    max="50"
+    step="5"
+  />
 </label>
 
 <label>
@@ -156,17 +181,17 @@ Create a **`Draggable`** once in `<script>` (stable attachment), then attach it.
   </select>
 </label>
 
-<div {@attach drag.attachment}>
+<div {...drag.target}>
   Grid: {gridSize}px, Axis: {lockAxis}
 </div>
 ```
 
-### Card stack with events
+### Card stack with drag callbacks
 
 ```svelte
 <script>
   import { Draggable } from '@neodrag/svelte';
-  import { events, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
+  import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
   let cards = $state([
     { id: 1, title: 'Task 1' },
@@ -181,36 +206,34 @@ Create a **`Draggable`** once in `<script>` (stable attachment), then attach it.
   } | null>(null);
 
   const cardDrag = new Draggable({
-    plugins: [
-      bounds(BoundsFrom.parent()),
-      events({
-        onDragStart: () => {
-          dragState = { cardId: 0, isDragging: true };
-        },
-        onDrag: (data) => {
-          dragState = {
-            cardId: dragState?.cardId ?? 0,
-            position: data.offset,
-          };
-        },
-        onDragEnd: () => {
-          dragState = null;
-        },
-      }),
-    ],
+    plugins: [bounds(BoundsFrom.parent())],
+    onDragStart: () => {
+      dragState = { cardId: 0, isDragging: true };
+    },
+    onDrag: (data) => {
+      dragState = {
+        cardId: dragState?.cardId ?? 0,
+        position: data.offset,
+      };
+    },
+    onDragEnd: () => {
+      dragState = null;
+    },
   });
 </script>
 
 {#each cards as card (card.id)}
   <div
-    {@attach cardDrag.attachment}
+    {...cardDrag.target}
     onpointerdown={() => {
       dragState = { cardId: card.id, isDragging: true };
     }}
   >
     {card.title}
     {#if dragState?.cardId === card.id}
-      - Dragging at ({dragState.position?.x.toFixed(0)}, {dragState.position?.y.toFixed(0)})
+      - Dragging at ({dragState.position?.x.toFixed(0)}, {dragState.position?.y.toFixed(
+        0,
+      )})
     {/if}
   </div>
 {/each}
@@ -221,24 +244,19 @@ Create a **`Draggable`** once in `<script>` (stable attachment), then attach it.
 ```svelte
 <script lang="ts">
   import { Draggable, type DragEventData } from '@neodrag/svelte';
-  import { axis, bounds, BoundsFrom, events, type Plugin } from '@neodrag/svelte/plugins';
+  import { axis, bounds, BoundsFrom, type Plugin } from '@neodrag/svelte/plugins';
 
   let dragData = $state<DragEventData | null>(null);
 
   const drag = new Draggable({
-    plugins: [
-      axis('x'),
-      bounds(BoundsFrom.viewport()),
-      events({
-        onDrag: (data: DragEventData) => {
-          dragData = data;
-        },
-      }),
-    ] satisfies Plugin[],
+    plugins: [axis('x'), bounds(BoundsFrom.viewport())] satisfies Plugin[],
+    onDrag: (data: DragEventData) => {
+      dragData = data;
+    },
   });
 </script>
 
-<div {@attach drag.attachment}>TypeScript-enabled dragging</div>
+<div {...drag.target}>TypeScript-enabled dragging</div>
 ```
 
 ## Shared engine (optional)
@@ -259,7 +277,7 @@ Most apps only need `new Draggable({ plugins })`. For a custom default plugin st
   console.log(engine.instances.size);
 </script>
 
-<div {@attach drag.attachment}>Custom engine instance</div>
+<div {...drag.target}>Custom engine instance</div>
 ```
 
 `Draggable` uses `Neodrag.shared` by default. Pass a custom `engine` when you need separate engines on one page (uncommon).
@@ -273,11 +291,56 @@ For drag-and-drop targets, import from `@neodrag/svelte/drop` and use `Droppable
   import { Droppable } from '@neodrag/svelte/drop';
   import { highlight } from '@neodrag/core/drop/plugins';
 
-  const drop = new Droppable({ plugins: [highlight({ overClass: 'over' })] });
+  const drop = new Droppable({
+    plugins: [highlight({ overClass: 'over' })],
+  });
 </script>
 
-<div {@attach drop.attachment}>Drop here</div>
+<div {...drop.zone}>Drop here</div>
 ```
+
+## Sortable lists
+
+`new Sortable()` from `@neodrag/svelte/sortable` returns element helpers for the list zone, row wrapper, and items:
+
+```svelte
+<script>
+  import { Sortable } from '@neodrag/svelte/drop';
+  import { highlight } from '@neodrag/core/drop/plugins';
+
+  let items = $state(['alpha', 'bravo', 'charlie']);
+
+  const list = new Sortable({
+    items: () => items,
+    keyBy: (id) => id,
+    onReorder: (next) => {
+      items = next;
+    },
+    containerPlugins: () => [highlight({ overClass: 'over' })],
+  });
+</script>
+
+<ul {...list.container}>
+  {#each items as id (id)}
+    <li {...list.row()}>
+      <button type="button" {...list.item(id).target}>{id}</button>
+    </li>
+  {/each}
+</ul>
+```
+
+Optional drop plugins (`highlight`, `collisionPriority`, etc.) go in `containerPlugins` on the sortable instance. Combine bindings on one node with `{...drag.target} {...resize.frame}`.
+
+### Binding element helpers
+
+| API | Property | Use on |
+|-----|----------|--------|
+| `Draggable` | `target` | Element to drag |
+| `Droppable` | `zone` | Drop surface |
+| `Resizable` | `frame` | Resizable box |
+| `Sortable` | `container` | Sortable list drop zone |
+| `Sortable` | `row()` | Row wrapper (visual preview) |
+| `Sortable` | `item(key).target` | Draggable chip |
 
 ## Resizable
 
@@ -287,9 +350,14 @@ For drag-and-drop targets, import from `@neodrag/svelte/drop` and use `Droppable
   import { resizeHandles, sizeBounds } from '@neodrag/svelte/resize';
 
   const resize = new Resizable({
-    plugins: [resizeHandles({ edges: ['e', 's'] }), sizeBounds({ minWidth: 100 })],
+    plugins: [
+      resizeHandles({ edges: ['e', 's'] }),
+      sizeBounds({ minWidth: 100 }),
+    ],
   });
 </script>
 
-<div {@attach resize.attachment} style="width:200px;height:120px">Resize me</div>
+<div {...resize.frame} style="width:200px;height:120px">
+  Resize me
+</div>
 ```

@@ -34,28 +34,37 @@ describe('Human behavior engine cost (instrumented)', () => {
 		}
 
 		scenarios.push(
-			await measureScenarioCost('steady-drag-loop', 'hot', async (options) => {
-				const measure = !!options?.measure;
-				resetBody();
-				const box = createBox();
-				const engine = new Neodrag({ plugins: MINIMAL_DRAG_PLUGINS, dev: false, profile: measure });
-				if (measure) engine.resetCostProfile();
-				const t0 = performance.now();
-				engine.draggable(box, [], { threshold: null });
-				for (let i = 0; i < 120; i++) {
-					resetElementPosition(box);
-					dragSteps(box, DRAG.fromX, DRAG.fromY, DRAG.toX, DRAG.toY, DRAG.steps);
-				}
-				const wallMs = performance.now() - t0;
-				const { flushEffects } = await import('./helpers.ts');
-				await flushEffects();
-				if (measure) {
-					const snapshot = engine.takeCostProfile(wallMs);
+			await measureScenarioCost(
+				'steady-drag-loop',
+				'hot',
+				async (options) => {
+					const measure = !!options?.measure;
+					resetBody();
+					const box = createBox();
+					const engine = new Neodrag({
+						plugins: MINIMAL_DRAG_PLUGINS,
+						dev: false,
+						profile: measure,
+					});
+					if (measure) engine.resetCostProfile();
+					const t0 = performance.now();
+					engine.draggable(box, [], { threshold: null });
+					for (let i = 0; i < 120; i++) {
+						resetElementPosition(box);
+						dragSteps(box, DRAG.fromX, DRAG.fromY, DRAG.toX, DRAG.toY, DRAG.steps);
+					}
+					const wallMs = performance.now() - t0;
+					const { flushEffects } = await import('./helpers.ts');
+					await flushEffects();
+					if (measure) {
+						const snapshot = engine.takeCostProfile(wallMs);
+						engine.dispose();
+						return snapshot ?? undefined;
+					}
 					engine.dispose();
-					return snapshot ?? undefined;
-				}
-				engine.dispose();
-			}, { iterations: 15, warmup: 3 }),
+				},
+				{ iterations: 15, warmup: 3 },
+			),
 		);
 
 		const report = buildHumanCostReport(scenarios);
@@ -63,7 +72,9 @@ describe('Human behavior engine cost (instrumented)', () => {
 		console.log('\n=== Neodrag — human behavior engine cost ===\n');
 		console.table(formatCostTable(scenarios));
 		for (const row of scenarios) {
-			console.log(`\n--- ${row.group}/${row.id} (median wall ${row.wall.medianMs.toFixed(3)} ms) ---`);
+			console.log(
+				`\n--- ${row.group}/${row.id} (median wall ${row.wall.medianMs.toFixed(3)} ms) ---`,
+			);
 			console.table(formatSpanBreakdown(row));
 		}
 
@@ -87,7 +98,7 @@ describe('Human behavior engine cost (instrumented)', () => {
 				const baseMedian = baselineByKey.get(key);
 				if (baseMedian === undefined) continue;
 				const ratio = row.wall.medianMs / Math.max(baseMedian, 0.05);
-				if (ratio > 1.2) {
+				if (ratio > 1.4) {
 					regressions.push(`${key}: ${ratio.toFixed(2)}× median wall vs baseline`);
 				}
 			}

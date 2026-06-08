@@ -32,6 +32,16 @@ describe('interactions v4 drag', () => {
 		await expect.element(draggable).toHaveStyle(translate(100, 100));
 	});
 
+	test('regression: translate persists after release without position plugin', async () => {
+		await dragAndDrop(draggable, { deltaX: 80, deltaY: 40 }, { steps: 5 });
+		await sleepAndWaitForEffects();
+		await expect.element(draggable).toHaveStyle(translate(80, 40));
+
+		await dragAndDrop(draggable, { deltaX: 20, deltaY: 10 }, { steps: 3 });
+		await sleepAndWaitForEffects();
+		await expect.element(draggable).toHaveStyle(translate(100, 50));
+	});
+
 	test('sets neodrag data attributes after drag', async () => {
 		await dragAndDrop(draggable, { deltaX: 50, deltaY: 50 }, { steps: 5 });
 		await sleepAndWaitForEffects();

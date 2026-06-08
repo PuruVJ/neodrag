@@ -8,9 +8,13 @@
 	const engine = new Neodrag({ dev: false });
 
 	onMount(() => {
-		engine.resizable(card, [resizeHandles({ edges: ['e'], size: 12 }), sizeBounds({ minWidth: 80 })], {
-			length: new Length(),
-		});
+		engine.resizable(
+			card,
+			[resizeHandles({ edges: ['e'], size: 12 }), sizeBounds({ minWidth: 80 })],
+			{
+				length: new Length(),
+			},
+		);
 		engine.draggable(card, [controls({ allow: ControlFrom.selector('[data-drag-handle]') })]);
 		return () => engine.dispose();
 	});

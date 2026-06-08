@@ -68,11 +68,11 @@ const drag = new Draggable({
 const immediate = new Draggable({ plugins: [], threshold: null });
 ```
 
-| `threshold` | Behavior |
-|-------------|----------|
-| omitted | Default: **3px** distance, **0ms** delay |
-| `null` | Start dragging on the first move |
-| `{ delay?, distance? }` | Custom threshold |
+| `threshold`             | Behavior                                 |
+| ----------------------- | ---------------------------------------- |
+| omitted                 | Default: **3px** distance, **0ms** delay |
+| `null`                  | Start dragging on the first move         |
+| `{ delay?, distance? }` | Custom threshold                         |
 
 Low-level API:
 
@@ -148,7 +148,7 @@ Destroys all bindings and listeners on this engine.
 
 ## Plugins
 
-Import built-in drag plugins from `@neodrag/core/plugins`. Drop helpers from `@neodrag/core/drop/plugins`; sortable from `@neodrag/core/drop`. Resize plugins from `@neodrag/core/resize`. In development, `installInteractionInspector(engine)` from `@neodrag/core/dev` overlays live drag/drop stats when `engine.dev` is true. Browser tests can use `@neodrag/test` (also re-exported from `@neodrag/core/testing`).
+Import built-in drag plugins from `@neodrag/core/plugins`. Drop helpers from `@neodrag/core/drop/plugins`; sortable from `@neodrag/core/sortable`. Resize plugins from `@neodrag/core/resize`. In development, `installInteractionInspector(engine)` from `@neodrag/core/dev` overlays live drag/drop stats when `engine.dev` is true. Browser tests can use `@neodrag/test` (also re-exported from `@neodrag/core/testing`).
 
 The main `@neodrag/core` entry exports the engine, types, and default plugin presets only — optional plugins are not pulled in unless you import them.
 
@@ -177,6 +177,13 @@ Framework packages accept `() => plugins` and call `Neodrag#update` internally. 
 console.log(Neodrag.shared.instances.size);
 ```
 
+## Grouped sortables
+
+Lists that share a `group` id can transfer items between columns. The engine drives **visual preview** during the drag; your app commits data when callbacks fire.
+
+- **`onTransfer(item, meta)`** — `meta.phase` is `'preview'` while the pointer resolves a foreign slot, and `'commit'` on drop. Update state on `'preview'` for optimistic UIs, or only on `'commit'` for conservative ones. A cancelled preview uses `phase: 'preview'` with `toIndex: -1`.
+- **`groupSourcePreview`** — `'freeze'` (default) keeps the source column layout unchanged until commit; `'reflow'` collapses the dragged item’s gap in the source list while hovering a friend column.
+
 ## Framework packages
 
 See the framework docs for `{@attach draggable.attachment}`, `{@attach droppable.attachment}`, `{@attach resizable.attachment}`, `useDraggable`, `useDroppable`, `useResizable`, `vDraggable`, `vDroppable`, and `vResizable`. All use this core engine.
@@ -202,7 +209,8 @@ export const designTokenLength: LengthAdapter = defineLengthAdapter({
     return resolveUnit(n, unit, lengthContext(ctx.element, ctx.axis));
   },
   readAuthoredPair: (node) => new Length().readAuthoredPair(node),
-  commitAuthored: (px, preserve, node) => new Length().commitAuthored(px, preserve, node),
+  commitAuthored: (px, preserve, node) =>
+    new Length().commitAuthored(px, preserve, node),
   cloneAuthored: (pair) => ({ ...pair }),
 });
 ```

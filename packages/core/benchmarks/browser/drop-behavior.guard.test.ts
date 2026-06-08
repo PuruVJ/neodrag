@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { Neodrag } from '../../src/index.ts';
 import { accepts, onDrop } from '../../src/drop-plugins.ts';
 import { dragData } from '../../src/plugins.ts';
-import { sortable } from '../../src/drop/index.ts';
+import { Sortable } from '../../src/sortable/index.ts';
 import { createBox, dragSteps, flushEffects, resetBody } from './helpers.ts';
 
 describe('drop & sortable behavioral guards', () => {
@@ -63,7 +63,7 @@ describe('drop & sortable behavioral guards', () => {
 		}
 		document.body.appendChild(container);
 
-		const list = sortable({
+		const list = new Sortable({
 			items: () => items,
 			keyBy: (i) => i.id,
 			onReorder: (next) => {

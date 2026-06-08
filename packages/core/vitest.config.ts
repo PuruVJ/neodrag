@@ -122,6 +122,7 @@ export default defineConfig({
 		exclude: ['chromium-bidi', 'fsevents'],
 	},
 	test: {
+		setupFiles: ['./tests/setup-interaction-defaults.ts'],
 		browser: {
 			enabled: true,
 			provider: 'playwright',

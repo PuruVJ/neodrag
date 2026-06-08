@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Draggable } from '@neodrag/svelte'
-	import { events, position } from '@neodrag/svelte/plugins';
+	import { Draggable } from '@neodrag/svelte';
+	import { position } from '@neodrag/svelte/plugins';
 	import type { Attachment } from 'svelte/attachments';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
@@ -17,20 +17,18 @@
 			});
 		};
 
-	const drag_0 = new Draggable({ plugins: [() => [
-		position({ current: pos.current }),
-		events({
-			onDragStart({ offset }) {
-				pos.set({ x: offset.x, y: offset.y }, { duration: 0 });
-			},
-			onDrag: ({ offset }) => {
-				pos.set({ x: offset.x, y: offset.y }, { duration: 0 });
-			},
-			onDragEnd: async () => {
-				await pos.set({ x: 0, y: 0 }, { duration: 4000 });
-			},
-		}),
-	]] });
+	const drag_0 = new Draggable({
+		plugins: [() => [position({ current: pos.current })]],
+		onDragStart({ offset }) {
+			pos.set({ x: offset.x, y: offset.y }, { duration: 0 });
+		},
+		onDrag({ offset }) {
+			pos.set({ x: offset.x, y: offset.y }, { duration: 0 });
+		},
+		onDragEnd: async () => {
+			await pos.set({ x: 0, y: 0 }, { duration: 4000 });
+		},
+	});
 </script>
 
 <!-- <span {@attach x([
@@ -49,9 +47,7 @@
 		}),
 	])}></span> -->
 
-<div
-	{@attach drag_0.attachment}
-></div>
+<div {...drag_0.target}></div>
 
 <!-- <div
 	use:legacyDraggable={[

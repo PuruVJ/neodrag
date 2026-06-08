@@ -1,0 +1,19 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"singleQuote": true,
+	"printWidth": 100,
+	"useTabs": true,
+	"semi": true,
+	"trailingComma": "all",
+	"jsxSingleQuote": false,
+	"svelte": true,
+	"overrides": [
+		{
+			"files": ["*.md", "*.mdx"],
+			"options": {
+				"useTabs": false,
+				"printWidth": 70,
+			},
+		},
+	],
+}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Neodrag } from '../../src/index.ts';
-	import { sortable } from '../../src/drop/index.ts';
+	import { Sortable } from '../../src/drop/index.ts';
 
 	let { preview = false }: { preview?: boolean } = $props();
 
@@ -11,17 +11,21 @@
 	]);
 
 	const engine = new Neodrag();
-	const list = sortable({
+	const list = new Sortable({
 		items: () => items,
 		keyBy: (i) => i.id,
+		releaseDuration: 0,
+		preview: preview ? 'state' : 'visual',
 		onReorder: (next) => {
 			items = next;
 		},
-		onSortPreview: preview
-			? (next) => {
-					items = next as typeof items;
+		...(preview
+			? {
+					onSortPreview: (next: typeof items) => {
+						items = next;
+					},
 				}
-			: undefined,
+			: {}),
 		strategy: 'vertical',
 	});
 	const bindDrop = (n: HTMLElement) => {
@@ -48,6 +52,7 @@
 
 <style>
 	.list {
+		position: relative;
 		list-style: none;
 		padding: 0;
 		margin: 0;

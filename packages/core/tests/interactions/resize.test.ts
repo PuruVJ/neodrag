@@ -50,7 +50,15 @@ describe('resizable', () => {
 		const rect = { width: 200, height: 100, top: 0, left: 0, right: 200, bottom: 100 };
 		box.getBoundingClientRect = () => ({ ...rect, toJSON: () => rect }) as DOMRect;
 		handle.getBoundingClientRect = () =>
-			({ left: 190, top: 45, width: 10, height: 10, right: 200, bottom: 55, toJSON: () => ({}) }) as DOMRect;
+			({
+				left: 190,
+				top: 45,
+				width: 10,
+				height: 10,
+				right: 200,
+				bottom: 55,
+				toJSON: () => ({}),
+			}) as DOMRect;
 
 		pointer(handle, 'pointerdown', 195, 50);
 		pointer(document.documentElement, 'pointermove', 250, 50);
@@ -65,7 +73,15 @@ describe('resizable', () => {
 		const rect = { width: 200, height: 100, top: 0, left: 0, right: 200, bottom: 100 };
 		box.getBoundingClientRect = () => ({ ...rect, toJSON: () => rect }) as DOMRect;
 		handle.getBoundingClientRect = () =>
-			({ left: 190, top: 45, width: 10, height: 10, right: 200, bottom: 55, toJSON: () => ({}) }) as DOMRect;
+			({
+				left: 190,
+				top: 45,
+				width: 10,
+				height: 10,
+				right: 200,
+				bottom: 55,
+				toJSON: () => ({}),
+			}) as DOMRect;
 
 		pointer(handle, 'pointerdown', 195, 50);
 		pointer(document.documentElement, 'pointermove', 280, 50);
@@ -86,7 +102,15 @@ describe('resizable', () => {
 		const rect = { width: 200, height: 100, top: 40, left: 100, right: 300, bottom: 140 };
 		box.getBoundingClientRect = () => ({ ...rect, toJSON: () => rect }) as DOMRect;
 		handle.getBoundingClientRect = () =>
-			({ left: 100, top: 85, width: 10, height: 10, right: 110, bottom: 95, toJSON: () => ({}) }) as DOMRect;
+			({
+				left: 100,
+				top: 85,
+				width: 10,
+				height: 10,
+				right: 110,
+				bottom: 95,
+				toJSON: () => ({}),
+			}) as DOMRect;
 
 		pointer(handle, 'pointerdown', 105, 90);
 		pointer(document.documentElement, 'pointermove', 55, 90);
@@ -105,7 +129,15 @@ describe('resizable', () => {
 		const rect = { width: 200, height: 100, top: 0, left: 0, right: 200, bottom: 100 };
 		box.getBoundingClientRect = () => ({ ...rect, toJSON: () => rect }) as DOMRect;
 		handle.getBoundingClientRect = () =>
-			({ left: 190, top: 45, width: 10, height: 10, right: 200, bottom: 55, toJSON: () => ({}) }) as DOMRect;
+			({
+				left: 190,
+				top: 45,
+				width: 10,
+				height: 10,
+				right: 200,
+				bottom: 55,
+				toJSON: () => ({}),
+			}) as DOMRect;
 
 		pointer(handle, 'pointerdown', 195, 50);
 		pointer(document.documentElement, 'pointermove', 400, 50);

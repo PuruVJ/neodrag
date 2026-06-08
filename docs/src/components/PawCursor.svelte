@@ -10,8 +10,7 @@
 	let mounted = $state(false);
 
 	const is_touch_device =
-		typeof globalThis.matchMedia === 'function' &&
-		globalThis.matchMedia('(hover: none)').matches;
+		typeof globalThis.matchMedia === 'function' && globalThis.matchMedia('(hover: none)').matches;
 
 	function handle_mouse_move(e: MouseEvent) {
 		if (is_touch_device) return;

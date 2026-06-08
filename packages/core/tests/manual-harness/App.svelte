@@ -1,12 +1,26 @@
 <script lang="ts">
+	import {
+		fuzzDrag,
+		midpointThrash,
+		randomSeed,
+		scribbleInPlace,
+		wildDrag,
+		wildDropApproach,
+		wildReorder,
+		wildResize,
+	} from '@neodrag/test';
 	import { Neodrag } from '../../src/index.ts';
 	import { dragData } from '../../src/plugins.ts';
 	import { accepts, onDrop } from '../../src/drop/index.ts';
-	import { sortable } from '../../src/drop/index.ts';
+	import { Sortable } from '../../src/drop/index.ts';
+	import { resizeHandles } from '../../src/resize/index.ts';
 	import InteractionsBox from '../components/InteractionsBox.svelte';
 	import InteractionsSortable from '../components/InteractionsSortable.svelte';
+	import { onMount } from 'svelte';
+	import FuzzPanel from './FuzzPanel.svelte';
 
-	let tab = $state<'drag' | 'sortable' | 'drop'>('drag');
+	let tab = $state<'drag' | 'sortable' | 'drop' | 'resize'>('drag');
+	let resizeBoxEl = $state<HTMLDivElement | null>(null);
 
 	let drops = $state(0);
 
@@ -17,7 +31,7 @@
 	]);
 
 	const engine = new Neodrag();
-	const list = sortable({
+	const list = new Sortable({
 		items: () => items,
 		keyBy: (i) => i.id,
 		onReorder: (next) => {
@@ -49,10 +63,51 @@
 		const h = engine.draggable(n, [...plugins]);
 		return () => h.destroy();
 	};
+
+	const bindResizeBox = (n: HTMLDivElement) => {
+		resizeBoxEl = n;
+		const h = engine.resizable(n, [resizeHandles({ edges: 'all', size: 10 })]);
+		return () => h.destroy();
+	};
+
+	function getFuzzTargets() {
+		const draggable = document.querySelector('[data-testid="draggable"]') as HTMLElement | null;
+		const dropzone = document.querySelector('[data-testid="dropzone"]') as HTMLElement | null;
+		const list = document.querySelector('[data-testid="list"]') as HTMLElement | null;
+		const item = document.querySelector('[data-testid="item-1"]') as HTMLElement | null;
+		const neighbor = document.querySelector('[data-testid="item-2"]') as HTMLElement | null;
+		return {
+			draggable: draggable ?? undefined,
+			dropzone: dropzone ?? undefined,
+			list: list ?? undefined,
+			item: item ?? undefined,
+			neighbor: neighbor ?? undefined,
+			resizeBox: resizeBoxEl ?? undefined,
+		};
+	}
+
+	onMount(() => {
+		(window as Window & { __neodragFuzz?: Record<string, unknown> }).__neodragFuzz = {
+			wildDrag,
+			scribbleInPlace,
+			wildDropApproach,
+			wildReorder,
+			midpointThrash,
+			wildResize,
+			fuzzDrag,
+			randomSeed,
+			getTargets: getFuzzTargets,
+		};
+	});
 </script>
 
 <nav>
-	<button type="button" data-tab="drag" class:active={tab === 'drag'} onclick={() => (tab = 'drag')}>
+	<button
+		type="button"
+		data-tab="drag"
+		class:active={tab === 'drag'}
+		onclick={() => (tab = 'drag')}
+	>
 		Drag
 	</button>
 	<button
@@ -63,8 +118,21 @@
 	>
 		Sortable
 	</button>
-	<button type="button" data-tab="drop" class:active={tab === 'drop'} onclick={() => (tab = 'drop')}>
+	<button
+		type="button"
+		data-tab="drop"
+		class:active={tab === 'drop'}
+		onclick={() => (tab = 'drop')}
+	>
 		Drop
+	</button>
+	<button
+		type="button"
+		data-tab="resize"
+		class:active={tab === 'resize'}
+		onclick={() => (tab = 'resize')}
+	>
+		Resize
 	</button>
 </nav>
 
@@ -82,14 +150,22 @@
 			</li>
 		{/each}
 	</ul>
-{:else}
+{:else if tab === 'drop'}
 	<div class="drop-scene">
 		<div class="dropzone" data-testid="dropzone" {@attach bindDropZone}>
 			<div class="card" data-testid="draggable" {@attach bindDragCard}></div>
 		</div>
 		<p data-testid="drop-count">{drops}</p>
 	</div>
+{:else}
+	<div
+		class="resize-box"
+		data-testid="resize-box"
+		{@attach bindResizeBox}
+	></div>
 {/if}
+
+<FuzzPanel {tab} getTargets={getFuzzTargets} />
 
 <style>
 	nav {
@@ -128,5 +204,11 @@
 		width: 80px;
 		height: 80px;
 		background: cyan;
+	}
+	.resize-box {
+		position: relative;
+		width: 200px;
+		height: 120px;
+		background: #c8f7c5;
 	}
 </style>

@@ -11,12 +11,9 @@
 	import { interact_outside } from '$attachments/interact-outside';
 	import Nav from '$components/docs/Nav.svelte';
 	import ThemeSwitcher from '$components/ThemeSwitcher.svelte';
-	import {
-		apply_docs_route_context,
-		framework_from_path,
-	} from '$helpers/framework-route';
+	import { framework_from_path } from '$helpers/framework-route';
 	import { FRAMEWORKS, type Framework } from '$helpers/constants';
-	import { framework_brand_var } from '$helpers/framework-brand';
+	import { init_theme_runtime } from '$state/user-preferences.svelte';
 	import { Draggable } from '@neodrag/svelte';
 	import { ControlFrom, controls } from '@neodrag/svelte/plugins';
 	import { prefetch } from 'astro:prefetch';
@@ -50,12 +47,7 @@
 		}
 	}
 
-	const { pathname: initial_pathname, framework: route_framework, nav_by_framework }: Props =
-		$props();
-
-	const dock_brand = $derived(
-		route_framework ? `var(${framework_brand_var(route_framework)})` : undefined,
-	);
+	const { pathname: initial_pathname, nav_by_framework }: Props = $props();
 
 	const frameworks: Framework[] = ['solid', 'react', 'svelte', 'vue', 'vanilla'];
 
@@ -82,18 +74,17 @@
 
 	function sync_route_from_location() {
 		pathname = window.location.pathname;
-		apply_docs_route_context(pathname);
 	}
 
 	$effect(() => {
-		pathname;
-		apply_docs_route_context(pathname);
-	});
-
-	$effect(() => {
+		init_theme_runtime();
 		sync_route_from_location();
 		document.addEventListener('astro:page-load', sync_route_from_location);
-		return () => document.removeEventListener('astro:page-load', sync_route_from_location);
+		document.addEventListener('astro:after-swap', sync_route_from_location);
+		return () => {
+			document.removeEventListener('astro:page-load', sync_route_from_location);
+			document.removeEventListener('astro:after-swap', sync_route_from_location);
+		};
 	});
 
 	const Icons: Record<Framework, Component> = {
@@ -123,12 +114,10 @@
 
 <section
 	class="dock-host pointer-events-none fixed bottom-4 left-0 z-[1000] flex w-full items-end justify-center gap-[clamp(2rem,10vw,8rem)] p-1.5 max-md:bottom-0 max-md:min-h-16 max-md:justify-stretch max-md:gap-0 max-md:p-0 md:overflow-visible"
-	style:--color-brand={dock_brand}
-	style:--secondary-color={dock_brand}
 >
 	<div
-		class="dock-angular-bevel dock-surface pointer-events-auto relative w-full overflow-visible shadow-[var(--dock-shadow)] max-md:min-h-16 md:h-auto md:w-auto"
-		{@attach dockDrag.attachment}
+		class="dock-angular-bevel dock-surface dock-float pointer-events-auto relative w-full overflow-visible max-md:min-h-16 md:h-auto md:w-auto"
+		{...dockDrag.target}
 		{@attach interact_outside(() => menu_view.close())}
 	>
 		<div
@@ -140,17 +129,25 @@
 					transition:slide={{ duration: 400, easing: expoOut }}
 				>
 					<div class="dock-mobile-menu__body">
-						<div class="dock-menu-scroll max-h-[48vh] overflow-y-auto">
+						<div
+							class="docs-sidebar-panel dock-menu-scroll max-h-[48vh] overflow-y-auto overflow-x-hidden"
+						>
 							<Nav compact {pathname} {nav_list} onclick={() => menu_view.toggle()} />
 						</div>
-						<div>{@render framework_selector(true)}</div>
-						<ThemeSwitcher embedded />
+						<div class="docs-sidebar-panel dock-mobile-menu__footer">
+							{@render framework_selector(true)}
+							<ThemeSwitcher embedded />
+						</div>
 					</div>
 				</div>
 			{/if}
 
-			<div class="relative z-[1] flex w-full shrink-0 max-md:h-16 md:items-center md:overflow-visible">
-				<div class="dock-toolbar relative z-[2] hidden max-md:hidden md:flex md:h-14 md:items-center md:overflow-visible">
+			<div
+				class="relative z-[1] flex w-full shrink-0 max-md:h-16 md:items-center md:overflow-visible"
+			>
+				<div
+					class="dock-toolbar relative z-[2] hidden max-md:hidden md:flex md:h-14 md:items-center md:overflow-visible"
+				>
 					{@render framework_selector(false)}
 					<div
 						class="mx-0.5 my-1.5 w-px min-h-9 self-stretch bg-gradient-to-b from-transparent via-[var(--dock-border-strong)] to-transparent"
@@ -223,8 +220,10 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class={[
-			'dock-zoom flex h-14 shrink-0 items-center justify-center overflow-visible',
-			!embedded && 'max-md:hidden',
+			'dock-zoom flex shrink-0 overflow-visible',
+			embedded
+				? 'dock-zoom--embedded h-auto w-full items-stretch justify-stretch'
+				: 'h-14 items-end justify-center max-md:hidden',
 		]}
 		onmouseenter={() => {
 			for (const framework of FRAMEWORKS) {
@@ -238,7 +237,10 @@
 	>
 		{#each frameworks as name}
 			<a
-				class="unstyled flex shrink-0 items-center overflow-visible"
+				class={[
+					'unstyled overflow-visible',
+					embedded ? 'flex min-w-0 flex-1' : 'flex shrink-0 items-end',
+				]}
 				href={replace_framework_from_pathname(name)}
 				onclick={() => {
 					if (embedded) menu_view.toggle();

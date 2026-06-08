@@ -8,17 +8,28 @@
 
 	const { compact = false, pathname, nav_list, onclick }: Props = $props();
 
-	const aria_current_val = (path: string) => (pathname?.endsWith(path) ? 'page' : 'false');
+	const active_slug = $derived.by(() => {
+		if (!pathname) return null;
+		let best: string | null = null;
+		for (const { sections } of nav_list) {
+			for (const { slug } of sections) {
+				if (pathname !== slug && !pathname.startsWith(`${slug}/`)) continue;
+				if (!best || slug.length > best.length) best = slug;
+			}
+		}
+		return best;
+	});
+
+	function aria_current_val(path: string) {
+		return active_slug === path ? 'page' : 'false';
+	}
 </script>
 
 <div class="flex h-full flex-col gap-4 overflow-x-hidden overflow-y-auto p-2">
 	{#if !compact}
-		<a
-			href="/"
-			class="unstyled m-1 flex items-center gap-2 font-semibold text-fg min-[968px]:m-4"
-		>
+		<a href="/" class="docs-nav-brand unstyled m-1 flex items-center gap-2 min-[968px]:m-4">
 			<img src="/logo.svg" alt="Neodrag icon, a pink squircle with a paw in it" class="w-12" />
-			<span class="h3 m-0 text-xl">Neodrag</span>
+			<span>Neodrag</span>
 		</a>
 	{/if}
 
@@ -33,7 +44,7 @@
 								<a
 									href={slug}
 									aria-current="page"
-									class="unstyled dock-angular-bevel__fill block px-3 py-1.5 font-mono text-sm font-extrabold text-fg"
+									class="docs-nav-link docs-nav-link--active unstyled dock-angular-bevel__fill block"
 									{onclick}
 								>
 									{title}
@@ -43,7 +54,7 @@
 							<a
 								href={slug}
 								aria-current="false"
-								class="unstyled block px-3 py-1.5 font-mono text-sm font-semibold text-[color-mix(in_lch,var(--app-color-dark),transparent_12%)] transition-[color] duration-75 hover:text-fg"
+								class="docs-nav-link unstyled"
 								{onclick}
 							>
 								{title}
@@ -54,9 +65,7 @@
 			</ul>
 
 			{#if index !== nav_list.length - 1}
-				<hr
-					class="my-4 h-0.5 border-0 bg-gradient-to-r from-brand via-[color-mix(in_lch,var(--color-brand),transparent_70%)] to-transparent"
-				/>
+				<hr class="docs-nav-divider" aria-hidden="true" />
 			{/if}
 		{/each}
 	</nav>

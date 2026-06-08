@@ -1,13 +1,31 @@
 export {
 	accepts,
-	applySortableReorder,
 	highlight,
 	onDrop,
-	sortable,
-	type SortableMode,
-	type SortableOptions,
-	type SortablePreviewMeta,
-	type SortableReorderMeta,
-	type SortableStrategy,
+	dropHitExpand,
+	collisionPriority,
+	collisionStrategy,
+	type DropCollisionStrategy,
 } from '@neodrag/core/drop';
-export { sortableItemPlugins } from './sortable.ts';
+
+export {
+	applySortableReorder,
+	applyGroupedSortableTransfer,
+	SORTABLE_ROW_ATTR,
+	sortableRowAttrs,
+	type SortableOptions,
+	type SortableStrategy,
+	type SortableMode,
+	type SortablePreviewMode,
+	type SortablePreviewMeta,
+	type SortableIntentMeta,
+	type SortableReorderMeta,
+	type SortableTransferMeta,
+} from '@neodrag/core/sortable';
+
+export { Droppable, type NeodragDropOptions, type DropPluginList } from '../droppable.ts';
+export {
+	Sortable,
+	type SortableElementProps,
+	type SortableRowProps,
+} from './sortable.ts';

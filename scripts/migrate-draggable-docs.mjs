@@ -73,8 +73,7 @@ function isPluginImport(name) {
 
 function fixImports(content) {
 	let out = content;
-	const svelteMain =
-		/(import\s*\{)([^}]+)(\}\s*from\s*['"]@neodrag\/svelte['"])/g;
+	const svelteMain = /(import\s*\{)([^}]+)(\}\s*from\s*['"]@neodrag\/svelte['"])/g;
 
 	out = out.replace(svelteMain, (_, open, imports, close) => {
 		const parts = splitTopLevelImports(imports);
@@ -96,8 +95,7 @@ function fixImports(content) {
 		return result || `${open}${close}`;
 	});
 
-	const dropMain =
-		/(import\s*\{)([^}]+)(\}\s*from\s*['"]@neodrag\/svelte\/drop['"])/g;
+	const dropMain = /(import\s*\{)([^}]+)(\}\s*from\s*['"]@neodrag\/svelte\/drop['"])/g;
 	out = out.replace(dropMain, (_, open, imports, close) => {
 		const parts = splitTopLevelImports(imports);
 		const main = [];
@@ -212,7 +210,10 @@ function migrateText(content) {
 		/use `\{@attach droppable\(\[\.\.\.\]\)\}` the same way as `draggable`/g,
 		'use `new Droppable({ plugins })` and `{@attach drop.attachment}` like `Draggable`',
 	);
-	out = out.replace(/\/\/ Shared engine used by draggable\(\) in most apps/g, '// Shared engine used by Draggable');
+	out = out.replace(
+		/\/\/ Shared engine used by draggable\(\) in most apps/g,
+		'// Shared engine used by Draggable',
+	);
 	return out;
 }
 

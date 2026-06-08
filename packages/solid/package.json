@@ -2,10 +2,30 @@
 	"name": "@neodrag/solid",
 	"version": "3.0.0-next.9",
 	"description": "SolidJS library to add dragging to your apps 😉",
-	"type": "module",
+	"keywords": [
+		"drag",
+		"draggable",
+		"neodrag",
+		"performant",
+		"react-draggable",
+		"small",
+		"solid",
+		"tiny"
+	],
+	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/solid#readme",
+	"bugs": {
+		"url": "https://github.com/PuruVJ/neodrag/issues"
+	},
+	"license": "MIT",
+	"author": "Puru Vijay",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PuruVJ/neodrag.git"
+	},
 	"files": [
 		"dist/*"
 	],
+	"type": "module",
 	"sideEffects": false,
 	"exports": {
 		".": {
@@ -22,6 +42,11 @@
 			"types": "./src/drop/index.ts",
 			"import": "./src/drop/index.ts",
 			"default": "./src/drop/index.ts"
+		},
+		"./sortable": {
+			"types": "./src/sortable/index.ts",
+			"import": "./src/sortable/index.ts",
+			"default": "./src/sortable/index.ts"
 		},
 		"./resize": {
 			"types": "./src/resize.ts",
@@ -47,6 +72,11 @@
 				"import": "./dist/drop/index.js",
 				"default": "./dist/drop/index.js"
 			},
+			"./sortable": {
+				"types": "./dist/sortable/index.d.ts",
+				"import": "./dist/sortable/index.js",
+				"default": "./dist/sortable/index.js"
+			},
 			"./resize": {
 				"types": "./dist/resize.d.ts",
 				"import": "./dist/resize.js",
@@ -55,43 +85,22 @@
 			"./package.json": "./package.json"
 		}
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/PuruVJ/neodrag.git"
-	},
-	"keywords": [
-		"draggable",
-		"solid",
-		"react-draggable",
-		"drag",
-		"neodrag",
-		"small",
-		"tiny",
-		"performant",
-		"neodrag"
-	],
-	"author": "Puru Vijay",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/PuruVJ/neodrag/issues"
-	},
-	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/solid#readme",
 	"scripts": {
 		"compile": "tsdown",
 		"prepublishOnly": "turbo compile",
 		"test": "vitest run --config vitest.config.ts"
-	},
-	"peerDependencies": {
-		"solid-js": "^1.0.0",
-		"@neodrag/core": "workspace:*"
 	},
 	"devDependencies": {
 		"@neodrag/core": "workspace:*",
 		"@vitest/browser": "^3.2.4",
 		"playwright": "^1.53.1",
 		"solid-js": "^1.9.7",
-		"vite-plugin-solid": "^2.11.6",
 		"tsdown": "catalog:",
+		"vite-plugin-solid": "^2.11.6",
 		"vitest": "^3.2.4"
+	},
+	"peerDependencies": {
+		"@neodrag/core": "workspace:*",
+		"solid-js": "^1.0.0"
 	}
 }

@@ -1,15 +1,33 @@
 {
 	"name": "@neodrag/core",
 	"version": "3.0.0-next.9",
-	"type": "module",
+	"license": "MIT",
+	"author": "Puru Vijay",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PuruVJ/neodrag.git"
+	},
 	"files": [
 		"dist/*"
 	],
+	"type": "module",
 	"sideEffects": false,
 	"exports": {
 		".": {
 			"types": "./src/index.ts",
 			"import": "./src/index.ts"
+		},
+		"./internal": {
+			"types": "./src/internal.ts",
+			"import": "./src/internal.ts"
+		},
+		"./draggable": {
+			"types": "./src/draggable/index.ts",
+			"import": "./src/draggable/index.ts"
+		},
+		"./resizable": {
+			"types": "./src/resizable/index.ts",
+			"import": "./src/resizable/index.ts"
 		},
 		"./plugins": {
 			"types": "./src/plugins.ts",
@@ -18,6 +36,10 @@
 		"./drop": {
 			"types": "./src/drop/index.ts",
 			"import": "./src/drop/index.ts"
+		},
+		"./sortable": {
+			"types": "./src/sortable/index.ts",
+			"import": "./src/sortable/index.ts"
 		},
 		"./drop/plugins": {
 			"types": "./src/drop-plugins.ts",
@@ -54,11 +76,22 @@
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
-		"access": "public",
 		"exports": {
 			".": {
 				"types": "./dist/index.d.ts",
 				"import": "./dist/index.js"
+			},
+			"./internal": {
+				"types": "./dist/internal.d.ts",
+				"import": "./dist/internal.js"
+			},
+			"./draggable": {
+				"types": "./dist/draggable/index.d.ts",
+				"import": "./dist/draggable/index.js"
+			},
+			"./resizable": {
+				"types": "./dist/resizable/index.d.ts",
+				"import": "./dist/resizable/index.js"
 			},
 			"./plugins": {
 				"types": "./dist/plugins.d.ts",
@@ -67,6 +100,10 @@
 			"./drop": {
 				"types": "./dist/drop/index.d.ts",
 				"import": "./dist/drop/index.js"
+			},
+			"./sortable": {
+				"types": "./dist/sortable/index.d.ts",
+				"import": "./dist/sortable/index.js"
 			},
 			"./drop/plugins": {
 				"types": "./dist/drop/plugins.d.ts",
@@ -101,40 +138,38 @@
 				"import": "./dist/resize/index.js"
 			},
 			"./package.json": "./package.json"
-		}
+		},
+		"access": "public"
 	},
 	"scripts": {
 		"compile:watch": "tsdown --watch",
-		"compile": "tsdown",
+		"compile": "tsdown && node scripts/verify-profile-strip.mjs",
 		"prepublishOnly": "npm run compile",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"test:webkit": "vitest run --browser=webkit",
 		"test:firefox": "vitest run --browser=firefox",
 		"test:chromium": "vitest run --browser=chromium",
-		"test:unit": "vitest run tests/interactions/state-machine.test.ts tests/interactions/session.test.ts tests/interactions/session-lifecycle.test.ts tests/interactions/report-storage.test.ts tests/interactions/plugins-grid-controls.test.ts tests/interactions/apply-transform.test.ts tests/interactions/update.test.ts tests/interactions/update-pending.test.ts tests/interactions/drop-update.test.ts tests/interactions/plugin-slots.test.ts tests/interactions/plugins-phases.test.ts tests/interactions/coalescing.test.ts tests/interactions/drop-raf.test.ts tests/interactions/transform-update.test.ts tests/interactions/update-defaults.test.ts tests/interactions/debug-snapshot.test.ts tests/interactions/engine-delegate.test.ts tests/interactions/sensors.test.ts tests/interactions/keyboard-drag.test.ts tests/interactions/threshold.test.ts tests/interactions/resize-anchor.test.ts tests/interactions/resize.test.ts tests/interactions/resize-bounds.test.ts tests/interactions/resize-plugins.test.ts tests/interactions/length-types.test.ts tests/interactions/engine-profile.test.ts --browser.enabled=false",
+		"test:unit": "vitest run tests/interactions/state-machine.test.ts tests/interactions/session.test.ts tests/interactions/session-lifecycle.test.ts tests/interactions/report-storage.test.ts tests/interactions/plugins-grid-controls.test.ts tests/interactions/apply-transform.test.ts tests/interactions/update.test.ts tests/interactions/update-pending.test.ts tests/interactions/drop-update.test.ts tests/interactions/plugin-slots.test.ts tests/interactions/plugins-phases.test.ts tests/interactions/coalescing.test.ts tests/interactions/drop-raf.test.ts tests/interactions/transform-update.test.ts tests/interactions/update-defaults.test.ts tests/interactions/debug-snapshot.test.ts tests/interactions/engine-delegate.test.ts tests/interactions/sensors.test.ts tests/interactions/keyboard-drag.test.ts tests/interactions/threshold.test.ts tests/interactions/resize-anchor.test.ts tests/interactions/resize.test.ts tests/interactions/resize-bounds.test.ts tests/interactions/resize-plugins.test.ts tests/interactions/length-types.test.ts tests/interactions/engine-profile.test.ts tests/interactions/sortable-flip-release.test.ts --browser.enabled=false",
 		"test:interactions": "vitest run --config vitest.interactions.config.ts",
 		"test:interactions:unit": "pnpm run test:unit",
 		"test:bench:guard": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/",
 		"test:human": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/human-expectations.suite.test.ts && vitest run --config vitest.interactions.config.ts tests/interactions/human-expectations.test.svelte.ts",
 		"bench": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/perf.suite.test.ts",
+		"bench:lifecycle": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/lifecycle.perf.suite.test.ts",
+		"bench:lifecycle:baseline": "node --experimental-strip-types benchmarks/scripts/record-lifecycle-baseline.ts",
+		"bench:init-cost": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/init-update-cost.suite.test.ts",
 		"bench:profile": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/human-profile.suite.test.ts",
 		"bench:cost": "vitest run --config vitest.bench.browser.config.ts benchmarks/browser/human-cost.suite.test.ts",
 		"bench:browser": "vitest run --config vitest.bench.browser.config.ts",
 		"bench:all": "pnpm test:bench:guard",
 		"bench:run": "pnpm test:bench:guard",
 		"bench:baseline": "node --experimental-strip-types benchmarks/scripts/record-baseline.ts",
+		"bench:cost:baseline": "node --experimental-strip-types benchmarks/scripts/record-human-cost-baseline.ts",
 		"test:coverage": "vitest run --coverage --browser=chromium"
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/PuruVJ/neodrag.git"
-	},
-	"author": "Puru Vijay",
-	"license": "MIT",
 	"devDependencies": {
 		"@neodrag/test": "workspace:*",
-		"@neodrag/svelte": "workspace:*",
 		"@vitest/coverage-v8": "3.2.4",
 		"jsdom": "^29.1.1",
 		"tsdown": "catalog:"

@@ -21,7 +21,11 @@ export const numberStub: LengthAdapter = {
 		return { width: formatPx(px.width), height: formatPx(px.height) };
 	},
 
-	commitAuthored(px: { width: number; height: number }, _preserve: AuthoredSizePair, _node: HTMLElement | SVGElement): AuthoredSizePair {
+	commitAuthored(
+		px: { width: number; height: number },
+		_preserve: AuthoredSizePair,
+		_node: HTMLElement | SVGElement,
+	): AuthoredSizePair {
 		return { width: formatPx(px.width), height: formatPx(px.height) };
 	},
 

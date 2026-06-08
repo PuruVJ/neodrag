@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Draggable, ghost } from '@neodrag/svelte'
+	import { Draggable, ghost } from '@neodrag/svelte';
 	import { events } from '@neodrag/svelte/plugins';
 	import { Droppable } from '@neodrag/svelte/drop';
 
@@ -43,41 +43,49 @@
 		}
 	}
 
-	const drag_0 = new Draggable({ plugins: [
-					ghost({ opacity: 0.2 }),
-					events({
-						onDragStart() {
-							startDrag(task);
-						},
-						onDragEnd() {
-							endDrag();
-						},
-					}),
-				] });
-	const drop_1 = new Droppable({ plugins: [
+	const drag_0 = new Draggable({
+		plugins: [
+			ghost({ opacity: 0.2 }),
+			events({
+				onDragStart() {
+					startDrag(task);
+				},
+				onDragEnd() {
+					endDrag();
+				},
+			}),
+		],
+	});
+	const drop_1 = new Droppable({
+		plugins: [
 			{
 				onDrop() {
 					dropInColumn('todo');
 				},
 			},
-		] });
-	const drop_2 = new Droppable({ plugins: [
+		],
+	});
+	const drop_2 = new Droppable({
+		plugins: [
 			{
 				onDrop() {
 					console.log(2);
 					dropInColumn('done');
 				},
 			},
-		] });
+		],
+	});
 
-	const drop_0 = new Droppable({ plugins: [
+	const drop_0 = new Droppable({
+		plugins: [
 			{
 				onDrop() {
 					console.log(2);
 					dropInColumn('done');
 				},
 			},
-		] });
+		],
+	});
 </script>
 
 <h1>Bare Kanban</h1>
@@ -103,7 +111,9 @@
 		{@attach drop_0.attachment}
 	>
 		<h2>DONE</h2>
-		{#e{@attach drop_2.attachment}und: white;"
+		{#each getTasksForColumn('done') as task (task.id)}
+			<div
+				style="border: 1px solid green; padding: 5px; margin: 5px 0; background: white;"
 				{@attach drag_0.attachment}
 			>
 				{task.title}

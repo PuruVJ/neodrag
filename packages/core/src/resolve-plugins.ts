@@ -1,4 +1,10 @@
-import type { DragPlugin, DragPluginList, DropPlugin, DropPluginList, PluginSlot } from './types.ts';
+import type {
+	DragPlugin,
+	DragPluginList,
+	DropPlugin,
+	DropPluginList,
+	PluginSlot,
+} from './types.ts';
 
 export function isReactiveSlot<T>(slot: PluginSlot<T>): slot is () => T | T[] {
 	return typeof slot === 'function';
@@ -39,6 +45,8 @@ export function resolvePluginList<T extends { key: symbol }>(
 export class PluginListResolver<T extends { key: symbol }> {
 	#slots: PluginSlot<T>[];
 	#staticCache: (T | undefined)[] = [];
+	#cachedFull: T[] | null = null;
+	#cachedAttach: T[] | null = null;
 
 	constructor(slots: PluginSlot<T>[]) {
 		this.#slots = slots;
@@ -55,14 +63,30 @@ export class PluginListResolver<T extends { key: symbol }> {
 	setSlots(slots: PluginSlot<T>[]) {
 		this.#slots = slots;
 		this.#staticCache = [];
+		this.#cachedFull = null;
+		this.#cachedAttach = null;
 	}
 
 	resolveFull(): T[] {
+		if (!this.hasReactive()) {
+			if (!this.#cachedFull) {
+				this.#staticCache = [];
+				this.#cachedFull = resolvePluginList(this.#slots, this.#staticCache, false);
+			}
+			return this.#cachedFull;
+		}
 		this.#staticCache = [];
 		return resolvePluginList(this.#slots, this.#staticCache, false);
 	}
 
 	resolveAttach(): T[] {
+		if (!this.hasReactive()) {
+			if (!this.#cachedAttach) {
+				this.#staticCache = [];
+				this.#cachedAttach = resolvePluginList(this.#slots, this.#staticCache, false, false);
+			}
+			return this.#cachedAttach;
+		}
 		this.#staticCache = [];
 		return resolvePluginList(this.#slots, this.#staticCache, false, false);
 	}
@@ -80,4 +104,3 @@ export function resolvedPluginsUnchanged<T>(prev: readonly T[], next: readonly T
 	}
 	return true;
 }
-

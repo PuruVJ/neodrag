@@ -23,7 +23,7 @@ One draggable to rule em all
 - 🤏 **Small in size** - ~5KB, plugin architecture enables tree-shaking
 - 🧩 **Plugin-based** - Mix and match only what you need
 - ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
-- 🎯 **Svelte 5 native** - Built for attachments with `{@attach}` syntax
+- 🎯 **Svelte 5 native** - Spread `{...drag.target}` on the element
 - 🔄 **Reactive** - Change options on the fly with compartments
 - 🗃️ **Highly customizable** - Tons of plugins available
 
@@ -43,69 +43,68 @@ Basic usage
 <script>
   import { Draggable } from '@neodrag/svelte';
 
-	const drag_0 = new Draggable({ plugins:  });
-	const drag_1 = new Draggable({ plugins: [axis('x'), grid([10, 10])] });
-	const drag_2 = new Draggable({ plugins: plugins });
-	const drag_3 = new Draggable({ plugins: [() => [axisComp]] });
+  const drag = new Draggable({ plugins: [] });
 </script>
 
-<div {@attach drag_0.attachment}>Hello</div>
+<div {...drag.target}>Hello</div>
 ```
 
-With plugins
+With plugins and drag callbacks
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { axis, grid } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { axis, grid } from '@neodrag/svelte/plugins';
+
+  const drag = new Draggable({
+    plugins: [axis('x'), grid([10, 10])],
+    onDrag(data) {
+      console.log(data.offset, data.input.kind);
+    },
+  });
 </script>
 
-<div {@attach drag_1.attachment}>
-  Hello
-</div>
+<div {...drag.target}>Hello</div>
+{#if drag.isDragging}Dragging…{/if}
 ```
 
 Defining plugins elsewhere with TypeScript
 
 ```svelte
 <script lang="ts">
-  import { Draggable } from '@neodrag/svelte'
-	import { axis, bounds, BoundsFrom, type Plugin } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import {
+    axis,
+    bounds,
+    BoundsFrom,
+    type Plugin,
+  } from '@neodrag/svelte/plugins';
 
-  let plugins: Plugin[] = [
-    axis('y'),
-    bounds(BoundsFrom.viewport()),
-  ];
+  let plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.viewport())];
+  const drag = new Draggable({ plugins });
 </script>
 
-<div {@attach drag_2.attachment}>Hello</div>
+<div {...drag.target}>Hello</div>
 ```
 
 Reactive plugins with compartments
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { axis } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { axis } from '@neodrag/svelte/plugins';
 
   let currentAxis = $state('x');
-  </script>
+  const drag = new Draggable({
+    plugins: [() => [axis(currentAxis)]],
+  });
+</script>
 
-<div {@attach drag_3.attachment}>
+<div {...drag.target}>
   Current axis: {currentAxis}
 </div>
-
-<button onclick={() => (currentAxis = currentAxis === 'x' ? 'y' : 'x')}>
-  Switch Axis
-</button>
 ```
-
-<a href="https://next.neodrag.dev/docs/svelte" style="font-size: 2rem">Read the docs</a>
-
-## Credits
-
-Inspired by [react-draggable](https://github.com/react-grid-layout/react-draggable), but with a modern plugin architecture and optimized for performance.
 
 # License
 
-MIT License © Puru Vijay
+MIT

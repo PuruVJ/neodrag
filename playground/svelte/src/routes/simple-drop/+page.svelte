@@ -29,11 +29,11 @@
 <div class="container">
 	<h1>Simple Drag and Drop Test</h1>
 
-	<div class="box draggable" {@attach drag.attachment}>
+	<div class="box draggable" {...drag.target}>
 		Drag me (dragged {dragCount} times)
 	</div>
 
-	<div class="box drop-zone" {@attach drop.attachment}>
+	<div class="box drop-zone" {...drop.zone}>
 		Drop here (dropped {dropCount} times)
 	</div>
 </div>

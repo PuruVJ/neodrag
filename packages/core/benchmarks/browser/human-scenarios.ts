@@ -3,7 +3,7 @@ import { DEFAULTS, Neodrag, type EngineOptions } from '../../src/index.ts';
 import { BoundsFrom, axis, bounds, disabled } from '../../src/plugins.ts';
 import { accepts, highlight, onDrop } from '../../src/drop-plugins.ts';
 import { dragData } from '../../src/plugins.ts';
-import { sortable } from '../../src/drop/index.ts';
+import { Sortable } from '../../src/sortable/index.ts';
 import {
 	createBox,
 	dragElementByDelta,
@@ -178,7 +178,7 @@ export function humanScenarios(): HumanScenario[] {
 						container.appendChild(li);
 					}
 					document.body.appendChild(container);
-					const list = sortable({
+					const list = new Sortable({
 						items: () => items,
 						keyBy: (i) => i.id,
 						onReorder: (next) => {

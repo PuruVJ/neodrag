@@ -113,13 +113,8 @@ npm install @neodrag/solid@next
 import { createDraggable } from '@neodrag/solid';
 
 // New imports
-import {
-  useDraggable,
-  axis,
-  bounds,
-  BoundsFrom,
-  events,
-} from '@neodrag/solid';
+import { createDraggable } from '@neodrag/solid';
+import { axis, bounds, BoundsFrom } from '@neodrag/solid/plugins';
 ```
 
 </div>
@@ -175,22 +170,26 @@ import {
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { axis, bounds, BoundsFrom, grid, events } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import {
+    axis,
+    bounds,
+    BoundsFrom,
+    grid,
+    events,
+  } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [
-    axis('x'),
-    bounds(BoundsFrom.parent()),
-    grid([10, 10]),
-    events({ onDrag: (data) => console.log(data) }),
-  ] });
+  const drag_0 = new Draggable({
+    plugins: [
+      axis('x'),
+      bounds(BoundsFrom.parent()),
+      grid([10, 10]),
+      events({ onDrag: (data) => console.log(data) }),
+    ],
+  });
 </script>
 
-<div
-  {@attach drag_0.attachment}
->
-  Drag me
-</div>
+<div {@attach drag_0.attachment}>Drag me</div>
 ```
 
 </div>
@@ -324,24 +323,19 @@ function App() {
 
 ```tsx
 import { createSignal } from 'solid-js';
-import {
-  useDraggable,
-  axis,
-  bounds,
-  BoundsFrom,
-  grid,
-  events,
-} from '@neodrag/solid';
+import { createDraggable } from '@neodrag/solid';
+import { axis, bounds, BoundsFrom, grid } from '@neodrag/solid/plugins';
 
 function App() {
   const [element, setElement] = createSignal();
 
-  useDraggable(element, [
+  createDraggable(element, [
     axis('x'),
     bounds(BoundsFrom.parent()),
     grid([10, 10]),
-    events({ onDrag: (data) => console.log(data) }),
-  ]);
+  ], {
+    syncState: 'full',
+  });
 
   return <div ref={setElement}>Drag me</div>;
 }
@@ -411,11 +405,11 @@ const instance = Neodrag.shared.draggable(element, [
 
 ### Grid and Snapping
 
-| v2 Option                    | v3 Plugin                    | Purpose              |
-| ---------------------------- | ---------------------------- | -------------------- |
-| `grid: [20, 20]`             | `grid([20, 20])`             | Snap to grid         |
+| v2 Option                    | v3 Plugin                                                    | Purpose                           |
+| ---------------------------- | ------------------------------------------------------------ | --------------------------------- |
+| `grid: [20, 20]`             | `grid([20, 20])`                                             | Snap to grid                      |
 | `threshold: { distance: 5 }` | `new Draggable({ threshold: { distance: 5 }, plugins: [] })` | Per-binding option (not a plugin) |
-| `threshold: { delay: 100 }`  | `new Draggable({ threshold: { delay: 100 }, plugins: [] })`  | Time delay threshold |
+| `threshold: { delay: 100 }`  | `new Draggable({ threshold: { delay: 100 }, plugins: [] })`  | Time delay threshold              |
 
 ### Controls and Interaction
 
@@ -429,8 +423,8 @@ const instance = Neodrag.shared.draggable(element, [
 
 Events moved from options to dedicated plugin. Event data structure changed:
 
-- **v2:** `offsetX`, `offsetY`, `rootNode`, `currentNode`, `event`
-- **v3:** `offset` object with `x` and `y` properties, `rootNode`, `currentNode`, `event`
+- **v2:** `offsetX`, `offsetY`, `rootNode`, `currentNode`, `event` (`PointerEvent`)
+- **v3:** `offset`, `offsetPx`, `rootNode`, `visualNode`, `input` (`InteractionInput`), `pointer` — use `data.input.native` when `data.input.kind === 'pointer'`
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -532,7 +526,7 @@ const plugins = [
 **v3 Events:**
 
 ```tsx
-useDraggable(element, [
+createDraggable(element, [
   events({
     onDragStart: ({ offset }) =>
       console.log('start', offset.x, offset.y),
@@ -606,21 +600,18 @@ Neodrag.shared.draggable(element, [
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { axis, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { axis, bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
   let currentAxis = $state('x');
   let isConstrained = $state(false);
 
-    
-	const drag_0 = new Draggable({ plugins: [() => [axisComp, boundsComp].filter(Boolean)] });
+  const drag_0 = new Draggable({
+    plugins: [() => [axisComp, boundsComp].filter(Boolean)],
+  });
 </script>
 
-<div
-  {@attach drag_0.attachment}
->
-  Drag me
-</div>
+<div {@attach drag_0.attachment}>Drag me</div>
 <button onclick={() => (currentAxis = 'y')}>Switch to Y</button>
 <button onclick={() => (isConstrained = !isConstrained)}
   >Toggle bounds</button
@@ -664,7 +655,6 @@ function App() {
   const [currentAxis, setCurrentAxis] = useState('x');
   const [isConstrained, setIsConstrained] = useState(false);
 
-    
   useDraggable(ref, () => [axisComp, boundsComp].filter(Boolean));
 
   return (
@@ -719,7 +709,6 @@ import { useCompartment } from '@neodrag/vue';
 const currentAxis = ref('x');
 const isConstrained = ref(false);
 
-
 const plugins = () => [axisComp, boundsComp].filter(Boolean);
 </script>
 
@@ -772,8 +761,7 @@ function App() {
   const [currentAxis, setCurrentAxis] = createSignal('x');
   const [isConstrained, setIsConstrained] = createSignal(false);
 
-    
-  useDraggable(element, [axisComp, boundsComp]);
+  createDraggable(element, [axisComp, boundsComp]);
 
   return (
     <div>
@@ -823,7 +811,6 @@ import { Compartment } from '@neodrag/vanilla';
 let currentAxis = 'x';
 let isConstrained = false;
 
-
 const instance = Neodrag.shared.draggable(element, () =>
   [axisComp, boundsComp].filter(Boolean),
 );
@@ -857,8 +844,8 @@ Create your own dragging behavior:
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { defineDragPlugin } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { defineDragPlugin } from '@neodrag/svelte/plugins';
 
   const loggerPlugin = defineDragPlugin(() => ({
     key: Symbol('logger'),
@@ -882,7 +869,7 @@ Create your own dragging behavior:
     },
   }));
 
-	const drag_0 = new Draggable({ plugins: [loggerPlugin()] });
+  const drag_0 = new Draggable({ plugins: [loggerPlugin()] });
 </script>
 
 <div {@attach drag_0.attachment}>Custom behavior</div>
@@ -961,7 +948,7 @@ const plugins = [loggerPlugin];
 <div slot="solid">
 
 ```tsx
-import { useDraggable, defineDragPlugin } from '@neodrag/solid';
+import { createDraggable, defineDragPlugin } from '@neodrag/solid';
 
 const loggerPlugin = defineDragPlugin(() => ({
   key: Symbol('logger'),
@@ -984,7 +971,7 @@ const loggerPlugin = defineDragPlugin(() => ({
 
 function CustomExample() {
   const [element, setElement] = createSignal();
-  useDraggable(element, [loggerPlugin]);
+  createDraggable(element, [loggerPlugin]);
   return <div ref={setElement}>Custom behavior</div>;
 }
 ```
@@ -1031,22 +1018,20 @@ Prevent page scrolling during drag:
 
 ```svelte
 <script>
-  import { Draggable } from '@neodrag/svelte'
-	import { scrollLock } from '@neodrag/svelte/plugins';
+  import { Draggable } from '@neodrag/svelte';
+  import { scrollLock } from '@neodrag/svelte/plugins';
 
-	const drag_0 = new Draggable({ plugins: [
-    scrollLock({
-      lockAxis: 'both',
-      allowScrollbar: false,
-    }),
-  ] });
+  const drag_0 = new Draggable({
+    plugins: [
+      scrollLock({
+        lockAxis: 'both',
+        allowScrollbar: false,
+      }),
+    ],
+  });
 </script>
 
-<div
-  {@attach drag_0.attachment}
->
-  No page scroll while dragging
-</div>
+<div {@attach drag_0.attachment}>No page scroll while dragging</div>
 ```
 
 </div>
@@ -1096,12 +1081,12 @@ const plugins = [
 <div slot="solid">
 
 ```tsx
-import { useDraggable, scrollLock } from '@neodrag/solid';
+import { createDraggable, scrollLock } from '@neodrag/solid';
 
 function ScrollLockExample() {
   const [element, setElement] = createSignal();
 
-  useDraggable(element, [
+  createDraggable(element, [
     scrollLock({
       lockAxis: 'both',
       allowScrollbar: false,
@@ -1171,8 +1156,8 @@ const instance = Neodrag.shared.draggable(element, [
 
 **Key Solid Changes:**
 
-- `createDraggable()` pattern → `useDraggable()` hook
-- `use:draggable` directive → `useDraggable(element, plugins)`
+- `createDraggable()` pattern → `createDraggable()` hook
+- `use:draggable` directive → `createDraggable(element, plugins)`
 - Add `createCompartment` for reactive plugins
 - Works with Solid's reactivity system
 

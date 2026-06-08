@@ -7,7 +7,7 @@ import { DEFAULTS, Neodrag } from '../../src/index.ts';
 import { BoundsFrom, axis, bounds, disabled } from '../../src/plugins.ts';
 import { accepts, highlight, onDrop } from '../../src/drop-plugins.ts';
 import { dragData } from '../../src/plugins.ts';
-import { sortable } from '../../src/drop/index.ts';
+import { Sortable } from '../../src/sortable/index.ts';
 import {
 	assertTranslate,
 	createBox,
@@ -138,14 +138,7 @@ describe('Human expectations (Chromium)', () => {
 
 			const br = box.getBoundingClientRect();
 			const zr = zone.getBoundingClientRect();
-			dragSteps(
-				box,
-				br.left + br.width / 2,
-				br.top + br.height / 2,
-				zr.left - 30,
-				zr.top - 30,
-				14,
-			);
+			dragSteps(box, br.left + br.width / 2, br.top + br.height / 2, zr.left - 30, zr.top - 30, 14);
 			await flushEffects();
 
 			expect(drops.length).toBe(0);
@@ -242,7 +235,7 @@ describe('Human expectations (Chromium)', () => {
 			}
 			document.body.appendChild(container);
 
-			const list = sortable({
+			const list = new Sortable({
 				items: () => items,
 				keyBy: (i) => i.id,
 				onReorder: (next) => {

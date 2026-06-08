@@ -5,6 +5,7 @@
 **Neodrag** is a comprehensive, multi-framework dragging library that provides a consistent API across different frontend frameworks. It's designed as a monorepo containing framework-specific packages that all share a common core.
 
 ### Key Features
+
 - **Multi-framework support**: Svelte, React, Vue, Solid, Vanilla JS
 - **Plugin-based architecture**: Modular, composable plugin system
 - **Performance focused**: Small bundle size, efficient rendering
@@ -50,6 +51,7 @@ neodrag/
 ### Framework Wrappers
 
 Each framework package provides:
+
 - Framework-specific API (actions, hooks, composables)
 - Integration with framework reactivity systems
 - Framework-specific TypeScript definitions
@@ -58,12 +60,14 @@ Each framework package provides:
 ## Development Workflow
 
 ### Package Management
+
 - **Package Manager**: pnpm with workspaces
 - **Build System**: Turbo for coordinated builds
 - **Bundler**: tsdown for TypeScript compilation
 - **Version Management**: Changesets for coordinated releases
 
 ### Key Scripts
+
 ```bash
 # Install dependencies
 pnpm install
@@ -90,6 +94,7 @@ pnpm ci:release  # Publish packages
 ```
 
 ### Build Configuration
+
 - **TypeScript**: Shared catalog version (5.8.3)
 - **Vite**: Shared catalog version (8.0.14, Rolldown bundler)
 - **Turbo**: Orchestrates compile, test, bench, sizes, build, and dev across packages
@@ -98,12 +103,14 @@ pnpm ci:release  # Publish packages
 ## Testing Strategy
 
 ### Test Framework: Vitest + Playwright
+
 - **Browser Testing**: Multi-browser support (Chromium, Firefox, WebKit)
 - **Component Testing**: Svelte component rendering in browser
 - **Visual Testing**: Screenshot comparisons for drag behaviors
 - **Custom Commands**: Mouse simulation via Playwright integration
 
 ### Test Structure
+
 ```
 packages/core/tests/
 ├── components/          # Test components (Svelte)
@@ -114,6 +121,7 @@ packages/core/tests/
 ```
 
 ### Key Testing Patterns
+
 - **Drag Simulation**: Custom `dragAndDrop` utility
 - **Position Verification**: CSS transform checking
 - **Plugin Testing**: Isolated plugin behavior verification
@@ -123,20 +131,23 @@ packages/core/tests/
 ## Plugin System Deep Dive
 
 ### Core Plugins (Default)
+
 1. **ignoreMultitouch**: Prevents multi-touch conflicts
-2. **stateMarker**: Adds drag state attributes
-3. **applyUserSelectHack**: Prevents text selection during drag
-4. **transform**: Applies position transforms
-5. **threshold**: Drag threshold and delay configuration
-6. **touchAction**: Touch event optimization
+2. **applyUserSelectHack**: Prevents text selection during drag
+3. **transform**: Applies position transforms
+4. **threshold**: Drag threshold and delay configuration
+5. **touchAction**: Touch event optimization
 
 ### Plugin Development Pattern
+
 ```typescript
 export const myPlugin = defineDragPlugin((options = {}) => ({
   key: Symbol('my-plugin'),
   name: 'my-plugin',
   init(ctx) {
-    return { /* state */ };
+    return {
+      /* state */
+    };
   },
   start(ctx, state, event) {
     return true;
@@ -144,14 +155,13 @@ export const myPlugin = defineDragPlugin((options = {}) => ({
   drag(ctx, state, event) {
     return { x: ctx.proposed.x, y: ctx.proposed.y };
   },
-  end(ctx, state, event) {
-  },
-  destroy(ctx, state) {
-  },
+  end(ctx, state, event) {},
+  destroy(ctx, state) {},
 }));
 ```
 
 ### Plugin Context API
+
 - **Position Properties**: `delta`, `proposed`, `offset`, `initial`
 - **State Properties**: `isDragging`, `isInteracting`
 - **DOM Properties**: `rootNode`, `currentlyDraggedNode`, `cachedRootNodeRect`
@@ -161,22 +171,26 @@ export const myPlugin = defineDragPlugin((options = {}) => ({
 ## Framework-Specific Details
 
 ### Svelte Integration
+
 - **Actions**: `use:draggable` action with plugin array
 - **Reactivity**: Svelte 5 runes integration with `$state` and `$effect`
 - **Reactive plugins**: `draggable(() => [...])` reconciles on dependency changes
 - **Legacy Support**: Separate legacy export for Svelte < 5
 
 ### React Integration
+
 - Hook-based API with `useDraggable`
 - Ref-based element attachment
 - React-specific state management
 
 ### Vue Integration
+
 - Composable pattern with `useDraggable`
 - Vue 3 reactivity integration
 - Directive support
 
 ### Vanilla Integration
+
 - Direct API access
 - Manual lifecycle management
 - Framework-agnostic usage
@@ -184,17 +198,20 @@ export const myPlugin = defineDragPlugin((options = {}) => ({
 ## Code Quality & Standards
 
 ### TypeScript Configuration
+
 - Strict mode enabled
 - Shared catalog versions across packages
 - Full type coverage including complex generic types
 
 ### Code Style
+
 - ESM modules throughout
 - No comments policy (self-documenting code)
 - Consistent naming conventions
 - Tree-shakeable exports
 
 ### Performance Considerations
+
 - Event delegation for efficiency
 - Pointer events over mouse events
 - requestAnimationFrame for visual updates
@@ -204,23 +221,27 @@ export const myPlugin = defineDragPlugin((options = {}) => ({
 ## Important Implementation Details
 
 ### Precision Handling
+
 - Known issues with large coordinate precision at JavaScript limits
 - Test cases document expected failures at 2^24+ coordinates
 - Delta calculation precision challenges
 
 ### Event System
+
 - Pointer capture for reliable dragging
 - Event delegation from document root
 - Proper cleanup on component destruction
 - Click prevention after drag operations
 
 ### SVG Support
+
 - Special handling for SVG elements vs HTML elements
 - Transform attribute vs CSS transform
 - Coordinate scaling considerations
 - Browser-specific transform syntax differences
 
 ### Error Handling
+
 - Graceful plugin failure handling
 - Error reporting system with context
 - Failed plugin isolation
@@ -250,6 +271,7 @@ pnpm ci:release            # Publish to npm
 ```
 
 ## Current Version Information
+
 - **Core**: 3.0.0-next.7
 - **Svelte**: 3.0.0-next.7
 - **React**: 3.0.0-next.7
@@ -258,6 +280,7 @@ pnpm ci:release            # Publish to npm
 - **Vanilla**: 3.0.0-next.7
 
 ## Branch Information
+
 - **Current Branch**: `new-api`
 - **Main Branch**: `main` (target for PRs)
 - **Development**: Active work on v3 API rewrite
@@ -265,21 +288,25 @@ pnpm ci:release            # Publish to npm
 ## Key Files to Understand
 
 ### Core Implementation
+
 - `packages/core/src/engine.ts` - Neodrag engine
 - `packages/core/src/plugins.ts` - Built-in drag/drop plugins
 - `packages/core/src/utils.ts` - Utility functions
 
 ### Framework Wrappers
+
 - `packages/svelte/src/index.svelte.ts` - Svelte 5 integration
 - `packages/react/src/index.ts` - React hooks
 - `packages/vue/src/index.ts` - Vue composables
 
 ### Testing
+
 - `packages/core/tests/interactions/` - Interaction engine tests
 - `packages/core/vitest.config.ts` - Test configuration
 - `packages/core/tests/components/` - Test components
 
 ### Configuration
+
 - `turbo.json` - Build orchestration
 - `pnpm-workspace.yaml` - Workspace configuration
 - `package.json` - Root package configuration

@@ -2,6 +2,8 @@ import type { BenchStats } from './browser/helpers.ts';
 
 export const BASELINE_REL = 'benchmarks/reports/baseline.json';
 export const LATEST_REL = 'benchmarks/reports/latest.json';
+export const LIFECYCLE_BASELINE_REL = 'benchmarks/reports/lifecycle-baseline.json';
+export const LIFECYCLE_LATEST_REL = 'benchmarks/reports/lifecycle-latest.json';
 
 export const MIN_COMPARE_MEDIAN_MS = 0.05;
 

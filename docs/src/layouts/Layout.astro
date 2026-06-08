@@ -6,7 +6,6 @@ import '../styles/app.css';
 import { get_nav_list } from '$/nav';
 import Dock from '$components/nav/Dock.svelte';
 import PawCursor from '$components/PawCursor.svelte';
-import { critical_framework_css } from '$helpers/framework-brand';
 import { framework_from_path, is_docs_path } from '$helpers/framework-route';
 import { SEO } from 'astro-seo';
 import { ClientRouter } from 'astro:transitions';
@@ -29,7 +28,7 @@ const nav_by_framework = Object.fromEntries(
 ---
 
 <!doctype html>
-<html lang="en" data-framework={framework}>
+<html lang="en" data-framework={framework} class:list={[{ 'docs-route': is_docs_route }]}>
 	<head>
 		<meta charset="UTF-8" />
 		<script is:inline>
@@ -39,7 +38,11 @@ const nav_by_framework = Object.fromEntries(
 				function parse_theme_storage(storage_value) {
 					if (!storage_value) return DEFAULT;
 					try {
-						return JSON.parse(storage_value) ?? DEFAULT;
+						const parsed = JSON.parse(storage_value) ?? DEFAULT;
+						if (parsed.preference !== 'system') {
+							parsed.current = parsed.preference;
+						}
+						return parsed;
 					} catch {
 						localStorage.removeItem('neodrag:theme');
 						return DEFAULT;
@@ -51,7 +54,7 @@ const nav_by_framework = Object.fromEntries(
 					if (local_theme.preference === 'system') {
 						return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 					}
-					return local_theme.current;
+					return local_theme.preference;
 				}
 
 				function apply_neodrag_theme() {
@@ -79,7 +82,6 @@ const nav_by_framework = Object.fromEntries(
 				apply_docs_framework_from_path(location.pathname);
 			})();
 		</script>
-		{framework && <style is:inline set:html={critical_framework_css(framework)} />}
 		<ClientRouter fallback="swap" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/png" href="/favicon.png" />
@@ -114,52 +116,45 @@ const nav_by_framework = Object.fromEntries(
 	<body class:list={[{ 'docs-route': is_docs_route }]}>
 		{
 			is_docs_route && (
-				<div
-					class="docs-page-grid"
-					aria-hidden="true"
-					style={framework
-						? `--docs-grid-accent: var(--app-color-brand-${framework})`
-						: undefined}
-				/>
+				<div class="docs-page-grid" aria-hidden="true" />
 			)
 		}
 		<script is:inline data-astro-rerun>
-			function apply_docs_route_context() {
-				const match = location.pathname.match(/\/docs\/(svelte|react|solid|vanilla|vue|core)/i);
-				const framework = match?.[1];
-				const is_docs = location.pathname.startsWith('/docs');
+			(function () {
+				const FRAMEWORK_PATH_RE = /\/docs\/(svelte|react|solid|vanilla|vue|core)/i;
 
-				if (framework) {
-					document.documentElement.dataset.framework = framework;
-				} else {
-					delete document.documentElement.dataset.framework;
+				function apply_docs_route_context(pathname) {
+					const path = pathname ?? location.pathname;
+					const framework = FRAMEWORK_PATH_RE.exec(path)?.[1];
+					const is_docs = path.startsWith('/docs');
+
+					if (framework) {
+						document.documentElement.dataset.framework = framework;
+					} else {
+						delete document.documentElement.dataset.framework;
+					}
+
+					delete document.body.dataset.framework;
+					document.documentElement.classList.toggle('docs-route', is_docs);
+					document.body.classList.toggle('docs-route', is_docs);
 				}
 
-				delete document.body.dataset.framework;
-				document.body.classList.toggle('docs-route', is_docs);
-			}
+				window.__neodrag_apply_docs_route = apply_docs_route_context;
 
-			window.__neodrag_apply_theme?.();
-			apply_docs_route_context();
+				window.__neodrag_apply_theme?.();
+				apply_docs_route_context();
 
-			document.addEventListener('astro:page-load', apply_docs_route_context);
-			document.addEventListener('astro:before-swap', (event) => {
-				const next = event.newDocument?.documentElement?.dataset?.framework;
-				if (next) {
-					document.documentElement.dataset.framework = next;
-				} else {
-					delete document.documentElement.dataset.framework;
-				}
-				delete document.body.dataset.framework;
-			});
-			document.addEventListener('astro:after-swap', apply_docs_route_context);
-			matchMedia('(prefers-color-scheme: dark)').addEventListener(
-				'change',
-				window.__neodrag_apply_theme,
-			);
-			addEventListener('storage', (event) => {
-				if (event.key === 'neodrag:theme') window.__neodrag_apply_theme?.();
-			});
+				document.addEventListener('astro:page-load', () => apply_docs_route_context());
+				document.addEventListener('astro:after-swap', () => apply_docs_route_context());
+
+				matchMedia('(prefers-color-scheme: dark)').addEventListener(
+					'change',
+					window.__neodrag_apply_theme,
+				);
+				addEventListener('storage', (event) => {
+					if (event.key === 'neodrag:theme') window.__neodrag_apply_theme?.();
+				});
+			})();
 		</script>
 
 		<div>

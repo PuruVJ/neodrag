@@ -1,11 +1,9 @@
-import { Neodrag } from './engine.ts';
-import { PluginBinding } from './plugin-binding.ts';
+import { Neodrag } from './engine/neodrag.ts';
+import { TargetBinding } from './target-binding.ts';
 import type { ResizeApplier } from './apply-resize.ts';
 import type { LengthAdapter } from './length-runtime.ts';
-import {
-	composeResizePluginList,
-	type ResizeSizeBoundsInput,
-} from './resize-bounds.ts';
+import type { MarkupAdapter } from './markup-adapter.ts';
+import { composeResizePluginList, type ResizeSizeBoundsInput } from './resize-bounds.ts';
 import type { ResizePlugin, ResizePluginList } from './resize/types.ts';
 
 export type { ResizeApplier };
@@ -22,11 +20,12 @@ export interface ResizableOptions extends ResizeSizeBoundsInput {
 	plugins: ResizePluginList;
 	applyResize?: ResizeApplier;
 	length?: LengthAdapter;
+	markup?: MarkupAdapter;
 }
 
-export class Resizable extends PluginBinding<ResizePlugin> {
+export class Resizable extends TargetBinding<ResizePlugin> {
 	constructor(options: ResizableOptions) {
-		const { engine, plugins, applyResize, length, minSize, maxSize, parent, ...rest } =
+		const { engine, plugins, applyResize, length, markup, minSize, maxSize, parent, ...rest } =
 			options;
 		if (Object.keys(rest).length > 0) {
 			throw new Error(`Unknown Resizable option(s): ${Object.keys(rest).join(', ')}`);
@@ -35,12 +34,13 @@ export class Resizable extends PluginBinding<ResizePlugin> {
 		super({
 			engine,
 			length,
+			markup,
 			plugins: composeResizePluginList(plugins, { minSize, maxSize, parent }),
-			attachIdempotency: 'node-and-handle',
-			register: (engine, node, resolved, binding) =>
+			sharedEngine: () => Neodrag.shared,
+			register: (engine, node, resolved, ctx) =>
 				engine.resizable(node, resolved, {
 					applyResize,
-					length: binding.length,
+					length: ctx.length,
 				}),
 		});
 	}

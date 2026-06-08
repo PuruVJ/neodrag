@@ -1,89 +1,75 @@
+import { Neodrag } from '@neodrag/core';
 import {
-	sortable,
+	Sortable as CoreSortable,
+	sortableItemAttrs,
+	sortableRowAttrs,
 	type SortableOptions,
-	type SortablePreviewMeta,
-	type SortableReorderMeta,
-} from '@neodrag/core/drop';
-import type { DragPluginList } from '@neodrag/core';
-import { useRef } from 'react';
-import { useDraggable, useDroppable } from '../index.ts';
+} from '@neodrag/core/sortable';
+import { registerSortableRowMarkup } from '@neodrag/core/internal';
+import { propsWithAttachment, type NeodragElementProps } from '../attachments.ts';
+import { Draggable } from '../draggable.ts';
+import { createReactiveMarkup } from '../markup.ts';
 
-export type SortableList<T> = ReturnType<typeof sortable<T>>;
+export type SortableElementProps = NeodragElementProps;
 
-export type UseSortableOptions<T> = Omit<
-	SortableOptions<T>,
-	'items' | 'onReorder' | 'onSortPreview' | 'onAdd' | 'onRemove'
-> & {
-	items: T[];
-	onReorder: (next: T[], meta: SortableReorderMeta<T>) => void;
-	onSortPreview?: (next: T[], meta: SortablePreviewMeta) => void;
-	onAdd?: SortableOptions<T>['onAdd'];
-	onRemove?: SortableOptions<T>['onRemove'];
-};
+export type SortableRowProps = NeodragElementProps;
 
-export function useSortable<T>(options: UseSortableOptions<T>) {
-	const listRef = useRef<SortableList<T> | null>(null);
+export type { SortableOptions };
 
-	const itemsRef = useRef(options.items);
-	itemsRef.current = options.items;
+let defaultEngine: Neodrag | null = null;
 
-	const keyByRef = useRef(options.keyBy);
-	keyByRef.current = options.keyBy;
+function engine(): Neodrag {
+	defaultEngine ??= new Neodrag();
+	return defaultEngine;
+}
 
-	const onReorderRef = useRef(options.onReorder);
-	onReorderRef.current = options.onReorder;
+export class Sortable<T> {
+	readonly #core: CoreSortable<T>;
+	readonly #itemDrags = new Map<string, Draggable>();
+	#containerAttach: ((element: HTMLElement | SVGElement | null) => void | (() => void)) | null =
+		null;
+	#containerMarkup: ReturnType<typeof createReactiveMarkup> | null = null;
+	#containerProps: NeodragElementProps | null = null;
+	#rowMarkup: ReturnType<typeof createReactiveMarkup> | null = null;
 
-	const onSortPreviewRef = useRef(options.onSortPreview);
-	onSortPreviewRef.current = options.onSortPreview;
-
-	const onAddRef = useRef(options.onAdd);
-	onAddRef.current = options.onAdd;
-
-	const onRemoveRef = useRef(options.onRemove);
-	onRemoveRef.current = options.onRemove;
-
-	if (!listRef.current) {
-		const {
-			items: _items,
-			onReorder: _onReorder,
-			onSortPreview: _onSortPreview,
-			onAdd: _onAdd,
-			onRemove: _onRemove,
-			keyBy: _keyBy,
-			...rest
-		} = options;
-		listRef.current = sortable({
-			...rest,
-			items: () => itemsRef.current,
-			keyBy: (item) => keyByRef.current(item),
-			onReorder: (next, meta) => onReorderRef.current(next, meta),
-			...( _onSortPreview
-				? { onSortPreview: (next, meta) => onSortPreviewRef.current?.(next, meta) }
-				: {}),
-			...(_onAdd ? { onAdd: (item, meta) => onAddRef.current?.(item, meta) } : {}),
-			...(_onRemove ? { onRemove: (item, meta) => onRemoveRef.current?.(item, meta) } : {}),
-		});
+	constructor(opts: SortableOptions<T>) {
+		this.#core = new CoreSortable(opts);
 	}
 
-	const list = listRef.current;
-	const { ref: dropRef } = useDroppable(list.container());
+	row(): NeodragElementProps {
+		this.#rowMarkup ??= createReactiveMarkup(sortableRowAttrs());
+		return propsWithAttachment(
+			(element) => registerSortableRowMarkup(element, this.#rowMarkup!.adapter),
+			this.#rowMarkup.attrs,
+		);
+	}
 
-	return { list, dropRef };
-}
+	item(key: string): Draggable {
+		let chip = this.#itemDrags.get(key);
+		if (!chip) {
+			chip = new Draggable({ plugins: this.#core.item(key), threshold: null });
+			Object.assign(chip.target, sortableItemAttrs(key));
+			this.#itemDrags.set(key, chip);
+		}
+		return chip;
+	}
 
-export function sortableItemPlugins<T>(
-	list: SortableList<T>,
-	key: string,
-	extra?: DragPluginList,
-): DragPluginList {
-	const plugins = list.item(key);
-	return extra ? [...plugins, ...extra] : plugins;
-}
+	get container(): NeodragElementProps {
+		this.#containerMarkup ??= createReactiveMarkup({});
+		if (!this.#containerAttach) {
+			const plugins = () => this.#core.container();
+			const markup = this.#containerMarkup;
+			this.#containerAttach = (element) => {
+				if (!element) return;
+				const handle = engine().droppable(element, plugins(), { markup: markup.adapter });
+				return () => handle.destroy();
+			};
+		}
+		this.#containerProps ??= propsWithAttachment(this.#containerAttach, this.#containerMarkup.attrs);
+		return this.#containerProps;
+	}
 
-export function useSortableItem<T>(
-	list: SortableList<T>,
-	key: string,
-	extra?: DragPluginList,
-) {
-	return useDraggable(sortableItemPlugins(list, key, extra));
+	containerPlugins() {
+		return this.#core.container();
+	}
 }

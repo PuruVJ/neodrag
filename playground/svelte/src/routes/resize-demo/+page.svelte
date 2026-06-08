@@ -7,10 +7,7 @@
 
 	const panel = new Resizable({
 		length,
-		plugins: [
-			...presetSplitPane('x'),
-			sizeBounds({ minWidth: '8rem', maxWidth: '100%' }),
-		],
+		plugins: [...presetSplitPane('x'), sizeBounds({ minWidth: '8rem', maxWidth: '100%' })],
 	});
 
 	const box = new Resizable({
@@ -30,12 +27,12 @@
 
 <div class="layout">
 	<div class="pane host">
-		<div class="pane-inner" {@attach panel.attachment}>
+		<div class="pane-inner" {...panel.frame}>
 			<span>Split pane — drag east edge</span>
 		</div>
 	</div>
 	<div class="box host">
-		<div class="box-inner" {@attach box.attachment}>
+		<div class="box-inner" {...box.frame}>
 			<span>Free resize</span>
 		</div>
 	</div>

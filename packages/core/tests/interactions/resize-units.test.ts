@@ -63,10 +63,26 @@ describe('resize units', () => {
 		});
 		box.getBoundingClientRect = () => rect() as DOMRect;
 		parent.getBoundingClientRect = () =>
-			({ width: 400, height: 300, top: 0, left: 0, right: 400, bottom: 300, toJSON: () => ({}) }) as DOMRect;
+			({
+				width: 400,
+				height: 300,
+				top: 0,
+				left: 0,
+				right: 400,
+				bottom: 300,
+				toJSON: () => ({}),
+			}) as DOMRect;
 		Object.defineProperty(box, 'offsetParent', { value: parent, configurable: true });
 		handle.getBoundingClientRect = () =>
-			({ left: w - 10, top: 45, width: 10, height: 10, right: w, bottom: 55, toJSON: () => ({}) }) as DOMRect;
+			({
+				left: w - 10,
+				top: 45,
+				width: 10,
+				height: 10,
+				right: w,
+				bottom: 55,
+				toJSON: () => ({}),
+			}) as DOMRect;
 
 		pointer(handle, 'pointerdown', w - 5, 50);
 		w = 280;
@@ -84,9 +100,25 @@ describe('resize units', () => {
 
 		let w = 200;
 		box.getBoundingClientRect = () =>
-			({ width: w, height: 100, top: 0, left: 0, right: w, bottom: 100, toJSON: () => ({}) }) as DOMRect;
+			({
+				width: w,
+				height: 100,
+				top: 0,
+				left: 0,
+				right: w,
+				bottom: 100,
+				toJSON: () => ({}),
+			}) as DOMRect;
 		handle.getBoundingClientRect = () =>
-			({ left: w - 10, top: 45, width: 10, height: 10, right: w, bottom: 55, toJSON: () => ({}) }) as DOMRect;
+			({
+				left: w - 10,
+				top: 45,
+				width: 10,
+				height: 10,
+				right: w,
+				bottom: 55,
+				toJSON: () => ({}),
+			}) as DOMRect;
 
 		pointer(handle, 'pointerdown', w - 5, 50);
 		w = 300;
@@ -105,9 +137,25 @@ describe('resize units', () => {
 		const handle = box.querySelector(`[${RESIZE_HANDLE_ATTR}="e"]`) as HTMLElement;
 		let w = 200;
 		box.getBoundingClientRect = () =>
-			({ width: w, height: 100, top: 0, left: 0, right: w, bottom: 100, toJSON: () => ({}) }) as DOMRect;
+			({
+				width: w,
+				height: 100,
+				top: 0,
+				left: 0,
+				right: w,
+				bottom: 100,
+				toJSON: () => ({}),
+			}) as DOMRect;
 		handle.getBoundingClientRect = () =>
-			({ left: w - 10, top: 45, width: 10, height: 10, right: w, bottom: 55, toJSON: () => ({}) }) as DOMRect;
+			({
+				left: w - 10,
+				top: 45,
+				width: 10,
+				height: 10,
+				right: w,
+				bottom: 55,
+				toJSON: () => ({}),
+			}) as DOMRect;
 
 		pointer(handle, 'pointerdown', w - 5, 50);
 		w = 250;

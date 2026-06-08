@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Draggable } from '../../src/index.ts';
+	import { bindTarget } from '../bind-target.ts';
 
 	const { external = 0 }: { external?: number } = $props();
 
@@ -8,7 +9,7 @@
 	void external;
 </script>
 
-<div class="box" {@attach drag.attachment} data-testid="draggable"></div>
+<div class="box" {@attach bindTarget(drag)} data-testid="draggable"></div>
 
 <style>
 	.box {

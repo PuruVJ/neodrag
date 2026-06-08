@@ -2,7 +2,8 @@
  * @vitest-environment jsdom
  */
 import { afterEach, describe, expect, it } from 'vitest';
-import { ariaDrag, keyboardDrag, MINIMAL_DRAG_PLUGINS, Neodrag } from '../../src/index.ts';
+import { MINIMAL_DRAG_PLUGINS, Neodrag } from '../../src/index.ts';
+import { ariaDrag, keyboardDrag } from '../../src/a11y/index.ts';
 import { Draggable } from '../../src/draggable-binding.ts';
 
 describe('keyboard drag', () => {

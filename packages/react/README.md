@@ -10,7 +10,7 @@
 One draggable to rule em all
 </h2>
 
-<p align="center">A lightweight React hook to make your elements draggable.</p>
+<p align="center">A lightweight React integration for Neodrag with class bindings and hooks.</p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@neodrag/react"><img src="https://img.shields.io/npm/v/@neodrag/react?color=e63900&label="></a>
@@ -20,11 +20,11 @@ One draggable to rule em all
 
 # Features
 
-- 🤏 **Small in size** - ~5KB, plugin architecture enables tree-shaking
-- 🧩 **Plugin-based** - Mix and match only what you need
-- ⚡ **Performance** - Event delegation, pointer capture, optimized for modern browsers
-- 🎯 **React Native** - Built for React hooks with `useDraggable`
-- 🔄 **Reactive** - pass `() => plugins`; the wrapper reconciles automatically
+- 🤏 **Small in size** - plugin architecture enables tree-shaking
+- 🧩 **Plugin-based** - mix and match only what you need
+- ⚡ **Performance** - event delegation, pointer capture, optimized for modern browsers
+- 🎯 **React bindings** - `Draggable` class, `useDraggable`, `{...spread}` target props
+- 🔄 **Reactive** - pass `() => plugins`; the binding reconciles automatically
 
 # Installing
 
@@ -34,97 +34,92 @@ npm install @neodrag/react@next
 
 # Usage
 
-Basic usage
+## Class binding (recommended)
 
 ```tsx
-import { useRef } from 'react';
+import { useMemo } from 'react';
+import { Draggable, useDraggableBinding } from '@neodrag/react';
+import { axis, grid } from '@neodrag/react/plugins';
+
+function App() {
+  const drag = useMemo(
+    () =>
+      new Draggable({
+        plugins: [axis('x'), grid([10, 10])],
+        onDrag(data) {
+          console.log(data.offset, data.input.kind);
+        },
+      }),
+    [],
+  );
+
+  const { spread, isDragging } = useDraggableBinding(drag);
+
+  return (
+    <>
+      <div {...spread} style={{ width: 100, height: 100 }} />
+      {isDragging ? 'Dragging…' : 'Idle'}
+    </>
+  );
+}
+```
+
+## Hook with options
+
+```tsx
 import { useDraggable } from '@neodrag/react';
+import { position } from '@neodrag/react/plugins';
 
 function App() {
-	const draggableRef = useRef<HTMLDivElement>(null);
-	useDraggable(draggableRef);
+  const { spread, isDragging } = useDraggable({
+    plugins: [position(() => ({ x: 0, y: 0 }))],
+    onDrag(data) {
+      console.log(data.offsetPx);
+    },
+  });
 
-	return <div ref={draggableRef}>Hello</div>;
+  return (
+    <>
+      <div {...spread} />
+      {isDragging ? 'Dragging…' : null}
+    </>
+  );
 }
 ```
 
-With plugins
+## Legacy ref + plugins
 
 ```tsx
-import { useRef } from 'react';
-import { useDraggable, axis, grid } from '@neodrag/react';
-
-function App() {
-	const draggableRef = useRef<HTMLDivElement>(null);
-
-	useDraggable(draggableRef, [axis('x'), grid([10, 10])]);
-
-	return <div ref={draggableRef}>Hello</div>;
-}
-```
-
-Defining plugins elsewhere with TypeScript
-
-```tsx
-import { useRef } from 'react';
-import { useDraggable, axis, bounds, BoundsFrom, type Plugin } from '@neodrag/react';
-
-function App() {
-	const draggableRef = useRef<HTMLDivElement>(null);
-
-	const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
-	useDraggable(draggableRef, plugins);
-
-	return <div ref={draggableRef}>Hello</div>;
-}
-```
-
-Getting drag state
-
-```tsx
-import { useRef, useEffect } from 'react';
 import { useDraggable } from '@neodrag/react';
+import { axis } from '@neodrag/react/plugins';
 
 function App() {
-	const draggableRef = useRef<HTMLDivElement>(null);
-	const dragState = useDraggable(draggableRef);
-
-	useEffect(() => {
-		console.log('Position:', dragState.offset);
-		console.log('Is dragging:', dragState.isDragging);
-	}, [dragState]);
-
-	return <div ref={draggableRef}>Hello</div>;
+  const { ref } = useDraggable([axis('x')]);
+  return <div ref={ref}>Hello</div>;
 }
 ```
 
-Reactive plugins with reactive plugin factories
+## Sortable
 
 ```tsx
-import { useRef, useState } from 'react';
-import { useDraggable, axis } from '@neodrag/react';
+import { Sortable, useSortableItem } from '@neodrag/react/sortable';
+import { useSortable } from '@neodrag/react/sortable';
+import { position } from '@neodrag/react/plugins';
 
-function App() {
-	const elementRef = useRef<HTMLDivElement>(null);
-	const [currentAxis, setCurrentAxis] = useState<'x' | 'y'>('x');
+const list = new Sortable({
+  items: () => rows,
+  keyBy: (r) => r.id,
+  itemPlugins: (key) => [position(() => positions[key])],
+  onReorder: (next) => setRows(next),
+});
 
-	
-	useDraggable(elementRef, () => [axisreactive plugin factories]);
-
-	return (
-		<div>
-			<div ref={elementRef}>Current axis: {currentAxis}</div>
-			<button onClick={() => setCurrentAxis(currentAxis === 'x' ? 'y' : 'x')}>Switch Axis</button>
-		</div>
-	);
+function Row({ id }: { id: string }) {
+  const { spread } = useSortableItem(list, id);
+  return <button {...spread}>{id}</button>;
 }
 ```
 
 <a href="https://next.neodrag.dev/docs/react" style="font-size: 2rem">Read the docs</a>
-
-## Credits
-
-Inspired by [react-draggable](https://github.com/react-grid-layout/react-draggable), but with a modern plugin architecture and optimized for performance.
 
 # License
 

@@ -8,17 +8,19 @@ tagline: 'A lightweight library to make your elements draggable.'
 npm i @neodrag/core@next @neodrag/vanilla@next
 ```
 
+Import built-in drag plugins from `@neodrag/vanilla/plugins`. Drop helpers from `@neodrag/vanilla/drop`; sortable from `@neodrag/vanilla/sortable`.
+
 ## Usage
 
-Use the shared `Neodrag` engine to bind an element. It returns a `Draggable` handle with `destroy()`:
+Create a `Draggable` (or `Droppable` / `Resizable`) binding and call `.attach(node)`. Each binding uses `Neodrag.shared` by default — one delegated pointer layer for the page, same as the framework packages.
 
 ### Basic
 
 ```typescript
-import { Neodrag } from '@neodrag/vanilla';
+import { Draggable } from '@neodrag/vanilla';
 
-const node = document.querySelector('#drag')!;
-const drag = Neodrag.shared.draggable(node);
+const drag = new Draggable({ plugins: [] });
+drag.attach(document.querySelector('#drag')!);
 
 // later
 drag.destroy();
@@ -27,119 +29,160 @@ drag.destroy();
 ### With plugins
 
 ```typescript
-import { Neodrag, axis, grid } from '@neodrag/vanilla';
+import { Draggable } from '@neodrag/vanilla';
+import { axis, grid } from '@neodrag/vanilla/plugins';
 
-const node = document.querySelector('#drag')!;
-const drag = Neodrag.shared.draggable(node, [axis('x'), grid([10, 10])]);
+const drag = new Draggable({
+  plugins: [axis('x'), grid([10, 10])],
+});
+drag.attach(document.querySelector('#drag')!);
 ```
 
 ### Plugins defined elsewhere (TypeScript)
 
 ```typescript
-import {
-  Neodrag,
-  axis,
-  bounds,
-  BoundsFrom,
-  type Plugin,
-} from '@neodrag/vanilla';
+import { Draggable, type DragPluginList } from '@neodrag/vanilla';
+import { axis, bounds, BoundsFrom } from '@neodrag/vanilla/plugins';
 
-const plugins: Plugin[] = [axis('y'), bounds(BoundsFrom.parent())];
+const plugins: DragPluginList = [axis('y'), bounds(BoundsFrom.parent())];
 
-const drag = Neodrag.shared.draggable(
-  document.querySelector('#drag')!,
-  plugins,
-);
+const drag = new Draggable({ plugins });
+drag.attach(document.querySelector('#drag')!);
 ```
 
-## Reactive plugins with compartments
+## Reactive plugins
 
 ```typescript
-import { Neodrag, axis, grid } from '@neodrag/vanilla';
+import { Draggable } from '@neodrag/vanilla';
+import { axis, grid } from '@neodrag/vanilla/plugins';
 
-const drag = Neodrag.shared.draggable(
-  document.querySelector('#drag')!,
-  () => [axisCompartment, grid([10, 10])],
-);
+let currentAxis: 'x' | 'y' = 'x';
 
-axisCompartment.current = axis('y');
+const drag = new Draggable({
+  plugins: [() => axis(currentAxis), grid([10, 10])],
+});
+drag.attach(document.querySelector('#drag')!);
+
+function switchAxis() {
+  currentAxis = currentAxis === 'x' ? 'y' : 'x';
+  drag.update();
+}
 ```
 
-### Multiple compartments
+### Multiple reactive slots
 
 ```typescript
-import {
-  Neodrag,
-  axis,
-  bounds,
-  BoundsFrom,
-  grid,
-} from '@neodrag/vanilla';
+import { Draggable } from '@neodrag/vanilla';
+import { axis, bounds, BoundsFrom, grid } from '@neodrag/vanilla/plugins';
 
-let currentAxis = 'x';
+let currentAxis: 'x' | 'y' | 'both' = 'x';
 let gridSize = 20;
 let enableBounds = false;
 
-
-const drag = Neodrag.shared.draggable(
-  document.querySelector('#drag')!,
-  () => [axisComp, gridComp, boundsComp],
-);
+const drag = new Draggable({
+  plugins: [
+    () => axis(currentAxis),
+    () => grid([gridSize, gridSize]),
+    () => (enableBounds ? bounds(BoundsFrom.parent()) : null),
+  ],
+});
+drag.attach(document.querySelector('#drag')!);
 
 function updateAxis(newAxis: 'x' | 'y' | 'both') {
   currentAxis = newAxis;
-  axisComp.current = axis(currentAxis);
+  drag.update();
 }
 ```
 
 ## Event handling
 
-```typescript
-import { Neodrag, events } from '@neodrag/vanilla';
+Callbacks live on the binding options (not a separate `events()` plugin):
 
-Neodrag.shared.draggable(document.querySelector('#drag')!, [
-  events({
-    onDragStart: (data) => console.log('Started:', data.offset),
-    onDrag: (data) => console.log('Dragging:', data.offset),
-    onDragEnd: (data) => console.log('Ended:', data.offset),
-  }),
-]);
+```typescript
+import { Draggable } from '@neodrag/vanilla';
+
+const drag = new Draggable({
+  plugins: [],
+  onDragStart: (data) => console.log('Started:', data.offset),
+  onDrag: (data) => console.log('Dragging:', data.offset),
+  onDragEnd: (data) => console.log('Ended:', data.offset),
+});
+drag.attach(document.querySelector('#drag')!);
 ```
 
 ## Drag controls
 
 ```typescript
-import { Neodrag, controls, ControlFrom } from '@neodrag/vanilla';
+import { Draggable } from '@neodrag/vanilla';
+import { controls, ControlFrom } from '@neodrag/vanilla/plugins';
 
-Neodrag.shared.draggable(document.querySelector('#drag')!, [
-  controls({
-    allow: ControlFrom.selector('.drag-handle'),
-    block: ControlFrom.selector('.no-drag'),
-  }),
-]);
+const drag = new Draggable({
+  plugins: [
+    controls({
+      allow: ControlFrom.selector('.drag-handle'),
+      block: ControlFrom.selector('.no-drag'),
+    }),
+  ],
+});
+drag.attach(document.querySelector('#drag')!);
 ```
+
+## Sortable lists
+
+```typescript
+import { Draggable, Droppable } from '@neodrag/vanilla';
+import { Sortable } from '@neodrag/vanilla/sortable';
+
+const items = [{ id: 'a' }, { id: 'b' }];
+
+const list = new Sortable({
+  items: () => items,
+  keyBy: (i) => i.id,
+  onReorder: (next) => {
+    items.length = 0;
+    items.push(...next);
+  },
+});
+
+const zone = new Droppable({ plugins: list.container() });
+zone.attach(document.querySelector('ul')!);
+
+for (const item of items) {
+  const chip = new Draggable({ plugins: list.item(item.id) });
+  chip.attach(document.querySelector(`[data-id="${item.id}"]`)!);
+}
+```
+
+Helpers like `applySortableReorder` and `SORTABLE_ROW_ATTR` are exported from `@neodrag/vanilla/sortable`.
 
 ## Custom engine
 
-Avoid multiple engines on one page unless you need isolated plugin defaults. Prefer `Neodrag.shared`:
+Pass `engine` when you need separate instances (uncommon). Otherwise rely on the default shared engine inside each binding:
 
 ```typescript
-import { Neodrag } from '@neodrag/vanilla';
+import { Neodrag, Draggable } from '@neodrag/vanilla';
+import { axis } from '@neodrag/vanilla/plugins';
 
 const engine = new Neodrag({
   onError: (error) => console.error(error),
 });
 
-const drag = engine.draggable(element, plugins);
-engine.dispose(); // destroys all bindings on this engine
+const drag = new Draggable({ plugins: [axis('x')], engine });
+drag.attach(document.querySelector('#drag')!);
+
+// engine.dispose(); // all bindings on this engine
 ```
+
+### Low-level engine API
+
+`Neodrag.shared.draggable(node, plugins)` still exists for advanced use. Prefer `new Draggable({ plugins }).attach(node)` so callbacks, threshold, and reactive `update()` stay consistent with Svelte/React/Vue.
 
 ## Cleanup
 
 ```typescript
-drag.destroy(); // single element
+drag.destroy(); // single binding
 // or
-engine.dispose(); // entire engine
+engine.dispose(); // entire custom engine
 ```
 
 ## CDN (Unpkg / jsDelivr)
@@ -151,52 +194,9 @@ engine.dispose(); // entire engine
 ```html
 <div id="drag">Drag me!</div>
 <script>
-  var drag = NeoDrag.Neodrag.shared.draggable(
-    document.getElementById('drag'),
-  );
+  var drag = new NeoDrag.Draggable({ plugins: [] });
+  drag.attach(document.getElementById('drag'));
 </script>
 ```
 
-### CDN with plugins
-
-```html
-<div id="constrained-drag">Constrained dragging</div>
-<script>
-  NeoDrag.Neodrag.shared.draggable(
-    document.getElementById('constrained-drag'),
-    [
-      NeoDrag.axis('x'),
-      NeoDrag.bounds(NeoDrag.BoundsFrom.parent()),
-      NeoDrag.grid([20, 20]),
-    ],
-  );
-</script>
-```
-
-### CDN with compartments
-
-```html
-<div id="reactive-drag">Reactive dragging</div>
-<button onclick="switchAxis()">Switch Axis</button>
-
-<script>
-  var currentAxis = 'x';
-  var axisCompartment = new NeoDrag.Compartment(function () {
-    return NeoDrag.axis(currentAxis);
-  });
-
-  NeoDrag.Neodrag.shared.draggable(
-    document.getElementById('reactive-drag'),
-    function () {
-      return [axisCompartment];
-    },
-  );
-
-  function switchAxis() {
-    currentAxis = currentAxis === 'x' ? 'y' : 'x';
-    axisCompartment.current = NeoDrag.axis(currentAxis);
-  }
-</script>
-```
-
-The global `NeoDrag` namespace re-exports plugins (`axis`, `grid`, `Compartment`, etc.) and the `Neodrag` engine class.
+The UMD build exposes `Draggable`, `Droppable`, `Resizable`, and `Neodrag` on the `NeoDrag` global. Import plugin helpers from a bundled `@neodrag/vanilla/plugins` build in app code; the minimal UMD entry does not include every plugin.

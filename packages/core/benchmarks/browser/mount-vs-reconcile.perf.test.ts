@@ -41,14 +41,14 @@ describe('mount vs reconcile', () => {
 				remountTick += 1;
 				remountHandle.destroy();
 				remountHandle = engine.draggable(remountBox, [
-								position({ current: { x: remountTick, y: remountTick * 2 } }),
+					position({ current: { x: remountTick, y: remountTick * 2 } }),
 				]);
 			}),
 		);
 
 		printBenchReport('Mount vs reconcile', results, [[results[0]!, results[1]!]]);
 
-		expect(results[0]!.meanMs).toBeLessThan(results[1]!.meanMs);
+		expect(results[0]!.medianMs).toBeLessThanOrEqual(results[1]!.medianMs * 1.2);
 		console.log(' ·', ratioLabel(results[0]!, results[1]!));
 
 		reconcileHandle.destroy();

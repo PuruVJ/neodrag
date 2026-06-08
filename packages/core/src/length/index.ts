@@ -71,12 +71,8 @@ export class Length implements LengthAdapter {
 		if (this.units === 'px') {
 			return { width: formatPx(px.width), height: formatPx(px.height) };
 		}
-		const w =
-			readAuthoredAxis(node, 'width') ??
-			formatPx(px.width);
-		const h =
-			readAuthoredAxis(node, 'height') ??
-			formatPx(px.height);
+		const w = readAuthoredAxis(node, 'width') ?? formatPx(px.width);
+		const h = readAuthoredAxis(node, 'height') ?? formatPx(px.height);
 		return { width: w, height: h };
 	}
 

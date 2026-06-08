@@ -15,13 +15,15 @@
 
 	const { world, index, framework, onframework, snippets }: Props = $props();
 
-	const hint = $derived(
-		world.available
-			? world.id === 'night-desk'
-				? 'Drag the windows — they stay inside the desk.'
-				: 'Drag and explore — plugins handle the rest.'
-			: 'Preview — this scenario ships soon. Night desk is live above.',
-	);
+	const HINTS: Record<string, string> = {
+		'night-desk': 'Stack floating panels — bounds keeps them on the desk.',
+		'last-mile': 'Drag the van over city blocks — they light up green on enter.',
+		'split-bill': 'Chips flow in a row (column when narrow) — siblings slide aside while you drag; drop commits the order.',
+		'fridge-paws': 'Swap magnets — order commits when you release.',
+		'laser-heist': 'Move cards across Plan, Sneak, Escape — onTransfer keeps state sane.',
+	};
+
+	const hint = $derived(HINTS[world.id] ?? 'Drag and explore — plugins handle the rest.');
 </script>
 
 <section
@@ -51,11 +53,6 @@
 
 		<div class="playground-divider" aria-hidden="true"></div>
 
-		<LiveCodePanel
-			world={world.id}
-			{framework}
-			{onframework}
-			{snippets}
-		/>
+		<LiveCodePanel world={world.id} {framework} {onframework} {snippets} />
 	</div>
 </section>

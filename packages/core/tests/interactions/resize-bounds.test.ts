@@ -2,11 +2,8 @@
  * @vitest-environment jsdom
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { Resizable } from '../../src/resizable-binding.ts';
-import {
-	composeResizePluginList,
-	resolveResizeSizeBounds,
-} from '../../src/resize-bounds.ts';
+import { Resizable } from '../../src/resizable/index.ts';
+import { composeResizePluginList, resolveResizeSizeBounds } from '../../src/resize-bounds.ts';
 import { resizeHandles, sizeBounds } from '../../src/resize/index.ts';
 import { SIZE_BOUNDS_PLUGIN_KEY } from '../../src/resize/plugins.ts';
 import { RESIZE_HANDLE_ATTR } from '../../src/resize/types.ts';
@@ -61,11 +58,12 @@ describe('resize size bounds', () => {
 
 	it('composeResizePluginList replaces sizeBounds plugin from slots', () => {
 		const legacy = sizeBounds({ minWidth: 10 });
-		const list = composeResizePluginList(
-			[resizeHandles({ edges: ['e'] }), legacy],
-			{ minSize: { width: 80, height: 60 } },
-		);
-		const resolved = list.filter((slot) => typeof slot !== 'function') as import('../../src/resize/types.ts').ResizePlugin[];
+		const list = composeResizePluginList([resizeHandles({ edges: ['e'] }), legacy], {
+			minSize: { width: 80, height: 60 },
+		});
+		const resolved = list.filter(
+			(slot) => typeof slot !== 'function',
+		) as import('../../src/resize/types.ts').ResizePlugin[];
 		const bounds = resolved.filter((p) => p.key === SIZE_BOUNDS_PLUGIN_KEY);
 		expect(bounds).toHaveLength(1);
 		expect(bounds[0]).not.toBe(legacy);
@@ -110,9 +108,7 @@ describe('resize size bounds', () => {
 
 	it('Resizable enforces minSize on width and height', () => {
 		const resize = new Resizable({
-			plugins: [
-				resizeHandles({ edges: ['e', 's'], size: 10 }),
-			],
+			plugins: [resizeHandles({ edges: ['e', 's'], size: 10 })],
 			minSize: { width: 80, height: 40 },
 		});
 		resize.attach(box);

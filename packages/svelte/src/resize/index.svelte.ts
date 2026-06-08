@@ -5,21 +5,41 @@ import {
 	type ResizePluginList,
 	type EngineOptions,
 } from '@neodrag/core';
-import { Attachment } from 'svelte/attachments';
 import { untrack } from 'svelte';
+import { resizeFrameAttrs } from '@neodrag/core/internal';
+import {
+	NEODRAG_ATTACH_KEY,
+	bindingProps,
+	bindingSpread,
+	propsWithAttachment,
+	type ResizableFrameOptions,
+	type NeodragElementProps,
+} from '../attachments.svelte.ts';
+import { createReactiveMarkup } from '../markup.svelte.ts';
 
 export type NeodragResizeOptions = EngineOptions;
 export type { ResizePluginList };
+export {
+	NEODRAG_ATTACH_KEY,
+	bindingProps,
+	bindingSpread,
+	propsWithAttachment,
+	type DraggableTargetOptions,
+	type DroppableZoneOptions,
+	type ResizableFrameOptions,
+	type NeodragElementProps,
+	type NeodragSpreadProps,
+} from '../attachments.svelte.ts';
 
 export { Neodrag };
 
 export class Resizable extends CoreResizable {
-	readonly #attachment: Attachment<HTMLElement | SVGElement>;
+	readonly #markup: ReturnType<typeof createReactiveMarkup>;
 
 	constructor(options: ConstructorParameters<typeof CoreResizable>[0]) {
-		super(options);
-
-		const coreAttachment = this.attachment;
+		const markup = createReactiveMarkup(resizeFrameAttrs());
+		super({ ...options, markup: markup.adapter });
+		this.#markup = markup;
 
 		if (this.hasReactiveSlots) {
 			$effect(() => {
@@ -27,17 +47,17 @@ export class Resizable extends CoreResizable {
 			});
 		}
 
-		this.#attachment = (element) => {
+		this.#markup.attrs[NEODRAG_ATTACH_KEY] = (element) => {
 			const cleanup = untrack(() => {
-				coreAttachment(element);
+				this.attach(element);
 				if (this.hasReactiveSlots) this.flushReactive();
 			});
 			return cleanup;
 		};
 	}
 
-	get attachment(): Attachment<HTMLElement | SVGElement> {
-		return this.#attachment;
+	get frame(): NeodragElementProps {
+		return this.#markup.attrs as NeodragElementProps;
 	}
 }
 

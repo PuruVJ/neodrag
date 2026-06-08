@@ -1,6 +1,6 @@
 import {
 	Draggable,
-	DroppableBinding,
+	Droppable,
 	Resizable,
 	Neodrag,
 	type DragPluginList,
@@ -11,4 +11,4 @@ import {
 
 export type NeodragOptions = EngineOptions;
 export type { DragPluginList, DropPluginList, ResizePluginList };
-export { Neodrag, Draggable, DroppableBinding as Droppable, Resizable };
+export { Neodrag, Draggable, Droppable, Resizable };

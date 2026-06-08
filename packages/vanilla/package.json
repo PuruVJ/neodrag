@@ -2,13 +2,35 @@
 	"name": "@neodrag/vanilla",
 	"version": "3.0.0-next.9",
 	"description": "JS library to add dragging to your apps 😉",
-	"unpkg": "./dist/umd/index.js",
-	"jsdelivr": "./dist/umd/index.js",
-	"type": "module",
+	"keywords": [
+		"drag",
+		"draggable",
+		"javascript",
+		"neodrag",
+		"performant",
+		"react-draggable",
+		"small",
+		"tiny",
+		"typescript",
+		"vanilla"
+	],
+	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/vanilla#readme",
+	"bugs": {
+		"url": "https://github.com/PuruVJ/neodrag/issues"
+	},
+	"license": "MIT",
+	"author": "Puru Vijay",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PuruVJ/neodrag.git"
+	},
 	"files": [
 		"dist/*"
 	],
+	"type": "module",
 	"sideEffects": false,
+	"unpkg": "./dist/umd/index.js",
+	"jsdelivr": "./dist/umd/index.js",
 	"exports": {
 		".": {
 			"types": "./src/index.ts",
@@ -22,7 +44,13 @@
 		},
 		"./drop": {
 			"types": "./src/drop.ts",
-			"import": "./src/drop.ts"
+			"import": "./src/drop.ts",
+			"default": "./src/drop.ts"
+		},
+		"./sortable": {
+			"types": "./src/sortable.ts",
+			"import": "./src/sortable.ts",
+			"default": "./src/sortable.ts"
 		},
 		"./resize": {
 			"types": "./src/resize.ts",
@@ -47,6 +75,11 @@
 				"import": "./dist/drop.js",
 				"default": "./dist/drop.js"
 			},
+			"./sortable": {
+				"types": "./dist/sortable.d.ts",
+				"import": "./dist/sortable.js",
+				"default": "./dist/sortable.js"
+			},
 			"./resize": {
 				"types": "./dist/resize.d.ts",
 				"import": "./dist/resize.js",
@@ -55,29 +88,6 @@
 			"./package.json": "./package.json"
 		}
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/PuruVJ/neodrag.git"
-	},
-	"keywords": [
-		"draggable",
-		"vanilla",
-		"javascript",
-		"typescript",
-		"react-draggable",
-		"drag",
-		"neodrag",
-		"small",
-		"tiny",
-		"performant",
-		"neodrag"
-	],
-	"author": "Puru Vijay",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/PuruVJ/neodrag/issues"
-	},
-	"homepage": "https://github.com/PuruVJ/neodrag/tree/main/packages/vanilla#readme",
 	"scripts": {
 		"compile": "tsdown",
 		"compile:watch": "tsdown --watch",
@@ -85,11 +95,11 @@
 		"pub": "pnpm compile && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm compile && pnpm publish --dry-run --no-git-checks --access public"
 	},
-	"peerDependencies": {
-		"@neodrag/core": "workspace:*"
-	},
 	"devDependencies": {
 		"@neodrag/core": "workspace:*",
 		"tsdown": "catalog:"
+	},
+	"peerDependencies": {
+		"@neodrag/core": "workspace:*"
 	}
 }
