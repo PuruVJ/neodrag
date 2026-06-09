@@ -1,0 +1,51 @@
+<!doctype html>
+<html><head><meta charset="utf-8" /><title>kanban perf</title></head><body>
+<script type="module">
+import { SortableList } from '/dist/dnd/index.js';
+let gbcr = 0; const _g = Element.prototype.getBoundingClientRect;
+Element.prototype.getBoundingClientRect = function () { gbcr++; return _g.call(this); };
+const raf = () => new Promise((r) => requestAnimationFrame(() => r()));
+function dispatch(t, type, x, y, b) { t.dispatchEvent(new PointerEvent(type, { bubbles: true, composed: true, cancelable: true, clientX: x, clientY: y, button: 0, buttons: b, pointerId: 1, pointerType: 'mouse' })); }
+const median = (a) => { const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; };
+
+function makeBoard(containers, perCol) {
+	document.body.innerHTML = '';
+	const lists = [];
+	for (let c = 0; c < containers; c++) {
+		const data = Array.from({ length: perCol }, (_, i) => ({ id: c + '_' + i }));
+		const ul = document.createElement('ul'); Object.assign(ul.style, { position: 'absolute', left: c * 180 + 'px', top: '0', width: '160px', margin: 0, padding: 0 });
+		document.body.appendChild(ul);
+		const render = () => { ul.innerHTML = ''; for (const it of data) { const li = document.createElement('li'); li.setAttribute('data-sortable-key', it.id); li.style.height = '22px'; li.style.display = 'block'; li.textContent = it.id; ul.appendChild(li); } }; render();
+		const s = new SortableList(ul, { items: data, keyOf: (x) => x.id, group: 'kb', animation: false, onReorder: (n) => data.splice(0, data.length, ...n), onTransfer: () => {} });
+		lists.push({ ul, data, s });
+	}
+	return lists;
+}
+
+window.kanban = async function (containers = 3, perCol = 8, moves = 600) {
+	const lists = makeBoard(containers, perCol);
+	const grab = lists[0].ul.querySelector('li');
+	const r = grab.getBoundingClientRect();
+	dispatch(grab, 'pointermove', r.left + 10, r.top + 10, 0);
+	dispatch(grab, 'pointerdown', r.left + 10, r.top + 10, 1);
+	dispatch(grab, 'pointermove', r.left + 14, r.top + 16, 1); // start
+	for (let i = 0; i < 30; i++) dispatch(grab, 'pointermove', r.left + 10 + (i % 50), r.top + 20 + (i % 100), 1); // warmup
+	gbcr = 0;
+	const span = containers * 180;
+	const samples = []; const batch = 20; let done = 0;
+	while (done < moves) { const t0 = performance.now();
+		for (let j = 0; j < batch; j++) { const i = done + j; dispatch(grab, 'pointermove', 10 + (i * 13) % span, 20 + (i * 7) % (perCol * 22), 1); }
+		samples.push((performance.now() - t0) / batch * 1000); done += batch;
+	}
+	const gbcrPerMove = +(gbcr / done).toFixed(2);
+	dispatch(grab, 'pointerup', 100, 100, 0);
+	lists.forEach((l) => l.s.destroy());
+	return { containers, perCol, moves: done, perMoveUs: +median(samples).toFixed(2), gbcrPerMove };
+};
+window.sweep = async function () {
+	const out = [];
+	for (const [c, n] of [[2, 8], [3, 8], [5, 8], [3, 30], [5, 50]]) out.push(await window.kanban(c, n));
+	return out;
+};
+window.__ready = true;
+</script></body></html>

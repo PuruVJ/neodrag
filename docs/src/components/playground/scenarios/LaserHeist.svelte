@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { WorldMeta } from '../worlds';
-	import { Droppable, applyGroupedSortableTransfer, highlight, Sortable } from '@neodrag/svelte/drop';
-	import { ghost } from '@neodrag/svelte/plugins';
+	import { SortableList, type TransferOp } from '@neodrag/svelte';
 
 	type Props = {
 		world: WorldMeta;
@@ -40,43 +39,36 @@
 		cards = [...cards.filter((card) => card.column !== column), ...tagged];
 	}
 
-	const column_highlight = highlight({ overClass: 'pg-drop-over' });
+	function transfer_into(column: ColumnId, op: TransferOp<HeistCard>) {
+		const moved: HeistCard = { ...op.item, column };
+		const without = cards.filter((card) => card.id !== moved.id);
+		const target = without.filter((card) => card.column === column);
+		const rest = without.filter((card) => card.column !== column);
+		target.splice(op.to, 0, moved);
+		cards = [...rest, ...target];
+	}
 
-	function board_for(column: ColumnId) {
-		return new Sortable({
-			items: () => in_column(column),
-			keyBy: (card) => card.id,
-			group: 'heist-board',
-			strategy: 'vertical',
-			onReorder: (next) => write_column(column, next),
-			onTransfer: (card, meta) => {
-				cards = applyGroupedSortableTransfer(cards, card, {
-					toIndex: meta.toIndex,
-					column,
-					columnOf: (row) => row.column,
-					withColumn: (row, col) => ({ ...row, column: col }),
-				});
+	function makeList(column: ColumnId) {
+		return new SortableList<HeistCard>({
+			get items() {
+				return in_column(column);
 			},
-			containerPlugins: () => [column_highlight],
-			itemPlugins: () => [ghost({ opacity: 1 })],
+			group: 'heist-board',
+			strategy: 'list',
+			axis: 'y',
+			animation: 200,
+			onReorder: (next) => write_column(column, next),
+			onTransfer: (op) => transfer_into(column, op),
 		});
 	}
 
-	const boards = {
-		plan: board_for('plan'),
-		sneak: board_for('sneak'),
-		escape: board_for('escape'),
-	} as const;
-
-	const columnDrops = {
-		plan: new Droppable({ plugins: boards.plan.containerPlugins() }),
-		sneak: new Droppable({ plugins: boards.sneak.containerPlugins() }),
-		escape: new Droppable({ plugins: boards.escape.containerPlugins() }),
-	} as const;
-
-	function cardAttach(column: ColumnId, id: string) {
-		return boards[column].item(id).attachment;
-	}
+	// One SortableList per column — a record of class instances just works in Svelte 5; each reads
+	// its column's cards through a getter, so no manual update() is needed.
+	const lists: Record<ColumnId, SortableList<HeistCard>> = {
+		plan: makeList('plan'),
+		sneak: makeList('sneak'),
+		escape: makeList('escape'),
+	};
 </script>
 
 <div class="pg-scene laser-heist">
@@ -85,19 +77,15 @@
 
 	<div class="heist-board">
 		{#each columns as column (column.id)}
-			<section class="heist-column heist-column--{column.tone}" {@attach columnDrops[column.id].attachment}>
+			<section class="heist-column heist-column--{column.tone}">
 				<header class="heist-column-head">
 					<span>{column.title}</span>
 					<span class="heist-count">{in_column(column.id).length}</span>
 				</header>
-				<ul class="heist-cards">
+				<ul class="heist-cards" {...lists[column.id].attach}>
 					{#each in_column(column.id) as card (card.id)}
-						<li>
-							<button
-								type="button"
-								class="heist-card"
-								{@attach cardAttach(column.id, card.id)}
-							>
+						<li {...lists[column.id].row(card)}>
+							<button type="button" class="heist-card">
 								{card.label}
 							</button>
 						</li>

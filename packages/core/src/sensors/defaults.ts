@@ -1,6 +1,5 @@
-import { KeyboardMoveSensor } from './keyboard-move-sensor.ts';
-import { KeyboardSensor } from './keyboard-sensor.ts';
-import { PointerSensor } from './pointer-sensor.ts';
+import { KeyboardMoveSensor, KeyboardSensor } from './keyboard.ts';
+import { PointerSensor } from './pointer.ts';
 import type { Sensor } from './types.ts';
 
 export function installDefaultSensors(register: (sensor: Sensor) => void): void {

@@ -1,11 +1,12 @@
 // Write a perfectly generic function that is an event listener
+// Returns an unlisten closure that removes the same listener.
 // Overload for HTML elements
 export function listen<EventName extends keyof HTMLElementEventMap>(
 	el: HTMLElement,
 	type: EventName,
 	listener: (this: HTMLElement, ev: HTMLElementEventMap[EventName]) => any,
 	options?: boolean | AddEventListenerOptions,
-): void;
+): () => void;
 
 // Overload for SVG elements
 export function listen<EventName extends keyof SVGElementEventMap>(
@@ -13,16 +14,25 @@ export function listen<EventName extends keyof SVGElementEventMap>(
 	type: EventName,
 	listener: (this: SVGElement, ev: SVGElementEventMap[EventName]) => any,
 	options?: boolean | AddEventListenerOptions,
-): void;
+): () => void;
+
+// Overload for the window (global scroll/resize, etc.)
+export function listen<EventName extends keyof WindowEventMap>(
+	el: Window,
+	type: EventName,
+	listener: (this: Window, ev: WindowEventMap[EventName]) => any,
+	options?: boolean | AddEventListenerOptions,
+): () => void;
 
 // Implementation
 export function listen(
-	el: HTMLElement | SVGElement,
+	el: HTMLElement | SVGElement | Window,
 	type: string,
 	listener: EventListener,
 	options?: boolean | AddEventListenerOptions,
-) {
+): () => void {
 	el.addEventListener(type, listener, options);
+	return (): void => el.removeEventListener(type, listener, options);
 }
 
 type KebabCase<S extends string> = S extends `${infer C}${infer T}`

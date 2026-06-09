@@ -3,7 +3,7 @@
 	import { FRAMEWORK_ICONS } from '$helpers/framework-icons';
 	import IonReloadIcon from '~icons/ion/reload';
 	import type { Framework } from '$helpers/constants';
-	import { draggable, events, position, Compartment, ControlFrom, controls } from '@neodrag/svelte';
+	import { Draggable } from '@neodrag/svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
@@ -39,13 +39,28 @@
 	let z_indices = $state([0, 0, 0, 0, 0]);
 	let box_z_index = $state(0);
 
-	// Top-level position compartments
-	const position_compartments = frameworks.map((_, idx) =>
-		Compartment.of(() => position({ current: framework_positions[idx].current })),
+	// One draggable per framework box. The reactive `get position()` getter closes over each
+	// index's Tween, so the wrapper pushes live `.update()` calls as the Tween animates — driving
+	// the spring-back-to-origin behavior on reset/release.
+	const framework_draggables = frameworks.map((_, idx) =>
+		new Draggable({
+			get position() {
+				return framework_positions[idx].current;
+			},
+			onDragStart: () => update_z_index(idx),
+			onDrag: (data) => framework_positions[idx].set(data.offset, { duration: 0 }),
+		}),
 	);
-	const box_position_compartment = Compartment.of(() =>
-		position({ current: box_position.current }),
-	);
+
+	// Draggable for the box, gated to its `.handle` via the `handle` option.
+	const box_draggable = new Draggable({
+		handle: '.handle',
+		get position() {
+			return box_position.current;
+		},
+		onDragStart: () => update_box_z_index(),
+		onDrag: (data) => box_position.set(data.offset, { duration: 0 }),
+	});
 
 	// Line properties for frameworks and box
 	let line_properties = $state(
@@ -173,17 +188,6 @@
 		calculate_box_line_properties();
 	}
 
-	// Update compartments when positions change
-	$effect(() => {
-		framework_positions.forEach((pos, idx) => {
-			pos.current;
-			position_compartments[idx].current = position({ current: pos.current });
-		});
-
-		box_position.current;
-		box_position_compartment.current = position({ current: box_position.current });
-	});
-
 	// RAF loop for continuous line updates
 	let raf_id: number;
 	function raf_loop() {
@@ -221,19 +225,13 @@
 	<!-- Framework logos in arc -->
 	<section class="frameworks-section">
 		<div class="frameworks-arc">
-			{#each frameworks as { name, icon: Icon }, idx}
+			{#each frameworks as { name, icon: Icon }, idx (name)}
 				<div
 					class="framework-item"
 					style:z-index={z_indices[idx]}
 					bind:this={framework_elements[idx]}
 					data-paw-cursor="true"
-					{@attach draggable(() => [
-						position_compartments[idx],
-						events({
-							onDragStart: () => update_z_index(idx),
-							onDrag: (data) => framework_positions[idx].set(data.offset, { duration: 0 }),
-						}),
-					])}
+					{...framework_draggables[idx].attach}
 				>
 					<button onclick={() => selectFramework(name)}>
 						<span>
@@ -256,14 +254,7 @@
 			class="empty-box"
 			style:z-index={box_z_index}
 			bind:this={box_element}
-			{@attach draggable(() => [
-				box_position_compartment,
-				controls({ allow: ControlFrom.selector('.handle') }),
-				events({
-					onDragStart: () => update_box_z_index(),
-					onDrag: (data) => box_position.set(data.offset, { duration: 0 }),
-				}),
-			])}
+			{...box_draggable.attach}
 		>
 			<div class="handle" data-paw-cursor="true"></div>
 
@@ -274,7 +265,7 @@
 	</section>
 
 	<!-- Lines connecting frameworks to logo -->
-	{#each line_properties as line, idx}
+	{#each line_properties as line, idx (idx)}
 		{#if line.visible}
 			<div
 				class="line"

@@ -6,7 +6,6 @@
 	import { browser } from '$helpers/utils';
 	import { theme } from '$state/user-preferences.svelte';
 	import { Draggable } from '@neodrag/svelte';
-	import { bounds, BoundsFrom, position } from '@neodrag/svelte/plugins';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
@@ -29,7 +28,10 @@
 	let drag_position = new Tween({ x: 0, y: 0 }, { easing: expoOut, duration: 1200 });
 
 	const heroDrag = new Draggable({
-		plugins: [bounds(BoundsFrom.parent()), () => position({ current: drag_position.current })],
+		bounds: 'parent',
+		get position() {
+			return drag_position.current;
+		},
 		onDragStart: () => {
 			box_wiggles = false;
 		},
@@ -84,7 +86,7 @@
 					class="box"
 					class:wiggles={box_wiggles}
 					data-paw-cursor="true"
-					{...heroDrag.target}
+					{...heroDrag.attach}
 				>
 					<div class="paw">
 						<PawIcon />

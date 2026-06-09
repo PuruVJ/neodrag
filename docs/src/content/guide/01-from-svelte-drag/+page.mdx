@@ -1,0 +1,243 @@
+---
+title: 'Migrating from svelte-drag'
+nav_title: 'From svelte-drag'
+tagline: 'Move from the old svelte-drag action to neodrag v3.'
+---
+
+`svelte-drag` was the original project — neodrag is its successor. v3 keeps the same options you already know (`axis`, `bounds`, `grid`, `handle`, `cancel`, `threshold`, `position`), but the way you attach it to an element has changed. It is no longer a `use:` action. Instead you create a `Draggable` **class instance** and spread its `attach` property onto the node.
+
+## Install
+
+```bash
+npm uninstall svelte-drag
+npm install @neodrag/svelte@next
+```
+
+Requires Svelte 5 — the attachment spread relies on Svelte attachments.
+
+## Attaching to an element
+
+This is the one mechanical change you make everywhere. `svelte-drag` exported a `draggable` action used with `use:`. neodrag v3 exports a `Draggable` class: construct it with your options, then spread `drag.attach` onto the element.
+
+```diff
+<script>
+-  import { draggable } from 'svelte-drag';
++  import { Draggable } from '@neodrag/svelte';
++
++  const drag = new Draggable();
+</script>
+
+- <div use:draggable>Drag me</div>
++ <div {...drag.attach}>Drag me</div>
+```
+
+Note the casing: it is the capitalized `Draggable` **class**, instantiated with `new`. Each draggable element gets its own instance:
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const box = new Draggable();
+  const handle = new Draggable();
+</script>
+
+<div {...box.attach}>Box one</div>
+<div {...handle.attach}>Box two</div>
+```
+
+## Options
+
+Pass options as a plain object to the constructor. The common ones are unchanged from `svelte-drag`:
+
+```diff
+<script>
+-  import { draggable } from 'svelte-drag';
++  import { Draggable } from '@neodrag/svelte';
++
++  const drag = new Draggable({
++    axis: 'x',
++    bounds: 'parent',
++    grid: [25, 25],
++    handle: '.handle',
++  });
+</script>
+
+- <div
+-   use:draggable={{
+-     axis: 'x',
+-     bounds: 'parent',
+-     grid: [25, 25],
+-     handle: '.handle',
+-   }}
+- >
++ <div {...drag.attach}>
+    <div class="handle">drag here</div>
+    Drag me
+  </div>
+```
+
+| `svelte-drag` option | neodrag v3 | notes |
+| --- | --- | --- |
+| `axis` | `axis` | `'x' \| 'y' \| 'both'` |
+| `bounds` | `bounds` | `'parent' \| 'viewport' \| HTMLElement \| { left, top, right, bottom } \| () => rect` |
+| `gridSize` / `grid` | `grid` | `[stepX, stepY]` in px |
+| `handle` | `handle` | `string \| HTMLElement` |
+| `cancel` | `cancel` | `string \| HTMLElement` |
+| `threshold` | `threshold` | a single `number` (px of movement before a drag begins) |
+| `defaultPosition` / `position` | `position` | `{ x, y }` |
+| `disabled` | `disabled` | `boolean` |
+
+### Bounds
+
+`bounds` keeps its string shorthands and now also accepts an element, a plain rect, or a function returning one. There is no `BoundsFrom` factory.
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const drag = new Draggable({ bounds: 'parent' });
+</script>
+
+<div class="container">
+  <div {...drag.attach}>Stays inside the parent</div>
+</div>
+```
+
+### touch-action and text selection are now built in
+
+In `svelte-drag` you sometimes had to set `touch-action` by hand so a touch drag wasn't stolen as a scroll, and reach for a separate trick to stop text from highlighting mid-drag. Both are built into v3:
+
+- `touchAction` defaults to an axis-aware value (`pan-y` for `axis: 'x'`, `pan-x` for `axis: 'y'`, `none` for free drag). Pass a custom CSS value, or `false` to leave `touch-action` alone.
+- `userSelect` defaults to `true`, setting `user-select: none` on the body during a drag. Pass `false` to allow selection.
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const drag = new Draggable({ touchAction: false, userSelect: false });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+## Position
+
+`position` is a controlled `{ x, y }` offset. Pass reactive state via a getter to read it, and add a setter to make it two-way — the wrapper writes the live offset back to your state on every move:
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  let pos = $state({ x: 0, y: 0 });
+  const drag = new Draggable({
+    get position() {
+      return pos;
+    },
+    set position(value) {
+      pos = value;
+    },
+  });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+<button onclick={() => (pos = { x: 0, y: 0 })}>Reset</button>
+<p>x: {pos.x}, y: {pos.y}</p>
+```
+
+A getter-only `position` stays one-way (you control it; the drag won't write back).
+
+## Events
+
+The DOM `CustomEvent`s (`on:svelte-drag:start`, `on:svelte-drag`, `on:svelte-drag:end`) are gone. v3 uses **callbacks in the options object** instead:
+
+```diff
+<script>
+-  import { draggable } from 'svelte-drag';
++  import { Draggable } from '@neodrag/svelte';
++
++  const drag = new Draggable({
++    onDragStart: ({ offset }) => console.log('start', offset),
++    onDrag: ({ offset }) => console.log('drag', offset),
++    onDragEnd: ({ offset }) => console.log('end', offset),
++  });
+</script>
+
+- <div
+-   use:draggable
+-   on:svelte-drag:start={(e) => console.log('start', e.detail)}
+-   on:svelte-drag={(e) => console.log('drag', e.detail)}
+-   on:svelte-drag:end={(e) => console.log('end', e.detail)}
+- >
++ <div {...drag.attach}>
+    Drag me
+  </div>
+```
+
+| `svelte-drag` event | neodrag v3 callback |
+| --- | --- |
+| `on:svelte-drag:start` | `onDragStart` |
+| `on:svelte-drag` | `onDrag` |
+| `on:svelte-drag:end` | `onDragEnd` |
+
+Each callback receives a `DragEventData`:
+
+```ts
+{
+  offset: { x: number; y: number };
+  node: HTMLElement | SVGElement;
+  input: InteractionInput; // normalized pointer/keyboard event
+}
+```
+
+The old `e.detail.offsetX` / `e.detail.offsetY` become `offset.x` / `offset.y`.
+
+## Reading drag state
+
+`svelte-drag` did not expose a reactive "is this dragging" flag — you tracked it yourself in the start/end events. v3 gives you `isDragging` directly off the instance:
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const drag = new Draggable();
+</script>
+
+<div {...drag.attach}>Drag me</div>
+{#if drag.isDragging}
+  <p>Dragging…</p>
+{/if}
+```
+
+## Reactive options
+
+Pass reactive state through getters. The wrapper reads the latest values and pushes them to the live instance on change — there is no need to recreate the draggable, and there are no compartments or thunks.
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  let locked = $state(false);
+  const drag = new Draggable({
+    get disabled() {
+      return locked;
+    },
+  });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+<button onclick={() => (locked = !locked)}>
+  {locked ? 'Unlock' : 'Lock'}
+</button>
+```
+
+## What's new in v3
+
+`svelte-drag`'s feature set maps onto v3 options one-to-one, but v3 is a much larger library. Once you have migrated, the same `@neodrag/svelte` import also gives you:
+
+- `Droppable` and `Resizable` companions that share one engine.
+- `SortableList` for reorderable lists (with FLIP animation and cross-container transfer), bound per-row with `{...list.row(id)}`.
+- A `use: []` slot for tree-shakeable extensions like `snapToGrid`, `magnetic`, `scrollLock`, `ghost`, and `haptics`.
+- Built-in keyboard dragging and ARIA support via the `ariaDrag` extension.
+- An opt-in CRDT/collab layer for real-time shared reordering.
+
+See the rest of the guide for those — none of it is bundled until you import it.

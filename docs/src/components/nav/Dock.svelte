@@ -15,7 +15,6 @@
 	import { FRAMEWORKS, type Framework } from '$helpers/constants';
 	import { init_theme_runtime } from '$state/user-preferences.svelte';
 	import { Draggable } from '@neodrag/svelte';
-	import { ControlFrom, controls } from '@neodrag/svelte/plugins';
 	import { prefetch } from 'astro:prefetch';
 	import type { Component } from 'svelte';
 	import { expoOut } from 'svelte/easing';
@@ -95,9 +94,7 @@
 		vue: VueIcon,
 	};
 
-	const dockDrag = new Draggable({
-		plugins: [controls({ allow: ControlFrom.selector('.handle') })],
-	});
+	const dockDrag = new Draggable({ handle: '.handle' });
 
 	const enable_dock_zoom = new MediaQuery('(min-width: 768px)');
 
@@ -117,7 +114,7 @@
 >
 	<div
 		class="dock-angular-bevel dock-surface dock-float pointer-events-auto relative w-full overflow-visible max-md:min-h-16 md:h-auto md:w-auto"
-		{...dockDrag.target}
+		{...dockDrag.attach}
 		{@attach interact_outside(() => menu_view.close())}
 	>
 		<div

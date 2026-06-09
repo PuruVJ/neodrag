@@ -1,22 +1,20 @@
 export {
-	defineResizePlugin,
+	clampSizeToBounds,
+	Resize,
+	ResizeHandle,
+	ResizeState,
+	resolveResizeBounds,
 	RESIZE_HANDLE_ATTR,
-	type ResizeCtx,
+	type ResizeBoundsContext,
+	type ResizeBoundsInput,
 	type ResizeEdge,
-	type ResizeEndReason,
-	type ResizePlugin,
-	type ResizePluginList,
-	type ResizeSession,
-	type SizePatch,
-} from './types.ts';
-export {
-	resizeHandles,
-	sizeBounds,
-	resizeAxis,
-	aspectRatio,
-	resizeEvents,
 	type ResizeEventData,
-} from './plugins.ts';
-export { presetPanel, presetCornerBox, presetSplitPane } from './presets.ts';
-export type { CssLengthString, CssLengthUnit, SizeInput } from '../length-runtime.ts';
-export { CSS_LENGTH_UNITS, isCssLengthUnit } from '../length-runtime.ts';
+	type ResizeOptions,
+	type ResizeSizeBounds,
+} from './resize.ts';
+export { Resizable } from './resizable.ts';
+export {
+	preserveUnits,
+	type ResizePlugin,
+	type ResizePluginContext,
+} from './preserve-units.ts';

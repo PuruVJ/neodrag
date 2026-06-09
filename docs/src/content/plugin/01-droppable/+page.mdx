@@ -1,0 +1,343 @@
+---
+title: 'Droppable'
+nav_title: 'Droppable'
+tagline: 'Drop zones that react to drags, with no wiring between them.'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+A **droppable** turns any element into a drop zone. Drop zones auto-observe every drag on the page — there is no registration, no shared context, no wiring between a draggable and a zone. Make a node draggable, make another node droppable, and the engine hit-tests them for you.
+
+The only contract between the two sides is **data**: a draggable carries a `dragData` payload, and a zone reads it through `accepts` and `onDrop`.
+
+## A complete drag → drop
+
+A draggable file chip that carries a payload, and a zone that only accepts files and reacts when one is dropped. The zone gets a `data-neodrag-over` attribute while an accepted drag hovers it — style that to give feedback.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable, Droppable } from '@neodrag/svelte';
+
+  const chip = new Draggable({ dragData: { kind: 'file', name: 'report.pdf' } });
+
+  let dropped = $state(null);
+  const zone = new Droppable({
+    accepts: ({ data }) => data?.kind === 'file',
+    onDrop: ({ data }) => (dropped = data.name),
+  });
+</script>
+
+<div {...chip.attach} class="chip">report.pdf</div>
+
+<div {...zone.attach} class="zone" class:over={zone.isOver}>
+  {dropped ? `Dropped: ${dropped}` : 'Drop a file here'}
+</div>
+
+<style>
+  .zone[data-neodrag-over] {
+    border-color: hotpink;
+  }
+</style>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useState } from 'react';
+import { useDraggable, useDroppable } from '@neodrag/react';
+
+function FileDrop() {
+  const chip = useDraggable({ dragData: { kind: 'file', name: 'report.pdf' } });
+
+  const [dropped, setDropped] = useState<string | null>(null);
+  const zone = useDroppable({
+    accepts: ({ data }) => (data as any)?.kind === 'file',
+    onDrop: ({ data }) => setDropped((data as any).name),
+  });
+
+  return (
+    <>
+      <div ref={chip.ref} className="chip">report.pdf</div>
+      <div ref={zone.ref} className="zone" data-over={zone.isOver}>
+        {dropped ? `Dropped: ${dropped}` : 'Drop a file here'}
+      </div>
+    </>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { useDraggable, useDroppable } from '@neodrag/vue';
+
+const chip = useDraggable({ dragData: { kind: 'file', name: 'report.pdf' } });
+
+const dropped = ref(null);
+const { ref: zoneRef, isOver } = useDroppable({
+  accepts: ({ data }) => data?.kind === 'file',
+  onDrop: ({ data }) => (dropped.value = data.name),
+});
+</script>
+
+<template>
+  <div :ref="chip.ref" class="chip">report.pdf</div>
+  <div :ref="zoneRef" class="zone">
+    {{ dropped ? `Dropped: ${dropped}` : 'Drop a file here' }}
+  </div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { createDraggable, createDroppable } from '@neodrag/solid';
+
+function FileDrop() {
+  const chip = createDraggable({ dragData: { kind: 'file', name: 'report.pdf' } });
+
+  const [dropped, setDropped] = createSignal<string | null>(null);
+  const zone = createDroppable({
+    accepts: ({ data }) => (data as any)?.kind === 'file',
+    onDrop: ({ data }) => setDropped((data as any).name),
+  });
+
+  return (
+    <>
+      <div ref={chip.ref} class="chip">report.pdf</div>
+      <div ref={zone.ref} class="zone" data-over={zone.isOver()}>
+        {dropped() ? `Dropped: ${dropped()}` : 'Drop a file here'}
+      </div>
+    </>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable, Droppable } from '@neodrag/vanilla';
+
+const chip = new Draggable(chipEl, {
+  dragData: { kind: 'file', name: 'report.pdf' },
+});
+
+const zone = new Droppable(zoneEl, {
+  accepts: ({ data }) => data?.kind === 'file',
+  onDrop: ({ data }) => (label.textContent = `Dropped: ${data.name}`),
+});
+
+// chip.destroy(); zone.destroy();  // when you're done
+```
+
+</div>
+</FrameworkSwitch>
+
+That is the whole feature: one draggable with `dragData`, one droppable with `accepts` + `onDrop`. The engine matches them.
+
+## Reacting to a zone's state
+
+Each binding exposes whether an accepted drag is currently over it, so you can drive UI without touching the DOM:
+
+- **Svelte** — `zone.isOver` (a reactive getter)
+- **React** — `const { ref, isOver } = useDroppable(...)`
+- **Vue** — `const { ref, isOver } = useDroppable(...)` (`isOver` is a `Ref`)
+- **Solid** — `const { ref, isOver } = createDroppable(...)` (`isOver` is an `Accessor`, call it)
+- **Vanilla** — read `data-neodrag-over` from the node, or use the `onEnter`/`onLeave` callbacks
+
+The engine also stamps the zone element with `data-neodrag-over` for the duration of an accepted hover — the cleanest way to style hover feedback in plain CSS:
+
+```css
+.zone[data-neodrag-over] {
+  outline: 2px dashed hotpink;
+  background: color-mix(in oklab, hotpink 12%, transparent);
+}
+```
+
+## DropOptions
+
+Everything a zone does is configured through its options.
+
+### `accepts`
+
+`accepts?: ({ dragNode, data }) => boolean`
+
+A filter that decides whether this zone reacts to a given drag. It receives the drag's DOM node and its `dragData`. Return `false` and the zone ignores the drag entirely — no enter/over/leave/drop events fire and `data-neodrag-over` is never set. Omit it to accept every drag.
+
+```js
+// Only accept cards from the "todo" column
+accepts: ({ data }) => data?.column === 'todo',
+```
+
+### Lifecycle callbacks
+
+All four receive a `DropEventData`:
+
+```ts
+DropEventData = { zone, dragNode, data, input }
+```
+
+- `zone` — the drop zone's node
+- `dragNode` — the element being dragged
+- `data` — the dragged item's `dragData` payload
+- `input` — the originating pointer/keyboard input
+
+| callback | fires |
+|---|---|
+| `onEnter` | an accepted drag first moves over the zone |
+| `onOver` | every move while an accepted drag is inside the zone |
+| `onLeave` | the drag exits the zone (or is dropped elsewhere) |
+| `onDrop` | the drag is released over the zone |
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Droppable } from '@neodrag/svelte';
+
+  const zone = new Droppable({
+    accepts: ({ data }) => data?.kind === 'file',
+    onEnter: ({ data }) => console.log('entered with', data),
+    onOver: ({ input }) => {/* track pointer inside the zone */},
+    onLeave: () => console.log('left'),
+    onDrop: ({ data, zone }) => console.log('dropped', data, 'into', zone),
+  });
+</script>
+
+<div {...zone.attach} class="zone">Drop here</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDroppable } from '@neodrag/react';
+
+function Zone() {
+  const { ref } = useDroppable({
+    accepts: ({ data }) => (data as any)?.kind === 'file',
+    onEnter: ({ data }) => console.log('entered with', data),
+    onOver: ({ input }) => {/* track pointer inside the zone */},
+    onLeave: () => console.log('left'),
+    onDrop: ({ data, zone }) => console.log('dropped', data, 'into', zone),
+  });
+  return <div ref={ref} className="zone">Drop here</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useDroppable } from '@neodrag/vue';
+
+const { ref } = useDroppable({
+  accepts: ({ data }) => data?.kind === 'file',
+  onEnter: ({ data }) => console.log('entered with', data),
+  onOver: ({ input }) => {/* track pointer inside the zone */},
+  onLeave: () => console.log('left'),
+  onDrop: ({ data, zone }) => console.log('dropped', data, 'into', zone),
+});
+</script>
+
+<template><div :ref="ref" class="zone">Drop here</div></template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDroppable } from '@neodrag/solid';
+
+function Zone() {
+  const { ref } = createDroppable({
+    accepts: ({ data }) => (data as any)?.kind === 'file',
+    onEnter: ({ data }) => console.log('entered with', data),
+    onOver: ({ input }) => {/* track pointer inside the zone */},
+    onLeave: () => console.log('left'),
+    onDrop: ({ data, zone }) => console.log('dropped', data, 'into', zone),
+  });
+  return <div ref={ref} class="zone">Drop here</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Droppable } from '@neodrag/vanilla';
+
+const zone = new Droppable(zoneEl, {
+  accepts: ({ data }) => data?.kind === 'file',
+  onEnter: ({ data }) => console.log('entered with', data),
+  onOver: ({ input }) => {/* track pointer inside the zone */},
+  onLeave: () => console.log('left'),
+  onDrop: ({ data, zone }) => console.log('dropped', data, 'into', zone),
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+### `priority`
+
+`priority?: number` (default `0`)
+
+When several zones overlap under the pointer, the highest `priority` wins the hit. Use it to layer a small zone on top of a larger one — give the inner zone a higher number so it claims the drop even though both rects contain the pointer.
+
+```js
+// inner trash icon beats the surrounding panel
+const panel = new Droppable(panelEl, { priority: 0 });
+const trash = new Droppable(trashEl, { priority: 10 });
+```
+
+Ties (equal priority) fall back to the collision policy.
+
+### `hitExpand`
+
+`hitExpand?: number` (default `0`)
+
+Grows the zone's hit rectangle by N pixels on every side, without changing its layout. Handy for small targets that are hard to hit precisely, or to add a forgiving margin around a zone.
+
+```js
+// a 24px icon that's easy to drop onto
+const zone = new Droppable(iconEl, { hitExpand: 16 });
+```
+
+### `collision`
+
+`collision?: CollisionPolicy` (default `'pointer'`)
+
+How the engine ranks a zone when deciding which one a drag is "over". One of:
+
+| policy | hit when |
+|---|---|
+| `'pointer'` | the pointer is inside the zone rect (cheapest, the default) |
+| `'closestCenter'` | rank by distance from the zone's center — the nearest center wins |
+| `'closestEdge'` | rank by distance to the zone's nearest edge |
+| `'intersection'` | rank by how much the dragged element's rect overlaps the zone |
+
+`'pointer'` follows the cursor exactly. The other policies follow the dragged element's geometry, which feels better for large draggables where the cursor may sit off-center.
+
+```js
+const zone = new Droppable(zoneEl, { collision: 'closestCenter' });
+```
+
+## Notes
+
+- **No wiring.** A `Droppable` registers itself with the global drop engine on bind and observes every drag automatically. You never connect a draggable to a zone by hand.
+- **`accepts` is the gate.** A rejected drag produces no events and no `data-neodrag-over` — both sides only ever see drags they care about.
+- **The payload is yours.** `dragData` is `unknown`; put whatever object you like on the draggable and read it back in `accepts`/`onDrop`.
+- **Cleanup.** Framework wrappers tear the zone down with the component; in vanilla call `zone.destroy()` yourself.

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Draggable } from '@neodrag/svelte';
-	import { bounds, BoundsFrom } from '@neodrag/svelte/plugins';
 
 	type Props = {
 		id: string;
@@ -14,7 +13,7 @@
 	const { title, body, stack, z, onactivate }: Props = $props();
 
 	const drag = new Draggable({
-		plugins: [bounds(BoundsFrom.parent())],
+		bounds: 'parent',
 		onDragStart: () => onactivate(),
 	});
 </script>
@@ -26,7 +25,7 @@
 	style:z-index={z}
 	style:top="calc(16% + var(--stack) * 11%)"
 	style:left="calc(14% + var(--stack) * 13%)"
-	{...drag.target}
+	{...drag.attach}
 	onpointerdown={onactivate}
 >
 	<div class="playground-window-chrome">

@@ -1,4 +1,4 @@
-import type { Neodrag, NeodragDebugSnapshot } from '../engine/neodrag.ts';
+import type { Interactions } from '../engine.ts';
 
 export interface InteractionInspectorOptions {
 	mount?: HTMLElement;
@@ -11,10 +11,10 @@ export interface InteractionInspector {
 }
 
 export function createInteractionInspector(
-	engine: Neodrag,
+	engine: Interactions,
 	options: InteractionInspectorOptions = {},
 ): InteractionInspector {
-	if (!engine.dev || !globalThis.document) {
+	if (!globalThis.document) {
 		return { refresh() {}, destroy() {} };
 	}
 
@@ -41,29 +41,16 @@ export function createInteractionInspector(
 	const title = options.title ?? 'neodrag';
 	let rafId = 0;
 
-	const render = (snapshot: NeodragDebugSnapshot | null) => {
-		if (!snapshot) {
-			panel.textContent = `${title}\n(dev mode off)`;
-			return;
-		}
-		const session = snapshot.session;
+	const render = () => {
+		const session = engine.session;
 		const sessionLine = session
-			? `drag: ${session.state} · Δ(${session.deltaX.toFixed(0)}, ${session.deltaY.toFixed(0)}) · over:${session.overTargets}`
-			: 'drag: idle';
-		const resize = snapshot.resizeSession;
-		const resizeLine = resize
-			? `resize: ${resize.state} · ${resize.width.toFixed(0)}×${resize.height.toFixed(0)} · Δw:${resize.deltaWidth.toFixed(0)} Δh:${resize.deltaHeight.toFixed(0)} · ${resize.anchor}`
-			: 'resize: idle';
-		panel.textContent = [
-			title,
-			`targets · drag:${snapshot.dragTargets} drop:${snapshot.dropTargets} resize:${snapshot.resizeTargets}`,
-			sessionLine,
-			resizeLine,
-		].join('\n');
+			? `session: ${session.started ? 'active' : 'pending'} · capability:${String(session.capability.key.description ?? 'unknown')}`
+			: 'session: idle';
+		panel.textContent = [title, sessionLine].join('\n');
 	};
 
 	const loop = () => {
-		render(engine.debugSnapshot());
+		render();
 		rafId = requestAnimationFrame(loop);
 	};
 
@@ -72,7 +59,7 @@ export function createInteractionInspector(
 
 	return {
 		refresh() {
-			render(engine.debugSnapshot());
+			render();
 		},
 		destroy() {
 			if (rafId) cancelAnimationFrame(rafId);
@@ -82,7 +69,7 @@ export function createInteractionInspector(
 }
 
 export function installInteractionInspector(
-	engine: Neodrag,
+	engine: Interactions,
 	options?: InteractionInspectorOptions,
 ): InteractionInspector {
 	return createInteractionInspector(engine, options);

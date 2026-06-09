@@ -1,15 +1,9 @@
 import { getCollection } from 'astro:content';
 
-const framework_collection = (await getCollection('framework')).sort((a, b) =>
-	a.id > b.id ? 1 : -1,
-);
 const migrations_collection = (await getCollection('migration')).sort((a, b) =>
 	a.id > b.id ? 1 : -1,
 );
 const plugin_collection = (await getCollection('plugin')).sort((a, b) => (a.id > b.id ? 1 : -1));
-const reference_collection = (await getCollection('reference')).sort((a, b) =>
-	a.id > b.id ? 1 : -1,
-);
 
 export const plugins_list = plugin_collection
 	.map((v) => v.id.replace(/\d{2}-(.+)\/page/, '$1'))
@@ -20,23 +14,13 @@ export function get_nav_list(framework: string) {
 
 	return [
 		{
-			title: 'framework',
-			sections: framework_collection.map((v) => ({
-				slug: `/docs/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
-				title: v.data.nav_title ?? v.data.title,
-			})),
+			title: 'start',
+			sections: [{ slug: `/docs/${framework}`, title: 'Getting Started' }],
 		},
 		{
-			title: 'plugin',
+			title: 'documentation',
 			sections: plugin_collection.map((v) => ({
 				slug: `/docs/${framework}/plugin/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
-				title: v.data.nav_title ?? v.data.title,
-			})),
-		},
-		{
-			title: 'reference',
-			sections: reference_collection.map((v) => ({
-				slug: `/docs/${framework}/reference/${v.id.replace(/\d{2}-(.+)\/page/, '$1')}`,
 				title: v.data.nav_title ?? v.data.title,
 			})),
 		},

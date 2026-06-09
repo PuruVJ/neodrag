@@ -4,4 +4,3 @@ export {
 	type InteractionInspector,
 	type InteractionInspectorOptions,
 } from './inspector.ts';
-export type { NeodragDebugSnapshot } from '../engine/neodrag.ts';

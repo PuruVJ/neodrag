@@ -1,14 +1,2 @@
-import {
-	Draggable,
-	Droppable,
-	Resizable,
-	Neodrag,
-	type DragPluginList,
-	type DropPluginList,
-	type ResizePluginList,
-	type EngineOptions,
-} from '@neodrag/core';
-
-export type NeodragOptions = EngineOptions;
-export type { DragPluginList, DropPluginList, ResizePluginList };
-export { Neodrag, Draggable, Droppable, Resizable };
+// Vanilla v3 — the core classes ARE the vanilla API. Direct, zero framework overhead.
+export * from '@neodrag/core';

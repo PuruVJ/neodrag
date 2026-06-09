@@ -1,9 +1,10 @@
 import type { SensorHost } from './sensors/types.ts';
 
-export type InteractionKind = 'pointer' | 'keyboard' | 'programmatic';
+export type InteractionKind = 'pointer' | 'keyboard' | 'programmatic' | 'native-dnd';
 export type InteractionPhase = 'start' | 'move' | 'end';
 
 export const KEYBOARD_POINTER_ID = -1;
+export const NATIVE_POINTER_ID = -2;
 
 export type InteractionModifiers = Readonly<{
 	shift: boolean;
@@ -55,10 +56,20 @@ export type ProgrammaticInteractionInput = InteractionInputBase & {
 	readonly source?: string;
 };
 
+/** An OS drag-and-drop (files/text) routed through the engine by the native-DnD sensor. There is
+ * no draggable node — `dataTransfer` carries the payload (readable only on the `drop` phase). */
+export type NativeDndInteractionInput = InteractionInputBase & {
+	readonly kind: 'native-dnd';
+	readonly native: DragEvent;
+	readonly dataTransfer: DataTransfer | null;
+	readonly pointerId: number;
+};
+
 export type InteractionInput =
 	| PointerInteractionInput
 	| KeyboardInteractionInput
-	| ProgrammaticInteractionInput;
+	| ProgrammaticInteractionInput
+	| NativeDndInteractionInput;
 
 function modifiersFrom(
 	shift: boolean,
@@ -169,6 +180,34 @@ export function programmaticToInput(opts: {
 		pointerId: opts.pointerId ?? KEYBOARD_POINTER_ID,
 		source: opts.source,
 	};
+}
+
+export function nativeDragToInput(native: DragEvent, phase: InteractionPhase): NativeDndInteractionInput {
+	return {
+		kind: 'native-dnd',
+		phase,
+		clientX: native.clientX,
+		clientY: native.clientY,
+		target: native.target,
+		modifiers: modifiersFrom(native.shiftKey, native.ctrlKey, native.altKey, native.metaKey),
+		timestamp: native.timeStamp,
+		native,
+		dataTransfer: native.dataTransfer,
+		pointerId: NATIVE_POINTER_ID,
+	};
+}
+
+/** The OS-drop payload — readable only on `drop` (the spec hides file/text content during hover). */
+export function nativeDropFiles(dt: DataTransfer | null): File[] {
+	return dt ? Array.from(dt.files) : [];
+}
+export function nativeDropText(dt: DataTransfer | null): string {
+	if (!dt) return '';
+	return dt.getData('text/plain') || dt.getData('text/uri-list') || dt.getData('text') || '';
+}
+
+export function isNativeDndInput(i: InteractionInput): i is NativeDndInteractionInput {
+	return i.kind === 'native-dnd';
 }
 
 export function isPointerInput(i: InteractionInput): i is PointerInteractionInput {

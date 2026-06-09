@@ -80,6 +80,9 @@ importers:
       '@fontsource/plus-jakarta-sans':
         specifier: ^5.0.18
         version: 5.2.6
+      '@neodrag/core':
+        specifier: workspace:*
+        version: link:../packages/core
       '@neodrag/svelte':
         specifier: workspace:*
         version: link:../packages/svelte
@@ -285,9 +288,15 @@ importers:
       '@neodrag/core':
         specifier: workspace:*
         version: link:../core
+      jsdom:
+        specifier: ^29.1.1
+        version: 29.1.1
       tsdown:
         specifier: 'catalog:'
         version: 0.22.0(tsx@4.20.3)(typescript@5.8.3)
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.12.4)(@vitest/browser@3.2.4)(esbuild@0.27.7)(jiti@2.7.0)(jsdom@29.1.1)(terser@5.43.1)(tsx@4.20.3)(yaml@2.8.0)
 
   packages/vue:
     devDependencies:

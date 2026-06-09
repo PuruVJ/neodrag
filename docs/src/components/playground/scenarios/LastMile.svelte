@@ -1,8 +1,6 @@
 <script lang="ts">
 	import type { WorldMeta } from '../worlds';
-	import { Draggable } from '@neodrag/svelte';
-	import { Droppable, accepts, highlight } from '@neodrag/svelte/drop';
-	import { bounds, BoundsFrom, dragData, grid } from '@neodrag/svelte/plugins';
+	import { Draggable, Droppable } from '@neodrag/svelte';
 
 	type Props = {
 		world: WorldMeta;
@@ -13,20 +11,15 @@
 	const step = 24;
 
 	const van = new Draggable({
-		plugins: [
-			bounds(BoundsFrom.parent()),
-			grid([step, step]),
-			dragData(() => ({ kind: 'van' })),
-		],
-		threshold: null,
+		bounds: 'parent',
+		grid: [step, step],
+		dragData: { kind: 'van' },
+		threshold: 0,
 	});
 
 	const drop_for = () =>
 		new Droppable({
-			plugins: [
-				accepts<{ kind: string }>((data) => data.kind === 'van'),
-				highlight({ overClass: 'pg-drop-over pg-drop-over--success' }),
-			],
+			accepts: ({ data }) => (data as { kind?: string })?.kind === 'van',
 		});
 
 	const north_drop = drop_for();
@@ -48,22 +41,28 @@
 		<span class="last-mile-park" aria-hidden="true"></span>
 		<span
 			class="last-mile-block last-mile-block--north"
+			class:pg-drop-over={north_drop.isOver}
+			class:pg-drop-over--success={north_drop.isOver}
 			aria-label={zone_label('north')}
-			{@attach north_drop.attachment}
+			{...north_drop.attach}
 			onmouseenter={() => (active_zone = 'north')}
 			onmouseleave={() => (active_zone = '')}
 		></span>
 		<span
 			class="last-mile-block last-mile-block--east"
+			class:pg-drop-over={east_drop.isOver}
+			class:pg-drop-over--success={east_drop.isOver}
 			aria-label={zone_label('east')}
-			{@attach east_drop.attachment}
+			{...east_drop.attach}
 			onmouseenter={() => (active_zone = 'east')}
 			onmouseleave={() => (active_zone = '')}
 		></span>
 		<span
 			class="last-mile-block last-mile-block--south"
+			class:pg-drop-over={south_drop.isOver}
+			class:pg-drop-over--success={south_drop.isOver}
 			aria-label={zone_label('south')}
-			{@attach south_drop.attachment}
+			{...south_drop.attach}
 			onmouseenter={() => (active_zone = 'south')}
 			onmouseleave={() => (active_zone = '')}
 		></span>
@@ -77,7 +76,7 @@
 			Drag the van over a block — it lights up green.
 		{/if}
 	</p>
-	<button type="button" class="last-mile-van" aria-label="Delivery van" {@attach van.attachment}>
+	<button type="button" class="last-mile-van" aria-label="Delivery van" {...van.attach}>
 		<span class="last-mile-van-icon" aria-hidden="true">🚐</span>
 	</button>
 </div>

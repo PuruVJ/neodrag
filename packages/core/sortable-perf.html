@@ -1,0 +1,58 @@
+<!doctype html>
+<html><head><meta charset="utf-8" /><title>sortable single-list perf</title></head><body>
+<script type="module">
+import { SortableList } from '/dist/dnd/index.js';
+let gbcr = 0; const _g = Element.prototype.getBoundingClientRect;
+Element.prototype.getBoundingClientRect = function () { gbcr++; return _g.call(this); };
+function dispatch(t, type, x, y, b) { t.dispatchEvent(new PointerEvent(type, { bubbles: true, composed: true, cancelable: true, clientX: x, clientY: y, button: 0, buttons: b, pointerId: 1, pointerType: 'mouse' })); }
+const median = (a) => { const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; };
+const H = 20; // item height px
+
+function makeList(n) {
+	document.body.innerHTML = '';
+	const data = Array.from({ length: n }, (_, i) => ({ id: 'i' + i }));
+	const ul = document.createElement('ul');
+	Object.assign(ul.style, { position: 'absolute', left: '0', top: '0', width: '200px', margin: 0, padding: 0 });
+	document.body.appendChild(ul);
+	for (const it of data) { const li = document.createElement('li'); li.setAttribute('data-sortable-key', it.id); li.style.height = H + 'px'; li.style.display = 'block'; li.textContent = it.id; ul.appendChild(li); }
+	const order = () => data.map((d) => d.id);
+	const s = new SortableList(ul, { items: data, keyOf: (x) => x.id, animation: false, onReorder: (next) => data.splice(0, data.length, ...next) });
+	return { ul, data, s, order };
+}
+
+// Drag item 0 downward across `cross` boundaries and back up — stresses #project per index change.
+window.run = async function (n, moves = 800) {
+	const { ul, s, order } = makeList(n);
+	const grab = ul.querySelector('li');
+	const r0 = grab.getBoundingClientRect();
+	dispatch(grab, 'pointermove', 5, r0.top + 5, 0);
+	dispatch(grab, 'pointerdown', 5, r0.top + 5, 1);
+	dispatch(grab, 'pointermove', 6, r0.top + 8, 1); // start
+	const reach = Math.min(n - 1, 200) * H; // sweep through up to 200 items
+	for (let i = 0; i < 40; i++) dispatch(grab, 'pointermove', 6, 8 + (i * H) % reach, 1); // warmup
+	gbcr = 0;
+	const samples = []; const batch = 20; let done = 0; let dir = 1; let y = 8;
+	while (done < moves) {
+		const t0 = performance.now();
+		for (let j = 0; j < batch; j++) {
+			y += dir * (H / 2);
+			if (y > reach) { y = reach; dir = -1; } else if (y < 8) { y = 8; dir = 1; }
+			dispatch(grab, 'pointermove', 6, y, 1);
+		}
+		samples.push((performance.now() - t0) / batch * 1000); done += batch;
+	}
+	const gbcrPerMove = +(gbcr / done).toFixed(3);
+	// correctness probe: drop near the bottom of the swept range, expect item0 to have moved down
+	dispatch(grab, 'pointermove', 6, reach, 1);
+	dispatch(grab, 'pointerup', 6, reach, 0);
+	const movedTo = order().indexOf('i0');
+	s.destroy();
+	return { n, moves: done, perMoveUs: +median(samples).toFixed(2), gbcrPerMove, item0MovedTo: movedTo };
+};
+window.sweep = async function () {
+	const out = [];
+	for (const n of [100, 500, 1000, 3000, 10000]) out.push(await window.run(n));
+	return out;
+};
+window.__ready = true;
+</script></body></html>

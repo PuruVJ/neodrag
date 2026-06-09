@@ -1,0 +1,1021 @@
+---
+title: 'Draggable'
+nav_title: 'Draggable'
+tagline: 'Make elements draggable — axis, bounds, grid, handles, threshold, position and more.'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+Draggable is the core capability of Neodrag: pick up an element with a pointer (mouse, touch, or pen) and move it. You bind it to a node, optionally pass an options object, and read back whether it's currently dragging. Everything — the class/hook, every option, and the extensions — comes from your one framework package.
+
+## Binding a draggable
+
+Each framework exposes the same capability through its native idiom. There's nothing to import beyond the package itself.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+In Svelte, `Draggable` is a **class**. Construct it in `<script>`, spread `{...drag.attach}` onto the element, and read `drag.isDragging`. Requires Svelte 5 (it's built on attachments).
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const drag = new Draggable();
+</script>
+
+<div {...drag.attach}>Drag me</div>
+
+{#if drag.isDragging}
+  <p>Dragging…</p>
+{/if}
+```
+
+</div>
+<div slot="react">
+
+The `useDraggable` hook owns the ref and returns it alongside `isDragging`. Put `ref` on the element.
+
+```tsx
+import { useDraggable } from '@neodrag/react';
+
+function Box() {
+  const { ref, isDragging } = useDraggable();
+  return <div ref={ref}>{isDragging ? 'Dragging…' : 'Drag me'}</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+The `useDraggable` composable returns a template `ref` and a reactive `isDragging`. Bind with `:ref`.
+
+```vue
+<script setup>
+  import { useDraggable } from '@neodrag/vue';
+
+  const { ref, isDragging } = useDraggable();
+</script>
+
+<template>
+  <div :ref="ref">{{ isDragging ? 'Dragging…' : 'Drag me' }}</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+`createDraggable` returns a `ref` setter and `isDragging` as an `Accessor` — call it to read.
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+
+function Box() {
+  const { ref, isDragging } = createDraggable();
+  return <div ref={ref}>{isDragging() ? 'Dragging…' : 'Drag me'}</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+The class **is** the API. Note the node comes **first** here. Call `.update()` to change options and `.destroy()` to tear down.
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+const node = document.querySelector('.box');
+const drag = new Draggable(node);
+
+// later:
+drag.update({ axis: 'y' });
+drag.destroy();
+```
+
+</div>
+</FrameworkSwitch>
+
+All the options below are plain keys on a single options object. Pass as many as you like together — they compose.
+
+## `axis`
+
+Lock movement to one axis. `'x'`, `'y'`, or `'both'` (the default — free movement).
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const drag = new Draggable({ axis: 'x' });
+</script>
+
+<div {...drag.attach}>Horizontal only</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({ axis: 'x' });
+  return <div ref={ref}>Horizontal only</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { useDraggable } from '@neodrag/vue';
+
+  const { ref } = useDraggable({ axis: 'x' });
+</script>
+
+<template><div :ref="ref">Horizontal only</div></template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({ axis: 'x' });
+  return <div ref={ref}>Horizontal only</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+new Draggable(node, { axis: 'x' });
+```
+
+</div>
+</FrameworkSwitch>
+
+## `bounds`
+
+Constrain movement so the element can't escape a region. `bounds` accepts several shapes:
+
+- `'parent'` — stay inside the offset parent's box.
+- `'viewport'` — stay inside the visible window.
+- an `HTMLElement` — stay inside that element's box.
+- a rect literal `{ left, top, right, bottom }` — fixed coordinates.
+- a function `() => rect` returning that shape — resolved at drag start, for dynamic bounds.
+
+If the element is larger than the bounds on an axis, it pins to the start edge rather than producing an invalid clamp.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const parent = new Draggable({ bounds: 'parent' });
+  const viewport = new Draggable({ bounds: 'viewport' });
+  const rect = new Draggable({ bounds: { left: 0, top: 0, right: 400, bottom: 300 } });
+  const dynamic = new Draggable({ bounds: () => document.querySelector('.zone').getBoundingClientRect() });
+</script>
+
+<div {...parent.attach}>Inside my parent</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({ bounds: 'parent' });
+  // also: 'viewport' | element | { left, top, right, bottom } | () => rect
+  return <div ref={ref}>Inside my parent</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { useDraggable } from '@neodrag/vue';
+
+  const { ref } = useDraggable({ bounds: 'parent' });
+  // also: 'viewport' | element | { left, top, right, bottom } | () => rect
+</script>
+
+<template><div :ref="ref">Inside my parent</div></template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({ bounds: 'parent' });
+  // also: 'viewport' | element | { left, top, right, bottom } | () => rect
+  return <div ref={ref}>Inside my parent</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+new Draggable(node, { bounds: 'parent' });
+new Draggable(node, { bounds: 'viewport' });
+new Draggable(node, { bounds: { left: 0, top: 0, right: 400, bottom: 300 } });
+new Draggable(node, { bounds: () => zone.getBoundingClientRect() });
+```
+
+</div>
+</FrameworkSwitch>
+
+## `grid`
+
+Snap the offset to a pixel grid. Pass `[stepX, stepY]`; a step of `0` leaves that axis free.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const drag = new Draggable({ grid: [25, 25] });
+</script>
+
+<div {...drag.attach}>Snaps to a 25px grid</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({ grid: [25, 25] });
+  return <div ref={ref}>Snaps to a 25px grid</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { useDraggable } from '@neodrag/vue';
+
+  const { ref } = useDraggable({ grid: [25, 25] });
+</script>
+
+<template><div :ref="ref">Snaps to a 25px grid</div></template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({ grid: [25, 25] });
+  return <div ref={ref}>Snaps to a 25px grid</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+new Draggable(node, { grid: [25, 25] });
+```
+
+</div>
+</FrameworkSwitch>
+
+## `handle`
+
+Only start a drag when the pointer lands inside this handle. Pass a CSS selector (run through `querySelectorAll` against the node — use a trusted, static selector) or an `HTMLElement`. The whole element still moves; only the **grab point** is restricted.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const drag = new Draggable({ controls: { handle: '.titlebar' } });
+</script>
+
+<div {...drag.attach} class="window">
+  <div class="titlebar">Grab here</div>
+  <p>Body — not a grab point</p>
+</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable } from '@neodrag/react';
+
+function Window() {
+  const { ref } = useDraggable({ controls: { handle: '.titlebar' } });
+  return (
+    <div ref={ref} className="window">
+      <div className="titlebar">Grab here</div>
+      <p>Body — not a grab point</p>
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { useDraggable } from '@neodrag/vue';
+
+  const { ref } = useDraggable({ controls: { handle: '.titlebar' } });
+</script>
+
+<template>
+  <div :ref="ref" class="window">
+    <div class="titlebar">Grab here</div>
+    <p>Body — not a grab point</p>
+  </div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+
+function Window() {
+  const { ref } = createDraggable({ controls: { handle: '.titlebar' } });
+  return (
+    <div ref={ref} class="window">
+      <div class="titlebar">Grab here</div>
+      <p>Body — not a grab point</p>
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+new Draggable(node, { controls: { handle: '.titlebar' } });
+```
+
+</div>
+</FrameworkSwitch>
+
+## `cancel`
+
+The inverse of `handle`: block a drag from starting when the pointer lands inside this region. Same selector/element rules. Useful for buttons or inputs inside a draggable card.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const drag = new Draggable({ controls: { cancel: '.no-drag' } });
+</script>
+
+<div {...drag.attach}>
+  Drag the card
+  <button class="no-drag">But not this button</button>
+</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable } from '@neodrag/react';
+
+function Card() {
+  const { ref } = useDraggable({ controls: { cancel: '.no-drag' } });
+  return (
+    <div ref={ref}>
+      Drag the card
+      <button className="no-drag">But not this button</button>
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { useDraggable } from '@neodrag/vue';
+
+  const { ref } = useDraggable({ controls: { cancel: '.no-drag' } });
+</script>
+
+<template>
+  <div :ref="ref">
+    Drag the card
+    <button class="no-drag">But not this button</button>
+  </div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+
+function Card() {
+  const { ref } = createDraggable({ controls: { cancel: '.no-drag' } });
+  return (
+    <div ref={ref}>
+      Drag the card
+      <button class="no-drag">But not this button</button>
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+new Draggable(node, { controls: { cancel: '.no-drag' } });
+```
+
+</div>
+</FrameworkSwitch>
+
+## `disabled`
+
+When `true`, a drag never starts. Toggle it from reactive state to turn dragging on and off — pass it as a getter (or just the latest value each render) so it updates live.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  let locked = $state(false);
+  const drag = new Draggable({ get disabled() { return locked; } });
+</script>
+
+<button onclick={() => (locked = !locked)}>{locked ? 'Unlock' : 'Lock'}</button>
+<div {...drag.attach}>Drag me — unless locked</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useState } from 'react';
+import { useDraggable } from '@neodrag/react';
+
+function Box() {
+  const [locked, setLocked] = useState(false);
+  const { ref } = useDraggable({ disabled: locked });
+  return (
+    <>
+      <button onClick={() => setLocked((v) => !v)}>{locked ? 'Unlock' : 'Lock'}</button>
+      <div ref={ref}>Drag me — unless locked</div>
+    </>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { ref as vref } from 'vue';
+  import { useDraggable } from '@neodrag/vue';
+
+  const locked = vref(false);
+  const { ref } = useDraggable({ get disabled() { return locked.value; } });
+</script>
+
+<template>
+  <button @click="locked = !locked">{{ locked ? 'Unlock' : 'Lock' }}</button>
+  <div :ref="ref">Drag me — unless locked</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { createDraggable } from '@neodrag/solid';
+
+function Box() {
+  const [locked, setLocked] = createSignal(false);
+  const { ref } = createDraggable({ get disabled() { return locked(); } });
+  return (
+    <>
+      <button onClick={() => setLocked((v) => !v)}>{locked() ? 'Unlock' : 'Lock'}</button>
+      <div ref={ref}>Drag me — unless locked</div>
+    </>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+const drag = new Draggable(node, { disabled: false });
+lockButton.addEventListener('click', () => drag.update({ disabled: true }));
+```
+
+</div>
+</FrameworkSwitch>
+
+## `threshold`
+
+Pixels of movement required before a drag begins (default `0` — starts immediately). Useful to distinguish a click from a drag.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const drag = new Draggable({ threshold: 8 });
+</script>
+
+<div {...drag.attach}>Move 8px to start</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({ threshold: 8 });
+  return <div ref={ref}>Move 8px to start</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { useDraggable } from '@neodrag/vue';
+
+  const { ref } = useDraggable({ threshold: 8 });
+</script>
+
+<template><div :ref="ref">Move 8px to start</div></template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({ threshold: 8 });
+  return <div ref={ref}>Move 8px to start</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+new Draggable(node, { threshold: 8 });
+```
+
+</div>
+</FrameworkSwitch>
+
+## `position`
+
+The element's offset as `{ x, y }`. Pass it once for an **initial** position, or wire it to reactive state to **control** the element.
+
+`position` is special. It is one of only **two bindable options** (the other is `size` on Resizable) — every other option is a **one-way input** you feed in (via a getter). `position` is the one that can flow **both ways**: feed it in to move the element, and let a drag write the live offset **back** into your state.
+
+You opt into two-way binding by defining a `position` **getter/setter pair** on the options object. The getter feeds your state in; the setter receives the live offset on every move, keeping your state in sync with the drag. A getter-only `position` stays one-way (programmatic control, drag doesn't write back).
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  let position = $state({ x: 0, y: 0 });
+
+  const drag = new Draggable({
+    get position() { return position; },
+    set position(v) { position = v; },
+  });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+<p>x: {position.x}, y: {position.y}</p>
+<button onclick={() => (position = { x: 0, y: 0 })}>Reset</button>
+```
+
+Dragging updates `position`; setting `position` (e.g. the Reset button) moves the element. Both directions stay in sync.
+
+</div>
+<div slot="react">
+
+```tsx
+import { useState } from 'react';
+import { useDraggable } from '@neodrag/react';
+
+function Box() {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const { ref } = useDraggable({
+    get position() { return position; },
+    set position(v) { setPosition(v); },
+  });
+  return (
+    <>
+      <div ref={ref}>Drag me</div>
+      <p>x: {position.x}, y: {position.y}</p>
+      <button onClick={() => setPosition({ x: 0, y: 0 })}>Reset</button>
+    </>
+  );
+}
+```
+
+Dragging calls `setPosition`; setting `position` moves the element. Both directions stay in sync.
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { ref as vref } from 'vue';
+  import { useDraggable } from '@neodrag/vue';
+
+  const position = vref({ x: 0, y: 0 });
+  const { ref } = useDraggable({
+    get position() { return position.value; },
+    set position(v) { position.value = v; },
+  });
+</script>
+
+<template>
+  <div :ref="ref">Drag me</div>
+  <p>x: {{ position.x }}, y: {{ position.y }}</p>
+  <button @click="position = { x: 0, y: 0 }">Reset</button>
+</template>
+```
+
+Dragging updates `position`; setting `position` moves the element. Both directions stay in sync.
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { createDraggable } from '@neodrag/solid';
+
+function Box() {
+  const [position, setPosition] = createSignal({ x: 0, y: 0 });
+  const { ref } = createDraggable({
+    get position() { return position(); },
+    set position(v) { setPosition(v); },
+  });
+  return (
+    <>
+      <div ref={ref}>Drag me</div>
+      <p>x: {position().x}, y: {position().y}</p>
+      <button onClick={() => setPosition({ x: 0, y: 0 })}>Reset</button>
+    </>
+  );
+}
+```
+
+Dragging calls `setPosition`; setting `position` moves the element. Both directions stay in sync.
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+// Initial / controlled offset:
+const drag = new Draggable(node, { position: { x: 40, y: 0 } });
+
+// Push a new position any time:
+drag.update({ position: { x: 0, y: 0 } });
+
+// Read the live offset:
+console.log(drag.offset);
+```
+
+</div>
+</FrameworkSwitch>
+
+## `dragData`
+
+An arbitrary payload carried by the drag. Drop zones read it through their `accepts` and `onDrop` handlers — see [Droppable](/docs/droppable). It's pure data; Neodrag never inspects it.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const drag = new Draggable({ dragData: { id: 'card-42', type: 'task' } });
+</script>
+
+<div {...drag.attach}>Drag me onto a drop zone</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable } from '@neodrag/react';
+
+function Card() {
+  const { ref } = useDraggable({ dragData: { id: 'card-42', type: 'task' } });
+  return <div ref={ref}>Drag me onto a drop zone</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { useDraggable } from '@neodrag/vue';
+
+  const { ref } = useDraggable({ dragData: { id: 'card-42', type: 'task' } });
+</script>
+
+<template><div :ref="ref">Drag me onto a drop zone</div></template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+
+function Card() {
+  const { ref } = createDraggable({ dragData: { id: 'card-42', type: 'task' } });
+  return <div ref={ref}>Drag me onto a drop zone</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+new Draggable(node, { dragData: { id: 'card-42', type: 'task' } });
+```
+
+</div>
+</FrameworkSwitch>
+
+## Built-in behaviors: `touchAction` & `userSelect`
+
+These two are the only **always-on** behaviors — every other option is opt-in. You usually never touch them; they just make touch and text-selection behave.
+
+### `touchAction`
+
+Sets the CSS `touch-action` on the node so a touch drag isn't hijacked by the browser as a native scroll or zoom. It's applied **at bind** (before the gesture can start) and is **axis-aware** by default:
+
+- `axis: 'x'` → `'pan-y'` (the browser keeps vertical scroll, you get horizontal drag)
+- `axis: 'y'` → `'pan-x'`
+- free drag → `'none'`
+
+Pass a custom string to override, or `false` to leave `touch-action` untouched.
+
+### `userSelect`
+
+Default `true` — sets `user-select: none` on the document body while a drag is active (and restores it on end), so text doesn't get highlighted as you drag. Set `false` to allow selection.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  // Defaults are sensible — only set these to opt out:
+  const drag = new Draggable({ touchAction: false, userSelect: false });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable } from '@neodrag/react';
+
+function Box() {
+  // Defaults are sensible — only set these to opt out:
+  const { ref } = useDraggable({ touchAction: false, userSelect: false });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { useDraggable } from '@neodrag/vue';
+
+  // Defaults are sensible — only set these to opt out:
+  const { ref } = useDraggable({ touchAction: false, userSelect: false });
+</script>
+
+<template><div :ref="ref">Drag me</div></template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+
+function Box() {
+  // Defaults are sensible — only set these to opt out:
+  const { ref } = createDraggable({ touchAction: false, userSelect: false });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+// Defaults are sensible — only set these to opt out:
+new Draggable(node, { touchAction: false, userSelect: false });
+```
+
+</div>
+</FrameworkSwitch>
+
+## Events: `onDragStart`, `onDrag`, `onDragEnd`
+
+Three callbacks fire over a drag's lifetime. Each receives a **`DragEventData`**:
+
+```ts
+type DragEventData = {
+  offset: { x: number; y: number }; // the current offset
+  node: HTMLElement | SVGElement;   // the dragged node
+  input;                            // the normalized interaction input (pointer/keyboard/…)
+};
+```
+
+`onDragStart` fires once the drag begins (after any `threshold`), `onDrag` on every move, and `onDragEnd` when it's released.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  const drag = new Draggable({
+    onDragStart: ({ offset }) => console.log('start', offset),
+    onDrag: ({ offset }) => console.log('move', offset),
+    onDragEnd: ({ offset }) => console.log('end', offset),
+  });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({
+    onDragStart: ({ offset }) => console.log('start', offset),
+    onDrag: ({ offset }) => console.log('move', offset),
+    onDragEnd: ({ offset }) => console.log('end', offset),
+  });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { useDraggable } from '@neodrag/vue';
+
+  const { ref } = useDraggable({
+    onDragStart: ({ offset }) => console.log('start', offset),
+    onDrag: ({ offset }) => console.log('move', offset),
+    onDragEnd: ({ offset }) => console.log('end', offset),
+  });
+</script>
+
+<template><div :ref="ref">Drag me</div></template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({
+    onDragStart: ({ offset }) => console.log('start', offset),
+    onDrag: ({ offset }) => console.log('move', offset),
+    onDragEnd: ({ offset }) => console.log('end', offset),
+  });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+new Draggable(node, {
+  onDragStart: ({ offset }) => console.log('start', offset),
+  onDrag: ({ offset }) => console.log('move', offset),
+  onDragEnd: ({ offset }) => console.log('end', offset),
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+## Styling the dragged element
+
+While a drag is active, Neodrag puts a `data-neodrag-dragging` attribute on the dragged node. Hook your styles onto it — no JS state needed.
+
+```css
+[data-neodrag-dragging] {
+  cursor: grabbing;
+  opacity: 0.9;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.25);
+}
+```
+
+## Going further: `use`
+
+For behaviors beyond the built-in options — magnetic snapping, scroll-locking, drag ghosts, haptics, ARIA announcements, or your own custom logic — pass a static array to the `use` option. These tier-2 extensions all import from your framework package. See [Extras](/docs/extras) for the full list, the authoring API, and the reactivity rule for `use`.

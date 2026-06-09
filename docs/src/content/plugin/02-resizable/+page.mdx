@@ -1,0 +1,392 @@
+---
+title: 'Resizable'
+nav_title: 'Resizable'
+tagline: 'Resize elements from edge and corner handles, with bounds and ratio lock.'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+`Resizable` turns an element into something you can drag-resize from its edges and corners. You author the handles yourself as child elements — neodrag claims a pointer-down on any element marked with `data-neodrag-resize-handle="<edge>"` and writes the new size in pixels for the duration of the gesture.
+
+There are eight edges: the sides `n`, `s`, `e`, `w` and the corners `ne`, `nw`, `se`, `sw`. A side handle resizes one axis; a corner resizes both.
+
+## A resizable panel
+
+Bind the capability to the panel, then drop eight handle elements inside it. The handles are plain DOM — style them however you like; neodrag only reads the `data-neodrag-resize-handle` attribute.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Resizable } from '@neodrag/svelte';
+
+  const resize = new Resizable({ minWidth: 120, minHeight: 80 });
+</script>
+
+<div class="panel" {...resize.attach}>
+  <span>{resize.size?.width ?? 0} × {resize.size?.height ?? 0}</span>
+
+  <span data-neodrag-resize-handle="n" class="handle n"></span>
+  <span data-neodrag-resize-handle="s" class="handle s"></span>
+  <span data-neodrag-resize-handle="e" class="handle e"></span>
+  <span data-neodrag-resize-handle="w" class="handle w"></span>
+  <span data-neodrag-resize-handle="ne" class="handle ne"></span>
+  <span data-neodrag-resize-handle="nw" class="handle nw"></span>
+  <span data-neodrag-resize-handle="se" class="handle se"></span>
+  <span data-neodrag-resize-handle="sw" class="handle sw"></span>
+</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useResizable } from '@neodrag/react';
+
+function Panel() {
+  const { ref } = useResizable({ minWidth: 120, minHeight: 80 });
+
+  return (
+    <div className="panel" ref={ref}>
+      <span data-neodrag-resize-handle="n" className="handle n" />
+      <span data-neodrag-resize-handle="s" className="handle s" />
+      <span data-neodrag-resize-handle="e" className="handle e" />
+      <span data-neodrag-resize-handle="w" className="handle w" />
+      <span data-neodrag-resize-handle="ne" className="handle ne" />
+      <span data-neodrag-resize-handle="nw" className="handle nw" />
+      <span data-neodrag-resize-handle="se" className="handle se" />
+      <span data-neodrag-resize-handle="sw" className="handle sw" />
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useResizable } from '@neodrag/vue';
+
+const { ref } = useResizable({ minWidth: 120, minHeight: 80 });
+</script>
+
+<template>
+  <div class="panel" :ref="ref">
+    <span data-neodrag-resize-handle="n" class="handle n" />
+    <span data-neodrag-resize-handle="s" class="handle s" />
+    <span data-neodrag-resize-handle="e" class="handle e" />
+    <span data-neodrag-resize-handle="w" class="handle w" />
+    <span data-neodrag-resize-handle="ne" class="handle ne" />
+    <span data-neodrag-resize-handle="nw" class="handle nw" />
+    <span data-neodrag-resize-handle="se" class="handle se" />
+    <span data-neodrag-resize-handle="sw" class="handle sw" />
+  </div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createResizable } from '@neodrag/solid';
+
+function Panel() {
+  const { ref } = createResizable({ minWidth: 120, minHeight: 80 });
+
+  return (
+    <div class="panel" ref={ref}>
+      <span data-neodrag-resize-handle="n" class="handle n" />
+      <span data-neodrag-resize-handle="s" class="handle s" />
+      <span data-neodrag-resize-handle="e" class="handle e" />
+      <span data-neodrag-resize-handle="w" class="handle w" />
+      <span data-neodrag-resize-handle="ne" class="handle ne" />
+      <span data-neodrag-resize-handle="nw" class="handle nw" />
+      <span data-neodrag-resize-handle="se" class="handle se" />
+      <span data-neodrag-resize-handle="sw" class="handle sw" />
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Resizable } from '@neodrag/vanilla';
+
+const panel = document.querySelector('.panel');
+const resize = new Resizable(panel, { minWidth: 120, minHeight: 80 });
+
+// panel HTML — author the handles inside it:
+// <span data-neodrag-resize-handle="se" class="handle se"></span>
+// …one per edge: n s e w ne nw se sw
+
+resize.size;     // { width, height }
+resize.destroy();
+```
+
+</div>
+</FrameworkSwitch>
+
+The handle CSS is entirely yours. A common layout pins each handle to its edge and gives it the matching resize cursor:
+
+```css
+.panel {
+  position: relative;
+  width: 240px;
+  height: 160px;
+}
+
+.handle {
+  position: absolute;
+}
+
+/* sides */
+.handle.n { top: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
+.handle.s { bottom: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
+.handle.e { top: 8px; bottom: 8px; right: -4px; width: 8px; cursor: ew-resize; }
+.handle.w { top: 8px; bottom: 8px; left: -4px; width: 8px; cursor: ew-resize; }
+
+/* corners */
+.handle.ne { top: -4px; right: -4px; width: 12px; height: 12px; cursor: nesw-resize; }
+.handle.nw { top: -4px; left: -4px; width: 12px; height: 12px; cursor: nwse-resize; }
+.handle.se { bottom: -4px; right: -4px; width: 12px; height: 12px; cursor: nwse-resize; }
+.handle.sw { bottom: -4px; left: -4px; width: 12px; height: 12px; cursor: nesw-resize; }
+```
+
+You don't need all eight — author only the handles you want. A panel that only grows from the bottom-right corner just has a single `se` handle.
+
+## Reacting to resize state
+
+In Svelte the instance exposes live state directly: `resize.isResizing` while a gesture is in flight, and `resize.size` (`{ width, height }`, or `undefined` before the first bind) for the current pixel size.
+
+```svelte
+<script>
+  import { Resizable } from '@neodrag/svelte';
+
+  const resize = new Resizable();
+</script>
+
+<div class="panel" class:resizing={resize.isResizing} {...resize.attach}>
+  {#if resize.size}
+    {Math.round(resize.size.width)} × {Math.round(resize.size.height)}
+  {/if}
+  <span data-neodrag-resize-handle="se" class="handle se"></span>
+</div>
+```
+
+In the other frameworks, read size and resize phases through the `onResize*` callbacks (below) and store them in your own state.
+
+## Options
+
+Pass these in the options object (`ResizeOptions`):
+
+| key | type | meaning |
+|---|---|---|
+| `minWidth` / `minHeight` | `number` | lower clamp, in px |
+| `maxWidth` / `maxHeight` | `number` | upper clamp, in px |
+| `aspectRatio` | `boolean \| number` | lock the ratio. `true` keeps the element's starting ratio; a number is an explicit `width / height` |
+| `bounds` | `'parent' \| 'viewport' \| HTMLElement \| {left,top,right,bottom} \| () => rect` | the anchored edge is pinned and the moving edge can only travel until it reaches this rect |
+| `disabled` | `boolean` | when true, handles stop claiming pointer-downs |
+| `use` | `ResizePlugin[]` | tier-2 resize extensions (see below) |
+| `onResizeStart` / `onResize` / `onResizeEnd` | `(e: ResizeEventData) => void` | lifecycle callbacks |
+
+`ResizeEventData = { width, height, edge, node, input }` — `width`/`height` are the new px size, `edge` is the handle being dragged.
+
+`bounds` shares the same vocabulary as drag bounds. A thunk (`() => rect`) is re-read on every move, so a scrolling or animating container stays correct:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Resizable } from '@neodrag/svelte';
+
+  const resize = new Resizable({
+    bounds: 'parent',
+    aspectRatio: 16 / 9,
+    minWidth: 160,
+    maxWidth: 640,
+    onResizeEnd: ({ width, height }) => console.log('committed', width, height),
+  });
+</script>
+
+<div class="panel" {...resize.attach}>
+  <span data-neodrag-resize-handle="se" class="handle se"></span>
+</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useResizable } from '@neodrag/react';
+
+function Panel() {
+  const { ref } = useResizable({
+    bounds: 'parent',
+    aspectRatio: 16 / 9,
+    minWidth: 160,
+    maxWidth: 640,
+    onResizeEnd: ({ width, height }) => console.log('committed', width, height),
+  });
+
+  return (
+    <div className="panel" ref={ref}>
+      <span data-neodrag-resize-handle="se" className="handle se" />
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useResizable } from '@neodrag/vue';
+
+const { ref } = useResizable({
+  bounds: 'parent',
+  aspectRatio: 16 / 9,
+  minWidth: 160,
+  maxWidth: 640,
+  onResizeEnd: ({ width, height }) => console.log('committed', width, height),
+});
+</script>
+
+<template>
+  <div class="panel" :ref="ref">
+    <span data-neodrag-resize-handle="se" class="handle se" />
+  </div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createResizable } from '@neodrag/solid';
+
+function Panel() {
+  const { ref } = createResizable({
+    bounds: 'parent',
+    aspectRatio: 16 / 9,
+    minWidth: 160,
+    maxWidth: 640,
+    onResizeEnd: ({ width, height }) => console.log('committed', width, height),
+  });
+
+  return (
+    <div class="panel" ref={ref}>
+      <span data-neodrag-resize-handle="se" class="handle se" />
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Resizable } from '@neodrag/vanilla';
+
+const resize = new Resizable(document.querySelector('.panel'), {
+  bounds: 'parent',
+  aspectRatio: 16 / 9,
+  minWidth: 160,
+  maxWidth: 640,
+  onResizeEnd: ({ width, height }) => console.log('committed', width, height),
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+## Pixels vs. CSS units
+
+The resize math is always in pixels — during a gesture neodrag writes plain `px` to `width`/`height` so the geometry is exact. If your element was authored with a relative unit (`width: 50%`, `height: 12rem`) and you want it to stay in that unit after resizing, add the `preserveUnits()` extension. It reads the authored unit on start and converts the final px size back to it on end:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Resizable, preserveUnits } from '@neodrag/svelte';
+
+  const resize = new Resizable({ use: [preserveUnits()] });
+</script>
+
+<div class="panel" style="width: 50%; height: 12rem;" {...resize.attach}>
+  <span data-neodrag-resize-handle="se" class="handle se"></span>
+</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useResizable, preserveUnits } from '@neodrag/react';
+
+function Panel() {
+  const { ref } = useResizable({ use: [preserveUnits()] });
+
+  return (
+    <div className="panel" style={{ width: '50%', height: '12rem' }} ref={ref}>
+      <span data-neodrag-resize-handle="se" className="handle se" />
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useResizable, preserveUnits } from '@neodrag/vue';
+
+const { ref } = useResizable({ use: [preserveUnits()] });
+</script>
+
+<template>
+  <div class="panel" style="width: 50%; height: 12rem" :ref="ref">
+    <span data-neodrag-resize-handle="se" class="handle se" />
+  </div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createResizable, preserveUnits } from '@neodrag/solid';
+
+function Panel() {
+  const { ref } = createResizable({ use: [preserveUnits()] });
+
+  return (
+    <div class="panel" style={{ width: '50%', height: '12rem' }} ref={ref}>
+      <span data-neodrag-resize-handle="se" class="handle se" />
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Resizable, preserveUnits } from '@neodrag/vanilla';
+
+const resize = new Resizable(document.querySelector('.panel'), {
+  use: [preserveUnits()],
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+`use: []` is a static array — see [Extras](/docs/extras) for the extension seam and the reactivity rule that applies to it.

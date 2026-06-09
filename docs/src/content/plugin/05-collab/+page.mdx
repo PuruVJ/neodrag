@@ -1,0 +1,332 @@
+---
+title: 'Collaboration'
+nav_title: 'Collab'
+tagline: 'Real-time, multiplayer sortable lists — neodrag is collab-first.'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+Collaboration is the headline. A [`SortableList`](./sortable) already emits everything a real-time backend needs — anchor-based move ops on every commit, and a reorder path for ops coming the other way. `bindCollab` connects the two so two (or two hundred) peers reorder the same list and converge, no matter who moves what when.
+
+```js
+import { SortableList, bindCollab, MemoryBackend } from '@neodrag/svelte';
+
+const [a, b] = MemoryBackend.pair('peerA', 'peerB');
+const off = bindCollab(list, a); // local commits → ops out · remote ops → applyExternal
+```
+
+`bindCollab(list, provider)` returns a teardown function. Call it on unmount.
+
+## The model
+
+Reordering converges because the op that crosses the wire is an **anchor**, not an index.
+
+```ts
+type MoveOp = { itemId: string; afterId: string | null };
+```
+
+`MoveOp` says "put `itemId` immediately after `afterId`" (`afterId: null` = move to the front). It never says "move to index 3" — and that's the whole trick. Two anchored moves **commute**: if peer A drops item `x` after `b` while peer B simultaneously deletes or reorders something elsewhere, A's op still means the same thing when it lands on B. Raw indices would drift; anchors survive concurrent edits, so every peer ends up with the same order regardless of arrival order.
+
+The loop has three halves:
+
+- **Outbound** — every local reorder you commit fires `onCommit(op)` on the list. `bindCollab` streams that op to your provider via `sendOp`.
+- **Inbound** — a remote op arrives through `onRemoteOp`; `bindCollab` replays it through `list.applyExternal(op)`, the exact same reorder path a local drag uses. No special "remote" code — the op just reconciles.
+- **Presence** (optional) — `list.presence()` exposes the live in-flight drag (`{ dragKey, fromIndex, toIndex }`). Broadcast it through `sendPresence` to draw a remote peer's ghost where they're about to drop.
+
+```
+   ┌─ local drag commits ─→ onCommit(op) ─→ provider.sendOp(op) ─→  wire
+   │
+list                                                                  │
+   │                                                                  ▼
+   └─ list.applyExternal(op) ←─ provider.onRemoteOp(handler) ←──── remote op
+```
+
+Because the inbound path is `applyExternal`, a remote op landing **mid-drag** rebases against your in-flight anchor — the neighbour moves under your ghost, your ghost doesn't jump. You get convergence without cancelling anyone's drag.
+
+## A two-peer demo
+
+`MemoryBackend.pair(idA, idB)` returns two connected in-process backends sharing one op channel (and one presence channel). It's the no-network harness for tests and demos — swap it for a real provider later with zero changes to the list code.
+
+First, mount a `SortableList` the usual way:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { SortableList } from '@neodrag/svelte';
+
+  let items = $state([
+    { id: 'a', label: 'Write spec' },
+    { id: 'b', label: 'Ship it' },
+    { id: 'c', label: 'Celebrate' },
+  ]);
+
+  const list = new SortableList({
+    get items() {
+      return items;
+    },
+    onReorder: (next) => (items = next),
+  });
+</script>
+
+<ul {...list.attach}>
+  {#each items as item (item.id)}
+    <li {...list.row(item)}>{item.label}</li>
+  {/each}
+</ul>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useSortable } from '@neodrag/react';
+import { useState } from 'react';
+
+function List() {
+  const [items, setItems] = useState([
+    { id: 'a', label: 'Write spec' },
+    { id: 'b', label: 'Ship it' },
+    { id: 'c', label: 'Celebrate' },
+  ]);
+
+  const { ref, row } = useSortable({
+    items,
+    onReorder: (next) => setItems(next),
+  });
+
+  return (
+    <ul ref={ref}>
+      {items.map((item) => (
+        <li key={item.id} {...row(item)}>
+          {item.label}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { useSortable } from '@neodrag/vue';
+  import { ref as vueRef } from 'vue';
+
+  const items = vueRef([
+    { id: 'a', label: 'Write spec' },
+    { id: 'b', label: 'Ship it' },
+    { id: 'c', label: 'Celebrate' },
+  ]);
+
+  const { ref, row } = useSortable({
+    get items() {
+      return items.value;
+    },
+    onReorder: (next) => (items.value = next),
+  });
+</script>
+
+<template>
+  <ul :ref="ref">
+    <li v-for="item in items" :key="item.id" v-bind="row(item)">
+      {{ item.label }}
+    </li>
+  </ul>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSortable } from '@neodrag/solid';
+import { createSignal } from 'solid-js';
+
+function List() {
+  const [items, setItems] = createSignal([
+    { id: 'a', label: 'Write spec' },
+    { id: 'b', label: 'Ship it' },
+    { id: 'c', label: 'Celebrate' },
+  ]);
+
+  const { ref, row } = createSortable({
+    get items() {
+      return items();
+    },
+    onReorder: (next) => setItems(next),
+  });
+
+  return (
+    <ul ref={ref}>
+      <For each={items()}>{(item) => <li {...row(item)}>{item.label}</li>}</For>
+    </ul>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { SortableList } from '@neodrag/vanilla';
+
+let items = [
+  { id: 'a', label: 'Write spec' },
+  { id: 'b', label: 'Ship it' },
+  { id: 'c', label: 'Celebrate' },
+];
+
+const list = new SortableList(document.querySelector('ul'), {
+  items,
+  onReorder: (next) => {
+    items = next;
+    render(); // your own DOM update; each <li> spreads list.row(item)
+  },
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+Now wire collaboration. This half is framework-agnostic — it's the same JS regardless of how the list was mounted. Hand each peer its own backend from the pair, and reorders on one list replay on the other:
+
+```js
+import { bindCollab, MemoryBackend } from '@neodrag/svelte';
+
+const [a, b] = MemoryBackend.pair('peerA', 'peerB');
+
+// two independently-mounted SortableLists, one per peer
+const offA = bindCollab(listA, a);
+const offB = bindCollab(listB, b);
+
+// drag in listA → MoveOp streams to listB and reconciles, and vice-versa
+
+// on teardown
+offA();
+offB();
+```
+
+That's a complete multiplayer reorder. In production you mount **one** list per client and give each its own provider — the demo just runs both peers in one tab.
+
+## Writing a CollabProvider
+
+`MemoryBackend` is a convenience. The real seam is a tiny interface — implement it over whatever transport you already run:
+
+```ts
+interface CollabProvider {
+  sendOp(op: MoveOp): void; // publish a durable move op to peers
+  onRemoteOp(handler: (op: MoveOp) => void): () => void; // subscribe; returns unsubscribe
+  sendPresence?(presence: SortablePresence | null): void; // ephemeral, optional
+}
+```
+
+Three methods. `sendOp` puts an op on the wire, `onRemoteOp` delivers ops from the wire, and the optional `sendPresence` carries the in-flight ghost. `MoveOp` is a plain `{ itemId, afterId }` object, so it serializes over anything.
+
+### Over Yjs
+
+Map the key order onto a shared `Y.Array<string>`. Apply an inbound op as a delete-then-insert in one transaction (Yjs merges concurrent edits deterministically); surface remote array changes back as a `MoveOp`.
+
+```ts
+import { applyMove } from '@neodrag/svelte';
+
+function yjsProvider(yarray) {
+  const provider = {
+    sendOp(op) {
+      yarray.doc.transact(() => {
+        const next = applyMove(yarray.toArray(), (k) => k, op);
+        yarray.delete(0, yarray.length);
+        yarray.insert(0, next);
+      }, 'neodrag');
+    },
+    onRemoteOp(handler) {
+      let last = yarray.toArray();
+      const observer = (_event, txn) => {
+        if (txn.origin === 'neodrag') {
+          last = yarray.toArray();
+          return; // ignore our own echo
+        }
+        const next = yarray.toArray();
+        const op = diffToMoveOp(last, next); // recover the anchor from before/after order
+        last = next;
+        if (op) handler(op);
+      };
+      yarray.observe(observer);
+      return () => yarray.unobserve(observer);
+    },
+  };
+  return provider;
+}
+```
+
+For presence, set the in-flight `list.presence()` on a `Y.Awareness` field and read peers' fields back in `onRemoteOp`-style subscription.
+
+### Over Liveblocks
+
+`sendOp` broadcasts a custom event; `onRemoteOp` subscribes to it. Presence rides Liveblocks' own presence channel.
+
+```ts
+function liveblocksProvider(room) {
+  return {
+    sendOp(op) {
+      room.broadcastEvent({ type: 'neodrag-move', op });
+    },
+    onRemoteOp(handler) {
+      return room.subscribe('event', ({ event }) => {
+        if (event?.type === 'neodrag-move') handler(event.op);
+      });
+    },
+    sendPresence(presence) {
+      room.updatePresence({ neodragDrag: presence });
+    },
+  };
+}
+```
+
+### Over a raw WebSocket
+
+The interface is small enough to satisfy directly. Serialize the op, echo-guard with a peer id, and you're done.
+
+```ts
+function socketProvider(socket, peerId) {
+  const handlers = new Set();
+  socket.addEventListener('message', (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'op' && msg.from !== peerId) {
+      for (const h of handlers) h(msg.op);
+    }
+  });
+  return {
+    sendOp(op) {
+      socket.send(JSON.stringify({ type: 'op', from: peerId, op }));
+    },
+    onRemoteOp(handler) {
+      handlers.add(handler);
+      return () => handlers.delete(handler);
+    },
+    sendPresence(presence) {
+      socket.send(JSON.stringify({ type: 'presence', from: peerId, presence }));
+    },
+  };
+}
+```
+
+Whichever you pick, the list side never changes — `bindCollab(list, provider)` is the only call site, and the same anchor ops flow through.
+
+## Live cursors and ghosts
+
+`list.presence()` returns the current in-flight reorder or `null`:
+
+```ts
+type SortablePresence = { dragKey: string; fromIndex: number; toIndex: number };
+```
+
+`dragKey` is the item being dragged; `toIndex` is where it would land. Broadcast it through `sendPresence` as the pointer moves, and on the receiving side render a placeholder at the peer's `toIndex` so everyone sees where everyone else is about to drop. Presence is ephemeral — publish `null` when the drag ends so no peer is left holding a stuck ghost. Unlike ops, presence is never persisted.
+
+## Where to next
+
+- [Sortable](./sortable) — the list, `row()`, FLIP, and cross-container transfer that collab builds on.
+- [Draggable](./draggable) — the drag capability underneath every sortable item.

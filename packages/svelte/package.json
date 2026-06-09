@@ -34,30 +34,6 @@
 			"import": "./src/index.svelte.ts",
 			"default": "./src/index.svelte.ts"
 		},
-		"./plugins": {
-			"types": "./src/plugins.ts",
-			"svelte": "./src/plugins.ts",
-			"import": "./src/plugins.ts",
-			"default": "./src/plugins.ts"
-		},
-		"./drop": {
-			"types": "./src/drop/index.svelte.ts",
-			"svelte": "./src/drop/index.svelte.ts",
-			"import": "./src/drop/index.svelte.ts",
-			"default": "./src/drop/index.svelte.ts"
-		},
-		"./sortable": {
-			"types": "./src/sortable/index.svelte.ts",
-			"svelte": "./src/sortable/index.svelte.ts",
-			"import": "./src/sortable/index.svelte.ts",
-			"default": "./src/sortable/index.svelte.ts"
-		},
-		"./resize": {
-			"types": "./src/resize/index.svelte.ts",
-			"svelte": "./src/resize/index.svelte.ts",
-			"import": "./src/resize/index.svelte.ts",
-			"default": "./src/resize/index.svelte.ts"
-		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -67,29 +43,6 @@
 				"svelte": "./dist/index.svelte.js",
 				"import": "./dist/index.svelte.js",
 				"default": "./dist/index.svelte.js"
-			},
-			"./plugins": {
-				"types": "./dist/plugins.d.ts",
-				"import": "./dist/plugins.js",
-				"default": "./dist/plugins.js"
-			},
-			"./drop": {
-				"types": "./dist/drop/index.svelte.d.ts",
-				"svelte": "./dist/drop/index.svelte.js",
-				"import": "./dist/drop/index.svelte.js",
-				"default": "./dist/drop/index.svelte.js"
-			},
-			"./sortable": {
-				"types": "./dist/sortable/index.svelte.d.ts",
-				"svelte": "./dist/sortable/index.svelte.js",
-				"import": "./dist/sortable/index.svelte.js",
-				"default": "./dist/sortable/index.svelte.js"
-			},
-			"./resize": {
-				"types": "./dist/resize/index.svelte.d.ts",
-				"svelte": "./dist/resize/index.svelte.js",
-				"import": "./dist/resize/index.svelte.js",
-				"default": "./dist/resize/index.svelte.js"
 			},
 			"./package.json": "./package.json"
 		}

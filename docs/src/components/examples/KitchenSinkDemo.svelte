@@ -1,18 +1,7 @@
 <script lang="ts">
 	import squircle from '$/worklet/squircle?url';
 	import { browser } from '$helpers/utils';
-	import { Draggable, type DragEventData } from '@neodrag/svelte';
-	import {
-		axis,
-		bounds,
-		BoundsFrom,
-		ControlFrom,
-		controls,
-		disabled,
-		grid,
-		position,
-		scrollLock,
-	} from '@neodrag/svelte/plugins';
+	import { Draggable, scrollLock, type DragEventData } from '@neodrag/svelte';
 	import { expoOut, sineIn } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
@@ -75,15 +64,15 @@
 	}
 
 	const drag_handlers = {
-		onDrag: ({ rootNode }: DragEventData) => {
+		onDrag: ({ node }: DragEventData) => {
 			is_backdrop_visible = true;
-			rootNode.style.zIndex = '20';
+			node.style.zIndex = '20';
 		},
-		onDragEnd: ({ rootNode }: DragEventData) => {
+		onDragEnd: ({ node }: DragEventData) => {
 			is_backdrop_visible = false;
 
 			setTimeout(() => {
-				update_z_index(rootNode);
+				update_z_index(node);
 			}, 200);
 		},
 	};
@@ -112,91 +101,99 @@
 			: '';
 	});
 
-	const drag_0 = new Draggable({ plugins: [], ...drag_handlers });
-	const drag_1 = new Draggable({ plugins: [axis('x')], ...drag_handlers });
-	const drag_2 = new Draggable({ plugins: [axis('y')], ...drag_handlers });
-	const drag_3 = new Draggable({ plugins: [scrollLock()], ...drag_handlers });
+	const drag_0 = new Draggable({ ...drag_handlers });
+	const drag_1 = new Draggable({ axis: 'x', ...drag_handlers });
+	const drag_2 = new Draggable({ axis: 'y', ...drag_handlers });
+	const drag_3 = new Draggable({ use: [scrollLock()], ...drag_handlers });
 	const drag_4 = new Draggable({
-		plugins: [],
 		...drag_handlers,
 		onDrag(data) {
 			drag_handlers.onDrag?.(data);
-			track_my_position = { x: data.offset.x as number, y: data.offset.y as number };
+			track_my_position = { x: data.offset.x, y: data.offset.y };
 		},
 	});
 	const drag_5 = new Draggable({
-		plugins: [controls({ allow: ControlFrom.selector('.handle') })],
+		controls: { handle: '.handle' },
 		...drag_handlers,
 	});
 	const drag_5b = new Draggable({
-		plugins: [controls({ allow: ControlFrom.selector('.handle') })],
+		controls: { handle: '.handle' },
 		...drag_handlers,
 	});
 	const drag_6 = new Draggable({
-		plugins: [controls({ block: ControlFrom.selector('.cancel') })],
+		controls: { cancel: '.cancel' },
 		...drag_handlers,
 	});
-	const drag_7 = new Draggable({ plugins: [grid([25, 25])], ...drag_handlers });
-	const drag_8 = new Draggable({ plugins: [grid([100, 25])], ...drag_handlers });
+	const drag_7 = new Draggable({ grid: [25, 25], ...drag_handlers });
+	const drag_8 = new Draggable({ grid: [100, 25], ...drag_handlers });
 	const drag_9 = new Draggable({
-		plugins: [bounds(BoundsFrom.parent())],
-		onDrag: ({ rootNode }) => {
+		bounds: 'parent',
+		onDrag: ({ node }) => {
 			highlight_parent = true;
-			rootNode.style.zIndex = '20';
+			node.style.zIndex = '20';
 		},
-		onDragEnd: ({ rootNode }) => {
+		onDragEnd: ({ node }) => {
 			highlight_parent = false;
-			setTimeout(() => update_z_index(rootNode), 200);
+			setTimeout(() => update_z_index(node), 200);
 		},
 	});
 	const drag_10 = new Draggable({
-		plugins: [bounds(BoundsFrom.selector('body'))],
-		onDrag: ({ rootNode }) => {
+		bounds: () => document.body.getBoundingClientRect(),
+		onDrag: ({ node }) => {
 			hightlight_body = true;
-			rootNode.style.zIndex = '20';
+			node.style.zIndex = '20';
 		},
-		onDragEnd: ({ rootNode }) => {
+		onDragEnd: ({ node }) => {
 			hightlight_body = false;
-			setTimeout(() => update_z_index(rootNode), 200);
+			setTimeout(() => update_z_index(node), 200);
 		},
 	});
 	const drag_11 = new Draggable({
-		plugins: [bounds(BoundsFrom.viewport(coord_bounds))],
-		onDrag: ({ rootNode }) => {
+		bounds: () => ({
+			left: coord_bounds.left,
+			top: coord_bounds.top,
+			right: window.innerWidth - coord_bounds.right,
+			bottom: window.innerHeight - coord_bounds.bottom,
+		}),
+		onDrag: ({ node }) => {
 			show_markers = true;
-			rootNode.style.zIndex = '20';
+			node.style.zIndex = '20';
 		},
-		onDragEnd: ({ rootNode }) => {
+		onDragEnd: ({ node }) => {
 			show_markers = false;
-			setTimeout(() => update_z_index(rootNode), 200);
+			setTimeout(() => update_z_index(node), 200);
 		},
 	});
 	const drag_12 = new Draggable({
-		plugins: [() => [position({ current: return_to_position_val })]],
+		get position() {
+			return return_to_position_val;
+		},
 		onDrag(data) {
 			drag_handlers.onDrag?.(data);
-			return_to_position_val = { x: data.offset.x as number, y: data.offset.y as number };
+			return_to_position_val = { x: data.offset.x, y: data.offset.y };
 		},
-		onDragEnd: async (data) => {
+		onDragEnd: (data) => {
 			drag_handlers.onDragEnd?.(data);
 			return_to_position_val = { x: 0, y: 0 };
 		},
 	});
 	const drag_13 = new Draggable({
-		plugins: [() => [position({ current: return_to_position_transition_val.current })]],
+		get position() {
+			return return_to_position_transition_val.current;
+		},
 		onDrag(data) {
 			drag_handlers.onDrag?.(data);
 			return_to_position_transition_val.set(
-				{ x: data.offset.x as number, y: data.offset.y as number },
+				{ x: data.offset.x, y: data.offset.y },
 				{ duration: 0 },
 			);
 		},
-		onDragEnd: async (data) => {
+		onDragEnd: (data) => {
 			drag_handlers.onDragEnd?.(data);
 			return_to_position_transition_val.target = { x: 0, y: 0 };
 		},
 	});
-	const drag_14 = new Draggable({ plugins: [disabled()], ...drag_handlers });
+	const drag_14 = new Draggable({ disabled: true, ...drag_handlers });
 </script>
 
 {#if is_backdrop_visible || show_markers}
@@ -233,7 +230,7 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[0]}
-			{...drag_0.target}
+			{...drag_0.attach}
 		>
 			I will drag in all directions
 		</div>
@@ -242,7 +239,7 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[1]}
-			{...drag_1.target}
+			{...drag_1.attach}
 		>
 			I will drag horizontally
 		</div>
@@ -251,7 +248,7 @@
 			class="box"
 			style:z-index={z_indices[2]}
 			data-paw-cursor="true"
-			{...drag_2.target}
+			{...drag_2.attach}
 		>
 			I will drag vertically
 		</div>
@@ -260,7 +257,7 @@
 			class="box single-handle"
 			style:z-index={z_indices[5]}
 			data-paw-cursor="true"
-			{...drag_3.target}
+			{...drag_3.attach}
 		>
 			I will lock scrolling
 		</div>
@@ -269,19 +266,19 @@
 			class="box track-position"
 			style:z-index={z_indices[4]}
 			data-paw-cursor="true"
-			{...drag_4.target}
+			{...drag_4.attach}
 		>
 			I track my position:
 			<code>x: {track_my_position.x} <br /> y: {track_my_position.y}</code>
 		</div>
 
-		<div class="box single-handle" style:z-index={z_indices[5]} {...drag_5.target}>
+		<div class="box single-handle" style:z-index={z_indices[5]} {...drag_5.attach}>
 			<button class="handle" data-paw-cursor="true" data-paw-color="light"> Drag here </button>
 
 			I can only be dragged by the handle 👆
 		</div>
 
-		<div class="box multiple-handles" style:z-index={z_indices[6]} {...drag_5b.target}>
+		<div class="box multiple-handles" style:z-index={z_indices[6]} {...drag_5b.attach}>
 			I can be dragged with all the handles
 
 			<div class="handle" data-paw-cursor="true"></div>
@@ -294,7 +291,7 @@
 			class="box"
 			style:z-index={z_indices[7]}
 			data-paw-cursor="true"
-			{...drag_6.target}
+			{...drag_6.attach}
 		>
 			I can be dragged anywhere
 
@@ -305,7 +302,7 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[8]}
-			{...drag_7.target}
+			{...drag_7.attach}
 		>
 			I snap to 25x25 grid
 		</div>
@@ -314,7 +311,7 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[9]}
-			{...drag_8.target}
+			{...drag_8.attach}
 		>
 			I snap to 100x25 grid
 		</div>
@@ -323,7 +320,7 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[10]}
-			{...drag_9.target}
+			{...drag_9.attach}
 		>
 			I can be dragged within my parents container only
 		</div>
@@ -332,7 +329,7 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[11]}
-			{...drag_10.target}
+			{...drag_10.attach}
 		>
 			I can be dragged within the body
 		</div>
@@ -341,7 +338,7 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[12]}
-			{...drag_11.target}
+			{...drag_11.attach}
 		>
 			Bounds
 			<code>top: 20 <br /> bottom: 50 <br /> left: 200 <br /> right: 400</code>
@@ -351,7 +348,7 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[13]}
-			{...drag_12.target}
+			{...drag_12.attach}
 		>
 			I will return to my position on drop
 		</div>
@@ -360,7 +357,7 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[14]}
-			{...drag_13.target}
+			{...drag_13.attach}
 		>
 			I will return to my position on drop, but with style! 😉
 		</div>
@@ -369,7 +366,7 @@
 			class="box"
 			data-paw-cursor="true"
 			style:z-index={z_indices[15]}
-			{...drag_14.target}
+			{...drag_14.attach}
 		>
 			<code>disabled: true</code>
 
@@ -439,7 +436,7 @@
 		--squircle-radius: 50px;
 		--squircle-smooth: 1;
 
-		&:global(.neodrag-dragging) {
+		&:global([data-neodrag-dragging]) {
 			background-color: var(--app-color-primary);
 			color: var(--app-color-primary-contrast);
 

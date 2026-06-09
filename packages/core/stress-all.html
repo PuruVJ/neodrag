@@ -1,0 +1,233 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8" /><title>neodrag v3 — full stress</title>
+<style>
+	body { margin: 0; font: 11px sans-serif; }
+	.box { position: absolute; width: 50px; height: 50px; background: #39f; }
+	.bnd { position: absolute; border: 1px solid #000; }
+	ul.list { position: absolute; margin: 0; padding: 0; list-style: none; width: 140px; }
+	ul.list li { height: 30px; line-height: 30px; background: #eee; margin: 0 0 3px; padding-left: 6px; }
+	ul.grid { position: absolute; margin: 0; padding: 0; list-style: none; width: 180px; display: flex; flex-wrap: wrap; gap: 4px; }
+	ul.grid li { width: 40px; height: 40px; background: #ddd; text-align: center; line-height: 40px; }
+	.zone { position: absolute; border: 2px dashed #c33; }
+	.rz { position: absolute; background: #fa3; }
+	.h { position: absolute; width: 10px; height: 10px; background: #900; }
+</style></head>
+<body>
+<script type="module">
+import {
+	Dnd, Draggable, Droppable, Resizable, SortableList, Drag, Drop, Resize, Sortable,
+	VirtualCollisionIndex,
+} from '/dist/dnd/index.js';
+
+const raf = () => new Promise((r) => requestAnimationFrame(() => r()));
+function mk(seed) { return () => { seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function dispatch(t, type, x, y, b) { t.dispatchEvent(new PointerEvent(type, { bubbles: true, composed: true, cancelable: true, clientX: x, clientY: y, button: 0, buttons: b, pointerId: 1, pointerType: 'mouse' })); }
+async function gesture(grab, pts) {
+	dispatch(grab, 'pointermove', pts[0].x, pts[0].y, 0);
+	dispatch(grab, 'pointerdown', pts[0].x, pts[0].y, 1);
+	for (let i = 1; i < pts.length; i++) { dispatch(grab, 'pointermove', pts[i].x, pts[i].y, 1); await raf(); }
+	const e = pts[pts.length - 1]; dispatch(grab, 'pointerup', e.x, e.y, 0); await raf();
+}
+const center = (el) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
+function chaos(rng, from, to, n = 18) {
+	const pts = [];
+	for (let i = 0; i <= n; i++) { const t = i / n; const z = Math.sin(t * Math.PI * 6) * 12 * (rng() - 0.5); const o = t > 0.8 ? (rng() - 0.5) * 36 : 0; pts.push({ x: from.x + (to.x - from.x) * t + z + o, y: from.y + (to.y - from.y) * t + z + o }); }
+	return pts;
+}
+function el(cls, style, parent = document.body) { const d = document.createElement('div'); d.className = cls; Object.assign(d.style, style); parent.appendChild(d); return d; }
+function clear() { document.body.innerHTML = ''; }
+function transl(node) { return getComputedStyle(node).translate || ''; }
+function inside(a, b, slack = 1.5) { return a.left >= b.left - slack && a.right <= b.right + slack && a.top >= b.top - slack && a.bottom <= b.bottom + slack; }
+function rect(n) { return n.getBoundingClientRect(); }
+
+function makeList(cls, n, style, parent = document.body, prefix = 'k') {
+	const ul = el(cls, style, parent); ul.tagName; // noop
+	const list = document.createElement('ul'); list.className = cls; Object.assign(list.style, style); parent.appendChild(list); ul.remove();
+	const keys = [];
+	for (let i = 0; i < n; i++) { const k = prefix + i; keys.push(k); const li = document.createElement('li'); li.setAttribute('data-sortable-key', k); li.textContent = k; list.appendChild(li); }
+	return { list, keys };
+}
+const sortableHandlers = (list, data, render) => ({ items: data, keyOf: (x) => x.id, onReorder: (next) => { data.splice(0, data.length, ...next); render(); } });
+
+const stress = {
+	// ---- DRAG: every option variant ----
+	async drag(seeds = 6) {
+		clear(); const F = [];
+		const bnd = el('bnd', { left: '20px', top: '20px', width: '300px', height: '260px' });
+		const cfgs = [
+			['axis-x', { axis: 'x' }, (n) => { const t = transl(n).split(/\s+/); return Math.abs(parseFloat(t[1]) || 0) < 0.01 ? null : 'y moved on axis:x ' + transl(n); }],
+			['axis-y', { axis: 'y' }, (n) => { const t = transl(n).split(/\s+/); return Math.abs(parseFloat(t[0]) || 0) < 0.01 ? null : 'x moved on axis:y'; }],
+			['bounds-parent', { bounds: 'parent' }, (n) => inside(rect(n), rect(bnd)) ? null : 'escaped parent'],
+			['grid', { grid: [20, 20] }, (n) => { const t = transl(n).split(/\s+/); const x = parseFloat(t[0]) || 0; return x % 20 === 0 ? null : 'not grid-snapped ' + x; }],
+			['threshold', { threshold: 12 }, () => null],
+			['position', { position: { x: 10, y: 10 } }, () => null],
+			['plugin', { use: [{ onMove: ({ offset }) => ({ x: Math.round(offset.x / 25) * 25, y: Math.round(offset.y / 25) * 25 }) }] }, (n) => { const x = parseFloat((transl(n).split(/\s+/)[0]) || 0); return x % 25 === 0 ? null : 'plugin snap failed ' + x; }],
+		];
+		const nodes = cfgs.map(([name], i) => el('box', { left: 60 + i * 4 + 'px', top: 60 + i * 4 + 'px', background: '#39f' }, bnd));
+		const ds = cfgs.map(([_, opt], i) => new Draggable(nodes[i], opt));
+		for (let s = 0; s < seeds; s++) { const rng = mk(11 + s * 977);
+			for (let i = 0; i < cfgs.length; i++) { const c = center(nodes[i]); await gesture(nodes[i], chaos(rng, c, { x: c.x + (rng() - .5) * 500, y: c.y + (rng() - .5) * 500 }));
+				if (transl(nodes[i]).match(/NaN|Infinity/)) F.push({ cfg: cfgs[i][0], v: 'NaN' });
+				const v = cfgs[i][2](nodes[i]); if (v) F.push({ seed: s, cfg: cfgs[i][0], v }); } }
+		ds.forEach((d) => d.destroy());
+		return { feature: 'drag(' + cfgs.length + ' variants)', runs: seeds, failures: F };
+	},
+
+	// ---- DRAG on SVG ----
+	async svgDrag(seeds = 5) {
+		clear(); const F = [];
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); Object.assign(svg.style, { position: 'absolute', left: '20px', top: '20px', width: '300px', height: '300px' }); document.body.appendChild(svg);
+		const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); r.setAttribute('x', '80'); r.setAttribute('y', '80'); r.setAttribute('width', '50'); r.setAttribute('height', '50'); r.setAttribute('fill', '#39f'); svg.appendChild(r);
+		const d = new Draggable(r, {});
+		for (let s = 0; s < seeds; s++) { const rng = mk(7 + s * 31); const c = center(r); await gesture(r, chaos(rng, c, { x: c.x + (rng() - .5) * 200, y: c.y + (rng() - .5) * 200 }));
+			const tr = r.transform.baseVal.numberOfItems > 0; if (!tr && (rng() > 0)) { /* moved at least once expected */ } }
+		const moved = r.transform.baseVal.numberOfItems > 0;
+		if (!moved) F.push({ v: 'svg rect never got a transform' });
+		d.destroy();
+		return { feature: 'svgDrag', runs: seeds, failures: F };
+	},
+
+	// ---- SORTABLE list with FLIP + lift ----
+	async sortableList(seeds = 6) {
+		clear(); const F = [];
+		const data = Array.from({ length: 6 }, (_, i) => ({ id: 's' + i }));
+		const { list } = makeList('list', 6, { left: '20px', top: '20px' }, document.body, 's');
+		const render = () => { list.innerHTML = ''; for (const it of data) { const li = document.createElement('li'); li.setAttribute('data-sortable-key', it.id); li.textContent = it.id; list.appendChild(li); } };
+		const s = new SortableList(list, { ...sortableHandlers(list, data, render), animation: 120, lift: true });
+		for (let i = 0; i < seeds; i++) { const rng = mk(3 + i * 53); const li = list.querySelectorAll('li'); const a = li[(rng() * li.length) | 0]; const b = li[(rng() * li.length) | 0]; await gesture(a, chaos(rng, center(a), center(b || li[0]), 24)); await raf(); await raf();
+			const keys = [...list.querySelectorAll('[data-sortable-key]')].map((n) => n.getAttribute('data-sortable-key'));
+			if (keys.length !== 6) F.push({ i, v: 'len ' + keys.length });
+			else if ([...keys].sort().join() !== data.map((d) => d.id).sort().join()) F.push({ i, v: 'desync dom=' + keys + ' data=' + data.map((d) => d.id) }); }
+		s.destroy();
+		return { feature: 'sortableList(FLIP+lift)', runs: seeds, failures: F };
+	},
+
+	// ---- SORTABLE grid strategy ----
+	async sortableGrid(seeds = 6) {
+		clear(); const F = [];
+		const data = Array.from({ length: 9 }, (_, i) => ({ id: 'g' + i }));
+		const list = document.createElement('ul'); list.className = 'grid'; Object.assign(list.style, { left: '20px', top: '20px' }); document.body.appendChild(list);
+		const render = () => { list.innerHTML = ''; for (const it of data) { const li = document.createElement('li'); li.setAttribute('data-sortable-key', it.id); li.textContent = it.id; list.appendChild(li); } }; render();
+		const s = new SortableList(list, { ...sortableHandlers(list, data, render), strategy: 'grid', animation: false });
+		for (let i = 0; i < seeds; i++) { const rng = mk(9 + i * 71); const li = list.querySelectorAll('li'); const a = li[(rng() * li.length) | 0]; const b = li[(rng() * li.length) | 0]; await gesture(a, chaos(rng, center(a), center(b || li[0]), 20));
+			const keys = [...list.querySelectorAll('[data-sortable-key]')].map((n) => n.getAttribute('data-sortable-key'));
+			if (new Set(keys).size !== 9) F.push({ i, v: 'grid keys ' + keys }); }
+		s.destroy();
+		return { feature: 'sortableGrid', runs: seeds, failures: F };
+	},
+
+	// ---- KANBAN: cross-container transfer between grouped lists ----
+	async kanban(seeds = 6) {
+		clear(); const F = [];
+		const dataA = Array.from({ length: 4 }, (_, i) => ({ id: 'a' + i }));
+		const dataB = Array.from({ length: 4 }, (_, i) => ({ id: 'b' + i }));
+		const listA = document.createElement('ul'); listA.className = 'list'; Object.assign(listA.style, { left: '20px', top: '20px' }); document.body.appendChild(listA);
+		const listB = document.createElement('ul'); listB.className = 'list'; Object.assign(listB.style, { left: '200px', top: '20px' }); document.body.appendChild(listB);
+		const mkR = (list, data) => () => { list.innerHTML = ''; for (const it of data) { const li = document.createElement('li'); li.setAttribute('data-sortable-key', it.id); li.textContent = it.id; list.appendChild(li); } };
+		const rA = mkR(listA, dataA), rB = mkR(listB, dataB); rA(); rB();
+		let transfers = 0;
+		const sa = new SortableList(listA, { ...sortableHandlers(listA, dataA, rA), group: 'kb', animation: false, onTransfer: () => transfers++ });
+		const sb = new SortableList(listB, { ...sortableHandlers(listB, dataB, rB), group: 'kb', animation: false, onTransfer: () => transfers++ });
+		for (let i = 0; i < seeds; i++) { const rng = mk(13 + i * 101);
+			const src = (rng() > .5 ? listA : listB); const dst = (src === listA ? listB : listA);
+			const items = src.querySelectorAll('li'); if (!items.length) continue;
+			const a = items[(rng() * items.length) | 0]; const dstItems = dst.querySelectorAll('li'); const target = dstItems[(rng() * Math.max(1, dstItems.length)) | 0] || dst;
+			await gesture(a, chaos(rng, center(a), center(target), 26)); }
+		const total = listA.querySelectorAll('[data-sortable-key]').length + listB.querySelectorAll('[data-sortable-key]').length;
+		const allKeys = [...listA.querySelectorAll('[data-sortable-key]'), ...listB.querySelectorAll('[data-sortable-key]')].map((n) => n.getAttribute('data-sortable-key'));
+		if (total !== 8) F.push({ v: 'lost/dup items: total=' + total });
+		if (new Set(allKeys).size !== 8) F.push({ v: 'duplicate keys across lists: ' + allKeys });
+		sa.destroy(); sb.destroy();
+		return { feature: 'kanban(cross-container)', runs: seeds, failures: F, transfers };
+	},
+
+	// ---- TWO independent sortables coexisting (the regression the teardown flagged) ----
+	async twoSortables(seeds = 5) {
+		clear(); const F = [];
+		const mkOne = (left, prefix) => { const data = Array.from({ length: 4 }, (_, i) => ({ id: prefix + i })); const list = document.createElement('ul'); list.className = 'list'; Object.assign(list.style, { left, top: '20px' }); document.body.appendChild(list); const r = () => { list.innerHTML = ''; for (const it of data) { const li = document.createElement('li'); li.setAttribute('data-sortable-key', it.id); li.textContent = it.id; list.appendChild(li); } }; r(); const s = new SortableList(list, { ...sortableHandlers(list, data, r), animation: false }); return { list, data, s }; };
+		const A = mkOne('20px', 'x'); const B = mkOne('200px', 'y'); // NOT grouped
+		for (let i = 0; i < seeds; i++) { const rng = mk(17 + i * 43);
+			for (const one of [A, B]) { const li = one.list.querySelectorAll('li'); const a = li[(rng() * li.length) | 0]; const b = li[(rng() * li.length) | 0]; await gesture(a, chaos(rng, center(a), center(b || li[0]), 18)); } }
+		const ka = [...A.list.querySelectorAll('[data-sortable-key]')].map((n) => n.getAttribute('data-sortable-key'));
+		const kb = [...B.list.querySelectorAll('[data-sortable-key]')].map((n) => n.getAttribute('data-sortable-key'));
+		if (ka.some((k) => !k.startsWith('x')) || kb.some((k) => !k.startsWith('y'))) F.push({ v: 'cross-leak between ungrouped sortables: A=' + ka + ' B=' + kb });
+		if (new Set(ka).size !== 4 || new Set(kb).size !== 4) F.push({ v: 'count drift A=' + ka + ' B=' + kb });
+		A.s.destroy(); B.s.destroy();
+		return { feature: 'twoSortables(isolation)', runs: seeds, failures: F };
+	},
+
+	// ---- DROP: overlapping zones + priority + accepts + collision strategy + virtual index ----
+	async drop(seeds = 6) {
+		clear(); const F = [];
+		const z1 = el('zone', { left: '200px', top: '60px', width: '160px', height: '120px' });
+		const z2 = el('zone', { left: '300px', top: '60px', width: '160px', height: '120px' }); // overlaps z1
+		const dragNode = el('box', { left: '40px', top: '90px', background: '#3c6' });
+		const d = new Draggable(dragNode, { dragData: { type: 'card' } });
+		let hi = 0, lo = 0, rejected = 0;
+		const dropCap = new Drop({ index: () => new VirtualCollisionIndex(), dropPointerSamples: 'all' });
+		// use raw capability for index option
+		const eng = new Dnd(); eng.use(dropCap); // separate engine; but dragNode is on shared engine — so wire a drag here too
+		const localDrag = new Drag(); eng.use(localDrag); localDrag.bind(dragNode, { dragData: { type: 'card' } });
+		dropCap.bind(z1, { priority: 1, collision: 'closestCenter', onDrop: () => hi++ });
+		dropCap.bind(z2, { priority: 0, collision: 'closestCenter', accepts: ({ data }) => data?.type === 'nope', onDrop: () => { lo++; } });
+		for (let s = 0; s < seeds; s++) { const rng = mk(5 + s * 67); const seam = { x: 320 + (rng() - .5) * 40, y: 120 }; await gesture(dragNode, chaos(rng, center(dragNode), seam, 20)); }
+		if (lo > 0) F.push({ v: 'dropped on a rejecting zone (accepts ignored)' });
+		if (hi === 0) F.push({ v: 'never dropped on the accepting zone' });
+		d.destroy(); localDrag._unbind?.(dragNode);
+		return { feature: 'drop(overlap+accepts+virtualIndex)', runs: seeds, failures: F, hi, lo };
+	},
+
+	// ---- RESIZE: all 8 edges + aspect + bounds + min/max ----
+	async resize(seeds = 4) {
+		clear(); const F = [];
+		const parent = el('bnd', { left: '20px', top: '20px', width: '400px', height: '400px' });
+		const edges = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
+		const made = edges.map((edge, i) => {
+			const box = el('rz', { left: 40 + (i % 4) * 90 + 'px', top: 40 + ((i / 4) | 0) * 120 + 'px', width: '60px', height: '50px' }, parent);
+			const h = document.createElement('div'); h.className = 'h'; h.setAttribute('data-neodrag-resize-handle', edge);
+			Object.assign(h.style, { right: '-5px', bottom: '-5px' }); box.appendChild(h);
+			const r = new Resizable(box, { minWidth: 20, minHeight: 20, maxWidth: 200, maxHeight: 200, ...(i === 0 ? { aspectRatio: true } : {}) });
+			return { box, h, edge, r };
+		});
+		for (let s = 0; s < seeds; s++) { const rng = mk(2 + s * 89);
+			for (const m of made) { const c = center(m.h); await gesture(m.h, chaos(rng, c, { x: c.x + (rng() - .5) * 600, y: c.y + (rng() - .5) * 600 }, 16));
+				const w = parseFloat(getComputedStyle(m.box).width), h = parseFloat(getComputedStyle(m.box).height);
+				if (!Number.isFinite(w) || !Number.isFinite(h) || w < 0 || h < 0) F.push({ edge: m.edge, v: 'bad dims ' + w + 'x' + h });
+				if (w > 200.5 || h > 200.5) F.push({ edge: m.edge, v: 'over max ' + w + 'x' + h });
+				if (w < 19.5 || h < 19.5) F.push({ edge: m.edge, v: 'under min ' + w + 'x' + h }); } }
+		made.forEach((m) => m.r.destroy());
+		return { feature: 'resize(8 edges+aspect+min/max)', runs: seeds, failures: F };
+	},
+
+	// ---- COMPOSITION: one element draggable + resizable + droppable ----
+	async composition(seeds = 5) {
+		clear(); const F = [];
+		const zone = el('zone', { left: '300px', top: '300px', width: '160px', height: '120px' });
+		const box = el('box', { left: '120px', top: '120px', width: '90px', height: '90px' });
+		const h = document.createElement('div'); h.className = 'h'; h.setAttribute('data-neodrag-resize-handle', 'se'); Object.assign(h.style, { right: '-5px', bottom: '-5px' }); box.appendChild(h);
+		let drops = 0;
+		const d = new Draggable(box, {}); const r = new Resizable(box, { minWidth: 30, minHeight: 30 }); const dz = new Droppable(box, {}); const z = new Droppable(zone, { onDrop: () => drops++ });
+		for (let s = 0; s < seeds; s++) { const rng = mk(23 + s * 7);
+			await gesture(box, chaos(rng, center(box), center(zone), 18)); // drag body → drop on zone
+			await gesture(h, chaos(rng, center(h), { x: center(h).x + (rng() - .5) * 120, y: center(h).y + (rng() - .5) * 120 }, 14)); // resize handle
+			if (transl(box).match(/NaN|Infinity/)) F.push({ s, v: 'NaN translate' });
+			const w = parseFloat(getComputedStyle(box).width); if (!Number.isFinite(w) || w < 29) F.push({ s, v: 'resize broke under min ' + w }); }
+		d.destroy(); r.destroy(); dz.destroy(); z.destroy();
+		return { feature: 'composition(drag+resize+drop)', runs: seeds, failures: F, drops };
+	},
+
+	async runAll() {
+		const out = [];
+		for (const name of ['drag', 'svgDrag', 'sortableList', 'sortableGrid', 'kanban', 'twoSortables', 'drop', 'resize', 'composition']) {
+			out.push(await this[name]());
+		}
+		const totalFail = out.reduce((a, r) => a + r.failures.length, 0);
+		return { totalFail, results: out };
+	},
+};
+window.stress = stress;
+window.__ready = true;
+</script>
+</body>
+</html>

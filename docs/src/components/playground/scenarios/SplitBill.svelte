@@ -1,13 +1,6 @@
 <script lang="ts">
 	import type { WorldMeta } from '../worlds';
-	import {
-		applyGroupedSortableTransfer,
-		collisionPriority,
-		collisionStrategy,
-		highlight,
-		Sortable,
-		type SortableStrategy,
-	} from '@neodrag/svelte/drop';
+	import { SortableList, type SortAxis, type TransferOp } from '@neodrag/svelte';
 
 	type Props = {
 		world: WorldMeta;
@@ -35,53 +28,41 @@
 
 	let last_drop = $state('');
 
-	let zone_strategy = $state<Record<Owner, SortableStrategy>>({
-		tray: 'horizontal',
-		alex: 'horizontal',
-		sam: 'horizontal',
+	let zone_axis = $state<Record<Owner, SortAxis>>({
+		tray: 'x',
+		alex: 'x',
+		sam: 'x',
 	});
 
-	const highlight_success = highlight({ overClass: 'pg-drop-over pg-drop-over--success' });
-
-	type BillItem = { id: ItemId; owner: Owner };
-
-	function all_items(): BillItem[] {
-		const rows: BillItem[] = tray_items.map((id) => ({ id, owner: 'tray' as const }));
-		for (const friend of ['alex', 'sam'] as const) {
-			for (const id of friend_order[friend]) {
-				rows.push({ id, owner: friend });
-			}
-		}
-		return rows;
+	function items_for(owner: Owner): ItemId[] {
+		return owner === 'tray' ? tray_items : friend_order[owner];
 	}
 
-	function items_for(owner: Owner) {
-		const ids = owner === 'tray' ? tray_items : friend_order[owner];
-		return ids.map((id) => ({ id, owner }));
-	}
-
-	function write_owner(owner: Owner, next: BillItem[]) {
-		const ids = next.map((row) => row.id);
+	function write_owner(owner: Owner, next: ItemId[]) {
 		if (owner === 'tray') {
-			tray_items = ids;
+			tray_items = next;
 			return;
 		}
-		friend_order = { ...friend_order, [owner]: ids };
+		friend_order = { ...friend_order, [owner]: next };
 	}
 
-	function transfer_to(owner: Owner, item: BillItem, toIndex: number) {
-		const rows = applyGroupedSortableTransfer(all_items(), item, {
-			toIndex,
-			column: owner,
-			columnOf: (row) => row.owner,
-			withColumn: (row, column) => ({ ...row, owner: column }),
-		});
-		tray_items = rows.filter((row) => row.owner === 'tray').map((row) => row.id);
+	function remove_everywhere(id: ItemId) {
+		tray_items = tray_items.filter((row) => row !== id);
 		friend_order = {
-			alex: rows.filter((row) => row.owner === 'alex').map((row) => row.id),
-			sam: rows.filter((row) => row.owner === 'sam').map((row) => row.id),
+			alex: friend_order.alex.filter((row) => row !== id),
+			sam: friend_order.sam.filter((row) => row !== id),
 		};
-		const label = META[item.id].label;
+	}
+
+	function transfer_to(owner: Owner, op: TransferOp<ItemId>) {
+		const id = op.item;
+		const toIndex = op.to;
+		remove_everywhere(id);
+		const current = items_for(owner);
+		const at = Math.max(0, Math.min(toIndex, current.length));
+		const next = [...current.slice(0, at), id, ...current.slice(at)];
+		write_owner(owner, next);
+		const label = META[id].label;
 		last_drop =
 			owner === 'tray'
 				? `${label} → Receipt`
@@ -90,41 +71,38 @@
 					: `${label} → Sam`;
 	}
 
-	function board_for(owner: Owner) {
-		return new Sortable({
-			items: () => items_for(owner),
-			keyBy: (item) => item.id,
-			group: GROUP,
-			preview: 'visual',
-			strategy: () => zone_strategy[owner],
-			transition: { duration: 220, easing: 'ease' },
-			onReorder: (next) => write_owner(owner, next),
-			onTransfer: (item, meta) => {
-				if (meta.phase !== 'commit' || meta.toIndex < 0) return;
-				transfer_to(owner, item, meta.toIndex);
+	function makeList(owner: Owner) {
+		return new SortableList<ItemId>({
+			get items() {
+				return items_for(owner);
 			},
-			containerPlugins: () => [
-				collisionPriority(owner === 'tray' ? 10 : 5),
-				collisionStrategy('closestCenter'),
-				highlight_success,
-			],
+			group: GROUP,
+			strategy: 'list',
+			get axis() {
+				return zone_axis[owner];
+			},
+			animation: 220,
+			onReorder: (next) => write_owner(owner, next),
+			onTransfer: (op) => transfer_to(owner, op),
 		});
 	}
 
-	const boards = {
-		tray: board_for('tray'),
-		alex: board_for('alex'),
-		sam: board_for('sam'),
-	} as const;
+	// One SortableList per owner — a record of class instances just works in Svelte 5; each reads
+	// its owner's items/axis through getters, so no manual update() effect is needed.
+	const lists: Record<Owner, SortableList<ItemId>> = {
+		tray: makeList('tray'),
+		alex: makeList('alex'),
+		sam: makeList('sam'),
+	};
 
 	function listLayout(node: HTMLElement, zone: Owner) {
 		const update = () => {
-			if (node.closest('[data-sortable-dragging]')) return;
+			if (node.closest('[data-neodrag-sortable-dragging]')) return;
 			const width = node.clientWidth;
 			if (width < 48) return;
-			const next: SortableStrategy = width < 168 ? 'vertical' : 'horizontal';
-			if (zone_strategy[zone] === next) return;
-			zone_strategy = { ...zone_strategy, [zone]: next };
+			const next: SortAxis = width < 168 ? 'y' : 'x';
+			if (zone_axis[zone] === next) return;
+			zone_axis = { ...zone_axis, [zone]: next };
 		};
 		update();
 		const observer = new ResizeObserver(update);
@@ -144,16 +122,15 @@
 		<ul
 			class="split-bill-sortable-list split-bill-tray-body"
 			class:is-empty={tray_items.length === 0}
-			{...boards.tray.container}
+			{...lists.tray.attach}
 			{@attach (n) => listLayout(n, 'tray')}
 		>
 			{#each tray_items as id (id)}
-				<li class="split-bill-tray-row" {...boards.tray.row()}>
+				<li class="split-bill-tray-row" {...lists.tray.row(id)}>
 					<button
 						type="button"
 						class="split-bill-chip"
 						class:split-bill-chip--latte={id === 'latte'}
-						{...boards.tray.item(id).target}
 					>
 						<span>{META[id].label}</span>
 						<em>{META[id].price}</em>
@@ -176,16 +153,15 @@
 				<ul
 					class="split-bill-sortable-list split-bill-zone-body"
 					class:is-empty={friend_order[friend as Friend].length === 0}
-					{...boards[friend as Friend].container}
+					{...lists[friend as Friend].attach}
 					{@attach (n) => listLayout(n, friend as Friend)}
 				>
 					{#each friend_order[friend as Friend] as id (id)}
-						<li class="split-bill-zone-row" {...boards[friend as Friend].row()}>
+						<li class="split-bill-zone-row" {...lists[friend as Friend].row(id)}>
 							<button
 								type="button"
 								class="split-bill-chip is-placed"
 								class:split-bill-chip--latte={id === 'latte'}
-								{...boards[friend as Friend].item(id).target}
 							>
 								<span>{META[id].label}</span>
 								<em>{META[id].price}</em>

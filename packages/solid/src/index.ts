@@ -1,252 +1,134 @@
 import {
-	Draggable as CoreDraggable,
+	Draggable,
 	Droppable,
-	Resizable as CoreResizable,
-	Neodrag,
+	Resizable,
+	SortableList,
+	SORTABLE_KEY_ATTR,
+	sortableKey,
 	type DragEventData,
-	type DragPlugin,
-	type DragPluginList,
-	type DropPluginList,
-	type ResizePluginList,
+	type DragOptions,
+	type DropEventData,
+	type DropOptions,
+	type ResizeOptions,
+	type SortableOptions,
+	type SortableRow,
 } from '@neodrag/core';
-import { eventPayload, hasReactiveSlots, programmaticToInput } from '@neodrag/core/internal';
-import { defineDragPlugin } from '@neodrag/core/plugins';
-import type { Accessor } from 'solid-js';
-import { createEffect, createSignal, onCleanup, untrack } from 'solid-js';
+import { createEffect, createSignal, onCleanup, type Accessor } from 'solid-js';
 
-export type { DragEventData, DragPluginList, ResizePluginList };
-export { Neodrag, CoreDraggable as Draggable, CoreResizable as Resizable };
+type Ref = (node: HTMLElement) => void;
 
-export type DragSyncMode = 'full' | 'start-end' | false;
+// Each primitive re-reads its options through `build()` inside a `createEffect`, so reactive
+// option values passed as getters (e.g. `createDraggable({ get axis() { return axis(); } })`) are
+// tracked and pushed to the live instance via `.update()` — no recreation. `build()` is evaluated
+// unconditionally before the `inst?.update` guard so its signals are tracked even before bind.
 
-export interface DragState extends DragEventData {
-	isDragging: boolean;
-}
-
-const idleInput = programmaticToInput({ phase: 'end', clientX: 0, clientY: 0 });
-
-const defaultDragState: DragState = {
-	offset: { x: 0, y: 0 },
-	offsetPx: { x: 0, y: 0 },
-	rootNode: null as unknown as HTMLElement,
-	visualNode: null as unknown as HTMLElement,
-	input: idleInput,
-	pointer: { x: 0, y: 0 },
-	isDragging: false,
-};
-
-const createSyncPlugin = (setState: (state: DragState) => void, mode: DragSyncMode) =>
-	defineDragPlugin(() => ({
-		key: Symbol('neodrag.solid-state-sync'),
-		phase: 'post',
-		skipOnCancel: true,
-
-		start(ctx, _, input) {
-			setState({ ...eventPayload(ctx, input), isDragging: true });
+/** Solid v3 — `create*` primitives returning a `ref` setter + reactive state accessors. */
+export function createDraggable(options: DragOptions = {}): {
+	ref: Ref;
+	isDragging: Accessor<boolean>;
+} {
+	const [isDragging, setDragging] = createSignal(false);
+	let inst: Draggable | null = null;
+	// Two-way `position`: a `set position(v)` accessor gets the live offset written back each move.
+	const positionTwoWay = Boolean(Object.getOwnPropertyDescriptor(options, 'position')?.set);
+	const build = (): DragOptions => ({
+		...options,
+		onDragStart: (e: DragEventData) => {
+			setDragging(true);
+			options.onDragStart?.(e);
 		},
-
-		drag(ctx, _, input) {
-			if (mode !== 'full') return;
-			setState({ ...eventPayload(ctx, input), isDragging: true });
+		onDrag: (e: DragEventData) => {
+			if (positionTwoWay) options.position = e.offset;
+			options.onDrag?.(e);
 		},
-
-		end(ctx, _, input) {
-			setState({ ...eventPayload(ctx, input), isDragging: false });
+		onDragEnd: (e: DragEventData) => {
+			setDragging(false);
+			options.onDragEnd?.(e);
 		},
-	}))();
-
-function withSync(plugins: DragPluginList, sync: DragPlugin): DragPluginList {
-	return [...plugins, sync];
-}
-
-export function createDraggable(
-	slots?: DragPluginList,
-	options?: { syncState?: DragSyncMode },
-): [Accessor<DragState>, (node: HTMLElement | SVGElement | null) => void];
-
-export function createDraggable(
-	element: Accessor<HTMLElement | SVGElement | null | undefined>,
-	slots: DragPluginList,
-	options?: { syncState?: DragSyncMode },
-): [Accessor<DragState>];
-
-export function createDraggable(
-	elementOrSlots: Accessor<HTMLElement | SVGElement | null | undefined> | DragPluginList = [],
-	maybeSlotsOrOptions?: DragPluginList | { syncState?: DragSyncMode },
-	maybeOptions?: { syncState?: DragSyncMode },
-) {
-	const isElementForm = typeof elementOrSlots === 'function';
-	const options = (isElementForm ? maybeOptions : maybeSlotsOrOptions) as
-		| { syncState?: DragSyncMode }
-		| undefined;
-	const syncMode: DragSyncMode = options?.syncState ?? 'start-end';
-
-	const [dragState, setDragState] = createSignal<DragState>(defaultDragState);
-	const sync = createSyncPlugin(setDragState, syncMode);
-
-	const slots = (): DragPluginList =>
-		isElementForm ? (maybeSlotsOrOptions as DragPluginList) : (elementOrSlots as DragPluginList);
-
-	const binding = new CoreDraggable({
-		plugins: untrack(() => withSync(slots(), sync)),
 	});
-
-	const attachRef = (node: HTMLElement | SVGElement | null) => {
-		if (!node) {
-			binding.detach();
-			return;
-		}
-		binding.attach(node);
+	const ref: Ref = (node) => {
+		inst?.destroy();
+		inst = new Draggable(node, build());
+		onCleanup(() => {
+			inst?.destroy();
+			inst = null;
+		});
 	};
-
-	if (isElementForm) {
-		const element = elementOrSlots as Accessor<HTMLElement | SVGElement | null | undefined>;
-
-		createEffect(() => {
-			const node = element();
-			if (!node) {
-				binding.detach();
-				return;
-			}
-			untrack(() => binding.attach(node));
-			onCleanup(() => binding.detach());
-		});
-
-		createEffect(() => {
-			const list = withSync(slots(), sync);
-			if (!hasReactiveSlots(list)) return;
-			binding.update(list);
-		});
-
-		onCleanup(() => binding.destroy());
-		return [dragState];
-	}
-
 	createEffect(() => {
-		const list = withSync(slots(), sync);
-		if (!hasReactiveSlots(list)) return;
-		binding.update(list);
+		const next = build();
+		inst?.update(next);
 	});
-
-	onCleanup(() => binding.destroy());
-
-	return [dragState, attachRef] as const;
+	return { ref, isDragging };
 }
 
-export function createDroppable(
-	slots?: DropPluginList,
-): [undefined, (node: HTMLElement | SVGElement | null) => void];
-
-export function createDroppable(
-	element: Accessor<HTMLElement | SVGElement | null | undefined>,
-	slots: DropPluginList,
-): [undefined];
-
-export function createDroppable(
-	elementOrSlots: Accessor<HTMLElement | SVGElement | null | undefined> | DropPluginList = [],
-	maybeSlots: DropPluginList = [],
-) {
-	const isElementForm = typeof elementOrSlots === 'function';
-	const slots = (): DropPluginList =>
-		isElementForm ? maybeSlots : (elementOrSlots as DropPluginList);
-
-	const binding = new Droppable({ plugins: untrack(() => slots()) });
-
-	const attachRef = (node: HTMLElement | SVGElement | null) => {
-		if (!node) {
-			binding.detach();
-			return;
-		}
-		binding.attach(node);
+export function createDroppable(options: DropOptions = {}): { ref: Ref; isOver: Accessor<boolean> } {
+	const [isOver, setOver] = createSignal(false);
+	let inst: Droppable | null = null;
+	const build = (): DropOptions => ({
+		...options,
+		onEnter: (e: DropEventData) => {
+			setOver(true);
+			options.onEnter?.(e);
+		},
+		onLeave: (e: DropEventData) => {
+			setOver(false);
+			options.onLeave?.(e);
+		},
+	});
+	const ref: Ref = (node) => {
+		inst?.destroy();
+		inst = new Droppable(node, build());
+		onCleanup(() => {
+			inst?.destroy();
+			inst = null;
+		});
 	};
-
-	if (isElementForm) {
-		const element = elementOrSlots as Accessor<HTMLElement | SVGElement | null | undefined>;
-
-		createEffect(() => {
-			const node = element();
-			if (!node) {
-				binding.detach();
-				return;
-			}
-			untrack(() => binding.attach(node));
-			onCleanup(() => binding.detach());
-		});
-
-		createEffect(() => {
-			if (!hasReactiveSlots(slots())) return;
-			binding.update(slots());
-		});
-
-		onCleanup(() => binding.destroy());
-		return [undefined];
-	}
-
 	createEffect(() => {
-		if (!hasReactiveSlots(slots())) return;
-		binding.update(slots());
+		const next = build();
+		inst?.update(next);
 	});
-
-	onCleanup(() => binding.destroy());
-
-	return [undefined, attachRef] as const;
+	return { ref, isOver };
 }
 
-export function createResizable(
-	slots?: ResizePluginList,
-): [undefined, (node: HTMLElement | SVGElement | null) => void];
-
-export function createResizable(
-	element: Accessor<HTMLElement | SVGElement | null | undefined>,
-	slots: ResizePluginList,
-): [undefined];
-
-export function createResizable(
-	elementOrSlots: Accessor<HTMLElement | SVGElement | null | undefined> | ResizePluginList = [],
-	maybeSlots: ResizePluginList = [],
-) {
-	const isElementForm = typeof elementOrSlots === 'function';
-	const slots = (): ResizePluginList =>
-		isElementForm ? maybeSlots : (elementOrSlots as ResizePluginList);
-
-	const binding = new CoreResizable({ plugins: untrack(() => slots()) });
-
-	const attachRef = (node: HTMLElement | SVGElement | null) => {
-		if (!node) {
-			binding.detach();
-			return;
-		}
-		binding.attach(node);
+export function createResizable(options: ResizeOptions = {}): { ref: Ref } {
+	let inst: Resizable | null = null;
+	const ref: Ref = (node) => {
+		inst?.destroy();
+		inst = new Resizable(node, options);
+		onCleanup(() => {
+			inst?.destroy();
+			inst = null;
+		});
 	};
-
-	if (isElementForm) {
-		const element = elementOrSlots as Accessor<HTMLElement | SVGElement | null | undefined>;
-
-		createEffect(() => {
-			const node = element();
-			if (!node) {
-				binding.detach();
-				return;
-			}
-			untrack(() => binding.attach(node));
-			onCleanup(() => binding.detach());
-		});
-
-		createEffect(() => {
-			if (!hasReactiveSlots(slots())) return;
-			binding.update(slots());
-		});
-
-		onCleanup(() => binding.destroy());
-		return [undefined];
-	}
-
 	createEffect(() => {
-		if (!hasReactiveSlots(slots())) return;
-		binding.update(slots());
+		const next = { ...options };
+		inst?.update(next);
 	});
-
-	onCleanup(() => binding.destroy());
-
-	return [undefined, attachRef] as const;
+	return { ref };
 }
+
+/**
+ * Sortable primitive. Put `ref` on the container and spread `{...row(key)}` on each item instead
+ * of hand-writing `data-sortable-key`. Pass `items` (and any option) as a getter to keep it live.
+ */
+export function createSortable<T = unknown>(options: SortableOptions<T>): {
+	ref: Ref;
+	row: (item: T) => SortableRow;
+} {
+	let inst: SortableList<T> | null = null;
+	const ref: Ref = (node) => {
+		inst?.destroy();
+		inst = new SortableList(node, { ...options });
+		onCleanup(() => {
+			inst?.destroy();
+			inst = null;
+		});
+	};
+	createEffect(() => {
+		const next = { ...options };
+		inst?.update(next);
+	});
+	return { ref, row: (item) => ({ [SORTABLE_KEY_ATTR]: sortableKey(item) }) as SortableRow };
+}
+
+export * from '@neodrag/core';

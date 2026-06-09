@@ -2,13 +2,13 @@ import { defineConfig } from 'tsdown';
 
 export default defineConfig([
 	{
-		entry: ['./src/index.ts', './src/drop.ts', './src/sortable.ts', './src/resize.ts'],
+		entry: ['./src/index.ts'],
 		format: 'esm',
 		dts: true,
 		clean: true,
 		platform: 'browser',
 		treeshake: { moduleSideEffects: false },
-		deps: { neverBundle: ['@neodrag/core'] },
+		deps: { neverBundle: [/^@neodrag\/core(\/.*)?$/] },
 	},
 	{
 		entry: ['./src/index.ts'],
@@ -18,11 +18,6 @@ export default defineConfig([
 		outDir: 'dist/umd',
 		platform: 'browser',
 		treeshake: true,
-		deps: { alwaysBundle: ['@neodrag/core'] },
-		outputOptions: {
-			globals: {
-				'@neodrag/core': 'NeoDragCore',
-			},
-		},
+		deps: { alwaysBundle: [/^@neodrag\/core(\/.*)?$/] },
 	},
 ]);

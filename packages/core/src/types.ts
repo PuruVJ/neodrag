@@ -1,172 +1,62 @@
 import type { InteractionInput } from './interaction-input.ts';
-import type { LengthAdapter } from './length-runtime.ts';
-import type { SizeInput } from './length-runtime.ts';
-import type { MarkupAdapter } from './markup-adapter.ts';
 
 export type EndReason = 'drop' | 'no-target' | 'cancel';
 
-export type SessionState = 'idle' | 'pending' | 'active' | 'completed' | 'cancelled';
+export type DndNode = HTMLElement | SVGElement;
 
-export type DeltaPatch = { x?: number; y?: number };
-
-export type PluginPhase = 'pre' | 'resolve' | 'post';
-
-export interface SessionPrivateStore {
-	get<T>(key: SessionKey<T>): T | undefined;
-	set<T>(key: SessionKey<T>, value: T): void;
-	delete(key: SessionKey<unknown>): void;
-	has(key: SessionKey<unknown>): boolean;
+/** What a capability returns when it claims a pointerdown. `data` is capability-private. */
+export interface ResolvedTarget {
+	node: DndNode;
+	data?: unknown;
 }
 
-export interface SessionKey<T> {
-	readonly __brand: T;
-	readonly id: symbol;
+/** The live interaction the engine drives, handed to the owning capability each phase. */
+export interface InteractionSession {
+	readonly capability: Capability;
+	readonly target: ResolvedTarget;
+	readonly pointerId: number;
+	readonly startInput: InteractionInput;
+	/** Latest input for this interaction. */
+	input: InteractionInput;
+	/** Shared payload set by the owning capability (e.g. drag data), read by observers. */
+	data?: unknown;
+	/** True once the threshold gate has passed and `start()` has run. */
+	started: boolean;
+	/** End this interaction from inside a capability (commit/cancel). */
+	end(reason: EndReason): void;
 }
 
-export function createSessionKey<T>(): SessionKey<T> {
-	return { id: Symbol('neodrag.session'), __brand: undefined as T };
+/**
+ * A capability is a peer interaction (drag, drop substrate, resize, sortable, …).
+ * The engine knows nothing about their semantics — it only routes pointer input
+ * to whichever capability claims a node, then drives the lifecycle.
+ */
+export interface Capability {
+	readonly key: symbol;
+	readonly name: string;
+	/** Higher runs first in pointerdown routing (e.g. resize-handle > drag-body). Default 0. */
+	readonly priority?: number;
+	/** Claim a pointerdown: return the bound target this capability owns, or null to pass. */
+	resolve(input: InteractionInput): ResolvedTarget | null;
+	/** Threshold gate, checked on each pending move. Return false to stay pending. Default: pass. */
+	shouldStart?(session: InteractionSession): boolean;
+	/** Runs once when the threshold passes. */
+	start(session: InteractionSession): void;
+	/** Runs on every move after start. */
+	move(session: InteractionSession): void;
+	/** Runs once on pointerup/cancel. */
+	end(session: InteractionSession, reason: EndReason): void;
+	/**
+	 * Optional: observe interactions owned by *another* capability (e.g. `drop` watching a
+	 * `drag` session to hit-test zones). Keeps capabilities decoupled — `drag` never imports
+	 * `drop`; `drop` opts into the stream. Fires after the owner's own start/move/end.
+	 */
+	observe?(session: InteractionSession, phase: 'start' | 'move' | 'end', reason?: EndReason): void;
 }
 
-export interface DragSourceInfo {
-	node: HTMLElement | SVGElement;
-	rect: DOMRect;
-}
-
-export interface DropTargetInfo {
-	node: HTMLElement | SVGElement;
-	rect: DOMRect;
-}
-
-export interface DragSession<T = unknown> {
-	readonly state: SessionState;
-	readonly source: DragSourceInfo;
-	readonly visual: DragSourceInfo;
-	readonly pointer: { readonly x: number; readonly y: number };
-	readonly delta: { readonly x: number; readonly y: number };
-	data: T;
-	readonly overTargets: ReadonlyArray<DropTargetInfo>;
-	readonly private: SessionPrivateStore;
-	setVisual(node: HTMLElement | SVGElement): void;
-	cancel(): void;
-	stopPropagation(): void;
-}
-
-export interface DragCtx {
-	readonly delta: { x: number; y: number };
-	readonly proposed: { x: number; y: number };
-	readonly offset: { x: number; y: number };
-	readonly offsetPx: { x: number; y: number };
-	readonly offsetAuthored?: { x: SizeInput; y: SizeInput };
-	readonly length: LengthAdapter;
-	readonly initial: { x: number; y: number };
-	readonly isDragging: boolean;
-	readonly isInteracting: boolean;
-	readonly rootNode: HTMLElement | SVGElement;
-	readonly markup: MarkupAdapter;
-	readonly lastInput: InteractionInput | null;
-	readonly lastEvent: PointerEvent | null;
-	readonly cachedRootNodeRect: DOMRect;
-	readonly session: DragSession;
-	effect(fn: () => void): void;
-	cancel(): void;
-	setForcedPosition(x: SizeInput, y: SizeInput): void;
-	setVisual(node: HTMLElement | SVGElement): void;
-}
-
-export interface DropCtx {
-	readonly pointer: { x: number; y: number };
-	readonly session: DragSession;
-	readonly rootNode: HTMLElement | SVGElement;
-	readonly markup: MarkupAdapter;
-	readonly cachedRootNodeRect: DOMRect;
-	readonly lastInput: InteractionInput | null;
-	readonly lastEvent: PointerEvent | null;
-	readonly isOver: boolean;
-	readonly length: LengthAdapter;
-	effect(fn: () => void): void;
-}
-
-const DEV = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production';
-
-export function pluginKeyLabel(key: symbol): string {
-	return key.description ?? 'plugin';
-}
-
-export function assertNamedPluginKey(key: symbol, dev: boolean = DEV): void {
-	if (!dev) return;
-	const label = key.description;
-	if (label != null && label !== '') return;
-	throw new Error(
-		'Neodrag plugin key must be a named Symbol (e.g. Symbol("my-plugin")). Anonymous Symbol() is not allowed when dev mode is on.',
-	);
-}
-
-export function assertNamedPluginKeys(
-	plugins: readonly { key: symbol }[],
-	dev: boolean = DEV,
-): void {
-	if (!dev) return;
-	for (const plugin of plugins) assertNamedPluginKey(plugin.key, true);
-}
-
-export interface DragPlugin<S = unknown> {
-	key: symbol;
-	phase?: PluginPhase;
-	skipOnCancel?: boolean;
-	init?(ctx: DragCtx): S;
-	start?(ctx: DragCtx, state: S, input: InteractionInput): boolean | void;
-	drag?(ctx: DragCtx, state: S, input: InteractionInput): DeltaPatch | void;
-	update?(ctx: DragCtx, state: S): void;
-	end?(ctx: DragCtx, state: S, input: InteractionInput, reason: EndReason): void;
-	destroy?(ctx: DragCtx, state: S): void;
-}
-
-export interface DropPlugin<S = unknown> {
-	key: symbol;
-	phase?: PluginPhase;
-	init?(ctx: DropCtx): S;
-	enter?(ctx: DropCtx, state: S, input: InteractionInput): boolean | void;
-	over?(ctx: DropCtx, state: S, input: InteractionInput): void;
-	leave?(ctx: DropCtx, state: S, input: InteractionInput): void;
-	drop?(ctx: DropCtx, state: S, input: InteractionInput): void;
-	update?(ctx: DropCtx, state: S): void;
-	destroy?(ctx: DropCtx, state: S): void;
-}
-
-export type PluginSlot<T> = T | (() => T | T[]);
-
-export type DragPluginList = PluginSlot<DragPlugin>[];
-export type DropPluginList = PluginSlot<DropPlugin>[];
-
-export interface ErrorInfo {
-	phase:
-		| 'init'
-		| 'start'
-		| 'drag'
-		| 'resize'
-		| 'end'
-		| 'enter'
-		| 'over'
-		| 'leave'
-		| 'drop'
-		| 'update'
-		| 'destroy';
-	plugin?: {
-		key: symbol;
-		hook: string;
-	};
-	node: HTMLElement | SVGElement;
-	error: unknown;
-}
-
-export function defineDragPlugin<S = unknown, Args extends unknown[] = []>(
-	fn: (...args: Args) => DragPlugin<S>,
-) {
-	return fn;
-}
-
-export function defineDropPlugin<S = unknown, Args extends unknown[] = []>(
-	fn: (...args: Args) => DropPlugin<S>,
-) {
-	return fn;
+export interface InteractionsOptions {
+	/** Element to delegate the single document-level listeners on. Default: documentElement. */
+	delegate?: () => HTMLElement;
+	/** Install pointer + keyboard sensors automatically. Default: true. */
+	defaultSensors?: boolean;
 }

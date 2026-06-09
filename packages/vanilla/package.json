@@ -37,25 +37,6 @@
 			"import": "./src/index.ts",
 			"default": "./src/index.ts"
 		},
-		"./plugins": {
-			"types": "./src/plugins.ts",
-			"import": "./src/plugins.ts",
-			"default": "./src/plugins.ts"
-		},
-		"./drop": {
-			"types": "./src/drop.ts",
-			"import": "./src/drop.ts",
-			"default": "./src/drop.ts"
-		},
-		"./sortable": {
-			"types": "./src/sortable.ts",
-			"import": "./src/sortable.ts",
-			"default": "./src/sortable.ts"
-		},
-		"./resize": {
-			"types": "./src/resize.ts",
-			"import": "./src/resize.ts"
-		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -65,39 +46,23 @@
 				"import": "./dist/index.js",
 				"default": "./dist/index.js"
 			},
-			"./plugins": {
-				"types": "./dist/plugins.d.ts",
-				"import": "./dist/plugins.js",
-				"default": "./dist/plugins.js"
-			},
-			"./drop": {
-				"types": "./dist/drop.d.ts",
-				"import": "./dist/drop.js",
-				"default": "./dist/drop.js"
-			},
-			"./sortable": {
-				"types": "./dist/sortable.d.ts",
-				"import": "./dist/sortable.js",
-				"default": "./dist/sortable.js"
-			},
-			"./resize": {
-				"types": "./dist/resize.d.ts",
-				"import": "./dist/resize.js",
-				"default": "./dist/resize.js"
-			},
 			"./package.json": "./package.json"
 		}
 	},
 	"scripts": {
 		"compile": "tsdown",
 		"compile:watch": "tsdown --watch",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"prepublishOnly": "turbo compile",
 		"pub": "pnpm compile && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm compile && pnpm publish --dry-run --no-git-checks --access public"
 	},
 	"devDependencies": {
 		"@neodrag/core": "workspace:*",
-		"tsdown": "catalog:"
+		"jsdom": "^29.1.1",
+		"tsdown": "catalog:",
+		"vitest": "^3.2.4"
 	},
 	"peerDependencies": {
 		"@neodrag/core": "workspace:*"

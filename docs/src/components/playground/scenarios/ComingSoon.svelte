@@ -9,7 +9,6 @@
 </script>
 
 <div class="hp-coming-soon">
-	<p class="hp-coming-soon-glyph" aria-hidden="true">{world.glyph}</p>
 	<p class="hp-coming-soon-title">{world.label}</p>
 	<p class="hp-coming-soon-tagline">{world.tagline}</p>
 	<p class="hp-coming-soon-note">

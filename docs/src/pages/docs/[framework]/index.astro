@@ -6,14 +6,12 @@ import { getCollection, render } from 'astro:content';
 
 const { framework } = Astro.params;
 
+// One shared "Getting Started" page, rendered for every framework — the framework URL segment
+// drives the FrameworkSwitch, so there are no per-framework landing pages.
 const framework_collection = await getCollection('framework');
-const framework_entry = framework_collection.find((f) => f.id.includes(framework));
+const framework_entry = framework_collection[0];
 
-if (!framework_entry) {
-	return;
-}
-
-const current_framework = framework_entry.id.replace(/\d{2}-(.+)\/page/, '$1');
+const current_framework = framework ?? 'svelte';
 
 const { Content, headings } = await render(framework_entry);
 

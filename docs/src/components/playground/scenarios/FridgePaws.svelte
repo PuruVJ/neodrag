@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WorldMeta } from '../worlds';
-	import { Sortable } from '@neodrag/svelte/drop';
+	import { SortableList } from '@neodrag/svelte';
 
 	type Props = {
 		world: WorldMeta;
@@ -10,14 +10,14 @@
 
 	let words = $state(['purr', 'snack', 'meow', 'nap', 'zoomies']);
 
-	const list = new Sortable({
-		items: () => words,
-		keyBy: (word) => word,
-		mode: 'swap',
-		onReorder: (next) => {
+	const list = new SortableList({
+		get items() {
+			return words;
+		},
+		axis: 'y',
+		onReorder: (next: string[]) => {
 			words = next;
 		},
-		strategy: 'vertical',
 	});
 </script>
 
@@ -29,14 +29,14 @@
 
 	<p class="pg-scene-kicker">Sortable · swap</p>
 
-	<ul class="fridge-magnet-list" {...list.container}>
+	<ul class="fridge-magnet-list" {...list.attach}>
 		{#each words as word, index (word)}
 			<li
 				class="fridge-magnet-row"
 				style:--magnet-tilt="{index % 2 === 0 ? '-2deg' : '2deg'}"
-				{...list.row()}
+				{...list.row(word)}
 			>
-				<button type="button" class="fridge-magnet" aria-label={word} {...list.item(word).target}>
+				<button type="button" class="fridge-magnet" aria-label={word}>
 					{word}
 				</button>
 			</li>

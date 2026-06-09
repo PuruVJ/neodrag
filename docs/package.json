@@ -14,6 +14,7 @@
 		"@fontsource-variable/inter": "^5.2.8",
 		"@fontsource-variable/jetbrains-mono": "^5.2.5",
 		"@fontsource/plus-jakarta-sans": "^5.0.18",
+		"@neodrag/core": "workspace:*",
 		"@neodrag/svelte": "workspace:*",
 		"astro-seo": "^0.8.4",
 		"lightningcss": "^1.30.1",

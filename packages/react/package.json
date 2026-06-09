@@ -34,26 +34,6 @@
 			"import": "./src/index.ts",
 			"default": "./src/index.ts"
 		},
-		"./plugins": {
-			"types": "./src/plugins.ts",
-			"import": "./src/plugins.ts",
-			"default": "./src/plugins.ts"
-		},
-		"./drop": {
-			"types": "./src/drop/index.ts",
-			"import": "./src/drop/index.ts",
-			"default": "./src/drop/index.ts"
-		},
-		"./sortable": {
-			"types": "./src/sortable/index.ts",
-			"import": "./src/sortable/index.ts",
-			"default": "./src/sortable/index.ts"
-		},
-		"./resize": {
-			"types": "./src/resize.ts",
-			"import": "./src/resize.ts",
-			"default": "./src/resize.ts"
-		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -62,26 +42,6 @@
 				"types": "./dist/index.d.ts",
 				"import": "./dist/index.js",
 				"default": "./dist/index.js"
-			},
-			"./plugins": {
-				"types": "./dist/plugins.d.ts",
-				"import": "./dist/plugins.js",
-				"default": "./dist/plugins.js"
-			},
-			"./drop": {
-				"types": "./dist/drop/index.d.ts",
-				"import": "./dist/drop/index.js",
-				"default": "./dist/drop/index.js"
-			},
-			"./sortable": {
-				"types": "./dist/sortable/index.d.ts",
-				"import": "./dist/sortable/index.js",
-				"default": "./dist/sortable/index.js"
-			},
-			"./resize": {
-				"types": "./dist/resize.d.ts",
-				"import": "./dist/resize.js",
-				"default": "./dist/resize.js"
 			},
 			"./package.json": "./package.json"
 		}
