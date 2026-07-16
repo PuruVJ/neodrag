@@ -1137,6 +1137,10 @@ export class Neodrag {
 
 	#destroyDrag(inst: DragInstance) {
 		measureCost(this, 'bind.destroy', () => {
+			if (this.#lastResult === inst.rootNode) {
+				this.#lastTarget = null;
+				this.#lastResult = null;
+			}
 			if (this.#activeSource === inst && inst.isInteracting) {
 				inst.cancelled = true;
 				this.#endActiveInteraction('cancel');
@@ -1575,4 +1579,3 @@ export class Neodrag {
 		inst.effects.clear();
 	}
 }
-

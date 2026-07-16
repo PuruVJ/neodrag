@@ -147,6 +147,32 @@ describe('engine session lifecycle', () => {
 		neodrag.dispose();
 	});
 
+	it('reuses a cached child target after its drag source is destroyed', () => {
+		const neodrag = engine();
+		const rootA = createBox();
+		const rootB = createBox();
+		rootB.style.left = '200px';
+		const child = document.createElement('button');
+		rootA.appendChild(child);
+
+		const first = neodrag.draggable(rootA, []);
+		pointer(child, 'pointerdown', 60, 60);
+		pointer(child, 'pointerup', 60, 60);
+		first.destroy();
+		rootA.remove();
+
+		rootB.appendChild(child);
+		neodrag.draggable(rootB, []);
+		pointer(child, 'pointerdown', 210, 60);
+		pointer(child, 'pointermove', 225, 75);
+		pointer(child, 'pointermove', 240, 90);
+		pointer(child, 'pointerup', 240, 90);
+
+		const result = getComputedStyle(rootB).translate;
+		neodrag.dispose();
+		expect(result).toContain('30');
+	});
+
 	it('dispose removes global listeners so a new engine can be used', () => {
 		const box = createBox();
 		const first = engine();
