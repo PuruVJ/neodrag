@@ -17,6 +17,7 @@ import {
 	PointerSensor,
 } from '../../src/sensors/index.ts';
 import { programmaticToInput } from '../../src/interaction-input.ts';
+import { translate } from './_browser.ts';
 
 function makeNode() {
 	const node = document.createElement('div');
@@ -76,7 +77,7 @@ describe('dnd/sensors barrel — real sensors integrate with the Interactions en
 			}),
 		);
 
-		expect(node.style.translate).toBe('50px 30px');
+		expect(translate(node)).toEqual({ x: 50, y: 30 });
 		dnd.dispose();
 	});
 
@@ -149,7 +150,7 @@ describe('dnd/sensors barrel — real sensors integrate with the Interactions en
 				pointerId: 3,
 			}),
 		);
-		expect(node.style.translate).toBe('20px 0px');
+		expect(translate(node)).toEqual({ x: 20, y: 0 });
 		dnd.dispose();
 	});
 

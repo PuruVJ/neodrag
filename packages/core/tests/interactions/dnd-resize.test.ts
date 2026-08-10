@@ -4,19 +4,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { Interactions } from '../../src/engine.ts';
 import { programmaticToInput } from '../../src/interaction-input.ts';
+import { mockRect } from './_browser.ts';
 import { Resize, type ResizeOptions } from '../../src/resize/resize.ts';
 
-function mockRect(el: HTMLElement, rect: { left: number; top: number; right: number; bottom: number }) {
-	el.getBoundingClientRect = () =>
-		({
-			...rect,
-			width: rect.right - rect.left,
-			height: rect.bottom - rect.top,
-			x: rect.left,
-			y: rect.top,
-			toJSON() {},
-		}) as DOMRect;
-}
 
 function input(target: HTMLElement, phase: 'start' | 'move' | 'end', x: number, y: number) {
 	return programmaticToInput({ phase, clientX: x, clientY: y, pointerId: 1, target });

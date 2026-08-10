@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { Interactions } from '../../src/engine.ts';
 import { Resize, type ResizeEdge, type ResizeOptions } from '../../src/resize/resize.ts';
 import type { CollabOp, LocalPresence, ResizeOp } from '../../src/collab-types.ts';
-import { input, mockRect } from './_browser.ts';
+import { input, mockRect, translate } from './_browser.ts';
 
 
 function setup(options: ResizeOptions = {}, edge: ResizeEdge = 'se') {
@@ -189,8 +189,7 @@ describe('Resize collab seam — position sync (west/north)', () => {
 		handle.applyExternal({ type: 'resize', target: 'panel', width: 140, height: 120, left: -40, top: -40 });
 		expect(box.style.width).toBe('140px');
 		expect(box.style.height).toBe('120px');
-		expect(box.style.left).toBe('-40px');
-		expect(box.style.top).toBe('-40px');
+		expect(translate(box)).toEqual({ x: -40, y: -40 });
 	});
 
 	it('a remote size-only op (east/south peer) leaves position untouched', () => {
@@ -207,10 +206,9 @@ describe('Resize collab seam — position sync (west/north)', () => {
 		const { box, handle } = setup({}, 'nw');
 		handle.applyExternal({ type: 'resize', target: 'panel', width: 100, height: 80, left: 0, top: 0 }); // home
 		handle.showRemotePresence({ type: 'resize', target: 'panel', peerId: 'A', width: 140, height: 120, left: -40, top: -40 });
-		expect(box.style.left).toBe('-40px');
+		expect(translate(box)).toEqual({ x: -40, y: -40 });
 		handle.clearRemotePresence('A');
-		expect(box.style.left).toBe('0px');
-		expect(box.style.top).toBe('0px');
+		expect(translate(box)).toEqual({ x: 0, y: 0 });
 	});
 
 	it('SVG geometry syncs position via x/y attributes', () => {

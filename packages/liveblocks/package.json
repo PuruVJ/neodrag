@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/liveblocks",
-	"version": "3.0.0-next.10",
+	"version": "3.0.0-next.11",
 	"description": "Liveblocks backend adapter for neodrag's collaborative Room 😉",
 	"keywords": [
 		"collab",

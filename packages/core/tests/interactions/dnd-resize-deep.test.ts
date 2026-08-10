@@ -4,6 +4,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { Interactions } from '../../src/engine.ts';
 import { programmaticToInput } from '../../src/interaction-input.ts';
+import { mockRect } from './_browser.ts';
 import {
 	clampSizeToBounds,
 	Resize,
@@ -12,20 +13,6 @@ import {
 } from '../../src/resize/resize.ts';
 import { preserveUnits } from '../../src/resize/preserve-units.ts';
 
-function mockRect(
-	el: Element,
-	rect: { left: number; top: number; right: number; bottom: number },
-) {
-	el.getBoundingClientRect = () =>
-		({
-			...rect,
-			width: rect.right - rect.left,
-			height: rect.bottom - rect.top,
-			x: rect.left,
-			y: rect.top,
-			toJSON() {},
-		}) as DOMRect;
-}
 
 function input(target: Element, phase: 'start' | 'move' | 'end', x: number, y: number) {
 	return programmaticToInput({ phase, clientX: x, clientY: y, pointerId: 1, target });

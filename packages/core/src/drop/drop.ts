@@ -334,6 +334,8 @@ export interface DropOptions {
 	priority?: number;
 	/** Grow the hit rect by N px on each side. */
 	hitExpand?: number;
+	/** When true, the zone is skipped during hit-testing — no enter/over/leave/drop. */
+	disabled?: boolean;
 	/** Opt this zone into OS drag-and-drop (files / selected text). Arms the native sensor on the
 	 * shared engine; the drop arrives through `onDrop` with `e.files` / `e.text`. */
 	native?: boolean;
@@ -375,6 +377,8 @@ const DROP_MARKER = 'data-neodrag-over';
 export const REMOTE_HOVER_ATTR = 'data-neodrag-remote-hover';
 /** Marks the floating cursor dot rendered for a remote peer's hover (value = peer id). */
 export const REMOTE_HOVER_MARKER_ATTR = 'data-neodrag-remote-hover-marker';
+/** Optional label on the remote-hover marker — the dragged item's sortable key when known. */
+export const REMOTE_HOVER_ITEM_ATTR = 'data-neodrag-remote-hover-item';
 
 /** In-flight drop-hover presence — the `drop-hover` variant of the unified presence frame. */
 export type DropHoverPresence = Extract<LocalPresence, { type: 'drop-hover' }>;
@@ -446,6 +450,7 @@ export class DropHandle {
 	}
 
 	destroy(): void {
+		this.#drop.clearRemotePresence(this.#state);
 		this.#drop._unbind(this.#state.node);
 		this.#state.node.removeAttribute(DROP_MARKER);
 	}
@@ -569,6 +574,10 @@ export class Drop implements Capability {
 			// A native (OS) drag only lands on zones that opted in with `native: true`; a pointer drag
 			// never lands on a native-only intent's own anchor node.
 			if (native ? !state.options.native : node === drag_node) {
+				state.rect = null;
+				continue;
+			}
+			if (state.options.disabled) {
 				state.rect = null;
 				continue;
 			}
@@ -706,6 +715,8 @@ export class Drop implements Capability {
 		}
 		marker.style.left = `${frame.x}px`;
 		marker.style.top = `${frame.y}px`;
+		if (frame.itemId) marker.setAttribute(REMOTE_HOVER_ITEM_ATTR, frame.itemId);
+		else marker.removeAttribute(REMOTE_HOVER_ITEM_ATTR);
 	}
 
 	/** Clear a remote peer's hover from `state`'s zone (or all peers when none is given). @internal */

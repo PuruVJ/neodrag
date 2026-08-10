@@ -848,6 +848,8 @@ const INDICATOR_ATTR = 'data-neodrag-sortable-indicator';
 const GHOST_ATTR = 'data-neodrag-sortable-ghost';
 /** Marks a placeholder rendered for a *remote* peer's in-flight reorder (their ghost in our list). */
 const REMOTE_GHOST_ATTR = 'data-neodrag-sortable-remote-ghost';
+/** Floating clone of a remote peer's dragged item (Room `mirror` mode). */
+const REMOTE_MIRROR_ATTR = 'data-neodrag-sortable-remote-mirror';
 
 export type SortStrategy = 'list' | 'grid';
 
@@ -902,6 +904,8 @@ export interface SortableOptions<T = unknown> {
 	 * on a boundary. Default 3.
 	 */
 	hysteresis?: number;
+	/** When true, the list ignores pointerdowns — no reorder starts. */
+	disabled?: boolean;
 }
 
 /** Ephemeral in-flight presence — broadcast by `@neodrag/collab`, never persisted. */
@@ -932,6 +936,8 @@ export class SortableContext<T = unknown> {
 	readonly presence_subscribers = new Set<(p: LocalPresence | null) => void>();
 	/** Remote peers' rendered ghost placeholders, keyed by peer id. */
 	readonly remote_ghosts = new Map<string, HTMLElement>();
+	/** Floating mirror clones for remote peers (when Room `mirror` is on), keyed by peer id. */
+	readonly remote_mirrors = new Map<string, HTMLElement>();
 	constructor(
 		readonly container: HTMLElement,
 		public options: SortableOptions<T>,
@@ -1134,7 +1140,10 @@ export class Sortable implements Capability {
 			let owner = el.parentElement;
 			while (owner) {
 				const ctx = this.#contexts.get(owner);
-				if (ctx) return { node: el, data: { ctx, key: el.getAttribute(SORTABLE_KEY_ATTR)! } };
+				if (ctx) {
+					if (ctx.options.disabled) return null;
+					return { node: el, data: { ctx, key: el.getAttribute(SORTABLE_KEY_ATTR)! } };
+				}
 				owner = owner.parentElement;
 			}
 		}
@@ -1756,43 +1765,141 @@ export class Sortable implements Capability {
 		}
 	}
 
-	/** Render a remote peer's in-flight reorder as a ghost placeholder at its insert slot. @internal */
+	/** Render a remote peer's in-flight reorder on this list's home row (and optional mirror). @internal */
 	showRemotePresence(
 		ctx: SortableContext,
 		frame: Extract<PresenceFrame, { type: 'sortable' }>,
-		_opts?: { mirror?: unknown },
+		opts?: { mirror?: unknown },
 	): void {
 		// Only the frame's *target* list shows the ghost; if this peer moved away from us, clear ours.
 		if (frame.target !== ctx.targetId) {
 			this.clearRemotePresence(ctx, frame.peerId);
 			return;
 		}
-		let ghost = ctx.remote_ghosts.get(frame.peerId);
-		if (!ghost) {
-			ghost = document.createElement('li');
-			ghost.setAttribute(REMOTE_GHOST_ATTR, frame.peerId);
-			ghost.style.pointerEvents = 'none';
-			ctx.remote_ghosts.set(frame.peerId, ghost);
-		}
-		const real_children = Array.from(ctx.container.children).filter((c) =>
-			c.hasAttribute(SORTABLE_KEY_ATTR),
+		const home = ctx.container.querySelector<HTMLElement>(
+			`[${SORTABLE_KEY_ATTR}="${CSS.escape(frame.itemId)}"]`,
 		);
-		const ref = real_children[frame.insertIndex] ?? null;
-		ctx.container.insertBefore(ghost, ref);
+		if (!home) return;
+
+		ctx.remote_ghosts.set(frame.peerId, home);
+		home.setAttribute(REMOTE_GHOST_ATTR, frame.peerId);
+
+		const mirror = opts?.mirror;
+		if (mirror) {
+			home.style.opacity = '0';
+			clearTranslate(home);
+			this.#ensureRemoteMirror(ctx, frame, home, mirror);
+			return;
+		}
+
+		// No mirror: slide the home row toward the destination slot so siblings don't overlap it.
+		this.#clearRemoteMirror(ctx, frame.peerId);
+		home.style.opacity = '';
+		const items = this.#measure(ctx);
+		const from = items.findIndex((it) => it.key === frame.itemId);
+		if (from < 0) return;
+		const from_rect = items[from]!.rect;
+		const axis = ctx.axis;
+		let dest = axis === 'y' ? from_rect.top : from_rect.left;
+		const to = frame.insertIndex;
+		if (items.length === 0) {
+			/* keep */
+		} else if (to <= 0) {
+			dest = axis === 'y' ? items[0]!.rect.top : items[0]!.rect.left;
+		} else if (to >= items.length) {
+			const last = items[items.length - 1]!;
+			dest = axis === 'y' ? last.rect.bottom : last.rect.right;
+		} else {
+			const at = items[to]!;
+			dest = axis === 'y' ? at.rect.top : at.rect.left;
+		}
+		const delta = dest - (axis === 'y' ? from_rect.top : from_rect.left);
+		if (axis === 'y') applyTranslate(home, 0, delta);
+		else applyTranslate(home, delta, 0);
+	}
+
+	#ensureRemoteMirror(
+		ctx: SortableContext,
+		frame: Extract<PresenceFrame, { type: 'sortable' }>,
+		home: HTMLElement,
+		mirror: unknown,
+	): void {
+		const mount = mirror === true ? document.body : mirror instanceof HTMLElement ? mirror : null;
+		if (!mount) return;
+		let clone = ctx.remote_mirrors.get(frame.peerId);
+		if (!clone) {
+			clone = home.cloneNode(true) as HTMLElement;
+			clone.removeAttribute(SORTABLE_KEY_ATTR);
+			clone.removeAttribute(REMOTE_GHOST_ATTR);
+			clone.setAttribute(REMOTE_MIRROR_ATTR, frame.peerId);
+			clone.style.pointerEvents = 'none';
+			clone.style.margin = '0';
+			mount.appendChild(clone);
+			ctx.remote_mirrors.set(frame.peerId, clone);
+		}
+		const home_rect = home.getBoundingClientRect();
+		const items = this.#measure(ctx);
+		const to = frame.insertIndex;
+		let top = home_rect.top;
+		let left = home_rect.left;
+		if (items.length) {
+			if (to <= 0) {
+				top = items[0]!.rect.top;
+				left = items[0]!.rect.left;
+			} else if (to >= items.length) {
+				const last = items[items.length - 1]!;
+				top = last.rect.bottom;
+				left = last.rect.left;
+			} else {
+				top = items[to]!.rect.top;
+				left = items[to]!.rect.left;
+			}
+		}
+		if (mirror === true) {
+			clone.style.position = 'fixed';
+			clone.style.left = `${left}px`;
+			clone.style.top = `${top}px`;
+		} else {
+			const mount_el = mount as HTMLElement;
+			const mr = mount_el.getBoundingClientRect();
+			clone.style.position = 'absolute';
+			clone.style.left = `${left - mr.left}px`;
+			clone.style.top = `${top - mr.top}px`;
+		}
+		clone.style.width = `${home_rect.width}px`;
+		clone.style.height = `${home_rect.height}px`;
+	}
+
+	#clearRemoteMirror(ctx: SortableContext, peer_id?: string): void {
+		if (peer_id) {
+			const m = ctx.remote_mirrors.get(peer_id);
+			if (m) {
+				m.remove();
+				ctx.remote_mirrors.delete(peer_id);
+			}
+			return;
+		}
+		for (const m of ctx.remote_mirrors.values()) m.remove();
+		ctx.remote_mirrors.clear();
 	}
 
 	/** Remove a remote peer's ghost (or all ghosts when no peer id is given). @internal */
 	clearRemotePresence(ctx: SortableContext, peer_id?: string, _opts?: { ease?: boolean }): void {
+		const clear_one = (peer: string, g: HTMLElement): void => {
+			g.removeAttribute(REMOTE_GHOST_ATTR);
+			g.style.opacity = '';
+			clearTranslate(g);
+			ctx.remote_ghosts.delete(peer);
+			this.#clearRemoteMirror(ctx, peer);
+		};
 		if (peer_id) {
 			const g = ctx.remote_ghosts.get(peer_id);
-			if (g) {
-				g.remove();
-				ctx.remote_ghosts.delete(peer_id);
-			}
+			if (g) clear_one(peer_id, g);
+			else this.#clearRemoteMirror(ctx, peer_id);
 			return;
 		}
-		for (const g of ctx.remote_ghosts.values()) g.remove();
-		ctx.remote_ghosts.clear();
+		for (const [peer, g] of [...ctx.remote_ghosts.entries()]) clear_one(peer, g);
+		this.#clearRemoteMirror(ctx);
 	}
 
 	#measure(ctx: SortableContext): ItemLayout[] {

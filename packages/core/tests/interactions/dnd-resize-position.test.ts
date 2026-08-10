@@ -14,7 +14,7 @@ import {
 	TRANSLATE_DRAG,
 	TRANSLATE_RESIZE,
 } from '../../src/transform.ts';
-import { input, mockRect } from './_browser.ts';
+import { input, mockRect, translate } from './_browser.ts';
 
 /** A 100×80 box anchored at (0,0) with a handle for `edge`. */
 function setup(edge: ResizeEdge, options: ResizeOptions = {}) {
@@ -47,7 +47,7 @@ describe('Resize position channel', () => {
 		drive('start', 0, 40);
 		drive('move', -30, 40); // pull the left edge 30px left
 		expect(box.style.width).toBe('130px');
-		expect(box.style.translate).toBe('-30px 0px');
+		expect(translate(box)).toEqual({ x: -30, y: 0 });
 		expect(handle.position).toEqual({ x: -30, y: 0 });
 		drive('end', -30, 40);
 	});
@@ -57,7 +57,7 @@ describe('Resize position channel', () => {
 		drive('start', 50, 0);
 		drive('move', 50, -20);
 		expect(box.style.height).toBe('100px');
-		expect(box.style.translate).toBe('0px -20px');
+		expect(translate(box)).toEqual({ x: 0, y: -20 });
 		drive('end', 50, -20);
 	});
 
@@ -67,7 +67,7 @@ describe('Resize position channel', () => {
 		drive('move', -10, -25);
 		expect(box.style.width).toBe('110px');
 		expect(box.style.height).toBe('105px');
-		expect(box.style.translate).toBe('-10px -25px');
+		expect(translate(box)).toEqual({ x: -10, y: -25 });
 		drive('end', -10, -25);
 	});
 
@@ -87,7 +87,7 @@ describe('Resize position channel', () => {
 		drive('start', 0, 40);
 		drive('move', -200, 40);
 		expect(box.style.width).toBe('150px');
-		expect(box.style.translate).toBe('-50px 0px'); // right edge (100) stays put
+		expect(translate(box)).toEqual({ x: -50, y: 0 }); // right edge (100) stays put
 		drive('end', -200, 40);
 	});
 
@@ -110,7 +110,7 @@ describe('Resize controlled inputs', () => {
 
 	it('applies a controlled position at bind', () => {
 		const { box, handle } = setup('se', { position: { x: 12, y: 8 } });
-		expect(box.style.translate).toBe('12px 8px');
+		expect(translate(box)).toEqual({ x: 12, y: 8 });
 		expect(handle.position).toEqual({ x: 12, y: 8 });
 	});
 
@@ -119,7 +119,7 @@ describe('Resize controlled inputs', () => {
 		handle.update({ size: { width: 200, height: 160 } });
 		handle.update({ position: { x: 7, y: 3 } });
 		expect(box.style.width).toBe('200px');
-		expect(box.style.translate).toBe('7px 3px');
+		expect(translate(box)).toEqual({ x: 7, y: 3 });
 	});
 
 	it('ignores controlled writes mid-gesture (the gesture owns the node)', () => {
@@ -127,7 +127,7 @@ describe('Resize controlled inputs', () => {
 		drive('start', 0, 40);
 		drive('move', -30, 40);
 		handle.update({ position: { x: 999, y: 999 } }); // must not fight the live resize
-		expect(box.style.translate).toBe('-30px 0px');
+		expect(translate(box)).toEqual({ x: -30, y: 0 });
 		drive('end', -30, 40);
 	});
 });
@@ -137,13 +137,13 @@ describe('Additive translate composition (drag + resize share a node)', () => {
 		const node = document.createElement('div');
 		applyTranslate(node, 30, 0, TRANSLATE_DRAG);
 		applyTranslate(node, -20, 0, TRANSLATE_RESIZE);
-		expect(node.style.translate).toBe('10px 0px'); // 30 + (-20)
+		expect(translate(node)).toEqual({ x: 10, y: 0 }); // 30 + (-20)
 
 		// Updating one part leaves the other intact — no jump when switching gestures.
 		applyTranslate(node, 30, 12, TRANSLATE_DRAG);
-		expect(node.style.translate).toBe('10px 12px');
+		expect(translate(node)).toEqual({ x: 10, y: 12 });
 
 		clearTranslate(node, TRANSLATE_RESIZE);
-		expect(node.style.translate).toBe('30px 12px'); // only the resize part removed
+		expect(translate(node)).toEqual({ x: 30, y: 12 }); // only the resize part removed
 	});
 });

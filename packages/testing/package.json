@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/test",
-	"version": "3.0.0-next.10",
+	"version": "3.0.0-next.11",
 	"description": "Browser test helpers for Neodrag (Vitest + Playwright)",
 	"license": "MIT",
 	"author": "Puru Vijay",

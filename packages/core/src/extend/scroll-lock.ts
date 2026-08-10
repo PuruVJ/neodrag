@@ -45,12 +45,15 @@ export function scrollLock(options: ScrollLockOptions = {}): DragPlugin {
 				overflow: target.style.getPropertyValue('overflow'),
 			};
 			target.style.setProperty('user-select', 'none');
+			target.style.setProperty('-webkit-user-select', 'none');
 			if (!allow_scrollbar) target.style.setProperty('overflow', 'hidden');
 			target.style.setProperty('touch-action', touch_action_for(lock_axis));
 		},
 		onEnd: () => {
 			if (!target || !saved) return;
 			target.style.setProperty('user-select', saved.user_select);
+			if (saved.user_select) target.style.setProperty('-webkit-user-select', saved.user_select);
+			else target.style.removeProperty('-webkit-user-select');
 			target.style.setProperty('touch-action', saved.touch_action);
 			target.style.setProperty('overflow', saved.overflow);
 			target = null;

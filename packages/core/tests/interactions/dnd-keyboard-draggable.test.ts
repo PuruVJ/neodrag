@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { Interactions } from '../../src/engine.ts';
 import { Drag } from '../../src/drag/drag.ts';
 import { getKeyboardDragConfig, keyboardDraggable } from '../../src/sensors/keyboard.ts';
+import { translate } from './_browser.ts';
 
 function makeNode() {
 	const node = document.createElement('div');
@@ -90,7 +91,7 @@ describe('keyboard drag — end to end through the Interactions engine', () => {
 		press(node, 'ArrowRight'); // move +10x
 		press(node, 'Space'); // commit
 
-		expect(node.style.translate).toBe('10px 0px');
+		expect(translate(node)).toEqual({ x: 10, y: 0 });
 		dnd.dispose();
 	});
 
@@ -103,7 +104,7 @@ describe('keyboard drag — end to end through the Interactions engine', () => {
 		press(node, 'ArrowDown');
 		press(node, 'Space');
 
-		expect(node.style.translate).toBe('20px 10px');
+		expect(translate(node)).toEqual({ x: 20, y: 10 });
 		dnd.dispose();
 	});
 
@@ -115,7 +116,7 @@ describe('keyboard drag — end to end through the Interactions engine', () => {
 		press(node, 'ArrowUp');
 		press(node, 'Space');
 
-		expect(node.style.translate).toBe('-8px -8px');
+		expect(translate(node)).toEqual({ x: -8, y: -8 });
 		dnd.dispose();
 	});
 
@@ -127,7 +128,7 @@ describe('keyboard drag — end to end through the Interactions engine', () => {
 		press(node, 'ArrowRight'); // honored
 		press(node, 'Space');
 
-		expect(node.style.translate).toBe('10px 0px');
+		expect(translate(node)).toEqual({ x: 10, y: 0 });
 		dnd.dispose();
 	});
 
@@ -136,7 +137,7 @@ describe('keyboard drag — end to end through the Interactions engine', () => {
 
 		press(node, 'Space');
 		press(node, 'ArrowDown'); // +5y committed live
-		expect(node.style.translate).toBe('0px 5px');
+		expect(translate(node)).toEqual({ x: 0, y: 5 });
 
 		// Escape cancels the active interaction.
 		document.documentElement.dispatchEvent(

@@ -106,7 +106,7 @@ describe('scrollLock (use:[] seam)', () => {
 		p.onStart!(ctx(container, 0, 0));
 		expect(container.style.getPropertyValue('overflow')).toBe('hidden');
 		expect(container.style.getPropertyValue('touch-action')).toBe('none');
-		expect(container.style.getPropertyValue('user-select')).toBe('none');
+		expect(container.style.getPropertyValue('user-select') || container.style.getPropertyValue('-webkit-user-select')).toBe('none');
 	});
 
 	it('restores the original inline styles on end', () => {

@@ -40,7 +40,7 @@ describe('Drag capability (DOM)', () => {
 		dnd.host.onInteractionEnd(input(node, 'end', 150, 140));
 
 		expect(events).toEqual(['start', 'drag', 'drag', 'end']);
-		expect(node.style.translate).toBe('50px 40px');
+		expect(translate(node)).toEqual({ x: 50, y: 40 });
 		expect(node.hasAttribute('data-neodrag-dragging')).toBe(false);
 	});
 
@@ -53,7 +53,7 @@ describe('Drag capability (DOM)', () => {
 		dnd.host.onInteractionStart(input(node, 'start', 0, 0));
 		dnd.host.onInteractionMove(input(node, 'move', 20, 99));
 		dnd.host.onInteractionEnd(input(node, 'end', 20, 99));
-		expect(node.style.translate).toBe('20px 0px');
+		expect(translate(node)).toEqual({ x: 20, y: 0 });
 	});
 
 	it('respects disabled (never starts)', () => {
@@ -85,7 +85,7 @@ describe('Drag capability (DOM)', () => {
 		dnd.host.onInteractionStart(input(node, 'start', 0, 0));
 		dnd.host.onInteractionMove(input(node, 'move', 23, 47));
 		dnd.host.onInteractionEnd(input(node, 'end', 23, 47));
-		expect(node.style.translate).toBe('20px 50px');
+		expect(translate(node)).toEqual({ x: 20, y: 50 });
 	});
 
 	it('threshold delays start until the pointer moves far enough', () => {

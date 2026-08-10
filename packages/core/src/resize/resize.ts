@@ -235,6 +235,17 @@ function applySize(node: DndNode, width: number, height: number): void {
 	el.style.height = `${height}px`;
 }
 
+/** Apply a far-edge pin offset. HTML uses the shared translate composer; SVG geometry elements
+ * (`rect`, …) take `x`/`y` attributes (the collab op's `left`/`top` are those attribute values). */
+function applyPosition(node: DndNode, left: number, top: number): void {
+	if (is_svg_element(node) && SVG_GEOMETRY.has(node.tagName.toLowerCase())) {
+		node.setAttribute('x', String(left));
+		node.setAttribute('y', String(top));
+		return;
+	}
+	applyTranslate(node, left, top, TRANSLATE_RESIZE);
+}
+
 /** In-flight resize presence — the `resize` variant of the unified presence frame. */
 export type ResizePresence = {
 	type: 'resize';
@@ -415,12 +426,16 @@ export class Resize implements Capability {
 			);
 		}
 		this.#nodes.set(node, state);
-		// Seed any controlled size/position so a fully-controlled resizable renders correctly before
-		// the first gesture (mirrors how drag applies an initial `position`).
+		// Seed size from controlled input or the current layout box so presence-clear can revert to
+		// a real home size before any local gesture has run (otherwise width/height stay 0).
 		if (options.size) {
 			state.width = options.size.width;
 			state.height = options.size.height;
 			applySize(node, state.width, state.height);
+		} else {
+			const rect = node.getBoundingClientRect();
+			state.width = rect.width;
+			state.height = rect.height;
 		}
 		if (options.position) {
 			state.offset.x = options.position.x;
@@ -541,19 +556,27 @@ export class Resize implements Capability {
 		state.options.onResizeEnd?.(state.event(session.input));
 		const changed = state.width !== state.initial_width || state.height !== state.initial_height;
 		if (changed) {
-			this.#emitCommit(state, {
-				type: 'resize',
-				target: state.targetId,
-				width: state.width,
-				height: state.height,
-				left: state.offset.x,
-				top: state.offset.y,
-			});
+			this.#emitCommit(state, this.#resizeOp(state));
 			state.pending_remote = null;
 		} else if (state.pending_remote) {
 			this.applyExternal(state, state.pending_remote);
 		}
 		for (const fn of state.presence_subscribers) fn(null);
+	}
+
+	/** Build a resize op. `left`/`top` only ride along for edges that pin the far side (`w`/`n`). */
+	#resizeOp(state: ResizeState): ResizeOp {
+		const op: ResizeOp = {
+			type: 'resize',
+			target: state.targetId,
+			width: state.width,
+			height: state.height,
+		};
+		if (state.edge.includes('w') || state.edge.includes('n')) {
+			op.left = state.offset.x;
+			op.top = state.offset.y;
+		}
+		return op;
 	}
 
 	#emitCommit(state: ResizeState, op: ResizeOp): void {
@@ -568,9 +591,11 @@ export class Resize implements Capability {
 			target: state.targetId,
 			width: state.width,
 			height: state.height,
-			left: state.offset.x,
-			top: state.offset.y,
 		};
+		if (state.edge.includes('w') || state.edge.includes('n')) {
+			frame.left = state.offset.x;
+			frame.top = state.offset.y;
+		}
 		for (const fn of state.presence_subscribers) fn(frame);
 	}
 
@@ -588,7 +613,7 @@ export class Resize implements Capability {
 		if (op.top !== undefined) state.offset.y = op.top;
 		if (state.node instanceof HTMLElement && state.node.style) state.node.style.transition = REMOTE_RESIZE_EASE;
 		applySize(state.node, op.width, op.height);
-		applyTranslate(state.node, state.offset.x, state.offset.y, TRANSLATE_RESIZE);
+		applyPosition(state.node, state.offset.x, state.offset.y);
 	}
 
 	showRemotePresence(state: ResizeState, frame: ResizePresence & { peerId: string }): void {
@@ -596,7 +621,7 @@ export class Resize implements Capability {
 		state.remote_peer = frame.peerId;
 		if (state.node instanceof HTMLElement && state.node.style) state.node.style.transition = REMOTE_RESIZE_EASE;
 		applySize(state.node, frame.width, frame.height);
-		applyTranslate(state.node, frame.left ?? state.offset.x, frame.top ?? state.offset.y, TRANSLATE_RESIZE);
+		applyPosition(state.node, frame.left ?? state.offset.x, frame.top ?? state.offset.y);
 	}
 
 	clearRemotePresence(state: ResizeState, peerId?: string): void {
@@ -605,7 +630,7 @@ export class Resize implements Capability {
 		if (state.resizing) return;
 		if (state.node instanceof HTMLElement && state.node.style) state.node.style.transition = REMOTE_RESIZE_EASE;
 		applySize(state.node, state.width, state.height);
-		applyTranslate(state.node, state.offset.x, state.offset.y, TRANSLATE_RESIZE);
+		applyPosition(state.node, state.offset.x, state.offset.y);
 	}
 
 	#findHandle(input: InteractionInput): { node: DndNode; edge: ResizeEdge } | null {

@@ -13,7 +13,17 @@ const ctx = (): DragEventData => ({
 const nav = navigator as Navigator & { vibrate?: (p: number | number[]) => boolean };
 
 afterEach(() => {
-	delete nav.vibrate;
+	try {
+		delete nav.vibrate;
+	} catch {
+		/* Chromium's navigator.vibrate is often non-configurable */
+	}
+	Object.defineProperty(nav, 'vibrate', {
+		configurable: true,
+		enumerable: true,
+		writable: true,
+		value: undefined,
+	});
 	vi.restoreAllMocks();
 });
 
@@ -78,8 +88,9 @@ describe('haptics() — navigator.vibrate firing', () => {
 
 describe('haptics() — graceful degradation', () => {
 	it('is a no-op when the Vibration API is unsupported (vibrate absent)', () => {
-		// No nav.vibrate defined — the optional chaining must swallow it.
-		expect('vibrate' in nav && nav.vibrate).toBeFalsy();
+		// Force-absent vibrate (Chromium ships a non-deletable native impl).
+		Object.defineProperty(nav, 'vibrate', { configurable: true, value: undefined });
+		expect(nav.vibrate).toBeFalsy();
 		const p = haptics();
 		expect(() => {
 			p.onStart!(ctx());
