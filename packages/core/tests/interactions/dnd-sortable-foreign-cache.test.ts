@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment jsdom
+ */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Interactions } from '../../src/engine.ts';
 import { Sortable } from '../../src/sortable/sortable.ts';

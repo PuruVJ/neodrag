@@ -1102,11 +1102,15 @@ export class Sortable implements Capability {
 	// Per-drag foreign-rect caches (grouped/kanban). A foreign container's item rects + own
 	// rect are measured once and reused every move — turning the O(containers×items) reflows
 	// the proximity scan would otherwise do *per move* into O(containers×items) *per drag*. A
-	// scroll/resize during the drag invalidates them so the next move re-measures.
+	// scroll/resize during the drag invalidates them so the next move re-measures. Nodes are
+	// cached with the rects so gap projection/clear can reuse them without re-querying the DOM
+	// on every insert-index change.
 	readonly #foreign_item_rects = new Map<symbol, ItemRect[]>();
+	readonly #foreign_nodes = new Map<symbol, HTMLElement[]>();
 	readonly #foreign_container_rects = new Map<symbol, DOMRect>();
 	readonly #on_foreign_invalidate = (): void => {
 		this.#foreign_item_rects.clear();
+		this.#foreign_nodes.clear();
 		this.#foreign_container_rects.clear();
 	};
 	#unlisten_foreign_invalidation: Array<() => void> = [];
@@ -1185,6 +1189,7 @@ export class Sortable implements Capability {
 		this.#foreign_touched.clear();
 		if (ctx.options.group) {
 			this.#foreign_item_rects.clear();
+			this.#foreign_nodes.clear();
 			this.#foreign_container_rects.clear();
 			this.#setupForeignInvalidation();
 		}
@@ -1232,6 +1237,7 @@ export class Sortable implements Capability {
 		this.#intent = null;
 		this.#teardownForeignInvalidation();
 		this.#foreign_item_rects.clear();
+		this.#foreign_nodes.clear();
 		this.#foreign_container_rects.clear();
 		const ctx = intent.context;
 		// The gesture ended — tell subscribers presence is over (remote peers clear our ghost). The
@@ -1512,7 +1518,7 @@ export class Sortable implements Capability {
 		const gap = axis === 'x' ? drag_rect.width : drag_rect.height;
 		const duration = resolveAnimationDuration(target_ctx.options.animation);
 		const transition = duration > 0 ? `translate ${duration}ms ${FLIP_EASING}` : '';
-		const nodes = this.#orderedNodes(target_ctx);
+		const nodes = this.#foreignOrderedNodes(target_ctx);
 		for (let i = 0; i < nodes.length; i++) {
 			const n = nodes[i]!;
 			if (transition) {
@@ -1534,13 +1540,31 @@ export class Sortable implements Capability {
 		if (this.#foreign_gap_id == null) return;
 		const target_ctx = this.#contextById(this.#foreign_gap_id);
 		if (target_ctx) {
-			for (const n of this.#orderedNodes(target_ctx)) {
+			for (const n of this.#foreignOrderedNodes(target_ctx)) {
 				if (!ease) n.style.transition = '';
 				clearTranslate(n);
 			}
 		}
 		this.#foreign_gap_id = null;
 		this.#foreign_gap_at = -1;
+	}
+
+	/** Measure foreign item rects + nodes once per drag (invalidated on scroll/resize). */
+	#cacheForeign(ctx: SortableContext): { rects: ItemRect[]; nodes: HTMLElement[] } {
+		let rects = this.#foreign_item_rects.get(ctx.id);
+		let nodes = this.#foreign_nodes.get(ctx.id);
+		if (!rects || !nodes) {
+			const measured = this.#measure(ctx);
+			rects = this.#itemRects(measured);
+			nodes = measured.map((it) => it.node);
+			this.#foreign_item_rects.set(ctx.id, rects);
+			this.#foreign_nodes.set(ctx.id, nodes);
+		}
+		return { rects, nodes };
+	}
+
+	#foreignOrderedNodes(ctx: SortableContext): HTMLElement[] {
+		return this.#cacheForeign(ctx).nodes;
 	}
 
 	#transferContainer(ctx: SortableContext): TransferContainer {
@@ -1555,12 +1579,7 @@ export class Sortable implements Capability {
 				return ctx.axis;
 			},
 			rects() {
-				let cached = self.#foreign_item_rects.get(ctx.id);
-				if (!cached) {
-					cached = self.#itemRects(self.#measure(ctx));
-					self.#foreign_item_rects.set(ctx.id, cached);
-				}
-				return cached;
+				return self.#cacheForeign(ctx).rects;
 			},
 			rect() {
 				let cached = self.#foreign_container_rects.get(ctx.id);

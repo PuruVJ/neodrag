@@ -63,8 +63,8 @@ export async function assertDragInvariants(ctx: DragInvariantContext): Promise<v
 }
 
 export async function assertSortableInvariants(ctx: SortableInvariantContext): Promise<void> {
-	const keysAfter = [...ctx.list.querySelectorAll('[data-sortable-key]')].map((n) =>
-		n.getAttribute('data-sortable-key'),
+	const keysAfter = [...ctx.list.querySelectorAll('[data-neodrag-sortable-key]')].map((n) =>
+		n.getAttribute('data-neodrag-sortable-key'),
 	);
 	if (keysAfter.length !== ctx.keysBefore.length) {
 		throw new Error(

@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { Drag } from '../../src/drag/drag.ts';
 import { Interactions } from '../../src/engine.ts';
 import { programmaticToInput } from '../../src/interaction-input.ts';
+import { translate } from './_browser.ts';
 
 function makeNode(): HTMLElement {
 	const el = document.createElement('div');

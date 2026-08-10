@@ -222,8 +222,13 @@ export async function isCursorOverElement(element: Element): Promise<boolean> {
 export async function getElementCoords(
 	element: Element | { element(): Element | Promise<Element> },
 ): Promise<{ x: number; y: number }> {
+	if (element == null) {
+		throw new Error(
+			'Invalid element provided to getElementCoords. Expected DOM Element or testing wrapper with element() method.',
+		);
+	}
 	const resolved =
-		'element' in element && typeof element.element === 'function'
+		typeof element === 'object' && 'element' in element && typeof element.element === 'function'
 			? await element.element()
 			: (element as Element);
 	const domElement = resolved;
@@ -471,7 +476,10 @@ export type PointerDragOptions = {
 async function resolveDragElement(
 	element: Element | { element(): Element | Promise<Element> },
 ): Promise<Element> {
-	if ('element' in element && typeof element.element === 'function') {
+	if (element == null) {
+		throw new Error('resolveDragElement: element is null or undefined');
+	}
+	if (typeof element === 'object' && 'element' in element && typeof element.element === 'function') {
 		return element.element();
 	}
 	return element as Element;
@@ -613,8 +621,11 @@ export async function dragUsingKeyboard(
 	element: Element | { element(): Element },
 	delta: { deltaX: number; deltaY: number },
 ): Promise<void> {
+	if (element == null) {
+		throw new Error('dragUsingKeyboard: element is null or undefined');
+	}
 	const domElement =
-		'element' in element && typeof element.element === 'function'
+		typeof element === 'object' && 'element' in element && typeof element.element === 'function'
 			? element.element()
 			: (element as Element);
 

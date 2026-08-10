@@ -4,10 +4,25 @@ export type ResizeEdge = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
 
 export const RESIZE_HANDLE_ATTR = 'data-neodrag-resize-handle';
 
-export type ElementLike = Element | { element(): Element | Promise<Element> };
+const SORTABLE_KEY_ATTR = 'data-neodrag-sortable-key';
+
+export type ElementLike =
+	| Element
+	| { element(): Element | Promise<Element> }
+	| (() => Element | Promise<Element | null | undefined>);
 
 export async function resolveElement(el: ElementLike): Promise<Element> {
-	if ('element' in el && typeof el.element === 'function') {
+	if (el == null) {
+		throw new Error('resolveElement: element is null or undefined');
+	}
+	if (typeof el === 'function') {
+		const resolved = await el();
+		if (resolved == null) {
+			throw new Error('resolveElement: getter returned null or undefined');
+		}
+		return resolveElement(resolved);
+	}
+	if (typeof el === 'object' && 'element' in el && typeof el.element === 'function') {
 		return el.element();
 	}
 	return el as Element;
@@ -43,12 +58,12 @@ export async function resolveHandle(root: ElementLike, edge: ResizeEdge): Promis
 
 export async function sortableItems(list: ElementLike): Promise<Element[]> {
 	const dom = await resolveElement(list);
-	return [...dom.querySelectorAll('[data-sortable-key]')];
+	return [...dom.querySelectorAll(`[${SORTABLE_KEY_ATTR}]`)];
 }
 
 export async function keyAt(list: ElementLike, index: number): Promise<string | null> {
 	const items = await sortableItems(list);
-	return items[index]?.getAttribute('data-sortable-key') ?? null;
+	return items[index]?.getAttribute(SORTABLE_KEY_ATTR) ?? null;
 }
 
 export async function sortableItemAt(list: ElementLike, index: number): Promise<Element> {
@@ -89,12 +104,12 @@ export async function midpointBetween(a: ElementLike, b: ElementLike): Promise<P
 
 export async function indexOfSortableItem(item: ElementLike, list: ElementLike): Promise<number> {
 	const dom = await resolveElement(item);
-	const key = dom.getAttribute('data-sortable-key');
+	const key = dom.getAttribute(SORTABLE_KEY_ATTR);
 	const items = await sortableItems(list);
-	return items.findIndex((n) => n.getAttribute('data-sortable-key') === key);
+	return items.findIndex((n) => n.getAttribute(SORTABLE_KEY_ATTR) === key);
 }
 
 export async function keysFromList(list: ElementLike): Promise<string[]> {
 	const items = await sortableItems(list);
-	return items.map((n) => n.getAttribute('data-sortable-key')!).filter(Boolean);
+	return items.map((n) => n.getAttribute(SORTABLE_KEY_ATTR)!).filter(Boolean);
 }
