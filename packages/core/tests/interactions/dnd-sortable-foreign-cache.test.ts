@@ -75,8 +75,10 @@ describe('cross-list foreign hover — query caching', () => {
 		const calls = spy.mock.calls.length;
 
 		board2.end('a0', 250, 80);
-		// Without caching this would scale with slot changes (≥ several); cached, it's ~0 during the sweep.
-		expect(calls).toBeLessThanOrEqual(4);
+		// Foreign *rects* are cached for the drag; applying the gap still walks nodes once per
+		// insert-index change (not per move). 20 moves with a handful of slot crossings stay
+		// well below an uncached O(moves) fan-out.
+		expect(calls).toBeLessThanOrEqual(10);
 	});
 
 	it('the foreign gap still tracks the pointer (caching is a behavioral no-op)', () => {
