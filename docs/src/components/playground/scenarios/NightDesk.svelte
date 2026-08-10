@@ -25,6 +25,7 @@
 	}
 </script>
 
+<!-- `.desk` styling (positioning + radial glow) is the shared scene rule in PlaygroundStage. -->
 <div class="desk">
 	{#each panels as panel, i (panel.id)}
 		<PanelWindow
@@ -37,13 +38,3 @@
 		/>
 	{/each}
 </div>
-
-<style>
-	.desk {
-		position: relative;
-		width: 100%;
-		height: 100%;
-		min-height: 100%;
-		box-sizing: border-box;
-	}
-</style>

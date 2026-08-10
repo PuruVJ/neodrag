@@ -7,7 +7,8 @@ import {
 } from '../interaction-input.ts';
 import type { Point, RectLike } from '../drag/drag.ts';
 import type { Capability, DndNode, InteractionSession, ResolvedTarget } from '../types.ts';
-import { listen } from '../utils.ts';
+import { autoId, listen } from '../utils.ts';
+import type { CollabOp, LocalPresence, PresenceFrame } from '../collab-types.ts';
 
 /**
  * Collision ranking policies. `'pointer'` and `'closestCenter'` are the originals ported from
@@ -206,7 +207,7 @@ export function resolveSampler(mode: DropSampleMode | DropSampler | undefined): 
  */
 export class RafBatch<T> {
 	readonly #run: (value: T) => void;
-	#rafId = 0;
+	#raf_id = 0;
 	#pending: T | null = null;
 	#has = false;
 
@@ -216,16 +217,16 @@ export class RafBatch<T> {
 
 	/** True while a frame is queued but not yet fired. */
 	get scheduled(): boolean {
-		return this.#rafId !== 0;
+		return this.#raf_id !== 0;
 	}
 
 	/** Coalesce: store the latest value, schedule one frame if none is pending. */
 	schedule(value: T): void {
 		this.#pending = value;
 		this.#has = true;
-		if (this.#rafId) return;
-		this.#rafId = requestAnimationFrame(() => {
-			this.#rafId = 0;
+		if (this.#raf_id) return;
+		this.#raf_id = requestAnimationFrame(() => {
+			this.#raf_id = 0;
 			if (!this.#has) return;
 			const v = this.#pending as T;
 			this.#has = false;
@@ -244,9 +245,9 @@ export class RafBatch<T> {
 
 	/** Cancel a pending frame and drop the stored value without running. */
 	cancel(): void {
-		if (this.#rafId) {
-			cancelAnimationFrame(this.#rafId);
-			this.#rafId = 0;
+		if (this.#raf_id) {
+			cancelAnimationFrame(this.#raf_id);
+			this.#raf_id = 0;
 		}
 		this.#has = false;
 		this.#pending = null;
@@ -336,6 +337,12 @@ export interface DropOptions {
 	/** Opt this zone into OS drag-and-drop (files / selected text). Arms the native sensor on the
 	 * shared engine; the drop arrives through `onDrop` with `e.files` / `e.text`. */
 	native?: boolean;
+	/**
+	 * Stable string id for this zone — the `target` in the unified collab op grammar. A drop has no
+	 * replayable op (its outcome is an app side-effect), but a zone *does* carry remote-hover presence;
+	 * the id must match across peers for that to route. An auto id is peer-local.
+	 */
+	id?: string;
 	onEnter?: (e: DropEventData) => void;
 	/* see DropEngineOptions for engine-wide knobs (samples, batching) that aren't per-zone */
 	onOver?: (e: DropEventData) => void;
@@ -364,15 +371,33 @@ export interface DropEngineOptions {
 }
 
 const DROP_MARKER = 'data-neodrag-over';
+/** Set on a zone (value = peer id) while a remote peer is hovering it. */
+export const REMOTE_HOVER_ATTR = 'data-neodrag-remote-hover';
+/** Marks the floating cursor dot rendered for a remote peer's hover (value = peer id). */
+export const REMOTE_HOVER_MARKER_ATTR = 'data-neodrag-remote-hover-marker';
+
+/** In-flight drop-hover presence — the `drop-hover` variant of the unified presence frame. */
+export type DropHoverPresence = Extract<LocalPresence, { type: 'drop-hover' }>;
 
 export class DropState {
 	isOver = false;
 	/** Rect cached at drag-start (invalidated on scroll/resize) — avoids a reflow per move. */
 	rect: RectLike | null = null;
+	/** Auto target id — peer-local; `targetId` prefers `options.id`. */
+	readonly auto_target_id = autoId('drop');
+	readonly presence_subscribers = new Set<(p: LocalPresence | null) => void>();
+	/** Remote peers' hover cursor markers, keyed by peer id. */
+	readonly remote_hovers = new Map<string, HTMLElement>();
 	constructor(
 		readonly node: DndNode,
 		public options: DropOptions,
 	) {}
+	get targetId(): string {
+		return this.options.id ?? this.auto_target_id;
+	}
+	get hasExplicitId(): boolean {
+		return this.options.id != null;
+	}
 }
 
 export class DropHandle {
@@ -386,6 +411,38 @@ export class DropHandle {
 
 	update(options: Partial<DropOptions>): void {
 		Object.assign(this.#state.options, options);
+	}
+
+	/** The zone's stable string id — the `target` in the unified op grammar. */
+	get targetId(): string {
+		return this.#state.targetId;
+	}
+
+	/** Whether `targetId` came from an explicit `id` option (auto ids are peer-local). */
+	get hasExplicitId(): boolean {
+		return this.#state.hasExplicitId;
+	}
+
+	/** A drop has no replayable op — `onCommit` exists to satisfy {@link CollabTarget} but never fires. */
+	onCommit(_fn: (op: CollabOp) => void): () => void {
+		return () => {};
+	}
+
+	onPresence(fn: (p: LocalPresence | null) => void): () => void {
+		this.#state.presence_subscribers.add(fn);
+		return () => this.#state.presence_subscribers.delete(fn);
+	}
+
+	/** No replayable drop op — a no-op (satisfies {@link CollabTarget}). */
+	applyExternal(_op: CollabOp): void {}
+
+	/** Render a remote peer hovering this zone — mark the zone + drop a floating cursor dot. */
+	showRemotePresence(frame: PresenceFrame): void {
+		if (frame.type === 'drop-hover') this.#drop.showRemotePresence(this.#state, frame);
+	}
+
+	clearRemotePresence(peerId?: string): void {
+		this.#drop.clearRemotePresence(this.#state, peerId);
 	}
 
 	destroy(): void {
@@ -412,35 +469,35 @@ export class Drop implements Capability {
 	readonly #zones = new Map<DndNode, DropState>();
 	readonly #index: CollisionIndex<DropState>;
 	readonly #sampler: DropSampler;
-	readonly #samplesNeedRect: boolean;
+	readonly #samples_need_rect: boolean;
 	readonly #coalesce: boolean;
 	readonly #batch: RafBatch<InteractionSession>;
 	#over = new Set<DropState>();
-	#overNext = new Set<DropState>();
-	#hitSeen = new Set<DropState>();
-	#hitCount = 0;
+	#over_next = new Set<DropState>();
+	#hit_seen = new Set<DropState>();
+	#hit_count = 0;
 	// Zone rects are measured once per drag and reused every move; a scroll/resize during the
 	// drag invalidates them so the next hit-test re-measures. Turns N reflows/move → N/drag.
 	#measured = false;
-	readonly #onInvalidate = (): void => {
+	readonly #on_invalidate = (): void => {
 		this.#measured = false;
 	};
-	#unlistenInvalidation: Array<() => void> = [];
+	#unlisten_invalidation: Array<() => void> = [];
 
 	constructor(options: DropEngineOptions = {}) {
 		this.#index = options.index ? options.index() : new LinearCollisionIndex<DropState>();
 		this.#sampler = resolveSampler(options.dropPointerSamples);
 		// The default 'pointer' sampler ignores the dragged element's rect — don't pay a reflow
 		// for it every move. Multi-sample modes / custom samplers do need it.
-		this.#samplesNeedRect =
+		this.#samples_need_rect =
 			options.dropPointerSamples != null && options.dropPointerSamples !== 'pointer';
 		this.#coalesce = options.coalesce === true;
-		this.#batch = new RafBatch<InteractionSession>((session) => this.#updateOver(session));
+		this.#batch = new RafBatch<InteractionSession>((session) => this.#update_over(session));
 	}
 
 	/** @internal Count of hit-tests run — lets tests assert N moves coalesce to one. */
 	get hitCount(): number {
-		return this.#hitCount;
+		return this.#hit_count;
 	}
 
 	/** @internal True while a coalesced hit-test frame is queued. */
@@ -473,49 +530,49 @@ export class Drop implements Capability {
 		if (phase === 'move') {
 			// Coalesce N moves/frame into one hit-test; sync fallback when batching is off.
 			if (this.#coalesce) this.#batch.schedule(session);
-			else this.#updateOver(session);
+			else this.#update_over(session);
 		} else if (phase === 'end') {
 			this.#commit(session, _reason);
-			this.#teardownInvalidation();
+			this.#teardown_invalidation();
 		} else if (phase === 'start') {
 			this.#batch.cancel();
-			this.#hitCount = 0;
+			this.#hit_count = 0;
 			this.#measured = false;
-			this.#setupInvalidation();
+			this.#setup_invalidation();
 		}
 	}
 
-	#setupInvalidation(): void {
+	#setup_invalidation(): void {
 		if (typeof window === 'undefined') return;
 		// scroll is captured (any scroll container) + passive; both just mark rects dirty.
-		this.#unlistenInvalidation.push(
-			listen(window, 'scroll', this.#onInvalidate, { capture: true, passive: true }),
-			listen(window, 'resize', this.#onInvalidate, { passive: true }),
+		this.#unlisten_invalidation.push(
+			listen(window, 'scroll', this.#on_invalidate, { capture: true, passive: true }),
+			listen(window, 'resize', this.#on_invalidate, { passive: true }),
 		);
 	}
 
-	#teardownInvalidation(): void {
-		for (const off of this.#unlistenInvalidation) off();
-		this.#unlistenInvalidation.length = 0;
+	#teardown_invalidation(): void {
+		for (const off of this.#unlisten_invalidation) off();
+		this.#unlisten_invalidation.length = 0;
 	}
 
 	/** Measure every (accepted) zone's rect once, populate the index. Cheap re-runs are no-ops. */
-	#ensureMeasured(session: InteractionSession): void {
+	#ensure_measured(session: InteractionSession): void {
 		if (this.#measured) return;
 		const input = session.input;
 		const native = isNativeDndInput(input);
-		const dragNode = native ? null : session.target.node;
+		const drag_node = native ? null : session.target.node;
 		const data = native ? null : session.data;
 		const types = native && input.dataTransfer ? [...input.dataTransfer.types] : undefined;
 		this.#index.clear();
 		for (const [node, state] of this.#zones) {
 			// A native (OS) drag only lands on zones that opted in with `native: true`; a pointer drag
 			// never lands on a native-only intent's own anchor node.
-			if (native ? !state.options.native : node === dragNode) {
+			if (native ? !state.options.native : node === drag_node) {
 				state.rect = null;
 				continue;
 			}
-			if (state.options.accepts && !state.options.accepts({ dragNode, data, types })) {
+			if (state.options.accepts && !state.options.accepts({ dragNode: drag_node, data, types })) {
 				state.rect = null;
 				continue;
 			}
@@ -527,12 +584,12 @@ export class Drop implements Capability {
 	}
 
 	/** Sample points to hit-test this frame: pointer + element-rect samples (multi-sample). */
-	#samplePoints(session: InteractionSession): Point[] {
+	#sample_points(session: InteractionSession): Point[] {
 		const pointer = { x: session.input.clientX, y: session.input.clientY };
-		return this.#sampler({ pointer, rect: this.#samplesNeedRect ? this.#dragRect(session) : null });
+		return this.#sampler({ pointer, rect: this.#samples_need_rect ? this.#drag_rect(session) : null });
 	}
 
-	#dragRect(session: InteractionSession): RectLike | null {
+	#drag_rect(session: InteractionSession): RectLike | null {
 		if (isNativeDndInput(session.input)) return null; // no element — hit-test the pointer only
 		const node = session.target.node;
 		if (typeof node.getBoundingClientRect !== 'function') return null;
@@ -541,13 +598,13 @@ export class Drop implements Capability {
 
 	/** Build the candidate set by hit-testing every sample point and unioning the matches. */
 	#candidates(session: InteractionSession): DropState[] {
-		this.#hitCount++;
-		this.#ensureMeasured(session);
+		this.#hit_count++;
+		this.#ensure_measured(session);
 
-		const seen = this.#hitSeen;
+		const seen = this.#hit_seen;
 		seen.clear();
 		const out: DropState[] = [];
-		for (const pt of this.#samplePoints(session)) {
+		for (const pt of this.#sample_points(session)) {
 			for (const hit of this.#index.query(pt.x, pt.y)) {
 				if (seen.has(hit)) continue;
 				seen.add(hit);
@@ -558,21 +615,21 @@ export class Drop implements Capability {
 	}
 
 	#best(session: InteractionSession, candidates: DropState[]): DropState | null {
-		const probeRect = this.#dragRect(session);
+		const probe_rect = this.#drag_rect(session);
 		const ranked: (RankCandidate & { state: DropState })[] = candidates.map((state) => ({
 			state,
 			rect: state.rect ?? state.node.getBoundingClientRect(),
 			priority: state.options.priority ?? 0,
 			policy: state.options.collision ?? 'pointer',
 		}));
-		const top = rankDrop(ranked, session.input.clientX, session.input.clientY, { probeRect });
+		const top = rankDrop(ranked, session.input.clientX, session.input.clientY, { probeRect: probe_rect });
 		return top ? top.state : null;
 	}
 
-	#updateOver(session: InteractionSession): void {
+	#update_over(session: InteractionSession): void {
 		const candidates = this.#candidates(session);
 		// Reuse a second Set instead of allocating one per move; swap the two at the end.
-		const next = this.#overNext;
+		const next = this.#over_next;
 		next.clear();
 		for (const c of candidates) next.add(c);
 
@@ -582,7 +639,7 @@ export class Drop implements Capability {
 		for (const state of next) {
 			if (!state.isOver) this.#enter(state, session);
 		}
-		this.#overNext = this.#over;
+		this.#over_next = this.#over;
 		this.#over = next;
 
 		const best = this.#best(session, candidates);
@@ -606,26 +663,79 @@ export class Drop implements Capability {
 		state.isOver = true;
 		state.node.setAttribute(DROP_MARKER, '');
 		state.options.onEnter?.(this.#event(state, session));
+		this.#pump_hover(state, session);
 	}
 
 	#leave(state: DropState, session: InteractionSession): void {
 		state.isOver = false;
 		state.node.removeAttribute(DROP_MARKER);
 		state.options.onLeave?.(this.#event(state, session));
+		for (const fn of state.presence_subscribers) fn(null);
+	}
+
+	/** Broadcast this peer's live hover over `state`'s zone as a `drop-hover` presence frame. */
+	#pump_hover(state: DropState, session: InteractionSession): void {
+		if (state.presence_subscribers.size === 0) return;
+		const input = session.input;
+		const drag_node = isNativeDndInput(input) ? null : session.target.node;
+		const itemId = drag_node?.getAttribute?.('data-neodrag-sortable-key') ?? undefined;
+		const frame: LocalPresence = {
+			type: 'drop-hover',
+			target: state.targetId,
+			x: input.clientX,
+			y: input.clientY,
+			...(itemId ? { itemId } : {}),
+		};
+		for (const fn of state.presence_subscribers) fn(frame);
+	}
+
+	/** Render a remote peer hovering `state`'s zone — mark the zone + a floating cursor dot. @internal */
+	showRemotePresence(state: DropState, frame: DropHoverPresence & { peerId: string }): void {
+		if (frame.target !== state.targetId) {
+			this.clearRemotePresence(state, frame.peerId);
+			return;
+		}
+		state.node.setAttribute(REMOTE_HOVER_ATTR, frame.peerId);
+		let marker = state.remote_hovers.get(frame.peerId);
+		if (!marker) {
+			marker = document.createElement('div');
+			marker.setAttribute(REMOTE_HOVER_MARKER_ATTR, frame.peerId);
+			marker.style.cssText = 'position:fixed;pointer-events:none;width:0;height:0;';
+			document.body.appendChild(marker);
+			state.remote_hovers.set(frame.peerId, marker);
+		}
+		marker.style.left = `${frame.x}px`;
+		marker.style.top = `${frame.y}px`;
+	}
+
+	/** Clear a remote peer's hover from `state`'s zone (or all peers when none is given). @internal */
+	clearRemotePresence(state: DropState, peerId?: string): void {
+		const remove = (id: string): void => {
+			const marker = state.remote_hovers.get(id);
+			if (marker) {
+				marker.remove();
+				state.remote_hovers.delete(id);
+			}
+			if (state.node.getAttribute(REMOTE_HOVER_ATTR) === id) {
+				state.node.removeAttribute(REMOTE_HOVER_ATTR);
+			}
+		};
+		if (peerId) remove(peerId);
+		else for (const id of [...state.remote_hovers.keys()]) remove(id);
 	}
 
 	#event(state: DropState, session: InteractionSession): DropEventData {
 		const input = session.input;
 		if (isNativeDndInput(input)) {
 			// File/text content is only readable on the `drop` phase (the spec hides it during hover).
-			const onDrop = input.phase === 'end';
+			const on_drop = input.phase === 'end';
 			return {
 				zone: state.node,
 				dragNode: null,
 				data: null,
 				input,
-				files: onDrop ? nativeDropFiles(input.dataTransfer) : [],
-				text: onDrop ? nativeDropText(input.dataTransfer) : '',
+				files: on_drop ? nativeDropFiles(input.dataTransfer) : [],
+				text: on_drop ? nativeDropText(input.dataTransfer) : '',
 			};
 		}
 		return {

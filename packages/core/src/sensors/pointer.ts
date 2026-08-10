@@ -18,11 +18,11 @@ export class PointerSensor extends SensorBase {
 	protected attach(host: SensorHost): () => void {
 		const target = host.getDelegate();
 		let armed = false;
-		let moveUpAbort: AbortController | null = null;
+		let move_up_abort: AbortController | null = null;
 
 		const disarm = () => {
-			moveUpAbort?.abort();
-			moveUpAbort = null;
+			move_up_abort?.abort();
+			move_up_abort = null;
 			armed = false;
 		};
 
@@ -31,27 +31,27 @@ export class PointerSensor extends SensorBase {
 		const arm = () => {
 			if (armed) return;
 			armed = true;
-			const signal = (moveUpAbort = new AbortController()).signal;
+			const signal = (move_up_abort = new AbortController()).signal;
 			listen(target, 'pointermove', (e) => host.onInteractionMove(pointerToInput(e, 'move')), {
 				passive: false,
 				capture: true,
 				signal,
 			});
-			const onUp = (e: PointerEvent) => {
+			const on_up = (e: PointerEvent) => {
 				disarm();
 				host.onInteractionEnd(pointerToInput(e, 'end'));
 			};
-			listen(target, 'pointerup', onUp, { passive: true, capture: true, signal });
-			listen(target, 'pointercancel', onUp, { passive: true, capture: true, signal });
+			listen(target, 'pointerup', on_up, { passive: true, capture: true, signal });
+			listen(target, 'pointercancel', on_up, { passive: true, capture: true, signal });
 		};
 
-		const onPointerDown = (e: PointerEvent) => {
+		const on_pointer_down = (e: PointerEvent) => {
 			if (!this.#buttons.includes(e.button)) return;
 			host.onInteractionStart(pointerToInput(e, 'start'));
 			arm();
 		};
 
-		const unlisten = listen(target, 'pointerdown', onPointerDown, {
+		const unlisten = listen(target, 'pointerdown', on_pointer_down, {
 			passive: true,
 			capture: true,
 		});

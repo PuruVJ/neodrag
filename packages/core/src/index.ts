@@ -26,7 +26,7 @@ export * from './drop/index.ts';
 export * from './resize/index.ts';
 export * from './sortable/index.ts';
 
-// Tier-2 `use: []` extensions (magnetic, scrollLock, touchAction, controls, …) and
-// the opt-in collaborative / CRDT layer. Tree-shaken away unless actually imported.
+// Tier-2 `use: []` extensions (magnetic, scrollLock, touchAction, controls, …). Tree-shaken away
+// unless imported. The opt-in collaborative layer (`Room`, …) is NOT re-exported here — it ships
+// only under the `@neodrag/core/collab` subpath, so a non-collab app never pulls the CRDT plumbing.
 export * from './extend/index.ts';
-export * from './collab/index.ts';

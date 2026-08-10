@@ -18,27 +18,27 @@ export interface GhostOptions {
 
 const GHOST_Z_INDEX = 2_147_483_640;
 
-let ghostHost: HTMLElement | null = null;
+let ghost_host: HTMLElement | null = null;
 
-function ensureGhostHost(): HTMLElement {
-	if (ghostHost?.isConnected) return ghostHost;
-	ghostHost = document.createElement('div');
-	ghostHost.dataset.neodragGhostHost = '';
-	ghostHost.style.position = 'fixed';
-	ghostHost.style.inset = '0';
-	ghostHost.style.zIndex = String(GHOST_Z_INDEX);
-	ghostHost.style.pointerEvents = 'none';
-	ghostHost.style.overflow = 'visible';
-	ghostHost.style.margin = '0';
-	ghostHost.style.padding = '0';
-	ghostHost.style.border = '0';
-	document.body.appendChild(ghostHost);
-	return ghostHost;
+function ensure_ghost_host(): HTMLElement {
+	if (ghost_host?.isConnected) return ghost_host;
+	ghost_host = document.createElement('div');
+	ghost_host.dataset.neodragGhostHost = '';
+	ghost_host.style.position = 'fixed';
+	ghost_host.style.inset = '0';
+	ghost_host.style.zIndex = String(GHOST_Z_INDEX);
+	ghost_host.style.pointerEvents = 'none';
+	ghost_host.style.overflow = 'visible';
+	ghost_host.style.margin = '0';
+	ghost_host.style.padding = '0';
+	ghost_host.style.border = '0';
+	document.body.appendChild(ghost_host);
+	return ghost_host;
 }
 
 export function ghost(options: GhostOptions = {}): DragPlugin {
 	const opacity = options.opacity ?? 0.5;
-	const zIndex = options.zIndex ?? GHOST_Z_INDEX;
+	const z_index = options.zIndex ?? GHOST_Z_INDEX;
 
 	let clone: HTMLElement | SVGElement | null = null;
 
@@ -69,9 +69,9 @@ export function ghost(options: GhostOptions = {}): DragPlugin {
 			s.width = `${rect.width}px`;
 			s.height = `${rect.height}px`;
 			s.translate = '';
-			s.setProperty('z-index', String(zIndex), 'important');
+			s.setProperty('z-index', String(z_index), 'important');
 
-			ensureGhostHost().appendChild(next);
+			ensure_ghost_host().appendChild(next);
 		},
 		onMove: ({ offset, node }): Point => {
 			// Keep the original pinned, move the clone instead.

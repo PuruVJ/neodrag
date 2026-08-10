@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WorldMeta } from '../worlds';
-	import { SortableList, type SortAxis, type TransferOp } from '@neodrag/svelte';
+	import { SortableList, type SortAxis, type TransferOp } from '@neodrag/svelte/sortable';
 
 	type Props = {
 		world: WorldMeta;
@@ -76,6 +76,7 @@
 			get items() {
 				return items_for(owner);
 			},
+			id: owner,
 			group: GROUP,
 			strategy: 'list',
 			get axis() {
@@ -111,65 +112,83 @@
 	}
 </script>
 
-<div class="pg-scene split-bill">
+<div
+	class="split-bill pg-scene grid grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-3.5 px-3.5 pt-10 pb-3.5 max-[720px]:grid-cols-1"
+>
 	<p class="pg-scene-kicker">Sortable receipt & friend columns</p>
 
-	<div class="split-bill-tray">
-		<header class="split-bill-tray-head">
-			<span class="split-bill-tray-title">Receipt</span>
-			<span class="split-bill-tray-total">$25</span>
+	<div class="flex min-h-0 flex-col rounded-lg border-2 border-border-strong bg-shell shadow-lg">
+		<header
+			class="flex items-baseline justify-between border-b-2 border-border bg-panel-strong px-3.5 py-2.5"
+		>
+			<span class="font-mono text-xs font-extrabold tracking-widest uppercase">Receipt</span>
+			<span class="font-black text-brand">$25</span>
 		</header>
 		<ul
-			class="split-bill-sortable-list split-bill-tray-body"
-			class:is-empty={tray_items.length === 0}
+			class="split-bill-sortable-list flex min-h-18 list-none items-start gap-2 p-3.5"
+			class:justify-center={tray_items.length === 0}
+			class:content-center={tray_items.length === 0}
 			{...lists.tray.attach}
 			{@attach (n) => listLayout(n, 'tray')}
 		>
 			{#each tray_items as id (id)}
-				<li class="split-bill-tray-row" {...lists.tray.row(id)}>
+				<li class="m-0 list-none p-0" {...lists.tray.row(id)}>
 					<button
 						type="button"
-						class="split-bill-chip"
-						class:split-bill-chip--latte={id === 'latte'}
+						class="inline-flex cursor-grab touch-none items-center gap-2 rounded-full border-2 border-border-strong bg-panel-strong px-3 py-1.5 text-sm font-extrabold text-fg shadow-md active:cursor-grabbing"
 					>
 						<span>{META[id].label}</span>
-						<em>{META[id].price}</em>
+						<em class="font-mono text-xs font-bold text-brand not-italic">{META[id].price}</em>
 					</button>
 				</li>
 			{/each}
 			{#if tray_items.length === 0}
-				<li class="split-bill-zone-placeholder" aria-hidden="true">Drop back to receipt</li>
+				<li
+					class="pointer-events-none m-0 p-2 text-center font-mono text-xs font-semibold tracking-wider uppercase text-fg-muted"
+					aria-hidden="true"
+				>
+					Drop back to receipt
+				</li>
 			{/if}
 		</ul>
 	</div>
 
-	<div class="split-bill-friends">
+	<div class="grid min-h-0 grid-rows-2 gap-2.5">
 		{#each ['alex', 'sam'] as friend (friend)}
-			<div class="split-bill-zone split-bill-zone--{friend}">
-				<div class="split-bill-zone-head">
+			<div
+				class="flex min-h-0 flex-col rounded-lg border-2 border-dashed border-border bg-shell/80 transition-all duration-150"
+			>
+				<div
+					class="flex items-center gap-2 border-b-2 border-border px-3 py-2 font-mono text-xs font-extrabold tracking-wider uppercase"
+				>
 					<span aria-hidden="true">{friend === 'alex' ? '🦊' : '🐻'}</span>
 					<span>{friend === 'alex' ? 'Alex' : 'Sam'}</span>
 				</div>
 				<ul
-					class="split-bill-sortable-list split-bill-zone-body"
-					class:is-empty={friend_order[friend as Friend].length === 0}
+					class="split-bill-sortable-list flex min-h-14 flex-1 list-none items-start gap-2 p-2.5"
+					class:justify-center={friend_order[friend as Friend].length === 0}
+					class:content-center={friend_order[friend as Friend].length === 0}
 					{...lists[friend as Friend].attach}
 					{@attach (n) => listLayout(n, friend as Friend)}
 				>
 					{#each friend_order[friend as Friend] as id (id)}
-						<li class="split-bill-zone-row" {...lists[friend as Friend].row(id)}>
+						<li class="m-0 list-none p-0" {...lists[friend as Friend].row(id)}>
 							<button
 								type="button"
-								class="split-bill-chip is-placed"
-								class:split-bill-chip--latte={id === 'latte'}
+								class="inline-flex max-w-full cursor-grab touch-none items-center justify-between gap-2 self-start rounded-full border-2 border-border-strong bg-panel-strong px-3 py-1.5 text-sm font-extrabold text-fg shadow-md active:cursor-grabbing"
 							>
 								<span>{META[id].label}</span>
-								<em>{META[id].price}</em>
+								<em class="font-mono text-xs font-bold text-brand not-italic">{META[id].price}</em>
 							</button>
 						</li>
 					{/each}
 					{#if friend_order[friend as Friend].length === 0}
-						<li class="split-bill-zone-placeholder" aria-hidden="true">Drop items here</li>
+						<li
+							class="pointer-events-none m-0 p-2 text-center font-mono text-xs font-semibold tracking-wider uppercase text-fg-muted"
+							aria-hidden="true"
+						>
+							Drop items here
+						</li>
 					{/if}
 				</ul>
 			</div>
@@ -177,6 +196,34 @@
 	</div>
 
 	{#if last_drop}
-		<p class="split-bill-toast" aria-live="polite">{last_drop}</p>
+		<p
+			class="pointer-events-none absolute bottom-2.5 left-1/2 z-20 m-0 -translate-x-1/2 rounded border border-border bg-shell px-2.5 py-1.5 font-mono text-xs font-extrabold tracking-widest uppercase text-brand"
+			aria-live="polite"
+		>
+			{last_drop}
+		</p>
 	{/if}
 </div>
+
+<style>
+	/* Receipt backdrop gradient + the self-sizing chip row (a self-referential container query) —
+	   both are tidier as one CSS rule than a long arbitrary value. */
+	.split-bill {
+		background: linear-gradient(
+			160deg,
+			color-mix(in lch, var(--color-panel), transparent 5%) 0%,
+			color-mix(in lch, var(--color-well), var(--color-brand) 4%) 100%
+		);
+	}
+
+	.split-bill-sortable-list {
+		container-type: inline-size;
+	}
+
+	@container (max-width: 10.5rem) {
+		.split-bill-sortable-list {
+			flex-direction: column;
+			flex-wrap: nowrap;
+		}
+	}
+</style>

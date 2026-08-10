@@ -51,11 +51,11 @@ type GamepadGrab = {
 	clientY: number;
 	config: ResolvedKeyboardDragOptions;
 	/** Fractional travel carried between polls, in `step` units, per axis. */
-	carryX: number;
-	carryY: number;
+	carry_x: number;
+	carry_y: number;
 };
 
-function centerOf(node: HTMLElement | SVGElement): { x: number; y: number } {
+function center_of(node: HTMLElement | SVGElement): { x: number; y: number } {
 	const rect = node.getBoundingClientRect();
 	return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
 }
@@ -63,7 +63,7 @@ function centerOf(node: HTMLElement | SVGElement): { x: number; y: number } {
 // Resolve the candidate draggable for a fresh grab: prefer the focused element's
 // registered keyboard-drag root, mirroring the keyboard path so a pad drives the
 // same nodes as the keyboard.
-function focusedRoot(): HTMLElement | SVGElement | null {
+function focused_root(): HTMLElement | SVGElement | null {
 	const active = typeof document !== 'undefined' ? document.activeElement : null;
 	return findKeyboardDragRoot(active);
 }
@@ -81,7 +81,7 @@ export class GamepadSensor extends SensorBase {
 
 	readonly #deadzone: number;
 	readonly #speed: number;
-	readonly #getGamepads: () => (Gamepad | null)[];
+	readonly #get_gamepads: () => (Gamepad | null)[];
 	readonly #now: () => number;
 
 	constructor(options: GamepadSensorOptions | null = {}) {
@@ -89,7 +89,7 @@ export class GamepadSensor extends SensorBase {
 		this.#deadzone = options?.deadzone ?? 0.25;
 		this.#speed = options?.speed ?? 12;
 		const provided = options?.getGamepads;
-		this.#getGamepads =
+		this.#get_gamepads =
 			provided ??
 			(() =>
 				typeof navigator !== 'undefined' && navigator.getGamepads
@@ -116,15 +116,15 @@ export class GamepadSensor extends SensorBase {
 	 */
 	createSession(host: SensorHost): GamepadSession {
 		let grab: GamepadGrab | null = null;
-		let lastPoll = this.#now();
+		let last_poll = this.#now();
 		// Per-button edge state so a held button fires exactly once.
-		const prevButtons = new Map<number, boolean>();
+		const prev_buttons = new Map<number, boolean>();
 
-		const startGrab = (root: HTMLElement | SVGElement): void => {
+		const start_grab = (root: HTMLElement | SVGElement): void => {
 			const config = getKeyboardDragConfig(root);
 			if (!config) return;
-			const center = centerOf(root);
-			grab = { node: root, clientX: center.x, clientY: center.y, config, carryX: 0, carryY: 0 };
+			const center = center_of(root);
+			grab = { node: root, clientX: center.x, clientY: center.y, config, carry_x: 0, carry_y: 0 };
 			host.onInteractionStart(
 				keyboardToInput({
 					phase: 'start',
@@ -136,7 +136,7 @@ export class GamepadSensor extends SensorBase {
 			);
 		};
 
-		const commitGrab = (): void => {
+		const commit_grab = (): void => {
 			if (!grab) return;
 			host.onInteractionEnd(
 				keyboardToInput({
@@ -150,12 +150,12 @@ export class GamepadSensor extends SensorBase {
 			grab = null;
 		};
 
-		const cancelGrab = (): void => {
+		const cancel_grab = (): void => {
 			grab = null;
 			host.cancelActive('cancel');
 		};
 
-		const emitMove = (g: GamepadGrab, dx: number, dy: number): void => {
+		const emit_move = (g: GamepadGrab, dx: number, dy: number): void => {
 			if (dx === 0 && dy === 0) return;
 			g.clientX += dx;
 			g.clientY += dy;
@@ -173,24 +173,24 @@ export class GamepadSensor extends SensorBase {
 		};
 
 		// True only on the frame a button transitions released → pressed.
-		const pressedEdge = (pad: Gamepad, index: number): boolean => {
+		const pressed_edge = (pad: Gamepad, index: number): boolean => {
 			const down = pad.buttons[index]?.pressed ?? false;
-			const was = prevButtons.get(index) ?? false;
-			prevButtons.set(index, down);
+			const was = prev_buttons.get(index) ?? false;
+			prev_buttons.set(index, down);
 			return down && !was;
 		};
 
 		// Apply the stick deadzone, rescaling the live range so motion ramps from 0 at the
 		// deadzone edge rather than snapping in. Returns a value in [-1, 1].
-		const applyDeadzone = (v: number): number => {
+		const apply_deadzone = (v: number): number => {
 			const mag = Math.abs(v);
 			if (mag <= this.#deadzone) return 0;
 			const scaled = (mag - this.#deadzone) / (1 - this.#deadzone);
 			return Math.sign(v) * scaled;
 		};
 
-		const firstConnected = (): Gamepad | null => {
-			for (const p of this.#getGamepads()) {
+		const first_connected = (): Gamepad | null => {
+			for (const p of this.#get_gamepads()) {
 				if (p && p.connected !== false) return p;
 			}
 			return null;
@@ -198,26 +198,26 @@ export class GamepadSensor extends SensorBase {
 
 		const poll = (): void => {
 			const now = this.#now();
-			const dt = Math.max(0, (now - lastPoll) / 1000);
-			lastPoll = now;
+			const dt = Math.max(0, (now - last_poll) / 1000);
+			last_poll = now;
 
-			const pad = firstConnected();
+			const pad = first_connected();
 			if (!pad) {
-				if (prevButtons.size) prevButtons.clear();
+				if (prev_buttons.size) prev_buttons.clear();
 				return;
 			}
 
 			// Grab / commit on A, cancel on B (edge-detected so a held button is one event).
-			const aEdge = pressedEdge(pad, BUTTON_A);
-			const bEdge = pressedEdge(pad, BUTTON_B);
+			const a_edge = pressed_edge(pad, BUTTON_A);
+			const b_edge = pressed_edge(pad, BUTTON_B);
 
-			if (bEdge && grab) {
-				cancelGrab();
-			} else if (aEdge) {
-				if (grab) commitGrab();
+			if (b_edge && grab) {
+				cancel_grab();
+			} else if (a_edge) {
+				if (grab) commit_grab();
 				else {
-					const root = focusedRoot();
-					if (root) startGrab(root);
+					const root = focused_root();
+					if (root) start_grab(root);
 				}
 			}
 
@@ -226,8 +226,8 @@ export class GamepadSensor extends SensorBase {
 			const axis = config.axis;
 
 			// Stick: continuous, velocity-based. Dpad: discrete, full deflection while held.
-			let nx = applyDeadzone(pad.axes[AXIS_LX] ?? 0);
-			let ny = applyDeadzone(pad.axes[AXIS_LY] ?? 0);
+			let nx = apply_deadzone(pad.axes[AXIS_LX] ?? 0);
+			let ny = apply_deadzone(pad.axes[AXIS_LY] ?? 0);
 			if (pad.buttons[DPAD_LEFT]?.pressed) nx = -1;
 			else if (pad.buttons[DPAD_RIGHT]?.pressed) nx = 1;
 			if (pad.buttons[DPAD_UP]?.pressed) ny = -1;
@@ -236,22 +236,22 @@ export class GamepadSensor extends SensorBase {
 			if (axis === 'x') ny = 0;
 			if (axis === 'y') nx = 0;
 
-			grab.carryX += nx * this.#speed * dt;
-			grab.carryY += ny * this.#speed * dt;
+			grab.carry_x += nx * this.#speed * dt;
+			grab.carry_y += ny * this.#speed * dt;
 
-			const stepsX = Math.trunc(grab.carryX);
-			const stepsY = Math.trunc(grab.carryY);
-			if (stepsX !== 0 || stepsY !== 0) {
-				grab.carryX -= stepsX;
-				grab.carryY -= stepsY;
-				emitMove(grab, stepsX * config.step, stepsY * config.step);
+			const steps_x = Math.trunc(grab.carry_x);
+			const steps_y = Math.trunc(grab.carry_y);
+			if (steps_x !== 0 || steps_y !== 0) {
+				grab.carry_x -= steps_x;
+				grab.carry_y -= steps_y;
+				emit_move(grab, steps_x * config.step, steps_y * config.step);
 			}
 		};
 
 		return {
 			poll,
 			stop() {
-				prevButtons.clear();
+				prev_buttons.clear();
 				grab = null;
 			},
 		};

@@ -39,22 +39,22 @@ export function createInteractionInspector(
 	} as CSSStyleDeclaration);
 
 	const title = options.title ?? 'neodrag';
-	let rafId = 0;
+	let raf_id = 0;
 
 	const render = () => {
 		const session = engine.session;
-		const sessionLine = session
+		const session_line = session
 			? `session: ${session.started ? 'active' : 'pending'} · capability:${String(session.capability.key.description ?? 'unknown')}`
 			: 'session: idle';
-		panel.textContent = [title, sessionLine].join('\n');
+		panel.textContent = [title, session_line].join('\n');
 	};
 
 	const loop = () => {
 		render();
-		rafId = requestAnimationFrame(loop);
+		raf_id = requestAnimationFrame(loop);
 	};
 
-	rafId = requestAnimationFrame(loop);
+	raf_id = requestAnimationFrame(loop);
 	mount.appendChild(panel);
 
 	return {
@@ -62,7 +62,7 @@ export function createInteractionInspector(
 			render();
 		},
 		destroy() {
-			if (rafId) cancelAnimationFrame(rafId);
+			if (raf_id) cancelAnimationFrame(raf_id);
 			panel.remove();
 		},
 	};

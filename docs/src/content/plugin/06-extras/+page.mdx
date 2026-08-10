@@ -1,0 +1,386 @@
+---
+title: 'Extras'
+nav_title: 'Overview'
+tagline: 'The use:[] seam — every built-in extension, plus authoring your own.'
+section: 'extras'
+---
+
+Draggable keeps a small, options-only core: `axis`, `bounds`, `grid`, `position`, the `handle()` / `cancel()` start-gate hooks, and the two always-on behaviors (`touchAction`, `userSelect`). Everything else — magnetic snapping, alignment guides, rubber-band selection, scroll locking, a floating ghost, haptics, accessibility announcements — lives behind one seam: the `use` option.
+
+```ts
+use?: DragPlugin[]
+```
+
+`use` takes an array of extensions. Each is a plain object — there is no reconcile machinery, no reactive slots, no lifecycle beyond three optional hooks. Extensions tree-shake to nothing unless you import them, so the core stays tiny while the long tail of behavior stays one import away.
+
+Everything in this section imports from your framework package — `@neodrag/svelte`, `@neodrag/react`, `@neodrag/vue`, `@neodrag/solid`, `@neodrag/vanilla`. There is no separate plugins entry point.
+
+## The extensions
+
+Each is its own page with a live demo and per-framework usage:
+
+- [**Magnetic**](/docs/svelte/plugin/magnetic) — snap the offset to the nearest target point within a radius.
+- [**Snap guides**](/docs/svelte/plugin/snap-guides) — the Figma move: align edges and centers to other elements, with guide lines.
+- [**Marquee select**](/docs/svelte/plugin/marquee) — rubber-band a box across items to multi-select.
+- [**Ghost**](/docs/svelte/plugin/ghost) — drag a translucent clone while the original stays put.
+- [**Auto-scroll**](/docs/svelte/plugin/auto-scroll) — scroll a container when the pointer hits its edge.
+- [**Scroll lock**](/docs/svelte/plugin/scroll-lock) — freeze scrolling and native panning for the drag.
+- [**Haptics**](/docs/svelte/plugin/haptics) — fire `navigator.vibrate` on start and end.
+- [**ARIA announcer**](/docs/svelte/plugin/aria) — announce keyboard drags to a live region.
+- [**On move**](/docs/svelte/plugin/on-move) — observe every move tick without changing the offset.
+
+Start-gating (`handle()` / `cancel()`) is **not** a `use:[]` extra — it is built into `Draggable` itself and hard-vetoes the start. See [Draggable → `handle` / `cancel`](/docs/svelte/plugin/draggable#handle).
+
+## The `DragPlugin` shape
+
+An extension is this object:
+
+```ts
+interface DragPlugin {
+  name?: string;
+  onStart?(ctx: DragEventData): void;
+  onMove?(ctx: DragEventData): Point | void;
+  onEnd?(ctx: DragEventData): void;
+}
+```
+
+- `onStart` runs once when a drag begins.
+- `onMove` runs every move tick. **Return a `{ x, y }` `Point` to override the offset** the core would otherwise apply; return nothing to leave it alone. This is how `magnetic` and `ghost` work.
+- `onEnd` runs once when the drag ends.
+
+Each hook receives the same `DragEventData`:
+
+```ts
+interface DragEventData {
+  offset: Point;   // current offset { x, y }
+  node: DndNode;   // the dragged element
+  input: InteractionInput; // live pointer / keyboard input (clientX/Y, etc.)
+}
+```
+
+That's the entire contract. Every built-in is just an object that fills in these three hooks.
+
+## Authoring a custom extension
+
+Because a `DragPlugin` is just an object with three optional hooks, writing your own is trivial. Return a `Point` from `onMove` to take over positioning; return nothing to observe only.
+
+Here's a constraint that pins movement to a circle of a given radius around the origin:
+
+```ts
+import type { DragPlugin, Point } from '@neodrag/core';
+
+function circular(radius: number): DragPlugin {
+  return {
+    name: 'circular',
+    onMove({ offset }): Point {
+      const dist = Math.hypot(offset.x, offset.y);
+      if (dist <= radius) return offset;
+      const scale = radius / dist;
+      return { x: offset.x * scale, y: offset.y * scale };
+    },
+  };
+}
+```
+
+Drop it into `use` like any built-in:
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+  // import { circular } from './circular';
+  const drag = new Draggable({ use: [circular(150)] });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable } from '@neodrag/react';
+// import { circular } from './circular';
+
+function Box() {
+  const { ref } = useDraggable({ use: [circular(150)] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useDraggable } from '@neodrag/vue';
+// import { circular } from './circular';
+const { ref } = useDraggable({ use: [circular(150)] });
+</script>
+
+<template>
+  <div :ref="ref">Drag me</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable } from '@neodrag/solid';
+// import { circular } from './circular';
+
+function Box() {
+  const { ref } = createDraggable({ use: [circular(150)] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+// import { circular } from './circular';
+
+new Draggable(node, { use: [circular(150)] });
+```
+
+</div>
+</FrameworkSwitch>
+
+## The reactivity rule
+
+This is the one thing to internalize about `use`:
+
+> `use` is a **static array**. It is built once for the binding. The extension instances inside it stay alive for the lifetime of the draggable, so any internal state they keep is preserved and `onStart`/`onEnd` stay balanced.
+
+That stability is the feature: a ghost clone, a saved scroll-lock style, a magnetic accumulator — none of it gets wiped mid-drag because the array never rebuilds.
+
+So how do you make an extension react to changing config? **The hook reads live config at call time.** You have two ways to do that:
+
+**1. A custom inline extension that closes over your reactive state.** The hook body reads the current value every move, so updating the state just changes the next tick's result.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+
+  let targets = $state([{ x: 0, y: 0 }]);
+
+  function snap(points, offset) {
+    let best = offset, bestD = Infinity;
+    for (const t of points) {
+      const d = Math.hypot(t.x - offset.x, t.y - offset.y);
+      if (d < bestD) { bestD = d; best = t; }
+    }
+    return bestD <= 30 ? best : offset;
+  }
+
+  // `use` stays static; the closure reads live `targets` each move.
+  const drag = new Draggable({
+    use: [{ onMove: ({ offset }) => snap(targets, offset) }],
+  });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { useDraggable } from '@neodrag/react';
+
+function Box() {
+  const targets = useRef([{ x: 0, y: 0 }]);
+
+  const snap = (points, offset) => {
+    let best = offset, bestD = Infinity;
+    for (const t of points) {
+      const d = Math.hypot(t.x - offset.x, t.y - offset.y);
+      if (d < bestD) { bestD = d; best = t; }
+    }
+    return bestD <= 30 ? best : offset;
+  };
+
+  const { ref } = useDraggable({
+    use: [{ onMove: ({ offset }) => snap(targets.current, offset) }],
+  });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref as vref } from 'vue';
+import { useDraggable } from '@neodrag/vue';
+
+const targets = vref([{ x: 0, y: 0 }]);
+
+function snap(points, offset) {
+  let best = offset, bestD = Infinity;
+  for (const t of points) {
+    const d = Math.hypot(t.x - offset.x, t.y - offset.y);
+    if (d < bestD) { bestD = d; best = t; }
+  }
+  return bestD <= 30 ? best : offset;
+}
+
+const { ref } = useDraggable({
+  use: [{ onMove: ({ offset }) => snap(targets.value, offset) }],
+});
+</script>
+
+<template>
+  <div :ref="ref">Drag me</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { createDraggable } from '@neodrag/solid';
+
+function Box() {
+  const [targets] = createSignal([{ x: 0, y: 0 }]);
+
+  const snap = (points, offset) => {
+    let best = offset, bestD = Infinity;
+    for (const t of points) {
+      const d = Math.hypot(t.x - offset.x, t.y - offset.y);
+      if (d < bestD) { bestD = d; best = t; }
+    }
+    return bestD <= 30 ? best : offset;
+  };
+
+  const { ref } = createDraggable({
+    use: [{ onMove: ({ offset }) => snap(targets(), offset) }],
+  });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable } from '@neodrag/vanilla';
+
+let targets = [{ x: 0, y: 0 }];
+
+function snap(points, offset) {
+  let best = offset, bestD = Infinity;
+  for (const t of points) {
+    const d = Math.hypot(t.x - offset.x, t.y - offset.y);
+    if (d < bestD) { bestD = d; best = t; }
+  }
+  return bestD <= 30 ? best : offset;
+}
+
+// Mutate `targets` later — the closure reads it live.
+new Draggable(node, {
+  use: [{ onMove: ({ offset }) => snap(targets, offset) }],
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+**2. A built-in that reads a reactive object you hand it.** Pass a reactive object (not a bare value) and mutate its fields — the extension reads the object's current contents when it runs.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable, magnetic } from '@neodrag/svelte';
+
+  // A reactive object you mutate; magnetic reads cfg.targets live.
+  const cfg = $state({ targets: [{ x: 0, y: 0 }] });
+  const drag = new Draggable({ use: [magnetic(cfg.targets, 30)] });
+
+  // Later: cfg.targets.push({ x: 200, y: 0 });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useRef } from 'react';
+import { useDraggable, magnetic } from '@neodrag/react';
+
+function Box() {
+  // A stable reactive container; mutate cfg.current.targets.
+  const cfg = useRef({ targets: [{ x: 0, y: 0 }] });
+  const { ref } = useDraggable({ use: [magnetic(cfg.current.targets, 30)] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { reactive } from 'vue';
+import { useDraggable, magnetic } from '@neodrag/vue';
+
+const cfg = reactive({ targets: [{ x: 0, y: 0 }] });
+const { ref } = useDraggable({ use: [magnetic(cfg.targets, 30)] });
+// Later: cfg.targets.push({ x: 200, y: 0 });
+</script>
+
+<template>
+  <div :ref="ref">Drag me</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createMutable } from 'solid-js/store';
+import { createDraggable, magnetic } from '@neodrag/solid';
+
+function Box() {
+  const cfg = createMutable({ targets: [{ x: 0, y: 0 }] });
+  const { ref } = createDraggable({ use: [magnetic(cfg.targets, 30)] });
+  // Later: cfg.targets.push({ x: 200, y: 0 });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable, magnetic } from '@neodrag/vanilla';
+
+const cfg = { targets: [{ x: 0, y: 0 }] };
+new Draggable(node, { use: [magnetic(cfg.targets, 30)] });
+// Later: cfg.targets.push({ x: 200, y: 0 });
+```
+
+</div>
+</FrameworkSwitch>
+
+Two things that do **not** work, by design:
+
+- **A bare primitive passed to a factory is captured by value.** `magnetic(targets, radius)` reads `radius` once when the factory runs; reassigning `radius` afterward changes nothing. That's plain JavaScript — not a limitation we can fix. Wrap it in a reactive object or use an inline closure (option 1) instead.
+- **Never make `use` itself a getter.** Unlike the core options (where getters are how you wire reactivity), a reactive `use` would rebuild the array and recreate every extension on each change — wiping ghost clones, saved styles, and any in-flight state. Keep `use` static; put the reactivity *inside* the hook.

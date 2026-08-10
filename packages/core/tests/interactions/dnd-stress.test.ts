@@ -56,7 +56,7 @@ function makeList(id: string, n: number, top: number): { list: HTMLUListElement;
 		const key = `${id}${i}`;
 		items.push(key);
 		const li = document.createElement('li');
-		li.setAttribute('data-sortable-key', key);
+		li.setAttribute('data-neodrag-sortable-key', key);
 		li.textContent = key;
 		Object.assign(li.style, { height: '40px', lineHeight: '40px', background: '#eee', marginBottom: '4px' });
 		list.appendChild(li);
@@ -67,8 +67,8 @@ function makeList(id: string, n: number, top: number): { list: HTMLUListElement;
 
 function reorderDom(list: HTMLElement, keyOrder: string[]) {
 	const byKey = new Map<string, Element>();
-	for (const li of list.querySelectorAll('[data-sortable-key]')) {
-		byKey.set(li.getAttribute('data-sortable-key')!, li);
+	for (const li of list.querySelectorAll('[data-neodrag-sortable-key]')) {
+		byKey.set(li.getAttribute('data-neodrag-sortable-key')!, li);
 	}
 	for (const key of keyOrder) {
 		const node = byKey.get(key);
@@ -147,7 +147,7 @@ describe('v3 core — real-browser fuzz stress', () => {
 
 		expect(result.failures).toEqual([]);
 		// data + DOM agree, still 6 unique items
-		const domKeys = [...list.querySelectorAll('[data-sortable-key]')].map((n) => n.getAttribute('data-sortable-key'));
+		const domKeys = [...list.querySelectorAll('[data-neodrag-sortable-key]')].map((n) => n.getAttribute('data-neodrag-sortable-key'));
 		expect(new Set(domKeys).size).toBe(6);
 		expect(domKeys.sort()).toEqual([...items].sort());
 	});
@@ -171,7 +171,7 @@ describe('v3 core — real-browser fuzz stress', () => {
 			if (fromItems.length === 0) break;
 			await wildDrag(fromItems[0]!, await sortableItemAt(b.list, 0), { seed: s * 13 + 3, intensity: 'normal' });
 		}
-		const total = a.list.querySelectorAll('[data-sortable-key]').length + b.list.querySelectorAll('[data-sortable-key]').length;
+		const total = a.list.querySelectorAll('[data-neodrag-sortable-key]').length + b.list.querySelectorAll('[data-neodrag-sortable-key]').length;
 		expect(total).toBe(8); // no items lost or duplicated across containers
 	});
 

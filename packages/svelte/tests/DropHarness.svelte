@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Droppable } from '@neodrag/svelte';
+	import { Droppable } from '@neodrag/svelte/drop';
 
 	let dropped = $state(false);
 	let names = $state<string[]>([]);

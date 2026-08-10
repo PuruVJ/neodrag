@@ -1,0 +1,81 @@
+---
+title: 'ARIA announcer'
+nav_title: 'ARIA announcer'
+tagline: 'Announce keyboard drags to a live region.'
+section: 'extras'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import AriaDemo from './AriaDemo.svelte';
+
+`ariaDrag` announces the drag to an ARIA live region and marks the node grabbed — primarily for keyboard drags, since pointer drags are already visible, so announcements are gated to keyboard input.
+
+<AriaDemo client:visible />
+
+## Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable, ariaDrag } from '@neodrag/svelte';
+  const drag = new Draggable({ use: [ariaDrag({ role: 'button', label: 'Draggable' })] });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable, ariaDrag } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({ use: [ariaDrag({ role: 'button', label: 'Draggable' })] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useDraggable, ariaDrag } from '@neodrag/vue';
+const { ref } = useDraggable({ use: [ariaDrag({ role: 'button', label: 'Draggable' })] });
+</script>
+
+<template>
+  <div :ref="ref">Drag me</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable, ariaDrag } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({ use: [ariaDrag({ role: 'button', label: 'Draggable' })] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable, ariaDrag } from '@neodrag/vanilla';
+
+new Draggable(node, { use: [ariaDrag({ role: 'button', label: 'Draggable' })] });
+```
+
+</div>
+</FrameworkSwitch>
+
+## Options
+
+`role` is the ARIA role to set. `label` is the accessible name. `liveRegion` is an element or getter for the live region; one is created if omitted. `announce` is a single boolean, or `{ grab, move, drop }` booleans to toggle each phase.

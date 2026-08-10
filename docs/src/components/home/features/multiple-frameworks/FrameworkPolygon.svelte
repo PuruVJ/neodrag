@@ -52,9 +52,8 @@
 		}),
 	);
 
-	// Draggable for the box, gated to its `.handle` via the `handle` option.
+	// Draggable for the box, gated to its `.handle` via the register hook (spread below).
 	const box_draggable = new Draggable({
-		handle: '.handle',
 		get position() {
 			return box_position.current;
 		},
@@ -256,7 +255,7 @@
 			bind:this={box_element}
 			{...box_draggable.attach}
 		>
-			<div class="handle" data-paw-cursor="true"></div>
+			<div class="handle" data-paw-cursor="true" {...box_draggable.handle()}></div>
 
 			<div class="code" style="view-transition-name: code-content">
 				{@render children?.()}

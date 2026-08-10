@@ -22,6 +22,12 @@ export interface InteractionSession {
 	data?: unknown;
 	/** True once the threshold gate has passed and `start()` has run. */
 	started: boolean;
+	/**
+	 * Whether the engine suppresses body text-selection (`user-select: none`, refcounted) for the
+	 * lifetime of this interaction. Defaults to `true` for every gesture; a capability sets it
+	 * `false` in `start()` (e.g. from a `userSelect: false` option) to opt out.
+	 */
+	userSelect?: boolean;
 	/** End this interaction from inside a capability (commit/cancel). */
 	end(reason: EndReason): void;
 }

@@ -89,10 +89,10 @@
 	>
 		{#if selected}
 			<span
-				class="dock-angular-bevel dock-angular-bevel--sm dock-angular-bevel--brand pointer-events-none absolute inset-0"
+				class="dock-bevel dock-bevel-sm dock-bevel-brand pointer-events-none absolute inset-0"
 				aria-hidden="true"
 			>
-				<span class="dock-angular-bevel__fill block h-full w-full"></span>
+				<span class="dock-bevel-fill block h-full w-full"></span>
 			</span>
 		{/if}
 		<span class="relative z-[1] flex w-full flex-col items-center justify-center gap-1">
@@ -141,12 +141,12 @@
 				{#if !embedded}
 					<div
 						class={[
-							'dock-item-tooltip pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 whitespace-nowrap',
+							'dock-tooltip pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 whitespace-nowrap',
 							is_focused ? 'block' : 'hidden group-focus-visible:block',
 						]}
 						aria-hidden="true"
 					>
-						<p class="dock-item-tooltip__label m-0 px-2.5 py-1 text-[0.6875rem] font-semibold tracking-[0.06em] capitalize">
+						<p class="dock-tooltip-label m-0 px-2.5 py-1 text-[0.6875rem] font-semibold tracking-[0.06em] capitalize">
 							{framework}
 						</p>
 					</div>

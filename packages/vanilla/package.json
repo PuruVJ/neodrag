@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/vanilla",
-	"version": "3.0.0-next.9",
+	"version": "3.0.0-next.10",
 	"description": "JS library to add dragging to your apps 😉",
 	"keywords": [
 		"drag",
@@ -37,6 +37,51 @@
 			"import": "./src/index.ts",
 			"default": "./src/index.ts"
 		},
+		"./collab": {
+			"types": "./src/collab.ts",
+			"import": "./src/collab.ts",
+			"default": "./src/collab.ts"
+		},
+		"./sortable": {
+			"types": "./src/sortable.ts",
+			"import": "./src/sortable.ts",
+			"default": "./src/sortable.ts"
+		},
+		"./resize": {
+			"types": "./src/resize.ts",
+			"import": "./src/resize.ts",
+			"default": "./src/resize.ts"
+		},
+		"./rotate": {
+			"types": "./src/rotate.ts",
+			"import": "./src/rotate.ts",
+			"default": "./src/rotate.ts"
+		},
+		"./drop": {
+			"types": "./src/drop.ts",
+			"import": "./src/drop.ts",
+			"default": "./src/drop.ts"
+		},
+		"./splitpane": {
+			"types": "./src/splitpane.ts",
+			"import": "./src/splitpane.ts",
+			"default": "./src/splitpane.ts"
+		},
+		"./panzoom": {
+			"types": "./src/panzoom.ts",
+			"import": "./src/panzoom.ts",
+			"default": "./src/panzoom.ts"
+		},
+		"./swipe": {
+			"types": "./src/swipe.ts",
+			"import": "./src/swipe.ts",
+			"default": "./src/swipe.ts"
+		},
+		"./select": {
+			"types": "./src/select.ts",
+			"import": "./src/select.ts",
+			"default": "./src/select.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -46,22 +91,66 @@
 				"import": "./dist/index.js",
 				"default": "./dist/index.js"
 			},
+			"./collab": {
+				"types": "./dist/collab.d.ts",
+				"import": "./dist/collab.js",
+				"default": "./dist/collab.js"
+			},
+			"./sortable": {
+				"types": "./dist/sortable.d.ts",
+				"import": "./dist/sortable.js",
+				"default": "./dist/sortable.js"
+			},
+			"./resize": {
+				"types": "./dist/resize.d.ts",
+				"import": "./dist/resize.js",
+				"default": "./dist/resize.js"
+			},
+			"./rotate": {
+				"types": "./dist/rotate.d.ts",
+				"import": "./dist/rotate.js",
+				"default": "./dist/rotate.js"
+			},
+			"./drop": {
+				"types": "./dist/drop.d.ts",
+				"import": "./dist/drop.js",
+				"default": "./dist/drop.js"
+			},
+			"./splitpane": {
+				"types": "./dist/splitpane.d.ts",
+				"import": "./dist/splitpane.js",
+				"default": "./dist/splitpane.js"
+			},
+			"./panzoom": {
+				"types": "./dist/panzoom.d.ts",
+				"import": "./dist/panzoom.js",
+				"default": "./dist/panzoom.js"
+			},
+			"./swipe": {
+				"types": "./dist/swipe.d.ts",
+				"import": "./dist/swipe.js",
+				"default": "./dist/swipe.js"
+			},
+			"./select": {
+				"types": "./dist/select.d.ts",
+				"import": "./dist/select.js",
+				"default": "./dist/select.js"
+			},
 			"./package.json": "./package.json"
 		}
 	},
 	"scripts": {
-		"compile": "tsdown",
-		"compile:watch": "tsdown --watch",
+		"compile": "vp pack",
+		"compile:watch": "vp pack --watch",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"prepublishOnly": "turbo compile",
+		"prepublishOnly": "vp run compile",
 		"pub": "pnpm compile && pnpm publish --no-git-checks --access public",
 		"pub:dry": "pnpm compile && pnpm publish --dry-run --no-git-checks --access public"
 	},
 	"devDependencies": {
 		"@neodrag/core": "workspace:*",
 		"jsdom": "^29.1.1",
-		"tsdown": "catalog:",
 		"vitest": "^3.2.4"
 	},
 	"peerDependencies": {

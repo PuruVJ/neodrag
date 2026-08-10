@@ -7,7 +7,9 @@
 			keyboardDrag({ step: 12, fastStep: 36, speedupDelay: 600 }),
 			ariaDrag({
 				label: 'Keyboard draggable card',
-				liveRegion: () => document.getElementById('keyboard-drag-live'),
+				get liveRegion() {
+					return document.getElementById('keyboard-drag-live');
+				},
 			}),
 		],
 	});

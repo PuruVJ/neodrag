@@ -40,11 +40,11 @@
 				{#each sections as { slug, title }}
 					<li class={compact ? 'py-0.5' : 'py-1'}>
 						{#if aria_current_val(slug) === 'page'}
-							<div class="dock-angular-bevel dock-angular-bevel--sm dock-angular-bevel--brand">
+							<div class="dock-bevel dock-bevel-sm dock-bevel-brand">
 								<a
 									href={slug}
 									aria-current="page"
-									class="docs-nav-link docs-nav-link--active unstyled dock-angular-bevel__fill block"
+									class="docs-nav-link docs-nav-link--active unstyled dock-bevel-fill block"
 									{onclick}
 								>
 									{title}

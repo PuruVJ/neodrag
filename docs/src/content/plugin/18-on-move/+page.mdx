@@ -1,0 +1,81 @@
+---
+title: 'On move'
+nav_title: 'On move'
+tagline: 'Observe every move tick without changing the offset.'
+section: 'extras'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import OnMoveDemo from './OnMoveDemo.svelte';
+
+`onMove` fires your callback with the current offset on every move tick without changing it — for analytics, telemetry, or a live read-out. (It is a convenience wrapper; the core `onDrag` option gives you the same per-move callback if you'd rather not add a plugin.)
+
+<OnMoveDemo client:visible />
+
+## Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable, onMove } from '@neodrag/svelte';
+  const drag = new Draggable({ use: [onMove(({ x, y }) => console.log(x, y))] });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable, onMove } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({ use: [onMove(({ x, y }) => console.log(x, y))] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useDraggable, onMove } from '@neodrag/vue';
+const { ref } = useDraggable({ use: [onMove(({ x, y }) => console.log(x, y))] });
+</script>
+
+<template>
+  <div :ref="ref">Drag me</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable, onMove } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({ use: [onMove(({ x, y }) => console.log(x, y))] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable, onMove } from '@neodrag/vanilla';
+
+new Draggable(node, { use: [onMove(({ x, y }) => console.log(x, y))] });
+```
+
+</div>
+</FrameworkSwitch>
+
+## Options
+
+A single argument — the callback `(offset: { x, y }) => void`, invoked each move tick. It never changes the applied offset (it returns nothing).

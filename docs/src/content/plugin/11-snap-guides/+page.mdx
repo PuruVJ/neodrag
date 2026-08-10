@@ -1,0 +1,99 @@
+---
+title: 'Snap guides'
+nav_title: 'Snap guides'
+tagline: 'Align edges and centers to other elements, with guide lines — the Figma move.'
+section: 'extras'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import SnapGuidesDemo from './SnapGuidesDemo.svelte';
+
+While dragging, the element's edges and center snap to the edges and centers of the target elements within a threshold, and a guide line flashes on each lock. It's the alignment move you know from Figma and other design tools.
+
+<SnapGuidesDemo client:visible />
+
+## Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable, snapGuides } from '@neodrag/svelte';
+  const drag = new Draggable({
+    use: [snapGuides({ get targets() { return document.querySelectorAll('.card'); }, threshold: 8 })],
+  });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable, snapGuides } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({
+    use: [snapGuides({ get targets() { return document.querySelectorAll('.card'); }, threshold: 8 })],
+  });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useDraggable, snapGuides } from '@neodrag/vue';
+const { ref } = useDraggable({
+  use: [snapGuides({ get targets() { return document.querySelectorAll('.card'); }, threshold: 8 })],
+});
+</script>
+
+<template>
+  <div :ref="ref">Drag me</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable, snapGuides } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({
+    use: [snapGuides({ get targets() { return document.querySelectorAll('.card'); }, threshold: 8 })],
+  });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable, snapGuides } from '@neodrag/vanilla';
+
+new Draggable(node, {
+  use: [snapGuides({ get targets() { return document.querySelectorAll('.card'); }, threshold: 8 })],
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+## Options
+
+`snapGuides` takes one options object:
+
+| key | type | meaning |
+|---|---|---|
+| `targets` | `ArrayLike<Element>` \| `() => ArrayLike<Element>` | the elements to align to — an array, a `NodeList`, a `get targets()` getter, or a function. Read fresh at each gesture start, so a getter stays live. The dragged element is skipped automatically |
+| `threshold` | `number` | snap distance in px; within this an edge or center locks to a target's. Default `5` |
+| `guides` | `boolean` | draw the alignment lines while snapped. Default `true`; style the line colour with the `--neodrag-snap-guide` CSS variable |
+
+A getter is the idiomatic way to keep `targets` live without rebuilding the plugin — `snapGuides({ get targets() { return mySiblings }, threshold: 8 })`.

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WorldMeta } from '../worlds';
-	import { SortableList } from '@neodrag/svelte';
+	import { SortableList } from '@neodrag/svelte/sortable';
 
 	const { world: _world }: { world: WorldMeta } = $props();
 
@@ -25,13 +25,27 @@
 		},
 		onReorder: (next) => (tracks = next),
 	});
+
+	const btn = 'cursor-pointer px-3.5 py-1.5 font-mono text-xs font-bold uppercase tracking-wider';
 </script>
 
 <div class="pg-scene indicator-scene">
 	<p class="pg-scene-kicker">Sortable · indicator</p>
-	<div class="indicator-toggle" role="group" aria-label="Drop indicator mode">
-		<button type="button" class:is-active={mode === 'push'} onclick={() => (mode = 'push')}>push</button>
-		<button type="button" class:is-active={mode === 'line'} onclick={() => (mode = 'line')}>line</button>
+	<div
+		class="inline-flex overflow-hidden rounded-full border-2 border-border-strong"
+		role="group"
+		aria-label="Drop indicator mode"
+	>
+		<button
+			type="button"
+			class="{btn} {mode === 'push' ? 'bg-brand text-shell' : 'text-fg-muted'}"
+			onclick={() => (mode = 'push')}>push</button
+		>
+		<button
+			type="button"
+			class="{btn} {mode === 'line' ? 'bg-brand text-shell' : 'text-fg-muted'}"
+			onclick={() => (mode = 'line')}>line</button
+		>
 	</div>
 	<p class="indicator-sub">
 		{mode === 'line'
@@ -39,9 +53,18 @@
 			: 'Siblings slide to open a gap for the dragged item.'}
 	</p>
 
-	<ul class="indicator-list" {...list.attach}>
+	<ul class="m-0 flex w-[min(14rem,70%)] list-none flex-col gap-1.5 p-0" {...list.attach}>
 		{#each tracks as track (track.id)}
-			<li class="indicator-row" {...list.row(track)}>{track.label}</li>
+			<li class="indicator-row" {...list.row(track.id)}>{track.label}</li>
 		{/each}
 	</ul>
 </div>
+
+<style>
+	/* line mode: the lifted row reads as a carried preview — a library data-attr state, kept as CSS. */
+	.indicator-row[data-neodrag-sortable-dragging] {
+		border-color: var(--color-brand);
+		box-shadow: 0 14px 30px -10px color-mix(in lch, var(--color-fg), transparent 55%);
+		scale: 1.02;
+	}
+</style>

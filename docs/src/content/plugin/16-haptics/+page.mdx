@@ -1,0 +1,81 @@
+---
+title: 'Haptics'
+nav_title: 'Haptics'
+tagline: 'Fire navigator.vibrate on drag start and end.'
+section: 'extras'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import HapticsDemo from './HapticsDemo.svelte';
+
+`haptics` fires `navigator.vibrate` on drag start and (optionally) end. It is SSR-guarded, and a no-op where the Vibration API is unsupported (e.g. desktop, iOS Safari). It defaults to a single 10ms tap on start.
+
+<HapticsDemo client:visible />
+
+## Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable, haptics } from '@neodrag/svelte';
+  const drag = new Draggable({ use: [haptics({ start: 10, end: [20, 40, 20] })] });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable, haptics } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({ use: [haptics({ start: 10, end: [20, 40, 20] })] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useDraggable, haptics } from '@neodrag/vue';
+const { ref } = useDraggable({ use: [haptics({ start: 10, end: [20, 40, 20] })] });
+</script>
+
+<template>
+  <div :ref="ref">Drag me</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable, haptics } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({ use: [haptics({ start: 10, end: [20, 40, 20] })] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable, haptics } from '@neodrag/vanilla';
+
+new Draggable(node, { use: [haptics({ start: 10, end: [20, 40, 20] })] });
+```
+
+</div>
+</FrameworkSwitch>
+
+## Options
+
+`start` and `end` — each is a number of milliseconds, or an on/off duration sequence (an array like `[20, 40, 20]`) passed straight to `navigator.vibrate`.

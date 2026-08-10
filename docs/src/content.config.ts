@@ -38,6 +38,8 @@ const plugin = defineCollection({
 		title: z.string(),
 		tagline: z.string(),
 		nav_title: z.string().optional(),
+		/** Nav grouping — `'documentation'` (default), `'extras'` (the `use:[]` plugins), or `'advanced'`. */
+		section: z.enum(['documentation', 'extras', 'advanced']).optional(),
 	}),
 });
 

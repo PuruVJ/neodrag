@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/test",
-	"version": "3.0.0-next.9",
+	"version": "3.0.0-next.10",
 	"description": "Browser test helpers for Neodrag (Vitest + Playwright)",
 	"license": "MIT",
 	"author": "Puru Vijay",
@@ -31,12 +31,11 @@
 		"access": "public"
 	},
 	"scripts": {
-		"compile": "tsdown",
+		"compile": "vp pack",
 		"prepublishOnly": "pnpm run compile"
 	},
 	"devDependencies": {
 		"@vitest/browser": "3.2.4",
-		"tsdown": "catalog:",
 		"vitest": "3.2.4"
 	},
 	"peerDependencies": {

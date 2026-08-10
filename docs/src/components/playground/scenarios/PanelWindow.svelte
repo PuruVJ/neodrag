@@ -20,7 +20,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <article
-	class="playground-window"
+	class="absolute w-[min(17rem,76%)] cursor-grab touch-none overflow-hidden rounded-lg border-2 border-border-strong bg-shell shadow-lg active:cursor-grabbing"
 	style:--stack={stack}
 	style:z-index={z}
 	style:top="calc(16% + var(--stack) * 11%)"
@@ -28,10 +28,10 @@
 	{...drag.attach}
 	onpointerdown={onactivate}
 >
-	<div class="playground-window-chrome">
-		<span class="window-title">{title}</span>
+	<div class="border-b-2 border-border bg-panel-strong px-4 py-2.5">
+		<span class="font-mono text-sm font-extrabold tracking-wider uppercase text-fg">{title}</span>
 	</div>
-	<div class="window-body">
-		<p>{body}</p>
+	<div class="px-5 pt-4 pb-5">
+		<p class="m-0 text-base leading-relaxed font-medium text-fg-muted">{body}</p>
 	</div>
 </article>

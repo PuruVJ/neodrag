@@ -1,0 +1,218 @@
+---
+title: 'Core engine'
+nav_title: 'Core'
+tagline: 'The framework-agnostic Interactions engine and composable capabilities.'
+section: 'advanced'
+---
+
+This page is for advanced users and framework authors. Everything above — the `Draggable`/`Droppable`/`Resizable`/`SortableList` classes, the hooks, the composables — is a thin shell over the pieces documented here. You rarely need this layer directly, but it's all public and unopinionated.
+
+Everything below comes from a single import. The dnd surface _is_ the package:
+
+```js
+import {
+  Draggable,
+  Droppable,
+  Resizable,
+  SortableList,
+  Interactions,
+  sharedEngine,
+  sharedCapability,
+  applyTranslate,
+  clearTranslate,
+} from '@neodrag/core';
+```
+
+There is no `@neodrag/core/dnd` — it's just `@neodrag/core`. Sensors live one level down at `@neodrag/core/sensors`.
+
+## Two layers
+
+The core is split into two layers, and you pick the one that fits:
+
+- **The ergonomic classes** — `Draggable`, `Droppable`, `Resizable`, `SortableList`. One element each, batteries included, wired into a shared engine for you. This is what the framework wrappers build on.
+- **The `Interactions` engine + capabilities** — the semantics-free interaction router and the `Capability` interface it routes to. This is the substrate you reach for when you're building a new interaction or hosting the engine yourself.
+
+## The ergonomic classes
+
+In core (and therefore in `@neodrag/vanilla`, which is just `export * from '@neodrag/core'`) the classes are **node-first**: you pass the element as the first argument, options as the second.
+
+```js
+import { Draggable } from '@neodrag/core';
+
+const drag = new Draggable(node, { axis: 'x' });
+
+drag.update({ axis: 'y' }); // fine-grained — only the given keys are written
+drag.offset; //  { x, y }  current offset
+drag.isDragging; //  boolean
+drag.destroy(); //  unbind + clear transform
+```
+
+The full set:
+
+- `new Draggable(node, options)` → `update(partial)`, `offset`, `isDragging`, `destroy()`
+- `new Droppable(node, options)` → `update(partial)`, `destroy()`
+- `new Resizable(node, options)` → `update(partial)`, `size`, `destroy()`
+- `new SortableList(container, options)` → `update(partial)`, `row(item)`, `applyExternal(op)`, `presence()`, `destroy()`
+
+> The Svelte class is the one exception: it's **options-only** (`new Draggable({ axis: 'x' })`, element bound via `.attach`). Core and vanilla are node-first.
+
+Each class is intentionally tiny — it constructs a per-binding handle on a shared capability and forwards to it. Importing only `Draggable` references only the `Drag` capability, so `Drop`/`Resize`/`Sortable` are tree-shaken out of your bundle.
+
+## The shared engine
+
+All four ergonomic classes register into **one** process-wide `Interactions` instance. That's how a `Droppable` knows about a `Draggable` without either importing the other: they're peers in the same engine, and drop _observes_ the drag session.
+
+```js
+import { sharedEngine, sharedCapability } from '@neodrag/core';
+
+sharedEngine(); // the lazily-created singleton Interactions every class shares
+```
+
+`sharedCapability(token, make)` is the registry behind it: keyed by capability class, it lazily constructs a capability the first time it's needed and `use()`s it into the shared engine, returning the same instance on every later call.
+
+```js
+import { sharedCapability } from '@neodrag/core';
+import { Drag } from '@neodrag/core';
+
+// What `new Draggable(node, opts)` does under the hood:
+const handle = sharedCapability(Drag, () => new Drag()).bind(node, opts);
+```
+
+Keying by class is what preserves tree-shaking: reference `Drag` and only `Drag` ends up in the graph. You never need to call these directly unless you're writing your own ergonomic wrapper around a custom capability.
+
+## The `Interactions` engine
+
+`Interactions` is the semantics-free core. It owns only the shared machinery — a single document-level set of sensor listeners, the active-session state, and the routing of pointer input to whichever capability claims a node. It knows nothing about dragging, dropping, or resizing. **Capabilities provide all meaning.**
+
+```js
+import { Interactions } from '@neodrag/core';
+
+const dnd = new Interactions(); // installs the default pointer + keyboard sensors
+dnd.use(myCapability); // compose one or more capabilities
+// …
+dnd.dispose(); // tear down sensors, cancel any active session
+```
+
+`new Interactions(options)` takes:
+
+- `delegate?: () => HTMLElement` — element to attach the single document-level listeners to. Default: `document.documentElement`.
+- `defaultSensors?: boolean` — auto-install the pointer + keyboard sensors. Default: `true`. Set `false` to register your own (see [Sensors](./sensors)).
+
+Methods:
+
+- `use(...capabilities)` — compose capabilities; returns `this`. Re-sorts by priority and recomputes observers.
+- `registerSensor(sensor)` — add a custom input source; returns `this`.
+- `get session` — the active `InteractionSession`, or `null`. Read-only view for capabilities and debugging.
+- `dispose()` — cancel any in-flight session, run every sensor cleanup, detach.
+
+### The single-session model
+
+A `Interactions` drives **one interaction at a time**. On the first qualifying pointerdown it asks each capability (highest priority first) to claim the node; the first to return a target owns the session for its whole lifetime. Subsequent pointerdowns are ignored until that session ends. Right-click (button 2) never starts a session, and input from a different pointer id than the active one is filtered out mid-gesture.
+
+### Priority routing
+
+Capabilities are consulted in descending `priority` order on pointerdown, and the first one whose `resolve()` returns a target wins — the rest are never asked.
+
+```js
+const dnd = new Interactions();
+dnd.use(dragCapability /* priority 0 */, resizeCapability /* priority 100 */);
+// A pointerdown on a resize handle is claimed by resize before drag is consulted.
+```
+
+This is exactly how a resize handle on a draggable panel wins over the body drag: resize sits at a higher priority, so it claims handle hits first and leaves the rest of the panel to drag.
+
+## The `Capability` interface
+
+A capability is a peer interaction — drag, the drop substrate, resize, sortable, or anything you invent. The engine routes raw pointer input to it and drives its lifecycle; you supply the semantics.
+
+```ts
+interface Capability {
+  readonly key: symbol;
+  readonly name: string;
+  /** Higher runs first in pointerdown routing. Default 0. */
+  readonly priority?: number;
+  /** Claim a pointerdown: return the bound target, or null to pass. */
+  resolve(input): ResolvedTarget | null;
+  /** Threshold gate, checked on each pending move. false → stay pending. Default: pass. */
+  shouldStart?(session): boolean;
+  /** Runs once when the threshold passes. */
+  start(session): void;
+  /** Runs on every move after start. */
+  move(session): void;
+  /** Runs once on pointerup / cancel. */
+  end(session, reason): void;
+  /** Observe interactions owned by *another* capability (e.g. drop watching drag). */
+  observe?(session, phase, reason?): void;
+}
+```
+
+The lifecycle the engine runs:
+
+1. **`resolve(input)`** — on pointerdown, claim the node by returning `{ node, data? }`, or `null` to let the next capability try. `data` is capability-private state the engine carries for you.
+2. **`shouldStart(session)`** — checked on every pending move until it returns `true`. This is the threshold gate. If the gesture ends before it passes, **`start`/`move`/`end` never fire** (a sub-threshold tap is not a drag). Defaults to passing immediately.
+3. **`start(session)`** — fires once, the moment the gate opens. The engine also takes pointer capture here.
+4. **`move(session)`** — fires on every subsequent move.
+5. **`end(session, reason)`** — fires once on pointerup or cancellation. `reason` is `'drop' | 'no-target' | 'cancel'`.
+
+A capability can also end its own session early from inside any phase via `session.end(reason)` — used for commit/cancel.
+
+### The session object
+
+```ts
+interface InteractionSession {
+  readonly capability: Capability; // the owner
+  readonly target: ResolvedTarget; // { node, data? } from resolve()
+  readonly pointerId: number;
+  readonly startInput: InteractionInput; // input at pointerdown
+  input: InteractionInput; // latest input
+  data?: unknown; // shared payload set by the owner, read by observers
+  started: boolean; // true once the gate passed and start() ran
+  end(reason): void; // end this interaction (commit / cancel)
+}
+```
+
+`session.data` is the decoupling channel: the drag capability writes the user's `dragData` onto it, and an observing drop capability reads it without ever importing drag.
+
+### Observing another capability
+
+`observe()` is how decoupled capabilities watch each other. Drag never imports drop; drop opts into the drag stream by implementing `observe`, and the engine fans every `start`/`move`/`end` of the owning session out to the other registered observers — _after_ the owner's own handler for that phase.
+
+```ts
+const drop: Capability = {
+  // …resolve/start/move/end for its own pointerdowns…
+  observe(session, phase, reason) {
+    if (session.capability.name !== 'drag') return;
+    // hit-test this zone against session.input, read session.data, etc.
+  },
+};
+```
+
+This is the entire mechanism behind "drop auto-observes drag — no wiring." Build a collision system, a snap target, or live analytics the same way.
+
+## Applying position
+
+Capabilities don't reach into the DOM ad-hoc. Position is written through two pure helpers that the engine exports:
+
+```js
+import { applyTranslate, clearTranslate } from '@neodrag/core';
+
+applyTranslate(node, x, y); // sets CSS `translate` (or an SVG transform), idempotent
+clearTranslate(node); // removes it
+```
+
+`applyTranslate` is idempotent (it skips the write when `x`/`y` are unchanged) and caches per node in a `WeakMap`, never a property on the element. It transparently handles SVG (an `SVGTransform` translate) versus HTML (the `translate` style). `clearTranslate` is a no-op on a node that was never translated, so whole-list clears cost only what was actually touched.
+
+## How the wrappers fit
+
+Every framework package is a thin shell over this layer:
+
+- **`@neodrag/vanilla`** is literally `export * from '@neodrag/core'` — the core classes _are_ the vanilla API.
+- **`@neodrag/react`**, **`@neodrag/vue`**, **`@neodrag/solid`**, and **`@neodrag/svelte`** wrap each ergonomic class in one hook / composable / primitive / class, bind it to a framework ref, mirror `isDragging`/`isOver`/`size` into framework-reactive state, and push a fine-grained `update()` when your options change. They also re-export everything from core, so the engine, the `Capability` types, and `applyTranslate`/`clearTranslate` are reachable from your framework package too.
+
+If you want a new interaction available everywhere, write a `Capability`, wrap it in an ergonomic class via `sharedCapability`, and the framework shells fall out almost for free.
+
+## Where to next
+
+- [Sensors](./sensors) — the input sources that feed the engine: pointer, keyboard, gamepad, and custom.
+- [Extras](./extras) — the `use: []` extension seam for per-interaction behavior (a lighter touch than a full capability).
+- [Draggable](./draggable) — the drag capability and all of its options, from the user's side.

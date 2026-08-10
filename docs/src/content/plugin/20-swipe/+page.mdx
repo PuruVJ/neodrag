@@ -1,0 +1,94 @@
+---
+title: 'Swipe'
+nav_title: 'Swipe'
+tagline: 'Swipe-to-dismiss — follow the pointer on one axis, fly out past a threshold or spring back.'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import SwipeDemo from './SwipeDemo.svelte';
+
+<SwipeDemo client:visible />
+
+`Swipeable` is the swipe-to-dismiss gesture — a list row you flick away, a card you toss off-screen. The element follows the pointer along one axis; released **past the threshold** it animates the rest of the way out and fires `onDismiss`, and released short of it springs back to rest. It's built on the core `Draggable`, so it gets the same pointer-capture and sensors as any drag.
+
+## Anatomy
+
+Bind the element, read `offset` / `isDismissed`, and (optionally) handle `onDismiss`. `reset()` springs a dismissed element back so you can re-show it.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Swipeable } from '@neodrag/svelte/swipe';
+
+  const swipe = new Swipeable({ axis: 'x', threshold: 0.4, onDismiss: (dir) => remove(dir) });
+</script>
+
+<div {...swipe.attach}>swipe me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useSwipe } from '@neodrag/react/swipe';
+
+function Row() {
+  const { ref, isDismissed } = useSwipe({ axis: 'x', threshold: 0.4, onDismiss: (dir) => remove(dir) });
+  return <div ref={ref}>swipe me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useSwipe } from '@neodrag/vue/swipe';
+
+const { ref, isDismissed } = useSwipe({ axis: 'x', threshold: 0.4, onDismiss: (dir) => remove(dir) });
+</script>
+
+<template>
+  <div :ref="ref">swipe me</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSwipe } from '@neodrag/solid/swipe';
+
+function Row() {
+  const { ref, isDismissed } = createSwipe({ axis: 'x', threshold: 0.4, onDismiss: (dir) => remove(dir) });
+  return <div ref={ref}>swipe me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Swipeable } from '@neodrag/vanilla/swipe';
+
+const swipe = new Swipeable({ axis: 'x', threshold: 0.4, onDismiss: (dir) => remove(dir) });
+const off = swipe.attach(node); // returns a disposer
+```
+
+</div>
+</FrameworkSwitch>
+
+## Options
+
+Pass these to the constructor / hook:
+
+| key | type | meaning |
+|---|---|---|
+| `axis` | `'x'` (default) \| `'y'` | the swipe direction |
+| `threshold` | `number` | dismiss distance — a **fraction** of the element's size when `<= 1` (default `0.4`), otherwise an absolute px distance |
+| `duration` | `number` | settle animation duration in ms (spring-back or fly-out). Default `220` |
+| `onDismiss` | `(direction: -1 \| 1) => void` | fires after the element flies out; `-1` is left/up, `1` is right/down |
+
+The instance exposes reactive `offset` (live px) and `isDismissed`, plus `reset()` to spring a dismissed element back to rest. The decision is also available as a pure function — `resolveSwipe(offset, size, threshold)` — and the framework-agnostic binder lives at `@neodrag/core/swipe` (`Swipeable`).

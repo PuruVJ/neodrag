@@ -1,0 +1,323 @@
+---
+title: 'Rotatable'
+nav_title: 'Rotatable'
+tagline: 'Rotate elements by an angle grip, with snap, clamp, and a configurable pivot.'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import RotatableDemo from './RotatableDemo.svelte';
+import ControlledRotateDemo from './ControlledRotateDemo.svelte';
+
+<RotatableDemo client:visible />
+
+`Rotatable` turns an element into something you can spin by a grip. It is a sibling of [Resizable](/docs/plugin/resizable) built on the **exact same seam**: you author the grip yourself as a child element, neodrag claims a pointer-down on any element marked with `data-neodrag-rotate-handle`, and writes the individual CSS `rotate` property for the duration of the gesture. Because it writes `rotate` (not `transform`), it composes on one element with drag's `translate` and resize's width/height — no transform collisions.
+
+You construct it the same way as every other capability and read `angle` (in degrees) back.
+
+## A rotatable card
+
+Bind the capability to the element, then drop a grip inside it. The grip is plain DOM — style it however you like; neodrag only reads the `data-neodrag-rotate-handle` attribute.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Rotatable } from '@neodrag/svelte/rotate';
+
+  const rotate = new Rotatable({ origin: 'center' });
+</script>
+
+<div class="card" {...rotate.attach} style="position: absolute">
+  <span>{Math.round(rotate.angle)}°</span>
+  <span class="grip" {...rotate.handle('top')}></span>
+</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useRotatable } from '@neodrag/react/rotate';
+
+function Card() {
+  const { ref, handle, angle } = useRotatable({ origin: 'center' });
+
+  return (
+    <div className="card" ref={ref} style={{ position: 'absolute' }}>
+      <span>{Math.round(angle)}°</span>
+      <span className="grip" {...handle('top')} />
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useRotatable } from '@neodrag/vue/rotate';
+
+const { ref, handle, angle } = useRotatable({ origin: 'center' });
+</script>
+
+<template>
+  <div class="card" :ref="ref" style="position: absolute">
+    <span>{{ Math.round(angle) }}°</span>
+    <span class="grip" v-bind="handle('top')" />
+  </div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createRotatable } from '@neodrag/solid/rotate';
+
+function Card() {
+  const { ref, handle, angle } = createRotatable({ origin: 'center' });
+
+  return (
+    <div class="card" ref={ref} style={{ position: 'absolute' }}>
+      <span>{Math.round(angle())}°</span>
+      <span class="grip" {...handle('top')} />
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Rotatable } from '@neodrag/vanilla/rotate';
+
+const card = document.querySelector('.card');
+const rotate = new Rotatable(card, { origin: 'center' });
+
+// card HTML — author the grip inside it:
+// <span data-neodrag-rotate-handle="top" class="grip"></span>
+
+rotate.angle;    // degrees
+rotate.destroy();
+```
+
+</div>
+</FrameworkSwitch>
+
+The grip CSS is entirely yours. A common layout floats a small handle above the element on a stem:
+
+```css
+.card {
+  position: relative;
+  width: 160px;
+  height: 100px;
+}
+
+.grip {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  cursor: grab;
+}
+```
+
+Rather than hand-writing the `data-neodrag-rotate-handle` attribute, every adapter ships a typed `handle(pos)` helper that returns the right prop — `{...rotate.handle('top')}` in Svelte, and `handle('top')` (spread onto the element) from `useRotatable` / `createRotatable` in React, Vue, and Solid. `pos` is type-checked, so a typo is a compile error rather than a dead grip.
+
+## Reacting to rotate state
+
+In Svelte the instance exposes live state directly: `rotate.isRotating` while a gesture is in flight, and `rotate.angle` (degrees) for the current angle.
+
+```svelte
+<script>
+  import { Rotatable } from '@neodrag/svelte/rotate';
+
+  const rotate = new Rotatable();
+</script>
+
+<div class="card" class:rotating={rotate.isRotating} {...rotate.attach} style="position: absolute">
+  {Math.round(rotate.angle)}°
+  <span class="grip" {...rotate.handle('top')}></span>
+</div>
+```
+
+In the other frameworks, `useRotatable` / `createRotatable` return `{ ref, handle, isRotating, angle }`; read the rotate phases through the `onRotate*` callbacks (below) and store them in your own state.
+
+## Controlled angle
+
+`angle` is also a **controlled input**. Pass a getter to drive the rotation from your own state, and pair it with a setter for two-way binding — the grip writes the live angle back each move, so a slider and the grip stay in lockstep. A controlled angle still snaps/clamps through `step`/`min`/`max`.
+
+<ControlledRotateDemo client:visible />
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Rotatable } from '@neodrag/svelte/rotate';
+
+  let angle = $state(0);
+  const rotate = new Rotatable({
+    get angle() { return angle; },
+    set angle(v) { angle = v; }, // the grip writes back here
+  });
+</script>
+
+<input type="range" min="-180" max="180" bind:value={angle} />
+<div class="card" {...rotate.attach}>
+  <span class="grip" {...rotate.handle('top')}></span>
+</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useRotatable } from '@neodrag/react/rotate';
+
+function Card() {
+  const [angle, setAngle] = useState(0);
+  const { ref, handle } = useRotatable({ angle, onRotate: (e) => setAngle(e.angle) });
+  return (
+    <>
+      <input type="range" min={-180} max={180} value={angle}
+             onChange={(e) => setAngle(+e.target.value)} />
+      <div className="card" ref={ref}><span className="grip" {...handle('top')} /></div>
+    </>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { useRotatable } from '@neodrag/vue/rotate';
+
+const angle = ref(0);
+const { ref: el, handle } = useRotatable({
+  get angle() { return angle.value; },
+  onRotate: (e) => (angle.value = e.angle),
+});
+</script>
+
+<template>
+  <input type="range" min="-180" max="180" v-model.number="angle" />
+  <div class="card" :ref="el"><span class="grip" v-bind="handle('top')" /></div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSignal } from 'solid-js';
+import { createRotatable } from '@neodrag/solid/rotate';
+
+function Card() {
+  const [angle, setAngle] = createSignal(0);
+  const { ref, handle } = createRotatable({
+    get angle() { return angle(); },
+    onRotate: (e) => setAngle(e.angle),
+  });
+  return (
+    <>
+      <input type="range" min={-180} max={180} value={angle()}
+             onInput={(e) => setAngle(+e.currentTarget.value)} />
+      <div class="card" ref={ref}><span class="grip" {...handle('top')} /></div>
+    </>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Rotatable } from '@neodrag/vanilla/rotate';
+
+const rotate = new Rotatable(card, { angle: 30 }); // initial angle
+rotate.update({ angle: 90 });                      // drive it imperatively
+```
+
+</div>
+</FrameworkSwitch>
+
+## Options
+
+Pass these in the options object (`RotateOptions`):
+
+| key | type | meaning |
+|---|---|---|
+| `origin` | `RotateOrigin` — `'center'` (default), a corner (`'tl' \| 'tr' \| 'bl' \| 'br'`), or an `{ x, y }` offset | the pivot the element spins around. **Local config — it never rides the wire** |
+| `step` | `number` | snap the angle to a multiple of this many degrees (e.g. `15`) |
+| `min` / `max` | `number` | clamp the angle, in degrees |
+| `angle` | `number` | controlled angle (degrees) — pass a getter to drive it, a setter for two-way binding. See [Controlled angle](#controlled-angle) |
+| `disabled` | `boolean` | when true, the grip stops claiming pointer-downs |
+| `userSelect` | `boolean` | suppress text selection while rotating. Default `true` |
+| `onRotateStart` / `onRotate` / `onRotateEnd` | `(e: RotateEventData) => void` | lifecycle callbacks |
+
+`RotateEventData = { angle, node, input }` — `angle` is the new angle in degrees.
+
+The pivot is configurable per element via `origin` and is **local config** — unlike the angle, it never crosses the wire, so two peers can spin the same element about different pivots and still converge on the same `rotate` value. `step` snaps; `min`/`max` clamp:
+
+```svelte
+<script>
+  import { Rotatable } from '@neodrag/svelte/rotate';
+
+  const rotate = new Rotatable({
+    origin: 'br',     // pivot at the bottom-right corner
+    step: 15,         // snap to 15° detents
+    min: -90,
+    max: 90,
+    onRotateEnd: ({ angle }) => console.log('committed', angle),
+  });
+</script>
+
+<div class="card" {...rotate.attach} style="position: absolute">
+  <span class="grip" {...rotate.handle('top')}></span>
+</div>
+```
+
+## Combine with Draggable and Resizable
+
+Rotate, resize, and drag are independent capabilities that each write a **different** CSS property — `rotate`, `width`/`height`, and `translate` — so all three can live on **one node** with no coordination. Spread every `attach` onto the same element and render each capability's handles:
+
+```svelte
+<script>
+  import { Draggable } from '@neodrag/svelte';
+  import { Resizable, RESIZE_EDGES } from '@neodrag/svelte/resize';
+  import { Rotatable } from '@neodrag/svelte/rotate';
+
+  const drag = new Draggable();
+  const resize = new Resizable({ minWidth: 80, minHeight: 60 });
+  const rotate = new Rotatable({ origin: 'center', step: 15 });
+</script>
+
+<div class="card" {...drag.attach} {...resize.attach} {...rotate.attach} style="position: absolute">
+  <span class="grip" {...rotate.handle('top')}></span>
+  {#each RESIZE_EDGES as edge (edge)}
+    <span class="handle {edge}" {...resize.handle(edge)}></span>
+  {/each}
+</div>
+```
+
+It just works because each gesture claims its pointer-down at a different priority: the rotate grip registers **above** the resize handles, which register above drag's body claim. A pointer-down that lands on the grip rotates, on a resize handle resizes, and anywhere else on the card drags — each owns the node for its gesture while the others stand down. The same pattern holds in every adapter.
+
+## Collaboration
+
+In the [collaboration model](/docs/plugin/collab) rotate is one more **last-write-wins value op** — `{ type: 'rotate', target, angle }` — with a matching presence frame in the same unified envelope. Join it to a room exactly like any other target:
+
+```js
+room.add(rotatable, 'knob'); // a Rotatable → `rotate` ops, last-write-wins
+```
+
+It syncs through the same `Room` and the same backends with **zero `Room` changes** — the proof the three-noun (sequence / value / presence) model generalizes. The `origin` pivot stays local, so only the resulting `angle` crosses the wire.

@@ -22,41 +22,41 @@ export interface AutoScrollOptions {
 
 type EdgeRect = { top: number; left: number; right: number; bottom: number };
 
-function resolveContainer(c: AutoScrollOptions['container']): HTMLElement | null {
+function resolve_container(c: AutoScrollOptions['container']): HTMLElement | null {
 	const el = typeof c === 'function' ? c() : c;
 	return el ?? null;
 }
 
-function viewportRect(): EdgeRect {
+function viewport_rect(): EdgeRect {
 	return { top: 0, left: 0, right: window.innerWidth, bottom: window.innerHeight };
 }
 
-function readPointer(input: InteractionInput): { x: number; y: number } {
+function read_pointer(input: InteractionInput): { x: number; y: number } {
 	return { x: input.clientX, y: input.clientY };
 }
 
 export function autoScroll(options: AutoScrollOptions = {}): DragPlugin {
 	const margin = options.margin ?? 48;
-	const maxSpeed = options.maxSpeed ?? 24;
+	const max_speed = options.maxSpeed ?? 24;
 
 	return {
 		name: 'auto-scroll',
 		onMove: ({ input }) => {
-			const container = resolveContainer(options.container);
-			const scrollEl: HTMLElement | Element =
+			const container = resolve_container(options.container);
+			const scroll_el: HTMLElement | Element =
 				container ?? document.scrollingElement ?? document.documentElement;
-			const rect: EdgeRect = container ? container.getBoundingClientRect() : viewportRect();
+			const rect: EdgeRect = container ? container.getBoundingClientRect() : viewport_rect();
 
-			const { x, y } = readPointer(input);
+			const { x, y } = read_pointer(input);
 			let dx = 0;
 			let dy = 0;
-			if (y < rect.top + margin) dy = -maxSpeed;
-			else if (y > rect.bottom - margin) dy = maxSpeed;
-			if (x < rect.left + margin) dx = -maxSpeed;
-			else if (x > rect.right - margin) dx = maxSpeed;
+			if (y < rect.top + margin) dy = -max_speed;
+			else if (y > rect.bottom - margin) dy = max_speed;
+			if (x < rect.left + margin) dx = -max_speed;
+			else if (x > rect.right - margin) dx = max_speed;
 
 			if (dx === 0 && dy === 0) return;
-			(scrollEl as HTMLElement).scrollBy(dx, dy);
+			(scroll_el as HTMLElement).scrollBy(dx, dy);
 		},
 	};
 }

@@ -1,0 +1,175 @@
+---
+title: 'Split Pane'
+nav_title: 'Split Pane'
+tagline: 'Resizable panes separated by draggable gutters — a conserved budget, nestable to any depth.'
+---
+
+import SplitPaneDemo from './SplitPaneDemo.svelte';
+import NestedSplitPaneDemo from './NestedSplitPaneDemo.svelte';
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+<SplitPaneDemo client:visible />
+
+`SplitPane` is the "resizable, but also not" capability: a row (or column) of **panes** separated by **gutters**. Dragging a gutter doesn't resize one element — it **redistributes a conserved budget** between the two neighbouring panes: one grows by exactly what the other loses, each clamped to its minimum, the total unchanged. The gutter itself never moves; the flex layout repositions it as the panes change.
+
+It's built on the drag primitive — each gutter is a one-axis `Draggable` whose drag delta maps to the neighbour-pair resize and returns `{ x: 0, y: 0 }` so it stays anchored. You author the markup; `SplitPane` provides the attachments.
+
+## Anatomy
+
+Bind three things: `container` on the wrapper, `pane(i)` on each pane, and `gutter(i)` on each divider (the gutter between pane `i` and `i + 1`). Read live weights from `sizes`.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { SplitPane } from '@neodrag/svelte/splitpane';
+
+  // weights (relative flex-grow); a gutter drag clamps each pane to minSizes.
+  const split = new SplitPane({ axis: 'x', sizes: [1, 1.4, 1], minSizes: 0.25 });
+</script>
+
+<div {...split.container}>
+  <div {...split.pane(0)}>A</div>
+  <div {...split.gutter(0)}></div>
+  <div {...split.pane(1)}>B</div>
+  <div {...split.gutter(1)}></div>
+  <div {...split.pane(2)}>C</div>
+</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useSplitPane } from '@neodrag/react/splitpane';
+
+function Editor() {
+  const { container, pane, gutter } = useSplitPane({ axis: 'x', sizes: [1, 1.4, 1], minSizes: 0.25 });
+  return (
+    <div ref={container}>
+      <div ref={pane(0)}>A</div>
+      <div ref={gutter(0)} />
+      <div ref={pane(1)}>B</div>
+      <div ref={gutter(1)} />
+      <div ref={pane(2)}>C</div>
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useSplitPane } from '@neodrag/vue/splitpane';
+
+const { container, pane, gutter } = useSplitPane({ axis: 'x', sizes: [1, 1.4, 1], minSizes: 0.25 });
+</script>
+
+<template>
+  <div :ref="container">
+    <div :ref="pane(0)">A</div>
+    <div :ref="gutter(0)" />
+    <div :ref="pane(1)">B</div>
+    <div :ref="gutter(1)" />
+    <div :ref="pane(2)">C</div>
+  </div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSplitPane } from '@neodrag/solid/splitpane';
+
+function Editor() {
+  const { container, pane, gutter } = createSplitPane({ axis: 'x', sizes: [1, 1.4, 1], minSizes: 0.25 });
+  return (
+    <div ref={container}>
+      <div ref={pane(0)}>A</div>
+      <div ref={gutter(0)} />
+      <div ref={pane(1)}>B</div>
+      <div ref={gutter(1)} />
+      <div ref={pane(2)}>C</div>
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { SplitPane } from '@neodrag/vanilla/splitpane';
+
+const split = new SplitPane({ axis: 'x', sizes: [1, 1.4, 1], minSizes: 0.25 });
+// each register method takes the element + (for panes/gutters) its index, and returns a disposer
+split.container(containerEl);
+split.pane(paneA, 0);
+split.gutter(gutter0, 0);
+split.pane(paneB, 1);
+split.gutter(gutter1, 1);
+split.pane(paneC, 2);
+```
+
+</div>
+</FrameworkSwitch>
+
+`container` sets `display: flex` + the direction; `pane(i)` applies the live `flex` weight and lets the pane shrink below its content (`min-width: 0`); `gutter(i)` makes the divider draggable. Style them however you like — give the gutter a `cursor: col-resize` (or `row-resize` for `axis: 'y'`) and a width.
+
+## Nesting
+
+Each `SplitPane` is a **fully independent instance** — its own weights, its own gutter draggables, no shared state. So you nest by dropping one split inside another's pane. Dragging an inner gutter resizes only the inner split (the drag engine binds the *innermost* draggable under the pointer); the outer is untouched, and vice versa.
+
+<NestedSplitPaneDemo client:visible />
+
+```svelte
+<script>
+  import { SplitPane } from '@neodrag/svelte/splitpane';
+
+  const outer = new SplitPane({ axis: 'x', sizes: [1, 2.2] });
+  const inner = new SplitPane({ axis: 'y', sizes: [2, 1] }); // the right pane, split vertically
+</script>
+
+<div {...outer.container}>
+  <div {...outer.pane(0)}>sidebar</div>
+  <div {...outer.gutter(0)}></div>
+  <div {...outer.pane(1)}>
+    <!-- the nested split fills the pane -->
+    <div {...inner.container} style="width: 100%; height: 100%">
+      <div {...inner.pane(0)}>editor</div>
+      <div {...inner.gutter(0)}></div>
+      <div {...inner.pane(1)}>terminal</div>
+    </div>
+  </div>
+</div>
+```
+
+The only layout rule for nesting: the inner `container` should **fill its pane** (`width: 100%; height: 100%`) — that's a CSS choice, not a `SplitPane` concern, so a top-level split is free to size its own container.
+
+## Options
+
+Pass these to `new SplitPane(options)` (`SplitPaneOptions`):
+
+| key | type | meaning |
+|---|---|---|
+| `axis` | `'x'` (default) \| `'y'` | `'x'` lays panes in a row (vertical gutters); `'y'` in a column (horizontal gutters) |
+| `sizes` | `number[]` | initial pane weights (relative `flex-grow`). Defaults to equal weights as panes register |
+| `minSizes` | `number \| number[]` | minimum weight per pane — one value for all, or one each. Default `0` |
+| `onResize` | `(sizes: number[]) => void` | fires once per gesture, on release, with the settled weights |
+| `onChange` | `(sizes: number[]) => void` | fires on every change (each move + a programmatic set) |
+
+The instance exposes `split.sizes` (reactive live weights) and `split.setSizes(weights)` (a programmatic set — e.g. a reset button or a saved layout).
+
+> Split Pane ships for **every framework**, each from its `/splitpane` subpath and exposing the same `container` / `pane(i)` / `gutter(i)` shape:
+>
+> - **Svelte** — `new SplitPane(opts)`, spread `{...split.container}` / `{...split.pane(i)}` / `{...split.gutter(i)}`.
+> - **React** — `useSplitPane(opts)` → `container` / `pane(i)` / `gutter(i)` refs + reactive `sizes`.
+> - **Vue** — `useSplitPane(opts)` → the same as `:ref` bindings + a `sizes` ref.
+> - **Solid** — `createSplitPane(opts)` → ref setters + a `sizes` accessor.
+> - **Vanilla** — the core `SplitPane` class directly: `container(el)` / `pane(el, i)` / `gutter(el, i)` register methods (each returns a disposer).
+>
+> They all wrap the framework-agnostic core at `@neodrag/core/splitpane` — the DOM-aware `SplitPane` binder plus `SplitPaneController` (the pure weight math) and the `splitGutter` drag plugin.

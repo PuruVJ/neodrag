@@ -81,33 +81,33 @@ export function startKeyboardRepeat(opts: {
 	speedupDelay: number;
 	fastInterval: number;
 }): KeyboardRepeatHandle {
-	let rafId = 0;
-	let lastTick = 0;
-	let startedAt = 0;
+	let raf_id = 0;
+	let last_tick = 0;
+	let started_at = 0;
 	let stopped = false;
 	let fast = false;
 
 	const loop = (now: number) => {
 		if (stopped) return;
-		if (!startedAt) startedAt = now;
+		if (!started_at) started_at = now;
 		const interval = fast ? opts.fastInterval : opts.slowInterval;
-		if (!fast && now - startedAt >= opts.speedupDelay) {
+		if (!fast && now - started_at >= opts.speedupDelay) {
 			fast = true;
-			lastTick = now;
+			last_tick = now;
 		}
-		if (now - lastTick >= interval) {
-			lastTick = now;
+		if (now - last_tick >= interval) {
+			last_tick = now;
 			opts.onTick(fast);
 		}
-		rafId = requestAnimationFrame(loop);
+		raf_id = requestAnimationFrame(loop);
 	};
 
-	rafId = requestAnimationFrame(loop);
+	raf_id = requestAnimationFrame(loop);
 
 	return {
 		stop() {
 			stopped = true;
-			if (rafId) cancelAnimationFrame(rafId);
+			if (raf_id) cancelAnimationFrame(raf_id);
 		},
 	};
 }
@@ -121,22 +121,22 @@ export const KEYBOARD_SENSOR_KEY = Symbol('neodrag.sensor.keyboard');
 export class KeyboardSensor extends SensorBase {
 	static readonly key = KEYBOARD_SENSOR_KEY;
 	readonly key = KeyboardSensor.key;
-	readonly #cancelKeys: Set<string>;
+	readonly #cancel_keys: Set<string>;
 
 	constructor(options: KeyboardSensorOptions | null = {}) {
 		super();
-		this.#cancelKeys = new Set(options?.cancelKeys ?? ['Escape']);
+		this.#cancel_keys = new Set(options?.cancelKeys ?? ['Escape']);
 	}
 
 	protected attach(host: SensorHost): () => void {
 		const target = host.getDelegate();
 
-		const onKeyDown = (e: KeyboardEvent) => {
-			if (!this.#cancelKeys.has(e.key)) return;
+		const on_key_down = (e: KeyboardEvent) => {
+			if (!this.#cancel_keys.has(e.key)) return;
 			host.cancelActive('cancel');
 		};
 
-		const unlisten = listen(target, 'keydown', onKeyDown, { passive: true });
+		const unlisten = listen(target, 'keydown', on_key_down, { passive: true });
 
 		return unlisten;
 	}
@@ -156,10 +156,10 @@ type GrabSession = {
 	clientY: number;
 	config: ResolvedKeyboardDragOptions;
 	repeat: ReturnType<typeof startKeyboardRepeat> | null;
-	lastKey: string;
+	last_key: string;
 };
 
-function axisDelta(
+function axis_delta(
 	key: string,
 	step: number,
 	axis: ResolvedKeyboardDragOptions['axis'],
@@ -176,13 +176,13 @@ function axisDelta(
 	return { x, y };
 }
 
-function centerOf(node: HTMLElement | SVGElement) {
+function center_of(node: HTMLElement | SVGElement) {
 	const rect = node.getBoundingClientRect();
 	return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
 }
 
-function isGrabKey(key: string, grabKey: string): boolean {
-	return key === grabKey || (grabKey === 'Space' && key === ' ');
+function is_grab_key(key: string, grab_key: string): boolean {
+	return key === grab_key || (grab_key === 'Space' && key === ' ');
 }
 
 export class KeyboardMoveSensor extends SensorBase {
@@ -193,14 +193,14 @@ export class KeyboardMoveSensor extends SensorBase {
 		const target = host.getDelegate();
 		let grab: GrabSession | null = null;
 
-		const stopRepeat = () => {
+		const stop_repeat = () => {
 			grab?.repeat?.stop();
 			if (grab) grab.repeat = null;
 		};
 
-		const emitMove = (session: GrabSession, key: string, fast: boolean) => {
+		const emit_move = (session: GrabSession, key: string, fast: boolean) => {
 			const step = fast ? session.config.fastStep : session.config.step;
-			const delta = axisDelta(key, step, session.config.axis);
+			const delta = axis_delta(key, step, session.config.axis);
 			if (!delta) return;
 			session.clientX += delta.x;
 			session.clientY += delta.y;
@@ -217,9 +217,9 @@ export class KeyboardMoveSensor extends SensorBase {
 			);
 		};
 
-		const releaseGrab = () => {
+		const release_grab = () => {
 			if (!grab) return;
-			stopRepeat();
+			stop_repeat();
 			host.onInteractionEnd(
 				keyboardToInput({
 					phase: 'end',
@@ -232,12 +232,12 @@ export class KeyboardMoveSensor extends SensorBase {
 			grab = null;
 		};
 
-		const onKeyDown = (e: KeyboardEvent) => {
+		const on_key_down = (e: KeyboardEvent) => {
 			if (e.defaultPrevented) return;
 
 			if (e.key === 'Escape' && grab) {
 				e.preventDefault();
-				stopRepeat();
+				stop_repeat();
 				grab = null;
 				host.cancelActive('cancel');
 				return;
@@ -245,31 +245,31 @@ export class KeyboardMoveSensor extends SensorBase {
 
 			const root = findKeyboardDragRoot(e.target);
 			if (!root) {
-				if (grab && isGrabKey(e.key, grab.config.grabKey)) {
+				if (grab && is_grab_key(e.key, grab.config.grabKey)) {
 					e.preventDefault();
-					releaseGrab();
+					release_grab();
 				}
 				return;
 			}
 
 			const config = getKeyboardDragConfig(root)!;
 
-			if (isGrabKey(e.key, config.grabKey)) {
+			if (is_grab_key(e.key, config.grabKey)) {
 				e.preventDefault();
 				if (grab?.node === root) {
-					releaseGrab();
+					release_grab();
 					return;
 				}
-				if (grab) releaseGrab();
+				if (grab) release_grab();
 
-				const center = centerOf(root);
+				const center = center_of(root);
 				grab = {
 					node: root,
 					clientX: center.x,
 					clientY: center.y,
 					config,
 					repeat: null,
-					lastKey: config.grabKey,
+					last_key: config.grabKey,
 				};
 				host.onInteractionStart(
 					keyboardToInput({
@@ -288,11 +288,11 @@ export class KeyboardMoveSensor extends SensorBase {
 			if (!ARROW_KEYS.has(e.key)) return;
 
 			e.preventDefault();
-			grab.lastKey = e.key;
-			stopRepeat();
+			grab.last_key = e.key;
+			stop_repeat();
 
 			if (!e.repeat) {
-				emitMove(grab, e.key, false);
+				emit_move(grab, e.key, false);
 				return;
 			}
 
@@ -302,23 +302,23 @@ export class KeyboardMoveSensor extends SensorBase {
 				fastInterval: config.fastInterval,
 				onTick: (fast) => {
 					if (!grab) return;
-					emitMove(grab, grab.lastKey, fast);
+					emit_move(grab, grab.last_key, fast);
 				},
 			});
 		};
 
-		const onBlur = () => {
-			if (grab) releaseGrab();
+		const on_blur = () => {
+			if (grab) release_grab();
 		};
 
-		const unlistenKeyDown = listen(target, 'keydown', onKeyDown, { passive: false });
-		const unlistenBlur = listen(target, 'blur', onBlur, { passive: true, capture: true });
+		const unlisten_key_down = listen(target, 'keydown', on_key_down, { passive: false });
+		const unlisten_blur = listen(target, 'blur', on_blur, { passive: true, capture: true });
 
 		return () => {
-			stopRepeat();
+			stop_repeat();
 			grab = null;
-			unlistenKeyDown();
-			unlistenBlur();
+			unlisten_key_down();
+			unlisten_blur();
 		};
 	}
 }

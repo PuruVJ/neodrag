@@ -1,0 +1,776 @@
+---
+title: 'Sortable'
+nav_title: 'Sortable'
+tagline: 'Reorderable lists and grids with cross-container transfer and FLIP.'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import SortableDemo from './SortableDemo.svelte';
+import GridDemo from './GridDemo.svelte';
+import GroupDemo from './GroupDemo.svelte';
+import IndicatorDemo from './IndicatorDemo.svelte';
+
+`SortableList` turns a container into a reorderable list or grid. You give it your **data** (`items`) and a way to **apply a reorder** (`onReorder`), then spread a per-row binding onto each item. The library owns the drag math, the placeholder, the FLIP animation and — if you opt in — cross-container transfer between lists that share a `group`.
+
+Two things make sortable different from the other capabilities:
+
+- It is **data-first**. You don't move DOM nodes; you hand the list your array and it tells you the new order. Your render stays the single source of truth.
+- Reorders are **anchor-based move ops** (`{ itemId, afterId }`), not index splices. An anchor survives concurrent inserts and deletes, which is exactly why the same op can be replayed by a remote peer — this is the seam the [Collaboration layer](/docs/plugin/collab) plugs into.
+
+<SortableDemo client:visible />
+
+## A basic list
+
+Bind the container, then spread `list.row(item.id)` onto each item — never hand-write `data-neodrag-sortable-key`. Pass the item's stable string key directly (for string/number items, pass the value itself). (Keys ride along in collaborative move ops, so use a real, stable key.) When a drag commits, `onReorder` fires with the reordered array; assign it back to your state and re-render.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { SortableList } from '@neodrag/svelte/sortable';
+
+  let items = $state([
+    { id: 'a', label: 'Write the spec' },
+    { id: 'b', label: 'Build the thing' },
+    { id: 'c', label: 'Ship it' },
+  ]);
+
+  const list = new SortableList({
+    get items() {
+      return items;
+    },
+    onReorder: (next) => {
+      items = next;
+    },
+  });
+</script>
+
+<ul {...list.attach}>
+  {#each items as item (item.id)}
+    <li {...list.row(item.id)}>{item.label}</li>
+  {/each}
+</ul>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useState } from 'react';
+import { useSortable } from '@neodrag/react/sortable';
+
+function TodoList() {
+  const [items, setItems] = useState([
+    { id: 'a', label: 'Write the spec' },
+    { id: 'b', label: 'Build the thing' },
+    { id: 'c', label: 'Ship it' },
+  ]);
+
+  const { ref, row } = useSortable({
+    items,
+    onReorder: (next) => setItems(next),
+  });
+
+  return (
+    <ul ref={ref}>
+      {items.map((item) => (
+        <li key={item.id} {...row(item.id)}>
+          {item.label}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref as vref } from 'vue';
+import { useSortable } from '@neodrag/vue/sortable';
+
+const items = vref([
+  { id: 'a', label: 'Write the spec' },
+  { id: 'b', label: 'Build the thing' },
+  { id: 'c', label: 'Ship it' },
+]);
+
+const { ref, row } = useSortable({
+  get items() {
+    return items.value;
+  },
+  onReorder: (next) => {
+    items.value = next;
+  },
+});
+</script>
+
+<template>
+  <ul :ref="ref">
+    <li v-for="item in items" :key="item.id" v-bind="row(item.id)">
+      {{ item.label }}
+    </li>
+  </ul>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSignal, For } from 'solid-js';
+import { createSortable } from '@neodrag/solid/sortable';
+
+function TodoList() {
+  const [items, setItems] = createSignal([
+    { id: 'a', label: 'Write the spec' },
+    { id: 'b', label: 'Build the thing' },
+    { id: 'c', label: 'Ship it' },
+  ]);
+
+  const { ref, row } = createSortable({
+    get items() {
+      return items();
+    },
+    onReorder: (next) => setItems(next),
+  });
+
+  return (
+    <ul ref={ref}>
+      <For each={items()}>{(item) => <li {...row(item.id)}>{item.label}</li>}</For>
+    </ul>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { SortableList } from '@neodrag/vanilla/sortable';
+
+let items = [
+  { id: 'a', label: 'Write the spec' },
+  { id: 'b', label: 'Build the thing' },
+  { id: 'c', label: 'Ship it' },
+];
+
+const container = document.querySelector('ul');
+
+function render() {
+  container.replaceChildren(
+    ...items.map((item) => {
+      const li = document.createElement('li');
+      li.textContent = item.label;
+      // row(item.id) returns { 'data-neodrag-sortable-key': key } — set it as an attribute.
+      for (const [attr, value] of Object.entries(list.row(item.id))) li.setAttribute(attr, value);
+      return li;
+    }),
+  );
+}
+
+const list = new SortableList(container, {
+  get items() {
+    return items;
+  },
+  onReorder: (next) => {
+    items = next;
+    render();
+  },
+});
+
+render();
+```
+
+</div>
+</FrameworkSwitch>
+
+> `row(item.id)` returns an object holding the `data-neodrag-sortable-key` attribute. In Svelte/React/Solid you spread it (`{...list.row(item.id)}`); in Vue you bind it (`v-bind="row(item.id)"`). It is type-checked, so there is no stringly-typed attribute to get wrong.
+
+### The options
+
+| key          | type                          | meaning                                                                                  |
+| ------------ | ----------------------------- | ---------------------------------------------------------------------------------------- |
+| `items`      | `T[]`                         | the current ordered items — push a fresh snapshot whenever your data changes; each row's key is the string you pass to `row(...)` |
+| `id`         | `string`                      | stable list id — the address used for cross-list transfer and for [collaboration](/docs/plugin/collab). Must match across peers; auto-assigned if omitted |
+| `onReorder`  | `(next, op) => void`          | fired on commit with the reordered array **and** the anchor `MoveOp`                      |
+| `axis`       | `'x' \| 'y'`                  | the active axis for a list (defaults to the layout direction)                            |
+| `strategy`   | `'list' \| 'grid'`            | `list` = 1D midpoint crossing, `grid` = 2D closest-center. Default `list`                |
+| `indicator`  | `'push' \| 'line'`            | preview style. `push` (default) opens a gap by displacing siblings; `line` keeps items in place and draws a drop-line at the insertion point |
+| `group`      | `string`                      | cross-container transfer group — lists sharing one can exchange items                    |
+| `accepts`    | `(item, { from, to }) => boolean` | vet an item transferring **into** this list from another container — return `false` to reject. Consulted only for cross-container transfer |
+| `animation`  | `boolean \| number`           | FLIP on reorder. `true` → 200ms, a number → that many ms, `false` → off. Default `true`  |
+| `lift`       | `boolean`                     | lift the dragged node onto `position: fixed` so it floats above its siblings. Default off |
+| `hysteresis` | `number`                      | px the pointer must cross past a slot boundary before the gap flips. Default 3            |
+| `onCommit`   | `(op: SortableOp) => void`    | pure op stream — fires a `SortableOp` (the move/transfer union) on every commit (the collab seam) |
+| `onTransfer` | `(op: TransferOp) => void`    | fires on the **target** list when an item transfers in from another container            |
+
+> There is **no `key` option** — a row's key is the string you pass to `row(item.id)` on each item, never a list-level setting. The per-row key is the single source of truth for ordering and for the `itemId` in every op.
+
+`onReorder` hands you both representations of the same move: `next` is the convenient reordered array (assign it to state), and `op` is the `MoveOp` — `{ itemId, afterId }`, where `afterId` is the key the item now sits after (`null` means it moved to the front).
+
+## A grid
+
+<GridDemo client:visible />
+
+Set `strategy: 'grid'` for a 2D arrangement — a photo wall, a board of cards, an icon grid. Instead of crossing midpoints along one axis, the dragged item snaps to the closest cell center. Everything else (data flow, `row()`, FLIP) is identical; only the targeting math changes.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { SortableList } from '@neodrag/svelte/sortable';
+
+  let photos = $state(initialPhotos);
+
+  const grid = new SortableList({
+    get items() {
+      return photos;
+    },
+    strategy: 'grid',
+    onReorder: (next) => {
+      photos = next;
+    },
+  });
+</script>
+
+<div class="grid" {...grid.attach}>
+  {#each photos as photo (photo.id)}
+    <img {...grid.row(photo.id)} src={photo.src} alt={photo.alt} />
+  {/each}
+</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useState } from 'react';
+import { useSortable } from '@neodrag/react/sortable';
+
+function PhotoWall() {
+  const [photos, setPhotos] = useState(initialPhotos);
+
+  const { ref, row } = useSortable({
+    items: photos,
+    strategy: 'grid',
+    onReorder: (next) => setPhotos(next),
+  });
+
+  return (
+    <div className="grid" ref={ref}>
+      {photos.map((photo) => (
+        <img key={photo.id} {...row(photo.id)} src={photo.src} alt={photo.alt} />
+      ))}
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref as vref } from 'vue';
+import { useSortable } from '@neodrag/vue/sortable';
+
+const photos = vref(initialPhotos);
+
+const { ref, row } = useSortable({
+  get items() {
+    return photos.value;
+  },
+  strategy: 'grid',
+  onReorder: (next) => {
+    photos.value = next;
+  },
+});
+</script>
+
+<template>
+  <div class="grid" :ref="ref">
+    <img v-for="photo in photos" :key="photo.id" v-bind="row(photo.id)" :src="photo.src" :alt="photo.alt" />
+  </div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSignal, For } from 'solid-js';
+import { createSortable } from '@neodrag/solid/sortable';
+
+function PhotoWall() {
+  const [photos, setPhotos] = createSignal(initialPhotos);
+
+  const { ref, row } = createSortable({
+    get items() {
+      return photos();
+    },
+    strategy: 'grid',
+    onReorder: (next) => setPhotos(next),
+  });
+
+  return (
+    <div class="grid" ref={ref}>
+      <For each={photos()}>
+        {(photo) => <img {...row(photo.id)} src={photo.src} alt={photo.alt} />}
+      </For>
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { SortableList } from '@neodrag/vanilla/sortable';
+
+let photos = initialPhotos;
+const container = document.querySelector('.grid');
+
+const grid = new SortableList(container, {
+  get items() {
+    return photos;
+  },
+  strategy: 'grid',
+  onReorder: (next) => {
+    photos = next;
+    render();
+  },
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+## Cross-container groups
+
+<GroupDemo client:visible />
+
+Give two (or more) lists the same `group` string and they become transfer-aware: drag an item out of one and drop it into another. No wiring connects them — they discover each other by group identity. This is the kanban / Trello pattern.
+
+When an item crosses over, `onReorder` fires on the **source** list (the item left, with its new order) and `onTransfer` fires on the **target** list with a `TransferOp` describing what arrived:
+
+```ts
+interface TransferOp<T> {
+  item: T;
+  fromList: string; // stable list id the item left (SortableOptions.id, or auto)
+  toList: string; // stable list id it arrived in
+  from: number; // index it left
+  to: number; // index it landed at
+}
+```
+
+Each list still owns its own slice of state — you move the item between the two arrays. The `fromList` / `toList` ids are serializable, so the same transfer fact is identical on every peer.
+
+Transfers also **fire `onCommit`** — a transfer is a committed cross-container fact, emitted once on the **source** list as a `transfer` op (`{ type: 'transfer', target, from, itemId, afterId }`, where `target` is the destination list id and `from` is the source). So a collab adapter subscribed to `onCommit` sees both in-list reorders (`move`) and cross-list moves (`transfer`) through the one stream.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { SortableList } from '@neodrag/svelte/sortable';
+
+  let todo = $state([{ id: '1', text: 'Draft' }]);
+  let done = $state([{ id: '2', text: 'Ship' }]);
+
+  const todoList = new SortableList({
+    get items() {
+      return todo;
+    },
+    group: 'board',
+    onReorder: (next) => {
+      todo = next;
+    },
+    onTransfer: ({ item, to }) => {
+      todo = [...todo.slice(0, to), item, ...todo.slice(to)];
+    },
+  });
+
+  const doneList = new SortableList({
+    get items() {
+      return done;
+    },
+    group: 'board',
+    onReorder: (next) => {
+      done = next;
+    },
+    onTransfer: ({ item, to }) => {
+      done = [...done.slice(0, to), item, ...done.slice(to)];
+    },
+  });
+</script>
+
+<div class="columns">
+  <ul {...todoList.attach}>
+    {#each todo as card (card.id)}
+      <li {...todoList.row(card.id)}>{card.text}</li>
+    {/each}
+  </ul>
+  <ul {...doneList.attach}>
+    {#each done as card (card.id)}
+      <li {...doneList.row(card.id)}>{card.text}</li>
+    {/each}
+  </ul>
+</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useState } from 'react';
+import { useSortable } from '@neodrag/react/sortable';
+
+function Board() {
+  const [todo, setTodo] = useState([{ id: '1', text: 'Draft' }]);
+  const [done, setDone] = useState([{ id: '2', text: 'Ship' }]);
+
+  const todoList = useSortable({
+    items: todo,
+    group: 'board',
+    onReorder: setTodo,
+    onTransfer: ({ item, to }) =>
+      setTodo((prev) => [...prev.slice(0, to), item, ...prev.slice(to)]),
+  });
+
+  const doneList = useSortable({
+    items: done,
+    group: 'board',
+    onReorder: setDone,
+    onTransfer: ({ item, to }) =>
+      setDone((prev) => [...prev.slice(0, to), item, ...prev.slice(to)]),
+  });
+
+  return (
+    <div className="columns">
+      <ul ref={todoList.ref}>
+        {todo.map((card) => (
+          <li key={card.id} {...todoList.row(card.id)}>
+            {card.text}
+          </li>
+        ))}
+      </ul>
+      <ul ref={doneList.ref}>
+        {done.map((card) => (
+          <li key={card.id} {...doneList.row(card.id)}>
+            {card.text}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref as vref } from 'vue';
+import { useSortable } from '@neodrag/vue/sortable';
+
+const todo = vref([{ id: '1', text: 'Draft' }]);
+const done = vref([{ id: '2', text: 'Ship' }]);
+
+const todoList = useSortable({
+  get items() {
+    return todo.value;
+  },
+  group: 'board',
+  onReorder: (next) => (todo.value = next),
+  onTransfer: ({ item, to }) =>
+    (todo.value = [...todo.value.slice(0, to), item, ...todo.value.slice(to)]),
+});
+
+const doneList = useSortable({
+  get items() {
+    return done.value;
+  },
+  group: 'board',
+  onReorder: (next) => (done.value = next),
+  onTransfer: ({ item, to }) =>
+    (done.value = [...done.value.slice(0, to), item, ...done.value.slice(to)]),
+});
+</script>
+
+<template>
+  <div class="columns">
+    <ul :ref="todoList.ref">
+      <li v-for="card in todo" :key="card.id" v-bind="todoList.row(card.id)">{{ card.text }}</li>
+    </ul>
+    <ul :ref="doneList.ref">
+      <li v-for="card in done" :key="card.id" v-bind="doneList.row(card.id)">{{ card.text }}</li>
+    </ul>
+  </div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSignal, For } from 'solid-js';
+import { createSortable } from '@neodrag/solid/sortable';
+
+function Board() {
+  const [todo, setTodo] = createSignal([{ id: '1', text: 'Draft' }]);
+  const [done, setDone] = createSignal([{ id: '2', text: 'Ship' }]);
+
+  const todoList = createSortable({
+    get items() {
+      return todo();
+    },
+    group: 'board',
+    onReorder: setTodo,
+    onTransfer: ({ item, to }) =>
+      setTodo((prev) => [...prev.slice(0, to), item, ...prev.slice(to)]),
+  });
+
+  const doneList = createSortable({
+    get items() {
+      return done();
+    },
+    group: 'board',
+    onReorder: setDone,
+    onTransfer: ({ item, to }) =>
+      setDone((prev) => [...prev.slice(0, to), item, ...prev.slice(to)]),
+  });
+
+  return (
+    <div class="columns">
+      <ul ref={todoList.ref}>
+        <For each={todo()}>{(card) => <li {...todoList.row(card.id)}>{card.text}</li>}</For>
+      </ul>
+      <ul ref={doneList.ref}>
+        <For each={done()}>{(card) => <li {...doneList.row(card.id)}>{card.text}</li>}</For>
+      </ul>
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { SortableList } from '@neodrag/vanilla/sortable';
+
+let todo = [{ id: '1', text: 'Draft' }];
+let done = [{ id: '2', text: 'Ship' }];
+
+const todoList = new SortableList(todoEl, {
+  get items() {
+    return todo;
+  },
+  group: 'board',
+  onReorder: (next) => {
+    todo = next;
+    renderTodo();
+  },
+  onTransfer: ({ item, to }) => {
+    todo = [...todo.slice(0, to), item, ...todo.slice(to)];
+    renderTodo();
+  },
+});
+
+const doneList = new SortableList(doneEl, {
+  get items() {
+    return done;
+  },
+  group: 'board',
+  onReorder: (next) => {
+    done = next;
+    renderDone();
+  },
+  onTransfer: ({ item, to }) => {
+    done = [...done.slice(0, to), item, ...done.slice(to)];
+    renderDone();
+  },
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+## Animation and lift
+
+By default reorders animate with **FLIP** (`animation: true`, 200ms): the library measures every row before and after the commit and plays the difference, so neighbours slide smoothly into their new slots. Pass a number to tune the duration, or `false` to turn it off.
+
+`lift: true` pins the dragged node onto `position: fixed` while you hold it, so it floats above its siblings instead of pushing them around in flow — the chip-out-of-the-list feel. Use it for cards and tiles; leave it off for tight inline lists.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { SortableList } from '@neodrag/svelte/sortable';
+
+  let cards = $state(initialCards);
+
+  const list = new SortableList({
+    get items() {
+      return cards;
+    },
+    animation: 250,
+    lift: true,
+    onReorder: (next) => {
+      cards = next;
+    },
+  });
+</script>
+
+<ul {...list.attach}>
+  {#each cards as card (card.id)}
+    <li {...list.row(card.id)}>{card.title}</li>
+  {/each}
+</ul>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useState } from 'react';
+import { useSortable } from '@neodrag/react/sortable';
+
+function Cards() {
+  const [cards, setCards] = useState(initialCards);
+
+  const { ref, row } = useSortable({
+    items: cards,
+    animation: 250,
+    lift: true,
+    onReorder: (next) => setCards(next),
+  });
+
+  return (
+    <ul ref={ref}>
+      {cards.map((card) => (
+        <li key={card.id} {...row(card.id)}>
+          {card.title}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { ref as vref } from 'vue';
+import { useSortable } from '@neodrag/vue/sortable';
+
+const cards = vref(initialCards);
+
+const { ref, row } = useSortable({
+  get items() {
+    return cards.value;
+  },
+  animation: 250,
+  lift: true,
+  onReorder: (next) => {
+    cards.value = next;
+  },
+});
+</script>
+
+<template>
+  <ul :ref="ref">
+    <li v-for="card in cards" :key="card.id" v-bind="row(card.id)">{{ card.title }}</li>
+  </ul>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSignal, For } from 'solid-js';
+import { createSortable } from '@neodrag/solid/sortable';
+
+function Cards() {
+  const [cards, setCards] = createSignal(initialCards);
+
+  const { ref, row } = createSortable({
+    get items() {
+      return cards();
+    },
+    animation: 250,
+    lift: true,
+    onReorder: (next) => setCards(next),
+  });
+
+  return (
+    <ul ref={ref}>
+      <For each={cards()}>{(card) => <li {...row(card.id)}>{card.title}</li>}</For>
+    </ul>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { SortableList } from '@neodrag/vanilla/sortable';
+
+let cards = initialCards;
+
+const list = new SortableList(container, {
+  get items() {
+    return cards;
+  },
+  animation: 250,
+  lift: true,
+  onReorder: (next) => {
+    cards = next;
+    render();
+  },
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+By default the preview is `push`: the dragged item opens a gap by displacing its siblings. Set `indicator: 'line'` to keep every item in place, dim a ghost at the origin, let the item drag freely, and draw an engine-owned drop-line at the insertion point. The committed reorder is identical — only the preview differs.
+
+<IndicatorDemo client:visible />
+
+The library tags the in-flight node so you can style each phase from CSS — no extra config:
+
+- `data-neodrag-sortable-dragging` on the node being dragged
+- `data-neodrag-sortable-lifted` on the lifted node (when `lift` is on)
+- `data-neodrag-sortable-placeholder` on the gap left behind in the flow
+
+```css
+[data-neodrag-sortable-dragging] {
+  opacity: 0.9;
+}
+
+[data-neodrag-sortable-placeholder] {
+  background: color-mix(in oklab, currentColor 8%, transparent);
+}
+```
+
+## Real-time and collaboration
+
+Because reorders are anchor-based ops, the exact same operation can be applied on a remote peer and converge — anchors commute where index splices clash. That's why every `SortableList` satisfies the `CollabTarget` seam: it emits committed ops, exposes its in-flight presence, and applies inbound ops through the same reorder path a local drag uses. The two seams you'll see most:
+
+- **`onCommit(op: SortableOp)`** — the durable, op-only stream. Fires a `move` (in-list) or `transfer` (cross-list) op on every commit. This is what a collab adapter subscribes to in order to broadcast your local moves.
+- **`applyExternal(op)`** — apply an inbound `SortableOp` from a remote peer through the same reorder path (Svelte/React/Solid/Vue expose this via the underlying list; vanilla calls it directly on the instance). Its companion presence reports the in-flight drag so you can render remote ghosts.
+
+You rarely touch these by hand — a **`Room`** (from `@neodrag/core`) wires `onCommit` → out and remote ops → `applyExternal` for you. Hand the list to `room.add(list, 'some-id')` and it's live. See the [Collaboration page](/docs/plugin/collab) for the full CRDT-ready setup over Yjs (`@neodrag/yjs`), Liveblocks (`@neodrag/liveblocks`), or your own backend.

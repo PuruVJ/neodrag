@@ -10,6 +10,8 @@ export { scrollLock, type ScrollLockOptions } from './scroll-lock.ts';
 export { ghost, type GhostOptions } from './ghost.ts';
 export { haptics } from './haptics.ts';
 export { ariaDrag, type AriaDragOptions, type AriaDragAnnounce } from './aria.ts';
+export { snapGuides, type SnapGuidesOptions } from './snap-guides.ts';
+export { marqueeSelect, rectsOverlap, type MarqueeOptions } from './marquee.ts';
 
 /** Spring tuning for `magnetic`'s fling mode. Both are unit-normalized (0–1). */
 export interface MagneticSpring {
@@ -34,18 +36,18 @@ export interface MagneticOptions {
 	spring?: boolean | MagneticSpring;
 }
 
-const easeInQuad = (t: number) => t * t;
+const ease_in_quad = (t: number) => t * t;
 const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n);
 
-function nearestWithin(targets: readonly Point[], p: Point, r2: number): Point | undefined {
+function nearest_within(targets: readonly Point[], p: Point, r2: number): Point | undefined {
 	let best: Point | undefined;
-	let bestD = r2;
+	let best_d = r2;
 	for (const t of targets) {
 		const dx = t.x - p.x;
 		const dy = t.y - p.y;
 		const d = dx * dx + dy * dy;
-		if (d <= bestD) {
-			bestD = d;
+		if (d <= best_d) {
+			best_d = d;
 			best = t;
 		}
 	}
@@ -64,13 +66,13 @@ export function magnetic(targets: readonly Point[], options: number | MagneticOp
 	const radius = opts.radius ?? 24;
 	const snap = opts.snap ?? radius * 0.25;
 	const strength = opts.strength ?? 1;
-	const easing = opts.easing ?? easeInQuad;
+	const easing = opts.easing ?? ease_in_quad;
 	const r2 = radius * radius;
 
 	const spring = opts.spring;
 	if (spring) {
-		const stiffness = (spring === true ? undefined : spring.stiffness) ?? 0.2;
-		const damping = (spring === true ? undefined : spring.damping) ?? 0.7;
+		const stiffness_factor = (spring === true ? undefined : spring.stiffness) ?? 0.2;
+		const damping_factor = (spring === true ? undefined : spring.damping) ?? 0.7;
 		const pos: Point = { x: 0, y: 0 };
 		const vel: Point = { x: 0, y: 0 };
 		let active = false;
@@ -85,7 +87,7 @@ export function magnetic(targets: readonly Point[], options: number | MagneticOp
 			onStart: reset,
 			onEnd: reset,
 			onMove: ({ offset }) => {
-				const t = nearestWithin(targets, offset, r2);
+				const t = nearest_within(targets, offset, r2);
 				if (!t) {
 					active = false;
 					target = null;
@@ -98,8 +100,8 @@ export function magnetic(targets: readonly Point[], options: number | MagneticOp
 					vel.x = vel.y = 0;
 				}
 				target = t;
-				vel.x = (vel.x + (t.x - pos.x) * stiffness) * damping;
-				vel.y = (vel.y + (t.y - pos.y) * stiffness) * damping;
+				vel.x = (vel.x + (t.x - pos.x) * stiffness_factor) * damping_factor;
+				vel.y = (vel.y + (t.y - pos.y) * stiffness_factor) * damping_factor;
 				pos.x += vel.x;
 				pos.y += vel.y;
 				return { x: pos.x, y: pos.y };
@@ -116,7 +118,7 @@ export function magnetic(targets: readonly Point[], options: number | MagneticOp
 	return {
 		name: 'magnetic',
 		onMove: ({ offset }) => {
-			const t = nearestWithin(targets, offset, r2);
+			const t = nearest_within(targets, offset, r2);
 			if (!t) return undefined;
 			const dist = Math.hypot(t.x - offset.x, t.y - offset.y);
 			if (dist <= snap) return t; // hard lock

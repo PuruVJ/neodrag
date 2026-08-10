@@ -6,7 +6,7 @@ tagline: 'What changed, and how to migrate.'
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-If you used Neodrag v2, the good news is the part you knew best didn't change. v3 **keeps the options-object ergonomics**: `axis`, `bounds`, `grid`, `handle`, `cancel`, `disabled`, `threshold` and `position` are still plain keys on a single options object — no imports, no helper factories, no wrappers around values. You pass the same shapes you always did.
+If you used Neodrag v2, the good news is the part you knew best didn't change. v3 **keeps the options-object ergonomics**: `axis`, `bounds`, `grid`, `disabled`, `threshold` and `position` are still plain keys on a single options object — no imports, no helper factories, no wrappers around values. You pass the same shapes you always did. (`handle` / `cancel` are no longer options — they became spreadable register hooks, `{...drag.handle()}` / `{...drag.cancel()}`, covered below.)
 
 What changed is everything _around_ that object. v3 is a rewrite on a shared, framework-agnostic engine, so it adds capabilities v2 never had (drop zones, resize, sortable lists), a single `use: []` seam for extensions, one normalized input model across pointer/keyboard/programmatic, and an opt-in collab layer for real-time sortable. Two of v2's flags — text-selection suppression and `touch-action` handling — are now **built in and on by default**. And the way you _attach_ a draggable to an element is now consistent across frameworks.
 
@@ -22,12 +22,12 @@ What changed is everything _around_ that object. v3 is a rewrite on a shared, fr
 | Bounds string (`'parent'`) | Supported | **Still supported**, plus `'viewport'`, element, rect, function |
 | Text selection during drag | `applyUserSelectHack` flag | **Built in** as `userSelect` (on by default) |
 | Touch scroll stealing the drag | manual | **Built in** as `touchAction` (axis-aware default) |
-| New capabilities | — | `Droppable`, `Resizable`, `SortableList` from the same package |
-| Extensions | Built-in only | `use: []` seam (`scrollLock`, `magnetic`, `snapToGrid`, `ghost`, …) |
-| Collab / real-time | — | Opt-in `bindCollab` for sortable |
-| Imports | Varied per framework | **Everything** from the one framework package |
+| New capabilities | — | `Droppable`, `Resizable`, `Rotatable`, `SortableList` — each at its own subpath |
+| Extensions | Built-in only | `use: []` seam (`scrollLock`, `magnetic`, `ghost`, `autoScroll`, …) |
+| Collab / real-time | — | Opt-in `Room` (from `@neodrag/<framework>/collab`) for every capability |
+| Imports | Varied per framework | Draggable from the package root; each other capability from its own subpath |
 
-Everything — wrappers, the `Draggable` / `Droppable` / `Resizable` / `SortableList` classes, extensions, collab — imports from the single framework package: `@neodrag/svelte`, `@neodrag/react`, `@neodrag/vue`, `@neodrag/solid`, `@neodrag/vanilla`. There are no subpaths to remember.
+The draggable wrapper imports from the package root — `@neodrag/svelte`, `@neodrag/react`, `@neodrag/vue`, `@neodrag/solid`, `@neodrag/vanilla`. Every other capability lives at its own subpath so an app pulls only what it uses: `@neodrag/<framework>/sortable`, `/resize`, `/rotate`, `/drop`, and `/collab`. The shape is identical across frameworks.
 
 ## Installation
 
@@ -35,7 +35,7 @@ Everything — wrappers, the `Draggable` / `Droppable` / `Resizable` / `Sortable
 <div slot="svelte">
 
 ```sh
-npm i @neodrag/svelte@next
+npm i @neodrag/svelte@next @neodrag/core@next
 ```
 
 v3 requires **Svelte 5** — the wrapper is built on attachments.
@@ -44,28 +44,28 @@ v3 requires **Svelte 5** — the wrapper is built on attachments.
 <div slot="react">
 
 ```sh
-npm i @neodrag/react@next
+npm i @neodrag/react@next @neodrag/core@next
 ```
 
 </div>
 <div slot="vue">
 
 ```sh
-npm i @neodrag/vue@next
+npm i @neodrag/vue@next @neodrag/core@next
 ```
 
 </div>
 <div slot="solid">
 
 ```sh
-npm i @neodrag/solid@next
+npm i @neodrag/solid@next @neodrag/core@next
 ```
 
 </div>
 <div slot="vanilla">
 
 ```sh
-npm i @neodrag/vanilla@next
+npm i @neodrag/vanilla@next @neodrag/core@next
 ```
 
 </div>
@@ -262,8 +262,8 @@ Almost all v2 options carry over **unchanged** as plain object keys. A few got m
 | `axis: 'x' \| 'y' \| 'both'` | `axis` (same) | Still a plain string. |
 | `bounds: 'parent'` | `bounds: 'parent'` | **Legacy string still works**, and now also `'viewport'`, an `HTMLElement`, a `{ left, top, right, bottom }` rect, or `() => rect`. |
 | `grid: [number, number]` | `grid` (same) | Snap offset to `[stepX, stepY]` px. |
-| `handle: string \| HTMLElement` | `handle` (same) | Only start a drag from inside this. |
-| `cancel: string \| HTMLElement` | `cancel` (same) | Never start a drag from inside this. |
+| `handle: string \| HTMLElement` | `{...drag.handle()}` | Now a **register hook** — spread it onto the grab element instead of passing a selector. Nest freely (innermost wins); pass `handle({ priority })` to override. |
+| `cancel: string \| HTMLElement` | `{...drag.cancel()}` | Now a **register hook** — spread it onto the no-drag region. A `cancel()` inside a `handle()` blocks (innermost wins). |
 | `disabled: boolean` | `disabled` (same) | When `true`, dragging never starts. |
 | `threshold: { distance, delay }` | `threshold: number` | Now a single number — px of movement before a drag begins (default `0`). |
 | `position: { x, y }` | `position` (same) | Controlled / initial offset — bind reactive state to drive it (now two-way). |
@@ -498,18 +498,19 @@ document.querySelector('#toggle').addEventListener('click', () => {
 
 ## What's new (and worth migrating toward)
 
-These had no v2 equivalent. All import from the same package and tree-shake — importing only the draggable won't pull any of them in.
+These had no v2 equivalent. Each lives at its own subpath and tree-shakes — importing only the draggable (from the package root) won't pull any of them in.
 
-- **Extensions via `use: []`** — opt-in behaviors like `scrollLock()`, `snapToGrid()`, `magnetic()`, `ghost()`, `haptics()`, `autoScroll()`. This is also the seam for your own custom logic: a plain object whose `onMove` may return a `{ x, y }` to override the offset. See [Extras](/docs/extras).
-- **Drop zones** — `Droppable` / `useDroppable`. Drop observes drag automatically on the shared engine; pair it with `dragData` and `accepts`. See [Droppable](/docs/droppable).
-- **Resize** — `Resizable` / `useResizable`, with `data-neodrag-resize-handle="se"` handles you author. See [Resizable](/docs/resizable).
-- **Sortable lists** — `SortableList`, with FLIP animation, grid strategy and cross-container groups. Each row gets `{...list.row(item.id)}` instead of a hand-written attribute. See [Sortable](/docs/sortable).
-- **Real-time collab** — `bindCollab` wires a sortable's anchor-based move ops to any backend (Yjs, Liveblocks, your transport). The ops are designed to survive concurrent edits. See [Collaboration](/docs/collaboration).
+- **Extensions via `use: []`** — opt-in behaviors like `scrollLock()`, `magnetic()`, `ghost()`, `haptics()`, `autoScroll()`. This is also the seam for your own custom logic: a plain object whose `onMove` may return a `{ x, y }` to override the offset. See [Extras](/docs/extras).
+- **Drop zones** — `Droppable` / `useDroppable` from `@neodrag/<framework>/drop`. Drop observes drag automatically on the shared engine; pair it with `dragData` and `accepts`. See [Droppable](/docs/droppable).
+- **Resize** — `Resizable` / `useResizable` from `@neodrag/<framework>/resize`. Spread the adapter's `handle(edge)` helper onto each handle element (e.g. `{...resize.handle('se')}`) instead of hand-writing `data-neodrag-resize-handle`. See [Resizable](/docs/resizable).
+- **Rotate** — `Rotatable` / `useRotatable` from `@neodrag/<framework>/rotate`. See [Rotatable](/docs/rotatable).
+- **Sortable lists** — `SortableList` from `@neodrag/<framework>/sortable`, with FLIP animation, grid strategy and cross-container groups. Each row gets `{...list.row(item.id)}` instead of a hand-written attribute. See [Sortable](/docs/sortable).
+- **Real-time collab** — a `Room` (from `@neodrag/<framework>/collab`, framework-agnostic) wires any capability's committed ops to a backend; `room.add(target, id)` joins each thing you sync. Sequence ops (sortable move/transfer) rebase under concurrency; value ops (drag/resize) are last-write-wins. Backends ship separately as `@neodrag/yjs` and `@neodrag/liveblocks`. See [Collaboration](/docs/collaboration).
 
 ## Migration checklist
 
-1. **Update the package** to `@neodrag/<framework>@next`. Everything still comes from that one import — delete any `/plugins` or other subpath imports.
-2. **Keep your options object.** `axis`, `bounds`, `grid`, `handle`, `cancel`, `disabled`, `position` are unchanged.
+1. **Update the package** to `@neodrag/<framework>@next`. Your draggable still imports from the package root — delete any v2 `/plugins` subpath imports. (New capabilities live at their own subpaths: `/sortable`, `/resize`, `/rotate`, `/drop`, `/collab`.)
+2. **Keep your options object.** `axis`, `bounds`, `grid`, `disabled`, `position` are unchanged. **Replace `handle` / `cancel` selectors with the register hooks** — spread `{...drag.handle()}` / `{...drag.cancel()}` onto those elements instead.
 3. **Collapse `threshold`** from `{ distance, delay }` to a single number.
 4. **Merge `defaultPosition` into `position`** (one option now).
 5. **Delete `applyUserSelectHack`** — text-selection suppression is built in (`userSelect`, on by default). Only pass `userSelect: false` if you _want_ selection during a drag.

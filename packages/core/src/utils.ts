@@ -118,10 +118,29 @@ export function mirrorPresentationTree(source: Element, target: Element) {
 	if (source instanceof HTMLElement && target instanceof HTMLElement) {
 		mirrorPresentationStyles(source, target);
 	}
-	const sourceChildren = source.children;
-	const targetChildren = target.children;
-	for (let i = 0; i < sourceChildren.length; i++) {
-		const child = targetChildren[i];
-		if (child) mirrorPresentationTree(sourceChildren[i]!, child);
+	const source_children = source.children;
+	const target_children = target.children;
+	for (let i = 0; i < source_children.length; i++) {
+		const child = target_children[i];
+		if (child) mirrorPresentationTree(source_children[i]!, child);
 	}
+}
+
+let auto_id_counter = 0;
+
+/** Peer-local auto id with a readable prefix (e.g. `autoId('rotate')` → `'rotate-1'`). Monotonic
+ *  within a session — distinct peers produce different ids, so anything synced across clients should
+ *  carry a stable user-supplied id instead. */
+export function autoId(prefix: string): string {
+	return `${prefix}-${++auto_id_counter}`;
+}
+
+const warned = new Set<string>();
+
+/** `console.warn` a message at most once per `key` for the lifetime of the module — keeps repeated
+ *  misconfigurations (one per element) from flooding the console. */
+export function warnOnce(key: string, message: string): void {
+	if (warned.has(key)) return;
+	warned.add(key);
+	console.warn(message);
 }

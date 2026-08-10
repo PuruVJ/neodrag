@@ -37,7 +37,7 @@
 		inline && 'theme-switcher-inline relative h-14 w-[9.25rem] shrink-0',
 		!embedded &&
 			!inline &&
-			'theme-switcher-standalone dock-angular-bevel dock-angular-bevel--sm dock-surface relative m-1 h-12',
+			'theme-switcher-standalone dock-bevel dock-bevel-sm dock-surface relative m-1 h-12',
 	]}
 	style:--theme-thumb-index={thumbnail ? undefined : thumb_index}
 >
@@ -46,7 +46,7 @@
 			'theme-switcher-track',
 			embedded && 'theme-switcher-track--embedded',
 			inline && 'theme-switcher-track--inline',
-			!embedded && !inline && 'dock-angular-bevel__fill theme-switcher-track--standalone',
+			!embedded && !inline && 'dock-bevel-fill theme-switcher-track--standalone',
 			thumbnail && 'theme-switcher-track--thumbnail',
 		]}
 	>

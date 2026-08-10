@@ -1,24 +1,25 @@
 <script lang="ts">
-	import { Sortable } from '@neodrag/svelte/drop';
+	import { SortableList } from '@neodrag/svelte';
 
 	let items = $state(['Apple', 'Banana', 'Cherry', 'Date', 'Elderberry']);
 
-	const list = new Sortable({
-		items: () => items,
-		keyBy: (item) => item,
+	const list = new SortableList<string>({
+		get items() {
+			return items;
+		},
+		axis: 'y',
 		onReorder: (next) => {
 			items = next;
 		},
-		strategy: 'vertical',
 	});
 </script>
 
 <h1>Sortable Test</h1>
 <p>Drag items to reorder them.</p>
 
-<div class="sortable-list" {...list.container}>
+<div class="sortable-list" {...list.attach}>
 	{#each items as item (item)}
-		<div class="sortable-item" {...list.row()} {...list.item(item).target}>
+		<div class="sortable-item" {...list.row(item)}>
 			<span class="index">{items.indexOf(item) + 1}</span>
 			<span class="name">{item}</span>
 		</div>

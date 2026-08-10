@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SortableList, type TransferOp } from '@neodrag/svelte';
+	import { SortableList, type TransferOp } from '@neodrag/svelte/sortable';
 
 	type Item = { id: string };
 
@@ -63,7 +63,7 @@
 		{#each a as item (item.id)}
 			<li
 				data-testid="row-{item.id}"
-				{...listA.row(item)}
+				{...listA.row(item.id)}
 				style="box-sizing: border-box; width: 120px; height: 40px; margin: 0; line-height: 40px; text-align: center; background: #cdc; border: 1px solid #575; touch-action: none; user-select: none;"
 			>
 				{item.id}
@@ -78,7 +78,7 @@
 		{#each b as item (item.id)}
 			<li
 				data-testid="row-{item.id}"
-				{...listB.row(item)}
+				{...listB.row(item.id)}
 				style="box-sizing: border-box; width: 120px; height: 40px; margin: 0; line-height: 40px; text-align: center; background: #dcc; border: 1px solid #755; touch-action: none; user-select: none;"
 			>
 				{item.id}

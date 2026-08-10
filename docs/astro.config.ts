@@ -7,6 +7,37 @@ import { defineConfig } from 'astro/config';
 import { h } from 'hastscript';
 import rehypeAutolinkHeadings, { type Options } from 'rehype-autolink-headings';
 import UnpluginIcons from 'unplugin-icons/vite';
+import type { Plugin } from 'vite';
+import { debugLogPlugin } from './debug-log-plugin.ts';
+
+// Dev-only: in `astro dev`, Astro injects its island + HMR runtime at the very top of <head>, pushing
+// the <meta charset="utf-8"> past the ~1024-byte window browsers pre-scan for an encoding. The dev
+// server also sends a bare `text/html` (no charset), so the browser guesses its locale default
+// (often Latin-1) and UTF-8 chars — em-dashes, smart quotes — garble into mojibake. Force the charset
+// onto the response header in dev so localhost matches prod. (Prod is already correct: the built
+// <meta charset> is the first tag in <head>, and Vercel serves `text/html; charset=utf-8`.)
+const devHtmlCharset: Plugin = {
+	name: 'neodrag:dev-html-charset',
+	apply: 'serve',
+	configureServer(server) {
+		server.middlewares.use((_req, res, next) => {
+			const setHeader = res.setHeader.bind(res);
+			res.setHeader = (name, value) => {
+				if (
+					typeof name === 'string' &&
+					name.toLowerCase() === 'content-type' &&
+					typeof value === 'string' &&
+					value.startsWith('text/html') &&
+					!value.includes('charset')
+				) {
+					return setHeader(name, `${value}; charset=utf-8`);
+				}
+				return setHeader(name, value);
+			};
+			next();
+		});
+	},
+};
 
 const AnchorLinkIcon = h(
 	'svg',
@@ -71,7 +102,7 @@ export default defineConfig({
 	},
 
 	vite: {
-		plugins: [tailwindcss(), UnpluginIcons({ autoInstall: true, compiler: 'svelte' })],
+		plugins: [tailwindcss(), UnpluginIcons({ autoInstall: true, compiler: 'svelte' }), debugLogPlugin(), devHtmlCharset],
 
 		optimizeDeps: {
 			exclude: ['@neodrag/*'],

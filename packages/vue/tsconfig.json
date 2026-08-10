@@ -8,7 +8,8 @@
 		"strict": true,
 		"esModuleInterop": true,
 		"moduleResolution": "Bundler",
+		"allowImportingTsExtensions": true,
 		"types": ["vitest/globals", "vue"]
 	},
-	"files": ["./src/index.ts"]
+	"include": ["src/**/*.ts"]
 }

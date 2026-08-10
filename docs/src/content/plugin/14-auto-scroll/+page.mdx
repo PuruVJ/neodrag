@@ -1,0 +1,81 @@
+---
+title: 'Auto-scroll'
+nav_title: 'Auto-scroll'
+tagline: 'Scroll a container when the pointer hits its edge.'
+section: 'extras'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import AutoScrollDemo from './AutoScrollDemo.svelte';
+
+`autoScroll` scrolls the nearest scrollable container when the pointer drifts into its edge margin — so you can drag past the visible bounds of a list or canvas.
+
+<AutoScrollDemo client:visible />
+
+## Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable, autoScroll } from '@neodrag/svelte';
+  const drag = new Draggable({ use: [autoScroll({ margin: 48, maxSpeed: 24 })] });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable, autoScroll } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({ use: [autoScroll({ margin: 48, maxSpeed: 24 })] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useDraggable, autoScroll } from '@neodrag/vue';
+const { ref } = useDraggable({ use: [autoScroll({ margin: 48, maxSpeed: 24 })] });
+</script>
+
+<template>
+  <div :ref="ref">Drag me</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable, autoScroll } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({ use: [autoScroll({ margin: 48, maxSpeed: 24 })] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable, autoScroll } from '@neodrag/vanilla';
+
+new Draggable(node, { use: [autoScroll({ margin: 48, maxSpeed: 24 })] });
+```
+
+</div>
+</FrameworkSwitch>
+
+## Options
+
+`margin` is the edge band in px inside which scrolling kicks in, default `48`. `maxSpeed` is the max px scrolled per move tick, default `24`. `container` is an element or a lazy getter `() => el`; default is the viewport.

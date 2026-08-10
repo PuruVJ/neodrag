@@ -1,0 +1,81 @@
+---
+title: 'Ghost'
+nav_title: 'Ghost'
+tagline: 'Drag a translucent clone while the original stays put.'
+section: 'extras'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import GhostDemo from './GhostDemo.svelte';
+
+`ghost` drags a floating, pointer-transparent clone in a shared overlay layer above everything while the original element stays exactly where it is — so there is nothing to reset.
+
+<GhostDemo client:visible />
+
+## Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable, ghost } from '@neodrag/svelte';
+  const drag = new Draggable({ use: [ghost({ opacity: 0.5 })] });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable, ghost } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({ use: [ghost({ opacity: 0.5 })] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useDraggable, ghost } from '@neodrag/vue';
+const { ref } = useDraggable({ use: [ghost({ opacity: 0.5 })] });
+</script>
+
+<template>
+  <div :ref="ref">Drag me</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable, ghost } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({ use: [ghost({ opacity: 0.5 })] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable, ghost } from '@neodrag/vanilla';
+
+new Draggable(node, { use: [ghost({ opacity: 0.5 })] });
+```
+
+</div>
+</FrameworkSwitch>
+
+## Options
+
+`opacity` (clone opacity, default `1`) and `zIndex` (clone z-index, default `2147483640`).

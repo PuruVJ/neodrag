@@ -1,19 +1,7 @@
-import {
-	Draggable,
-	Droppable,
-	Resizable,
-	SortableList,
-	SORTABLE_KEY_ATTR,
-	sortableKey,
-	type DragEventData,
-	type DragOptions,
-	type DropEventData,
-	type DropOptions,
-	type ResizeOptions,
-	type SortableOptions,
-	type SortableRow,
-} from '@neodrag/core';
+import { Draggable, type DragEventData, type DragOptions } from '@neodrag/core';
+import type { Room } from '@neodrag/core/collab';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRoomBinding } from './_room-context.ts';
 
 type RefCallback = (node: HTMLElement | null) => void;
 
@@ -21,18 +9,33 @@ type RefCallback = (node: HTMLElement | null) => void;
  * React wrapper for the v3 core — thin (~one hook per capability). The instance lives in a
  * ref; the latest options live in a ref so callbacks stay stable; each render pushes a
  * fine-grained `update()`. `isDragging`/`isOver` come back as state.
+ *
+ * **Collab:** pass an `id` (and a `room`, or mount a `<RoomProvider>`) and the draggable auto-joins
+ * that room on mount and leaves on unmount — its committed position syncs as a `drag` op.
  */
-export function useDraggable(options: DragOptions = {}): { ref: RefCallback; isDragging: boolean } {
+type RegEntry = { priority: number; off: (() => void) | null };
+
+export function useDraggable(options: DragOptions & { room?: Room } = {}): {
+	ref: RefCallback;
+	isDragging: boolean;
+	handle: (opts?: { priority?: number }) => RefCallback;
+	cancel: (opts?: { priority?: number }) => RefCallback;
+} {
 	const instance = useRef<Draggable | null>(null);
 	const opts = useRef(options);
 	opts.current = options;
-	const [isDragging, setDragging] = useState(false);
+	const [isDragging, set_dragging] = useState(false);
+	const { join, leave } = useRoomBinding(options.room);
+	// Handle/cancel registries (node → {priority, off}). `off` is null until the instance exists, so
+	// a handle that mounts before this hook's element still registers once the instance is created.
+	const handles = useRef(new Map<HTMLElement, RegEntry>());
+	const cancels = useRef(new Map<HTMLElement, RegEntry>());
 
 	const wrapped = useCallback(
 		(): DragOptions => ({
 			...opts.current,
 			onDragStart: (e: DragEventData) => {
-				setDragging(true);
+				set_dragging(true);
 				opts.current.onDragStart?.(e);
 			},
 			onDrag: (e: DragEventData) => {
@@ -43,7 +46,7 @@ export function useDraggable(options: DragOptions = {}): { ref: RefCallback; isD
 				opts.current.onDrag?.(e);
 			},
 			onDragEnd: (e: DragEventData) => {
-				setDragging(false);
+				set_dragging(false);
 				opts.current.onDragEnd?.(e);
 			},
 		}),
@@ -52,97 +55,89 @@ export function useDraggable(options: DragOptions = {}): { ref: RefCallback; isD
 
 	const ref = useCallback<RefCallback>(
 		(node) => {
-			instance.current?.destroy();
-			instance.current = node ? new Draggable(node, wrapped()) : null;
+			leave();
+			if (instance.current) {
+				for (const e of handles.current.values()) e.off = null;
+				for (const e of cancels.current.values()) e.off = null;
+				instance.current.destroy();
+			}
+			if (node) {
+				const inst = (instance.current = new Draggable(node, wrapped()));
+				join(inst, opts.current.id);
+				// Flush handles/cancels registered before the instance existed.
+				for (const [n, e] of handles.current) e.off = inst.registerHandle(n, { priority: e.priority });
+				for (const [n, e] of cancels.current) e.off = inst.registerCancel(n, { priority: e.priority });
+			} else {
+				instance.current = null;
+			}
 		},
-		[wrapped],
+		[wrapped, join, leave],
 	);
 
-	useEffect(() => {
-		instance.current?.update(wrapped());
-	});
-
-	return { ref, isDragging };
-}
-
-export function useDroppable(options: DropOptions = {}): { ref: RefCallback; isOver: boolean } {
-	const instance = useRef<Droppable | null>(null);
-	const opts = useRef(options);
-	opts.current = options;
-	const [isOver, setOver] = useState(false);
-
-	const wrapped = useCallback(
-		(): DropOptions => ({
-			...opts.current,
-			onEnter: (e: DropEventData) => {
-				setOver(true);
-				opts.current.onEnter?.(e);
-			},
-			onLeave: (e: DropEventData) => {
-				setOver(false);
-				opts.current.onLeave?.(e);
-			},
-		}),
+	// `handle`/`cancel` are stable; each returns a ref callback that tracks its own node (so React's
+	// node-less `null` unmount call can still unregister the right one). A new callback per render is
+	// a net no-op: the old one unregisters the node, the new one re-registers it.
+	const marker = useCallback(
+		(map: Map<HTMLElement, RegEntry>, is_handle: boolean, priority: number): RefCallback => {
+			let node: HTMLElement | null = null;
+			return (n) => {
+				if (n) {
+					node = n;
+					const off = instance.current
+						? is_handle
+							? instance.current.registerHandle(n, { priority })
+							: instance.current.registerCancel(n, { priority })
+						: null;
+					map.set(n, { priority, off });
+				} else if (node) {
+					map.get(node)?.off?.();
+					map.delete(node);
+					node = null;
+				}
+			};
+		},
 		[],
 	);
-
-	const ref = useCallback<RefCallback>(
-		(node) => {
-			instance.current?.destroy();
-			instance.current = node ? new Droppable(node, wrapped()) : null;
-		},
-		[wrapped],
+	const handle = useCallback(
+		(o?: { priority?: number }) => marker(handles.current, true, o?.priority ?? 0),
+		[marker],
+	);
+	const cancel = useCallback(
+		(o?: { priority?: number }) => marker(cancels.current, false, o?.priority ?? 0),
+		[marker],
 	);
 
 	useEffect(() => {
 		instance.current?.update(wrapped());
 	});
 
-	return { ref, isOver };
+	return { ref, isDragging, handle, cancel };
 }
 
-export function useResizable(options: ResizeOptions = {}): { ref: RefCallback } {
-	const instance = useRef<Resizable | null>(null);
-	const opts = useRef(options);
-	opts.current = options;
+// The draggable option surface, for `useDraggable(opts)`. Other capabilities live at their own
+// subpaths — `@neodrag/react/sortable`, `/resize`, `/rotate`, `/drop`, `/collab` — and the core
+// `Interactions` engine at `@neodrag/core`. The root stays drag-only.
+export type { DragOptions, DragEventData, Axis, BoundsInput, DragPlugin } from '@neodrag/core';
 
-	const ref = useCallback<RefCallback>((node) => {
-		instance.current?.destroy();
-		instance.current = node ? new Resizable(node, opts.current) : null;
-	}, []);
-
-	useEffect(() => {
-		instance.current?.update(opts.current);
-	});
-
-	return { ref };
-}
-
-/**
- * Sortable hook. Put `ref` on the container and spread `{...row(key)}` on each item instead of
- * hand-writing `data-sortable-key`. Pass the latest `items` each render; the hook reconciles.
- */
-export function useSortable<T = unknown>(options: SortableOptions<T>): {
-	ref: RefCallback;
-	row: (item: T) => SortableRow;
-} {
-	const instance = useRef<SortableList<T> | null>(null);
-	const opts = useRef(options);
-	opts.current = options;
-
-	const ref = useCallback<RefCallback>((node) => {
-		instance.current?.destroy();
-		instance.current = node ? new SortableList(node, opts.current) : null;
-	}, []);
-
-	useEffect(() => {
-		instance.current?.update(opts.current);
-	});
-
-	return { ref, row: (item) => ({ [SORTABLE_KEY_ATTR]: sortableKey(item) }) as SortableRow };
-}
-
-// Unified surface: the hooks above plus the full class-based core — Draggable/Droppable/
-// Resizable/SortableList, every option type, the `use: []` extensions and the collab/CRDT
-// layer. All tree-shakeable.
-export * from '@neodrag/core';
+// Tier-2 `use: []` drag extensions — framework-agnostic, re-exported from core so they sit alongside
+// the draggable (`import { useDraggable, magnetic } from '@neodrag/react'`). Tree-shaken away unless used.
+export {
+	autoScroll,
+	scrollLock,
+	ghost,
+	haptics,
+	ariaDrag,
+	snapGuides,
+	marqueeSelect,
+	magnetic,
+	onMove,
+	type AutoScrollOptions,
+	type ScrollLockOptions,
+	type GhostOptions,
+	type AriaDragOptions,
+	type AriaDragAnnounce,
+	type SnapGuidesOptions,
+	type MarqueeOptions,
+	type MagneticOptions,
+	type MagneticSpring,
+} from '@neodrag/core';

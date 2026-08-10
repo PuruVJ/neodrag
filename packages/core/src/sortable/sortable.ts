@@ -2,7 +2,8 @@ import { isPointerInput, type InteractionInput } from '../interaction-input.ts';
 import type { EndReason } from '../types.ts';
 import { applyTranslate, clearTranslate } from '../transform.ts';
 import type { Capability, InteractionSession, ResolvedTarget } from '../types.ts';
-import { listen } from '../utils.ts';
+import { autoId, listen, warnOnce } from '../utils.ts';
+import type { CollabOp, LocalPresence, PresenceFrame, SortableOp } from '../collab-types.ts';
 
 /* ────────────────────────────────────────────────────────────────────────────
  * reorder — CRDT-ready anchor-based move ops (merged from ./reorder.ts)
@@ -25,8 +26,8 @@ export interface MoveOp {
 // normal case — you map over one `items` array for both the engine and `row()`). The WeakMap makes
 // lookup O(1) and never mutates or retains the item. The `⁣` (invisible-separator) prefix keeps
 // these from ever colliding with a real user key in a mixed list.
-const autoKeys = new WeakMap<object, string>();
-let autoKeyCounter = 0;
+const auto_keys = new WeakMap<object, string>();
+let auto_key_counter = 0;
 
 /**
  * The stable key for an item. Any value works — there is no `keyOf` option:
@@ -43,8 +44,8 @@ export function sortableKey<T>(item: T): string {
 		const o = item as Record<string, unknown>;
 		if ('id' in o) return String(o.id);
 		if ('key' in o) return String(o.key);
-		let k = autoKeys.get(o);
-		if (k === undefined) autoKeys.set(o, (k = `⁣${(autoKeyCounter += 1)}`));
+		let k = auto_keys.get(o);
+		if (k === undefined) auto_keys.set(o, (k = `⁣${(auto_key_counter += 1)}`));
 		return k;
 	}
 	return String(item);
@@ -150,12 +151,12 @@ export function computeTargetFromMids(
 ): number {
 	if (mids.length === 0) return 0;
 	const edge = options.edgeThresholdPx ?? 0;
-	const dragEntry = excludeKey ? mids.find((e) => e.key === excludeKey) : undefined;
-	const dragIndex = dragEntry?.index ?? -1;
+	const drag_entry = excludeKey ? mids.find((e) => e.key === excludeKey) : undefined;
+	const drag_index = drag_entry?.index ?? -1;
 
-	if (!options.skipDragDeadZone && options.dragFootprint && dragIndex >= 0) {
+	if (!options.skipDragDeadZone && options.dragFootprint && drag_index >= 0) {
 		const { start, end } = options.dragFootprint;
-		if (pos >= start && pos <= end) return dragIndex;
+		if (pos >= start && pos <= end) return drag_index;
 	}
 
 	let to = 0;
@@ -258,14 +259,14 @@ export function computeGridOverIndex(
 	}
 
 	let best = 0;
-	let bestDist = Infinity;
+	let best_dist = Infinity;
 	for (let i = 0; i < rects.length; i++) {
 		const c = center(rects[i]!);
 		const dx = pointerX - c.x;
 		const dy = pointerY - c.y;
 		const dist = dx * dx + dy * dy;
-		if (dist < bestDist) {
-			bestDist = dist;
+		if (dist < best_dist) {
+			best_dist = dist;
 			best = i;
 		}
 	}
@@ -289,20 +290,20 @@ export function gridDisplacements(
 	const shifts = new Map<number, { x: number; y: number }>();
 	if (from === to) return shifts;
 
-	const slotStart = (i: number) => ({ x: rects[i]!.left, y: rects[i]!.top });
+	const slot_start = (i: number) => ({ x: rects[i]!.left, y: rects[i]!.top });
 
 	if (to > from) {
 		// Items from+1..to each slide back into their predecessor's slot.
 		for (let i = from + 1; i <= to && i < rects.length; i++) {
-			const here = slotStart(i);
-			const prev = slotStart(i - 1);
+			const here = slot_start(i);
+			const prev = slot_start(i - 1);
 			shifts.set(i, { x: prev.x - here.x, y: prev.y - here.y });
 		}
 	} else {
 		// Items to..from-1 each slide forward into their successor's slot.
 		for (let i = to; i < from && i >= 0; i++) {
-			const here = slotStart(i);
-			const next = slotStart(i + 1);
+			const here = slot_start(i);
+			const next = slot_start(i + 1);
 			shifts.set(i, { x: next.x - here.x, y: next.y - here.y });
 		}
 	}
@@ -443,9 +444,9 @@ function createsFixedContainingBlock(style: CSSStyleDeclaration): boolean {
 	if (style.perspective && style.perspective !== 'none') return true;
 	if (style.filter && style.filter !== 'none') return true;
 	if (style.backdropFilter && style.backdropFilter !== 'none') return true;
-	const willChange = style.willChange;
-	if (!willChange || willChange === 'auto') return false;
-	for (const token of willChange.split(',')) {
+	const will_change = style.willChange;
+	if (!will_change || will_change === 'auto') return false;
+	for (const token of will_change.split(',')) {
 		const part = token.trim();
 		if (part === 'transform' || part === 'perspective') return true;
 	}
@@ -467,8 +468,8 @@ export function fixedLocalCoords(node: HTMLElement, rect: DOMRect): { left: numb
 	const block = findFixedContainingBlock(node);
 	const root = node.ownerDocument?.documentElement ?? document.documentElement;
 	if (block === root) return { left: rect.left, top: rect.top };
-	const blockRect = block.getBoundingClientRect();
-	return { left: rect.left - blockRect.left, top: rect.top - blockRect.top };
+	const block_rect = block.getBoundingClientRect();
+	return { left: rect.left - block_rect.left, top: rect.top - block_rect.top };
 }
 
 /**
@@ -564,8 +565,8 @@ export interface TransferContainer {
 	rects(): ItemRect[];
 	/** The container's own rect (cached per drag; invalidated on scroll/resize). */
 	rect(): TransferRectLike;
-	/** Whether this container will accept `item` transferring in from `fromNode`. */
-	accepts(item: unknown, fromNode: HTMLElement): boolean;
+	/** Whether this container will accept `item` transferring in from `from_node`. */
+	accepts(item: unknown, from_node: HTMLElement): boolean;
 }
 
 /** The committed cross-container move. Mirrors the original GroupDropPlan 'transfer' kind. */
@@ -627,18 +628,18 @@ function pointerInColumn(c: TransferContainer, px: number, py: number): boolean 
 function scoreSample(
 	px: number,
 	py: number,
-	hitRect: TransferRectLike,
+	hit_rect: TransferRectLike,
 	axis: SortAxis,
 	threshold: number,
-	allowBand: boolean,
-	insideBias: number,
-	proximityBias: number,
+	allow_band: boolean,
+	inside_bias: number,
+	proximity_bias: number,
 ): number | null {
-	if (!overlapsCross(px, py, hitRect, axis)) return null;
-	const dist = approachDist(px, py, hitRect, axis);
-	if (dist === 0) return insideBias + rectCenterDist(px, py, hitRect);
-	if (!allowBand || dist > threshold) return null;
-	return proximityBias + dist;
+	if (!overlapsCross(px, py, hit_rect, axis)) return null;
+	const dist = approachDist(px, py, hit_rect, axis);
+	if (dist === 0) return inside_bias + rectCenterDist(px, py, hit_rect);
+	if (!allow_band || dist > threshold) return null;
+	return proximity_bias + dist;
 }
 
 /**
@@ -654,29 +655,29 @@ export function scoreTarget(
 	proximityPx: number,
 ): number | null {
 	const rects = target.rects();
-	const hasItems = rects.length > 0;
-	const contentRect = unionRect(rects) ?? target.rect();
+	const has_items = rects.length > 0;
+	const content_rect = unionRect(rects) ?? target.rect();
 	const axis = target.axis;
 
-	const pointerIn = pointerInColumn(target, pointerX, pointerY);
-	const dragIn = pointerInColumn(target, dragCenterX, dragCenterY);
-	if (!pointerIn && !dragIn) return null;
+	const pointer_in = pointerInColumn(target, pointerX, pointerY);
+	const drag_in = pointerInColumn(target, dragCenterX, dragCenterY);
+	if (!pointer_in && !drag_in) return null;
 
-	const pointerScore =
-		scoreSample(pointerX, pointerY, contentRect, axis, proximityPx, hasItems, POINTER_HIT_BIAS, POINTER_PROXIMITY_BIAS) ??
+	const pointer_score =
+		scoreSample(pointerX, pointerY, content_rect, axis, proximityPx, has_items, POINTER_HIT_BIAS, POINTER_PROXIMITY_BIAS) ??
 		Infinity;
-	const dragScore =
-		scoreSample(dragCenterX, dragCenterY, contentRect, axis, proximityPx, hasItems, DRAG_CENTER_HIT_BIAS, DRAG_PROXIMITY_BIAS) ??
+	const drag_score =
+		scoreSample(dragCenterX, dragCenterY, content_rect, axis, proximityPx, has_items, DRAG_CENTER_HIT_BIAS, DRAG_PROXIMITY_BIAS) ??
 		Infinity;
 
-	let score = pointerScore;
-	if (!Number.isFinite(score)) score = dragScore;
+	let score = pointer_score;
+	if (!Number.isFinite(score)) score = drag_score;
 	if (!Number.isFinite(score)) {
-		if (pointerIn) {
-			score = POINTER_HIT_BIAS + approachDist(pointerX, pointerY, contentRect, axis) + rectCenterDist(pointerX, pointerY, contentRect);
-		} else if (dragIn) {
+		if (pointer_in) {
+			score = POINTER_HIT_BIAS + approachDist(pointerX, pointerY, content_rect, axis) + rectCenterDist(pointerX, pointerY, content_rect);
+		} else if (drag_in) {
 			score =
-				DRAG_CENTER_HIT_BIAS + approachDist(dragCenterX, dragCenterY, contentRect, axis) + rectCenterDist(dragCenterX, dragCenterY, contentRect);
+				DRAG_CENTER_HIT_BIAS + approachDist(dragCenterX, dragCenterY, content_rect, axis) + rectCenterDist(dragCenterX, dragCenterY, content_rect);
 		} else {
 			return null;
 		}
@@ -718,14 +719,14 @@ export class TransferRegistry {
 	): TransferContainer | null {
 		if (!source.group) return null;
 		let best: TransferContainer | null = null;
-		let bestScore = Infinity;
+		let best_score = Infinity;
 		for (const c of this.#containers.values()) {
 			if (c.id === source.id) continue;
 			if (c.group !== source.group) continue;
 			if (accept && !accept(c)) continue;
 			const score = scoreTarget(c, pointerX, pointerY, dragCenterX, dragCenterY, proximityPx);
-			if (score == null || score >= bestScore) continue;
-			bestScore = score;
+			if (score == null || score >= best_score) continue;
+			best_score = score;
 			best = c;
 		}
 		return best;
@@ -759,10 +760,10 @@ export function resolveForeignInsertAt(target: TransferContainer, pointerX: numb
 	const len = rects.length;
 	if (len === 0) return 0;
 	const axis = target.axis;
-	const contentRect = unionRect(rects)!;
+	const content_rect = unionRect(rects)!;
 
 	// Pointer beyond the content's far edge along the approach axis → append.
-	const beyond = axis === 'x' ? pointerX > contentRect.right : pointerY > contentRect.bottom;
+	const beyond = axis === 'x' ? pointerX > content_rect.right : pointerY > content_rect.bottom;
 	if (beyond) return len;
 
 	const pos = axis === 'x' ? pointerX : pointerY;
@@ -824,14 +825,14 @@ export function resolveTransferTarget(
 /**
  * Sortable DOM state-attribute convention — the contract a host stylesheet can hook. The engine
  * is the only writer of these; nothing else should set them:
- * - `data-sortable-key`                     — per row, the item's stable key (set via `row()`).
+ * - `data-neodrag-sortable-key`                     — per row, the item's stable key (set via `row()`).
  * - `data-neodrag-sortable-dragging`        — on the row currently being dragged.
  * - `data-neodrag-sortable-elevated-source` — on the source list during a grouped (cross-container)
  *                                             drag, so it stacks above sibling lists.
  * - `data-neodrag-sortable-indicator`       — on the engine-drawn drop-line in `indicator: 'line'`.
  * - `data-neodrag-sortable-ghost`           — on the dimmed origin placeholder in `indicator: 'line'`.
  */
-export const SORTABLE_KEY_ATTR = 'data-sortable-key';
+export const SORTABLE_KEY_ATTR = 'data-neodrag-sortable-key';
 const DRAGGING_MARKER = 'data-neodrag-sortable-dragging';
 // Stacking for a non-lifted dragged item: it stays a child of its source list, so by paint order
 // it would slide *under* a destination list's items on a cross-container drag. Raising its z-index
@@ -845,6 +846,8 @@ const ELEVATED_SOURCE_ATTR = 'data-neodrag-sortable-elevated-source';
 // placeholder, restyled). Both default-styled inline so the mode works with zero CSS.
 const INDICATOR_ATTR = 'data-neodrag-sortable-indicator';
 const GHOST_ATTR = 'data-neodrag-sortable-ghost';
+/** Marks a placeholder rendered for a *remote* peer's in-flight reorder (their ghost in our list). */
+const REMOTE_GHOST_ATTR = 'data-neodrag-sortable-remote-ghost';
 
 export type SortStrategy = 'list' | 'grid';
 
@@ -856,6 +859,11 @@ export interface SortableOptions<T = unknown> {
 	items: T[];
 	/** Anchor-based move op + the convenient reordered array. */
 	onReorder: (next: T[], op: MoveOp) => void;
+	/**
+	 * Stable string id for this list — the `target` in the unified collab op grammar (it must match
+	 * across collaborating peers). An auto id is peer-local.
+	 */
+	id?: string;
 	/** Pure op stream — what `@neodrag/collab` subscribes to (durable, fires on every commit). */
 	onCommit?: (op: MoveOp) => void;
 	/** Cross-container move — fires on the *target* container when an item transfers in. */
@@ -914,10 +922,16 @@ function eventPath(input: InteractionInput): EventTarget[] {
 	return input.target ? [input.target] : [];
 }
 
-let nextContextId = 0;
+let next_context_id = 0;
 
 export class SortableContext<T = unknown> {
-	readonly id = Symbol(`sortable-${nextContextId++}`);
+	readonly id = Symbol(`sortable-${next_context_id++}`);
+	/** Auto target id — peer-local; `targetId` prefers `options.id`. */
+	readonly auto_target_id = autoId('sortable');
+	readonly commit_subscribers = new Set<(op: SortableOp) => void>();
+	readonly presence_subscribers = new Set<(p: LocalPresence | null) => void>();
+	/** Remote peers' rendered ghost placeholders, keyed by peer id. */
+	readonly remote_ghosts = new Map<string, HTMLElement>();
 	constructor(
 		readonly container: HTMLElement,
 		public options: SortableOptions<T>,
@@ -928,6 +942,16 @@ export class SortableContext<T = unknown> {
 	get strategy(): SortStrategy {
 		return this.options.strategy ?? 'list';
 	}
+	get targetId(): string {
+		return this.options.id ?? this.auto_target_id;
+	}
+	get hasExplicitId(): boolean {
+		return this.options.id != null;
+	}
+	/** The current key order of this list. */
+	keys(): string[] {
+		return this.options.items.map((it) => sortableKey(it));
+	}
 }
 
 /**
@@ -935,14 +959,14 @@ export class SortableContext<T = unknown> {
  * that mutates as the pointer moves. Now also carries the FLIP/lift/hysteresis state.
  */
 class IntentSnapshot {
-	toIndex: number;
-	/** The `toIndex` whose displacement is currently written to the DOM — drives incremental
+	to_index: number;
+	/** The `to_index` whose displacement is currently written to the DOM — drives incremental
 	 * projection: only the union of the old and new displaced ranges needs touching per move. */
-	appliedTo: number;
+	applied_to: number;
 	lift: LiftState | null = null;
 	/** The transfer target this move is heading into (cross-container), or null. */
-	foreignTarget: TransferContainer | null = null;
-	readonly transferState: TransferState = createTransferState();
+	foreign_target: TransferContainer | null = null;
+	readonly transfer_state: TransferState = createTransferState();
 	/** Slot boundaries (between mids) for hysteresis. */
 	readonly boundaries: number[];
 	readonly mids: MidEntry[];
@@ -951,20 +975,20 @@ class IntentSnapshot {
 	constructor(
 		readonly context: SortableContext,
 		readonly items: ItemLayout[],
-		readonly fromIndex: number,
+		readonly from_index: number,
 		readonly axis: SortAxis,
 		readonly slot: number,
 		mids: MidEntry[],
 	) {
-		this.toIndex = fromIndex;
-		this.appliedTo = fromIndex;
+		this.to_index = from_index;
+		this.applied_to = from_index;
 		this.mids = mids;
 		// Hysteresis boundaries live in *insert-index* space: the boundary between accepting
 		// insert-slot k and k+1 is the measured midpoint of the k-th non-dragged item (sorted
 		// by position). Crossing it by `band` px is required before the gap flips.
-		const dragKey = items[fromIndex]?.key;
+		const drag_key = items[from_index]?.key;
 		this.boundaries = mids
-			.filter((m) => m.key !== dragKey)
+			.filter((m) => m.key !== drag_key)
 			.sort((a, b) => a.mid - b.mid)
 			.map((m) => m.mid);
 	}
@@ -980,11 +1004,54 @@ export class SortableHandle<T = unknown> {
 	update(options: Partial<SortableOptions<T>>): void {
 		Object.assign(this.#ctx.options, options);
 	}
-	/** Apply a remote anchor move op (e.g. a CRDT peer) through the same reorder path. */
-	applyExternal(op: MoveOp): void {
-		const next = applyMove(this.#ctx.options.items, op);
-		this.#ctx.options.onReorder(next, op);
+
+	/** The list's stable string id — the `target` in the unified op grammar. */
+	get targetId(): string {
+		return this.#ctx.targetId;
 	}
+
+	/** Whether `targetId` came from an explicit `id` option (auto ids are peer-local). */
+	get hasExplicitId(): boolean {
+		return this.#ctx.hasExplicitId;
+	}
+
+	/** The current key order — the Room seeds its reconciler from it. */
+	keys(): string[] {
+		return this.#ctx.keys();
+	}
+
+	onCommit(fn: (op: CollabOp) => void): () => void {
+		this.#ctx.commit_subscribers.add(fn as (op: SortableOp) => void);
+		return () => this.#ctx.commit_subscribers.delete(fn as (op: SortableOp) => void);
+	}
+
+	onPresence(fn: (p: LocalPresence | null) => void): () => void {
+		this.#ctx.presence_subscribers.add(fn);
+		return () => this.#ctx.presence_subscribers.delete(fn);
+	}
+
+	/**
+	 * Apply a remote fact through the same reorder path. Accepts a wire op (`{type:'move'|'transfer',
+	 * target, …}`) from the Room, or — legacy — a bare anchor {@link MoveOp}. Foreign op kinds no-op.
+	 */
+	applyExternal(op: MoveOp | CollabOp): void {
+		if (!('type' in op)) {
+			const next = applyMove(this.#ctx.options.items, op);
+			this.#ctx.options.onReorder(next, op);
+			return;
+		}
+		this.#cap.applyExternalOp(this.#ctx as SortableContext, op);
+	}
+
+	/** Render a remote peer's in-flight reorder as a ghost placeholder. Foreign kinds no-op. */
+	showRemotePresence(frame: PresenceFrame, opts?: { mirror?: unknown }): void {
+		if (frame.type === 'sortable') this.#cap.showRemotePresence(this.#ctx as SortableContext, frame, opts);
+	}
+
+	clearRemotePresence(peer_id?: string, opts?: { ease?: boolean }): void {
+		this.#cap.clearRemotePresence(this.#ctx as SortableContext, peer_id, opts);
+	}
+
 	/** Current in-flight reorder presence, or null. */
 	presence(): SortablePresence | null {
 		return this.#cap.presenceFor(this.#ctx as SortableContext);
@@ -1011,35 +1078,41 @@ export class Sortable implements Capability {
 	#intent: IntentSnapshot | null = null;
 	// Foreign-list gap preview: which container currently holds an open gap, at which insert index,
 	// and every node we've eased a transition onto (for a clean strip at drag end).
-	#foreignGapId: symbol | null = null;
-	#foreignGapAt = -1;
-	readonly #foreignTouched = new Set<HTMLElement>();
+	#foreign_gap_id: symbol | null = null;
+	#foreign_gap_at = -1;
+	readonly #foreign_touched = new Set<HTMLElement>();
 	// Stacking elevation during a drag, restored at end. The dragged node is raised so it sits above
 	// its own siblings; the source *list* is raised so a cross-container chip floats above sibling
 	// lists (each list is its own stacking context, so the chip can't escape on its own z-index).
-	#raisedNode: HTMLElement | null = null;
-	#savedNodeZ = '';
-	#savedNodePos = '';
-	#raisedList: HTMLElement | null = null;
-	#savedListZ = '';
-	#savedListPos = '';
+	#raised_node: HTMLElement | null = null;
+	#saved_node_z = '';
+	#saved_node_pos = '';
+	#raised_list: HTMLElement | null = null;
+	#saved_list_z = '';
+	#saved_list_pos = '';
 	// `indicator: 'line'` mode: the single engine-drawn drop-line (fixed-positioned, reparented to
 	// whichever container the pointer is over). Removed at drag end.
-	#indicatorEl: HTMLElement | null = null;
+	#indicator_el: HTMLElement | null = null;
 	// Per-drag foreign-rect caches (grouped/kanban). A foreign container's item rects + own
 	// rect are measured once and reused every move — turning the O(containers×items) reflows
 	// the proximity scan would otherwise do *per move* into O(containers×items) *per drag*. A
 	// scroll/resize during the drag invalidates them so the next move re-measures.
-	readonly #foreignItemRects = new Map<symbol, ItemRect[]>();
-	readonly #foreignContainerRects = new Map<symbol, DOMRect>();
-	readonly #onForeignInvalidate = (): void => {
-		this.#foreignItemRects.clear();
-		this.#foreignContainerRects.clear();
+	readonly #foreign_item_rects = new Map<symbol, ItemRect[]>();
+	readonly #foreign_container_rects = new Map<symbol, DOMRect>();
+	readonly #on_foreign_invalidate = (): void => {
+		this.#foreign_item_rects.clear();
+		this.#foreign_container_rects.clear();
 	};
-	#unlistenForeignInvalidation: Array<() => void> = [];
+	#unlisten_foreign_invalidation: Array<() => void> = [];
 
 	bind<T>(container: HTMLElement, options: SortableOptions<T>): SortableHandle<T> {
 		const ctx = new SortableContext(container, options as SortableOptions);
+		if (options.onCommit && options.id == null) {
+			warnOnce(
+				'sortable:id',
+				'this sortable uses onCommit but has no `id` — auto ids are peer-local and will not match across collaborating clients. Give it a stable `id`.',
+			);
+		}
 		this.#contexts.set(container, ctx);
 		this.#registry.register(this.#transferContainer(ctx));
 		return new SortableHandle(this, ctx as SortableContext) as unknown as SortableHandle<T>;
@@ -1071,19 +1144,19 @@ export class Sortable implements Capability {
 	start(session: InteractionSession): void {
 		const { ctx, key } = session.target.data as { ctx: SortableContext; key: string };
 		const items = this.#measure(ctx);
-		const fromIndex = items.findIndex((it) => it.key === key);
-		if (fromIndex === -1) return;
-		const slot = this.#slot(items, fromIndex, ctx.axis);
+		const from_index = items.findIndex((it) => it.key === key);
+		if (from_index === -1) return;
+		const slot = this.#slot(items, from_index, ctx.axis);
 		const mids = buildMids(this.#itemRects(items), ctx.axis);
-		this.#intent = new IntentSnapshot(ctx, items, fromIndex, ctx.axis, slot, mids);
-		const node = items[fromIndex].node;
+		this.#intent = new IntentSnapshot(ctx, items, from_index, ctx.axis, slot, mids);
+		const node = items[from_index].node;
 		node.setAttribute(DRAGGING_MARKER, '');
 		// `line` mode lifts the item so it floats free of the flow; the placeholder it leaves behind
 		// becomes the dimmed ghost. `push` mode lifts only if asked.
-		const lineMode = ctx.options.indicator === 'line';
+		const line_mode = ctx.options.indicator === 'line';
 		this.#removeIndicator();
-		if (ctx.options.lift || lineMode) this.#intent.lift = liftNode(node);
-		if (lineMode && this.#intent.lift) this.#makeGhost(node, this.#intent.lift);
+		if (ctx.options.lift || line_mode) this.#intent.lift = liftNode(node);
+		if (line_mode && this.#intent.lift) this.#makeGhost(node, this.#intent.lift);
 		this.#raiseStacking(node, ctx, Boolean(this.#intent.lift));
 
 		// Ease the gap: siblings glide as the dragged item opens/closes space. The dragged node is
@@ -1091,19 +1164,19 @@ export class Sortable implements Capability {
 		// animation mechanisms (CSS `translate` transition here, WAAPI `transform` there) don't fight.
 		// `line` mode never displaces siblings, so there is nothing to ease.
 		const duration = resolveAnimationDuration(ctx.options.animation);
-		if (!lineMode && duration > 0) {
+		if (!line_mode && duration > 0) {
 			const transition = `translate ${duration}ms ${FLIP_EASING}`;
 			for (let i = 0; i < items.length; i++) {
-				if (i !== fromIndex) items[i].node.style.transition = transition;
+				if (i !== from_index) items[i].node.style.transition = transition;
 			}
 		}
 
-		this.#foreignGapId = null;
-		this.#foreignGapAt = -1;
-		this.#foreignTouched.clear();
+		this.#foreign_gap_id = null;
+		this.#foreign_gap_at = -1;
+		this.#foreign_touched.clear();
 		if (ctx.options.group) {
-			this.#foreignItemRects.clear();
-			this.#foreignContainerRects.clear();
+			this.#foreign_item_rects.clear();
+			this.#foreign_container_rects.clear();
 			this.#setupForeignInvalidation();
 		}
 	}
@@ -1113,33 +1186,35 @@ export class Sortable implements Capability {
 		if (!intent) return;
 		const dx = session.input.clientX - session.startInput.clientX;
 		const dy = session.input.clientY - session.startInput.clientY;
-		const node = intent.items[intent.fromIndex].node;
+		const node = intent.items[intent.from_index].node;
 
 		// Cross-container: is the pointer better aligned with a grouped foreign column?
 		const foreign = this.#resolveForeign(intent, session.input);
 		if (foreign) {
-			if (intent.foreignTarget !== foreign) {
+			if (intent.foreign_target !== foreign) {
 				this.#collapseSource(intent); // the item left — close up its slot in the source list
 				this.#clearForeignGap(true); // ease shut a previous foreign target's gap
-				intent.foreignTarget = foreign;
+				intent.foreign_target = foreign;
 			}
 			// Open/update the gap in the foreign list so its items make room for the incoming chip.
 			this.#projectForeign(foreign, intent, session.input);
 			this.#followPointer(node, intent, dx, dy);
+			this.#pumpPresence(intent);
 			return;
 		}
-		if (intent.foreignTarget) {
-			intent.foreignTarget = null;
+		if (intent.foreign_target) {
+			intent.foreign_target = null;
 			this.#clearForeignGap(true); // ease the foreign gap closed on the way out
 			this.#clearDisplacement(intent);
 		}
 
 		const to = this.#targetIndex(intent, session.input);
-		if (to !== intent.toIndex) {
-			intent.toIndex = to;
+		if (to !== intent.to_index) {
+			intent.to_index = to;
 			this.#project(intent);
 		}
 		this.#followPointer(node, intent, dx, dy);
+		this.#pumpPresence(intent);
 	}
 
 	end(session: InteractionSession, reason: EndReason): void {
@@ -1147,110 +1222,114 @@ export class Sortable implements Capability {
 		if (!intent) return;
 		this.#intent = null;
 		this.#teardownForeignInvalidation();
-		this.#foreignItemRects.clear();
-		this.#foreignContainerRects.clear();
+		this.#foreign_item_rects.clear();
+		this.#foreign_container_rects.clear();
 		const ctx = intent.context;
-		const draggedNode = intent.items[intent.fromIndex].node;
+		// The gesture ended — tell subscribers presence is over (remote peers clear our ghost). The
+		// durable commit op rides out separately below.
+		for (const fn of ctx.presence_subscribers) fn(null);
+		const dragged_node = intent.items[intent.from_index].node;
 		const duration = resolveAnimationDuration(ctx.options.animation);
 
 		// Capture pre-mutation rects for the commit FLIP. Only items within the reorder span
 		// (between fromIndex and the target/applied index) actually move; capturing + animating
 		// just them keeps the commit O(displaced) instead of O(items) getBoundingClientRect.
-		const flipLo = Math.min(intent.fromIndex, intent.toIndex, intent.appliedTo);
-		const flipHi = Math.max(intent.fromIndex, intent.toIndex, intent.appliedTo);
-		const flipNodes: HTMLElement[] = [];
-		for (let i = flipLo; i <= flipHi; i++) flipNodes.push(intent.items[i].node);
-		const before = duration > 0 ? recordFlipRects(flipNodes) : null;
+		const flip_lo = Math.min(intent.from_index, intent.to_index, intent.applied_to);
+		const flip_hi = Math.max(intent.from_index, intent.to_index, intent.applied_to);
+		const flip_nodes: HTMLElement[] = [];
+		for (let i = flip_lo; i <= flip_hi; i++) flip_nodes.push(intent.items[i].node);
+		const before = duration > 0 ? recordFlipRects(flip_nodes) : null;
 
 		// Transfer FLIP capture — before the re-render, while the foreign list is still gap-open and
 		// the dragged node still sits at the drop point. Across a transfer the framework destroys the
 		// source node and creates a fresh one in the target, so FLIP can't track it by identity; we
 		// record the drop rect and, next frame, glide the *new* node in from there. The displaced
 		// foreign items persist, so they FLIP normally from their open-gap rects to settled.
-		let transferFlip: {
+		let transfer_flip: {
 			key: string;
-			dropRect: DOMRect;
-			targetCtx: SortableContext;
-			foreignBefore: Map<HTMLElement, DOMRect>;
+			drop_rect: DOMRect;
+			target_ctx: SortableContext;
+			foreign_before: Map<HTMLElement, DOMRect>;
 		} | null = null;
-		if (duration > 0 && reason !== 'cancel' && intent.foreignTarget) {
-			const targetCtx = this.#contextById(intent.foreignTarget.id);
-			const item = ctx.options.items[intent.fromIndex];
-			if (targetCtx && item !== undefined) {
-				transferFlip = {
+		if (duration > 0 && reason !== 'cancel' && intent.foreign_target) {
+			const target_ctx = this.#contextById(intent.foreign_target.id);
+			const item = ctx.options.items[intent.from_index];
+			if (target_ctx && item !== undefined) {
+				transfer_flip = {
 					key: sortableKey(item),
-					dropRect: draggedNode.getBoundingClientRect(),
-					targetCtx,
-					foreignBefore: recordFlipRects(this.#orderedNodes(targetCtx)),
+					drop_rect: dragged_node.getBoundingClientRect(),
+					target_ctx,
+					foreign_before: recordFlipRects(this.#orderedNodes(target_ctx)),
 				};
 			}
 		}
 
 		// Cross-container transfer wins if a foreign target was active at release.
 		const transferred =
-			reason !== 'cancel' && intent.foreignTarget
+			reason !== 'cancel' && intent.foreign_target
 				? this.#commitTransfer(intent, session.input)
 				: false;
 
 		// Release visual state. Strip the during-drag eased transitions first so the clears below
 		// are instant — otherwise clearing a `translate` would itself animate and fight the FLIP.
 		for (const it of intent.items) it.node.style.transition = '';
-		for (const n of this.#foreignTouched) n.style.transition = '';
-		this.#foreignTouched.clear();
+		for (const n of this.#foreign_touched) n.style.transition = '';
+		this.#foreign_touched.clear();
 		this.#clearForeignGap(false); // instant: an inserted item takes the slot seamlessly
 		this.#clearDisplacement(intent);
 		this.#removeIndicator(); // line mode: drop the drop-line (the ghost goes with releaseNode)
 		this.#restoreStacking();
 		if (intent.lift) {
-			releaseNode(draggedNode, intent.lift);
+			releaseNode(dragged_node, intent.lift);
 			intent.lift = null;
 		} else {
-			clearTranslate(draggedNode);
+			clearTranslate(dragged_node);
 		}
-		draggedNode.removeAttribute(DRAGGING_MARKER);
+		dragged_node.removeAttribute(DRAGGING_MARKER);
 
 		if (transferred) {
-			if (transferFlip) {
-				const tf = transferFlip;
+			if (transfer_flip) {
+				const tf = transfer_flip;
 				afterFrame(() => {
 					// Displaced foreign items glide from their open-gap rects to where they settle.
-					void playFlip([...tf.foreignBefore.keys()], tf.foreignBefore, duration);
+					void playFlip([...tf.foreign_before.keys()], tf.foreign_before, duration);
 					// The incoming item: glide the freshly-rendered node from the drop point into its
 					// slot, kept on top (raised z-index) for the duration of the travel.
-					const incoming = this.#orderedNodes(tf.targetCtx).find(
+					const incoming = this.#orderedNodes(tf.target_ctx).find(
 						(n) => n.getAttribute(SORTABLE_KEY_ATTR) === tf.key,
 					);
 					if (incoming) {
-						const savedZ = incoming.style.zIndex;
-						const savedPos = incoming.style.position;
+						const saved_z = incoming.style.zIndex;
+						const saved_pos = incoming.style.position;
 						if (getComputedStyle(incoming).position === 'static') incoming.style.position = 'relative';
 						incoming.style.zIndex = DRAG_Z_INDEX;
-						void playFlip([incoming], new Map([[incoming, tf.dropRect]]), duration).then(() => {
-							incoming.style.zIndex = savedZ;
-							incoming.style.position = savedPos;
+						void playFlip([incoming], new Map([[incoming, tf.drop_rect]]), duration).then(() => {
+							incoming.style.zIndex = saved_z;
+							incoming.style.position = saved_pos;
 						});
 					}
 				});
 			}
 			return;
 		}
-		if (reason === 'cancel' || intent.toIndex === intent.fromIndex) {
+		if (reason === 'cancel' || intent.to_index === intent.from_index) {
 			// Even a no-op cancel should settle siblings if they were displaced.
-			if (before) afterFrame(() => void playFlip(flipNodes, before, duration));
+			if (before) afterFrame(() => void playFlip(flip_nodes, before, duration));
 			return;
 		}
 
 		const keys = intent.items.map((it) => it.key);
-		const op = moveOpFromIndices(keys, intent.fromIndex, intent.toIndex);
+		const op = moveOpFromIndices(keys, intent.from_index, intent.to_index);
 		const next = applyMove(ctx.options.items, op);
 		ctx.options.onReorder(next, op);
 		ctx.options.onCommit?.(op);
+		this.#emitWire(ctx, { type: 'move', target: ctx.targetId, itemId: op.itemId, afterId: op.afterId });
 
 		// FLIP is measured on the NEXT frame, not now: the engine reorders by callback, but
 		// Svelte/Vue/React patch the DOM asynchronously, so a synchronous measure here reads stale
 		// "Last" rects and the chip visibly jumps before settling. One rAF lands after the DOM
 		// update; the only paint that frame shows the correctly-inverted start, so there's no flash.
-		if (before) afterFrame(() => void playFlip(flipNodes, before, duration));
+		if (before) afterFrame(() => void playFlip(flip_nodes, before, duration));
 	}
 
 	/** Presence snapshot of an in-flight reorder for `ctx` (CRDT-ready hook, inert if unused). */
@@ -1258,9 +1337,9 @@ export class Sortable implements Capability {
 		const intent = this.#intent;
 		if (!intent || intent.context !== ctx) return null;
 		return {
-			dragKey: intent.items[intent.fromIndex].key,
-			fromIndex: intent.fromIndex,
-			toIndex: intent.toIndex,
+			dragKey: intent.items[intent.from_index].key,
+			fromIndex: intent.from_index,
+			toIndex: intent.to_index,
 		};
 	}
 
@@ -1282,17 +1361,17 @@ export class Sortable implements Capability {
 	 */
 	#raiseStacking(node: HTMLElement, ctx: SortableContext, lifted: boolean): void {
 		if (!lifted) {
-			this.#raisedNode = node;
-			this.#savedNodeZ = node.style.zIndex;
-			this.#savedNodePos = node.style.position;
+			this.#raised_node = node;
+			this.#saved_node_z = node.style.zIndex;
+			this.#saved_node_pos = node.style.position;
 			if (getComputedStyle(node).position === 'static') node.style.position = 'relative';
 			node.style.zIndex = DRAG_Z_INDEX;
 		}
 		if (ctx.options.group) {
 			const list = ctx.container;
-			this.#raisedList = list;
-			this.#savedListZ = list.style.zIndex;
-			this.#savedListPos = list.style.position;
+			this.#raised_list = list;
+			this.#saved_list_z = list.style.zIndex;
+			this.#saved_list_pos = list.style.position;
 			if (getComputedStyle(list).position === 'static') list.style.position = 'relative';
 			list.style.zIndex = DRAG_Z_INDEX;
 			list.setAttribute(ELEVATED_SOURCE_ATTR, '');
@@ -1300,16 +1379,16 @@ export class Sortable implements Capability {
 	}
 
 	#restoreStacking(): void {
-		if (this.#raisedNode) {
-			this.#raisedNode.style.zIndex = this.#savedNodeZ;
-			this.#raisedNode.style.position = this.#savedNodePos;
-			this.#raisedNode = null;
+		if (this.#raised_node) {
+			this.#raised_node.style.zIndex = this.#saved_node_z;
+			this.#raised_node.style.position = this.#saved_node_pos;
+			this.#raised_node = null;
 		}
-		if (this.#raisedList) {
-			this.#raisedList.style.zIndex = this.#savedListZ;
-			this.#raisedList.style.position = this.#savedListPos;
-			this.#raisedList.removeAttribute(ELEVATED_SOURCE_ATTR);
-			this.#raisedList = null;
+		if (this.#raised_list) {
+			this.#raised_list.style.zIndex = this.#saved_list_z;
+			this.#raised_list.style.position = this.#saved_list_pos;
+			this.#raised_list.removeAttribute(ELEVATED_SOURCE_ATTR);
+			this.#raised_list = null;
 		}
 	}
 
@@ -1329,7 +1408,7 @@ export class Sortable implements Capability {
 
 	/** The single engine-drawn drop-line (lazy, fixed-positioned on document.body, default-styled). */
 	#ensureIndicator(): HTMLElement {
-		if (this.#indicatorEl) return this.#indicatorEl;
+		if (this.#indicator_el) return this.#indicator_el;
 		const el = document.createElement('div');
 		el.setAttribute(INDICATOR_ATTR, '');
 		Object.assign(el.style, {
@@ -1340,13 +1419,13 @@ export class Sortable implements Capability {
 			pointerEvents: 'none',
 		} satisfies Partial<CSSStyleDeclaration>);
 		document.body.appendChild(el);
-		this.#indicatorEl = el;
+		this.#indicator_el = el;
 		return el;
 	}
 
 	#removeIndicator(): void {
-		this.#indicatorEl?.remove();
-		this.#indicatorEl = null;
+		this.#indicator_el?.remove();
+		this.#indicator_el = null;
 	}
 
 	/**
@@ -1399,37 +1478,37 @@ export class Sortable implements Capability {
 	 * via the transition armed here on the foreign nodes. Re-runs only when the insert index moves.
 	 */
 	#projectForeign(foreign: TransferContainer, intent: IntentSnapshot, input: InteractionInput): void {
-		const targetCtx = this.#contextById(foreign.id);
-		if (!targetCtx) return;
+		const target_ctx = this.#contextById(foreign.id);
+		if (!target_ctx) return;
 		const axis = foreign.axis;
 		const raw = resolveForeignInsertAt(foreign, input.clientX, input.clientY);
 		// Anti-flap: hold the open gap until the pointer crosses the slot boundary by `band` px,
 		// the same hysteresis the in-list insert uses. Mids come from the cached (un-displaced)
 		// foreign rects, so this adds no reflow. `current = -1` on first entry → no hold.
-		const current = foreign.id === this.#foreignGapId ? this.#foreignGapAt : -1;
+		const current = foreign.id === this.#foreign_gap_id ? this.#foreign_gap_at : -1;
 		const pos = axis === 'x' ? input.clientX : input.clientY;
-		const band = targetCtx.options.hysteresis ?? 3;
+		const band = target_ctx.options.hysteresis ?? 3;
 		const at = stabilizeForeignInsertAt(current, raw, pos, buildMids(foreign.rects(), axis), band);
-		if (foreign.id === this.#foreignGapId && at === this.#foreignGapAt) return;
-		this.#foreignGapId = foreign.id;
-		this.#foreignGapAt = at;
+		if (foreign.id === this.#foreign_gap_id && at === this.#foreign_gap_at) return;
+		this.#foreign_gap_id = foreign.id;
+		this.#foreign_gap_at = at;
 
 		if (intent.context.options.indicator === 'line') {
 			// Line mode: draw the drop-line in the foreign list instead of opening a gap.
-			this.#showIndicator(targetCtx.container, foreign.rects(), at, axis, targetCtx.strategy);
+			this.#showIndicator(target_ctx.container, foreign.rects(), at, axis, target_ctx.strategy);
 			return;
 		}
 
-		const dragRect = intent.items[intent.fromIndex].node.getBoundingClientRect();
-		const gap = axis === 'x' ? dragRect.width : dragRect.height;
-		const duration = resolveAnimationDuration(targetCtx.options.animation);
+		const drag_rect = intent.items[intent.from_index].node.getBoundingClientRect();
+		const gap = axis === 'x' ? drag_rect.width : drag_rect.height;
+		const duration = resolveAnimationDuration(target_ctx.options.animation);
 		const transition = duration > 0 ? `translate ${duration}ms ${FLIP_EASING}` : '';
-		const nodes = this.#orderedNodes(targetCtx);
+		const nodes = this.#orderedNodes(target_ctx);
 		for (let i = 0; i < nodes.length; i++) {
 			const n = nodes[i]!;
 			if (transition) {
 				n.style.transition = transition;
-				this.#foreignTouched.add(n);
+				this.#foreign_touched.add(n);
 			}
 			const shift = i >= at ? gap : 0;
 			if (axis === 'x') applyTranslate(n, shift, 0);
@@ -1443,16 +1522,16 @@ export class Sortable implements Capability {
 	 * (at commit, where the inserted item takes the slot, and at teardown).
 	 */
 	#clearForeignGap(ease: boolean): void {
-		if (this.#foreignGapId == null) return;
-		const targetCtx = this.#contextById(this.#foreignGapId);
-		if (targetCtx) {
-			for (const n of this.#orderedNodes(targetCtx)) {
+		if (this.#foreign_gap_id == null) return;
+		const target_ctx = this.#contextById(this.#foreign_gap_id);
+		if (target_ctx) {
+			for (const n of this.#orderedNodes(target_ctx)) {
 				if (!ease) n.style.transition = '';
 				clearTranslate(n);
 			}
 		}
-		this.#foreignGapId = null;
-		this.#foreignGapAt = -1;
+		this.#foreign_gap_id = null;
+		this.#foreign_gap_at = -1;
 	}
 
 	#transferContainer(ctx: SortableContext): TransferContainer {
@@ -1467,26 +1546,26 @@ export class Sortable implements Capability {
 				return ctx.axis;
 			},
 			rects() {
-				let cached = self.#foreignItemRects.get(ctx.id);
+				let cached = self.#foreign_item_rects.get(ctx.id);
 				if (!cached) {
 					cached = self.#itemRects(self.#measure(ctx));
-					self.#foreignItemRects.set(ctx.id, cached);
+					self.#foreign_item_rects.set(ctx.id, cached);
 				}
 				return cached;
 			},
 			rect() {
-				let cached = self.#foreignContainerRects.get(ctx.id);
+				let cached = self.#foreign_container_rects.get(ctx.id);
 				if (!cached) {
 					cached = ctx.container.getBoundingClientRect();
-					self.#foreignContainerRects.set(ctx.id, cached);
+					self.#foreign_container_rects.set(ctx.id, cached);
 				}
 				return cached;
 			},
-			accepts(item, fromNode) {
+			accepts(item, from_node) {
 				const fn = ctx.options.accepts;
 				if (!fn) return true;
 				try {
-					return fn(item, { from: fromNode, to: ctx.container });
+					return fn(item, { from: from_node, to: ctx.container });
 				} catch {
 					return false; // a throwing predicate rejects — never let it break the drag
 				}
@@ -1496,15 +1575,15 @@ export class Sortable implements Capability {
 
 	#setupForeignInvalidation(): void {
 		if (typeof window === 'undefined') return;
-		this.#unlistenForeignInvalidation.push(
-			listen(window, 'scroll', this.#onForeignInvalidate, { capture: true, passive: true }),
-			listen(window, 'resize', this.#onForeignInvalidate, { passive: true }),
+		this.#unlisten_foreign_invalidation.push(
+			listen(window, 'scroll', this.#on_foreign_invalidate, { capture: true, passive: true }),
+			listen(window, 'resize', this.#on_foreign_invalidate, { passive: true }),
 		);
 	}
 
 	#teardownForeignInvalidation(): void {
-		for (const off of this.#unlistenForeignInvalidation) off();
-		this.#unlistenForeignInvalidation.length = 0;
+		for (const off of this.#unlisten_foreign_invalidation) off();
+		this.#unlisten_foreign_invalidation.length = 0;
 	}
 
 	#resolveForeign(intent: IntentSnapshot, input: InteractionInput): TransferContainer | null {
@@ -1512,22 +1591,22 @@ export class Sortable implements Capability {
 		if (!ctx.options.group) return null;
 		const source = this.#registry.get(ctx.id);
 		if (!source) return null;
-		const node = intent.items[intent.fromIndex].node;
+		const node = intent.items[intent.from_index].node;
 		const r = node.getBoundingClientRect();
-		const dragCx = (r.left + r.right) / 2;
-		const dragCy = (r.top + r.bottom) / 2;
+		const drag_cx = (r.left + r.right) / 2;
+		const drag_cy = (r.top + r.bottom) / 2;
 		const proximity = ctx.options.foreignProximity ?? this.#autoProximity(r);
 		// A zone that rejects the dragged item is not a candidate — no preview gap, no drop.
-		const item = ctx.options.items[intent.fromIndex];
+		const item = ctx.options.items[intent.from_index];
 		const accept = (c: TransferContainer): boolean => c.accepts(item, node);
 		return resolveTransferTarget(
 			this.#registry,
-			intent.transferState,
+			intent.transfer_state,
 			source,
 			input.clientX,
 			input.clientY,
-			dragCx,
-			dragCy,
+			drag_cx,
+			drag_cy,
 			proximity,
 			accept,
 		);
@@ -1538,49 +1617,182 @@ export class Sortable implements Capability {
 	}
 
 	#commitTransfer(intent: IntentSnapshot, input: InteractionInput): boolean {
-		const target = intent.foreignTarget;
+		const target = intent.foreign_target;
 		if (!target) return false;
-		const sourceCtx = intent.context;
-		const targetCtx = this.#contextById(target.id);
-		if (!targetCtx) return false;
+		const source_ctx = intent.context;
+		const target_ctx = this.#contextById(target.id);
+		if (!target_ctx) return false;
 
-		const item = sourceCtx.options.items[intent.fromIndex];
+		const item = source_ctx.options.items[intent.from_index];
 		if (item === undefined) return false;
 		const to = resolveForeignInsertAt(target, input.clientX, input.clientY);
+		// The wire anchor — computed from the pre-insertion target order so a callback that mutates
+		// `items` can't shift it out from under us.
+		const wire_after_id = to > 0 ? sortableKey(target_ctx.options.items[to - 1]!) : null;
 
 		const op: TransferOp = {
 			item,
-			fromContainer: sourceCtx.id,
-			toContainer: targetCtx.id,
-			from: intent.fromIndex,
+			fromContainer: source_ctx.id,
+			toContainer: target_ctx.id,
+			from: intent.from_index,
 			to,
 		};
 
-		// Fire the target's transfer seam if present; else apply the default split move.
-		if (targetCtx.options.onTransfer) {
-			targetCtx.options.onTransfer(op);
+		// The source ALWAYS loses the item — fired here (not only in the default branch) so that even a
+		// target whose `onTransfer` only *adds* can't leave a duplicate behind in the source list.
+		const source_next = source_ctx.options.items.filter((_, i) => i !== intent.from_index);
+		const source_op = moveOpFromIndices(
+			intent.items.map((it) => it.key),
+			intent.from_index,
+			intent.from_index,
+		);
+		source_ctx.options.onReorder(source_next, source_op);
+
+		// The target gains it — through its `onTransfer` seam if present, else the default insert.
+		if (target_ctx.options.onTransfer) {
+			target_ctx.options.onTransfer(op);
 		} else {
-			const sourceNext = sourceCtx.options.items.filter((_, i) => i !== intent.fromIndex);
-			const sourceOp = moveOpFromIndices(
-				intent.items.map((it) => it.key),
-				intent.fromIndex,
-				intent.fromIndex,
-			);
-			sourceCtx.options.onReorder(sourceNext, sourceOp);
-			const targetItems = targetCtx.options.items.slice();
-			targetItems.splice(to, 0, item);
-			const beforeKey = to > 0 ? sortableKey(targetItems[to - 1]!) : null;
-			targetCtx.options.onReorder(targetItems, {
+			const target_items = target_ctx.options.items.slice();
+			target_items.splice(to, 0, item);
+			const before_key = to > 0 ? sortableKey(target_items[to - 1]!) : null;
+			target_ctx.options.onReorder(target_items, {
 				itemId: sortableKey(item),
-				afterId: beforeKey,
+				afterId: before_key,
 			});
 		}
+		// Durable wire op — emitted once, on the *source* list (the Room fans it out to peers).
+		this.#emitWire(source_ctx, {
+			type: 'transfer',
+			target: target_ctx.targetId,
+			from: source_ctx.targetId,
+			itemId: sortableKey(item),
+			afterId: wire_after_id,
+		});
 		return true;
 	}
 
 	#contextById(id: symbol): SortableContext | undefined {
 		for (const ctx of this.#contexts.values()) if (ctx.id === id) return ctx;
 		return undefined;
+	}
+
+	#contextByTargetId(id: string): SortableContext | undefined {
+		for (const ctx of this.#contexts.values()) if (ctx.targetId === id) return ctx;
+		return undefined;
+	}
+
+	/* ── unified collab seam ─────────────────────────────────────────────────── */
+
+	/** Fan a durable wire op out to a context's commit subscribers (the Room). */
+	#emitWire(ctx: SortableContext, op: SortableOp): void {
+		for (const fn of ctx.commit_subscribers) fn(op);
+	}
+
+	/** Broadcast the current in-flight reorder as a wire presence frame. */
+	#pumpPresence(intent: IntentSnapshot): void {
+		const ctx = intent.context;
+		if (ctx.presence_subscribers.size === 0) return;
+		const drag_key = intent.items[intent.from_index]?.key;
+		if (drag_key == null) return;
+		const target_ctx = intent.foreign_target ? this.#contextById(intent.foreign_target.id) : ctx;
+		const frame: LocalPresence = {
+			type: 'sortable',
+			target: (target_ctx ?? ctx).targetId,
+			fromTarget: ctx.targetId,
+			itemId: drag_key,
+			insertIndex: intent.to_index,
+			rel: null,
+		};
+		for (const fn of ctx.presence_subscribers) fn(frame);
+	}
+
+	/** Apply a remote wire op (`move`/`transfer`) through the same reorder paths a local commit uses.
+	 *  Foreign op kinds (drag/resize/rotate) no-op. @internal */
+	applyExternalOp(ctx: SortableContext, op: CollabOp): void {
+		if (op.type === 'move') {
+			if (op.target !== ctx.targetId) return;
+			const internal: MoveOp = { itemId: op.itemId, afterId: op.afterId };
+			const next = applyMove(ctx.options.items, internal);
+			ctx.options.onReorder(next, internal);
+		} else if (op.type === 'transfer') {
+			this.#applyTransferOp(op);
+		}
+	}
+
+	/** Apply a remote cross-list transfer: remove from the `from` list, insert into the `target`. */
+	#applyTransferOp(op: Extract<SortableOp, { type: 'transfer' }>): void {
+		const from_ctx = this.#contextByTargetId(op.from);
+		const to_ctx = this.#contextByTargetId(op.target);
+		if (!from_ctx || !to_ctx) return;
+		const from_index = from_ctx.options.items.findIndex((it) => sortableKey(it) === op.itemId);
+		if (from_index === -1) return;
+		const item = from_ctx.options.items[from_index]!;
+
+		const target_without = to_ctx.options.items.filter((it) => sortableKey(it) !== op.itemId);
+		const at =
+			op.afterId === null
+				? 0
+				: (() => {
+						const i = target_without.findIndex((it) => sortableKey(it) === op.afterId);
+						return i === -1 ? target_without.length : i + 1;
+					})();
+
+		const source_next = from_ctx.options.items.filter((_, i) => i !== from_index);
+		from_ctx.options.onReorder(source_next, { itemId: op.itemId, afterId: null });
+
+		const internal_op: TransferOp = {
+			item,
+			fromContainer: from_ctx.id,
+			toContainer: to_ctx.id,
+			from: from_index,
+			to: at,
+		};
+		if (to_ctx.options.onTransfer) {
+			to_ctx.options.onTransfer(internal_op);
+		} else {
+			const target_items = to_ctx.options.items.slice();
+			target_items.splice(at, 0, item);
+			to_ctx.options.onReorder(target_items, { itemId: op.itemId, afterId: op.afterId });
+		}
+	}
+
+	/** Render a remote peer's in-flight reorder as a ghost placeholder at its insert slot. @internal */
+	showRemotePresence(
+		ctx: SortableContext,
+		frame: Extract<PresenceFrame, { type: 'sortable' }>,
+		_opts?: { mirror?: unknown },
+	): void {
+		// Only the frame's *target* list shows the ghost; if this peer moved away from us, clear ours.
+		if (frame.target !== ctx.targetId) {
+			this.clearRemotePresence(ctx, frame.peerId);
+			return;
+		}
+		let ghost = ctx.remote_ghosts.get(frame.peerId);
+		if (!ghost) {
+			ghost = document.createElement('li');
+			ghost.setAttribute(REMOTE_GHOST_ATTR, frame.peerId);
+			ghost.style.pointerEvents = 'none';
+			ctx.remote_ghosts.set(frame.peerId, ghost);
+		}
+		const real_children = Array.from(ctx.container.children).filter((c) =>
+			c.hasAttribute(SORTABLE_KEY_ATTR),
+		);
+		const ref = real_children[frame.insertIndex] ?? null;
+		ctx.container.insertBefore(ghost, ref);
+	}
+
+	/** Remove a remote peer's ghost (or all ghosts when no peer id is given). @internal */
+	clearRemotePresence(ctx: SortableContext, peer_id?: string, _opts?: { ease?: boolean }): void {
+		if (peer_id) {
+			const g = ctx.remote_ghosts.get(peer_id);
+			if (g) {
+				g.remove();
+				ctx.remote_ghosts.delete(peer_id);
+			}
+			return;
+		}
+		for (const g of ctx.remote_ghosts.values()) g.remove();
+		ctx.remote_ghosts.clear();
 	}
 
 	#measure(ctx: SortableContext): ItemLayout[] {
@@ -1623,22 +1835,22 @@ export class Sortable implements Capability {
 		}
 		// List: variable-size midpoint crossing + hysteresis to stop index flapping.
 		const pos = intent.axis === 'y' ? input.clientY : input.clientX;
-		const dragRect = intent.items[intent.fromIndex].rect;
-		const dragKey = intent.items[intent.fromIndex].key;
+		const drag_rect = intent.items[intent.from_index].rect;
+		const drag_key = intent.items[intent.from_index].key;
 		const footprint = intent.footprint;
 		if (intent.axis === 'y') {
-			footprint.start = dragRect.top;
-			footprint.end = dragRect.bottom;
+			footprint.start = drag_rect.top;
+			footprint.end = drag_rect.bottom;
 		} else {
-			footprint.start = dragRect.left;
-			footprint.end = dragRect.right;
+			footprint.start = drag_rect.left;
+			footprint.end = drag_rect.right;
 		}
-		const raw = computeTargetFromMids(intent.mids, pos, dragKey, intent.items.length, {
+		const raw = computeTargetFromMids(intent.mids, pos, drag_key, intent.items.length, {
 			dragFootprint: intent.lift ? null : footprint,
 			skipDragDeadZone: Boolean(intent.lift),
 		});
 		const band = intent.context.options.hysteresis ?? 3;
-		return stabilizeInsertAt(intent.toIndex, raw, pos, intent.boundaries, band);
+		return stabilizeInsertAt(intent.to_index, raw, pos, intent.boundaries, band);
 	}
 
 	#project(intent: IntentSnapshot): void {
@@ -1647,7 +1859,7 @@ export class Sortable implements Capability {
 			this.#showIndicator(
 				intent.context.container,
 				intent.items.map((it) => it.rect),
-				intent.toIndex,
+				intent.to_index,
 				intent.axis,
 				intent.context.strategy,
 			);
@@ -1657,46 +1869,46 @@ export class Sortable implements Capability {
 			this.#projectGrid(intent);
 			return;
 		}
-		const { items, fromIndex, toIndex, axis, slot } = intent;
-		// Only items between fromIndex and *either* the previously-applied toIndex or the new one
+		const { items, from_index, to_index, axis, slot } = intent;
+		// Only items between from_index and *either* the previously-applied to_index or the new one
 		// can change state: those entering the displaced range get shifted, those leaving it are
 		// recomputed to shift 0 (reset). Sweeping just this union keeps projection O(excursion)
 		// per move instead of O(items) — and still resets items that left the range.
-		const lo = Math.min(fromIndex, intent.appliedTo, toIndex);
-		const hi = Math.max(fromIndex, intent.appliedTo, toIndex);
+		const lo = Math.min(from_index, intent.applied_to, to_index);
+		const hi = Math.max(from_index, intent.applied_to, to_index);
 		for (let i = lo; i <= hi; i++) {
-			if (i === fromIndex) continue;
+			if (i === from_index) continue;
 			let shift = 0;
-			if (toIndex > fromIndex && i > fromIndex && i <= toIndex) shift = -slot;
-			else if (toIndex < fromIndex && i >= toIndex && i < fromIndex) shift = slot;
+			if (to_index > from_index && i > from_index && i <= to_index) shift = -slot;
+			else if (to_index < from_index && i >= to_index && i < from_index) shift = slot;
 			if (axis === 'y') applyTranslate(items[i].node, 0, shift);
 			else applyTranslate(items[i].node, shift, 0);
 		}
-		intent.appliedTo = toIndex;
+		intent.applied_to = to_index;
 	}
 
 	#projectGrid(intent: IntentSnapshot): void {
-		const shifts = gridDisplacements(this.#itemRects(intent.items), intent.fromIndex, intent.toIndex);
-		const lo = Math.min(intent.fromIndex, intent.appliedTo, intent.toIndex);
-		const hi = Math.max(intent.fromIndex, intent.appliedTo, intent.toIndex);
+		const shifts = gridDisplacements(this.#itemRects(intent.items), intent.from_index, intent.to_index);
+		const lo = Math.min(intent.from_index, intent.applied_to, intent.to_index);
+		const hi = Math.max(intent.from_index, intent.applied_to, intent.to_index);
 		for (let i = lo; i <= hi; i++) {
-			if (i === intent.fromIndex) continue;
+			if (i === intent.from_index) continue;
 			const shift = shifts.get(i);
 			if (shift) applyTranslate(intent.items[i].node, shift.x, shift.y);
 			else clearTranslate(intent.items[i].node);
 		}
-		intent.appliedTo = intent.toIndex;
+		intent.applied_to = intent.to_index;
 	}
 
 	#clearDisplacement(intent: IntentSnapshot): void {
 		// Only the currently-displaced range carries a translate; reset just those.
-		const lo = Math.min(intent.fromIndex, intent.appliedTo);
-		const hi = Math.max(intent.fromIndex, intent.appliedTo);
+		const lo = Math.min(intent.from_index, intent.applied_to);
+		const hi = Math.max(intent.from_index, intent.applied_to);
 		for (let i = lo; i <= hi; i++) {
-			if (i === intent.fromIndex) continue;
+			if (i === intent.from_index) continue;
 			clearTranslate(intent.items[i].node);
 		}
-		intent.appliedTo = intent.fromIndex;
+		intent.applied_to = intent.from_index;
 	}
 
 	/**
@@ -1704,20 +1916,20 @@ export class Sortable implements Capability {
 	 * remaining items close up over it, instead of leaving a ghost gap where it used to sit (a
 	 * non-lifted item keeps its layout box, so just clearing displacement snaps siblings back
 	 * *behind* it). Items after the grabbed index slide back one slot; items before it reset. Eased
-	 * via the armed transition. `appliedTo` is parked past the tail so a later #clearDisplacement
+	 * via the armed transition. `applied_to` is parked past the tail so a later #clearDisplacement
 	 * (on re-entry / release) undoes the whole collapsed range.
 	 */
 	#collapseSource(intent: IntentSnapshot): void {
 		// Line mode keeps the item lifted, so its placeholder/ghost already holds the origin slot —
 		// nothing to collapse (the ghost is meant to stay put).
 		if (intent.context.options.indicator === 'line') return;
-		const { items, fromIndex, axis, slot } = intent;
+		const { items, from_index, axis, slot } = intent;
 		for (let i = 0; i < items.length; i++) {
-			if (i === fromIndex) continue;
-			const shift = i > fromIndex ? -slot : 0;
+			if (i === from_index) continue;
+			const shift = i > from_index ? -slot : 0;
 			if (axis === 'y') applyTranslate(items[i].node, 0, shift);
 			else applyTranslate(items[i].node, shift, 0);
 		}
-		intent.appliedTo = Math.max(fromIndex, items.length - 1);
+		intent.applied_to = Math.max(from_index, items.length - 1);
 	}
 }

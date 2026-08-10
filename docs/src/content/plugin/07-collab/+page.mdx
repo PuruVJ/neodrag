@@ -1,0 +1,459 @@
+---
+title: 'Collaboration'
+nav_title: 'Collab'
+tagline: 'Real-time multiplayer for every capability — one Room, one unified model.'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+Collaboration is the headline. Every neodrag capability — a draggable box, a resizable panel, a sortable list — already emits everything a real-time backend needs, and consumes everything coming the other way. A **`Room`** connects those emitters to a transport so two (or two hundred) peers manipulate the same things and converge, no matter who moves what when.
+
+```js
+import { Room, MemoryBackend } from '@neodrag/svelte/collab';
+
+const [a, b] = MemoryBackend.pair('peerA', 'peerB');
+
+const room = new Room(a); // local commits → ops out · remote ops → applied · presence → rendered
+room.add(list, 'tasks'); // join a target under a stable id shared by every peer
+```
+
+Import `Room` from **your framework's `/collab` subpath** — `@neodrag/svelte/collab`, `@neodrag/react/collab`, `@neodrag/vue/collab`, `@neodrag/solid/collab`, `@neodrag/vanilla/collab`. They all re-export the same framework-agnostic orchestrator, so the wiring below is identical whichever you pick (examples use svelte). There is no separate orchestration package to install — only the network adapters ship separately: `@neodrag/yjs` and `@neodrag/liveblocks` (covered below). `room.destroy()` tears the whole room down — call it on unmount.
+
+## The model: target, op, presence
+
+The entire layer is three nouns, identical for every capability. Learn them once and you can derive how to sync anything — including capabilities that don't exist yet.
+
+1. **Target** — anything synced has a stable string `id`. A draggable box, a resizable panel, a sortable list: each is a target. The `id` is the address peers agree on, so it **must be the same string on every peer** (`'tasks'`, `'hero-card'`, `'sidebar-panel'`). You hand a capability instance to `room.add(target, id)` and it becomes a participant.
+
+2. **Op** — a serializable, past-tense **fact** emitted the instant a gesture commits. Every op is `{ type, target, …payload }`:
+
+   ```ts
+   type CollabOp =
+     | { type: 'move'; target: string; itemId: string; afterId: string | null }
+     | { type: 'transfer'; target: string; from: string; itemId: string; afterId: string | null }
+     | { type: 'drag'; target: string; x: number; y: number }
+     | { type: 'resize'; target: string; width: number; height: number };
+   ```
+
+   The op is the unit that crosses the wire. **Sequence ops** (`move`, `transfer`) are anchor-based and **rebase** under concurrency — they describe *"put `itemId` after `afterId`"*, never *"move to index 3"*, so two concurrent moves commute and every peer ends up with the same order. **Value ops** (`drag`, `resize`) are **last-write-wins registers** — the newest `{ x, y }` or `{ width, height }` simply wins. All four are idempotent to re-apply.
+
+3. **Presence** — the same envelope, but ephemeral and **present-tense**: the in-flight frame of a gesture that hasn't committed yet (where a peer is *currently* dragging, the gap they're *about to* drop into). A frame is published continuously as the pointer moves and **`null` when the gesture ends**, so no peer is ever left holding a stuck ghost. Presence is never persisted.
+
+That's the whole grammar. A capability that satisfies the structural seam (`onCommit`, `onPresence`, `applyExternal`, `showRemotePresence`) joins a room and gets multiplayer for free — the `Room` never special-cases who it's talking to.
+
+## A two-peer demo
+
+`MemoryBackend.pair(idA, idB)` returns two connected in-process backends sharing one op channel **and** one presence channel. It's the no-network harness for tests and demos — swap it for a real adapter later with zero changes to your target code.
+
+First, mount a `SortableList` the usual way:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { SortableList } from '@neodrag/svelte/sortable';
+
+  let items = $state([
+    { id: 'a', label: 'Write spec' },
+    { id: 'b', label: 'Ship it' },
+    { id: 'c', label: 'Celebrate' },
+  ]);
+
+  const list = new SortableList({
+    get items() {
+      return items;
+    },
+    onReorder: (next) => (items = next),
+  });
+</script>
+
+<ul {...list.attach}>
+  {#each items as item (item.id)}
+    <li {...list.row(item.id)}>{item.label}</li>
+  {/each}
+</ul>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useSortable } from '@neodrag/react/sortable';
+import { useState } from 'react';
+
+function List() {
+  const [items, setItems] = useState([
+    { id: 'a', label: 'Write spec' },
+    { id: 'b', label: 'Ship it' },
+    { id: 'c', label: 'Celebrate' },
+  ]);
+
+  const { ref, row } = useSortable({
+    items,
+    onReorder: (next) => setItems(next),
+  });
+
+  return (
+    <ul ref={ref}>
+      {items.map((item) => (
+        <li key={item.id} {...row(item.id)}>
+          {item.label}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+  import { useSortable } from '@neodrag/vue/sortable';
+  import { ref as vueRef } from 'vue';
+
+  const items = vueRef([
+    { id: 'a', label: 'Write spec' },
+    { id: 'b', label: 'Ship it' },
+    { id: 'c', label: 'Celebrate' },
+  ]);
+
+  const { ref, row } = useSortable({
+    get items() {
+      return items.value;
+    },
+    onReorder: (next) => (items.value = next),
+  });
+</script>
+
+<template>
+  <ul :ref="ref">
+    <li v-for="item in items" :key="item.id" v-bind="row(item.id)">
+      {{ item.label }}
+    </li>
+  </ul>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSortable } from '@neodrag/solid/sortable';
+import { createSignal, For } from 'solid-js';
+
+function List() {
+  const [items, setItems] = createSignal([
+    { id: 'a', label: 'Write spec' },
+    { id: 'b', label: 'Ship it' },
+    { id: 'c', label: 'Celebrate' },
+  ]);
+
+  const { ref, row } = createSortable({
+    get items() {
+      return items();
+    },
+    onReorder: (next) => setItems(next),
+  });
+
+  return (
+    <ul ref={ref}>
+      <For each={items()}>{(item) => <li {...row(item.id)}>{item.label}</li>}</For>
+    </ul>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { SortableList } from '@neodrag/vanilla/sortable';
+
+let items = [
+  { id: 'a', label: 'Write spec' },
+  { id: 'b', label: 'Ship it' },
+  { id: 'c', label: 'Celebrate' },
+];
+
+const list = new SortableList(document.querySelector('ul'), {
+  items,
+  onReorder: (next) => {
+    items = next;
+    render(); // your own DOM update; each <li> spreads list.row(item.id)
+  },
+});
+```
+
+</div>
+</FrameworkSwitch>
+
+Now join it to a room. The underlying model is always `room.add(target, id)`, but each framework exposes it idiomatically — the **adapter calls `add` for you** at mount and the disposer at unmount, so you never juggle the instance:
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+Pass the `room` option to any capability — it auto-joins under its `id` on mount and leaves on unmount. The `Room` from `@neodrag/svelte/collab` is **reactive**: read `room.peers` / `room.presences` straight in markup.
+
+```svelte
+<script>
+  import { SortableList } from '@neodrag/svelte/sortable';
+  import { Room, MemoryBackend } from '@neodrag/svelte/collab';
+
+  const [a, b] = MemoryBackend.pair('peerA', 'peerB');
+  const room = new Room(a); // one room per peer
+
+  const list = new SortableList({
+    id: 'tasks',
+    room,
+    get items() {
+      return items;
+    },
+    onReorder: (next) => (items = next),
+  });
+</script>
+
+<ul {...list.attach}>…</ul>
+{#each room.peers as id}<Avatar {id} />{/each}
+```
+
+</div>
+<div slot="react">
+
+Wrap a subtree in `<RoomProvider>`; every capability hook inside auto-joins. `useRoom()` returns reactive `peers` / `presences` (via `useSyncExternalStore`) for presence UI.
+
+```tsx
+import { RoomProvider, useRoom } from '@neodrag/react/collab';
+import { useSortable } from '@neodrag/react/sortable';
+
+function Tasks() {
+  const { ref, row } = useSortable({ id: 'tasks', items, onReorder: setItems });
+  return (
+    <ul ref={ref}>
+      {items.map((i) => (
+        <li key={i.id} {...row(i.id)}>
+          {i.label}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Presence() {
+  const { peers } = useRoom();
+  return peers.map((id) => <Avatar key={id} id={id} />);
+}
+
+<RoomProvider backend={backend}>
+  <Tasks />
+  <Presence />
+</RoomProvider>;
+```
+
+</div>
+<div slot="vue">
+
+Call `provideRoom` in an ancestor `setup()`; descendant composables auto-join. `useRoom()` returns reactive `peers` / `presences` refs.
+
+```vue
+<script setup>
+  import { provideRoom, useRoom } from '@neodrag/vue/collab';
+  import { useSortable } from '@neodrag/vue/sortable';
+
+  provideRoom(backend); // descendants auto-join
+  const { ref, row } = useSortable({
+    id: 'tasks',
+    get items() {
+      return items.value;
+    },
+    onReorder: (n) => (items.value = n),
+  });
+  const { peers } = useRoom();
+</script>
+```
+
+</div>
+<div slot="solid">
+
+Wrap in `<RoomProvider>`; every primitive inside auto-joins. `useRoom()` returns reactive `peers` / `presences` accessors.
+
+```tsx
+import { RoomProvider, useRoom } from '@neodrag/solid/collab';
+import { createSortable } from '@neodrag/solid/sortable';
+
+function Tasks() {
+  const { ref, row } = createSortable({ id: 'tasks', items, onReorder: setItems });
+  return (
+    <ul ref={ref}>
+      <For each={items()}>{(i) => <li {...row(i.id)}>{i.label}</li>}</For>
+    </ul>
+  );
+}
+
+<RoomProvider backend={backend}>
+  <Tasks />
+</RoomProvider>;
+```
+
+</div>
+<div slot="vanilla">
+
+You already hold the instance, so add it explicitly. `add` returns a disposer (call it to leave); `room.destroy()` tears the whole room down.
+
+```js
+import { SortableList } from '@neodrag/vanilla/sortable';
+import { Room, MemoryBackend } from '@neodrag/vanilla/collab';
+
+const [a, b] = MemoryBackend.pair('peerA', 'peerB');
+const room = new Room(a);
+const off = room.add(new SortableList(elA, { id: 'tasks', items, onReorder }), 'tasks');
+// off();          // this target leaves
+// room.destroy(); // the whole room tears down
+```
+
+</div>
+</FrameworkSwitch>
+
+That's a complete multiplayer reorder: a peer mounts **one** list per client, each with its own `Room` + backend, both at id `'tasks'`. A drag in one streams a `move` op to the other and reconciles; a drag mid-flight on one peer while the other commits rebases the in-flight anchor so the ghost doesn't jump. (The live demo just runs both peers in one tab.)
+
+Because the inbound path is the same reorder path a local drag uses, a remote op landing **mid-drag** rebases against your in-flight anchor: the neighbour moves under your ghost, your ghost doesn't jump. You get convergence without cancelling anyone's gesture.
+
+## Many targets, one room
+
+A `Room` is not single-list. Call `add` once per thing you want synced — lists, boxes, panels, in any mix — and ops route by `target` id:
+
+```js
+const room = new Room(backend);
+
+room.add(todoList, 'todo'); // a SortableList
+room.add(doneList, 'done'); // another SortableList (same group → transfers between them)
+room.add(heroCard, 'hero'); // a Draggable → `drag` ops, last-write-wins
+room.add(sidebar, 'sidebar'); // a Resizable → `resize` ops, last-write-wins
+```
+
+Every target shares the room's one op channel and one presence channel; the `Room` demultiplexes by id. Single-list collaboration is simply the one-`add` case — there is no special shortcut for it.
+
+> The thing you pass to `add` is the capability instance itself (a `Draggable`, `Resizable`, `SortableList`, or a sortable handle). They all satisfy the same `CollabTarget` seam, which is exactly why one `Room` can drive every kind.
+
+## `id` and `row(key)` are required
+
+Two requirements make convergence possible, and the library warns if you skip them:
+
+- **A stable `id` per target.** Pass it as the second arg to `add` (`room.add(list, 'tasks')`) — this stamps the target so its ops carry a `target` field every peer recognizes. Auto-generated ids (`sortable:3`) are peer-local and will *not* match across clients; `room.add` warns if it sees one. Two targets sharing an id in one room also warns.
+- **A real key on every sortable row.** Bind each row with `{...list.row(item.id)}` (`v-bind` in Vue) — the key is passed **at the row**, and it's the `itemId` that rides along in every `move`/`transfer` op. Use a stable domain key, never an array index. There is no `key` option on the list; the key lives on the row.
+
+## Gap, ghost, and `mirror`
+
+When a remote peer drags, every other peer renders their in-flight gesture from the presence frame. By default that's **gap + ghost**: the dragged row's home position dims to a ghost, and a gap opens at the peer's live `insertIndex` so siblings displace — you see *where* they're about to drop without a second cursor flying around.
+
+Pass `mirror: true` to the room to also **float the dragged row/node** following the remote motion — a keyless clone that tracks the other peer's pointer, the "I can see your hand" feel:
+
+```js
+const room = new Room(backend, { mirror: true });
+```
+
+The float is positioned from the presence frame's `rel` — the dragged node's top-left **relative to its list container**, not an absolute screen coordinate. That keeps it geometry-portable: two peers whose lists sit at different scroll offsets or window positions still render the mirror in the right place. Leave `mirror` off for tight inline lists; turn it on for cards and tiles.
+
+`Room` options:
+
+| key                  | type                              | meaning                                                                            |
+| -------------------- | --------------------------------- | ---------------------------------------------------------------------------------- |
+| `mirror`             | `boolean`                         | float the dragged row/node under a remote sortable gesture (vs. gap-only). Default `false` |
+| `presenceThrottleMs` | `number`                          | rate-limit outbound presence frames so a 120Hz gesture doesn't flood the wire. Default `40` |
+| `presenceTtlMs`      | `number`                          | auto-clear a remote peer's presence this many ms after its last frame (no terminal `null`). `0` disables. Default `0` |
+| `onRemotePresence`   | `(frame \| null) => void`         | called whenever remote presence changes — render cursors, name tags, anything      |
+
+### Reactive presence
+
+`onRemotePresence` is the low-level hook. For UI you usually want the room's live state instead: **`room.peers`** (connected peer ids) and **`room.presences`** (each peer's in-flight gesture frame, by id), plus **`room.subscribe(listener)`** to react to changes. Each framework wraps these in its native reactivity so you can render presence declaratively — there's no separate helper to learn:
+
+- **Svelte** — the `Room` from `@neodrag/svelte/collab` is reactive; read `room.peers` / `room.presences` directly in markup. (`Room.reactive(room)` gives a reactive view of a room you didn't create here.)
+- **React** — `useRoom()` returns `{ room, peers, presences }`, kept live via `useSyncExternalStore`.
+- **Vue** — `useRoom()` returns `peers` / `presences` as refs.
+- **Solid** — `useRoom()` returns `peers` / `presences` as accessors.
+
+## Backends
+
+`MemoryBackend` is the in-process harness. A real backend implements the `CollabBackend` seam — a peer id, an op channel (`sendOp` / `onRemoteOp`), and a presence transport — over whatever transport you already run. neodrag ships two adapters.
+
+Both shipped adapters back the **whole op set** — `move`, `transfer`, `drag`, `resize` — across as many targets as you add to the room. You hand the adapter the **whole document** (not one list); each target the room adds becomes its own child in that doc, keyed by id.
+
+### Over Yjs — `@neodrag/yjs`
+
+`yjsBackend(peerId, doc, awareness)` takes the shared `Y.Doc` + `Y.Awareness` (from `y-websocket`, `y-webrtc`, whatever provider you run). Each target becomes a top-level shared type, keyed by kind so the inbound side knows how to read it: a sortable list `id` → a `Y.Array<string>` at `neodrag/list/<id>` (the key order; `move` reorders it, `transfer` deletes from one array and inserts into another), and a draggable/resizable `id` → a `Y.Map` LWW register at `neodrag/val/<id>`. The exported `listName(id)` / `valName(id)` helpers give you those keys, so you can bind your own UI to the same `Y.Array` if you like.
+
+```ts
+import { Room } from '@neodrag/svelte/collab';
+import { yjsBackend } from '@neodrag/yjs';
+import * as Y from 'yjs';
+import { WebsocketProvider } from 'y-websocket';
+
+const doc = new Y.Doc();
+const provider = new WebsocketProvider('wss://your.server', 'my-room', doc);
+
+const room = new Room(yjsBackend(provider.awareness.clientID + '', doc, provider.awareness));
+room.add(list, 'tasks'); // a sortable list → Y.Array at neodrag/list/tasks
+room.add(chip, 'chip');  // a draggable    → Y.Map   at neodrag/val/chip
+```
+
+### Over Liveblocks — `@neodrag/liveblocks`
+
+`liveblocksBackend(peerId, room, root, factory)` takes the Liveblocks room, a `LiveMap` storage root, and a small `factory` for creating children (`{ list, object }` — so the package stays decoupled from `@liveblocks/client`). Same child model: a sortable list → a `LiveList<string>` at `neodrag/list/<id>` (reordered via its native, conflict-aware `.move()`), a draggable/resizable → a `LiveObject` at `neodrag/val/<id>`.
+
+```ts
+import { Room } from '@neodrag/svelte/collab';
+import { liveblocksBackend } from '@neodrag/liveblocks';
+import { LiveList, LiveObject } from '@liveblocks/client';
+
+// `lbRoom` + `root` (a LiveMap in your Storage) come from your @liveblocks/client setup.
+const factory = { list: (init) => new LiveList(init), object: (init) => new LiveObject(init) };
+const room = new Room(liveblocksBackend(lbRoom.getSelf()?.connectionId + '', lbRoom, root, factory));
+room.add(list, 'tasks');
+room.add(panel, 'panel'); // a resizable → LiveObject at neodrag/val/panel
+```
+
+### State, not the op verbatim
+
+Both adapters are **CRDT-native**: a commit mutates the shared structure (the `Y.Array` / `LiveList` reorders, the value register updates), and the wire carries that *merged state*, not your op object. The receiving peer observes the change and **re-derives an equivalent op** — so a `move '0' after '1'` may arrive as the equivalent `move '1' to front`; the resulting order is identical, which is what converges. Value ops (`drag`/`resize`) are last-write-wins registers; concurrent edits resolve to arrival order. If you'd rather ship your op objects verbatim (an op-log, your own server, a raw WebSocket), implement `CollabBackend` directly — it's three methods plus a presence transport, and a `CollabOp` is a plain serializable object.
+
+## Convergence & the edges
+
+With a shipped backend (`@neodrag/yjs`, `@neodrag/liveblocks`, or `MemoryBackend`) and ordinary page usage, **this is all handled for you** — concurrent edits converge, stale ghosts clear, and any reorder (single-item or a bulk re-sort of the shared array) replays exactly. You don't have to think about the items below to be correct; they're the contracts that hold the guarantees up, surfaced for when you go off the paved path.
+
+- **Convergence rides the transport.** Ops carry no clock — sequence ops rebase via anchors, value ops are last-write-wins. Converging *simultaneous* commits is therefore the transport's job, and every shipped backend does it: Yjs/Liveblocks merge through their shared array/list (a CRDT), `MemoryBackend` is in-process and serial. You only have to think about this if you **hand-roll a raw fan-out broadcast** — two peers that both "move to front" in the same instant, applied in different arrival orders, would land differently. The escape hatch is real (write `CollabBackend` against any wire you like), but back it with an ordered or CRDT channel, not a bare rebroadcast. (This is distributed-systems physics, not a neodrag quirk — there's no converging concurrent edits without *some* ordering or merge.)
+- **Resize syncs size *and* position.** A **west/north** resize shifts the element's `left`/`top` (or an SVG element's `x`/`y`) to pin the far edge; the `resize` op now carries those alongside `{width, height}` when the edge moves them, so a free-floating *positioned* panel stays put across peers. East/south resizes (which only grow the far edge) omit them — the fields are optional, so a peer running an older build still converges on size.
+- **Big catch-ups are frame-sequenced.** When *many* ops land in one tick (a peer reconnecting after a long absence), the engine — which reads row order from the live DOM — applies the first immediately and spaces the rest one per frame, so each resolves against a DOM that has caught up. That matters on frameworks that patch the DOM a frame behind their reactive data (Svelte/Vue); React already lags in step. You don't chunk anything — a burst of any size converges on its own.
+- **Ghosts self-expire.** Presence clears on the gesture's terminal `null` frame — but a peer that crashes or drops its connection never sends one. So the `Room` can also sweep any presence that goes silent for `presenceTtlMs` (default `0` = disabled; pass a positive ms value like `30_000` to enable), treating the timeout exactly like a real `null`. A transport that surfaces disconnects can still clear faster by publishing `null` itself; the TTL is the floor, not the only path.
+
+Everything else the model used to ask you to remember — keeping both columns of a group mounted, cleaning up a peer's ghost on disconnect, replaying a multi-item reorder — is now a default the engine and the shipped backends handle, not a rule you have to follow.
+
+## Drop syncs presence, not an op
+
+Notice there is **no `drop` op**. That's on purpose. A drop's *outcome* — file uploaded, card assigned, order placed — is an **application side-effect**, not replayable shared state. Replaying a drop op on a remote peer would re-fire those side-effects, which is exactly wrong. So [Droppable](./droppable) stays outside the *op* model: each peer runs its own drop handlers locally, and only the resulting *state changes* (a `move`, a `transfer`, a `drag`) flow through the room.
+
+What **does** flow is the *hover* — a "they're about to drop here" highlight, which is a presence concern, not an op. Give a zone a stable `id` and `room.add(droppable, id)`, and while a remote peer drags over it the engine sets `data-neodrag-remote-hover` (the peer id) on your zone and floats a `data-neodrag-remote-hover-marker` element at their cursor — both yours to style. It's the same `drop-hover` presence frame in the same envelope, routed by the same `Room`; `onCommit`/`applyExternal` stay no-ops because there's still nothing to commit.
+
+```css
+[data-neodrag-remote-hover] { outline: 2px dashed var(--peer); }
+[data-neodrag-remote-hover-marker] { width: 8px; height: 8px; border-radius: 50%; background: var(--peer); }
+```
+
+## What the model absorbs next
+
+The three-noun model is deliberately open. New capabilities join without touching the `Room` — they add one op variant and one presence variant and implement the same `CollabTarget` seam.
+
+[**`Rotatable`**](/docs/plugin/resizable#rotatable-the-same-shape-for-angle) is the proof. It's another engine capability claiming its own grip, exactly like Resizable claims edge handles, and it syncs with nothing new from the architecture: one more last-write-wins value op —
+
+```ts
+{ type: 'rotate'; target: string; angle: number }
+```
+
+— and a matching present-tense presence frame, both flowing through the same `Room`, the same backend, the same `add(target, id)`. **No `Room` change, no new transport** — it shipped by adding exactly those two variants and implementing the `CollabTarget` seam. Any gesture that commits a value or a sequence is already expressible.
+
+## Where to next
+
+- [Sortable](./sortable) — the list, `row()`, FLIP, and cross-container transfer that the `move`/`transfer` ops come from.
+- [Draggable](./draggable) — the drag capability behind the `drag` value op.
+- [Resizable](./resizable) — the resize capability behind the `resize` value op.

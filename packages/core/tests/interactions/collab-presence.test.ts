@@ -1,18 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-	MemoryPresence,
-	PresenceChannel,
-	type CollabPresence,
-} from '../../src/collab/index.ts';
+import { MemoryPresence, PresenceChannel, type PresenceFrame } from '../../src/collab/index.ts';
 
-const frame = (peerId: string, insertIndex: number, x = 0, y = 0): CollabPresence => ({
+type SortableFrame = Extract<PresenceFrame, { type: 'sortable' }>;
+
+const frame = (peerId: string, insertIndex: number, x = 0, y = 0): SortableFrame => ({
+	type: 'sortable',
 	peerId,
-	dragKey: 'k',
-	fromIndex: 0,
-	toIndex: insertIndex,
+	target: 'list',
+	fromTarget: 'list',
+	itemId: 'k',
 	insertIndex,
-	pointer: { x, y },
+	rel: { x, y },
 });
+
+/** Pull the insert index off a (sortable) frame — `null` for a null/foreign frame. */
+const idx = (p: PresenceFrame | null | undefined): number | null =>
+	p && p.type === 'sortable' ? p.insertIndex : null;
 
 describe('PresenceChannel — round-trip', () => {
 	beforeEach(() => vi.useFakeTimers());
@@ -25,15 +28,15 @@ describe('PresenceChannel — round-trip', () => {
 		const a = new PresenceChannel(ta);
 		const b = new PresenceChannel(tb);
 
-		const seen: Array<[string, CollabPresence | null]> = [];
+		const seen: Array<[string, PresenceFrame | null]> = [];
 		b.onPresence((id, p) => seen.push([id, p]));
 
 		a.broadcast(frame('A', 2, 10, 20));
 
 		expect(seen).toHaveLength(1);
 		expect(seen[0][0]).toBe('A');
-		expect(seen[0][1]).toMatchObject({ peerId: 'A', insertIndex: 2, pointer: { x: 10, y: 20 } });
-		expect(b.remotePresences().get('A')?.insertIndex).toBe(2);
+		expect(seen[0][1]).toMatchObject({ peerId: 'A', insertIndex: 2, rel: { x: 10, y: 20 } });
+		expect(idx(b.remotePresences().get('A'))).toBe(2);
 
 		a.dispose();
 		b.dispose();
@@ -64,7 +67,7 @@ describe('PresenceChannel — round-trip', () => {
 		const b = new PresenceChannel(tb, 40);
 
 		const received: number[] = [];
-		b.onPresence((_id, p) => p && received.push(p.insertIndex));
+		b.onPresence((_id, p) => p && idx(p) !== null && received.push(idx(p)!));
 
 		// 5 rapid frames within the throttle window.
 		a.broadcast(frame('A', 0)); // leading edge — sent now
@@ -95,8 +98,8 @@ describe('PresenceChannel — round-trip', () => {
 		a.broadcast(frame('A', 1));
 		b.broadcast(frame('B', 2));
 
-		expect(b.remotePresences().get('A')?.insertIndex).toBe(1);
-		expect(a.remotePresences().get('B')?.insertIndex).toBe(2);
+		expect(idx(b.remotePresences().get('A'))).toBe(1);
+		expect(idx(a.remotePresences().get('B'))).toBe(2);
 		// neither sees its own frame echoed
 		expect(a.remotePresences().has('A')).toBe(false);
 		expect(b.remotePresences().has('B')).toBe(false);

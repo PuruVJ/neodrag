@@ -48,8 +48,8 @@ jobs:
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
 
-      - name: Compile
+      - name: Compile (vp pack)
         run: pnpm compile
 
-      - name: Test (Turbo)
+      - name: Test (vp · Vitest 4 browser matrix)
         run: pnpm test:ci

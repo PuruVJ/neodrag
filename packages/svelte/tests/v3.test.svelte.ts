@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { Draggable, Droppable, Resizable } from '@neodrag/svelte';
+import { Draggable } from '@neodrag/svelte';
+import { Droppable } from '@neodrag/svelte/drop';
+import { Resizable } from '@neodrag/svelte/resize';
 import { dragAndDrop, startCursorTracking, stopCursorTracking } from '../../core/tests/mouse.ts';
 import { sleepAndWaitForEffects, translate } from '../../core/tests/utils.ts';
 import DraggableHarness from './DraggableHarness.svelte';

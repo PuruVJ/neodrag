@@ -4,7 +4,7 @@ nav_title: 'From svelte-drag'
 tagline: 'Move from the old svelte-drag action to neodrag v3.'
 ---
 
-`svelte-drag` was the original project — neodrag is its successor. v3 keeps the same options you already know (`axis`, `bounds`, `grid`, `handle`, `cancel`, `threshold`, `position`), but the way you attach it to an element has changed. It is no longer a `use:` action. Instead you create a `Draggable` **class instance** and spread its `attach` property onto the node.
+`svelte-drag` was the original project — neodrag is its successor. v3 keeps the same capabilities you already know (`axis`, `bounds`, `grid`, `threshold`, `position`, and `handle`/`cancel` — now spreadable register hooks), but the way you attach it to an element has changed. It is no longer a `use:` action. Instead you create a `Draggable` **class instance** and spread its `attach` property onto the node.
 
 ## Install
 
@@ -58,7 +58,6 @@ Pass options as a plain object to the constructor. The common ones are unchanged
 +    axis: 'x',
 +    bounds: 'parent',
 +    grid: [25, 25],
-+    handle: '.handle',
 +  });
 </script>
 
@@ -70,8 +69,9 @@ Pass options as a plain object to the constructor. The common ones are unchanged
 -     handle: '.handle',
 -   }}
 - >
+-   <div class="handle">drag here</div>
 + <div {...drag.attach}>
-    <div class="handle">drag here</div>
++   <div class="handle" {...drag.handle()}>drag here</div>
     Drag me
   </div>
 ```
@@ -81,8 +81,8 @@ Pass options as a plain object to the constructor. The common ones are unchanged
 | `axis` | `axis` | `'x' \| 'y' \| 'both'` |
 | `bounds` | `bounds` | `'parent' \| 'viewport' \| HTMLElement \| { left, top, right, bottom } \| () => rect` |
 | `gridSize` / `grid` | `grid` | `[stepX, stepY]` in px |
-| `handle` | `handle` | `string \| HTMLElement` |
-| `cancel` | `cancel` | `string \| HTMLElement` |
+| `handle` | `{...drag.handle()}` | A spread-on register hook, not an option — put it on the grab element. |
+| `cancel` | `{...drag.cancel()}` | A spread-on register hook, not an option — put it on the no-drag region. |
 | `threshold` | `threshold` | a single `number` (px of movement before a drag begins) |
 | `defaultPosition` / `position` | `position` | `{ x, y }` |
 | `disabled` | `disabled` | `boolean` |
@@ -236,7 +236,7 @@ Pass reactive state through getters. The wrapper reads the latest values and pus
 
 - `Droppable` and `Resizable` companions that share one engine.
 - `SortableList` for reorderable lists (with FLIP animation and cross-container transfer), bound per-row with `{...list.row(id)}`.
-- A `use: []` slot for tree-shakeable extensions like `snapToGrid`, `magnetic`, `scrollLock`, `ghost`, and `haptics`.
+- A `use: []` slot for tree-shakeable extensions like `magnetic`, `scrollLock`, `ghost`, `autoScroll`, and `haptics`.
 - Built-in keyboard dragging and ARIA support via the `ariaDrag` extension.
 - An opt-in CRDT/collab layer for real-time shared reordering.
 

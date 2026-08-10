@@ -1,0 +1,59 @@
+{
+	"name": "@neodrag/liveblocks",
+	"version": "3.0.0-next.10",
+	"description": "Liveblocks backend adapter for neodrag's collaborative Room 😉",
+	"keywords": [
+		"collab",
+		"crdt",
+		"drag",
+		"draggable",
+		"liveblocks",
+		"neodrag",
+		"sortable"
+	],
+	"homepage": "https://neodrag.dev/docs/collab",
+	"bugs": {
+		"url": "https://github.com/PuruVJ/neodrag/issues"
+	},
+	"license": "MIT",
+	"author": "Puru Vijay",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PuruVJ/neodrag.git"
+	},
+	"files": [
+		"dist/*"
+	],
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"import": "./src/index.ts"
+		},
+		"./package.json": "./package.json"
+	},
+	"publishConfig": {
+		"exports": {
+			".": {
+				"types": "./dist/index.d.ts",
+				"import": "./dist/index.js"
+			},
+			"./package.json": "./package.json"
+		}
+	},
+	"scripts": {
+		"compile": "vp pack",
+		"prepublishOnly": "vp run compile",
+		"test": "vitest run"
+	},
+	"devDependencies": {
+		"@liveblocks/client": "^2.0.0",
+		"@neodrag/core": "workspace:*",
+		"vitest": "^4.1.8"
+	},
+	"peerDependencies": {
+		"@liveblocks/client": "^2.0.0",
+		"@neodrag/core": "workspace:*"
+	}
+}

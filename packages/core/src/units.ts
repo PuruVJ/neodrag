@@ -30,18 +30,18 @@ export function parseLength(raw: string): ParsedLength | null {
 	return { value: Number.parseFloat(match[1]!), unit: match[2] as CssLengthUnit };
 }
 
-function rootFontSizePx(): number {
+function root_font_size_px(): number {
 	const n = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
 	return Number.isFinite(n) && n > 0 ? n : 16;
 }
 
-function elementFontSizePx(node: DndNode): number {
-	if (!(node instanceof HTMLElement)) return rootFontSizePx();
+function element_font_size_px(node: DndNode): number {
+	if (!(node instanceof HTMLElement)) return root_font_size_px();
 	const n = Number.parseFloat(getComputedStyle(node).fontSize);
-	return Number.isFinite(n) && n > 0 ? n : rootFontSizePx();
+	return Number.isFinite(n) && n > 0 ? n : root_font_size_px();
 }
 
-function parentRect(node: DndNode): DOMRect | undefined {
+function parent_rect(node: DndNode): DOMRect | undefined {
 	const parent =
 		node instanceof HTMLElement
 			? node.offsetParent instanceof HTMLElement
@@ -57,16 +57,16 @@ export function pxToUnit(px: number, unit: CssLengthUnit, axis: LengthAxis, node
 		case 'px':
 			return px;
 		case '%': {
-			const parent = parentRect(node);
+			const parent = parent_rect(node);
 			const base = parent ? (axis === 'width' ? parent.width : parent.height) : 0;
 			return base > 0 ? (px / base) * 100 : px;
 		}
 		case 'rem':
-			return px / rootFontSizePx();
+			return px / root_font_size_px();
 		case 'em':
 		case 'ch':
 		case 'ex':
-			return px / elementFontSizePx(node);
+			return px / element_font_size_px(node);
 		case 'vw':
 			return window.innerWidth > 0 ? (px / window.innerWidth) * 100 : px;
 		case 'vh':

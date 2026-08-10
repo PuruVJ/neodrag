@@ -16,7 +16,7 @@ export type AriaDragOptions = {
 	announce?: AriaDragAnnounce;
 };
 
-function resolveAnnounce(
+function resolve_announce(
 	announce: AriaDragAnnounce | undefined,
 	key: keyof NonNullable<Exclude<AriaDragAnnounce, boolean>>,
 ): boolean {
@@ -36,13 +36,13 @@ export function ariaDrag(options: AriaDragOptions | null = {}): DragPlugin {
 	const label = options?.label ?? 'Draggable';
 	const announce = options?.announce;
 
-	let liveRegion: HTMLElement | null = null;
+	let live_region: HTMLElement | null = null;
 
 	const speak = (message: string): void => {
-		if (liveRegion) liveRegion.textContent = message;
+		if (live_region) live_region.textContent = message;
 	};
 
-	const resolveLiveRegion = (): HTMLElement | null => {
+	const resolve_live_region = (): HTMLElement | null => {
 		const provided = options?.liveRegion?.();
 		if (provided) return provided;
 		const region = document.createElement('div');
@@ -63,19 +63,19 @@ export function ariaDrag(options: AriaDragOptions | null = {}): DragPlugin {
 			el.setAttribute('role', role);
 			el.setAttribute('aria-label', label);
 			el.setAttribute('aria-grabbed', 'true');
-			liveRegion = resolveLiveRegion();
-			if (isKeyboardInput(input) && resolveAnnounce(announce, 'grab')) speak('Grabbed');
+			live_region = resolve_live_region();
+			if (isKeyboardInput(input) && resolve_announce(announce, 'grab')) speak('Grabbed');
 		},
 
 		onMove({ offset, input }: DragEventData): void {
-			if (!isKeyboardInput(input) || !resolveAnnounce(announce, 'move')) return;
+			if (!isKeyboardInput(input) || !resolve_announce(announce, 'move')) return;
 			speak(`Position ${Math.round(offset.x)}, ${Math.round(offset.y)}`);
 		},
 
 		onEnd({ node, input }: DragEventData): void {
 			const el = node as HTMLElement;
 			el.setAttribute('aria-grabbed', 'false');
-			if (isKeyboardInput(input) && resolveAnnounce(announce, 'drop')) speak('Released');
+			if (isKeyboardInput(input) && resolve_announce(announce, 'drop')) speak('Released');
 			else speak('');
 		},
 	};

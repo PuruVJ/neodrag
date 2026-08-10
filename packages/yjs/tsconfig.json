@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"module": "ESNext",
+		"target": "ESNext",
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"declarationDir": "dist",
+		"strict": true,
+		"esModuleInterop": true,
+		"moduleResolution": "Bundler",
+		"rootDir": "src"
+	},
+	"include": ["src/**/*.ts"]
+}

@@ -4,11 +4,12 @@ import {
 	type InteractionInput,
 } from './interaction-input.ts';
 import { installDefaultSensors } from './sensors/defaults.ts';
+import { userSelectHack } from './user-select.ts';
 import type { Sensor, SensorHost } from './sensors/types.ts';
 import type { EndReason } from './types.ts';
 import type { Capability, InteractionsOptions, InteractionSession } from './types.ts';
 
-const defaultDelegate = () => document.documentElement;
+const default_delegate = () => document.documentElement;
 
 /**
  * The semantics-free engine. It owns only the shared machinery — single document-level
@@ -20,28 +21,28 @@ export class Interactions {
 	readonly #sensors: Sensor[] = [];
 	readonly #cleanups = new Map<symbol, () => void>();
 	readonly #delegate: () => HTMLElement;
-	readonly #defaultSensors: boolean;
+	readonly #default_sensors: boolean;
 	readonly host: SensorHost;
 
 	#observers: Capability[] = [];
-	#sensorsInstalled = false;
-	#pointerDisarm: (() => void) | null = null;
+	#sensors_installed = false;
+	#pointer_disarm: (() => void) | null = null;
 	#session: InteractionSession | null = null;
-	#activePointerId: number | null = null;
-	#capturedNode: Element | null = null;
-	#capturedPointerId = -1;
+	#active_pointer_id: number | null = null;
+	#captured_node: Element | null = null;
+	#captured_pointer_id = -1;
 
 	constructor(options: InteractionsOptions = {}) {
-		this.#delegate = options.delegate ?? defaultDelegate;
-		this.#defaultSensors = options.defaultSensors !== false;
+		this.#delegate = options.delegate ?? default_delegate;
+		this.#default_sensors = options.defaultSensors !== false;
 		this.host = {
 			getDelegate: () => this.#delegate(),
 			setPointerDisarm: (disarm) => {
-				this.#pointerDisarm = disarm;
+				this.#pointer_disarm = disarm;
 			},
-			onInteractionStart: (input) => this.#onStart(input),
-			onInteractionMove: (input) => this.#onMove(input),
-			onInteractionEnd: (input) => this.#onEnd(input),
+			onInteractionStart: (input) => this.#on_start(input),
+			onInteractionMove: (input) => this.#on_move(input),
+			onInteractionEnd: (input) => this.#on_end(input),
 			cancelActive: (reason) => {
 				if (this.#session) this.#finish(reason);
 			},
@@ -58,13 +59,13 @@ export class Interactions {
 		for (const cap of capabilities) this.#capabilities.push(cap);
 		this.#capabilities.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 		this.#observers = this.#capabilities.filter((c) => typeof c.observe === 'function');
-		this.#ensureSensors();
+		this.#ensure_sensors();
 		return this;
 	}
 
 	registerSensor(sensor: Sensor): this {
 		if (!this.#sensors.some((s) => s.key === sensor.key)) this.#sensors.push(sensor);
-		if (this.#sensorsInstalled && !this.#cleanups.has(sensor.key)) {
+		if (this.#sensors_installed && !this.#cleanups.has(sensor.key)) {
 			this.#cleanups.set(sensor.key, sensor.setup(this.host));
 		}
 		return this;
@@ -74,14 +75,14 @@ export class Interactions {
 		if (this.#session) this.#finish('cancel');
 		for (const cleanup of this.#cleanups.values()) cleanup();
 		this.#cleanups.clear();
-		this.#sensorsInstalled = false;
-		this.#pointerDisarm = null;
+		this.#sensors_installed = false;
+		this.#pointer_disarm = null;
 	}
 
-	#ensureSensors(): void {
-		if (this.#sensorsInstalled) return;
-		this.#sensorsInstalled = true;
-		if (this.#defaultSensors && this.#sensors.length === 0) {
+	#ensure_sensors(): void {
+		if (this.#sensors_installed) return;
+		this.#sensors_installed = true;
+		if (this.#default_sensors && this.#sensors.length === 0) {
 			installDefaultSensors((sensor) => this.#sensors.push(sensor));
 		}
 		for (const sensor of this.#sensors) {
@@ -89,18 +90,18 @@ export class Interactions {
 		}
 	}
 
-	#onStart(input: InteractionInput): void {
+	#on_start(input: InteractionInput): void {
 		if (this.#session) return;
 		if (isPointerInput(input) && input.pointer.button === 2) return;
 
 		for (const capability of this.#capabilities) {
 			const target = capability.resolve(input);
 			if (!target) continue;
-			this.#activePointerId = interactionPointerId(input);
+			this.#active_pointer_id = interactionPointerId(input);
 			this.#session = {
 				capability,
 				target,
-				pointerId: this.#activePointerId,
+				pointerId: this.#active_pointer_id,
 				startInput: input,
 				input,
 				started: false,
@@ -110,10 +111,10 @@ export class Interactions {
 		}
 	}
 
-	#onMove(input: InteractionInput): void {
+	#on_move(input: InteractionInput): void {
 		const session = this.#session;
 		if (!session) return;
-		if (this.#activePointerId !== null && interactionPointerId(input) !== this.#activePointerId) {
+		if (this.#active_pointer_id !== null && interactionPointerId(input) !== this.#active_pointer_id) {
 			return;
 		}
 		session.input = input;
@@ -123,12 +124,15 @@ export class Interactions {
 			if (!pass) return;
 			session.started = true;
 			session.capability.start(session);
+			// Centralized text-selection suppression: every gesture gets body `user-select: none`
+			// (refcounted) unless its capability opted out via `session.userSelect = false` in start().
+			if (session.userSelect !== false) userSelectHack.apply();
 			if (isPointerInput(input)) {
 				try {
 					const node = session.target.node as Element;
 					node.setPointerCapture?.(input.pointer.pointerId);
-					this.#capturedNode = node;
-					this.#capturedPointerId = input.pointer.pointerId;
+					this.#captured_node = node;
+					this.#captured_pointer_id = input.pointer.pointerId;
 				} catch {
 					/* capture is best-effort */
 				}
@@ -140,10 +144,10 @@ export class Interactions {
 		this.#notify(session, 'move');
 	}
 
-	#onEnd(input: InteractionInput): void {
+	#on_end(input: InteractionInput): void {
 		const session = this.#session;
 		if (!session) return;
-		if (this.#activePointerId !== null && interactionPointerId(input) !== this.#activePointerId) {
+		if (this.#active_pointer_id !== null && interactionPointerId(input) !== this.#active_pointer_id) {
 			return;
 		}
 		session.input = input;
@@ -155,23 +159,24 @@ export class Interactions {
 		if (!session) return;
 		// Settle engine state before teardown so re-entrant end() calls are no-ops.
 		this.#session = null;
-		this.#activePointerId = null;
-		this.#releaseCapture();
+		this.#active_pointer_id = null;
+		this.#release_capture();
 		if (session.started) {
 			session.capability.end(session, reason);
+			if (session.userSelect !== false) userSelectHack.release();
 			this.#notify(session, 'end', reason);
 		}
-		this.#pointerDisarm?.();
+		this.#pointer_disarm?.();
 	}
 
 	// Explicitly hand the pointer back. Browsers auto-release implicit capture on pointerup, but
 	// not on cancel/programmatic end — so we release ourselves (guarded; release is best-effort).
-	#releaseCapture(): void {
-		const node = this.#capturedNode;
+	#release_capture(): void {
+		const node = this.#captured_node;
 		if (!node) return;
-		const id = this.#capturedPointerId;
-		this.#capturedNode = null;
-		this.#capturedPointerId = -1;
+		const id = this.#captured_pointer_id;
+		this.#captured_node = null;
+		this.#captured_pointer_id = -1;
 		try {
 			if (node.hasPointerCapture?.(id)) node.releasePointerCapture?.(id);
 		} catch {

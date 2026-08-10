@@ -4,10 +4,20 @@
 		"target": "ESNext",
 		"noEmit": true,
 		"strict": true,
-		"lib": ["ES2023.Array", "DOM"],
+		"lib": [
+			"ESNext",
+			"DOM",
+			"DOM.Iterable"
+		],
 		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
-		"types": ["@vitest/browser/providers/playwright"]
+		"types": [
+			"node",
+			"vitest/importMeta"
+		]
 	},
-	"include": ["./**/*.ts", "./**/*.svelte"]
+	"include": [
+		"./**/*.ts",
+		"./**/*.svelte"
+	]
 }

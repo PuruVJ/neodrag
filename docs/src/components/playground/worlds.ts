@@ -9,8 +9,10 @@ import RealtimeCollab from './scenarios/RealtimeCollab.svelte';
 import ResizeDesk from './scenarios/ResizeDesk.svelte';
 import SplitBill from './scenarios/SplitBill.svelte';
 import StickerGrid from './scenarios/StickerGrid.svelte';
+import Workshop from './scenarios/Workshop.svelte';
 
 export type WorldId =
+	| 'workshop'
 	| 'night-desk'
 	| 'last-mile'
 	| 'split-bill'
@@ -34,6 +36,12 @@ export const WORLDS: WorldMeta[] = [
 		id: 'realtime-collab',
 		label: 'Realtime collab',
 		tagline: 'Two peers, one list — synced live',
+		available: true,
+	},
+	{
+		id: 'workshop',
+		label: 'Workshop',
+		tagline: 'Drag · resize · rotate — one node',
 		available: true,
 	},
 	{
@@ -94,7 +102,8 @@ export const WORLDS: WorldMeta[] = [
 
 export const DEFAULT_WORLD: WorldId = 'realtime-collab';
 
-export const WORLD_COMPONENTS: Record<WorldId, Component> = {
+export const WORLD_COMPONENTS: Record<WorldId, Component<{ world: WorldMeta }>> = {
+	workshop: Workshop,
 	'night-desk': NightDesk,
 	'last-mile': LastMile,
 	'split-bill': SplitBill,

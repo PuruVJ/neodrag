@@ -1,0 +1,81 @@
+---
+title: 'Magnetic'
+nav_title: 'Magnetic'
+tagline: 'Snap the drag offset to the nearest target point within a radius.'
+section: 'extras'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import MagneticDemo from './MagneticDemo.svelte';
+
+`magnetic` snaps the offset to the nearest target point once the drag gets within `radius` px, with a soft spring that eases the element onto it and settles after the pointer stops.
+
+<MagneticDemo client:visible />
+
+## Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable, magnetic } from '@neodrag/svelte';
+  const drag = new Draggable({ use: [magnetic([{ x: 0, y: 0 }, { x: 200, y: 0 }], 30)] });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable, magnetic } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({ use: [magnetic([{ x: 0, y: 0 }, { x: 200, y: 0 }], 30)] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useDraggable, magnetic } from '@neodrag/vue';
+const { ref } = useDraggable({ use: [magnetic([{ x: 0, y: 0 }, { x: 200, y: 0 }], 30)] });
+</script>
+
+<template>
+  <div :ref="ref">Drag me</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable, magnetic } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({ use: [magnetic([{ x: 0, y: 0 }, { x: 200, y: 0 }], 30)] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable, magnetic } from '@neodrag/vanilla';
+
+new Draggable(node, { use: [magnetic([{ x: 0, y: 0 }, { x: 200, y: 0 }], 30)] });
+```
+
+</div>
+</FrameworkSwitch>
+
+## Options
+
+`targets` is a list of `{ x, y }` points in **offset space** (deltas from where the drag started). The second argument is either a bare `radius` number (default `24`) or an options object `{ radius, snap, strength, easing, spring }`. Setting `spring: true` (or `spring: { stiffness, damping }`) swaps the eased drift for momentum — fling, overshoot, and settle.

@@ -1,0 +1,158 @@
+---
+title: 'Pan & Zoom'
+nav_title: 'Pan & Zoom'
+tagline: 'An infinite canvas — drag to pan, scroll or pinch to zoom toward the cursor.'
+---
+
+import PanZoomDemo from './PanZoomDemo.svelte';
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+
+<PanZoomDemo client:visible />
+
+`PanZoom` is the infinite-canvas capability — a Figma/Miro viewport. You drag empty space to **pan** and scroll (or pinch) to **zoom**, and the zoom always pivots around the cursor so the content under it stays put. It's two layers: a fixed **viewport** that clips, and an inner **world** that transforms.
+
+It's built on the drag primitive — the viewport is a `Draggable` running the `pan` plugin, so panning gets the same pointer-capture, sensors, and text-selection suppression as any drag, and the plugin returns `{ x: 0, y: 0 }` so the viewport itself never moves: only the world layer's `transform` changes. Zoom is a wheel listener plus a two-finger pinch handler; because the engine's multitouch guard cancels the one-finger pan when a second finger lands, pan and pinch never fight.
+
+## Anatomy
+
+Bind two things: `viewport` on the clipping element and `world` on the inner content layer. Everything you want to pan and zoom lives inside the world. Read the live transform from `scale` / `x` / `y`.
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { PanZoom } from '@neodrag/svelte/panzoom';
+
+  const canvas = new PanZoom({ minScale: 0.4, maxScale: 4 });
+</script>
+
+<div {...canvas.viewport} style="width: 100%; height: 480px;">
+  <div {...canvas.world}>
+    <!-- anything: nodes, an image, an SVG, more draggables -->
+    <div class="node">A</div>
+  </div>
+</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { usePanZoom } from '@neodrag/react/panzoom';
+
+function Canvas() {
+  const { viewport, world, scale } = usePanZoom({ minScale: 0.4, maxScale: 4 });
+  return (
+    <div ref={viewport} style={{ width: '100%', height: 480 }}>
+      <div ref={world}>
+        <div className="node">A</div>
+      </div>
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { usePanZoom } from '@neodrag/vue/panzoom';
+
+const { viewport, world, scale } = usePanZoom({ minScale: 0.4, maxScale: 4 });
+</script>
+
+<template>
+  <div :ref="viewport" style="width: 100%; height: 480px">
+    <div :ref="world"><div class="node">A</div></div>
+  </div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createPanZoom } from '@neodrag/solid/panzoom';
+
+function Canvas() {
+  const { viewport, world, scale } = createPanZoom({ minScale: 0.4, maxScale: 4 });
+  return (
+    <div ref={viewport} style={{ width: '100%', height: '480px' }}>
+      <div ref={world}>
+        <div class="node">A</div>
+      </div>
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { PanZoom } from '@neodrag/vanilla/panzoom';
+
+const canvas = new PanZoom({ minScale: 0.4, maxScale: 4 });
+canvas.viewport(viewportEl); // each returns a disposer
+canvas.world(worldEl);
+```
+
+</div>
+</FrameworkSwitch>
+
+`viewport` sets `overflow: hidden`, `touch-action: none`, and (if you haven't) `position: relative`, then wires the pan drag and the wheel/pinch zoom. `world` sets `transform-origin: 0 0` and applies the live `translate(...) scale(...)`. Give the viewport a height and a `cursor: grab` — the rest is yours.
+
+## Zooming toward the cursor
+
+The math that keeps a canvas feeling right: when the scale changes, the point under the cursor must stay under the cursor. `PanZoom` does this for wheel and pinch automatically, and the same is available programmatically — `zoomBy` / `zoomTo` take an optional viewport-local focus point (default: the viewport centre).
+
+```svelte
+<button onclick={() => canvas.zoomBy(1.25)}>zoom in</button>   <!-- around the centre -->
+<button onclick={() => canvas.reset()}>reset</button>
+
+<!-- zoom to 2× around a specific viewport-local point -->
+<button onclick={() => canvas.zoomTo(2, 100, 80)}>zoom here</button>
+```
+
+## Options
+
+Pass these to `new PanZoom(options)`:
+
+| key | type | meaning |
+|---|---|---|
+| `minScale` | `number` | smallest allowed scale. Default `0.1` |
+| `maxScale` | `number` | largest allowed scale. Default `8` |
+| `scale` | `number` | initial scale. Default `1` |
+| `x` / `y` | `number` | initial world translate in viewport px. Default `0` |
+| `wheelSpeed` | `number` | wheel-zoom sensitivity (scale multiplier per delta unit). Default `0.0015` |
+| `onChange` | `(t: { x, y, scale }) => void` | fires on every change — pan, zoom, or programmatic set |
+| `id` | `string` | stable target id for collab (must match across peers) |
+| `room` | `Room` | join a collab room — the viewport becomes a **shared canvas** (see below) |
+
+The instance exposes reactive `canvas.scale` / `canvas.x` / `canvas.y` / `canvas.transform`, plus methods: `zoomBy(factor, cx?, cy?)`, `zoomTo(scale, cx?, cy?)`, `panBy(dx, dy)`, `setTransform({ x?, y?, scale? })`, and `reset()`.
+
+## Collaboration — a shared canvas
+
+Pass a `room` and an `id` and the viewport syncs across peers: panning and zooming on one client moves everyone's canvas to the same `{ x, y, scale }`. The transform commits on pan release / each zoom as a last-write-wins `panzoom` op, and live pan presence streams in between, so a remote peer follows the gesture in real time. A local pan always wins over an incoming remote fact mid-gesture (no fighting). It's the same `Room` seam every capability uses — see [Collaboration](/docs/svelte/plugin/collab).
+
+```svelte
+<script>
+  import { PanZoom } from '@neodrag/svelte/panzoom';
+  import { Room } from '@neodrag/svelte/collab';
+
+  const room = new Room(/* your backend */);
+  const canvas = new PanZoom({ id: 'board', room });
+</script>
+```
+
+> Pan & Zoom ships for **every framework**, each from its `/panzoom` subpath and exposing the same `viewport` / `world` shape plus reactive `scale` / `x` / `y`:
+>
+> - **Svelte** — `new PanZoom(opts)`, spread `{...canvas.viewport}` / `{...canvas.world}`.
+> - **React** — `usePanZoom(opts)` → `viewport` / `world` refs + reactive `scale` / `x` / `y`.
+> - **Vue** — `usePanZoom(opts)` → the same as `:ref` bindings + `scale` / `x` / `y` refs.
+> - **Solid** — `createPanZoom(opts)` → ref setters + `scale()` / `x()` / `y()` accessors.
+> - **Vanilla** — the core `PanZoom` class directly: `viewport(el)` / `world(el)` register methods (each returns a disposer).
+>
+> The pan drag, wheel + two-finger pinch zoom, and the world transform all live in the framework-agnostic core at `@neodrag/core/panzoom` (the DOM-aware `PanZoom` binder plus `PanZoomController` and the `pan` drag plugin), so every wrapper is a thin, identical adapter.

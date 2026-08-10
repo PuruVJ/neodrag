@@ -1,0 +1,81 @@
+---
+title: 'Scroll lock'
+nav_title: 'Scroll lock'
+tagline: 'Freeze scrolling and native panning for the drag.'
+section: 'extras'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import ScrollLockDemo from './ScrollLockDemo.svelte';
+
+`scrollLock` freezes scrolling, text selection, and native touch panning on a container for the duration of the drag, then restores the exact inline styles it touched.
+
+<ScrollLockDemo client:visible />
+
+## Usage
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Draggable, scrollLock } from '@neodrag/svelte';
+  const drag = new Draggable({ use: [scrollLock({ lockAxis: 'both' })] });
+</script>
+
+<div {...drag.attach}>Drag me</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useDraggable, scrollLock } from '@neodrag/react';
+
+function Box() {
+  const { ref } = useDraggable({ use: [scrollLock({ lockAxis: 'both' })] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useDraggable, scrollLock } from '@neodrag/vue';
+const { ref } = useDraggable({ use: [scrollLock({ lockAxis: 'both' })] });
+</script>
+
+<template>
+  <div :ref="ref">Drag me</div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createDraggable, scrollLock } from '@neodrag/solid';
+
+function Box() {
+  const { ref } = createDraggable({ use: [scrollLock({ lockAxis: 'both' })] });
+  return <div ref={ref}>Drag me</div>;
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Draggable, scrollLock } from '@neodrag/vanilla';
+
+new Draggable(node, { use: [scrollLock({ lockAxis: 'both' })] });
+```
+
+</div>
+</FrameworkSwitch>
+
+## Options
+
+`lockAxis` (`'x' | 'y' | 'both'`) is which native pan axis to forbid, default `'both'`. `container` is an element or lazy getter; default `document.documentElement`. `allowScrollbar` keeps the scrollbar by skipping `overflow: hidden`, default `false`.

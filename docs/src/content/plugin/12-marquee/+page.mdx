@@ -1,0 +1,107 @@
+---
+title: 'Marquee select'
+nav_title: 'Marquee select'
+tagline: 'Rubber-band a box across items to multi-select.'
+section: 'extras'
+---
+
+import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import MarqueeDemo from './MarqueeDemo.svelte';
+
+The selection region is itself a Draggable; dragging across it rubber-band selects every item the box touches. It is built on the engine's `marqueeSelect` `use:[]` plugin — the region gets the same pointer-capture, sensors, and text-selection suppression as any drag, and the plugin returns `{ x: 0, y: 0 }` each move so the region never actually translates.
+
+<MarqueeDemo client:visible />
+
+## Usage
+
+Every framework ships an ergonomic `Selectable` wrapper from its `/select` subpath — it wires the region and items for you, gives each selected item a `data-neodrag-selected` attribute, and exposes the live selection. Under the hood it's the `marqueeSelect` `use:[]` plugin on a `Draggable` region (still exported from the root if you'd rather wire it by hand).
+
+<FrameworkSwitch>
+<div slot="svelte">
+
+```svelte
+<script>
+  import { Selectable } from '@neodrag/svelte/select';
+
+  const items = ['a', 'b', 'c', 'd'];
+  const sel = new Selectable();
+  // sel.selected is the live Set; sel.clear() resets it.
+</script>
+
+<div {...sel.container}>
+  {#each items as id (id)}
+    <div {...sel.item(id)}>{id}</div>
+  {/each}
+</div>
+```
+
+</div>
+<div slot="react">
+
+```tsx
+import { useSelect } from '@neodrag/react/select';
+
+function Grid({ items }) {
+  const { container, item, selected } = useSelect();
+  // `selected` is the live array of selected values.
+  return (
+    <div ref={container}>
+      {items.map((id) => <div key={id} ref={item(id)}>{id}</div>)}
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vue">
+
+```vue
+<script setup>
+import { useSelect } from '@neodrag/vue/select';
+
+const { container, item, selected } = useSelect();
+</script>
+
+<template>
+  <div :ref="container">
+    <div v-for="id in items" :key="id" :ref="item(id)">{{ id }}</div>
+  </div>
+</template>
+```
+
+</div>
+<div slot="solid">
+
+```tsx
+import { createSelect } from '@neodrag/solid/select';
+
+function Grid(props) {
+  const { container, item, selected } = createSelect();
+  return (
+    <div ref={container}>
+      <For each={props.items}>{(id) => <div ref={item(id)}>{id}</div>}</For>
+    </div>
+  );
+}
+```
+
+</div>
+<div slot="vanilla">
+
+```js
+import { Selectable } from '@neodrag/vanilla/select';
+
+const sel = new Selectable();
+sel.container(regionEl); // each register method returns a disposer
+for (const [id, el] of itemEls) sel.item(id, el);
+// sel.selected is the live Set; sel.clear() resets it.
+```
+
+</div>
+</FrameworkSwitch>
+
+## Options
+
+**The `Selectable` wrapper** takes `{ box?, onSelect? }`, exposes the live `selected` set/array + `clear()`, and is bound with `container` + `item(value)`. `box` (default `true`) draws the selection rectangle — style it with the `--neodrag-marquee-fill` and `--neodrag-marquee-stroke` CSS variables.
+
+**The underlying plugin** is `marqueeSelect(getItems, onSelect, options)` — `getItems` returns the selectable elements (re-read at each gesture start), `onSelect` fires every move with the array of elements the box currently touches, and `options` is just `{ box }`. The region never translates — the plugin always returns `{ x: 0, y: 0 }`.

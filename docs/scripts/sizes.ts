@@ -57,6 +57,7 @@ export type SizesOutput = {
 		engineMinimal: number;
 		sortable: number;
 		draggableOnly: number;
+		rotatable: number;
 	};
 	presets: Record<string, { bytes: number; drag: string[]; drop: string[]; label: string }>;
 };
@@ -132,6 +133,8 @@ async function setupCoreEnvironment(tempDir: string) {
 					'./drop': './drop/index.js',
 					'./drop/plugins': './drop/plugins.js',
 					'./sortable': './sortable/index.js',
+					'./resize': './resize/index.js',
+					'./rotate': './rotate/index.js',
 					'./draggable': './draggable/index.js',
 					'./resizable': './resizable/index.js',
 					'./presets': './presets.js',
@@ -172,6 +175,7 @@ async function measureEntry(tempDir: string, filename: string, content: string):
 				'@neodrag/core/plugins',
 				'@neodrag/core/drop',
 				'@neodrag/core/sortable',
+				'@neodrag/core/rotate',
 				'@neodrag/core/draggable',
 			],
 		},
@@ -264,7 +268,17 @@ export { engine, plugins };
 `,
 	);
 
-	return { engineMinimal, sortable, draggableOnly };
+	const rotatable = await measureEntry(
+		tempDir,
+		'rotatable',
+		`import { Rotatable } from '@neodrag/core/rotate';
+const node = typeof document !== 'undefined' ? document.createElement('div') : {};
+const binding = new Rotatable(node, { origin: 'center' });
+export { binding };
+`,
+	);
+
+	return { engineMinimal, sortable, draggableOnly, rotatable };
 }
 
 async function main() {
@@ -356,6 +370,7 @@ async function main() {
 	console.log(`  engine minimal: ${extras.engineMinimal} B`);
 	console.log(`  sortable helper: ${extras.sortable} B`);
 	console.log(`  draggable only: ${extras.draggableOnly} B`);
+	console.log(`  rotatable only: ${extras.rotatable} B`);
 
 	rmSync(tempDir, { recursive: true, force: true });
 }

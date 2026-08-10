@@ -2,14 +2,13 @@
 	"extends": "astro/tsconfigs/strict",
 	"compilerOptions": {
 		"strictNullChecks": true,
-		"baseUrl": ".",
 		"paths": {
-			"$layouts/*": ["src/layouts/*"],
-			"$components/*": ["src/components/*"],
-			"$state/*": ["src/state/*"],
-			"$attachments/*": ["src/attachments/*"],
-			"$helpers/*": ["src/helpers/*"],
-			"$/*": ["src/*"]
+			"$layouts/*": ["./src/layouts/*"],
+			"$components/*": ["./src/components/*"],
+			"$state/*": ["./src/state/*"],
+			"$attachments/*": ["./src/attachments/*"],
+			"$helpers/*": ["./src/helpers/*"],
+			"$/*": ["./src/*"]
 		}
 	},
 	"include": [".astro/types.d.ts", "**/*"],

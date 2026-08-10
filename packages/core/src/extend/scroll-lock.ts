@@ -15,22 +15,22 @@ export interface ScrollLockOptions {
 	allowScrollbar?: boolean;
 }
 
-type Saved = { userSelect: string; touchAction: string; overflow: string };
+type Saved = { user_select: string; touch_action: string; overflow: string };
 
-function resolveContainer(c: ScrollLockOptions['container']): HTMLElement {
+function resolve_container(c: ScrollLockOptions['container']): HTMLElement {
 	const el = typeof c === 'function' ? c() : c;
 	return el instanceof HTMLElement ? el : document.documentElement;
 }
 
-function touchActionFor(lockAxis: NonNullable<ScrollLockOptions['lockAxis']>): string {
-	if (lockAxis === 'both') return 'none';
+function touch_action_for(lock_axis: NonNullable<ScrollLockOptions['lockAxis']>): string {
+	if (lock_axis === 'both') return 'none';
 	// Lock x → only vertical panning survives, and vice versa.
-	return lockAxis === 'x' ? 'pan-y' : 'pan-x';
+	return lock_axis === 'x' ? 'pan-y' : 'pan-x';
 }
 
 export function scrollLock(options: ScrollLockOptions = {}): DragPlugin {
-	const lockAxis = options.lockAxis ?? 'both';
-	const allowScrollbar = options.allowScrollbar ?? false;
+	const lock_axis = options.lockAxis ?? 'both';
+	const allow_scrollbar = options.allowScrollbar ?? false;
 
 	let target: HTMLElement | null = null;
 	let saved: Saved | null = null;
@@ -38,20 +38,20 @@ export function scrollLock(options: ScrollLockOptions = {}): DragPlugin {
 	return {
 		name: 'scroll-lock',
 		onStart: () => {
-			target = resolveContainer(options.container);
+			target = resolve_container(options.container);
 			saved = {
-				userSelect: target.style.getPropertyValue('user-select'),
-				touchAction: target.style.getPropertyValue('touch-action'),
+				user_select: target.style.getPropertyValue('user-select'),
+				touch_action: target.style.getPropertyValue('touch-action'),
 				overflow: target.style.getPropertyValue('overflow'),
 			};
 			target.style.setProperty('user-select', 'none');
-			if (!allowScrollbar) target.style.setProperty('overflow', 'hidden');
-			target.style.setProperty('touch-action', touchActionFor(lockAxis));
+			if (!allow_scrollbar) target.style.setProperty('overflow', 'hidden');
+			target.style.setProperty('touch-action', touch_action_for(lock_axis));
 		},
 		onEnd: () => {
 			if (!target || !saved) return;
-			target.style.setProperty('user-select', saved.userSelect);
-			target.style.setProperty('touch-action', saved.touchAction);
+			target.style.setProperty('user-select', saved.user_select);
+			target.style.setProperty('touch-action', saved.touch_action);
 			target.style.setProperty('overflow', saved.overflow);
 			target = null;
 			saved = null;

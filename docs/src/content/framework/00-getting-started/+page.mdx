@@ -6,17 +6,17 @@ tagline: 'Install neodrag and make your first element draggable.'
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
 
-Neodrag is a small, composable, cross-framework, collab-first toolkit for **drag**, **drop**, **sortable**, and **resize** — one consistent API across Svelte, React, Vue, Solid, and vanilla JS.
+Neodrag is a small, composable, cross-framework, collab-first toolkit for **drag**, **drop**, **sortable**, **resize**, and **rotate** — one consistent API across Svelte, React, Vue, Solid, and vanilla JS.
 
 ## Install
 
-Everything ships from a single framework package. It's fully tree-shakeable — you only pay for what you import.
+Install your framework package **and `@neodrag/core`** — core is a peer dependency that holds the shared engine, so every capability resolves to one instance (it isn't auto-installed by pnpm). Your framework package's **root** is drag; the other capabilities live behind subpaths — `@neodrag/svelte/sortable`, `/resize`, `/rotate`, `/drop`, `/collab` — so you only pay for what you import.
 
 <FrameworkSwitch>
 <div slot="svelte">
 
 ```bash
-npm i @neodrag/svelte@next
+npm i @neodrag/svelte@next @neodrag/core@next
 ```
 
 Requires Svelte 5 (the wrapper uses attachments).
@@ -25,28 +25,28 @@ Requires Svelte 5 (the wrapper uses attachments).
 <div slot="react">
 
 ```bash
-npm i @neodrag/react@next
+npm i @neodrag/react@next @neodrag/core@next
 ```
 
 </div>
 <div slot="vue">
 
 ```bash
-npm i @neodrag/vue@next
+npm i @neodrag/vue@next @neodrag/core@next
 ```
 
 </div>
 <div slot="solid">
 
 ```bash
-npm i @neodrag/solid@next
+npm i @neodrag/solid@next @neodrag/core@next
 ```
 
 </div>
 <div slot="vanilla">
 
 ```bash
-npm i @neodrag/vanilla@next
+npm i @neodrag/vanilla@next @neodrag/core@next
 ```
 
 </div>
@@ -124,16 +124,16 @@ const drag = new Draggable(node, {});
 </div>
 </FrameworkSwitch>
 
-That's a free-moving box. Pass options to shape it — `axis`, `bounds`, `grid`, `handle`, and more — all covered on the [Draggable](./draggable) page.
+That's a free-moving box. Pass options to shape it — `axis`, `bounds`, `grid`, `controls`, and more — all covered on the [Draggable](./draggable) page.
 
 ## The mental model
 
 Four ideas carry the whole library:
 
-- **Options** shape one interaction. `{ axis, bounds, grid, handle, … }` configure a single draggable, droppable, resizable, or sortable. Sensible built-ins like `touchAction` (touch drags aren't stolen as scroll) and `userSelect` (no text highlight while dragging) are always on.
+- **Options** shape one interaction. `{ axis, bounds, grid, controls, … }` configure a single draggable, droppable, resizable, or sortable. Sensible built-ins like `touchAction` (touch drags aren't stolen as scroll) and `userSelect` (no text highlight while dragging) are always on.
 - **Capabilities** are the four things you can do: **drag**, **drop**, **resize**, **sortable**. Each is its own class/hook with its own options, and they compose — a sortable item can also be droppable, a resizable panel can also be dragged.
-- **Extras** extend an interaction through the `use: []` seam — `magnetic`, `snapToGrid`, `scrollLock`, `autoScroll`, `ghost`, `haptics`, `ariaDrag`, and your own. They snap onto any capability without changing its core options.
-- **Collab** is first-class. A `SortableList` emits anchor-based, commutative ops; `bindCollab` wires them to any provider (Yjs, Liveblocks, WebSocket) for real-time multiplayer reordering and live presence.
+- **Extras** extend an interaction through the `use: []` seam — `magnetic`, `scrollLock`, `autoScroll`, `ghost`, `haptics`, `ariaDrag`, and your own. They snap onto any capability without changing its core options.
+- **Collab** is first-class. Every capability emits serializable ops on commit; a `Room` (from `@neodrag/core`) wires them to a backend — `room.add(target, id)` joins a draggable, resizable, or sortable under a shared id — for real-time multiplayer and live presence. Backends ship as `@neodrag/yjs` and `@neodrag/liveblocks`.
 
 ## Where to next
 

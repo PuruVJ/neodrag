@@ -5,8 +5,18 @@ tagline: 'Make elements draggable — axis, bounds, grid, handles, threshold, po
 ---
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import DraggableDemo from './DraggableDemo.svelte';
+import AxisDemo from './AxisDemo.svelte';
+import BoundsDemo from './BoundsDemo.svelte';
+import GridDemo from './GridDemo.svelte';
+import HandleDemo from './HandleDemo.svelte';
+import CancelDemo from './CancelDemo.svelte';
+import ThresholdDemo from './ThresholdDemo.svelte';
+import PositionDemo from './PositionDemo.svelte';
 
 Draggable is the core capability of Neodrag: pick up an element with a pointer (mouse, touch, or pen) and move it. You bind it to a node, optionally pass an options object, and read back whether it's currently dragging. Everything — the class/hook, every option, and the extensions — comes from your one framework package.
+
+<DraggableDemo client:visible />
 
 ## Binding a draggable
 
@@ -99,6 +109,8 @@ All the options below are plain keys on a single options object. Pass as many as
 
 ## `axis`
 
+<AxisDemo client:visible />
+
 Lock movement to one axis. `'x'`, `'y'`, or `'both'` (the default — free movement).
 
 <FrameworkSwitch>
@@ -164,6 +176,8 @@ new Draggable(node, { axis: 'x' });
 </FrameworkSwitch>
 
 ## `bounds`
+
+<BoundsDemo client:visible />
 
 Constrain movement so the element can't escape a region. `bounds` accepts several shapes:
 
@@ -248,6 +262,8 @@ new Draggable(node, { bounds: () => zone.getBoundingClientRect() });
 
 ## `grid`
 
+<GridDemo client:visible />
+
 Snap the offset to a pixel grid. Pass `[stepX, stepY]`; a step of `0` leaves that axis free.
 
 <FrameworkSwitch>
@@ -314,7 +330,9 @@ new Draggable(node, { grid: [25, 25] });
 
 ## `handle`
 
-Only start a drag when the pointer lands inside this handle. Pass a CSS selector (run through `querySelectorAll` against the node — use a trusted, static selector) or an `HTMLElement`. The whole element still moves; only the **grab point** is restricted.
+<HandleDemo client:visible />
+
+Mark a descendant as the grab point and a drag may start only from inside it. Spread the `handle()` hook onto that element — no selectors, no extra config. The whole element still moves; only the grab point is restricted. Handles nest: the **innermost** registered marker on the pointer's path wins, and an optional `handle({ priority })` overrides the nesting.
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -323,11 +341,11 @@ Only start a drag when the pointer lands inside this handle. Pass a CSS selector
 <script>
   import { Draggable } from '@neodrag/svelte';
 
-  const drag = new Draggable({ controls: { handle: '.titlebar' } });
+  const drag = new Draggable();
 </script>
 
 <div {...drag.attach} class="window">
-  <div class="titlebar">Grab here</div>
+  <div class="titlebar" {...drag.handle()}>Grab here</div>
   <p>Body — not a grab point</p>
 </div>
 ```
@@ -339,10 +357,10 @@ Only start a drag when the pointer lands inside this handle. Pass a CSS selector
 import { useDraggable } from '@neodrag/react';
 
 function Window() {
-  const { ref } = useDraggable({ controls: { handle: '.titlebar' } });
+  const { ref, handle } = useDraggable();
   return (
     <div ref={ref} className="window">
-      <div className="titlebar">Grab here</div>
+      <div className="titlebar" ref={handle()}>Grab here</div>
       <p>Body — not a grab point</p>
     </div>
   );
@@ -356,12 +374,12 @@ function Window() {
 <script setup>
   import { useDraggable } from '@neodrag/vue';
 
-  const { ref } = useDraggable({ controls: { handle: '.titlebar' } });
+  const { ref, handle } = useDraggable();
 </script>
 
 <template>
   <div :ref="ref" class="window">
-    <div class="titlebar">Grab here</div>
+    <div class="titlebar" :ref="handle()">Grab here</div>
     <p>Body — not a grab point</p>
   </div>
 </template>
@@ -374,10 +392,10 @@ function Window() {
 import { createDraggable } from '@neodrag/solid';
 
 function Window() {
-  const { ref } = createDraggable({ controls: { handle: '.titlebar' } });
+  const { ref, handle } = createDraggable();
   return (
     <div ref={ref} class="window">
-      <div class="titlebar">Grab here</div>
+      <div class="titlebar" ref={handle()}>Grab here</div>
       <p>Body — not a grab point</p>
     </div>
   );
@@ -390,7 +408,8 @@ function Window() {
 ```js
 import { Draggable } from '@neodrag/vanilla';
 
-new Draggable(node, { controls: { handle: '.titlebar' } });
+const drag = new Draggable(node);
+drag.registerHandle(node.querySelector('.titlebar'));
 ```
 
 </div>
@@ -398,7 +417,9 @@ new Draggable(node, { controls: { handle: '.titlebar' } });
 
 ## `cancel`
 
-The inverse of `handle`: block a drag from starting when the pointer lands inside this region. Same selector/element rules. Useful for buttons or inputs inside a draggable card.
+<CancelDemo client:visible />
+
+The inverse of `handle`: spread the `cancel()` hook onto a region and a drag may never start from inside it. Useful for buttons or inputs inside a draggable card. A `cancel()` nested in a `handle()` blocks (innermost wins); a deeper `handle()` re-opens it.
 
 <FrameworkSwitch>
 <div slot="svelte">
@@ -407,12 +428,12 @@ The inverse of `handle`: block a drag from starting when the pointer lands insid
 <script>
   import { Draggable } from '@neodrag/svelte';
 
-  const drag = new Draggable({ controls: { cancel: '.no-drag' } });
+  const drag = new Draggable();
 </script>
 
 <div {...drag.attach}>
   Drag the card
-  <button class="no-drag">But not this button</button>
+  <button {...drag.cancel()}>But not this button</button>
 </div>
 ```
 
@@ -423,11 +444,11 @@ The inverse of `handle`: block a drag from starting when the pointer lands insid
 import { useDraggable } from '@neodrag/react';
 
 function Card() {
-  const { ref } = useDraggable({ controls: { cancel: '.no-drag' } });
+  const { ref, cancel } = useDraggable();
   return (
     <div ref={ref}>
       Drag the card
-      <button className="no-drag">But not this button</button>
+      <button ref={cancel()}>But not this button</button>
     </div>
   );
 }
@@ -440,13 +461,13 @@ function Card() {
 <script setup>
   import { useDraggable } from '@neodrag/vue';
 
-  const { ref } = useDraggable({ controls: { cancel: '.no-drag' } });
+  const { ref, cancel } = useDraggable();
 </script>
 
 <template>
   <div :ref="ref">
     Drag the card
-    <button class="no-drag">But not this button</button>
+    <button :ref="cancel()">But not this button</button>
   </div>
 </template>
 ```
@@ -458,11 +479,11 @@ function Card() {
 import { createDraggable } from '@neodrag/solid';
 
 function Card() {
-  const { ref } = createDraggable({ controls: { cancel: '.no-drag' } });
+  const { ref, cancel } = createDraggable();
   return (
     <div ref={ref}>
       Drag the card
-      <button class="no-drag">But not this button</button>
+      <button ref={cancel()}>But not this button</button>
     </div>
   );
 }
@@ -474,7 +495,8 @@ function Card() {
 ```js
 import { Draggable } from '@neodrag/vanilla';
 
-new Draggable(node, { controls: { cancel: '.no-drag' } });
+const drag = new Draggable(node);
+drag.registerCancel(node.querySelector('button'));
 ```
 
 </div>
@@ -570,6 +592,8 @@ lockButton.addEventListener('click', () => drag.update({ disabled: true }));
 
 ## `threshold`
 
+<ThresholdDemo client:visible />
+
 Pixels of movement required before a drag begins (default `0` — starts immediately). Useful to distinguish a click from a drag.
 
 <FrameworkSwitch>
@@ -635,6 +659,8 @@ new Draggable(node, { threshold: 8 });
 </FrameworkSwitch>
 
 ## `position`
+
+<PositionDemo client:visible />
 
 The element's offset as `{ x, y }`. Pass it once for an **initial** position, or wire it to reactive state to **control** the element.
 
@@ -1019,3 +1045,7 @@ While a drag is active, Neodrag puts a `data-neodrag-dragging` attribute on the 
 ## Going further: `use`
 
 For behaviors beyond the built-in options — magnetic snapping, scroll-locking, drag ghosts, haptics, ARIA announcements, or your own custom logic — pass a static array to the `use` option. These tier-2 extensions all import from your framework package. See [Extras](/docs/extras) for the full list, the authoring API, and the reactivity rule for `use`.
+
+## Going further: combine with Resizable
+
+Draggable composes with the other capabilities on the **same node**. Put a [Resizable](/docs/plugin/resizable#combine-with-draggable) alongside it — spread both `{...drag.attach}` and `{...resize.attach}` onto one element — and you get a panel you grab by its body and resize from its edges. It works without any coordination because the resize handles claim pointer-downs at a higher priority than the drag body, so each gesture routes to the right capability. See the [movable + resizable demo](/docs/plugin/resizable#combine-with-draggable) on the Resizable page.

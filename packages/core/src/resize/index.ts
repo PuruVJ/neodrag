@@ -5,10 +5,12 @@ export {
 	ResizeState,
 	resolveResizeBounds,
 	RESIZE_HANDLE_ATTR,
+	RESIZE_EDGES,
 	type ResizeBoundsContext,
 	type ResizeBoundsInput,
 	type ResizeEdge,
 	type ResizeEventData,
+	type ResizeHandleProps,
 	type ResizeOptions,
 	type ResizeSizeBounds,
 } from './resize.ts';

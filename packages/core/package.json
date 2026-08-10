@@ -1,6 +1,6 @@
 {
 	"name": "@neodrag/core",
-	"version": "3.0.0-next.9",
+	"version": "3.0.0-next.10",
 	"license": "MIT",
 	"author": "Puru Vijay",
 	"repository": {
@@ -16,6 +16,42 @@
 		".": {
 			"types": "./src/index.ts",
 			"import": "./src/index.ts"
+		},
+		"./sortable": {
+			"types": "./src/sortable/index.ts",
+			"import": "./src/sortable/index.ts"
+		},
+		"./resize": {
+			"types": "./src/resize/index.ts",
+			"import": "./src/resize/index.ts"
+		},
+		"./rotate": {
+			"types": "./src/rotate/index.ts",
+			"import": "./src/rotate/index.ts"
+		},
+		"./drop": {
+			"types": "./src/drop/index.ts",
+			"import": "./src/drop/index.ts"
+		},
+		"./splitpane": {
+			"types": "./src/splitpane/index.ts",
+			"import": "./src/splitpane/index.ts"
+		},
+		"./panzoom": {
+			"types": "./src/panzoom/index.ts",
+			"import": "./src/panzoom/index.ts"
+		},
+		"./swipe": {
+			"types": "./src/swipe/index.ts",
+			"import": "./src/swipe/index.ts"
+		},
+		"./select": {
+			"types": "./src/select/index.ts",
+			"import": "./src/select/index.ts"
+		},
+		"./collab": {
+			"types": "./src/collab/index.ts",
+			"import": "./src/collab/index.ts"
 		},
 		"./testing": {
 			"types": "./src/testing/index.ts",
@@ -41,6 +77,42 @@
 				"types": "./dist/index.d.ts",
 				"import": "./dist/index.js"
 			},
+			"./sortable": {
+				"types": "./dist/sortable/index.d.ts",
+				"import": "./dist/sortable/index.js"
+			},
+			"./resize": {
+				"types": "./dist/resize/index.d.ts",
+				"import": "./dist/resize/index.js"
+			},
+			"./rotate": {
+				"types": "./dist/rotate/index.d.ts",
+				"import": "./dist/rotate/index.js"
+			},
+			"./drop": {
+				"types": "./dist/drop/index.d.ts",
+				"import": "./dist/drop/index.js"
+			},
+			"./splitpane": {
+				"types": "./dist/splitpane/index.d.ts",
+				"import": "./dist/splitpane/index.js"
+			},
+			"./panzoom": {
+				"types": "./dist/panzoom/index.d.ts",
+				"import": "./dist/panzoom/index.js"
+			},
+			"./swipe": {
+				"types": "./dist/swipe/index.d.ts",
+				"import": "./dist/swipe/index.js"
+			},
+			"./select": {
+				"types": "./dist/select/index.d.ts",
+				"import": "./dist/select/index.js"
+			},
+			"./collab": {
+				"types": "./dist/collab/index.d.ts",
+				"import": "./dist/collab/index.js"
+			},
 			"./testing": {
 				"types": "./dist/testing/index.d.ts",
 				"import": "./dist/testing/index.js"
@@ -62,22 +134,21 @@
 		"access": "public"
 	},
 	"scripts": {
-		"compile:watch": "tsdown --watch",
-		"compile": "tsdown",
+		"compile:watch": "vp pack --watch",
+		"compile": "vp pack",
 		"prepublishOnly": "npm run compile",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"test:webkit": "vitest run --browser=webkit",
-		"test:firefox": "vitest run --browser=firefox",
-		"test:chromium": "vitest run --browser=chromium",
-		"test:unit": "vitest run tests/interactions/arena-haptics.test.ts tests/interactions/arena-virtual-index.test.ts tests/interactions/collab-adapters.test.ts tests/interactions/collab-presence.test.ts tests/interactions/collab-reconcile.test.ts tests/interactions/collab-session.test.ts tests/interactions/dnd-collab.test.ts tests/interactions/dnd-core.test.ts tests/interactions/dnd-drag-constraints.test.ts tests/interactions/dnd-drag-extras.test.ts tests/interactions/dnd-drag.test.ts tests/interactions/dnd-drop-deep.test.ts tests/interactions/dnd-drop.test.ts tests/interactions/dnd-extend.test.ts tests/interactions/dnd-gamepad-sensor.test.ts tests/interactions/dnd-haptics.test.ts tests/interactions/dnd-input-filters.test.ts tests/interactions/dnd-keyboard-draggable.test.ts tests/interactions/dnd-pointer-capture.test.ts tests/interactions/dnd-resize-deep.test.ts tests/interactions/dnd-resize.test.ts tests/interactions/dnd-sensor-integration.test.ts tests/interactions/dnd-sortable-pure.test.ts tests/interactions/dnd-sortable-reorder.test.ts tests/interactions/dnd-virtual-index.test.ts --browser.enabled=false",
+		"test:webkit": "vitest run --project=webkit",
+		"test:firefox": "vitest run --project=firefox",
+		"test:chromium": "vitest run --project=chromium",
+		"test:unit": "vitest run tests/interactions/arena-haptics.test.ts tests/interactions/arena-virtual-index.test.ts tests/interactions/collab-presence.test.ts tests/interactions/dnd-collab.test.ts tests/interactions/dnd-core.test.ts tests/interactions/dnd-drag-constraints.test.ts tests/interactions/dnd-drag-extras.test.ts tests/interactions/dnd-drag.test.ts tests/interactions/dnd-drop-deep.test.ts tests/interactions/dnd-drop.test.ts tests/interactions/dnd-extend.test.ts tests/interactions/dnd-gamepad-sensor.test.ts tests/interactions/dnd-haptics.test.ts tests/interactions/dnd-input-filters.test.ts tests/interactions/dnd-keyboard-draggable.test.ts tests/interactions/dnd-pointer-capture.test.ts tests/interactions/dnd-resize-deep.test.ts tests/interactions/dnd-resize.test.ts tests/interactions/dnd-sensor-integration.test.ts tests/interactions/dnd-sortable-pure.test.ts tests/interactions/dnd-sortable-reorder.test.ts tests/interactions/dnd-virtual-index.test.ts tests/interactions/splitpane.test.ts tests/interactions/snap-guides.test.ts tests/interactions/marquee.test.ts tests/interactions/panzoom.test.ts --browser.enabled=false",
 		"test:interactions:unit": "pnpm run test:unit",
-		"test:coverage": "vitest run --coverage --browser=chromium"
+		"test:coverage": "vitest run --coverage --project=chromium"
 	},
 	"devDependencies": {
 		"@neodrag/test": "workspace:*",
-		"@vitest/coverage-v8": "3.2.4",
-		"jsdom": "^29.1.1",
-		"tsdown": "catalog:"
+		"@vitest/coverage-v8": "^4.1.8",
+		"jsdom": "^29.1.1"
 	}
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SortableList } from '@neodrag/svelte';
+	import { SortableList } from '@neodrag/svelte/sortable';
 
 	type Item = { id: string };
 
@@ -42,7 +42,7 @@
 	{#each items as item (item.id)}
 		<li
 			data-testid="row-{item.id}"
-			{...list.row(item)}
+			{...list.row(item.id)}
 			style="box-sizing: border-box; width: 120px; height: 40px; margin: 0; line-height: 40px; text-align: center; background: #ccd; border: 1px solid #557; touch-action: none; user-select: none;"
 		>
 			{item.id}

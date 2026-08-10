@@ -112,18 +112,9 @@
 			track_my_position = { x: data.offset.x, y: data.offset.y };
 		},
 	});
-	const drag_5 = new Draggable({
-		controls: { handle: '.handle' },
-		...drag_handlers,
-	});
-	const drag_5b = new Draggable({
-		controls: { handle: '.handle' },
-		...drag_handlers,
-	});
-	const drag_6 = new Draggable({
-		controls: { cancel: '.cancel' },
-		...drag_handlers,
-	});
+	const drag_5 = new Draggable({ ...drag_handlers });
+	const drag_5b = new Draggable({ ...drag_handlers });
+	const drag_6 = new Draggable({ ...drag_handlers });
 	const drag_7 = new Draggable({ grid: [25, 25], ...drag_handlers });
 	const drag_8 = new Draggable({ grid: [100, 25], ...drag_handlers });
 	const drag_9 = new Draggable({
@@ -273,7 +264,7 @@
 		</div>
 
 		<div class="box single-handle" style:z-index={z_indices[5]} {...drag_5.attach}>
-			<button class="handle" data-paw-cursor="true" data-paw-color="light"> Drag here </button>
+			<button class="handle" data-paw-cursor="true" data-paw-color="light" {...drag_5.handle()}> Drag here </button>
 
 			I can only be dragged by the handle 👆
 		</div>
@@ -281,10 +272,10 @@
 		<div class="box multiple-handles" style:z-index={z_indices[6]} {...drag_5b.attach}>
 			I can be dragged with all the handles
 
-			<div class="handle" data-paw-cursor="true"></div>
-			<div class="handle" data-paw-cursor="true"></div>
-			<div class="handle" data-paw-cursor="true"></div>
-			<div class="handle" data-paw-cursor="true"></div>
+			<div class="handle" data-paw-cursor="true" {...drag_5b.handle()}></div>
+			<div class="handle" data-paw-cursor="true" {...drag_5b.handle()}></div>
+			<div class="handle" data-paw-cursor="true" {...drag_5b.handle()}></div>
+			<div class="handle" data-paw-cursor="true" {...drag_5b.handle()}></div>
 		</div>
 
 		<div
@@ -295,7 +286,7 @@
 		>
 			I can be dragged anywhere
 
-			<button class="cancel" data-paw-cursor="false"> except for this box </button>
+			<button class="cancel" data-paw-cursor="false" {...drag_6.cancel()}> except for this box </button>
 		</div>
 
 		<div

@@ -5,10 +5,15 @@ tagline: 'Drop zones that react to drags, with no wiring between them.'
 ---
 
 import FrameworkSwitch from '$components/FrameworkSwitch.astro';
+import DroppableDemo from './DroppableDemo.svelte';
+import AcceptsDemo from './AcceptsDemo.svelte';
+import NativeDemo from './NativeDemo.svelte';
 
 A **droppable** turns any element into a drop zone. Drop zones auto-observe every drag on the page — there is no registration, no shared context, no wiring between a draggable and a zone. Make a node draggable, make another node droppable, and the engine hit-tests them for you.
 
 The only contract between the two sides is **data**: a draggable carries a `dragData` payload, and a zone reads it through `accepts` and `onDrop`.
+
+<DroppableDemo client:visible />
 
 ## A complete drag → drop
 
@@ -19,7 +24,8 @@ A draggable file chip that carries a payload, and a zone that only accepts files
 
 ```svelte
 <script>
-  import { Draggable, Droppable } from '@neodrag/svelte';
+  import { Draggable } from '@neodrag/svelte';
+  import { Droppable } from '@neodrag/svelte/drop';
 
   const chip = new Draggable({ dragData: { kind: 'file', name: 'report.pdf' } });
 
@@ -48,7 +54,8 @@ A draggable file chip that carries a payload, and a zone that only accepts files
 
 ```tsx
 import { useState } from 'react';
-import { useDraggable, useDroppable } from '@neodrag/react';
+import { useDraggable } from '@neodrag/react';
+import { useDroppable } from '@neodrag/react/drop';
 
 function FileDrop() {
   const chip = useDraggable({ dragData: { kind: 'file', name: 'report.pdf' } });
@@ -76,7 +83,8 @@ function FileDrop() {
 ```vue
 <script setup>
 import { ref } from 'vue';
-import { useDraggable, useDroppable } from '@neodrag/vue';
+import { useDraggable } from '@neodrag/vue';
+import { useDroppable } from '@neodrag/vue/drop';
 
 const chip = useDraggable({ dragData: { kind: 'file', name: 'report.pdf' } });
 
@@ -100,7 +108,8 @@ const { ref: zoneRef, isOver } = useDroppable({
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { createDraggable, createDroppable } from '@neodrag/solid';
+import { createDraggable } from '@neodrag/solid';
+import { createDroppable } from '@neodrag/solid/drop';
 
 function FileDrop() {
   const chip = createDraggable({ dragData: { kind: 'file', name: 'report.pdf' } });
@@ -126,7 +135,8 @@ function FileDrop() {
 <div slot="vanilla">
 
 ```js
-import { Draggable, Droppable } from '@neodrag/vanilla';
+import { Draggable } from '@neodrag/vanilla';
+import { Droppable } from '@neodrag/vanilla/drop';
 
 const chip = new Draggable(chipEl, {
   dragData: { kind: 'file', name: 'report.pdf' },
@@ -170,6 +180,8 @@ Everything a zone does is configured through its options.
 
 ### `accepts`
 
+<AcceptsDemo client:visible />
+
 `accepts?: ({ dragNode, data }) => boolean`
 
 A filter that decides whether this zone reacts to a given drag. It receives the drag's DOM node and its `dragData`. Return `false` and the zone ignores the drag entirely — no enter/over/leave/drop events fire and `data-neodrag-over` is never set. Omit it to accept every drag.
@@ -204,7 +216,7 @@ DropEventData = { zone, dragNode, data, input }
 
 ```svelte
 <script>
-  import { Droppable } from '@neodrag/svelte';
+  import { Droppable } from '@neodrag/svelte/drop';
 
   const zone = new Droppable({
     accepts: ({ data }) => data?.kind === 'file',
@@ -222,7 +234,7 @@ DropEventData = { zone, dragNode, data, input }
 <div slot="react">
 
 ```tsx
-import { useDroppable } from '@neodrag/react';
+import { useDroppable } from '@neodrag/react/drop';
 
 function Zone() {
   const { ref } = useDroppable({
@@ -241,7 +253,7 @@ function Zone() {
 
 ```vue
 <script setup>
-import { useDroppable } from '@neodrag/vue';
+import { useDroppable } from '@neodrag/vue/drop';
 
 const { ref } = useDroppable({
   accepts: ({ data }) => data?.kind === 'file',
@@ -259,7 +271,7 @@ const { ref } = useDroppable({
 <div slot="solid">
 
 ```tsx
-import { createDroppable } from '@neodrag/solid';
+import { createDroppable } from '@neodrag/solid/drop';
 
 function Zone() {
   const { ref } = createDroppable({
@@ -277,7 +289,7 @@ function Zone() {
 <div slot="vanilla">
 
 ```js
-import { Droppable } from '@neodrag/vanilla';
+import { Droppable } from '@neodrag/vanilla/drop';
 
 const zone = new Droppable(zoneEl, {
   accepts: ({ data }) => data?.kind === 'file',
@@ -333,6 +345,35 @@ How the engine ranks a zone when deciding which one a drag is "over". One of:
 
 ```js
 const zone = new Droppable(zoneEl, { collision: 'closestCenter' });
+```
+
+### `native`
+
+<NativeDemo client:visible />
+
+`native?: boolean` (default `false`)
+
+Opts the zone into **OS** drag-and-drop. Set it and the engine arms a native sensor on the shared engine, so a drag of files or selected text from your desktop or another application lands on the zone exactly like an in-app drag. The payload arrives on `onDrop` as `e.files` (a `File[]`) and `e.text` (a string) — both are only readable on the drop itself, never during hover.
+
+```js
+const zone = new Droppable(zoneEl, {
+  native: true,
+  onDrop: ({ files, text }) => {
+    if (files?.length) upload(files);
+    else if (text) insert(text);
+  },
+});
+```
+
+For a native drag, `accepts` receives `data: null` and a `types` array of the OS payload kinds (e.g. `'Files'`, `'text/plain'`) so you can gate on those instead of `dragData`.
+
+## Collab: remote-hover presence
+
+A drop carries **no synced op** — its outcome (upload, assign, place an order) is a local side-effect, not replayable state. But you *can* sync the **hover**: give the zone a stable `id` and add it to a [collab `Room`](./collab), and while a remote peer drags over the zone the engine sets `data-neodrag-remote-hover="<peerId>"` on it and floats a `data-neodrag-remote-hover-marker` element at their cursor — both yours to style.
+
+```js
+const zone = new Droppable(el, { id: 'inbox', onDrop: assign });
+room.add(zone, 'inbox'); // now peers see each other hovering — still no `onDrop` replay
 ```
 
 ## Notes
