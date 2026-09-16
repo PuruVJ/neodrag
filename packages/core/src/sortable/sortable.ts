@@ -79,6 +79,16 @@ export function reorderKeys(keys: readonly string[], from: number, to: number): 
 	return applyMove(keys as string[], moveOpFromIndices(keys, from, to));
 }
 
+/**
+ * The items the `indicator: 'line'` drop-line is measured against: every item except the dragged
+ * one. The insert index is in insert-after-removal space (the dragged item doesn't count toward
+ * its own slot), so the rect list must skip it too. Keeping it in shifts every slot past the
+ * origin one item early, which drew the line one row above where a downward drag lands.
+ */
+export function lineIndicatorRects<T>(items: readonly T[], from_index: number): T[] {
+	return items.filter((_, i) => i !== from_index);
+}
+
 /* ────────────────────────────────────────────────────────────────────────────
  * mids — midpoint resolution + hysteresis (merged from ./mids.ts)
  * ──────────────────────────────────────────────────────────────────────────── */
@@ -1965,7 +1975,7 @@ export class Sortable implements Capability {
 			// Line mode: nothing displaces — just move the drop-line to the insertion boundary.
 			this.#showIndicator(
 				intent.context.container,
-				intent.items.map((it) => it.rect),
+				lineIndicatorRects(intent.items, intent.from_index).map((it) => it.rect),
 				intent.to_index,
 				intent.axis,
 				intent.context.strategy,
