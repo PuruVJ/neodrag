@@ -593,13 +593,6 @@ export function draggable(node: HTMLElement, options: DragOptions = {}) {
 			if (!is_interacting) return;
 
 			if (is_dragging) {
-				// Listen for click handler and cancel it
-				listen('click', (e) => e.stopPropagation(), {
-					once: true,
-					signal: controller.signal,
-					capture: true,
-				});
-
 				if (recomputeBounds.dragEnd) computed_bounds = compute_bound_rect(bounds, node);
 
 				// Apply class defaultClassDragged
