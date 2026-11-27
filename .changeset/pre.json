@@ -15,7 +15,8 @@
     "@neodrag/playground-svelte": "0.0.1",
     "@neodrag/playground-vanilla": "0.0.0",
     "@neodrag/playground-vanilla-umd": "0.0.0",
-    "@neodrag/playground-vue": "0.0.10"
+    "@neodrag/playground-vue": "0.0.10",
+    "@neodrag/test": "3.0.0-next.9"
   },
   "changesets": [
     "cool-drinks-thank",
@@ -29,6 +30,7 @@
     "proud-years-yawn",
     "purple-colts-tie",
     "purple-cooks-invent",
+    "remove-compartment-reactive",
     "ripe-carrots-wonder",
     "rotten-bags-speak",
     "slick-foxes-yawn",
