@@ -1,5 +1,16 @@
 # @neodrag/react
 
+## 3.0.0-next.10
+
+### Minor Changes
+
+- [#261](https://github.com/PuruVJ/neodrag/pull/261) [`9d08b5f`](https://github.com/PuruVJ/neodrag/commit/9d08b5fc0b8a9cab0f17b6e4c511dda61591ed32) Thanks [@PuruVJ](https://github.com/PuruVJ)! - Remove `Compartment` from the public API. Framework wrappers now reconcile plugin changes internally via `engine.update` when you pass a reactive plugin factory (`() => plugins`). Transform repaints after reactive position updates. Added browser tests for two-way `position` binding, update re-entry guards, and a comprehensive Chromium reactive benchmark suite.
+
+### Patch Changes
+
+- Updated dependencies [[`9d08b5f`](https://github.com/PuruVJ/neodrag/commit/9d08b5fc0b8a9cab0f17b6e4c511dda61591ed32)]:
+  - @neodrag/core@3.0.0-next.10
+
 ## 3.0.0-next.8
 
 ### Patch Changes
