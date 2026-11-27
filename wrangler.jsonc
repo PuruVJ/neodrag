@@ -1,0 +1,17 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "neodrag-next",
+	"compatibility_date": "2026-11-01",
+	"assets": {
+		"directory": "./docs/dist",
+		"html_handling": "auto-trailing-slash",
+		"not_found_handling": "none"
+	},
+	"routes": [
+		{ "pattern": "next.neodrag.dev", "custom_domain": true },
+		{ "pattern": "v3.neodrag.dev", "custom_domain": true }
+	],
+	"observability": { "enabled": true },
+	"workers_dev": true,
+	"preview_urls": true
+}
